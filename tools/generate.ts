@@ -31,6 +31,18 @@ const CODE_OF: Record<string, string> = {
   tax: "TAX",
 };
 
+/**
+ * YAML parses an unquoted `date: 2026-08-08` into a JS Date, and interpolating one renders it in
+ * the RUNNER's timezone — "Fri Aug 07 2026 19:00:00 GMT-0500" on macOS vs "Sat Aug 08 2026
+ * 00:00:00 GMT+0000" on a UTC CI box. That made this generator machine-dependent and the
+ * stale-file gate caught it on the first CI run. Always reduce to a UTC calendar day.
+ */
+function ymd(v: unknown): string {
+  if (v instanceof Date) return v.toISOString().slice(0, 10);
+  const s = String(v ?? "").trim();
+  return s || "—";
+}
+
 function frontMatter(text: string) {
   const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!m) return null;
@@ -176,7 +188,7 @@ let md = `<!-- ${HEADER} -->\n\n# Decisions in force\n\n`;
 md += `Accepted and not superseded, as of the last \`deno task gen\`.\n\n`;
 for (const a of inForce) {
   md += `## [${a.id}](${basename(a.file)}) — ${a.title ?? "(untitled)"}\n\n`;
-  md += `**Contexts:** ${(a.contexts ?? []).join(", ") || "—"} · **Decided:** ${a.date ?? "—"}\n\n`;
+  md += `**Contexts:** ${(a.contexts ?? []).join(", ") || "—"} · **Decided:** ${ymd(a.date)}\n\n`;
   if (a.y) md += `> ${a.y}\n\n`;
 }
 md += `# Proposed, not yet in force\n\n`;
@@ -186,7 +198,7 @@ if (proposed.length === 0) {
   md += `| ADR | Title | Review by | Blocked on |\n|---|---|---|---|\n`;
   for (const a of proposed) {
     const blockers = (a.relates_to ?? []).filter((x) => /^(HOT|OQ|SPIKE)-/.test(x)).join(", ") || "—";
-    md += `| [${a.id}](${basename(a.file)}) | ${a.title ?? ""} | ${a.review_by ?? "**unset**"} | ${blockers} |\n`;
+    md += `| [${a.id}](${basename(a.file)}) | ${a.title ?? ""} | ${a.review_by ? ymd(a.review_by) : "**unset**"} | ${blockers} |\n`;
   }
 }
 await Deno.writeTextFile(`${ROOT}/adr/in-force.generated.md`, md);
