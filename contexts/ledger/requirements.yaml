@@ -1,0 +1,21 @@
+# Requirements for LED. Nothing lands here directly — everything is promoted from inbox/.
+#
+# Required per requirement: id, statement, rationale, source, priority, verification_method, status.
+# verification_method: inspection | analysis | demonstration | test
+# priority: must | should | could
+# status: draft | agreed | superseded
+
+requirements:
+  - id: REQ-LED-001
+    statement: >-
+      Every revenue and COGS posting shall carry both a product line and a cost type, and a
+      posting missing either shall be rejected rather than recorded.
+    rationale: >-
+      A dimension that may be absent will be absent. Measured 2026-08-08 on the current system:
+      28.7% of line revenue ($485,821.72 of $1,689,895.68) carries no product line, concentrated
+      in service lines at 71.9%. The dimension was optional and that is the entire cause.
+    source: inbox/2026-08-08-untracked-revenue-share.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [ADR-0009, HOT-006]

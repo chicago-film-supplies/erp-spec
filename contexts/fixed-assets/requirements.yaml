@@ -1,0 +1,11 @@
+# Requirements for FA. Nothing lands here directly — everything is promoted from inbox/.
+#
+# Required per requirement: id, statement, rationale, source, priority, verification_method, status.
+# verification_method: inspection | analysis | demonstration | test
+# priority: must | should | could
+# status: draft | agreed | superseded
+#
+# Statements are implementation-free. "The system shall record the acting crew member on every
+# leg" — not "add an actor_id column".
+
+requirements: []

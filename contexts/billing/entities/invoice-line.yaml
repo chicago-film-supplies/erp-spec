@@ -1,0 +1,10 @@
+# EXAMPLE ENTITY — one per context, to fix the shape. Not a schema. Not exhaustive.
+entity: InvoiceLine
+fields:
+  line_id:       { type: uuid, required: true }
+  product_ref:   { type: product_id, required: true }
+  quantity:      { type: int32, required: true }
+  unit_amount_minor: { type: int64, required: true }
+  discount:      { type: discount, required: false, note: "percent bounded [0,100], or flat dollars-per-unit-per-factor. never a bare number" }
+  product_line:  { type: dimension_ref, required: true }
+  tax_determined: { type: tax_result_ref, required: true }

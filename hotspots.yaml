@@ -1,0 +1,128 @@
+# Hotspots — statements in the spec that contradict each other or the observed world.
+#
+# A hotspot is a CONFLICT, not a task and not a question. When two spec statements disagree,
+# open one here rather than silently picking a side. Resolution is by ADR.
+#
+# status: open | resolved | superseded
+
+hotspots:
+  - id: HOT-001
+    statement: >-
+      Does `Trucking` mean third-party freight (no wage labour) or an own long-haul run
+      (labour-bearing)? The costing model treats these oppositely — one is a passthrough with no
+      person-day, the other absorbs a full crew-day.
+    contexts: [fulfillment, ledger, ordering]
+    why_it_matters: >-
+      Decides whether a trucked fulfillment absorbs labour cost at all, and therefore whether
+      `trucked` is a fulfillment mode that generates a shift.
+    evidence: >-
+      Verified 2026-08-08: `Trucking` and `Shipping` are both active service products in the
+      `Transport` product line. `Trucking` books to COA 4100 — the same revenue account as Crew
+      labour services and Delivery/Setup/Removal — while `Shipping` books to its own COA 4150.
+      Suggestive of own-run vs freight, but not decisive.
+    blocks: [OQ-010, ADR-0011]
+    status: open
+
+  - id: HOT-002
+    statement: >-
+      Are the collecting/returning flags really per-leg? Only ~2% of revenue sits on asymmetric
+      combinations, which contradicts a confirmed deliver-out/customer-returns pattern.
+    contexts: [fulfillment, ordering]
+    why_it_matters: >-
+      If the flags are genuinely per-destination rather than per-leg, then a leg record cannot be
+      reconstructed from history, and the migration cannot backfill leg-level actor or shift.
+    evidence: >-
+      Verified 2026-08-08: in the current system the flags are stored per DESTINATION
+      (`destinations[].customer_collecting` / `.customer_returning`), not per leg. The structural
+      half of this hotspot is settled — they are not per-leg today. The ~2% asymmetry figure is
+      NOT yet reproduced and remains unverified.
+    blocks: [OQ-007, ADR-0011]
+    status: open
+
+  - id: HOT-003
+    statement: Does the `Crew` product line already carry labour today?
+    contexts: [ledger, fulfillment]
+    why_it_matters: >-
+      If Crew already carries labour, the new cost-type dimension partly duplicates it and the
+      migration has to decide which one survives.
+    evidence: >-
+      Verified 2026-08-08, and the answer splits. The `Crew` product line contains exactly three
+      products — Surface Protection Install/Tear Out, Truck Pack/Load Out, Layout Install/Tear Out
+      — all `type: service`, all booking to COA 4100. So Crew carries billable labour REVENUE.
+      Whether any labour COST is recorded anywhere today is a separate question and is not
+      answered by this evidence.
+    blocks: [OQ-011]
+    status: open
+
+  - id: HOT-004
+    statement: >-
+      Should long-haul absorb a byproduct-loss premium on top of the person-day, mirroring what
+      the customer is charged?
+    contexts: [ledger, fulfillment]
+    why_it_matters: >-
+      A long-haul run consumes a crew-day that cannot pick up byproducts, so its true opportunity
+      cost exceeds its wage cost. Charging only the person-day understates long-haul COGS and
+      makes long-haul look more profitable than it is.
+    blocks: [OQ-006]
+    status: open
+
+  - id: HOT-005
+    statement: >-
+      Is TigerBeetle or DuckDB the reporting source of truth, given TB timestamps are posting time
+      and reporting needs accounting date?
+    contexts: [ledger, banking]
+    why_it_matters: >-
+      Every report — trial balance, P&L, close — is periodised by accounting date. If TB cannot
+      express that, TB balances cannot answer a period question directly and DuckDB becomes
+      authoritative for reporting while TB stays authoritative for balance integrity. That split
+      has to be deliberate, named, and reconciled.
+    blocks: [OQ-009, ADR-0008, ADR-0010]
+    status: open
+
+  - id: HOT-006
+    statement: >-
+      Xero history migration: import known-defective lines, or restate? Roughly 90% of historical
+      Xero lines are behind the 2025-12-31 lock and unrepairable.
+    contexts: [ledger, billing]
+    why_it_matters: >-
+      Importing defective lines makes the new ledger's history agree with the filed tax position
+      but carries the tracking defect forward permanently. Restating makes the new ledger correct
+      but disagrees with what was filed.
+    evidence: >-
+      Related and verified 2026-08-08: 28.7% of CFS line revenue carries no product-line
+      dimension, concentrated in `service` lines (71.9% of service revenue untracked) and worst in
+      2024 (48.3%). Whatever is imported inherits that.
+    blocks: [OQ-012]
+    status: open
+
+  - id: HOT-007
+    statement: >-
+      Are fulfillment legs first-class recorded events, or derived from orders? The current system
+      derives them, which is why actor and shift are unrecoverable.
+    contexts: [fulfillment]
+    why_it_matters: >-
+      This is the single decision the whole labour-costing design rests on. Derived legs cannot
+      carry an actor, a clock-in, or a shift id, so COGS labour allocation is impossible without
+      first-class legs.
+    blocks: [OQ-001, ADR-0011]
+    status: open
+
+  - id: HOT-008
+    statement: >-
+      Duplicate ACTIVE charge products book the same economic event to different revenue accounts,
+      so the source data does not determine the posting.
+    contexts: [ledger, billing]
+    why_it_matters: >-
+      The new posting rules must map a billed line to exactly one account. Today the account
+      depends on which of two identically-named active products the operator happened to pick, so
+      historical revenue is split across accounts for no economic reason — and any posting rule
+      derived from history inherits the ambiguity.
+    evidence: >-
+      Verified 2026-08-08 in the `Delivery` product line, all `active: true`: "Distance Charge"
+      exists twice (one `service` @ COA 4100, one `surcharge` @ COA 4110); "Rush Charge" exists
+      twice (both `surcharge` @ COA 4100); "Off Hours Surcharge" (`service` @ 4100) coexists with
+      "Off Hours Charge" (`surcharge` @ 4110); "Weekend Surcharge" (`service` @ 4100) coexists with
+      "Weekend Charge" (`surcharge` @ 4110). The `- Old` variants are correctly inactive; these
+      are not.
+    blocks: [OQ-014]
+    status: open

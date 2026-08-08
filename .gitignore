@@ -1,0 +1,12 @@
+.DS_Store
+*.swp
+deno.lock
+
+# DuckDB caches are rebuildable artifacts (ADR-0006). Parquet is durable; .duckdb is not.
+*.duckdb
+*.duckdb.wal
+
+# TLA+ model-checking output
+formal/states/
+*.toolbox/
+*.out

@@ -1,0 +1,186 @@
+# Open questions — decisions someone must make, each with an owner and a date.
+#
+# An OQ is a DECISION, not work. Work is a GitHub issue. A conflict is a HOT-.
+#
+# `deno task validate` FAILS on any entry missing `owner` or `decide_by`. Every entry below is
+# seeded TBD/TBD on purpose — filling them in is the first real act of planning, and the failure
+# list is the day-one worklist.
+#
+# status: open | answered | dropped
+# Dates are ISO calendar dates (America/Chicago).
+
+open_questions:
+  - id: OQ-001
+    question: >-
+      Are fulfillment legs first-class recorded events with their own identity, or derived from
+      the order's destinations at read time?
+    owner: TBD
+    decide_by: TBD
+    blocks: [HOT-007, ADR-0011, REQ-FUL]
+    status: open
+    notes: >-
+      Everything in the labour-costing design depends on this. A derived leg cannot carry an
+      actor, a clock-in, or a shift id. SPIKE-none — this is a design decision, not an
+      investigation.
+
+  - id: OQ-002
+    question: >-
+      What is the grouping key for a trip, and may one trip span destinations belonging to
+      different orders?
+    owner: TBD
+    decide_by: TBD
+    blocks: [HOT-007]
+    status: open
+    notes: >-
+      "Destinations sharing a date and direction" is the stated rule. If a trip may cross orders,
+      trip is a fulfillment aggregate and cannot live under an order.
+
+  - id: OQ-003
+    question: >-
+      Is `fulfillment_mode` a property of the order, or of each destination?
+    owner: TBD
+    decide_by: TBD
+    blocks: [ADR-0011]
+    status: open
+    notes: >-
+      Newly live: multi-destination orders are now possible, so one order can plausibly have a
+      counter pickup for one destination and a delivery for another. The seeded design puts the
+      enum on the order.
+
+  - id: OQ-004
+    question: Who assigns a product's `handling_bucket`, and is it revisable per order?
+    owner: TBD
+    decide_by: TBD
+    blocks: []
+    status: open
+
+  - id: OQ-005
+    question: Is a shift per-person or per-crew?
+    owner: TBD
+    decide_by: TBD
+    blocks: [REQ-FUL, REQ-LED]
+    status: open
+    notes: >-
+      Material because `shift_id` goes on every leg. A crew-level shift makes leg→shift
+      many-to-one; a person-level shift makes it many-to-many and needs a join.
+
+  - id: OQ-006
+    question: >-
+      Should a long-haul run absorb a byproduct-loss premium on top of the person-day, mirroring
+      what the customer is charged?
+    owner: TBD
+    decide_by: TBD
+    blocks: [HOT-004]
+    status: open
+
+  - id: OQ-007
+    question: >-
+      Should the collecting/returning flags become per-leg in the new system, given they are
+      per-destination today?
+    owner: TBD
+    decide_by: TBD
+    blocks: [HOT-002, ADR-0011]
+    status: open
+    notes: >-
+      Verified 2026-08-08 that they are per-destination in the current system. The question is
+      forward-looking, and it decides whether leg history can be backfilled at migration or only
+      accumulated going forward.
+
+  - id: OQ-008
+    question: Who sets standard labour rates, how often are they revised, and what happens to
+      in-flight jobs when a rate changes?
+    owner: TBD
+    decide_by: TBD
+    blocks: [REQ-LED]
+    status: open
+
+  - id: OQ-009
+    question: >-
+      Is TigerBeetle or DuckDB the reporting source of truth, given TB timestamps are posting time
+      and reporting is periodised by accounting date?
+    owner: TBD
+    decide_by: TBD
+    blocks: [HOT-005, ADR-0008, ADR-0010]
+    status: open
+    notes: Informed by SPIKE-003, but the split is a decision, not a finding.
+
+  - id: OQ-010
+    question: >-
+      Does `Trucking` mean third-party freight (no wage labour) or an own long-haul run
+      (labour-bearing)?
+    owner: TBD
+    decide_by: TBD
+    blocks: [HOT-001, ADR-0011]
+    status: open
+    notes: >-
+      Evidence 2026-08-08: `Trucking` books to COA 4100 alongside Crew labour and Delivery
+      services; `Shipping` books to its own COA 4150. Suggestive of own-run vs freight.
+
+  - id: OQ-011
+    question: >-
+      Is any labour COST recorded anywhere in the current system today, or only billable labour
+      revenue?
+    owner: TBD
+    decide_by: TBD
+    blocks: [HOT-003, REQ-LED]
+    status: open
+    notes: >-
+      Verified 2026-08-08 that the `Crew` product line carries three billable service products,
+      all revenue at COA 4100. Cost side unexamined. Answering this decides whether the migration
+      has any labour cost history to carry, or starts from zero.
+
+  - id: OQ-012
+    question: Xero history — import the known-defective lines as-is, or restate them?
+    owner: TBD
+    decide_by: TBD
+    blocks: [HOT-006, REQ-LED]
+    status: open
+    notes: >-
+      ~90% of historical Xero lines sit behind the 2025-12-31 lock. Verified 2026-08-08 that
+      28.7% of CFS line revenue carries no product-line dimension — whatever is imported inherits
+      that.
+
+  - id: OQ-013
+    question: >-
+      Do the 55 order uids referenced by invoices but absent from `orders` actually not exist, and
+      is the count still 55?
+    owner: TBD
+    decide_by: TBD
+    blocks: []
+    status: open
+    notes: >-
+      Unverified as of 2026-08-08 — checking it means cross-referencing every invoice's
+      `query_by_orders` against the orders collection. This is the evidence for the "no hard
+      deletes, ever" fence, so it is worth confirming rather than inheriting.
+
+  - id: OQ-014
+    question: >-
+      For each pair of duplicate active charge products, which is canonical — and does a surcharge
+      post to COA 4100 or 4110?
+    owner: TBD
+    decide_by: TBD
+    blocks: [HOT-008, REQ-LED, REQ-BIL]
+    status: open
+
+  - id: OQ-015
+    question: >-
+      What identifies the one-off out-of-state engagement, and what is the exclusion flag's
+      semantics — excluded from run-rate reporting only, or from more?
+    owner: TBD
+    decide_by: TBD
+    blocks: [REQ-BIL]
+    status: open
+
+  - id: OQ-016
+    question: >-
+      Does the repo require the `spec` CI check to pass before merge, given `deno task validate`
+      is red by design until the seeded worklist is cleared?
+    owner: TBD
+    decide_by: TBD
+    blocks: []
+    status: open
+    notes: >-
+      Left unprotected at seed time: a required check that fails by design blocks every merge from
+      day one. Enable with
+      `gh api -X PUT repos/chicago-film-supplies/erp-spec/branches/main/protection` once validate
+      is green. See inbox/2026-08-08-ci-red-by-design.md.

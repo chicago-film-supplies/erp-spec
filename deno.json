@@ -1,0 +1,23 @@
+{
+  "name": "@cfs/erp-spec",
+  "version": "0.0.0",
+  "exports": {},
+  "tasks": {
+    "validate": "deno run --allow-read --allow-env=SPEC_TODAY tools/validate.ts",
+    "triage": "deno run --allow-read --allow-env=SPEC_TODAY tools/validate.ts --triage-only",
+    "gen": "deno run --allow-read --allow-write tools/generate.ts",
+    "ingest": "deno run --allow-read --allow-write tools/ingest.ts"
+  },
+  "imports": {
+    "@std/yaml": "jsr:@std/yaml@^1.0.5",
+    "@std/fs": "jsr:@std/fs@^1.0.8",
+    "@std/path": "jsr:@std/path@^1.0.8"
+  },
+  "fmt": {
+    "lineWidth": 100,
+    "exclude": ["traceability/", "**/*.generated.*"]
+  },
+  "lint": {
+    "exclude": ["traceability/", "**/*.generated.*"]
+  }
+}

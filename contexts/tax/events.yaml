@@ -1,0 +1,6 @@
+# Domain events for TAX.
+#
+# Every event needs a producer and at least one consumer, or `terminal: true`.
+# An event with no consumer that is not terminal is a design smell the validator will catch.
+
+events: []

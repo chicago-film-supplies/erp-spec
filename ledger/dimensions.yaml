@@ -1,0 +1,48 @@
+# Dimensions — axes a balance can be sliced by, carried ON the posting, never derived later.
+#
+# REQ-LED-001: both mandatory dimensions are NOT NULLABLE on revenue and COGS postings.
+# A posting missing either is rejected, not recorded. The current system's optional dimension is
+# why 28.7% of line revenue has none.
+
+dimensions:
+  - id: product_line
+    description: What category of goods or service the line belongs to.
+    required_on: [revenue, cogs]
+    nullable: false
+    source: "verified:2026-08-08:db_tracking_categories_query (21 values in the current system)"
+    values:
+      - Crafty
+      - Surface Protection
+      - Traffic, Safety & Signage
+      - Replacements
+      - Delivery
+      - Wardrobe
+      - Fans & Heaters
+      - Office Supplies
+      - Hair & Makeup
+      - Transport
+      - Power, Lights & Tools
+      - Trash & Cleanup
+      - Janitorial
+      - Other
+      - Transaction Fees
+      - Walkies & Hotspots
+      - Carts & Ramps
+      - Expendables
+      - Tables & Chairs
+      - Crew
+      - Tents
+    note: >-
+      Carried over as-is for now. Whether the new system keeps all 21 — and whether "Other" should
+      exist at all, given a non-nullable dimension makes it the new null — is m3 work.
+
+  - id: cost_type
+    description: What kind of work a labour posting represents.
+    required_on: [cogs]
+    nullable: false
+    source: inbox/2026-08-08-two-reporting-dimensions.md
+    values: [delivery, counter, warehouse]
+
+# Cardinality note for ADR-0008: 21 product lines x 3 cost types = 63 combinations per dimensioned
+# GL code. Across the dimensioned accounts above that is several hundred TigerBeetle accounts.
+# Verify this stays tractable before accepting ADR-0008.

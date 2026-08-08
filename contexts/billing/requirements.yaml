@@ -1,0 +1,21 @@
+# Requirements for BIL. Nothing lands here directly — everything is promoted from inbox/.
+#
+# Required per requirement: id, statement, rationale, source, priority, verification_method, status.
+# verification_method: inspection | analysis | demonstration | test
+# priority: must | should | could
+# status: draft | agreed | superseded
+
+requirements:
+  - id: REQ-BIL-001
+    statement: >-
+      A voided source document shall be excluded from every default aggregate, and its inclusion
+      shall require an explicit opt-in at the point of query.
+    rationale: >-
+      Verified 2026-08-08: 41 of 999 invoices are void, carrying 477 line items worth $69,769.66,
+      and nothing filters them by default. They contaminated the untracked-revenue measurement on
+      the same day it was taken. An exclusion that must be remembered will be forgotten.
+    source: inbox/2026-08-08-void-invoices-not-filtered.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: []

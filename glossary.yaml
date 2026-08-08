@@ -1,0 +1,289 @@
+# Glossary — one definition per domain term.
+#
+# Rules:
+#   - Check `aliases` before introducing a new term. Prefer editing over near-duplicating.
+#   - `definition: TODO` means nobody can state it confidently yet. Every TODO carries an OQ.
+#   - `contexts` must resolve to real directories under contexts/.
+#   - `source` is an inbox file, an ADR, or a verification query against the live CFS API.
+
+terms:
+  # ── Fulfillment geometry ────────────────────────────────────────────────────
+
+  - term: leg
+    definition: >-
+      One directed movement of equipment between CFS and a destination — outbound (CFS delivers)
+      or inbound (CFS collects). A leg is the unit that consumes crew time and vehicle capacity,
+      and therefore the unit labour cost attaches to.
+    aliases: [field leg, run]
+    contexts: [fulfillment]
+    source: inbox/2026-08-08-shift-id-on-every-leg.md
+    open_questions: [OQ-001, OQ-007]
+    notes: >-
+      Granularity is the contested part, not the concept. The current system has no leg record at
+      all — legs are inferred from an order's destination flags, which is why actor and shift are
+      unrecoverable (HOT-007).
+
+  - term: chargeable field leg
+    definition: >-
+      A leg the customer is billed for. The quantity on a `Delivery/Setup/Removal` line is the
+      count of chargeable field legs — NOT a count of services rendered.
+    aliases: [billable leg]
+    contexts: [fulfillment, billing]
+    source: "verified:2026-08-08:db_invoices_query invoice #2128"
+    verified: true
+    notes: >-
+      Verified on prod invoice 2128: one destination with customer_collecting=false and
+      customer_returning=false (CFS both delivers and collects) carries
+      `Delivery/Setup/Removal` quantity=2. Two legs, one service line, quantity 2.
+
+  - term: trip
+    definition: >-
+      A set of legs sharing a date and a direction, executed as one vehicle run by one crew. A
+      trip is NOT a destination and NOT an invoice — destinations sharing a date and direction
+      group into one trip.
+    aliases: [run, vehicle run]
+    contexts: [fulfillment]
+    source: inbox/2026-08-08-shift-id-on-every-leg.md
+    open_questions: [OQ-002]
+    notes: >-
+      The grouping key ("date and direction") is stated but not pinned — whether a trip may span
+      destinations belonging to different orders is undecided, and it determines whether trip is
+      an ordering concept or purely a fulfillment one.
+
+  - term: destination
+    definition: >-
+      A place equipment goes, carrying its own delivery and collection addresses, its own charge
+      and delivery/collection date ranges, and its own `customer_collecting` / `customer_returning`
+      flags. An order may have several.
+    aliases: [delivery destination, site]
+    contexts: [ordering, fulfillment, billing]
+    source: "verified:2026-08-08:db_invoices_query invoice #2128"
+    verified: true
+    notes: >-
+      In the CURRENT system the collecting/returning flags live on the destination, not on a leg
+      (HOT-002). Multi-destination orders are newly possible and will start appearing.
+
+  - term: counter pickup
+    definition: >-
+      A fulfillment where the customer both collects and returns the equipment themselves — i.e.
+      `customer_collecting` AND `customer_returning` are both true. No CFS field leg occurs.
+    aliases: [counter, will-call, customer pickup]
+    contexts: [fulfillment, ordering]
+    source: inbox/2026-08-08-fulfillment-mode-enum.md
+    verified: false
+
+  - term: fulfillment mode
+    definition: >-
+      An enum on the order recording how equipment reaches and leaves the customer:
+      `local_delivery` | `counter` | `shipped` | `trucked`.
+    aliases: [delivery mode]
+    contexts: [ordering, fulfillment]
+    source: inbox/2026-08-08-fulfillment-mode-enum.md
+    open_questions: [OQ-003]
+    notes: >-
+      Discriminator rules, stated and to be preserved: `counter` = both flags true. `shipped` =
+      an explicit shipping line was billed, NEVER inferred from geography. `delivery` = the union
+      of "flags indicate a field leg" OR "a delivery-category line was billed". `trucked` is the
+      one with no stated discriminator — see HOT-001.
+
+  - term: handling bucket
+    definition: >-
+      A per-product classification of how much physical handling one unit needs:
+      `bag` | `two_person_lift` | `needs_cart_or_truck_space`. Drives crew sizing and vehicle
+      capacity planning.
+    aliases: [handling class]
+    contexts: [ordering, fulfillment]
+    source: inbox/2026-08-08-handling-bucket-per-product.md
+    open_questions: [OQ-004]
+    notes: >-
+      The current system has `shipping.{weight,height,width,length}` on every product and all 549
+      are zero — verified. The handling bucket exists because the dimensional data never got
+      captured and probably never will.
+
+  # ── Labour and costing ──────────────────────────────────────────────────────
+
+  - term: shift
+    definition: >-
+      A contiguous span of paid time for one person on one day, bounded by clock-in and clock-out.
+      Carries an 8-hour minimum guarantee, 1.5x after 8 hours, and a mandatory 10 hours off before
+      the next shift.
+    aliases: [crew day, person-day]
+    contexts: [fulfillment, ledger]
+    source: inbox/2026-08-08-labour-cost-step-function.md
+    open_questions: [OQ-005]
+    notes: >-
+      Whether a shift is per-person or per-crew is undecided and material — `shift_id` is meant to
+      go on every leg, and a crew-level shift makes that a many-to-one where a person-level shift
+      makes it many-to-many.
+
+  - term: causal job
+    definition: >-
+      The single job a shift exists to serve. Every shift has exactly one. The causal job bears
+      the whole crew-day of cost.
+    aliases: [primary job, causing job]
+    contexts: [fulfillment, ledger]
+    source: inbox/2026-08-08-byproduct-causal-job-rule.md
+    verified: false
+
+  - term: byproduct
+    definition: >-
+      Work performed during a shift that is not the causal job. A byproduct absorbs zero
+      incremental labour cost — it rode along on a crew-day that was already being paid for.
+    aliases: [piggyback, ride-along]
+    contexts: [fulfillment, ledger]
+    source: inbox/2026-08-08-byproduct-causal-job-rule.md
+    open_questions: [OQ-006]
+    notes: >-
+      The rule is settled. What is not settled is whether long-haul should absorb a byproduct-loss
+      premium on top of the person-day, mirroring what the customer is charged (HOT-004).
+
+  - term: cost type
+    definition: >-
+      One of the two mandatory reporting dimensions on a labour posting: `delivery` | `counter` |
+      `warehouse`. Answers "what kind of work was this", independent of what product line it
+      served.
+    aliases: [labour type, activity type]
+    contexts: [ledger, fulfillment]
+    source: inbox/2026-08-08-two-reporting-dimensions.md
+    verified: false
+
+  - term: product line
+    definition: >-
+      The revenue/COGS dimension describing what category of goods or service a line belongs to —
+      the second mandatory reporting dimension alongside cost type.
+    aliases: [tracking category, category]
+    contexts: [ledger, billing, ordering]
+    source: "verified:2026-08-08:db_tracking_categories_query"
+    verified: true
+    notes: >-
+      In the current system this is the Xero tracking category. 21 exist: Crafty, Surface
+      Protection, Traffic Safety & Signage, Replacements, Delivery, Wardrobe, Fans & Heaters,
+      Office Supplies, Hair & Makeup, Transport, Power Lights & Tools, Trash & Cleanup, Janitorial,
+      Other, Transaction Fees, Walkies & Hotspots, Carts & Ramps, Expendables, Tables & Chairs,
+      Crew, Tents. 28.7% of historical line revenue carries none.
+
+  - term: standard cost
+    definition: >-
+      A predetermined per-unit labour cost applied to a job when it is performed, rather than the
+      actual cost of the crew-day. The difference between standard applied and actual incurred is
+      the variance.
+    aliases: [applied cost]
+    contexts: [ledger]
+    source: inbox/2026-08-08-standard-cost-with-variance.md
+    open_questions: [OQ-008]
+    notes: The rates themselves are unset, and who sets them (and how often) is undecided.
+
+  - term: variance
+    definition: >-
+      Actual labour cost incurred minus standard cost absorbed, posted as its own line rather than
+      spread pro-rata across jobs.
+    aliases: [labour variance, absorption variance]
+    contexts: [ledger]
+    source: inbox/2026-08-08-standard-cost-with-variance.md
+    verified: false
+
+  - term: unabsorbed labour
+    definition: >-
+      The residual labour cost that no causal job absorbed, posted to an untracked
+      `COGS – Unabsorbed Labour` account. This account IS the idle-capacity KPI — it is not a
+      plug or a rounding sink.
+    aliases: [idle capacity, unabsorbed]
+    contexts: [ledger]
+    source: inbox/2026-08-08-standard-cost-with-variance.md
+    verified: false
+
+  # ── Accounting core ─────────────────────────────────────────────────────────
+
+  - term: accounting date
+    definition: >-
+      The date a transaction belongs to for reporting and period purposes. Determines which period
+      a posting falls in. Set by the business event, not by the clock.
+    aliases: [effective date, transaction date, GL date]
+    contexts: [ledger, billing, tax]
+    source: adr/ADR-0010-accounting-date-vs-posting-timestamp.md
+    verified: false
+    notes: Never conflate with posting timestamp. They are always distinct fields.
+
+  - term: posting timestamp
+    definition: >-
+      The wall-clock instant the posting was durably recorded. Monotonic, assigned by the ledger,
+      never back-dated. Answers "when did we learn this", not "when did it happen".
+    aliases: [recorded at, system time]
+    contexts: [ledger]
+    source: adr/ADR-0010-accounting-date-vs-posting-timestamp.md
+    open_questions: [OQ-009]
+    notes: >-
+      TigerBeetle assigns its own timestamp at post time and that is a posting timestamp, not an
+      accounting date. Reporting needs accounting date. This is HOT-005 and SPIKE-003.
+
+  - term: journal entry
+    definition: >-
+      A balanced set of debits and credits sharing one accounting date, one source document, and
+      one posting rule. The atomic unit of the ledger — never partially posted.
+    aliases: [JE, entry]
+    contexts: [ledger]
+    source: ledger/posting-rules.yaml
+    verified: false
+
+  - term: source document
+    definition: >-
+      The business artifact a journal entry was derived from — an invoice, a shift record, a bank
+      transaction, a depreciation run. Every posting names exactly one, and it is reachable from
+      the posting.
+    aliases: [source doc, originating document]
+    contexts: [ledger]
+    source: ledger/posting-rules.yaml
+    verified: false
+
+  - term: dimension
+    definition: >-
+      An axis a balance can be sliced by, carried on the posting itself rather than derived later.
+      Two are mandatory on every COGS and revenue posting: product line and cost type.
+    aliases: [tracking dimension, analysis code]
+    contexts: [ledger]
+    source: ledger/dimensions.yaml
+    verified: false
+    notes: >-
+      The current system's equivalent is the Xero tracking option, and 28.7% of line revenue
+      carries none. A dimension that can be null is a dimension that will be null.
+
+  - term: period close
+    definition: >-
+      The act of freezing an accounting period so no further postings may take its accounting
+      date. Produces an immutable close record.
+    aliases: [close, month-end close]
+    contexts: [ledger]
+    source: formal/period-close.tla
+    verified: false
+    notes: >-
+      Per ADR-0006 a closed period's Parquet file is the audit artifact and its hash goes into the
+      close record.
+
+  - term: book
+    definition: >-
+      A parallel set of valuations over the same assets under a different rule set. CFS runs two:
+      `gaap` and `tax`. Every fixed asset carries a basis in each, and the difference between them
+      is itself reportable.
+    aliases: [basis, valuation basis]
+    contexts: [fixed-assets, ledger, tax]
+    source: adr/ADR-0007-replace-asset-accountant.md
+    verified: false
+    notes: >-
+      "Book" and "basis" are used interchangeably in conversation. Here `book` is the set
+      (gaap|tax) and `basis` is the carrying amount within a book. Do not introduce a third term.
+
+  # ── Terms deliberately left open ────────────────────────────────────────────
+
+  - term: trucking
+    definition: TODO
+    aliases: [long haul]
+    contexts: [fulfillment, ordering]
+    source: "verified:2026-08-08:db_products_query tracking_category_name=Transport"
+    verified: false
+    open_questions: [OQ-010]
+    notes: >-
+      HOT-001. Evidence, not proof: `Trucking` and `Shipping` are both products in the `Transport`
+      product line, but `Trucking` books to COA 4100 — the same revenue account as Crew labour and
+      Delivery services — while `Shipping` books to its own COA 4150. That grouping suggests
+      Trucking is an own-crew long-haul run (labour-bearing) and Shipping is third-party freight.
+      Not confirmed. The answer decides whether trucking absorbs a person-day.

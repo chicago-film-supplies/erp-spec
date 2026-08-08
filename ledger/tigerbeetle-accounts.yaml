@@ -1,0 +1,15 @@
+# TigerBeetle account mapping. Blocked on ADR-0008 (proposed) and HOT-005 / OQ-009.
+#
+# The proposed model is dimension-exploded: one TB account per
+# (GL code x product line x cost type). Transfer `user_data` is RESERVED for high-cardinality
+# references and must never become part of account identity:
+#
+#   user_data_128 -> journal_entry_id
+#   user_data_64  -> source_document ref
+#   user_data_32  -> posting_rule id
+#
+# Do not populate this file until ADR-0008 is accepted. If DuckDB becomes the reporting source of
+# truth (OQ-009), real-time dimensional balances may be solving a problem nobody has, and a much
+# smaller account tree wins.
+
+accounts: []

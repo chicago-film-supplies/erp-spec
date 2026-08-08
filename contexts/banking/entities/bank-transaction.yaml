@@ -1,0 +1,12 @@
+# EXAMPLE ENTITY — one per context, to fix the shape. Not a schema. Not exhaustive.
+entity: BankTransaction
+description: >-
+  A translated bank line. The Plaid identifier lives in the boundary translation table, NOT here
+  (ADR-0009).
+fields:
+  bank_transaction_id: { type: uuid, required: true, note: "ours, not Plaid's" }
+  amount_minor:        { type: int64, required: true }
+  posted_on:           { type: date, required: true }
+  cleared:             { type: bool, required: true, note: "pending vs posted. SPIKE-004" }
+  description_raw:     { type: string, required: true }
+  match_state:         { type: enum, values: [unmatched, matched, quarantined], required: true }

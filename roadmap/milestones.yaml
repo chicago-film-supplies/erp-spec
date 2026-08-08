@@ -1,0 +1,76 @@
+# Milestones to spec-v1. Exit criteria are falsifiable statements, not activities.
+
+milestones:
+  - id: m0
+    title: Charter and non-goals
+    depends_on: []
+    exit_criteria:
+      - charter.md scope and non-goals list has stopped changing across two consecutive sessions.
+      - Every non-goal states why it is out, not just that it is.
+      - The fences (no hard deletes, integer minor units, distinct date fields, no foreign ids in domain) are each traceable to a finding.
+
+  - id: m1
+    title: Big-picture event storm
+    depends_on: [m0]
+    exit_criteria:
+      - Every domain event in the order-to-cash and fulfillment paths is named and placed on a timeline.
+      - Each event has a declared producer and at least one consumer, or is marked terminal.
+      - Events that only exist because of CRMS or Xero are explicitly excluded, not carried forward.
+
+  - id: m2
+    title: Context map and glossary v1
+    depends_on: [m1]
+    exit_criteria:
+      - All eight contexts have a context.md stating their responsibility and their boundary.
+      - Zero glossary terms with `definition: TODO`.
+      - Every glossary term used in a requirement statement resolves, and no two terms are near-duplicates.
+
+  - id: m3
+    title: Ledger core
+    depends_on: [m2]
+    exit_criteria:
+      - Chart of accounts complete, including the COGS and unabsorbed-labour accounts.
+      - Dimensions defined with their full value sets and their nullability rule (which is: not nullable).
+      - Posting rules defined for every source document type.
+      - Golden input->expected-transfer vectors exist for every posting rule, including the failure cases.
+
+  - id: m4
+    title: All spikes closed by ADR
+    depends_on: [m3]
+    exit_criteria:
+      - Every SPIKE- has status closed and names the ADR it produced.
+      - No ADR remains `proposed` past its review_by date.
+      - Every HOT- is resolved or has an ADR that consciously defers it with a stated reason.
+
+  - id: m5
+    title: Formal specs checking clean
+    depends_on: [m4]
+    exit_criteria:
+      - two-store-commit.tla model checks clean against its three failure questions.
+      - period-close.tla model checks clean, including the back-dated-posting-into-closed-period case.
+      - Both specs have been run, not merely written — with the model-checker output recorded.
+
+  - id: m6
+    title: Migration field map complete
+    depends_on: [m2]
+    exit_criteria:
+      - Every current Firestore path maps to a new field, an explicit drop, or a quarantine.
+      - The defective paths are mapped as defective — untracked lines, hard-deleted order refs, duplicate active products — not silently normalized.
+      - A decision exists for Xero history (OQ-012) and its consequence is reflected in the map.
+
+  - id: m7
+    title: Walking skeleton defined
+    depends_on: [m3, m5, m6]
+    exit_criteria:
+      - One order -> one fulfillment -> one invoice -> one posting -> one report is specified end to end.
+      - Every step names its requirements, its events, and its posting rule.
+      - The skeleton exercises both reporting dimensions and at least one labour absorption.
+
+  - id: spec-v1
+    title: Tag spec-v1
+    depends_on: [m0, m1, m2, m3, m4, m5, m6, m7]
+    exit_criteria:
+      - All prior milestone exit criteria met.
+      - Zero open questions without an owner and a decide_by date.
+      - Clean `deno task validate`.
+      - `deno task gen` produces no diff.

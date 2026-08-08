@@ -1,0 +1,75 @@
+# Every current Firestore path -> a new field, an explicit drop, or a quarantine.
+#
+# m6 work. Seeded only with the paths the verification pass touched. The rule that matters:
+# **defective paths are mapped as defective**, not silently normalized. A migration that cleans
+# data on the way through destroys the evidence that it was ever dirty.
+#
+# disposition: map | drop | quarantine | defective
+
+mappings:
+  - from: products.shipping.weight
+    to: null
+    disposition: drop
+    reason: >-
+      0 of 549 products have a non-zero value — verified 2026-08-08. Superseded by
+      handling_bucket. Dropping a field that was never populated costs nothing; carrying it
+      forward implies data that does not exist.
+
+  - from: products.shipping.{height,width,length}
+    to: null
+    disposition: drop
+    reason: "Same — 0 of 549 non-zero, verified 2026-08-08."
+
+  - from: invoices.items[].tracking_category
+    to: posting.product_line
+    disposition: defective
+    reason: >-
+      Null on 28.7% of line revenue. Two separable classes — 254 lines recoverable from
+      xero_tracking_option_id, 129 lines not recoverable at all. Must be migrated as two
+      populations, not one.
+    blocked_by: [OQ-012]
+
+  - from: invoices.items[].xero_tracking_option_id
+    to: null
+    disposition: drop
+    reason: >-
+      Foreign identifier — ADR-0009 forbids it entering the domain model. Used at migration time
+      to recover the 254 lines above, then discarded.
+
+  - from: invoices.query_by_orders
+    to: invoice.order_refs
+    disposition: defective
+    reason: "55 referenced order uids reportedly do not exist. Unverified — OQ-013. Unresolvable refs quarantine, never null (ADR-0009)."
+
+  - from: invoices.status == "void"
+    to: invoice.status
+    disposition: map
+    reason: "41 of 999. Maps directly, but REQ-BIL-001 changes the DEFAULT — void excluded unless opted in."
+
+  - from: destinations[].customer_collecting
+    to: leg.direction
+    disposition: defective
+    reason: >-
+      Per-destination today, not per-leg (verified 2026-08-08). Legs cannot be backfilled from it
+      with an actor or a shift. Migration produces destination-level facts only; leg history
+      starts at cutover.
+    blocked_by: [HOT-002, HOT-007]
+
+  - from: products (duplicate active charge products)
+    to: product
+    disposition: quarantine
+    reason: >-
+      HOT-008 — duplicate ACTIVE products book identical events to different accounts. Cannot map
+      until OQ-014 names the canonical member of each pair.
+
+  - from: "*.{_cents fields}"
+    to: "*.{_minor fields}"
+    disposition: map
+    reason: "Already integer cents in the current system. Direct map — the hard part was already done."
+
+  - from: "*.{rate fields}"
+    to: "*.rate"
+    disposition: map
+    reason: >-
+      Rates stay 4dp decimals and do NOT get a _minor suffix. They sit adjacent to amounts in four
+      schemas and a sweep that converts every money field is how the beta.117 regression happened.

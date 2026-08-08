@@ -1,0 +1,25 @@
+# Domain events for FUL.
+# Every event needs a producer and at least one consumer, or `terminal: true`.
+
+events:
+  - id: EVT-FUL-001
+    name: LegCompleted
+    description: >-
+      One directed movement between CFS and a destination finished, with its actor, clock-in and
+      clock-out recorded.
+    producer: fulfillment
+    consumers: [billing, availability]
+    terminal: false
+    carries: [leg_id, shift_id, actor_id, destination_ref, direction, clock_in, clock_out]
+    blocked_by: [HOT-007]
+
+  - id: EVT-FUL-002
+    name: ShiftRecorded
+    description: >-
+      A person's paid span for one day closed, naming its causal job. Byproduct work performed
+      during the shift absorbs no incremental cost.
+    producer: fulfillment
+    consumers: [ledger]
+    terminal: false
+    carries: [shift_id, causal_job_ref, crew_size, clock_in, clock_out]
+    blocked_by: [OQ-005]

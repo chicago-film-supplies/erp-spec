@@ -1,0 +1,37 @@
+# Chart of accounts.
+#
+# INCOMPLETE — this is m3 work. What follows is the REVENUE side reverse-engineered from codes
+# observed on live invoice lines on 2026-08-08, plus the accounts the costing design requires.
+# Assets, liabilities and equity are TODO. Do not treat this as authoritative.
+#
+# Every account: code, name, type, normal_balance, dimensioned (whether postings must carry
+# product line + cost type).
+
+accounts:
+  # ── Revenue (observed live) ───────────────────────────────────────────────
+  - { code: 4000, name: "Rental Revenue",       type: revenue, normal_balance: credit, dimensioned: true,  source: "verified:2026-08-08" }
+  - { code: 4100, name: "Service Revenue",      type: revenue, normal_balance: credit, dimensioned: true,  source: "verified:2026-08-08",
+      note: "Catch-all spanning Crew, Delivery, Transport and Trash & Cleanup product lines. The account does NOT determine the product line — this is the argument for carrying the dimension on the posting." }
+  - { code: 4110, name: "Surcharge Revenue",    type: revenue, normal_balance: credit, dimensioned: true,  source: "verified:2026-08-08",
+      note: "HOT-008 — duplicate active products split identical surcharges between 4100 and 4110." }
+  - { code: 4120, name: "TODO",                 type: revenue, normal_balance: credit, dimensioned: true,  source: "verified:2026-08-08 (code seen, name unknown)" }
+  - { code: 4140, name: "TODO",                 type: revenue, normal_balance: credit, dimensioned: true,  source: "verified:2026-08-08 (code seen, name unknown)" }
+  - { code: 4150, name: "Shipping Revenue",     type: revenue, normal_balance: credit, dimensioned: true,  source: "verified:2026-08-08" }
+  - { code: 4200, name: "Sale Revenue",         type: revenue, normal_balance: credit, dimensioned: true,  source: "verified:2026-08-08" }
+  - { code: 4210, name: "Replacement Revenue",  type: revenue, normal_balance: credit, dimensioned: true,  source: "verified:2026-08-08" }
+  - { code: 4700, name: "TODO",                 type: revenue, normal_balance: credit, dimensioned: true,  source: "verified:2026-08-08 (code seen, name unknown)" }
+  - { code: 4800, name: "TODO",                 type: revenue, normal_balance: credit, dimensioned: true,  source: "verified:2026-08-08 (code seen, name unknown)" }
+
+  # ── Liability (observed live) ─────────────────────────────────────────────
+  - { code: 2210, name: "Bottled Water Tax Payable", type: liability, normal_balance: credit, dimensioned: false, source: "verified:2026-08-08" }
+  - { code: 2800, name: "TODO",                      type: liability, normal_balance: credit, dimensioned: false, source: "verified:2026-08-08 (code seen, name unknown)" }
+
+  # ── COGS (required by the costing design; not present today) ──────────────
+  - { code: 5100, name: "COGS – Labour Absorbed", type: expense, normal_balance: debit, dimensioned: true,
+      note: "Standard cost applied to causal jobs." }
+  - { code: 5190, name: "COGS – Labour Variance", type: expense, normal_balance: debit, dimensioned: true,
+      note: "Actual minus standard. Its own line, never spread pro-rata." }
+  - { code: 5199, name: "COGS – Unabsorbed Labour", type: expense, normal_balance: debit, dimensioned: false,
+      note: "DELIBERATELY UNDIMENSIONED. This account IS the idle-capacity KPI, not a plug. A dimension here would let idle time be attributed to a product line, which is exactly the lie to avoid." }
+
+# TODO: assets, remaining liabilities, equity, retained earnings roll target.

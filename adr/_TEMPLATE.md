@@ -1,0 +1,32 @@
+---
+id: ADR-0000
+title:
+status: proposed        # proposed | accepted | rejected | superseded
+date: 2026-08-08
+review_by:              # REQUIRED while proposed. validate fails once this date passes.
+deciders: [repo owner]
+contexts: []
+relates_to: []          # HOT-/OQ-/SPIKE-/REQ- ids
+supersedes:
+superseded_by:
+---
+
+> **In the context of** <situation>, **facing** <concern>, **we decided** <option>, **to achieve**
+> <quality>, **accepting** <downside>.
+
+## Context
+
+What forces are at play. Terse, factual, no narrative.
+
+## Decision
+
+The decision, stated in the active voice.
+
+## Considered options
+
+Only if real options existed. Delete this section otherwise — a fabricated options list is worse
+than none.
+
+## Consequences
+
+What becomes true, including what becomes harder. Enumerate the work this pulls into scope.

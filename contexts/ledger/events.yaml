@@ -1,0 +1,23 @@
+# Domain events for LED.
+# Every event needs a producer and at least one consumer, or `terminal: true`.
+
+events:
+  - id: EVT-LED-001
+    name: JournalEntryPosted
+    description: >-
+      A balanced set of debits and credits was durably recorded, carrying one accounting date, one
+      source document and one posting rule.
+    producer: ledger
+    consumers: [banking]
+    terminal: false
+    carries: [journal_entry_id, accounting_date, posting_timestamp, source_document_ref]
+
+  - id: EVT-LED-002
+    name: PeriodClosed
+    description: >-
+      An accounting period was frozen. No further posting may take an accounting date inside it.
+      The close record carries the hash of the period's Parquet artifact.
+    producer: ledger
+    consumers: [fixed-assets, billing, tax]
+    terminal: false
+    carries: [period, closed_at, parquet_sha256]

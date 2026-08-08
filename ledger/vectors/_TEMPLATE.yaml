@@ -1,0 +1,15 @@
+# Golden vector — one input business event, one expected set of transfers.
+#
+# These are the executable part of the ledger spec. A posting rule with no vector is a sentence,
+# not a specification. Include the FAILURE cases: a posting missing a dimension must appear here
+# with an expected rejection, or REQ-LED-001 is unenforced.
+
+name:
+posting_rule:
+given:
+  # the business event, in full
+expect:
+  transfers: []
+  # - { debit_account: , credit_account: , amount_minor: , accounting_date: , product_line: , cost_type: }
+  rejects:
+  # - reason: "missing product_line dimension"
