@@ -56,3 +56,5 @@ Accepted and not superseded, as of the last `deno task gen`.
 | [ADR-0011](ADR-0011-fulfillment-legs-first-class.md) | Fulfillment legs are first-class recorded events | 2026-10-15 | HOT-007, HOT-001, HOT-002, OQ-001, OQ-005, OQ-007 |
 | [ADR-0012](ADR-0012-valkey-queues-in-process-workers.md) | Valkey-backed queues with in-process workers, replacing Cloud Tasks | 2026-10-15 | SPIKE-010 |
 | [ADR-0013](ADR-0013-linode-self-hosted.md) | Self-host on Linode, with Caddy fronting TLS | 2026-10-15 | SPIKE-011 |
+| [ADR-0014](ADR-0014-lifecycle-state-is-derived.md) | Lifecycle state is derived from the ledger, never assigned | 2026-10-15 | HOT-005, HOT-009 |
+| [ADR-0015](ADR-0015-reservations-as-pending-transfers.md) | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-10-15 | SPIKE-002, SPIKE-012 |

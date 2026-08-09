@@ -12,9 +12,9 @@ is `deno task validate`'s judgement, not this file's.
 | | Count | |
 |---|---:|---|
 | Open questions | 16 | **16 with no owner or no decide-by** |
-| Conflicts (HOT) | 8 | 8 open |
-| Decisions (ADR) | 13 | 7 in force · 6 proposed |
-| Spikes | 11 | 11 open |
+| Conflicts (HOT) | 9 | 9 open |
+| Decisions (ADR) | 15 | 7 in force · 8 proposed |
+| Spikes | 12 | 12 open |
 | Requirements | 2 | 2 without a scenario |
 | Inbox | 29 | 22 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
@@ -55,6 +55,7 @@ is `deno task validate`'s judgement, not this file's.
 | `HOT-006` | Xero history migration: import known-defective lines, or restate? Roughly 90% of historical Xero lines are be… | `OQ-012` |
 | `HOT-007` | Are fulfillment legs first-class recorded events, or derived from orders? The current system derives them, wh… | `OQ-001` `ADR-0011` |
 | `HOT-008` | Duplicate ACTIVE charge products book the same economic event to different revenue accounts, so the source da… | `OQ-014` |
+| `HOT-009` | `invoice.status` carries two different semantics in one field — an assigned lifecycle fact (draft / issued /… | `ADR-0014` |
 
 ## Decisions
 
@@ -68,7 +69,7 @@ is `deno task validate`'s judgement, not this file's.
 - `ADR-0006` — DuckDB over Parquet as the read side
 - `ADR-0007` — Replace asset.accountant; dual GAAP/tax basis in scope
 
-### Proposed (6)
+### Proposed (8)
 
 | ADR | Title | Review by | Blocked on |
 |---|---|---|---|
@@ -78,6 +79,8 @@ is `deno task validate`'s judgement, not this file's.
 | `ADR-0011` | Fulfillment legs are first-class recorded events | 2026-10-15 | `HOT-007` `HOT-001` `HOT-002` `OQ-001` `OQ-005` `OQ-007` |
 | `ADR-0012` | Valkey-backed queues with in-process workers, replacing Cloud Tasks | 2026-10-15 | `SPIKE-010` |
 | `ADR-0013` | Self-host on Linode, with Caddy fronting TLS | 2026-10-15 | `SPIKE-011` |
+| `ADR-0014` | Lifecycle state is derived from the ledger, never assigned | 2026-10-15 | `HOT-005` `HOT-009` |
+| `ADR-0015` | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-10-15 | `SPIKE-002` `SPIKE-012` |
 
 ## Spikes
 
@@ -94,6 +97,7 @@ is `deno task validate`'s judgement, not this file's.
 | `SPIKE-009` | What replaces Firestore real-time listeners — MongoDB change streams plus a soc… | 1 week | _new ADR_ | open |
 | `SPIKE-010` | Does a production-grade Valkey queue client run under Deno, and can it express… | 3 days | `ADR-0012` | open |
 | `SPIKE-011` | Does TigerBeetle meet its durability and latency expectations on Linode block s… | 3 days | `ADR-0013` | open |
+| `SPIKE-012` | At which fulfillment moment does a booking become a TigerBeetle pending transfe… | 1 week | `ADR-0015` | open |
 
 ## Roadmap
 

@@ -126,3 +126,23 @@ hotspots:
       are not.
     blocks: [OQ-014]
     status: open
+
+  - id: HOT-009
+    statement: >-
+      `invoice.status` carries two different semantics in one field — an assigned lifecycle fact
+      (draft / issued / voided) and a derived balance fact (part_paid / paid) — so no invariant can
+      be stated about either half.
+    contexts: [billing, ledger]
+    why_it_matters: >-
+      ADR-0014 makes derived state a rebuildable projection and assigned state a recorded fact. A
+      field that is both cannot be either, and the two live defect populations are one of each: the
+      derived half going stale, and the lifecycle half disagreeing with the balance. Decomposing
+      the field is a precondition for applying ADR-0014 to invoices at all.
+    evidence: >-
+      Two open populations in the v1 corpus, both measured: 86 orders hold a stale denormalized
+      invoice status (api-cloudrun#453) — the derived half drifting from the facts that determine
+      it; and voided invoices still carry a balance the external ledger closed (api-cloudrun#436),
+      a population recorded as GROWING rather than historical — the lifecycle half asserting a
+      state the balance contradicts.
+    blocks: [ADR-0014]
+    status: open
