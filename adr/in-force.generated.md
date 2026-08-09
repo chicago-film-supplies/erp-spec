@@ -44,17 +44,17 @@ Accepted and not superseded, as of the last `deno task gen`.
 
 | ADR | Title | Review by | Blocked on |
 |---|---|---|---|
-| [ADR-0009](ADR-0009-anticorruption-layer.md) | Anticorruption layer — foreign identifiers never enter domain models | 2026-10-15 | HOT-006 |
-| [ADR-0010](ADR-0010-accounting-date-vs-posting-timestamp.md) | Accounting date vs posting timestamp policy | 2026-10-15 | HOT-005, OQ-009, SPIKE-003 |
-| [ADR-0011](ADR-0011-fulfillment-legs-first-class.md) | Fulfillment legs are first-class recorded events | 2026-10-15 | HOT-007, HOT-001, HOT-002, OQ-001, OQ-002, OQ-003, OQ-005, OQ-007, OQ-010 |
-| [ADR-0012](ADR-0012-valkey-queues-in-process-workers.md) | Valkey-backed queues with in-process workers, replacing Cloud Tasks | 2026-10-15 | SPIKE-010 |
-| [ADR-0013](ADR-0013-linode-self-hosted.md) | Self-host on Linode, with Caddy fronting TLS | 2026-10-15 | SPIKE-011 |
-| [ADR-0014](ADR-0014-lifecycle-state-is-derived.md) | Lifecycle state is derived from the ledger, never assigned | 2026-10-15 | HOT-005, HOT-009 |
-| [ADR-0015](ADR-0015-reservations-as-pending-transfers.md) | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-10-15 | SPIKE-002, SPIKE-012 |
-| [ADR-0016](ADR-0016-quint-over-tla.md) | Quint replaces TLA+ for the formal specs | 2026-10-15 | SPIKE-002 |
-| [ADR-0017](ADR-0017-reporting-authority-by-period-state.md) | Reporting authority is split by period state | 2026-10-15 | HOT-005, OQ-009 |
-| [ADR-0018](ADR-0018-plain-coa-dimensions-on-the-posting.md) | A plain chart of accounts, with dimensions carried on the posting | 2026-10-15 | HOT-005, OQ-009 |
-| [ADR-0019](ADR-0019-labour-costing-is-actual.md) | Labour costing is actual; absorption measures utilisation, not rate variance | 2026-10-15 | HOT-003, HOT-004, HOT-010, OQ-005, OQ-006, OQ-008, OQ-011, OQ-017, OQ-018, OQ-019 |
+| [ADR-0009](ADR-0009-anticorruption-layer.md) | Anticorruption layer — foreign identifiers never enter domain models | 2026-09-15 | HOT-006 |
+| [ADR-0010](ADR-0010-accounting-date-vs-posting-timestamp.md) | Accounting date vs posting timestamp policy | 2026-11-01 | HOT-005, OQ-009, SPIKE-003 |
+| [ADR-0011](ADR-0011-fulfillment-legs-first-class.md) | Fulfillment legs are first-class recorded events | 2026-09-01 | HOT-007, HOT-001, HOT-002, OQ-001, OQ-002, OQ-003, OQ-005, OQ-007, OQ-010 |
+| [ADR-0012](ADR-0012-valkey-queues-in-process-workers.md) | Valkey-backed queues with in-process workers, replacing Cloud Tasks | 2026-10-01 | SPIKE-010 |
+| [ADR-0013](ADR-0013-linode-self-hosted.md) | Self-host on Linode, with Caddy fronting TLS | 2026-10-01 | SPIKE-011 |
+| [ADR-0014](ADR-0014-lifecycle-state-is-derived.md) | Lifecycle state is derived from the ledger, never assigned | 2026-09-01 | HOT-005, HOT-009 |
+| [ADR-0015](ADR-0015-reservations-as-pending-transfers.md) | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-11-01 | SPIKE-002, SPIKE-012 |
+| [ADR-0016](ADR-0016-quint-over-tla.md) | Quint replaces TLA+ for the formal specs | 2026-09-01 | SPIKE-002 |
+| [ADR-0017](ADR-0017-reporting-authority-by-period-state.md) | Reporting authority is split by period state | 2026-09-01 | HOT-005, OQ-009 |
+| [ADR-0018](ADR-0018-plain-coa-dimensions-on-the-posting.md) | A plain chart of accounts, with dimensions carried on the posting | 2026-09-01 | HOT-005, OQ-009 |
+| [ADR-0019](ADR-0019-labour-costing-is-actual.md) | Labour costing is actual; absorption measures utilisation, not rate variance | 2026-10-01 | HOT-003, HOT-004, HOT-010, OQ-005, OQ-006, OQ-008, OQ-011, OQ-017, OQ-018, OQ-019 |
 | [ADR-0020](ADR-0020-xero-history-is-restated.md) | Xero history is restated, not imported as-is | 2026-10-15 | HOT-006, OQ-012 |
-| [ADR-0021](ADR-0021-charge-product-canonicalization.md) | Item type determines the revenue account; duplicate charge products are canonicalized | 2026-10-15 | HOT-008, OQ-014 |
-| [ADR-0022](ADR-0022-invoice-status-decomposed.md) | Invoice status decomposes into two derived projections | 2026-10-15 | HOT-009 |
+| [ADR-0021](ADR-0021-charge-product-canonicalization.md) | Item type determines the revenue account; duplicate charge products are canonicalized | 2026-09-01 | HOT-008, OQ-014 |
+| [ADR-0022](ADR-0022-invoice-status-decomposed.md) | Invoice status decomposes into two derived projections | 2026-09-01 | HOT-009 |

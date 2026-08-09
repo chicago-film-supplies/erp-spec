@@ -43,20 +43,20 @@ None.
 
 | ADR | Title | Review by | Blocked on |
 |---|---|---|---|
-| `ADR-0009` | Anticorruption layer — foreign identifiers never enter domain models | 2026-10-15 | `HOT-006` |
-| `ADR-0010` | Accounting date vs posting timestamp policy | 2026-10-15 | `HOT-005` `OQ-009` `SPIKE-003` |
-| `ADR-0011` | Fulfillment legs are first-class recorded events | 2026-10-15 | `HOT-007` `HOT-001` `HOT-002` `OQ-001` `OQ-002` `OQ-003` `OQ-005` `OQ-007` `OQ-010` |
-| `ADR-0012` | Valkey-backed queues with in-process workers, replacing Cloud Tasks | 2026-10-15 | `SPIKE-010` |
-| `ADR-0013` | Self-host on Linode, with Caddy fronting TLS | 2026-10-15 | `SPIKE-011` |
-| `ADR-0014` | Lifecycle state is derived from the ledger, never assigned | 2026-10-15 | `HOT-005` `HOT-009` |
-| `ADR-0015` | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-10-15 | `SPIKE-002` `SPIKE-012` |
-| `ADR-0016` | Quint replaces TLA+ for the formal specs | 2026-10-15 | `SPIKE-002` |
-| `ADR-0017` | Reporting authority is split by period state | 2026-10-15 | `HOT-005` `OQ-009` |
-| `ADR-0018` | A plain chart of accounts, with dimensions carried on the posting | 2026-10-15 | `HOT-005` `OQ-009` |
-| `ADR-0019` | Labour costing is actual; absorption measures utilisation, not rate variance | 2026-10-15 | `HOT-003` `HOT-004` `HOT-010` `OQ-005` `OQ-006` `OQ-008` `OQ-011` `OQ-017` `OQ-018` `OQ-019` |
+| `ADR-0009` | Anticorruption layer — foreign identifiers never enter domain models | 2026-09-15 | `HOT-006` |
+| `ADR-0010` | Accounting date vs posting timestamp policy | 2026-11-01 | `HOT-005` `OQ-009` `SPIKE-003` |
+| `ADR-0011` | Fulfillment legs are first-class recorded events | 2026-09-01 | `HOT-007` `HOT-001` `HOT-002` `OQ-001` `OQ-002` `OQ-003` `OQ-005` `OQ-007` `OQ-010` |
+| `ADR-0012` | Valkey-backed queues with in-process workers, replacing Cloud Tasks | 2026-10-01 | `SPIKE-010` |
+| `ADR-0013` | Self-host on Linode, with Caddy fronting TLS | 2026-10-01 | `SPIKE-011` |
+| `ADR-0014` | Lifecycle state is derived from the ledger, never assigned | 2026-09-01 | `HOT-005` `HOT-009` |
+| `ADR-0015` | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-11-01 | `SPIKE-002` `SPIKE-012` |
+| `ADR-0016` | Quint replaces TLA+ for the formal specs | 2026-09-01 | `SPIKE-002` |
+| `ADR-0017` | Reporting authority is split by period state | 2026-09-01 | `HOT-005` `OQ-009` |
+| `ADR-0018` | A plain chart of accounts, with dimensions carried on the posting | 2026-09-01 | `HOT-005` `OQ-009` |
+| `ADR-0019` | Labour costing is actual; absorption measures utilisation, not rate variance | 2026-10-01 | `HOT-003` `HOT-004` `HOT-010` `OQ-005` `OQ-006` `OQ-008` `OQ-011` `OQ-017` `OQ-018` `OQ-019` |
 | `ADR-0020` | Xero history is restated, not imported as-is | 2026-10-15 | `HOT-006` `OQ-012` |
-| `ADR-0021` | Item type determines the revenue account; duplicate charge products are canonicalized | 2026-10-15 | `HOT-008` `OQ-014` |
-| `ADR-0022` | Invoice status decomposes into two derived projections | 2026-10-15 | `HOT-009` |
+| `ADR-0021` | Item type determines the revenue account; duplicate charge products are canonicalized | 2026-09-01 | `HOT-008` `OQ-014` |
+| `ADR-0022` | Invoice status decomposes into two derived projections | 2026-09-01 | `HOT-009` |
 
 ## Spikes
 

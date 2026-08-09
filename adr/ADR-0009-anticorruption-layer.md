@@ -3,7 +3,7 @@ id: ADR-0009
 title: Anticorruption layer — foreign identifiers never enter domain models
 status: proposed
 date: 2026-08-08
-review_by: 2026-10-15
+review_by: 2026-09-15
 deciders: [repo owner]
 contexts: [ledger, billing, banking, ordering]
 relates_to: [HOT-006]

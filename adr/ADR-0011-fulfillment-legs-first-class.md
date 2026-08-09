@@ -3,7 +3,7 @@ id: ADR-0011
 title: Fulfillment legs are first-class recorded events
 status: proposed
 date: 2026-08-08
-review_by: 2026-10-15
+review_by: 2026-09-01
 deciders: [repo owner]
 contexts: [fulfillment, ledger]
 relates_to: [HOT-007, HOT-001, HOT-002, OQ-001, OQ-002, OQ-003, OQ-005, OQ-007, OQ-010, ADR-0019]

@@ -3,7 +3,7 @@ id: ADR-0012
 title: Valkey-backed queues with in-process workers, replacing Cloud Tasks
 status: proposed
 date: 2026-08-09
-review_by: 2026-10-15
+review_by: 2026-10-01
 deciders: [repo owner]
 contexts: [ordering, billing, fulfillment]
 relates_to: [SPIKE-010, ADR-0004]

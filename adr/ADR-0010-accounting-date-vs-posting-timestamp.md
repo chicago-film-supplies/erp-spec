@@ -3,7 +3,7 @@ id: ADR-0010
 title: Accounting date vs posting timestamp policy
 status: proposed
 date: 2026-08-08
-review_by: 2026-10-15
+review_by: 2026-11-01
 deciders: [repo owner]
 contexts: [ledger]
 relates_to: [HOT-005, OQ-009, SPIKE-003]

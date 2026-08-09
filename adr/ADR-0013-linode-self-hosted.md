@@ -3,7 +3,7 @@ id: ADR-0013
 title: Self-host on Linode, with Caddy fronting TLS
 status: proposed
 date: 2026-08-09
-review_by: 2026-10-15
+review_by: 2026-10-01
 deciders: [repo owner]
 contexts: [ledger, ordering, billing, fulfillment]
 relates_to: [ADR-0003, ADR-0004, ADR-0012, SPIKE-011]

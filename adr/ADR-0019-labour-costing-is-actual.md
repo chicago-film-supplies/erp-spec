@@ -3,7 +3,7 @@ id: ADR-0019
 title: Labour costing is actual; absorption measures utilisation, not rate variance
 status: proposed
 date: 2026-08-09
-review_by: 2026-10-15
+review_by: 2026-10-01
 deciders: [repo owner]
 contexts: [ledger, fulfillment]
 relates_to: [HOT-003, HOT-004, HOT-010, OQ-005, OQ-006, OQ-008, OQ-011, OQ-017, OQ-018, OQ-019]

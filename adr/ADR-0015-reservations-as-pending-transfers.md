@@ -3,7 +3,7 @@ id: ADR-0015
 title: Inventory reservations are TigerBeetle pending transfers, over the operational window only
 status: proposed
 date: 2026-08-09
-review_by: 2026-10-15
+review_by: 2026-11-01
 deciders: [repo owner]
 contexts: [availability, fulfillment, ordering]
 relates_to: [ADR-0003, ADR-0014, SPIKE-002, SPIKE-012]

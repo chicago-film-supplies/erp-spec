@@ -3,7 +3,7 @@ id: ADR-0016
 title: Quint replaces TLA+ for the formal specs
 status: proposed
 date: 2026-08-09
-review_by: 2026-10-15
+review_by: 2026-09-01
 deciders: [repo owner]
 contexts: [ledger, ordering]
 relates_to: [SPIKE-002, ADR-0010]

@@ -3,7 +3,7 @@ id: ADR-0022
 title: Invoice status decomposes into two derived projections
 status: proposed
 date: 2026-08-09
-review_by: 2026-10-15
+review_by: 2026-09-01
 deciders: [repo owner]
 contexts: [billing, ledger]
 relates_to: [HOT-009, ADR-0014, ADR-0017]

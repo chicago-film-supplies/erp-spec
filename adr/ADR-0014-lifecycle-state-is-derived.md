@@ -3,7 +3,7 @@ id: ADR-0014
 title: Lifecycle state is derived from the ledger, never assigned
 status: proposed
 date: 2026-08-09
-review_by: 2026-10-15
+review_by: 2026-09-01
 deciders: [repo owner]
 contexts: [ordering, billing, ledger, fulfillment]
 relates_to: [ADR-0003, ADR-0015, HOT-005, HOT-009]
