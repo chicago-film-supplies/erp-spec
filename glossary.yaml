@@ -253,7 +253,7 @@ terms:
       date. Produces an immutable close record.
     aliases: [close, month-end close]
     contexts: [ledger]
-    source: formal/period-close.tla
+    source: formal/period-close.qnt
     verified: false
     notes: >-
       Per ADR-0006 a closed period's Parquet file is the audit artifact and its hash goes into the

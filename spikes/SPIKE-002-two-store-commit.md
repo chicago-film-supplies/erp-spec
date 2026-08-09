@@ -6,10 +6,10 @@ question: >-
 timebox: 1 week
 method: >-
   Specify the protocol as TB pending transfer -> Mongo write -> post/void. Enumerate every
-  interleaving of crash and retry. Model-check it in `formal/two-store-commit.tla`. Then build a
+  interleaving of crash and retry. Model-check it in `formal/two-store-commit.qnt`. Then build a
   harness that kills the process at each step and asserts the invariants hold on recovery.
 exit_criteria:
-  - "TLA+ model checks clean for the three failure questions: can a pending transfer be orphaned; can a Mongo doc exist with no posted transfer; can a retry double-post."
+  - "Quint model checks clean for the three failure questions: can a pending transfer be orphaned; can a Mongo doc exist with no posted transfer; can a retry double-post."
   - A crash-injection harness reproduces each interleaving and the recovery path restores consistency.
   - Orphan detection and resolution is specified, including its time bound.
 closes_adr: new

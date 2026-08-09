@@ -2,7 +2,7 @@
 
 Executable specification language on the same foundation as TLA+ (Lamport's temporal logic of
 actions), with modern syntax and a real CLI. The candidate modern path for the `formal/` specs
-(`two-store-commit.tla`, `period-close.tla`), which are currently TLA+ **stubs**.
+(`two-store-commit.qnt`, `period-close.qnt`). The `.tla` stubs they replaced were never executed.
 
 ## Canonical docs
 
@@ -45,7 +45,7 @@ The kit remains interesting if containerised Quint work starts — it is not a s
   **not** abandon the TLA+ toolchain in `formal/` — it is a nicer front end to the same verification.
 - **The `formal/` rule holds either way:** "a spec that has never been model-checked is prose with
   angle brackets." Milestone `m5`'s exit criterion is a **recorded checker run**, not a written
-  spec. `quint verify` (or `tlc2.TLC` on the `.tla`) is what produces that artifact.
+  spec. `quint verify` is what produces that artifact.
 - **`run`/`test` give executable exploration TLA+ lacks** — useful for enumerating the crash/retry
   interleavings in [[SPIKE-002]] before committing to a full `verify`.
 - If a Go sidecar lands ([[ADR-0004]]), the extra network hop belongs in the model — Quint spec and
@@ -56,4 +56,4 @@ The kit remains interesting if containerised Quint work starts — it is not a s
 - `formal/` uses TLA+ today (run via `tla2tools.jar`). Introducing Quint is **not yet ADR'd** —
   open one before migrating the specs, so the choice is recorded rather than drifted into.
 
-Cross-refs: [[SPIKE-002]] · `formal/two-store-commit.tla` · `formal/period-close.tla` · [[ADR-0004]]
+Cross-refs: [[SPIKE-002]] · `formal/two-store-commit.qnt` · `formal/period-close.qnt` · [[ADR-0004]] · [[ADR-0016]]

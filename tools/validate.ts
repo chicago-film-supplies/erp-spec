@@ -219,6 +219,15 @@ if (TRIAGE_ONLY) {
   for (const q of oqs) check(q.id, "OQ", "open-questions.yaml");
   for (const s of spikes) check(s.id, "SPIKE", rel(s._file));
 
+  // A spike's id must match its filename for the same reason an ADR's must: STATUS and the spec
+  // map link to spikes by path, and a renamed file silently breaks every link to it. ADRs have
+  // had this check since the start; spikes never did.
+  for (const s of spikes) {
+    if (typeof s.id === "string" && !basename(s._file).startsWith(s.id)) {
+      fail("1", `${rel(s._file)}: filename does not start with its id "${s.id}"`);
+    }
+  }
+
   // an ADR's id must match its filename, or in-force.generated.md links break
   for (const a of adrs) {
     if (typeof a.id === "string" && !basename(a._file).startsWith(a.id)) {
@@ -456,6 +465,10 @@ for (const i of inbox) {
     }
   };
   for (const h of hots) refCheck(h.blocks, h.id);
+  // `blocked_by` on an event was covered by nothing — `blocked_by: [SPIKE-999]` passed. It is the
+  // field that decides what the event storm is waiting on, so a typo there quietly detaches an
+  // event from the spike or question that actually gates it.
+  for (const e of evts) refCheck((e as { blocked_by?: unknown }).blocked_by, e.id);
   for (const q of oqs) refCheck((q as { blocks?: unknown }).blocks, q.id);
   for (const a of adrs) refCheck(a.relates_to, a.id);
   for (const r of reqs) refCheck((r as { relates_to?: unknown }).relates_to, r.id);

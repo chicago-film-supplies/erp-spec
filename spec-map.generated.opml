@@ -255,7 +255,7 @@
           <outline text="If it fails, the failure mode is characterised precisely enough to size the Go sidecar."/>
         </outline>
         <outline text="SPIKE-002 — What commit protocol keeps a MongoDB document write and a TigerBeetle posting consistent across cra…" _note="timebox: 1 week · closes: a new ADR · open">
-          <outline text="TLA+ model checks clean for the three failure questions: can a pending transfer be orphaned; can a Mongo doc exist with no posted transfer; can a retry double-post."/>
+          <outline text="Quint model checks clean for the three failure questions: can a pending transfer be orphaned; can a Mongo doc exist with no posted transfer; can a retry double-post."/>
           <outline text="A crash-injection harness reproduces each interleaving and the recovery path restores consistency."/>
           <outline text="Orphan detection and resolution is specified, including its time bound."/>
         </outline>

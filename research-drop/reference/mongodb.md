@@ -32,6 +32,6 @@ the shape that drove the Firestore design and still fits a document store.
   after a disconnect longer than the oplog window.
 - **The Mongo write is step 2 of the two-store commit** ([[ADR-0003]] / [[SPIKE-002]]): TB pending →
   **Mongo write** → TB post/void. Invariant: a Mongo document must never exist without a pending or
-  posted transfer (`formal/two-store-commit.tla`).
+  posted transfer (`formal/two-store-commit.qnt`).
 
-Cross-refs: [[ADR-0003]] · [[SPIKE-006]] · [[SPIKE-009]] · [[SPIKE-002]] · `formal/two-store-commit.tla`
+Cross-refs: [[ADR-0003]] · [[SPIKE-006]] · [[SPIKE-009]] · [[SPIKE-002]] · `formal/two-store-commit.qnt`
