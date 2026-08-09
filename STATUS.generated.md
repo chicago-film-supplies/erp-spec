@@ -13,10 +13,10 @@ is `deno task validate`'s judgement, not this file's.
 |---|---:|---|
 | Open questions | 16 | **16 with no owner or no decide-by** |
 | Conflicts (HOT) | 8 | 8 open |
-| Decisions (ADR) | 11 | 7 in force · 4 proposed |
-| Spikes | 9 | 9 open |
+| Decisions (ADR) | 12 | 7 in force · 5 proposed |
+| Spikes | 10 | 10 open |
 | Requirements | 2 | 2 without a scenario |
-| Inbox | 25 | 22 unpromoted |
+| Inbox | 28 | 22 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 23 | 1 still `TODO` |
 
@@ -68,7 +68,7 @@ is `deno task validate`'s judgement, not this file's.
 - `ADR-0006` — DuckDB over Parquet as the read side
 - `ADR-0007` — Replace asset.accountant; dual GAAP/tax basis in scope
 
-### Proposed (4)
+### Proposed (5)
 
 | ADR | Title | Review by | Blocked on |
 |---|---|---|---|
@@ -76,6 +76,7 @@ is `deno task validate`'s judgement, not this file's.
 | `ADR-0009` | Anticorruption layer — foreign identifiers never enter domain models | 2026-10-15 | `HOT-006` |
 | `ADR-0010` | Accounting date vs posting timestamp policy | 2026-10-15 | `HOT-005` `OQ-009` `SPIKE-003` |
 | `ADR-0011` | Fulfillment legs are first-class recorded events | 2026-10-15 | `HOT-007` `HOT-001` `HOT-002` `OQ-001` `OQ-005` `OQ-007` |
+| `ADR-0012` | Valkey-backed queues with in-process workers, replacing Cloud Tasks | 2026-10-15 | `SPIKE-010` |
 
 ## Spikes
 
@@ -90,6 +91,7 @@ is `deno task validate`'s judgement, not this file's.
 | `SPIKE-007` | How is DuckDB reached from Deno — native addon or WASM — and can the client que… | 2 days | _new ADR_ | open |
 | `SPIKE-008` | How do the Chicago Personal Property Lease Transaction Tax and Illinois home-ru… | 1 week | _new ADR_ | open |
 | `SPIKE-009` | What replaces Firestore real-time listeners — MongoDB change streams plus a soc… | 1 week | _new ADR_ | open |
+| `SPIKE-010` | Does a production-grade Valkey queue client run under Deno, and can it express… | 3 days | `ADR-0012` | open |
 
 ## Roadmap
 

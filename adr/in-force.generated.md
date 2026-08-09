@@ -54,3 +54,4 @@ Accepted and not superseded, as of the last `deno task gen`.
 | [ADR-0009](ADR-0009-anticorruption-layer.md) | Anticorruption layer — foreign identifiers never enter domain models | 2026-10-15 | HOT-006 |
 | [ADR-0010](ADR-0010-accounting-date-vs-posting-timestamp.md) | Accounting date vs posting timestamp policy | 2026-10-15 | HOT-005, OQ-009, SPIKE-003 |
 | [ADR-0011](ADR-0011-fulfillment-legs-first-class.md) | Fulfillment legs are first-class recorded events | 2026-10-15 | HOT-007, HOT-001, HOT-002, OQ-001, OQ-005, OQ-007 |
+| [ADR-0012](ADR-0012-valkey-queues-in-process-workers.md) | Valkey-backed queues with in-process workers, replacing Cloud Tasks | 2026-10-15 | SPIKE-010 |
