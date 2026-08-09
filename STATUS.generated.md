@@ -13,8 +13,8 @@ is `deno task validate`'s judgement, not this file's.
 |---|---:|---|
 | Open questions | 20 | **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 10 | 0 open |
-| Decisions (ADR) | 22 | 6 in force · 14 proposed |
-| Spikes | 12 | 12 open |
+| Decisions (ADR) | 23 | 6 in force · 15 proposed |
+| Spikes | 12 | 11 open |
 | Requirements | 2 | 0 without a scenario |
 | Inbox | 33 | 22 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
@@ -39,7 +39,7 @@ None.
 - `ADR-0005` — Retain SolidJS clients
 - `ADR-0007` — Replace asset.accountant; dual GAAP/tax basis in scope
 
-### Proposed (14)
+### Proposed (15)
 
 | ADR | Title | Review by | Blocked on |
 |---|---|---|---|
@@ -57,12 +57,13 @@ None.
 | `ADR-0020` | Xero history is restated, not imported as-is | 2026-10-15 | `HOT-006` `OQ-012` |
 | `ADR-0021` | Item type determines the revenue account; duplicate charge products are canonicalized | 2026-09-01 | `HOT-008` `OQ-014` |
 | `ADR-0022` | Invoice status decomposes into two derived projections | 2026-09-01 | `HOT-009` |
+| `ADR-0023` | Native Node-API addons load under Deno; the deployment unit is a self-extracting compiled binary | 2026-10-01 | `SPIKE-001` `SPIKE-007` `SPIKE-010` |
 
 ## Spikes
 
 | Spike | Question | Timebox | Closes | Status |
 |---|---|---|---|---|
-| `SPIKE-001` | Does the TigerBeetle client load and run under Deno via node-api compatibility? | 2 days | `ADR-0004` | open |
+| `SPIKE-001` | Does the TigerBeetle client load and run under Deno via node-api compatibility? | 2 days | `ADR-0023` | closed |
 | `SPIKE-002` | What commit protocol keeps a MongoDB document write and a TigerBeetle posting c… | 1 week | _new ADR_ | open |
 | `SPIKE-003` | How does TigerBeetle's timestamp behave when loading history, and what are the… | 3 days | `ADR-0010` | open |
 | `SPIKE-004` | What does Plaid actually provide, and what does bank reconciliation actually ne… | 3 days | _new ADR_ | open |

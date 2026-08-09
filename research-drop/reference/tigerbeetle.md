@@ -15,11 +15,31 @@ Everything balance-bearing lives here; nested business documents do not (that is
   377,290 B of markdown-ish text (709 headings, 199 fenced blocks). Grep it by heading —
   `## Two-Phase Transfers`, `### pending_id`, `#### flags.post_pending_transfer` all resolve.
 
-## Version (checked 2026-08-09)
+## Version (measured 2026-08-09)
 
-- Cluster `0.16.x` (latest ~`0.16.57`). Releases are frequent (often several/week).
+- **Cluster `0.17.9`**, client `tigerbeetle-node@0.17.9`. Releases are frequent (often
+  several/week).
 - **Client version must match the cluster version.** TB pins client↔server; a mismatched
   `tigerbeetle-node` will refuse to talk to the cluster. Pin both together and bump in lockstep.
+  They genuinely ship together: server `0.17.9` was tagged 2026-07-06T17:24:50Z and the npm
+  package published 2026-07-06T17:24:43Z, seven seconds apart.
+- Verified by running both: server reports `TigerBeetle version 0.17.9+cc1c06a`, and
+  `spikes/harness/tb-probe.ts` drives it from Deno with the matching client
+  (`code:2026-08-09:erp-spec@b555c5c:spikes/harness/tb-probe.ts`).
+- **This entry said `0.16.x (latest ~0.16.57)` until 2026-08-09**, dated with the same check-date
+  it carries now, five weeks after 0.17.0. Following that pin would have produced a client↔server
+  mismatch and a SPIKE-001 "failure" with nothing to do with Deno. `research-drop/` is invisible to
+  `validate`, `gen` and `ingest` by design, so nothing here can ever go red on its own — re-measure
+  rather than trust the date.
+- **`tigerbeetle-universal-macos.zip` is a release asset**, so no container runtime is needed to
+  stand up a local cluster.
+
+## Status-enum trap
+
+`created` is **`4294967295` (0xFFFFFFFF), not `0`** — for both `CreateAccountStatus` and
+`CreateTransferStatus`. Zero is not a member of either enum. So `status === 0` is never true, and
+`status !== 0` reports every success as a failure. SPIKE-001's probe hit this on its first run and
+read `[4294967295, 4294967295]` as a hard error.
 
 ## CFS-specific gotchas
 
@@ -43,17 +63,24 @@ Everything balance-bearing lives here; nested business documents do not (that is
   periodise a trial balance / P&L / close on the TB timestamp. Accounting date is a distinct field
   held outside TB. This is load-bearing, not a detail.
 - **Two-phase transfers (pending → post/void) carry the two-store commit.** [[ADR-0003]] /
-  [[SPIKE-002]] / `formal/two-store-commit.tla`: TB *pending* → Mongo write → TB *post* (or *void*
+  [[SPIKE-002]] / `formal/two-store-commit.qnt`: TB *pending* → Mongo write → TB *post* (or *void*
   if the Mongo write failed). The three failure modes to design out: orphaned pending, Mongo doc
   with no posted transfer, retry double-post.
 - **One shared client per process; it auto-batches.** Max ~8189 events per batch. Do not spin up a
   client per request.
 
-## Open risk
+## Loading under Deno — settled 2026-08-09
 
-- **Loading under Deno is unproven** ([[SPIKE-001]]): the client is a native node-api addon. Exercise
-  it under `deno run`, `deno test`, **and** `deno compile` — napi support differs across the three.
-  Fallback if it fails is a Go sidecar for the ledger service only ([[ADR-0004]] revisit trigger),
-  which adds a network hop the TLA+/Quint model must then include.
+**It works. No Go sidecar.** [[SPIKE-001]] is closed; [[ADR-0023]] records the result. The client
+drives a real 0.17.9 cluster from Deno under `deno run`, `deno test`, `deno compile` and
+`deno compile --self-extracting` — u128 exact both ways, linked batches rolling back, two-phase
+post *and* void, and 400 transfers through one shared client with no double-post.
 
-Cross-refs: [[ADR-0003]] · [[ADR-0004]] · [[ADR-0008]] · [[ADR-0010]] · [[SPIKE-001]] · [[SPIKE-002]] · [[HOT-005]]
+The one constraint that came out of it: **`deno compile --bundle` drops `client.node`**
+(`Cannot find module './bin/aarch64-macos/client.node'`) and `--self-extracting` does not rescue
+it. Compile with `--self-extracting`, never with `--bundle`.
+
+Still open: this is macOS, which upstream treats as a development configuration — storage
+behaviour on Linux is [[SPIKE-011]].
+
+Cross-refs: [[ADR-0003]] · [[ADR-0004]] · [[ADR-0008]] · [[ADR-0010]] · [[ADR-0023]] · [[SPIKE-001]] · [[SPIKE-002]] · [[SPIKE-011]] · [[HOT-005]]
