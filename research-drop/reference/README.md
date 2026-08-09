@@ -29,6 +29,7 @@ docs do not.
 | [TigerBeetle](tigerbeetle.md) | The ledger — double-entry enforced in the DB | single-page docs dump |
 | [DuckDB](duckdb.md) | Read side over Parquet — dimensional reporting | `duckdb.org/llms.txt` |
 | [Quint](quint.md) | Formal specs (modern path for `formal/`) | `quint.sh/docs` + LLM kit |
+| [Valkey](valkey.md) | Candidate cache / pub-sub / socket fan-out | curated (no `llms.txt`) |
 | [Caddy](caddy.md) | Candidate reverse proxy / auto-HTTPS front | curated (no `llms.txt`) |
 
 ## Version pins

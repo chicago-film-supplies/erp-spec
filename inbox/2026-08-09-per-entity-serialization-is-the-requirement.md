@@ -2,10 +2,10 @@
 kind: constraint
 title: Per-entity serialization is what the queue layer actually has to provide
 contexts: [ordering, billing]
-source: "code read 2026-08-09 — api-cloudrun src/lib/taskQueues.ts (xeroInvoiceQueue, xeroQuoteQueue, userNameCascadeQueue, orderFinalizeQueue), src/lib/taskLease.ts (LEASE_MS 180s), taskQueueCoverage.test.ts T5"
+source: "code:2026-08-09:api-cloudrun@1d3387bd:src/lib/taskQueues.ts+src/lib/taskLease.ts+tests/unit/taskQueueCoverage.test.ts — 4 queues at max_concurrent_dispatches 1, LEASE_MS 180000, T5 asserts retryBudget >= leaseMs > timeoutTier"
 confidence: high
 promotes_to: [ADR-0012]
-verified: false
+verified: true
 triage_count: 0
 ---
 

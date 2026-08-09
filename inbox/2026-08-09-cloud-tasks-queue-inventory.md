@@ -2,10 +2,10 @@
 kind: research
 title: The v1 Cloud Tasks surface, and how much of it survives the rebuild
 contexts: [ordering, billing, fulfillment]
-source: "code read 2026-08-09 — api-cloudrun src/lib/taskQueues.ts (16 queues, 29 handlers), infra/main.tf local.task_queues, infra/cloud-scheduler.tf (15 jobs), 18 createCloudTask call sites"
+source: "code:2026-08-09:api-cloudrun@1d3387bd:src/lib/taskQueues.ts+infra/main.tf+infra/cloud-scheduler.tf — 16 queues, 29 handlers (16 queue-fed / 13 scheduler-only), 15 scheduler jobs, 18 createCloudTask call sites"
 confidence: high
 promotes_to: [ADR-0012]
-verified: false
+verified: true
 triage_count: 0
 ---
 

@@ -62,9 +62,10 @@ made `generate.ts` machine-dependent and produced `inbox/` filenames beginning
 
 ## Rules for Claude Code working in this repo
 
-1. **Verify structural assumptions against the live CFS API before writing them as fact.**
-   Read-only queries only (`mcp__cfs-api-prod__db_*`). Unverified assertions get
-   `verified: false` and an `OQ-`.
+1. **Verify structural assumptions before writing them as fact** — against the live CFS API for
+   claims about data (read-only `mcp__cfs-api-prod__db_*`), against the repo for claims about code
+   or infra. Both count as verification; see *Verification etiquette* for the dated, pinned
+   `source:` forms. Unverified assertions get `verified: false` and an `OQ-`.
 2. Every requirement needs a `source:` — an inbox file, an ADR, or a verification query. No
    unsourced requirements.
 3. Never mark an ADR `accepted` on your own initiative. Draft as `proposed`.
@@ -77,6 +78,10 @@ made `generate.ts` machine-dependent and produced `inbox/` filenames beginning
 8. **Accounting date and posting timestamp are always distinct fields.** Never conflate.
 9. Prose style: bulleted, terse, no hedging, no filler preamble. Empty sections get a bare
    `TODO`, not placeholder prose.
+10. **Before writing spec that touches a stack tool, read its note in `research-drop/reference/`.**
+    Curated, Claude-facing references for the target stack (Deno, Hono, Zod, MongoDB, TigerBeetle,
+    DuckDB, Quint, Valkey, Caddy): canonical `llms.txt` links + the project-specific traps, cross-linked to
+    the ADRs and spikes. Not spec, not ingested, not validated — see `research-drop/reference/README.md`.
 
 ## Two rules that exist because the current system broke on them
 
@@ -95,9 +100,21 @@ The live CFS API is production. `db_*` reads are safe and are the point. Do not 
 not reach Xero or CRMS from here at all — both are single-tenant and live, and Xero's daily
 quota is a shared exhaustible resource (workspace `CLAUDE.md` → *External systems*).
 
-Record a verification as a `source:` of the form `verified:2026-08-08:db_invoices_query` plus
-the number you actually measured. **Record the measured value as a number, not as "confirmed"** —
-a signal that does not flip is itself a finding.
+**Two kinds of verification count, and both set `verified: true`.** Both must be dated and pinned
+to something that can go stale, because an undated claim silently becomes a lie:
+
+| Kind | `source:` form |
+|---|---|
+| Live CFS API — a read-only `db_*` query | `api:2026-08-09:db_invoices_query` + the number measured |
+| Repo source or infra — a file actually read | `code:2026-08-09:api-cloudrun@1d3387bd:src/lib/taskQueues.ts` + the number measured |
+
+- **Pin a source read to the commit sha**, not the release tag. A tag identifies what is
+  *deployed*; a sha identifies what was *read*. Add the tag as well (`@v0.140.0`) only when the
+  claim is about live behaviour rather than about the code.
+- **Record the measured value as a number, not as "confirmed"** — a signal that does not flip is
+  itself a finding.
+- `verified: false` means nobody checked, and it still earns an `OQ-`. It does not mean "checked,
+  but only against source".
 
 ## Deferred work
 

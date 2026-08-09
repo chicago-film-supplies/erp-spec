@@ -2,10 +2,10 @@
 kind: finding
 title: Most of v1's queueing complexity is HTTP-delivery shaped, not domain shaped
 contexts: [ordering, billing]
-source: "code read 2026-08-09 — api-cloudrun .claude/skills/queueing/SKILL.md (platform facts 1-7), src/lib/taskHandler.ts, src/lib/cloudTasks.ts"
+source: "code:2026-08-09:api-cloudrun@1d3387bd:.claude/skills/queueing/SKILL.md+src/lib/taskHandler.ts+src/lib/cloudTasks.ts — 7 documented platform facts, 5 of them transport-derived"
 confidence: high
 promotes_to: [ADR-0012]
-verified: false
+verified: true
 triage_count: 0
 ---
 
