@@ -43,8 +43,13 @@ The duplicate-dispatch lease and the `retryBudget >= leaseMs > timeoutTier` inva
 **eliminated, not reimplemented** — an in-process worker holding an entity lock makes duplicate
 processing structurally impossible rather than detectable after the fact.
 
-**Revisit trigger:** if the chosen client library cannot run under Deno (SPIKE-010), that selects a
-different library or a sidecar. It does not reopen the substrate.
+**This decides the queue role only.** `research-drop/reference/valkey.md` requires each Valkey role
+to be adopted explicitly; the socket / real-time fan-out role stays undecided under SPIKE-009, and
+the pub/sub-vs-Streams choice belongs to that decision, not this one.
+
+**Revisit trigger:** if the chosen queue library cannot run under Deno (SPIKE-010), that selects a
+different library or a sidecar. It does not reopen the substrate — a RESP client is a plain network
+client and carries no native-addon risk.
 
 ## Considered options
 
@@ -62,9 +67,11 @@ different library or a sidecar. It does not reopen the substrate.
   flight. SPIKE-002 already requires orphan detection with a time bound for pending transfers; this
   is the same loop and should be specified once. Jobs must be idempotent and reconstructible from
   state.
-- **Durability is an explicit decision.** Valkey AOF at `everysec` can lose about a second of
-  acknowledged jobs on hard crash. Acceptable given the sweeper above, but it must be stated rather
-  than inherited from a default.
+- **Queue state is never a source of truth.** Valkey AOF at `everysec` can lose about a second of
+  acknowledged jobs on hard crash, and the reference note's rule is stronger than a durability
+  setting: anything in Valkey must be rebuildable from MongoDB, TigerBeetle or Parquet. The
+  reconciliation sweeper is what makes that true for queued work — it is the mechanism, not a
+  backstop. The AOF setting must still be stated rather than inherited from a default.
 - **Worker liveness replaces the paused-queue trap.** A queue paused out-of-band once swallowed
   enqueues for seven weeks unnoticed. The equivalent failure is a worker that is not running, and
   it needs an equivalent audit — self-hosting does not remove the failure class.

@@ -1,7 +1,8 @@
 # Caddy
 
-Candidate reverse proxy / automatic-HTTPS front for the Deno API. **Not yet decided** — the current
-API runs on Cloud Run ([[ADR-0004]] context), where Google already fronts TLS.
+Reverse proxy / automatic-HTTPS front for the Deno API. **Adopted by [[ADR-0013]]** (proposed,
+2026-08-09), which self-hosts on Linode. The v1 API runs on Cloud Run ([[ADR-0004]] context), where
+Google fronts TLS and Caddy would be redundant.
 
 ## Canonical docs
 
@@ -21,7 +22,8 @@ API runs on Cloud Run ([[ADR-0004]] context), where Google already fronts TLS.
   renews the cert itself.
 - **Only adopt Caddy if the API is self-hosted.** If deployment stays on Cloud Run, Caddy is largely
   redundant — the platform terminates TLS. Introducing it there is a solution without a problem.
-- **No ADR yet.** Open one before adopting Caddy, so the hosting/TLS boundary is a recorded decision
-  rather than an accident of setup.
+- **ADR'd as of 2026-08-09.** [[ADR-0013]] (proposed) self-hosts on Linode with Caddy terminating
+  TLS, which is what satisfies the "only adopt if self-hosted" condition above and makes the
+  hosting/TLS boundary a recorded decision rather than an accident of setup.
 
-Cross-refs: [[ADR-0004]]
+Cross-refs: [[ADR-0013]] · [[ADR-0004]]

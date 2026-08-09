@@ -23,8 +23,14 @@ status: open
 
 ## Notes
 
-Same risk shape as SPIKE-001, and the same rule applies: a failure here selects a different client
-or a sidecar, it does not reopen the substrate or the language.
+**The Valkey client is not the risk — the queue library is.** `research-drop/reference/valkey.md`
+is right that a RESP client is a plain network client and carries none of the `deno compile`/napi
+exposure that TigerBeetle and DuckDB do. What is unproven is a queue *library* on top of it:
+BullMQ ships Lua scripts and Node-API assumptions, and that is what this spike exercises. Scope the
+timebox accordingly — connectivity will work on day one.
+
+A failure here selects a different library or a sidecar. It does not reopen the substrate or the
+language.
 
 Per-entity serialization is the load-bearing criterion, not throughput. Three v1 queues use a
 global concurrency cap of 1 as a stand-in for it, and ADR-0012 commits to eliminating the CAS lease

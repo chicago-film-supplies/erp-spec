@@ -1,8 +1,9 @@
 # Valkey
 
-Candidate in-memory store (cache / pub-sub / streams) — the BSD-licensed, Linux-Foundation fork of
-Redis, protocol-compatible with it. **Not yet decided** — no ADR references Valkey. The natural fit
-is the socket / real-time layer that replaces Firestore listeners ([[SPIKE-009]]).
+In-memory store (queues / cache / pub-sub / streams) — the BSD-licensed, Linux-Foundation fork of
+Redis, protocol-compatible with it. **Adopted for job queues by [[ADR-0012]]** (proposed,
+2026-08-09). Its other roles, including the socket / real-time layer that replaces Firestore
+listeners ([[SPIKE-009]]), are still undecided — see *Decision status*.
 
 ## Canonical docs
 
@@ -37,8 +38,15 @@ is the socket / real-time layer that replaces Firestore listeners ([[SPIKE-009]]
 
 ## Decision status
 
-- **Not ADR'd.** Open an ADR before adopting Valkey, and decide the role explicitly (socket fan-out
-  vs cache vs rate-limit/session store) — pub/sub vs Streams is the load-bearing choice for the
-  socket layer. Until then it is candidate infrastructure, not part of the stack.
+Roles are adopted **one at a time**, each by its own decision:
 
-Cross-refs: [[SPIKE-009]] · [[ADR-0006]]
+| Role | Status |
+|---|---|
+| Job queues, replacing Cloud Tasks | [[ADR-0012]] (proposed, 2026-08-09) · client risk in [[SPIKE-010]] |
+| Socket / real-time fan-out | **undecided** — [[SPIKE-009]]; pub/sub vs Streams is the load-bearing choice |
+| Cache · rate-limit · session store | **undecided** |
+
+An adopted role does not adopt the others. ADR-0012 deliberately does not settle pub/sub vs
+Streams, because that choice belongs to the socket layer.
+
+Cross-refs: [[ADR-0012]] · [[SPIKE-009]] · [[SPIKE-010]] · [[ADR-0006]]
