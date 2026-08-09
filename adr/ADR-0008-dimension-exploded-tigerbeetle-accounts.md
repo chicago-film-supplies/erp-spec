@@ -1,14 +1,14 @@
 ---
 id: ADR-0008
 title: Dimension-exploded TigerBeetle accounts
-status: proposed
+status: superseded
 date: 2026-08-08
 review_by: 2026-10-15
 deciders: [repo owner]
 contexts: [ledger]
 relates_to: [HOT-005, OQ-009]
 supersedes:
-superseded_by:
+superseded_by: ADR-0018
 ---
 
 > **In the context of** needing real-time balances sliced by dimension, **facing** TigerBeetle's

@@ -12,10 +12,14 @@ rules: []
 #
 #   invoice_issued        <- EVT-BIL-  : Dr Accounts Receivable / Cr Revenue (by product line) / Cr Tax Payable
 #   invoice_voided        <- EVT-BIL-  : reversal. NOT a delete — REQ-BIL-001 and the no-hard-delete fence.
-#   shift_recorded        <- EVT-FUL-002: Dr COGS-Labour Absorbed (standard, dimensioned)
+#   shift_recorded        <- EVT-FUL-002: Dr COGS-Labour Absorbed (ACTUAL rate, dimensioned)
 #                                          Dr COGS-Unabsorbed Labour (residual, undimensioned)
 #                                          Cr Accrued Labour
-#   labour_variance       <- period    : Dr/Cr COGS-Labour Variance
+#     ADR-0019: costing is ACTUAL, from the per-contact wage. There is no standard rate, so the
+#     absorbed/unabsorbed split measures UTILISATION — guaranteed-but-unworked hours are a real
+#     cost attributable to no job. A `labour_variance` RATE-variance rule was listed here and is
+#     removed: with no standard rate it could never fire. Overtime allocation across jobs is
+#     OQ-018; the consecutive-day rule is OQ-019.
 #   depreciation_run      <- EVT-FA-   : Dr Depreciation Expense / Cr Accumulated Depreciation. PER BOOK.
 #   bank_transaction_matched <- EVT-BNK-: Dr/Cr Cash against the matched posting
 #   period_closed         <- EVT-LED-002: no postings; writes the close record incl. Parquet hash

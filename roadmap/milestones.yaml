@@ -46,8 +46,8 @@ milestones:
     title: Formal specs checking clean
     depends_on: [m4]
     exit_criteria:
-      - two-store-commit.tla model checks clean against its three failure questions.
-      - period-close.tla model checks clean, including the back-dated-posting-into-closed-period case.
+      - two-store-commit.qnt model checks clean against its three failure questions.
+      - period-close.qnt model checks clean, including the back-dated-posting-into-closed-period case.
       - Both specs have been run, not merely written — with the model-checker output recorded.
 
   - id: m6

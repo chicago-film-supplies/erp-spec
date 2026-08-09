@@ -1,13 +1,13 @@
 ---
 id: ADR-0006
 title: DuckDB over Parquet as the read side
-status: accepted
+status: superseded
 date: 2026-08-08
 deciders: [repo owner]
 contexts: [ledger, banking]
 relates_to: [HOT-005, SPIKE-007, OQ-009]
 supersedes:
-superseded_by:
+superseded_by: ADR-0017
 ---
 
 > **In the context of** needing analytical reporting over the ledger, **facing** a transactional

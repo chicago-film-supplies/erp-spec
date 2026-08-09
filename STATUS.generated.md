@@ -12,8 +12,8 @@ is `deno task validate`'s judgement, not this file's.
 | | Count | |
 |---|---:|---|
 | Open questions | 19 | **0 with no owner or no decide-by** |
-| Conflicts (HOT) | 10 | 10 open |
-| Decisions (ADR) | 15 | 7 in force · 8 proposed |
+| Conflicts (HOT) | 10 | 1 open |
+| Decisions (ADR) | 21 | 6 in force · 13 proposed |
 | Spikes | 12 | 12 open |
 | Requirements | 2 | 2 without a scenario |
 | Inbox | 32 | 22 unpromoted |
@@ -28,41 +28,36 @@ None — every open question has an owner and a decide-by date.
 
 | HOT | Statement | Blocks |
 |---|---|---|
-| `HOT-001` | Does `Trucking` mean third-party freight (no wage labour) or an own long-haul run (labour-bearing)? The costi… | `OQ-010` `ADR-0011` |
-| `HOT-002` | Are the collecting/returning flags really per-leg? Only ~2% of revenue sits on asymmetric combinations, which… | `OQ-007` `ADR-0011` |
-| `HOT-003` | Does the `Crew` product line already carry labour today? | `OQ-011` |
-| `HOT-004` | Should long-haul absorb a byproduct-loss premium on top of the person-day, mirroring what the customer is cha… | `OQ-006` |
-| `HOT-005` | Is TigerBeetle or DuckDB the reporting source of truth, given TB timestamps are posting time and reporting ne… | `OQ-009` `ADR-0008` `ADR-0010` |
-| `HOT-006` | Xero history migration: import known-defective lines, or restate? Roughly 90% of historical Xero lines are be… | `OQ-012` |
-| `HOT-007` | Are fulfillment legs first-class recorded events, or derived from orders? The current system derives them, wh… | `OQ-001` `ADR-0011` |
-| `HOT-008` | Duplicate ACTIVE charge products book the same economic event to different revenue accounts, so the source da… | `OQ-014` |
 | `HOT-009` | `invoice.status` carries two different semantics in one field — an assigned lifecycle fact (draft / issued /… | `ADR-0014` |
-| `HOT-010` | The charter and `posting-rules.yaml` specify standard-cost absorption with a `labour_variance` posting rule,… | `OQ-018` `OQ-019` |
 
 ## Decisions
 
-### In force (7)
+### In force (6)
 
 - `ADR-0001` — Replace Xero with an in-house ledger
 - `ADR-0002` — Bank feed sourced from Plaid, single Chase account
 - `ADR-0003` — MongoDB for documents and masterfiles; TigerBeetle for the ledger
 - `ADR-0004` — Retain Deno/Hono and TypeScript
 - `ADR-0005` — Retain SolidJS clients
-- `ADR-0006` — DuckDB over Parquet as the read side
 - `ADR-0007` — Replace asset.accountant; dual GAAP/tax basis in scope
 
-### Proposed (8)
+### Proposed (13)
 
 | ADR | Title | Review by | Blocked on |
 |---|---|---|---|
-| `ADR-0008` | Dimension-exploded TigerBeetle accounts | 2026-10-15 | `HOT-005` `OQ-009` |
 | `ADR-0009` | Anticorruption layer — foreign identifiers never enter domain models | 2026-10-15 | `HOT-006` |
 | `ADR-0010` | Accounting date vs posting timestamp policy | 2026-10-15 | `HOT-005` `OQ-009` `SPIKE-003` |
-| `ADR-0011` | Fulfillment legs are first-class recorded events | 2026-10-15 | `HOT-007` `HOT-001` `HOT-002` `OQ-001` `OQ-005` `OQ-007` |
+| `ADR-0011` | Fulfillment legs are first-class recorded events | 2026-10-15 | `HOT-007` `HOT-001` `HOT-002` `OQ-001` `OQ-002` `OQ-003` `OQ-005` `OQ-007` `OQ-010` |
 | `ADR-0012` | Valkey-backed queues with in-process workers, replacing Cloud Tasks | 2026-10-15 | `SPIKE-010` |
 | `ADR-0013` | Self-host on Linode, with Caddy fronting TLS | 2026-10-15 | `SPIKE-011` |
 | `ADR-0014` | Lifecycle state is derived from the ledger, never assigned | 2026-10-15 | `HOT-005` `HOT-009` |
 | `ADR-0015` | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-10-15 | `SPIKE-002` `SPIKE-012` |
+| `ADR-0016` | Quint replaces TLA+ for the formal specs | 2026-10-15 | `SPIKE-002` |
+| `ADR-0017` | Reporting authority is split by period state | 2026-10-15 | `HOT-005` `OQ-009` |
+| `ADR-0018` | A plain chart of accounts, with dimensions carried on the posting | 2026-10-15 | `HOT-005` `OQ-009` |
+| `ADR-0019` | Labour costing is actual; absorption measures utilisation, not rate variance | 2026-10-15 | `HOT-003` `HOT-004` `HOT-010` `OQ-005` `OQ-006` `OQ-008` `OQ-011` `OQ-017` `OQ-018` `OQ-019` |
+| `ADR-0020` | Xero history is restated, not imported as-is | 2026-10-15 | `HOT-006` `OQ-012` |
+| `ADR-0021` | Item type determines the revenue account; duplicate charge products are canonicalized | 2026-10-15 | `HOT-008` `OQ-014` |
 
 ## Spikes
 

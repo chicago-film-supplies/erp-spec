@@ -13,7 +13,10 @@ crew cost can be allocated to COGS against the job that caused it.
 - Order → fulfillment → invoice → posting → report, end to end.
 - A double-entry general ledger owned by CFS, with period close and lock.
 - Fixed asset register with **dual GAAP and tax basis** and a reportable deferred difference.
-- Labour scheduling, shift recording, and standard-cost absorption into COGS.
+- Labour scheduling, shift recording, and **actual**-cost absorption into COGS, where the
+  absorbed/unabsorbed split measures **utilisation** rather than rate variance (`ADR-0019`).
+- **Purchase orders**, in two roles: the document labour scheduling generates and costs flow from,
+  and inventory acquisition — retail stock, and fixed assets bought for rental or internal ops.
 - Sales and Chicago Personal Property Lease Transaction Tax determination.
 - Bank feed ingestion and reconciliation.
 - 1099 / W-9 tracking for contractors.
@@ -41,9 +44,14 @@ Each of these is a deliberate decision, not an oversight. Reversing one is an AD
 
 ## Fences
 
-- **No hard deletes, ever.** 55 order uids referenced by invoices do not exist in the current
-  system (`inbox/2026-08-08-hard-deleted-order-uids.md`, unverified — `OQ-013`). Every domain
-  object is soft-deleted or superseded.
+- **No hard deletes, ever.** Every domain object is soft-deleted or superseded.
+  ⚠️ **The evidence originally cited for this fence does not reproduce.** The claim was 55 order
+  uids referenced by invoices with no order document; measured against prod on 2026-08-09 across
+  all five order↔invoice reference paths, the count is **0**
+  (`inbox/2026-08-09-hard-deleted-order-uids-do-not-reproduce.md`, `OQ-013`). The fence is retained
+  on its own merits — an accounting system whose charter is to be the record must not lose records,
+  and `ADR-0021` already depends on a deactivated product's references still resolving — but it is
+  retained *deliberately*, not on the strength of that number.
 - **Money is integer minor units** in every schema, wire format, and stored document.
 - **Accounting date and posting timestamp are distinct fields** on every posting.
 - **Foreign-system identifiers never enter domain models** (`ADR-0009`). Translation happens at

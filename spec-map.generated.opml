@@ -34,8 +34,8 @@
           <outline text="Every HOT- is resolved or has an ADR that consciously defers it with a stated reason."/>
         </outline>
         <outline text="m5 — Formal specs checking clean" _note="depends on: m4 · 3 exit criteria">
-          <outline text="two-store-commit.tla model checks clean against its three failure questions."/>
-          <outline text="period-close.tla model checks clean, including the back-dated-posting-into-closed-period case."/>
+          <outline text="two-store-commit.qnt model checks clean against its three failure questions."/>
+          <outline text="period-close.qnt model checks clean, including the back-dated-posting-into-closed-period case."/>
           <outline text="Both specs have been run, not merely written — with the model-checker output recorded."/>
         </outline>
         <outline text="m6 — Migration field map complete" _note="depends on: m2 · 3 exit criteria">
@@ -120,7 +120,7 @@
           <outline text="blocks REQ-LED"/>
         </outline>
       </outline>
-      <outline text="Conflicts (10 open)">
+      <outline text="Conflicts (1 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labour) or an own long-haul run (labour-bearing)?…" _note="Decides whether a trucked fulfillment absorbs labour cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
           <outline text="blocks OQ-010"/>
           <outline text="blocks ADR-0011"/>
@@ -158,21 +158,16 @@
           <outline text="blocks OQ-019"/>
         </outline>
       </outline>
-      <outline text="Decisions (7 in force, 8 proposed)">
-        <outline text="In force (7)">
+      <outline text="Decisions (6 in force, 13 proposed)">
+        <outline text="In force (6)">
           <outline text="ADR-0001 — Replace Xero with an in-house ledger" _note="**In the context of** owning the order-to-invoice path but renting the ledger, **facing** a tracking-dimension defect that Xero silently absorbs and a costing model Xero cannot express, **we decided** to build the general ledger in-house, **to achieve** dimensional postings that cannot be null and a labour-absorption model we control, **accepting** that a large amount of unglamorous accounting surface area becomes ours to build and keep correct."/>
           <outline text="ADR-0002 — Bank feed sourced from Plaid, single Chase account" _note="**In the context of** needing bank transactions now that Xero's feed goes away, **facing** one bank and one account, **we decided** to source the feed from Plaid, **to achieve** a working feed without a bank-specific integration, **accepting** that Plaid's transaction model is a consumer-fintech model, not an accounting bank feed."/>
           <outline text="ADR-0003 — MongoDB for documents and masterfiles; TigerBeetle for the ledger" _note="**In the context of** replacing Firestore, **facing** two genuinely different storage problems — nested mutable business documents and an immutable balance-bearing ledger — **we decided** to use MongoDB for documents and TigerBeetle for the ledger, **to achieve** a ledger with enforced double-entry and real throughput alongside a document store that fits the order shape, **accepting** a two-store commit problem that has to be specified formally."/>
           <outline text="ADR-0004 — Retain Deno/Hono and TypeScript" _note="**In the context of** a greenfield rebuild that invites a stack change, **facing** a working Deno/Hono API and a one-person team, **we decided** to keep Deno, Hono and TypeScript, **to achieve** continuity of tooling and shared types with the clients, **accepting** that the TigerBeetle client may not load cleanly under Deno."/>
           <outline text="ADR-0005 — Retain SolidJS clients" _note="**In the context of** rebuilding the API underneath the operator UI, **facing** a working SolidJS manager app, **we decided** to keep SolidJS, **to achieve** reuse of the existing client and its component work, **accepting** that the reactive data layer must be rebuilt regardless because Firestore's real-time listeners go away."/>
-          <outline text="ADR-0006 — DuckDB over Parquet as the read side" _note="**In the context of** needing analytical reporting over the ledger, **facing** a transactional store that cannot answer period questions by accounting date, **we decided** to build the read side as DuckDB over Parquet, **to achieve** fast dimensional reporting and a durable audit artifact per period, **accepting** that reporting truth and balance truth now live in different systems."/>
           <outline text="ADR-0007 — Replace asset.accountant; dual GAAP/tax basis in scope" _note="**In the context of** building our own ledger, **facing** a separate hosted tool holding the asset register, **we decided** to bring fixed assets in-house with both GAAP and tax basis, **to achieve** depreciation postings that originate in the same ledger as everything else and a reportable deferred difference, **accepting** a genuinely intricate tax-depreciation rules problem."/>
         </outline>
-        <outline text="Proposed (8)">
-          <outline text="ADR-0008 — Dimension-exploded TigerBeetle accounts" _note="review by: 2026-10-15 · **In the context of** needing real-time balances sliced by dimension, **facing** TigerBeetle's fixed account model with no native dimension support, **we decided** to explode dimensions into the account identity — one account per (GL code × product line × cost type) — **to achieve** dimensional balances that are read directly rather than aggregated, **accepting** a multiplicative account count and a migration cost whenever a dimension value is added.">
-            <outline text="blocked on HOT-005"/>
-            <outline text="blocked on OQ-009"/>
-          </outline>
+        <outline text="Proposed (13)">
           <outline text="ADR-0009 — Anticorruption layer — foreign identifiers never enter domain models" _note="review by: 2026-10-15 · **In the context of** integrating Plaid and any surviving external system, **facing** a tracking-id drift that silently cost 28.7% of revenue its dimension, **we decided** that foreign identifiers never enter domain models and an unresolvable id is a hard error, **to achieve** failures that are loud at the boundary instead of silent in the data, **accepting** that ingestion will refuse work that the current system would have accepted.">
             <outline text="blocked on HOT-006"/>
           </outline>
@@ -186,8 +181,11 @@
             <outline text="blocked on HOT-001"/>
             <outline text="blocked on HOT-002"/>
             <outline text="blocked on OQ-001"/>
+            <outline text="blocked on OQ-002"/>
+            <outline text="blocked on OQ-003"/>
             <outline text="blocked on OQ-005"/>
             <outline text="blocked on OQ-007"/>
+            <outline text="blocked on OQ-010"/>
           </outline>
           <outline text="ADR-0012 — Valkey-backed queues with in-process workers, replacing Cloud Tasks" _note="review by: 2026-10-15 · **In the context of** leaving Cloud Tasks along with the rest of the GCP platform, **facing** 16 queues whose config largely encodes HTTP-delivery hazards rather than domain requirements, **we decided** to run queues on Valkey with in-process workers and serialize on a per-entity lock, **to achieve** the removal of the duplicate-dispatch lease and its coupled-knobs invariant, **accepting** that durability becomes a configuration decision and worker liveness becomes ours to monitor.">
             <outline text="blocked on SPIKE-010"/>
@@ -202,6 +200,37 @@
           <outline text="ADR-0015 — Inventory reservations are TigerBeetle pending transfers, over the operational window only" _note="review by: 2026-10-15 · **In the context of** wanting order state derivable and oversell prevented in the database, **facing** a balance model with no time dimension and an availability question that is entirely about time, **we decided** to model reservations as two-phase transfers over the operational window only, **to achieve** custody oversell that is unrepresentable and a fulfillment state that is derived, **accepting** that future-dated booking conflicts stay with the interval engine.">
             <outline text="blocked on SPIKE-002"/>
             <outline text="blocked on SPIKE-012"/>
+          </outline>
+          <outline text="ADR-0016 — Quint replaces TLA+ for the formal specs" _note="review by: 2026-10-15 · **In the context of** two formal specs that exist as never-executed stubs, **facing** a choice between TLA+ and Quint before either is written for real, **we decided** to use Quint, **to achieve** specs a one-person team will actually maintain and traces that can be replayed against the implementation, **accepting** a smaller ecosystem than TLA+'s.">
+            <outline text="blocked on SPIKE-002"/>
+          </outline>
+          <outline text="ADR-0017 — Reporting authority is split by period state" _note="review by: 2026-10-15 · **In the context of** a ledger whose timestamps are posting time and reporting that is periodised by accounting date, **facing** a requirement that reported figures must not drift, **we decided** to split reporting authority by period state, **to achieve** closed-period figures that cannot drift at all, **accepting** that open-period figures come from the document store rather than the ledger.">
+            <outline text="blocked on HOT-005"/>
+            <outline text="blocked on OQ-009"/>
+          </outline>
+          <outline text="ADR-0018 — A plain chart of accounts, with dimensions carried on the posting" _note="review by: 2026-10-15 · **In the context of** needing balances sliced by product line and cost type, **facing** a ledger with no dimension fields, **we decided** to keep the chart of accounts plain and carry dimensions on the posting, **to achieve** an account tree an auditor can read and a dimension set that grows by addition, **accepting** that a dimensional balance is answered by the read side rather than by a single account read.">
+            <outline text="blocked on HOT-005"/>
+            <outline text="blocked on OQ-009"/>
+          </outline>
+          <outline text="ADR-0019 — Labour costing is actual; absorption measures utilisation, not rate variance" _note="review by: 2026-10-15 · **In the context of** bringing crew cost into COGS against the job that caused it, **facing** a business that pays actual per-person wages rather than standard rates, **we decided** to cost labour at actual and let absorption measure utilisation, **to achieve** a variance that reflects something real, **accepting** that the charter's &quot;standard-cost absorption&quot; wording no longer describes the model.">
+            <outline text="blocked on HOT-003"/>
+            <outline text="blocked on HOT-004"/>
+            <outline text="blocked on HOT-010"/>
+            <outline text="blocked on OQ-005"/>
+            <outline text="blocked on OQ-006"/>
+            <outline text="blocked on OQ-008"/>
+            <outline text="blocked on OQ-011"/>
+            <outline text="blocked on OQ-017"/>
+            <outline text="blocked on OQ-018"/>
+            <outline text="blocked on OQ-019"/>
+          </outline>
+          <outline text="ADR-0020 — Xero history is restated, not imported as-is" _note="review by: 2026-10-15 · **In the context of** migrating invoice history whose product-line dimension is missing on a material share of revenue, **facing** a new ledger where that dimension is not nullable, **we decided** to restate the history rather than import it as-is, **to achieve** a corpus that can be reported dimensionally without a permanent unknown bucket, **accepting** that restatement assigns dimensions to lines inside closed periods.">
+            <outline text="blocked on HOT-006"/>
+            <outline text="blocked on OQ-012"/>
+          </outline>
+          <outline text="ADR-0021 — Item type determines the revenue account; duplicate charge products are canonicalized" _note="review by: 2026-10-15 · **In the context of** duplicate active charge products booking the same economic event to different revenue accounts, **facing** posting rules that must map a billed line to exactly one account, **we decided** that the item type determines the account and the correctly-typed duplicate is canonical, **to achieve** a rule a posting engine can enforce, **accepting** that some historical revenue moves account under ADR-0020's restatement.">
+            <outline text="blocked on HOT-008"/>
+            <outline text="blocked on OQ-014"/>
           </outline>
         </outline>
       </outline>
