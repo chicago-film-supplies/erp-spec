@@ -53,10 +53,13 @@ function frontMatter(text: string) {
   }
 }
 
+/** See validate.ts — `spikes/harness/node_modules` is on disk and invisible to `.gitignore`. */
+const SKIP = [/[\\/]node_modules[\\/]/];
+
 async function filesIn(dir: string, ext: string): Promise<string[]> {
   const out: string[] = [];
   try {
-    for await (const e of walk(`${ROOT}/${dir}`, { exts: [ext], includeDirs: false })) {
+    for await (const e of walk(`${ROOT}/${dir}`, { exts: [ext], includeDirs: false, skip: SKIP })) {
       if (!isTemplate(e.path)) out.push(e.path);
     }
   } catch { /* absent */ }

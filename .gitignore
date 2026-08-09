@@ -1,6 +1,13 @@
 .DS_Store
 *.swp
 deno.lock
+.claude/settings.local.json
+
+# Spike harness (spikes/harness/) — measurement code, not spec, not the target system.
+# Its npm pins are exact in deno.json precisely because deno.lock is ignored above.
+node_modules/
+spikes/harness/.bin/      # compiled probe binaries, ~200-370 MB each
+spikes/harness/.data/     # TigerBeetle cluster files, Valkey RDB/AOF, downloaded archives
 
 # Cached upstream stack docs — refetched by `deno task fetch-llms-docs` (24h).
 # Upstream is the source; this is a local copy, never a spec input.

@@ -14,12 +14,19 @@ wins.
 | Directory | Mutability | Rule |
 |---|---|---|
 | `inbox/`, `research-drop/` | append-only | raw capture, one idea per file, never rewritten |
-| `contexts/`, `ledger/`, `migration/`, `roadmap/` | refactored freely | structured spec, CI-validated |
+| `contexts/`, `ledger/`, `migration/`, `roadmap/`, `spikes/` | refactored freely | structured spec, CI-validated |
 | `adr/` | **immutable once `accepted`** | superseded by a new ADR, never edited |
 
 Nothing goes straight into a `requirements.yaml`. Everything enters `inbox/` and is **promoted**
 at triage. Promotion writes `promotes_to:` into the inbox file and `source:` into the target.
 Nothing is ever deleted.
+
+**The one exception to "no implementation code".** Measurement code that produces spike evidence
+and implements nothing in the target system lives in `spikes/harness/`. It is the same category as
+`tools/`: it exists so a claim in a spike's `## Notes` can be re-run rather than believed. The rule
+is unchanged everywhere else — nothing in `contexts/`, `ledger/` or `adr/` is executable, and the
+harness may never be imported by anything that ships. Underscore-prefix any `.md` you put under
+`spikes/`, because `validate.ts` recurses and demands front matter on every `.md` it finds.
 
 ## ID formats
 

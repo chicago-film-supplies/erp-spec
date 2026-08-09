@@ -47,10 +47,18 @@ function frontMatter(text: string): { fm: Record<string, unknown>; body: string 
   }
 }
 
+/**
+ * `.gitignore` is invisible to `walk()`. `spikes/harness/` installs a real node_modules tree
+ * (Node-API addons need one on disk), and every package README in it is an unparseable `.md` —
+ * 403 gate-1 failures the first time the harness was installed. Skip it here rather than teach
+ * every gate about it.
+ */
+const SKIP = [/[\\/]node_modules[\\/]/, /[\\/]spikes[\\/]harness[\\/]\.(bin|data)[\\/]/];
+
 async function filesIn(dir: string, ext: string): Promise<string[]> {
   const out: string[] = [];
   try {
-    for await (const e of walk(`${ROOT}/${dir}`, { exts: [ext], includeDirs: false })) {
+    for await (const e of walk(`${ROOT}/${dir}`, { exts: [ext], includeDirs: false, skip: SKIP })) {
       if (!isTemplate(e.path)) out.push(e.path);
     }
   } catch { /* dir absent */ }

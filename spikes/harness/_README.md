@@ -1,0 +1,108 @@
+# Spike harness
+
+Measurement code for SPIKE-001, SPIKE-007 and SPIKE-010. **Not spec, and not the target system.**
+It implements nothing that will ship; it exists to turn predictions about Deno's native-addon
+support into measured cells. Same category as `tools/` — it is here so a claim in a spike's
+`## Notes` can be re-run instead of believed.
+
+The underscore prefix on this file keeps it out of `validate.ts`, which walks `spikes/`
+recursively and requires front matter on every `.md` it finds.
+
+## Why it exists
+
+Three spikes asked the same question in three costumes: *does a native npm dependency load and
+keep working under Deno, across `deno run`, `deno test` and `deno compile`?* Three packages ×
+three modes is nine cells and not one had ever been filled in. Every statement in this repo about
+native addons under Deno was a prediction, including several that turned out to be wrong.
+
+## Running it
+
+```
+cd spikes/harness
+deno install          # exact pins, see deno.json
+deno task matrix      # the whole grid, ~4 min — prints markdown
+```
+
+Individual probes:
+
+```
+deno task napi        # all three, one process
+deno task napi-test   # the `deno test` leg
+deno task tb          # SPIKE-001 — needs a local TigerBeetle, see below
+deno task duckdb      # SPIKE-007 server-side leg
+deno task valkey      # SPIKE-010 — needs a local Valkey, see below
+```
+
+## Two things about the design that are not obvious
+
+**Every probe asserts a value, never an absence of throw.** A module that imports and then hands
+back a truncated integer is the failure mode that matters, and it passes any "does it load" check.
+So the TigerBeetle probe asserts a u128 does not fit in a u64, and the DuckDB probe asserts a
+HUGEINT round-trips exactly rather than arriving as a float.
+
+**Each package gets its own compile entrypoint** (`entry-*.ts`, importing `probe-*.ts` directly and
+never `napi-probe.ts`). `deno compile` embeds every statically-reachable literal `import()`, so a
+shared entrypoint puts all three dependency trees in every binary: measured before the split, all
+three binaries came out at an identical 364 MB and every `--bundle` cell failed on BullMQ's
+optional `pg` peer, masking the DuckDB question entirely.
+
+## The staging directory, and the trap that forced it
+
+`matrix.ts` copies its sources to a temp dir **outside `$HOME`** and runs everything from there.
+
+Deno's node resolution walks up from the importing file. BullMQ v6 ships a Postgres backend that
+lazily `require('pg')`; esbuild follows that eagerly under `--bundle` and, run from a path nested
+under a home directory containing an unrelated `~/node_modules/pg`, resolved it there and failed
+with `Import "pgpass" not a dependency and not in import map`. Staged under `/var/folders` the same
+cell compiles and passes.
+
+That was very nearly written down as "BullMQ cannot be bundled". It is a property of the machine,
+not of BullMQ. A harness whose results depend on what else is installed in the home directory is
+not a measurement, so the staging is load-bearing rather than tidiness.
+
+## Versions this was measured against
+
+| | version | note |
+|---|---|---|
+| Deno | 2.9.2 | `aarch64-apple-darwin` |
+| `tigerbeetle-node` | 0.17.9 | client and server ship in lockstep — pin both |
+| TigerBeetle server | 0.17.9 | `tigerbeetle-universal-macos.zip` release asset, no container |
+| `@duckdb/node-api` | 1.5.5-r.3 | DuckDB v1.5.5 |
+| `@duckdb/duckdb-wasm` | 1.33.1-dev57.0 | |
+| `bullmq` | 6.0.9 | |
+| `ioredis` | 6.0.0 | |
+| `msgpackr` | 2.0.5 | transitive via bullmq; pinned so the probe can import it directly |
+
+`deno.lock` is gitignored repo-wide, so **`deno.json` is the lockfile** — every npm specifier is an
+exact version, never a caret range.
+
+## This will rot, and that is fine
+
+It pins six npm packages against one Deno version on one platform. Its value is reproducibility at
+the *next* Deno upgrade, not perpetual green: when Deno 2.10 lands, re-run `deno task matrix` and
+diff the table. Nothing in CI runs it, deliberately — a spike harness that gates the build would
+make an upstream change break an unrelated push.
+
+macOS results do not transfer to Linux. TigerBeetle upstream supports Linux ≥5.6 for production and
+treats macOS as a development configuration; storage behaviour on the deployment target is
+SPIKE-011's job, not this one's.
+
+## Local servers
+
+TigerBeetle (no container — a macOS universal binary is a release asset):
+
+```
+curl -Lo .data/tb.zip https://github.com/tigerbeetle/tigerbeetle/releases/download/0.17.9/tigerbeetle-universal-macos.zip
+unzip -o .data/tb.zip -d .data
+.data/tigerbeetle format --cluster=0 --replica=0 --replica-count=1 --development .data/0_0.tigerbeetle
+.data/tigerbeetle start --addresses=3000 --development .data/0_0.tigerbeetle
+```
+
+Valkey (`brew install valkey`):
+
+```
+valkey-server --port 6399 --dir .data --appendonly yes --appendfsync everysec
+```
+
+`.bin/` (compiled binaries) and `.data/` (cluster files, RDB/AOF, downloaded archives) are
+gitignored.

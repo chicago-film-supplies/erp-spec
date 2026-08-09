@@ -1,0 +1,32 @@
+{
+  "name": "@cfs/erp-spec-spike-harness",
+  "version": "0.0.0",
+  "exports": {},
+
+  "//": "Exact pins, no caret ranges. deno.lock is gitignored repo-wide, so this file IS the lockfile.",
+  "imports": {
+    "tigerbeetle-node": "npm:tigerbeetle-node@0.17.9",
+    "@duckdb/node-api": "npm:@duckdb/node-api@1.5.5-r.3",
+    "@duckdb/duckdb-wasm": "npm:@duckdb/duckdb-wasm@1.33.1-dev57.0",
+    "bullmq": "npm:bullmq@6.0.9",
+    "ioredis": "npm:ioredis@6.0.0",
+    "msgpackr": "npm:msgpackr@2.0.5",
+    "msgpackr-extract": "npm:msgpackr-extract@3.0.4"
+  },
+
+  "//nodeModulesDir": "Node-API addons need a real node_modules tree on disk; Deno's default global npm cache does not give the dlopen'ing addon a sibling directory to resolve against.",
+  "nodeModulesDir": "auto",
+
+  "tasks": {
+    "matrix": "deno run --allow-read --allow-write --allow-env --allow-ffi --allow-run --allow-net --allow-sys matrix.ts",
+    "napi": "deno run --allow-read --allow-env --allow-ffi napi-probe.ts",
+    "napi-test": "deno test --allow-read --allow-env --allow-ffi napi-probe_test.ts",
+    "tb": "deno run --allow-read --allow-env --allow-ffi --allow-net tb-probe.ts",
+    "duckdb": "deno run --allow-read --allow-write --allow-env --allow-ffi duckdb-probe.ts",
+    "duckdb-wasm": "deno run --allow-read --allow-env --allow-net duckdb-wasm-probe.ts",
+    "valkey": "deno run --allow-read --allow-env --allow-net --allow-sys valkey-queue-probe.ts"
+  },
+
+  "fmt": { "lineWidth": 100 },
+  "lint": { "rules": { "exclude": ["no-explicit-any"] } }
+}
