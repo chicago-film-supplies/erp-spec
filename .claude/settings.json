@@ -1,0 +1,45 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/stack-digest.sh",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "deno task fetch-llms-docs",
+            "timeout": 60,
+            "async": true,
+            "statusMessage": "Refreshing cached stack docs…"
+          }
+        ]
+      }
+    ]
+  },
+  "extraKnownMarketplaces": {
+    "quint": {
+      "source": {
+        "source": "github",
+        "repo": "quint-co/quint"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "quint@quint": true
+  },
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:caddyserver.com)",
+      "WebFetch(domain:docs.tigerbeetle.com)",
+      "WebFetch(domain:duckdb.org)",
+      "WebFetch(domain:hono.dev)",
+      "WebFetch(domain:mongodb.com)",
+      "WebFetch(domain:quint.sh)",
+      "WebFetch(domain:valkey.io)",
+      "WebFetch(domain:www.mongodb.com)"
+    ]
+  }
+}

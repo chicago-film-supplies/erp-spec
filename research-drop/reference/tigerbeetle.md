@@ -9,7 +9,11 @@ Everything balance-bearing lives here; nested business documents do not (that is
 - **Single-page dump** (best single source to feed an LLM): <https://docs.tigerbeetle.com/single-page/>
 - Doc source (markdown, versioned): <https://github.com/tigerbeetle/tigerbeetle/tree/main/docs>
 - Node client: `tigerbeetle-node` — <https://www.npmjs.com/package/tigerbeetle-node>
-- No `llms.txt` published as of 2026-08-09; the single-page dump is the substitute.
+- No `llms.txt` published as of 2026-08-09 — `docs.tigerbeetle.com/llms.txt` returns **404**
+  (`api:2026-08-09`). The single-page dump is the substitute, and it is **cached locally** at
+  `.claude/docs/tigerbeetle.txt` by `deno task fetch-llms-docs`: 1,230,763 B of HTML reduced to
+  377,290 B of markdown-ish text (709 headings, 199 fenced blocks). Grep it by heading —
+  `## Two-Phase Transfers`, `### pending_id`, `#### flags.post_pending_transfer` all resolve.
 
 ## Version (checked 2026-08-09)
 

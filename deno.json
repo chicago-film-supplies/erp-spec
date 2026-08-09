@@ -6,7 +6,8 @@
     "validate": "deno run --allow-read --allow-env=SPEC_TODAY tools/validate.ts",
     "triage": "deno run --allow-read --allow-env=SPEC_TODAY tools/validate.ts --triage-only",
     "gen": "deno run --allow-read --allow-write tools/generate.ts",
-    "ingest": "deno run --allow-read --allow-write tools/ingest.ts"
+    "ingest": "deno run --allow-read --allow-write tools/ingest.ts",
+    "fetch-llms-docs": "deno run --allow-read=.claude/docs --allow-write=.claude/docs --allow-net=docs.deno.com,docs.tigerbeetle.com,duckdb.org,hono.dev,quint.sh,www.mongodb.com,zod.dev tools/fetch-llms-docs.ts"
   },
   "imports": {
     "@std/yaml": "jsr:@std/yaml@^1.0.5",

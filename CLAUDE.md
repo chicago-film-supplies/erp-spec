@@ -78,10 +78,32 @@ made `generate.ts` machine-dependent and produced `inbox/` filenames beginning
 8. **Accounting date and posting timestamp are always distinct fields.** Never conflate.
 9. Prose style: bulleted, terse, no hedging, no filler preamble. Empty sections get a bare
    `TODO`, not placeholder prose.
-10. **Before writing spec that touches a stack tool, read its note in `research-drop/reference/`.**
-    Curated, Claude-facing references for the target stack (Deno, Hono, Zod, MongoDB, TigerBeetle,
-    DuckDB, Quint, Valkey, Caddy): canonical `llms.txt` links + the project-specific traps, cross-linked to
+10. **Before writing spec that touches a stack tool, read its note in `research-drop/reference/`**,
+    then the cached upstream dump in `.claude/docs/` if you need the mechanics. Curated,
+    Claude-facing references for the target stack (Deno, Hono, Zod, MongoDB, TigerBeetle,
+    DuckDB, Quint, Valkey, Caddy): the project-specific traps, cross-linked to
     the ADRs and spikes. Not spec, not ingested, not validated — see `research-drop/reference/README.md`.
+
+## LLM reference docs
+
+Two halves, and the order matters. The **curated note** (`research-drop/reference/<tool>.md`) carries
+what upstream cannot know — which ADR adopted the tool, what is still undecided, the trap that bit
+us. The **cached dump** (`.claude/docs/<tool>.txt`, gitignored) carries upstream's own reference
+material, refetched by `deno task fetch-llms-docs` when the local copy is over 24h old.
+
+The session-start digest (`.claude/hooks/stack-digest.sh`) lists both, **derived from the
+filesystem** — which is why there is deliberately no table of filenames here. A hand-maintained
+list is exactly what rots: `api-cloudrun/CLAUDE.md` still instructs the model to read a
+`.claude/docs/eta.txt` its fetcher has never once been permitted to write.
+
+Not every tool has an upstream dump, and the difference is worth knowing before you go looking:
+
+- **Full reference** — TigerBeetle, Hono, Zod. Read the cached file; grep it by heading.
+- **Link index only** — MongoDB, DuckDB, Quint (`llms-full.txt` 404s on all three, checked
+  2026-08-09). The cached file is a routing table; follow a link with WebFetch for the content.
+- **Nothing upstream** — Valkey, Caddy publish no `llms.txt` at all. The curated note is the source.
+- **Quint** also ships official agent skills, enabled as a plugin in `.claude/settings.json` —
+  those beat both halves for authoring `.qnt`.
 
 ## Two rules that exist because the current system broke on them
 

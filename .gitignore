@@ -2,6 +2,10 @@
 *.swp
 deno.lock
 
+# Cached upstream stack docs — refetched by `deno task fetch-llms-docs` (24h).
+# Upstream is the source; this is a local copy, never a spec input.
+.claude/docs/
+
 # DuckDB caches are rebuildable artifacts (ADR-0006). Parquet is durable; .duckdb is not.
 *.duckdb
 *.duckdb.wal
