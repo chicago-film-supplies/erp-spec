@@ -38,14 +38,17 @@
 #                              amount                           a dotted path — NEVER an expression
 #                              dimensions                       `none`, or a map of dimension paths
 #   control_total            a field of the source document the transfer amounts must sum to
+#   invariants[]             what must hold, in prose, each traceable to a REQ/ADR
+#   vectors_dir              ledger/vectors/<id>/
 #
 # **A posting whose amount is zero is not written.** A TigerBeetle transfer carries a non-zero
 # amount, so a zero-value leg is an absence rather than a transfer — a fully depreciated asset is
-# disposed of with ONE relief leg, not two, and a `per:` over an empty collection produces nothing
-# at all. This is why `asset_basis_adjusted` can legitimately post nothing while still being
-# `specified`, and why the control total of such an entry is zero rather than unstated.
-#   invariants[]             what must hold, in prose, each traceable to a REQ/ADR
-#   vectors_dir              ledger/vectors/<id>/
+# disposed of with ONE relief leg, not two, an ordinary payment writes no unapplied leg, and a
+# `per:` over an empty collection produces nothing at all. This is why `asset_basis_adjusted` can
+# legitimately post nothing while still being `specified`, and why the control total of such an
+# entry is zero rather than unstated. **Gate 10m fails on a zero-amount transfer in any vector** —
+# it was added after a deliberately zero leg passed every other check, because a zero adds nothing
+# to a control total and 10i therefore cannot see it.
 #
 # **`amount:` is a path, never arithmetic.** Gate 10l forbids `+ - * / %` in it. This is a fence,
 # not formatting: every rounding decision stays upstream in the source document where the money
@@ -202,6 +205,10 @@ rules:
         per: session.settlements
         amount: settlement.amount_minor
         dimensions: none
+      - debit_account: session.deposit_account
+        credit_account: 2050
+        amount: session.unapplied_minor
+        dimensions: none
     control_total: session.amount_minor
     invariants:
       - >-
@@ -213,11 +220,22 @@ rules:
         payment or a multi-invoice allocation"
         (`code:2026-08-09:core@33f5654:src/schemas/settlement.ts`).
       - >-
-        **The rows must sum to the money that arrived** (control total). An entry that credits less
-        AR than the cash it debits is not a smaller entry, it is an unbalanced one — the remainder is
-        an overpayment, which **CFS cannot currently record at all** because every settlement names
-        an invoice. Refusing it is the same answer the current model gives; where the remainder
-        should land is **OQ-028**.
+        **The entry accounts for ALL the money that arrived** (control total), and the part that
+        relieves no receivable is a liability rather than a refusal. `session.unapplied_minor`
+        credits **2050 Customer Credit Balances** — the same account an unallocated credit note
+        sits in, because it is the same fact: customer value CFS holds that is attached to no
+        invoice. This is what all four surveyed suites do with an advance (OQ-028; NetSuite
+        `Customer Deposits`, SAP a special G/L reconciliation account, Intacct an AR Advance, Odoo a
+        down-payment liability).
+        The remainder is zero on an ordinary payment, so the leg is not written at all — see the
+        note on zero amounts in this file's header.
+      - >-
+        **Recording an overpayment is not endorsing it.** An operator who keys $15,000 for $1,500
+        gets a visible liability rather than an error, and the deliberate cost is that the mis-key
+        lands silently. The money is in the bank either way, and refusing to record it puts the
+        ledger further from the bank rather than closer — so the check belongs in the client, which
+        **warns before recording a remainder** (owner, 2026-08-09). A warning an operator can
+        override is the right shape for a fact that is real but usually wrong.
       - >-
         **A session names exactly ONE deposit account.** Money that arrives in two accounts is two
         events, however it looked to the operator. Without this the debit side of the fan is
@@ -306,7 +324,7 @@ rules:
     control_total: credit_note.total_minor
     invariants:
       - >-
-        **The credit side is 2050 Customer Credits (Unallocated), NOT 1200.** A credit note is
+        **The credit side is 2050 Customer Credit Balances, NOT 1200.** A credit note is
         issued against an organization and allocated to invoices afterwards, so between the two it
         is attached to no invoice. Crediting AR at issue puts the unallocated balance in the control
         account while no invoice in the subledger carries it, and AR stops tying to the sum of open
@@ -663,7 +681,7 @@ no_posting:
 # plus `leg_completed`, which is not a rule at all and moved to `no_posting`.
 #
 # Two of them were not free, and what unblocked each is worth keeping:
-#   · `credit_note_issued` had no credit-side account. **2050 Customer Credits (Unallocated)** is
+#   · `credit_note_issued` had no credit-side account. **2050 Customer Credit Balances** is
 #     minted for it, because crediting 1200 at issue breaks the tie between the AR control account
 #     and the invoice subledger by exactly the unallocated balance.
 #   · `asset_disposed` needed the dual-book question answered first — ADR-0026 (proposed), which

@@ -83,6 +83,8 @@ made `generate.ts` machine-dependent and produced `inbox/` filenames beginning
    near-duplicating.
 7. **Money is integer minor units everywhere.** No floats, no decimal strings, in any schema.
 8. **Accounting date and posting timestamp are always distinct fields.** Never conflate.
+8a. **Survey before deciding anything accounting-shaped** — see *Accounting decisions* below. Not
+    optional, and not only for the hard ones.
 9. Prose style: bulleted, terse, no hedging, no filler preamble. Empty sections get a bare
    `TODO`, not placeholder prose.
 10. **Before writing spec that touches a stack tool, read its note in `research-drop/reference/`**,
@@ -122,6 +124,39 @@ Both are already enforced in the `~/cfs` workspace and both are load-bearing her
 - **A stated guarantee that nothing executes is not a guarantee.** If this repo asserts an
   invariant, something in `deno task validate` has to be able to fail on it. Land new gates
   **red**, watch them bite, then fix the data.
+
+## Accounting decisions: survey before deciding
+
+**Standing instruction from the owner, 2026-08-09.** Any decision about where something posts, what
+an account means, how two books relate, or how a document is presented is researched against **five
+references before a recommendation is made**:
+
+| | What it settles |
+|---|---|
+| **GAAP** | what the presentation rule actually requires — and it is usually narrower or stricter than the shape everyone builds |
+| **SAP S/4HANA** | the most configurable answer; its *mechanisms* (special G/L indicators, non-posting depreciation areas, ledger groups) name the distinctions worth having |
+| **NetSuite** | the mid-market default, and its docs state GL impact per transaction type explicitly |
+| **Sage Intacct** | the same tier, different opinions — where it and NetSuite disagree there is a real choice |
+| **Odoo** | the open-source answer, and the one whose *absence* of a feature is informative: its documented workarounds show what the shape costs when it is not built in |
+
+Two things the survey is for, and only the first is obvious:
+
+- **The default.** What four systems do by default is not automatically right, but differing from all
+  four is a claim that needs an argument.
+- **The CRITERION.** More valuable than the default. The tax-book survey found the systems split on
+  whether a tax book posts — but agreed on *why* (does the book need its own trial balance). The
+  credit-balance survey found all four put a credit note in AR — but the line they all drew was "is
+  this value attached to a billed sale", and **CFS's credit notes fail that test on their own data
+  model**, so following the criterion and departing from the default was the correct read. A survey
+  that only collects defaults gets this backwards.
+
+Practitioner material counts and is sometimes the best evidence: a consultancy publishing *how to
+work around* a product's default is a measurement of what that default costs. Cite it.
+
+Record the survey in `inbox/` with the links, dated, before it is cited by an ADR — the survey is
+evidence and evidence is append-only. Worked examples:
+`inbox/2026-08-09-tax-and-gaap-statements-are-both-required.md` and
+`inbox/2026-08-09-unallocated-credit-has-no-home-in-ar.md`.
 
 ## Verification etiquette
 

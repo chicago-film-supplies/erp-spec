@@ -1,0 +1,53 @@
+name: unapplied-remainder-goes-to-customer-credit-balances
+posting_rule: settlement_recorded
+kind: accept
+source: >-
+  OQ-028, answered by the four-suite survey in
+  `inbox/2026-08-09-customer-credit-balances-across-four-suites.md`: every one of SAP, NetSuite,
+  Sage Intacct and Odoo gives customer value that is attached to no invoice a **liability**, never a
+  receivable. No live population — `settlements.uid_invoice` is required in the current system
+  (`code:2026-08-09:core@33f5654:src/schemas/settlement.ts`), so CFS cannot record this today at
+  all. Amounts follow `one-payment-across-two-invoices`.
+
+given:
+  ledger_state:
+    closed_periods: []
+    ar_posted_invoices: [INV-VEC-0001, INV-VEC-0002]
+  session:
+    id: SES-VEC-0002
+    accounting_date: "2026-08-05"
+    deposit_account: 1001
+    amount_minor: 160031
+    unapplied_minor: 10000
+    instrument: check
+    settlements:
+      - { id: SET-VEC-0001, invoice: INV-VEC-0001, amount_minor: 50000 }
+      - { id: SET-VEC-0002, invoice: INV-VEC-0002, amount_minor: 100031 }
+
+derivation: >-
+  A $1,600.31 check against $1,500.31 of invoices. $100.00 relieves no receivable.
+  **Three transfers: two against AR and one against 2050 Customer Credit Balances.**
+  `control_total` = 50000 + 100031 + 10000 = **160031** = the money that arrived, so the entry
+  accounts for all of it and the bank reconciles.
+  **The remainder is a liability, not a receivable, and that is the survey's answer rather than a
+  preference.** All four suites put value attached to no invoice into a liability — NetSuite
+  `Customer Deposits` ("they don't affect the customer's accounts receivable balance"), SAP a
+  special G/L alternative reconciliation account explicitly so it is "not presented in the balance
+  sheet together with receivables", Intacct an AR Advance, Odoo a down-payment liability. It lands
+  in the same account an unallocated credit note does, because it is the same fact.
+  ⚠️ **This vector replaced a REJECT.** The rule first refused a session whose rows did not sum to
+  the money received, on the reasoning that an operator keying $15,000 for $1,500 should see an
+  error rather than get a silent liability. That was the weaker case: the money is in the bank
+  either way, so refusing puts the ledger further from the bank rather than closer, and the
+  mis-key is caught by a **client-side warning before recording a remainder** (owner, 2026-08-09) —
+  which an operator can override, as they must, because the fact is real and merely unusual.
+  On an ordinary fully-applied payment `unapplied_minor` is 0 and the third leg is **not written**
+  — see `one-payment-across-two-invoices`, whose entry is two transfers.
+  No dimension: 1001, 1200 and 2050 all name none.
+
+expect:
+  transfers:
+    - { debit_account: 1001, credit_account: 1200, amount_minor: 50000, accounting_date: "2026-08-05" }
+    - { debit_account: 1001, credit_account: 1200, amount_minor: 100031, accounting_date: "2026-08-05" }
+    - { debit_account: 1001, credit_account: 2050, amount_minor: 10000, accounting_date: "2026-08-05" }
+  rejects: []

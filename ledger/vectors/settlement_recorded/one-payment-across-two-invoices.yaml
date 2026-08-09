@@ -17,6 +17,7 @@ given:
     accounting_date: "2026-08-05"
     deposit_account: 1001
     amount_minor: 150031
+    unapplied_minor: 0
     instrument: check
     settlements:
       - { id: SET-VEC-0001, invoice: INV-VEC-0001, amount_minor: 50000 }
@@ -29,6 +30,10 @@ derivation: >-
   relieve.
   The fan is over the session's rows, so the entry is two transfers debiting **one** deposit account
   and crediting 1200 twice. `control_total` = 50000 + 100031 = **150031** = the money that arrived.
+  **`unapplied_minor` is 0, so the third leg is not written.** Every cent relieved a receivable.
+  The arm that fires when it does not is `unapplied-remainder-goes-to-customer-credit-balances`,
+  and stating the zero here rather than omitting the field is the same absence-versus-null
+  distinction REQ-LED-001 draws: the operator applied the whole payment, and that is a fact.
   **This is the evidence, not an illustration.** erp-spec#3 asks whether `journal_entry_id` can be
   derived as (source document, posting event) and freed from `user_data_128`. Here one journal entry
   references two invoices, so the grouping is not a function of any single source-document

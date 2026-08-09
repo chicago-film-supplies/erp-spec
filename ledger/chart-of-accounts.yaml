@@ -10,7 +10,7 @@
 #
 # **137 entries**, because three are minted rather than carried across — each `disposition: new`,
 # `status_live: absent`, with the rule that needs it named in its `reason`: 5800/5801 for
-# absorbed/unabsorbed labour (ADR-0019), and **2050 Customer Credits (Unallocated)** for
+# absorbed/unabsorbed labour (ADR-0019), and **2050 Customer Credit Balances** for
 # `credit_note_issued`, which had no credit-side account at all (erp-spec#5).
 #
 # A `disposition` is a PROPOSAL for the cutover, with a reason, for the owner to review. It is not
@@ -423,36 +423,50 @@ accounts:
     source: "api:2026-08-09:db_chart_of_accounts_query"
 
   - code: 2050
-    name: "Customer Credits (Unallocated)"
+    name: "Customer Credit Balances"
     class: liability
     normal_balance: credit
     dimensions: []
     disposition: new
     status_live: absent
     reason: >-
-      **`credit_note_issued` had no credit-side account and this is it** (erp-spec#5). A credit note
-      is issued against an ORGANIZATION and allocated to invoices afterwards — one note may be split
-      across several, and one operator action may draw on several notes. Between the two the credit
-      is a dated, numbered obligation to a customer attached to no invoice, and it has to sit
-      somewhere.
-      **Not 1200.** Crediting Accounts Receivable at issue puts the unallocated credit in the
-      control account while no invoice in the subledger carries it, so AR stops tying to the sum of
-      open invoices by exactly the unallocated total — with nothing on the face of either to show
-      it. A control account that does not reconcile to its subledger is the defect a control account
-      exists to prevent.
-      The current system already holds this balance: `credit-notes.remaining_credit_cents` per note,
-      and an invoice's `totals.amount_credited_cents` moves only when a `settlements` row of
-      `type: credit` exists — at ALLOCATION, not at issue
-      (`code:2026-08-09:core@33f5654:src/schemas/settlement.ts`). This account is the ledger-side
-      name for a number CFS already keeps.
+      **Every form of customer value that is not yet attached to an invoice**, and the credit-side
+      account `credit_note_issued` had none of (erp-spec#5). Three populations, one account:
+      unallocated credit notes, the unapplied remainder of an overpayment (OQ-028), and any deposit
+      taken before an invoice exists.
+      **The GAAP name, deliberately.** "Customer credit balances" is the phrase the presentation
+      rule itself uses — customer credit balances are not netted against receivables — so the
+      account is named for the rule that makes it necessary rather than for the document that most
+      often fills it.
+      **Not 1200, and the survey is the reason it is not.** All four suites surveyed put a credit
+      MEMO in receivables (SAP posts it to the customer's ordinary reconciliation account; NetSuite
+      is Dr revenue / Cr AR; Odoo reverses the invoice's journal items; Intacct treats it as an AR
+      adjustment). But all four draw the same line for value that is NOT attached to a billed sale,
+      and give it a liability: SAP a special G/L alternative reconciliation account, explicitly so
+      it is "not presented in the balance sheet together with receivables"; NetSuite `Customer
+      Deposits`, an Other Current Liability that does not touch AR; Odoo a down-payment product
+      booked to a current liability; Intacct an AR Advance.
+      **A CFS credit note fails that test on its own data model.** It is organization-scoped — no
+      `query_by_orders`, where `Invoice` requires min-1 — and where it lands is a separate
+      `settlements` row that may split it across invoices. CN-1015: $259.74 issued, $247.75 to
+      invoice 1767 and $11.99 to invoice 1751 (`api:2026-08-09:get_settlements`). At issue it is
+      attached to nothing, which is the deposit side of the line, not the credit-memo side.
       ⚠️ A `disposition: new` is a PROPOSAL for the owner, like every other disposition in this
       file. The alternative — credit 1200 at issue, Xero's model and what the live GL does today —
       would make `credit_note_allocated` post nothing and move EVT-BIL-006 to `no_posting`.
     source: "api:2026-08-09:search_credit_notes"
     note: >-
-      13 credit notes live, 10 `applied` / 3 `void`, and none currently unallocated — so this
-      account's balance is $0.00 at cutover and the design is being chosen for the state the model
-      permits rather than for one the corpus is sitting in today.
+      13 credit notes live, 10 `applied` / 3 `void`, and **none currently unallocated** — every
+      `remaining_credit_cents` is 0. So this account's balance is $0.00 at cutover and it is being
+      chosen for the state the model permits rather than for one the corpus is sitting in.
+      ⚠️ **ONE balance, not one per source.** TigerBeetle holds a single total here; the per-note
+      remaining and the per-customer position are projections in the document store, which is where
+      `credit-notes.remaining_credit_cents` already lives. ADR-0018 keeps the chart plain, so there
+      is no account per note and no account per customer — and the over-allocation check therefore
+      consults the projection, not a ledger balance.
+      A deposit against undelivered goods is a performance obligation and a credit note is not; if
+      deposits ever become material, that distinction is a presentation split within this account
+      rather than a reason to have avoided it.
 
   - code: 2160
     name: "Payroll Wages Payable"

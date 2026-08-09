@@ -491,7 +491,24 @@ open_questions:
     owner: alex
     decide_by: 2026-09-15
     blocks: [ADR-0026]
-    status: open
+    status: answered
+    answer: >-
+      **Accrual** — stated by the owner 2026-08-09 and independently visible in the statements: 1200
+      Accounts Receivable (25,824.26) and 2000 Accounts Payable (30,240.04) appear **identically on
+      both balance sheets**, and total liabilities agree to the cent. A cash-basis tax statement
+      carries neither.
+      **And nothing else differs except retail inventory.** Measured account by account across both
+      2025 statements: 52 of 60 P&L lines are byte-identical, and the entire difference is
+      **7000 Depreciation Expense** (63,553.48) plus **5000 COGS: Retail Inventory** (105.60),
+      summing to the net-income difference of 63,659.08 with **zero residual**. On the balance sheet,
+      accumulated depreciation (467,638.68) plus 1400 Retail Inventory (259.13) equals the total
+      asset difference and the total equity difference exactly.
+      So ADR-0026's overlay has **two** components rather than one, and the second is not the
+      fixed-asset register. Why the two books cost retail inventory differently is **OQ-029**.
+      **Permanent differences are in neither book**: meals, political expenditures and vehicle
+      tickets are identical on both statements and are Schedule M-1 adjustments on the return. The
+      ledger should carry no M-1 logic at all.
+      Evidence: `inbox/2026-08-09-book-to-tax-difference-is-exactly-two-accounts.md`.
     notes: >-
       ADR-0026 fixes WHERE the tax book lives — derived at report time, never posted — but not what
       is in it. Depreciation and §179 are the differences the fixed-asset register can supply on its
@@ -514,7 +531,19 @@ open_questions:
     owner: alex
     decide_by: 2026-09-15
     blocks: [REQ-LED]
-    status: open
+    status: answered
+    answer: >-
+      **2050 Customer Credit Balances** — the same account an unallocated credit note sits in,
+      because it is the same fact: customer value CFS holds that is attached to no invoice. Decided
+      by the owner 2026-08-09 on the four-suite survey
+      (`inbox/2026-08-09-customer-credit-balances-across-four-suites.md`), which found that SAP,
+      NetSuite, Sage Intacct and Odoo each give this value a liability and each use **one** such
+      account rather than one per source.
+      `settlement_recorded` therefore **records the remainder rather than refusing the session**.
+      The mis-key argument for refusing — $15,000 keyed for $1,500 becomes a silent liability — was
+      judged the weaker case: the money is in the bank either way, so refusing puts the ledger
+      further from the bank rather than closer. **The client warns before recording a remainder**,
+      and the warning is overridable because the fact is real and merely unusual.
     notes: >-
       Surfaced by writing `settlement_recorded`, whose control total requires a session's rows to sum
       to the money that arrived. If a customer pays more than the invoices in that session are owed,
@@ -532,3 +561,28 @@ open_questions:
       disposition is already `undecided` pending SPIKE-004.
       Not a blocker on `settlement_recorded`: refusing is a defensible rule and matches today's
       model. It is a gap in what the system can record, which is why it is a question and not a bug.
+
+  - id: OQ-029
+    question: >-
+      Why do the two books cost retail inventory differently, and which basis does v2 carry as the
+      GL number?
+    owner: alex
+    decide_by: 2026-09-15
+    blocks: [ADR-0026]
+    status: open
+    notes: >-
+      Measured 2026-08-09 across both 2025 statements: after depreciation, the **only** other
+      book-to-tax difference is retail inventory. 5000 Cost of Goods Sold: Retail Inventory is
+      36,985.62 on the tax basis against 36,880.02 on GAAP for 2025, and 1400 Retail Inventory is
+      43,392.63 against 43,651.76 — a cumulative 259.13, which is exactly the fold of the annual COGS
+      differences (0.66 + 152.87 + 105.60).
+      Immaterial today at 0.6% of the balance, and **growing**: 0.66 in 2023, 152.87 in 2024, 105.60
+      in 2025.
+      It matters structurally rather than numerically. ADR-0026 derives the tax book from the
+      fixed-asset register; this difference is not the register, so the overlay has a **second
+      source** and the ADR cannot describe it as a fixed-asset feature. Before that can be specified,
+      someone has to say what the difference IS — a costing-method difference, a §263A adjustment, a
+      write-down treated differently, or an artifact of how the tax package computes inventory.
+      Not answerable from the repo or the CFS API: the GL line detail is in Xero and the tax figure
+      comes from the tax package. A question for the owner and the CPA.
+      Evidence: `inbox/2026-08-09-book-to-tax-difference-is-exactly-two-accounts.md`.

@@ -56,7 +56,7 @@
           <outline text="[object Object]"/>
         </outline>
       </outline>
-      <outline text="Open questions (0 of 28 undecided)" _note="The bottleneck. Each blocks what is listed under it.">
+      <outline text="Open questions (0 of 29 undecided)" _note="The bottleneck. Each blocks what is listed under it.">
         <outline text="OQ-001 — Are fulfillment legs first-class recorded events with their own identity, or derived from the order…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-007"/>
           <outline text="blocks ADR-0011"/>
@@ -148,6 +148,9 @@
         </outline>
         <outline text="OQ-028 — Where does a customer overpayment land — money received that exceeds what the invoices it was sent…" _note="owner: alex · decide by: 2026-09-15">
           <outline text="blocks REQ-LED"/>
+        </outline>
+        <outline text="OQ-029 — Why do the two books cost retail inventory differently, and which basis does v2 carry as the GL num…" _note="owner: alex · decide by: 2026-09-15">
+          <outline text="blocks ADR-0026"/>
         </outline>
       </outline>
       <outline text="Conflicts (0 open)">
@@ -251,6 +254,7 @@
           <outline text="ADR-0026 — The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time" _note="review by: 2026-10-01 · **In the context of** a fixed-asset register that must produce a full P&amp;L *and balance sheet* on both a GAAP and a tax basis across years, **facing** a fleet where a §179 election expenses an asset in year 1 that GAAP carries for 5, 10 or 20, **we decided** that only the GAAP book posts to the general ledger and the tax book is derived at report time from the register's per-book schedules, **to achieve** two complete sets of statements without a second write path, **accepting** that the tax book has no double-entry enforcement of its own and is only as good as its derivation.">
             <outline text="blocked on SPIKE-005"/>
             <outline text="blocked on OQ-027"/>
+            <outline text="blocked on OQ-029"/>
           </outline>
         </outline>
       </outline>
@@ -376,7 +380,7 @@
           <outline text="EVT-TAX-003 — TaxRateSuperseded" _note="tax → billing"/>
         </outline>
       </outline>
-      <outline text="Capture (24 unpromoted of 35)" _note="no drops pending">
+      <outline text="Capture (26 unpromoted of 37)" _note="no drops pending">
         <outline text="Actor per leg, clock in/out per stop, crew size per trip" _note="inbox/2026-08-08-actor-and-clock-per-leg.md"/>
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
@@ -399,6 +403,8 @@
         <outline text="Two reporting dimensions are required simultaneously — product line AND cost type" _note="inbox/2026-08-08-two-reporting-dimensions.md"/>
         <outline text="Two distinct tracking defects with different signatures, separable in the data" _note="inbox/2026-08-08-two-tracking-defects.md"/>
         <outline text="What the 2026-08-08 verification pass checked, and what it could not" _note="inbox/2026-08-08-verification-pass-summary.md"/>
+        <outline text="The whole book-to-tax difference is two accounts — depreciation and retail inventory — and it recon…" _note="inbox/2026-08-09-book-to-tax-difference-is-exactly-two-accounts.md"/>
+        <outline text="Where a credit note and an advance sit — SAP, NetSuite, Sage Intacct and Odoo all draw the same lin…" _note="inbox/2026-08-09-customer-credit-balances-across-four-suites.md"/>
         <outline text="Both a tax-basis and a GAAP-basis P&amp;L and balance sheet are required, across years" _note="inbox/2026-08-09-tax-and-gaap-statements-are-both-required.md"/>
         <outline text="An unallocated credit note has no home in Accounts Receivable — the control account and the subledg…" _note="inbox/2026-08-09-unallocated-credit-has-no-home-in-ar.md"/>
       </outline>

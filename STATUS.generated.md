@@ -11,12 +11,12 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 28 | **0 with no owner or no decide-by** |
+| Open questions | 29 | **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 11 | 0 open |
 | Decisions (ADR) | 26 | 16 in force · 8 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 2 | 0 without a scenario |
-| Inbox | 35 | 24 unpromoted |
+| Inbox | 37 | 26 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 23 | 0 still `TODO` |
 
@@ -60,7 +60,7 @@ None.
 | `ADR-0019` | Labour costing is actual; absorption measures utilisation, not rate variance | 2026-10-01 | `HOT-003` `HOT-004` `HOT-010` `OQ-005` `OQ-006` `OQ-008` `OQ-011` `OQ-017` `OQ-018` `OQ-019` |
 | `ADR-0020` | Xero history is restated, not imported as-is | 2026-10-15 | `HOT-006` `OQ-012` |
 | `ADR-0025` | The dimension obligation is per account, and what is refused is absence rather than null | 2026-10-01 | `HOT-011` `OQ-021` `OQ-022` `OQ-025` |
-| `ADR-0026` | The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time | 2026-10-01 | `SPIKE-005` `OQ-027` |
+| `ADR-0026` | The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time | 2026-10-01 | `SPIKE-005` `OQ-027` `OQ-029` |
 
 ## Spikes
 

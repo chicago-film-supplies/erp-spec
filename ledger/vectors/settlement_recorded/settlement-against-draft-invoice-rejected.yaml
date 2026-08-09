@@ -17,6 +17,7 @@ given:
     accounting_date: "2026-08-05"
     deposit_account: 1001
     amount_minor: 150031
+    unapplied_minor: 0
     instrument: check
     settlements:
       - { id: SET-VEC-0001, invoice: INV-VEC-0001, amount_minor: 50000 }

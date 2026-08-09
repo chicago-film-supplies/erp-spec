@@ -6,7 +6,7 @@ date: 2026-08-09
 review_by: 2026-10-01
 deciders: [repo owner]
 contexts: [fixed-assets, ledger, tax]
-relates_to: [ADR-0007, ADR-0017, ADR-0018, SPIKE-005, OQ-027]
+relates_to: [ADR-0007, ADR-0017, ADR-0018, SPIKE-005, OQ-027, OQ-029]
 supersedes:
 superseded_by:
 ---
@@ -40,6 +40,19 @@ superseded_by:
   depreciation, but a disposal relieves cost against a *different* accumulated depreciation and a
   *different* gain per book, so the `Cr` to the asset account cannot be shared. Duplicating the asset
   account drags in the funding account, and that drags in AP. It is all postings or none.
+- **The derivation was checked against the real statements after this ADR was drafted, and it holds
+  exactly.** CFS's actual 2025 statements on both bases differ in **two accounts** and nothing else:
+  7000 Depreciation Expense (63,553.48) and 5000 COGS: Retail Inventory (105.60), summing to the
+  net-income difference of 63,659.08 with **zero residual**. 52 of 60 P&L lines are byte-identical.
+  On the balance sheet, accumulated depreciation (467,638.68) plus retail inventory (259.13) equals
+  both the total-asset and the total-equity difference, and **total liabilities agree to the cent**.
+  So a derived tax book is not merely defensible — it is what CFS's own two statements already are.
+  Measured 2026-08-09; `inbox/2026-08-09-book-to-tax-difference-is-exactly-two-accounts.md`.
+- **The tax basis is accrual** (OQ-027): AR 25,824.26 and AP 30,240.04 appear identically on both
+  balance sheets, so the overlay does not have to restate working capital.
+- **The tax depreciation figure is already produced this way, by hand.** The tax P&L annotates 7000
+  with "** From Tax Depreciation Schedule in Asset Accountant" — the hosted register ADR-0007
+  replaces. This decision brings an existing manual process in-house rather than inventing one.
 - A true parallel ledger costs more here than the survey suggests. `ledger/tigerbeetle-accounts.yaml`
   fixes **TB account id = the GL code widened to u128**, and TigerBeetle account ids are globally
   unique rather than per-ledger — so a second ledger changes that rule. Every posting rule would fan
@@ -52,8 +65,10 @@ superseded_by:
 **TigerBeetle holds one book: GAAP.** No tax-basis value is ever posted to it.
 
 The **tax book is produced by the read side** (ADR-0017: MongoDB for open periods, the sealed
-Parquet artifact for closed ones) as a set of balanced, per-asset, per-period **tax-book entries**
-derived from the fixed-asset register's tax schedule. They use the same chart of accounts — 7001
+Parquet artifact for closed ones) as a set of balanced **tax-book entries** derived from two
+sources, which the measurement above shows are the only two that exist: the fixed-asset register's
+per-asset tax schedule, and the retail-inventory costing difference (**OQ-029** — immaterial at
+$259.13 cumulative, unexplained, and growing). They use the same chart of accounts — 7001
 Section 179 Depreciation Expense, the `Less-Accumulated Depreciation` accounts, 1998 Gain/Loss On
 Asset Disposal — and they are entries in the projection, never transfers in the ledger.
 
@@ -90,10 +105,15 @@ they are the GAAP set.
 - **7001 Section 179 Depreciation Expense is a tax-book-only account.** It stays in the chart, and
   it will never carry a TigerBeetle transfer. Its `note` in `ledger/chart-of-accounts.yaml` already
   says a §179 election "is exactly a tax-basis-only expense".
-- **Depreciation is not the only book difference, and the rest are not settled.** If CFS files on a
-  cash basis, the tax balance sheet drops AR and AP entirely and the overlay is far larger than the
-  register — **OQ-027**. Meals disallowance and accrual timing are P&L-only differences of the same
-  family. This decision fixes *where* the tax book lives, not *what* is in it.
+- **Permanent differences belong to NEITHER book, and the ledger must carry no M-1 logic.** Meals
+  (17,777.88), political expenditures (1,250.00) and vehicle tickets (3,635.88) are identical on
+  both 2025 statements despite being nondeductible or half-deductible. They are Schedule M-1
+  adjustments **on the return**, downstream of both sets of statements. A system that tried to build
+  them into the tax book would be doing the CPA's job with worse information.
+- **Opening balances load per book at migration.** 3000 Member Equity / Opening Balance is
+  266,586.46 on the tax basis and 467,529.68 on GAAP; 3100 Retained Earnings is 35,741.63 against
+  239,037.14. The difference is the accumulated basis divergence of years before the cutover, and it
+  has to arrive as data rather than be derived — the register does not hold pre-cutover schedules.
 - **Reversible in one direction only, cheaply.** Adding a posting parallel ledger later means
   writing history into it; going the other way means deleting a ledger. Starting non-posting is the
   reversible end.
