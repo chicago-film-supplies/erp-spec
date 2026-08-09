@@ -361,7 +361,11 @@ open_questions:
       postings — the bottled water tax among them — likewise carry no dimension, because 2200 and
       2210 require none.
       REQ-LED-001 is unaffected: a posting to an account whose `dimensions` list names
-      `product_line` is still REJECTED if it lacks one. There is no null in a required field.
+      `product_line` is still REJECTED if it lacks one.
+      ⚠️ **Refined the same day by OQ-025**, which drew the line more precisely: what is refused is
+      ABSENCE, not null. A declared `product_line: null` records that no tracked value applies and
+      is recorded; a missing key means nobody decided and is refused. This answer's original
+      closing sentence — "there is no null in a required field" — is superseded by that.
     notes: >-
       ADR-0020 deferred this to m3 explicitly and m3 cannot answer it — it is a taxonomy decision,
       not a finding. A non-nullable dimension makes `Other` the new null: the bucket that means

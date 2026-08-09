@@ -9,7 +9,7 @@ fields:
   direction:         { type: enum, values: [debit, credit], required: true }
   accounting_date:   { type: date, required: true, note: "determines the period. set by the business event" }
   posting_timestamp: { type: timestamp, required: true, note: "when recorded. monotonic. never back-dated" }
-  product_line:      { type: dimension_ref, required: true, note: "REQ-LED-001 — not nullable" }
-  cost_type:         { type: dimension_ref, required: true, note: "REQ-LED-001 — not nullable" }
+  product_line:      { type: dimension_ref, required: declared_where_account_requires, nullable: true, note: "REQ-LED-001 / ADR-0025 — the KEY must be declared on a posting to an account naming it; an explicit null records that no tracked value applies. Absence is refused; so is an empty string." }
+  cost_type:         { type: dimension_ref, required: declared_where_account_requires, nullable: true, note: "ADR-0025 — a LABOUR dimension. Only 5800 names it, so most postings do not carry it at all. Was `required: true` on every posting, which no rental revenue or retail-COGS posting could satisfy." }
   source_document:   { type: document_ref, required: true }
   posting_rule:      { type: rule_id, required: true }
