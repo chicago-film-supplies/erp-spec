@@ -156,6 +156,17 @@ for (const f of await filesIn("inbox", ".md")) {
   inbox.push({ file: f, fm: parsed.fm });
 }
 
+// Parse-coverage sweep. Every structured YAML in the repo must at least PARSE, whether or not a
+// gate below inspects its contents. roadmap/milestones.yaml shipped broken in the seed commit
+// precisely because nothing read it — an unquoted `: ` inside a sequence scalar. A file no tool
+// opens is a file with no guarantees.
+for (const p of ["roadmap/milestones.yaml", "glossary.yaml", "hotspots.yaml", "open-questions.yaml"]) {
+  await readYaml(`${ROOT}/${p}`);
+}
+for await (const e of walk(`${ROOT}/ledger`, { exts: [".yaml"], includeDirs: false })) {
+  if (!isTemplate(e.path)) await readYaml(e.path);
+}
+
 const hotY = await readYaml<{ hotspots?: typeof hots }>(`${ROOT}/hotspots.yaml`);
 hots.push(...(hotY?.hotspots ?? []));
 const oqY = await readYaml<{ open_questions?: typeof oqs }>(`${ROOT}/open-questions.yaml`);

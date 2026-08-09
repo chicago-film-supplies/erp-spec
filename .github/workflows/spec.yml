@@ -30,8 +30,9 @@ jobs:
       - name: Fail on stale generated files
         if: always()
         run: |
-          if ! git diff --quiet -- traceability/ adr/in-force.generated.md; then
+          if ! git diff --quiet; then
             echo "::error::Generated files are stale. Run 'deno task gen' and commit the result."
-            git --no-pager diff -- traceability/ adr/in-force.generated.md
+            git --no-pager diff --stat
+            git --no-pager diff
             exit 1
           fi

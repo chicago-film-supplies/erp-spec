@@ -22,7 +22,7 @@ milestones:
     depends_on: [m1]
     exit_criteria:
       - All eight contexts have a context.md stating their responsibility and their boundary.
-      - Zero glossary terms with `definition: TODO`.
+      - "Zero glossary terms with `definition: TODO`."
       - Every glossary term used in a requirement statement resolves, and no two terms are near-duplicates.
 
   - id: m3
@@ -30,7 +30,7 @@ milestones:
     depends_on: [m2]
     exit_criteria:
       - Chart of accounts complete, including the COGS and unabsorbed-labour accounts.
-      - Dimensions defined with their full value sets and their nullability rule (which is: not nullable).
+      - "Dimensions defined with their full value sets and their nullability rule (which is: not nullable)."
       - Posting rules defined for every source document type.
       - Golden input->expected-transfer vectors exist for every posting rule, including the failure cases.
 
@@ -73,4 +73,4 @@ milestones:
       - All prior milestone exit criteria met.
       - Zero open questions without an owner and a decide_by date.
       - Clean `deno task validate`.
-      - `deno task gen` produces no diff.
+      - "`deno task gen` produces no diff."

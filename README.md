@@ -1,68 +1,158 @@
 # erp-spec
 
-Planning repo for a greenfield rebuild of the CFS inventory/order/invoice system into a full
-ERP with its own accounting layer.
+Planning repo for a greenfield rebuild of the CFS inventory/order/invoice system into a full ERP
+with its own accounting layer. **No implementation code lives here.** The output is a `spec-v1`
+git tag.
 
-- **Target stack:** Deno/Hono API · MongoDB (documents) · TigerBeetle (ledger) · DuckDB over
-  Parquet (read side) · SolidJS clients.
-- **Replaces:** the current Firestore-backed CFS API, **Xero**, and **asset.accountant**.
-- **Keeps:** an external employer of record for payroll. Labour *scheduling* moves in-house, which
-  is what makes COGS labour allocation possible.
-- **Output:** a `spec-v1` git tag. No shipping code lives here.
+Replaces the Firestore-backed CFS API, **Xero**, and **asset.accountant**. Keeps an external
+employer of record for payroll — labour *scheduling* moves in-house, which is what makes COGS
+labour allocation possible.
 
-Conventions — lifecycles, ID formats, working rules — are in `CLAUDE.md`. Read that first.
+Target stack: Deno/Hono API · MongoDB (documents) · TigerBeetle (ledger) · DuckDB over Parquet
+(read side) · SolidJS clients.
 
-## Tasks
+---
 
-| Task | Does |
+## Start here
+
+| Open this | To answer |
 |---|---|
-| `deno task validate` | All CI gates. Non-zero exit on failure. |
-| `deno task triage` | Lists unpromoted `inbox/` items. Always exits 0. |
-| `deno task gen` | Writes `traceability/matrix.generated.json` + `adr/in-force.generated.md`. |
-| `deno task ingest` | Absorbs `research-drop/*.md` into `inbox/` + `open-questions.yaml` + `hotspots.yaml`. |
+| **[`STATUS.generated.md`](STATUS.generated.md)** | Where does the project stand right now? |
+| **`spec-map.generated.opml`** | What is the shape of the whole thing? (open in MindNode) |
+| [`charter.md`](charter.md) | What is in scope, and what is deliberately not? |
+| [`CLAUDE.md`](CLAUDE.md) | What are the rules for changing anything here? |
+| [`adr/in-force.generated.md`](adr/in-force.generated.md) | What has already been decided? |
 
-**`deno task validate` is expected to fail right now.** The failures are the worklist — seeded
-open questions have no owner or decide-by date, and no requirements exist yet. See
-`## Current worklist` below.
+## The four commands
+
+```
+deno task validate    # every gate. exits 1 while anything is unresolved — that list is the worklist
+deno task triage      # just the inbox items not yet promoted into the spec
+deno task ingest      # absorb research-drop/*.md into the spec
+deno task gen         # rewrite the four generated files. run before every commit
+```
+
+`validate` is **expected to fail** until the seeded worklist is cleared. That is not a broken
+repo — it is the repo telling you what has not been decided yet.
+
+---
+
+## How to use it
+
+### The three lifecycles
+
+Everything is in exactly one. Mixing them is the main mistake to avoid.
+
+| Directory | Lifecycle | In practice |
+|---|---|---|
+| `inbox/`, `research-drop/` | **append-only** | Write once, never edit. A correction is a *new* file. |
+| `contexts/`, `ledger/`, `migration/`, `roadmap/` | **refactor freely** | The real spec. Rewrite whenever understanding improves. |
+| `adr/` | **immutable once `accepted`** | Never edited. Superseded by a new ADR. |
+
+### How a thought becomes spec
+
+```
+chat session → research-drop/*.md → deno task ingest → inbox/
+                                                         ↓  triage: you decide
+                                        contexts/<ctx>/requirements.yaml
+                                                         ↓
+                                        contexts/<ctx>/features/*.feature
+```
+
+Nothing skips straight into `requirements.yaml`. Promotion is **bidirectional** — the inbox file
+gets `promotes_to: [REQ-…]`, the requirement gets `source: inbox/…`. That is what makes the
+traceability matrix work, and why "why does this requirement exist?" always has an answer.
+
+`[question]` bullets route to `open-questions.yaml`. `[correction]` bullets route to
+`hotspots.yaml` — never overwriting what they contradict.
+
+### Know which of these four you are looking at
+
+The single easiest thing to blur:
+
+- **`OQ-`** — a **decision** someone must make. Has an owner and a date. → `open-questions.yaml`
+- **`HOT-`** — a **contradiction** between two statements. Resolved by an ADR, never by quietly
+  picking a side. → `hotspots.yaml`
+- **`SPIKE-`** — an **investigation**. Timeboxed, must close by producing an ADR. → `spikes/`
+- **GitHub issue** — **work** someone must do.
+
+### A working session
+
+**Start** — two commands tell you the whole state:
+
+```
+deno task validate     # what is undecided or unbuilt
+deno task triage       # what is captured but not yet promoted
+```
+
+**During** — capture into `research-drop/`, then `deno task ingest`.
+
+**Before committing** — `deno task gen`, or CI fails on stale generated files.
+
+---
 
 ## Depositing research from a Claude chat session
 
-Until the desktop client can write to this filesystem directly, the loop is manual and the
-boundary is a **file format**, not a tool:
+The boundary is a **file format**, not a tool, so it works whether the file arrives via desktop
+filesystem access, a synced Drive folder, or copy-paste:
 
-1. In the chat session, produce output in the shape documented in `research-drop/_FORMAT.md`.
+1. In the chat session, produce output in the shape documented in
+   [`research-drop/_FORMAT.md`](research-drop/_FORMAT.md).
 2. Save it as `research-drop/YYYY-MM-DD-<topic>.md`.
 3. Run `deno task ingest`.
 
-Ingestion splits each tagged bullet into its own append-only `inbox/` file, routes `[question]`
-bullets to `open-questions.yaml` and `[correction]` bullets to `hotspots.yaml`, and stamps the
-drop file `status: ingested`. It never rewrites the drop body — that file is the provenance
-record. Re-running is idempotent.
+Ingestion splits each tagged bullet into its own append-only `inbox/` file, routes questions and
+corrections to the right structured file, and stamps the drop `status: ingested`. It never
+rewrites the drop body — that file is the provenance record. Re-running is idempotent.
 
-`research-drop/_EXAMPLE.md` is a filled-in drop showing the shape. The `_` prefix makes it inert —
+`research-drop/_EXAMPLE.md` is a filled-in drop showing the shape. The `_` prefix makes it inert:
 ingestion and validation both skip `_`-prefixed files, so the example can never pollute the spec.
 
-The format does not change when this automates.
+**Put numbers in the bullets.** A finding without a measurement is an opinion with a tag.
+
+---
+
+## The mind map
+
+`deno task gen` writes `spec-map.generated.opml` — the whole spec as a tree: roadmap, open
+questions and what each blocks, conflicts, decisions in force vs proposed, spikes, contexts, and
+the unpromoted capture backlog.
+
+Open it in **MindNode** (File → Open, or drag it in). MindNode Next also imports FreeMind,
+Markdown and Xmind; OPML was chosen because it is not locked to one app — OmniOutliner, Xmind,
+Freeplane and most outliners read it too.
+
+**It is a one-way view.** Rearranging the map in MindNode and re-running `deno task gen` discards
+the rearrangement. Edit the YAML, regenerate the map.
+
+---
 
 ## Where things live
 
 | Directory | Holds |
 |---|---|
-| `inbox/`, `research-drop/` | Raw capture. Append-only, never rewritten. |
+| `inbox/`, `research-drop/` | Raw capture. Append-only. |
 | `contexts/` | Per-bounded-context requirements, events, entities, Gherkin features. |
 | `ledger/` | Chart of accounts, dimensions, posting rules, golden input→transfer vectors. |
-| `adr/` | Decisions. Immutable once `accepted`. |
+| `adr/` | Decisions. Immutable once accepted. |
 | `spikes/` | Timeboxed investigations. Each closes with an ADR. |
 | `formal/` | TLA+ specs for the two-store commit and period-close protocols. |
 | `migration/` | Current Firestore path → new field map, including the defective paths. |
 | `roadmap/` | Milestones to `spec-v1`. |
-| `traceability/` | Generated only. Never hand-edited. |
+| `traceability/` | Generated only. |
 
-## Current worklist
+Context codes: `LED` ledger · `FUL` fulfillment · `BIL` billing · `FA` fixed-assets ·
+`ORD` ordering · `AVL` availability · `BNK` banking · `TAX` tax.
 
-Generated by the day-one `deno task validate` run — see the seeded `OQ-` entries needing an
-owner and a decide-by date, and the `HOT-` conflicts blocking the proposed ADRs.
+## Generated files — never hand-edit
 
-Verification status of the seeded facts is recorded per-file in `verified:` front matter. What
-was checked against the live CFS API on 2026-08-08 is summarised in
-`inbox/2026-08-08-verification-pass-summary.md`.
+Anything with `.generated.` in the name is rewritten by `deno task gen`, and CI fails on a diff:
+
+- `STATUS.generated.md` — the dashboard
+- `spec-map.generated.opml` — the mind map
+- `adr/in-force.generated.md` — accepted, not superseded
+- `traceability/matrix.generated.json` — REQ ↔ ADR ↔ event ↔ scenario ↔ inbox source
+
+All four are deterministic and **read no clock**, so they only change when the spec changes.
+Whether a `decide_by` has actually passed is `validate`'s judgement — it writes nothing, so it is
+free to read the real date.

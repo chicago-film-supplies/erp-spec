@@ -41,11 +41,24 @@ Context codes: `LED` ledger · `FUL` fulfillment · `BIL` billing · `FA` fixed-
 
 Carry `.generated.` in the filename and a header comment. Never hand-edited. Currently:
 
-- `traceability/matrix.generated.json`
-- `adr/in-force.generated.md`
+- `STATUS.generated.md` — the dashboard: what is undecided, blocked, or uncovered
+- `spec-map.generated.opml` — the whole spec as a mind map (MindNode / Xmind / any outliner)
+- `adr/in-force.generated.md` — accepted, not superseded
+- `traceability/matrix.generated.json` — REQ ↔ ADR ↔ event ↔ scenario ↔ inbox source
 
 CI regenerates them and fails on a diff, so a stale generated file is a build break, not a
 silent lie.
+
+**Generated files must read no clock.** `generate.ts` may not call `new Date()`, and must reduce
+any YAML-parsed date to a UTC calendar day — a generated file that changes on its own turns the
+stale-file gate red on unrelated pushes, and the gate stops meaning anything. Time-dependent
+judgements (has a `decide_by` passed? is an ADR past its `review_by`?) belong in `validate.ts`,
+which writes nothing and is therefore free to read the real date.
+
+Two bugs have already come from the second half of that rule: YAML parses an unquoted
+`date: 2026-08-08` into a JS `Date`, whose `String()` renders in the **runner's** timezone. It
+made `generate.ts` machine-dependent and produced `inbox/` filenames beginning
+`Fri Aug 07 2026 19:00:00 GMT-0500 (...)`.
 
 ## Rules for Claude Code working in this repo
 
