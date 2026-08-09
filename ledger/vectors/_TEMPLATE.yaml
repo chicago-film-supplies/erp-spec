@@ -3,13 +3,50 @@
 # These are the executable part of the ledger spec. A posting rule with no vector is a sentence,
 # not a specification. Include the FAILURE cases: a posting missing a dimension must appear here
 # with an expected rejection, or REQ-LED-001 is unenforced.
+#
+# One file per vector, in `ledger/vectors/<posting_rule>/`. The directory name must equal a rule id.
+#
+# ── keeping the oracle honest ───────────────────────────────────────────────────────────────────
+# ⚠️ **"Σ debits == Σ credits" is VACUOUS on this shape and is deliberately not checked.** A
+# transfer here is a `{debit_account, credit_account, amount_minor}` triple — TigerBeetle's actual
+# model — so every transfer contributes the same amount to both sides and the sums are equal by
+# construction, for any set of transfers whatsoever. A gate asserting it could never fail. It is
+# the textbook shape of a guard that only consults its own oracle.
+#
+# What is checked instead, and can fail:
+#
+#   1. **control_total** — Σ `amount_minor` equals a field of the SOURCE DOCUMENT named by the rule,
+#      not by this file. A rule that drops the tax leg or double-counts a line fails it.
+#   2. **minimal pairs** — every `kind: reject` vector names `differs_from` (an accept vector for
+#      the same rule) and `differs_in` (the exact paths). A reject vector sharing nothing with an
+#      accept vector proves only that SOMETHING was refused, not that the rule discriminates on the
+#      field it claims to. This is the spec analogue of the workspace's fail-closed companion.
+#   3. **dimension obligation** — checked against `chart-of-accounts.yaml`'s `dimensioned:` flag and
+#      `dimensions.yaml`'s value sets. Two files this vector does not control.
+#   4. **integer minor units** — any `*_minor` is a non-negative integer. Never a string, never a
+#      float.
+#
+# ── dates ───────────────────────────────────────────────────────────────────────────────────────
+# ⚠️ **QUOTE every date.** An unquoted `2026-07-31` parses to a JS `Date` whose `String()` renders
+# in the RUNNER's timezone — the bug that has already produced machine-dependent output twice in
+# this repo. The gate rejects a parsed Date in any `*_date` field.
 
 name:
 posting_rule:
+kind: # accept | reject
+source: # where the SHAPE came from, dated and pinned. Amounts may be synthetic; say so.
+
+# reject vectors only — the minimal pair this one differs from, and exactly how
+differs_from:
+differs_in: []
+
 given:
-  # the business event, in full
+  # the business event, in full, including any ledger state the rule consults
+  ledger_state:
+    closed_periods: []
+
 expect:
   transfers: []
   # - { debit_account: , credit_account: , amount_minor: , accounting_date: , product_line: , cost_type: }
-  rejects:
+  rejects: []
   # - reason: "missing product_line dimension"

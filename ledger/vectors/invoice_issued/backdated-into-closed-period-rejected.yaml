@@ -1,0 +1,45 @@
+name: backdated-into-closed-period-rejected
+posting_rule: invoice_issued
+kind: reject
+source: >-
+  ADR-0017 — a closed period's Parquet artifact is immutable and hashed into the close record.
+  Cross-checked by `formal/period-close.qnt` in m5; a vector and a model-checked spec are two
+  independent expressions of the same rule, and if they disagree one of them is wrong.
+
+differs_from: two-lines-two-product-lines-with-tax
+differs_in: [ledger_state.closed_periods]
+
+given:
+  ledger_state:
+    closed_periods: ["2026-07"]
+  invoice:
+    id: INV-VEC-0006
+    invoice_date: "2026-07-31"
+    total_minor: 100031
+    lines:
+      - net_minor: 75000
+        revenue_account: 4000
+        product_line: "Power, Lights & Tools"
+      - net_minor: 12500
+        revenue_account: 4200
+        product_line: "Expendables"
+    tax_components:
+      - { payable_account: 2200, amount_minor: 11250 }
+      - { payable_account: 2200, amount_minor: 1281 }
+
+derivation: >-
+  Byte-identical to the accept vector except that 2026-07 is closed. Every dimension is present and
+  valid and the control total balances — **the posting is refused on period state alone**, which is
+  what makes this a minimal pair rather than a second dimension test.
+  **The test is on ACCOUNTING DATE, never on posting timestamp** (ADR-0010). The posting timestamp
+  here is 2026-08 and is monotonic and fine; it is the 2026-07-31 accounting date that lands inside
+  the sealed period. A rule that checked the timestamp would accept this and silently break the
+  artifact hash, and that is the exact conflation the charter fence exists to prevent.
+  The remedy is not to refuse the invoice outright but to give it an accounting date in an open
+  period — the same manoeuvre `invoice_voided` performs, and the reason that rule needs its own
+  closed-period vector.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "accounting_date 2026-07-31 falls inside closed period 2026-07 (ADR-0010, ADR-0017)"

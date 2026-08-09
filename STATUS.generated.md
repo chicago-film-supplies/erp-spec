@@ -11,8 +11,8 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 20 | **0 with no owner or no decide-by** |
-| Conflicts (HOT) | 10 | 0 open |
+| Open questions | 24 | **0 with no owner or no decide-by** |
+| Conflicts (HOT) | 11 | 1 open |
 | Decisions (ADR) | 24 | 6 in force · 16 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 2 | 0 without a scenario |
@@ -26,7 +26,9 @@ None — every open question has an owner and a decide-by date.
 
 ## Open conflicts
 
-None.
+| HOT | Statement | Blocks |
+|---|---|---|
+| `HOT-011` | REQ-LED-001 and ADR-0018 require BOTH dimensions on every revenue and COGS posting; `ledger/dimensions.yaml`… | `OQ-021` |
 
 ## Decisions
 

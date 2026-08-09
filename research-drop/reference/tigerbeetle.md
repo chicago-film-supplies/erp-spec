@@ -51,14 +51,25 @@ read `[4294967295, 4294967295]` as a hard error.
 - **Accounts and transfers are immutable; `id` is the idempotency key.** Use TB's recommended
   time-based, lexicographically-sortable 128-bit ids (48-bit ms timestamp + 80-bit random). Do
   **not** use random ids — they hurt LSM write throughput.
-- **No queries, no joins, no ad-hoc aggregation.** Balances are per-account only. This is *why*
-  [[ADR-0008]] explodes dimensions into account identity, and *why* DuckDB is the read side
-  ([[ADR-0006]]). Do not plan to "just group transfers by dimension" — that is not a thing TB does.
+- **No queries, no joins, no ad-hoc aggregation.** Balances are per-account only. Do not plan to
+  "just group transfers by dimension" — that is not a thing TB does. ⚠️ This used to say it was
+  *why* [[ADR-0008]] exploded dimensions into account identity; **[[ADR-0008]] is superseded by
+  [[ADR-0018]]**, which keeps the chart plain and carries dimensions on the posting, because
+  [[ADR-0017]] made the read side answer dimensional balances anyway. Same TB limitation, opposite
+  conclusion.
 - **Account `flags` set balance direction/constraints:** `debits_must_not_exceed_credits` /
-  `credits_must_not_exceed_debits`. Choose per the COA normal balance for that account.
-- **`user_data_128/64/32` are the only per-transfer reference fields.** [[ADR-0008]] reserves them:
-  `128 → journal_entry_id`, `64 → source_document`, `32 → posting_rule`. High-cardinality refs go
-  *here*, never into account identity.
+  `credits_must_not_exceed_debits`. ⚠️ **Do NOT choose these per the COA normal balance.** That
+  advice stood here and is wrong for a general ledger: a revenue account legitimately goes
+  debit-side on a reversal, and AR legitimately goes credit-side on a customer overpayment, so
+  flagging by normal balance makes correct entries fail at the database. `normal_balance` in
+  `ledger/chart-of-accounts.yaml` is a **reporting** property, not a constraint. These flags belong
+  on the **inventory-custody** ledger ([[ADR-0015]]), where making overselling unrepresentable is
+  the entire point — `EVT-FUL-005` says so in terms. See `ledger/tigerbeetle-accounts.yaml`.
+- **`user_data_128/64/32` are the only per-transfer reference fields.** The working assignment is
+  `128 → journal_entry_id`, `64 → source_document`, `32 → accounting_date` (packed `YYYYMMDD`),
+  with `posting_rule` evicted to the Mongo projection — three fields, four claimants, tracked as
+  erp-spec#3 and still `proposed` pending [[SPIKE-003]]. High-cardinality refs go *here*, never
+  into account identity.
 - **TB timestamp = posting time, NOT accounting date** ([[HOT-005]] / [[ADR-0010]]). Never
   periodise a trial balance / P&L / close on the TB timestamp. Accounting date is a distinct field
   held outside TB. This is load-bearing, not a detail.

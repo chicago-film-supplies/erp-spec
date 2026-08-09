@@ -1,0 +1,42 @@
+name: close-writes-parquet-hash
+posting_rule: period_closed
+kind: accept
+source: "EVT-LED-002 `carries: [period, closed_at, parquet_sha256]`; ADR-0017 for the artifact rule."
+
+given:
+  ledger_state:
+    closed_periods: []
+  period:
+    id: "2026-07"
+    last_day: "2026-07-31"
+    posting_count: 1284
+  artifact:
+    format: parquet
+    exported_from: mongodb
+    sha256: "<computed from the artifact bytes>"
+
+derivation: >-
+  **Zero transfers.** Closing a period moves no money; it seals one. A close that posted anything
+  would be altering the figures it exists to fix.
+  What it writes is the close record: the period, the close timestamp, and the **sha256 of the
+  period's Parquet artifact**. That hash is the entire drift guarantee — a closed period cannot
+  drift because its artifact is immutable and its hash is recorded, which is stronger than
+  recompute-and-compare because it needs no recomputation to be trusted.
+  The artifact is exported **from MongoDB, not from TigerBeetle**: Mongo holds the accounting date
+  and is queryable, and TigerBeetle has no bulk export (ADR-0017). It is a batch artifact produced
+  at close, never appended on the request path — per-posting appends would make the commit a
+  three-store commit, and Parquet is not a transactional format.
+  ⚠️ The vector asserts the hash's **shape, not its value**. A specific digest depends on the
+  artifact bytes, which no spec can pin; asserting one would make this vector a restatement of
+  whatever produced it.
+
+expect:
+  transfers: []
+  writes:
+    close_record:
+      period: "2026-07"
+      closed_at: assigned_by_ledger
+      parquet_sha256:
+        present: true
+        format: "^[0-9a-f]{64}$"
+  rejects: []

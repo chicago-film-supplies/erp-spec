@@ -1,0 +1,43 @@
+name: unknown-product-line-rejected
+posting_rule: invoice_issued
+kind: reject
+source: >-
+  The failure mode ADR-0009 was written for: Xero drops an unresolvable tracking option id and
+  returns success, so the line lands untracked. 254 prod lines had a null CFS denorm while the
+  foreign id survived — `api:2026-08-09:db_invoices_query`.
+
+differs_from: two-lines-two-product-lines-with-tax
+differs_in: ["invoice.lines[1].product_line"]
+
+given:
+  ledger_state:
+    closed_periods: []
+  invoice:
+    id: INV-VEC-0005
+    invoice_date: "2026-07-31"
+    total_minor: 100031
+    lines:
+      - net_minor: 75000
+        revenue_account: 4000
+        product_line: "Power, Lights & Tools"
+      - net_minor: 12500
+        revenue_account: 4200
+        product_line: "Camera Support"
+    tax_components:
+      - { payable_account: 2200, amount_minor: 11250 }
+      - { payable_account: 2200, amount_minor: 1281 }
+
+derivation: >-
+  `"Camera Support"` is a plausible product line for this business and is **not one of the 21
+  declared values** in `ledger/dimensions.yaml`. Present and non-empty is not enough — the value
+  must be a member of the set, or the dimension is free text and the reports built on it are
+  incomparable.
+  This is the vector that makes the check independent: it can only pass or fail by consulting
+  `dimensions.yaml`, a file neither the rule nor this vector controls. **An unresolvable value is a
+  hard error, never a null and never a new bucket** (ADR-0009).
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "product_line \"Camera Support\" is not a member of the declared value set in ledger/dimensions.yaml (ADR-0009, REQ-LED-001)"
+      line: 1

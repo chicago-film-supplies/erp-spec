@@ -318,3 +318,75 @@ open_questions:
       availability receives the stock, but nothing owns the inbound document. Placing PO events in
       one of them arbitrarily is the failure to avoid. A ninth context is the obvious answer and
       also the expensive one: m2's exit criterion names eight, so adding one reopens m2.
+
+  - id: OQ-021
+    question: >-
+      Which postings must carry which dimensions — is `cost_type` a labour-only dimension, and may
+      a revenue or COGS account be undimensioned at all?
+    owner: alex
+    decide_by: 2026-09-15
+    blocks: [REQ-LED, HOT-011]
+    status: open
+    notes: >-
+      Three statements disagree and all three are load-bearing. REQ-LED-001 says both dimensions on
+      every revenue and COGS posting; `ledger/dimensions.yaml` says `product_line` on revenue and
+      both on COGS; and the chart of accounts has accounts where even `product_line` has no
+      defensible value. `ledger/chart-of-accounts.yaml` is written on the narrowest reading and
+      leaves 8 accounts `dimensioned: undecided` pointing here — 4130 PSA Income, 4300 Discounts
+      Received, 4400 Markup on Reimbursable Expenses, 5001 COGS Purchase Discounts, and the
+      non-operating revenue block. Whichever way this goes, REQ-LED-001's statement or
+      `dimensions.yaml`'s `required_on` has to be amended, because they cannot both stand. See
+      HOT-011 for the evidence.
+
+  - id: OQ-022
+    question: >-
+      Does `Other` survive as a `product_line` value, and what value do facility and professional
+      service lines take instead?
+    owner: alex
+    decide_by: 2026-09-15
+    blocks: [REQ-LED]
+    status: open
+    notes: >-
+      ADR-0020 deferred this to m3 explicitly and m3 cannot answer it — it is a taxonomy decision,
+      not a finding. A non-nullable dimension makes `Other` the new null: the bucket that means
+      "nobody chose" while looking like a choice. ADR-0020 names the exact population that needs a
+      real value — Warehouse Rental, Office Rental, Indoor Parking, Location Scouting, Security,
+      Safety & Security Assessment — all facility or professional services with no equipment
+      category. Every other undimensioned line restates mechanically (Trash Removal and Walk Around
+      Trash Sweep to `Trash & Cleanup`, Trucking to `Transport`, Contract Labor to `Crew`), so this
+      residue is the whole of the judgement. Deciding it late means restating the restatement.
+
+  - id: OQ-023
+    question: >-
+      What posts to `5400 Cost of Goods Sold: Job Costs` today, and does own-crew labour cost belong
+      there rather than in a new 5800?
+    owner: alex
+    decide_by: 2026-09-15
+    blocks: [REQ-LED]
+    status: open
+    notes: >-
+      ADR-0019 moves own-crew cost out of 6600 Wages into "a dimensioned COGS account beside the
+      existing 5200", and `ledger/chart-of-accounts.yaml` mints 5800 for it. But 5400 already exists,
+      is Active, and its live description reads "costs related to the completion of a job that are
+      NOT assets and NOT general expenses" — which is a description of job labour among other things.
+      If crew cost already lands there, 5800 duplicates it and the migration has two accounts
+      competing for the same money. **Not answerable from the CFS API**: the GL line detail is in
+      Xero, and this repo may not reach Xero (single-tenant, live, shared daily quota). It needs
+      someone to look at the Xero account activity directly.
+
+  - id: OQ-024
+    question: What is the CREDIT leg of a labour cost posting?
+    owner: alex
+    decide_by: 2026-09-15
+    blocks: [REQ-LED, EVT-FUL-002]
+    status: open
+    notes: >-
+      ADR-0019 names both debit legs — 5800 absorbed, 5801 unabsorbed — and no credit. Without one
+      `shift_recorded` cannot balance even in principle, which makes this a third blocker on that
+      rule alongside OQ-018 and OQ-019. The live chart offers no obvious target: every payroll
+      liability (2160 Payroll Wages Payable, 2170, 2180, 2190) is **Archived** and proposed for drop
+      as a charter non-goal, and 6600 Wages is an expense, not a liability
+      (`api:2026-08-09:db_chart_of_accounts_query`). ADR-0019 says cost flows from the purchase
+      order / bill that labour scheduling generates, which points at 2000 Accounts Payable — but
+      that is an inference from account status, not a decision, and it interacts with OQ-020 since
+      nothing yet owns purchase orders.

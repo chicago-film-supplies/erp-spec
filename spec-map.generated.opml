@@ -55,7 +55,7 @@
           <outline text="`deno task gen` produces no diff."/>
         </outline>
       </outline>
-      <outline text="Open questions (0 of 20 undecided)" _note="The bottleneck. Each blocks what is listed under it.">
+      <outline text="Open questions (0 of 24 undecided)" _note="The bottleneck. Each blocks what is listed under it.">
         <outline text="OQ-001 — Are fulfillment legs first-class recorded events with their own identity, or derived from the order…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-007"/>
           <outline text="blocks ADR-0011"/>
@@ -122,8 +122,22 @@
         <outline text="OQ-020 — Which context owns purchase orders — or is procurement a ninth bounded context?" _note="owner: alex · decide by: 2026-09-15">
           <outline text="blocks EVT-FA-001"/>
         </outline>
+        <outline text="OQ-021 — Which postings must carry which dimensions — is `cost_type` a labour-only dimension, and may a reve…" _note="owner: alex · decide by: 2026-09-15">
+          <outline text="blocks REQ-LED"/>
+          <outline text="blocks HOT-011"/>
+        </outline>
+        <outline text="OQ-022 — Does `Other` survive as a `product_line` value, and what value do facility and professional service…" _note="owner: alex · decide by: 2026-09-15">
+          <outline text="blocks REQ-LED"/>
+        </outline>
+        <outline text="OQ-023 — What posts to `5400 Cost of Goods Sold: Job Costs` today, and does own-crew labour cost belong ther…" _note="owner: alex · decide by: 2026-09-15">
+          <outline text="blocks REQ-LED"/>
+        </outline>
+        <outline text="OQ-024 — What is the CREDIT leg of a labour cost posting?" _note="owner: alex · decide by: 2026-09-15">
+          <outline text="blocks REQ-LED"/>
+          <outline text="blocks EVT-FUL-002"/>
+        </outline>
       </outline>
-      <outline text="Conflicts (0 open)">
+      <outline text="Conflicts (1 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labour) or an own long-haul run (labour-bearing)?…" _note="Decides whether a trucked fulfillment absorbs labour cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
           <outline text="blocks OQ-010"/>
           <outline text="blocks ADR-0011"/>
@@ -159,6 +173,9 @@
         <outline text="HOT-010 — The charter and `posting-rules.yaml` specify standard-cost absorption with a `labour_variance` post…" _note="A rate variance cannot exist where there is no standard rate, so `labour_variance` as specified has no input and would be a posting rule that can never fire. Absorption itself survives and must not be discarded with it: a guaranteed 8 hours means paid-but-unworked time is a real cost attributable to no job, so `COGS-Labour Absorbed` and `COGS-Unabsorbed Labour` both stand. What they measure is UTILISATION, not rate deviation, and the posting rules must say which.">
           <outline text="blocks OQ-018"/>
           <outline text="blocks OQ-019"/>
+        </outline>
+        <outline text="HOT-011 — REQ-LED-001 and ADR-0018 require BOTH dimensions on every revenue and COGS posting; `ledger/dimensi…" _note="REQ-LED-001 is the repo's only ledger requirement and the golden vectors' rejection cases are its entire enforcement, so which reading is authoritative decides what those vectors assert. Written as REQ-LED-001 states it, the rule refuses legitimate postings — interest income has no product line and no &quot;kind of work&quot;. Written as `dimensions.yaml` states it, the requirement's own text is wrong. `ledger/chart-of-accounts.yaml`'s `dimensioned:` column cannot be set correctly until one of them wins, and 8 accounts currently carry `dimensioned: undecided` waiting on it.">
+          <outline text="blocks OQ-021"/>
         </outline>
       </outline>
       <outline text="Decisions (6 in force, 16 proposed)">

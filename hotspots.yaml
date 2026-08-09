@@ -184,3 +184,31 @@ hotspots:
     blocks: [OQ-018, OQ-019]
     status: resolved
     resolved_by: ADR-0019
+
+  - id: HOT-011
+    statement: >-
+      REQ-LED-001 and ADR-0018 require BOTH dimensions on every revenue and COGS posting;
+      `ledger/dimensions.yaml` requires only `product_line` on revenue; and the chart of accounts
+      contains revenue and COGS accounts for which neither dimension has a defensible value.
+    contexts: [ledger]
+    why_it_matters: >-
+      REQ-LED-001 is the repo's only ledger requirement and the golden vectors' rejection cases are
+      its entire enforcement, so which reading is authoritative decides what those vectors assert.
+      Written as REQ-LED-001 states it, the rule refuses legitimate postings — interest income has
+      no product line and no "kind of work". Written as `dimensions.yaml` states it, the
+      requirement's own text is wrong. `ledger/chart-of-accounts.yaml`'s `dimensioned:` column
+      cannot be set correctly until one of them wins, and 8 accounts currently carry
+      `dimensioned: undecided` waiting on it.
+    evidence: >-
+      `cost_type`'s own description in `ledger/dimensions.yaml` is "What kind of work a LABOUR
+      posting represents", with values `[delivery, counter, warehouse]` and `required_on: [cogs]` —
+      there is no member of that set for a rental revenue posting or for `5000 Cost of Goods Sold:
+      Retail Inventory`. Against REQ-LED-001, "Every revenue and COGS posting shall carry both a
+      product line and a cost type", and ADR-0018, "both mandatory dimensions are not nullable on
+      revenue and COGS postings". Separately, the live chart holds 5 non-operating revenue accounts
+      (4800 Other Income, 4810 Cashback, 4820 Interest, 4830 Vendor Refunds, 4840 Sales Tax Discount
+      — all `type: Other Income`) and 4600 Cash Discrepancies, none of which arises from a sale
+      (`api:2026-08-09:db_chart_of_accounts_query`, 134 accounts). Forcing a product line onto them
+      makes `Other` the new null, which `dimensions.yaml`'s own note already warns against.
+    blocks: [OQ-021]
+    status: open

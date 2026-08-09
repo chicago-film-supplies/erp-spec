@@ -1,0 +1,45 @@
+name: void-in-closed-period-posts-to-open-period
+posting_rule: invoice_voided
+kind: accept
+source: >-
+  EVT-BIL-002 and ADR-0017 state the rule; this vector is what makes it fail if implemented as a
+  plain negation. ~90% of the historical corpus sits behind the 2025-12-31 lock (charter, HOT-006),
+  so a void against a closed period is the common case at migration, not the exotic one.
+
+given:
+  ledger_state:
+    closed_periods: ["2026-07"]
+  invoice:
+    id: INV-VEC-0002
+    total_minor: 100031
+  void:
+    accounting_date: "2026-08-05"
+    reason: "voided after the July close"
+  original_journal_entry:
+    accounting_date: "2026-07-31"
+    transfers:
+      - { debit_account: 1200, credit_account: 4000, amount_minor: 75000, product_line: "Power, Lights & Tools" }
+      - { debit_account: 1200, credit_account: 4200, amount_minor: 12500, product_line: "Expendables" }
+      - { debit_account: 1200, credit_account: 2200, amount_minor: 11250 }
+      - { debit_account: 1200, credit_account: 2200, amount_minor: 1281 }
+
+derivation: >-
+  **The load-bearing vector for this rule.** Same four reversals, same amounts, same dimensions as
+  `reversal-of-issued-invoice` — but every expected `accounting_date` is **2026-08-05**, not the
+  original's 2026-07-31.
+  A naive implementation reverses "the original entry", inherits its accounting date, and lands
+  inside closed period 2026-07. That would change July's figures after July's Parquet artifact was
+  sealed and hashed, breaking the one guarantee ADR-0017 buys — that a closed period cannot drift.
+  So the reversal takes the void's own date, in an OPEN period. July keeps the sale it reported;
+  August carries the reversal. That is not a workaround, it is what restating a closed period
+  correctly looks like, and it is why `accounting_date: void.accounting_date` in the rule is not
+  interchangeable with `original_journal_entry.accounting_date`.
+  Control total is unchanged at 100031 — the period moved, the money did not.
+
+expect:
+  transfers:
+    - { debit_account: 4000, credit_account: 1200, amount_minor: 75000, accounting_date: "2026-08-05", product_line: "Power, Lights & Tools" }
+    - { debit_account: 4200, credit_account: 1200, amount_minor: 12500, accounting_date: "2026-08-05", product_line: "Expendables" }
+    - { debit_account: 2200, credit_account: 1200, amount_minor: 11250, accounting_date: "2026-08-05" }
+    - { debit_account: 2200, credit_account: 1200, amount_minor: 1281, accounting_date: "2026-08-05" }
+  rejects: []

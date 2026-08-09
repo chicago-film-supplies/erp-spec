@@ -1,0 +1,42 @@
+name: empty-string-product-line-rejected
+posting_rule: invoice_issued
+kind: reject
+source: >-
+  No live population — this vector exists to close the gap ADR-0018 names, that with dimensions off
+  account identity "nothing structural catches a missing one — the non-null rule has to".
+
+differs_from: two-lines-two-product-lines-with-tax
+differs_in: ["invoice.lines[1].product_line"]
+
+given:
+  ledger_state:
+    closed_periods: []
+  invoice:
+    id: INV-VEC-0004
+    invoice_date: "2026-07-31"
+    total_minor: 100031
+    lines:
+      - net_minor: 75000
+        revenue_account: 4000
+        product_line: "Power, Lights & Tools"
+      - net_minor: 12500
+        revenue_account: 4200
+        product_line: ""
+    tax_components:
+      - { payable_account: 2200, amount_minor: 11250 }
+      - { payable_account: 2200, amount_minor: 1281 }
+
+derivation: >-
+  **An empty string is not a dimension value, and this is a different failure from an absent one.**
+  A `NOT NULL` constraint is satisfied by `""`, so a rule implemented as a null check passes this
+  input and records a posting whose product line is the empty string — a dimension that exists,
+  reports as a distinct bucket, and means nothing. The current system's untracked revenue is a null;
+  this is how the same defect comes back wearing a value.
+  Refusal is not substitution: there is no coercion to `"Other"`, which would be the same lie with a
+  friendlier name (see OQ-022 on whether `Other` should survive at all).
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "product_line is the empty string — not a member of the declared value set (REQ-LED-001)"
+      line: 1

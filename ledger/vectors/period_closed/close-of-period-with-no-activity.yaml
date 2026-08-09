@@ -1,0 +1,38 @@
+name: close-of-period-with-no-activity
+posting_rule: period_closed
+kind: accept
+source: "ADR-0017 — monthly close cadence, confirmed when close is specified in m3."
+
+given:
+  ledger_state:
+    closed_periods: ["2026-07"]
+  period:
+    id: "2026-08"
+    last_day: "2026-08-31"
+    posting_count: 0
+  artifact:
+    format: parquet
+    exported_from: mongodb
+    sha256: "<computed from the artifact bytes — an empty row group still hashes>"
+
+derivation: >-
+  A month with **zero postings still closes, and still produces a hashed artifact**. The close
+  record is what makes the period sealed; without one, an empty month stays open forever and a
+  back-dated posting can land in it years later with nothing to refuse it.
+  An empty Parquet file is a real file with real bytes and a real digest — "nothing to export" is
+  not "nothing to hash". A close path that short-circuits on an empty period is the standard hole
+  here, and it fails closed in the worst way: silently, and only for the periods nobody was
+  watching.
+  This vector differs from `close-writes-parquet-hash` only in `posting_count`, and it is an accept
+  rather than a reject precisely because emptiness must not change the outcome.
+
+expect:
+  transfers: []
+  writes:
+    close_record:
+      period: "2026-08"
+      closed_at: assigned_by_ledger
+      parquet_sha256:
+        present: true
+        format: "^[0-9a-f]{64}$"
+  rejects: []

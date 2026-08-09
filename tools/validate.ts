@@ -27,13 +27,21 @@ const notes: string[] = [];
 const isTemplate = (p: string) => basename(p).startsWith("_") || basename(p).includes(".generated.");
 const rel = (p: string) => relative(ROOT, p);
 
+/**
+ * Parsed once per path. Several gates read the same file — without the cache a single unparseable
+ * vector reported its failure once per reader, which reads as several broken files.
+ */
+const yamlCache = new Map<string, unknown>();
 async function readYaml<T = unknown>(path: string): Promise<T | null> {
+  if (yamlCache.has(path)) return yamlCache.get(path) as T | null;
+  let out: unknown = null;
   try {
-    return parseYaml(await Deno.readTextFile(path)) as T;
+    out = parseYaml(await Deno.readTextFile(path));
   } catch (e) {
     fail("parse", `${rel(path)}: ${e instanceof Error ? e.message : e}`);
-    return null;
   }
+  yamlCache.set(path, out);
+  return out as T | null;
 }
 
 /** Split `---\n...\n---\nbody` into front matter + body. */
@@ -475,6 +483,517 @@ for (const i of inbox) {
   for (const t of terms) refCheck((t as { open_questions?: unknown }).open_questions, `glossary "${t.term}"`);
 }
 
+// ── gate 10: ledger content ─────────────────────────────────────────────────
+/**
+ * `ledger/` was parse-checked only — nothing read the contents, which is why an invented account
+ * code sat in collision with a live one, a deleted posting rule's account outlived it, and a file
+ * blocked on a superseded ADR went unnoticed. Its own comment said "A file no tool opens is a file
+ * with no guarantees"; the ledger was that file.
+ */
+{
+  const G = "10";
+  const CLASSES = ["asset", "liability", "equity", "revenue", "expense"];
+  const DISPOSITIONS = ["adopt", "rename", "merge", "drop", "new", "undecided"];
+  const RULE_STATUS = ["specified", "blocked", "unwritten"];
+
+  interface Account {
+    code?: number;
+    name?: string;
+    class?: string;
+    normal_balance?: string;
+    contra?: boolean;
+    dimensioned?: unknown;
+    disposition?: string;
+    status_live?: string;
+    class_live?: string;
+    merge_into?: number;
+    reason?: string;
+    blocked_by?: string[];
+    source?: string;
+    note?: string;
+  }
+
+  const coaY = await readYaml<{ accounts?: Account[] }>(`${ROOT}/ledger/chart-of-accounts.yaml`);
+  const accounts = coaY?.accounts ?? [];
+  const byCode = new Map<number, Account>();
+
+  // Is a referenced blocker genuinely still open? A rule that stays "blocked" after its blocker
+  // closes is the failure this exists to catch — and it cannot be caught by reading the rule alone.
+  const isOpenBlocker = (id: string): boolean | null => {
+    const q = oqs.find((x) => x.id === id);
+    if (q) return String(q.status ?? "open") !== "answered";
+    const s = spikes.find((x) => x.id === id);
+    if (s) return !["closed", "abandoned"].includes(String(s.status ?? "open"));
+    const h = hots.find((x) => x.id === id);
+    if (h) return String(h.status ?? "open") !== "resolved";
+    return null; // does not resolve at all
+  };
+
+  const checkBlockers = (ids: unknown, where: string) => {
+    if (!Array.isArray(ids) || ids.length === 0) {
+      fail(G, `${where}: needs a non-empty \`blocked_by\``);
+      return;
+    }
+    for (const raw of ids) {
+      const id = String(raw);
+      if (!/^(OQ|SPIKE|HOT)-\d{3}$/.test(id)) {
+        fail(G, `${where}: blocker "${id}" is not an OQ-/SPIKE-/HOT- id`);
+        continue;
+      }
+      const open = isOpenBlocker(id);
+      if (open === null) fail(G, `${where}: blocker "${id}" does not resolve`);
+      else if (!open) fail(G, `${where}: blocker "${id}" is no longer open — the block has expired`);
+    }
+  };
+
+  // 10a — account well-formedness
+  for (const [i, a] of accounts.entries()) {
+    const where = `chart-of-accounts[${i}] (code ${a.code ?? "?"})`;
+    for (const f of ["code", "name", "class", "normal_balance", "disposition", "source"] as const) {
+      if (a[f] === undefined || a[f] === null || a[f] === "") fail(G, `${where}: missing \`${f}\``);
+    }
+    if (a.dimensioned === undefined) fail(G, `${where}: missing \`dimensioned\``);
+    if (typeof a.code !== "number" || !Number.isInteger(a.code)) {
+      fail(G, `${where}: \`code\` must be an integer`);
+    } else if (byCode.has(a.code)) {
+      fail(G, `chart-of-accounts: code ${a.code} is duplicated`);
+    } else byCode.set(a.code, a);
+
+    if (/^TODO$/i.test(String(a.name ?? "").trim())) {
+      fail(G, `${where}: name is "TODO" — an account nobody has identified is not a chart entry`);
+    }
+    if (a.class && !CLASSES.includes(a.class)) fail(G, `${where}: class "${a.class}" not one of ${CLASSES.join(" | ")}`);
+    if (a.normal_balance && !["debit", "credit"].includes(a.normal_balance)) {
+      fail(G, `${where}: normal_balance "${a.normal_balance}" not debit | credit`);
+    }
+    if (a.disposition && !DISPOSITIONS.includes(a.disposition)) {
+      fail(G, `${where}: disposition "${a.disposition}" not one of ${DISPOSITIONS.join(" | ")}`);
+    }
+    if (a.dimensioned !== undefined && typeof a.dimensioned !== "boolean" && a.dimensioned !== "undecided") {
+      fail(G, `${where}: dimensioned must be true | false | undecided`);
+    }
+
+    // 10b — normal_balance follows class, inverted by `contra`. Both arms are exercised by the
+    // live chart (6 accumulated-depreciation accounts + 5001 + 3200 are contra), so this is not
+    // vacuous in either direction.
+    if (a.class && a.normal_balance) {
+      const natural = ["asset", "expense"].includes(a.class) ? "debit" : "credit";
+      const expected = a.contra === true ? (natural === "debit" ? "credit" : "debit") : natural;
+      if (a.normal_balance !== expected) {
+        fail(
+          G,
+          `${where}: class "${a.class}"${a.contra ? " with contra: true" : ""} implies normal_balance ` +
+            `"${expected}", found "${a.normal_balance}"`,
+        );
+      }
+    }
+
+    // 10c — a disposition that removes or defers an account must say why
+    if (a.disposition === "drop" && !a.reason) fail(G, `${where}: \`drop\` requires a \`reason\``);
+    if (a.disposition === "new" && !a.reason) fail(G, `${where}: \`new\` requires a \`reason\``);
+    if (a.disposition === "merge") {
+      if (!a.reason) fail(G, `${where}: \`merge\` requires a \`reason\``);
+      if (a.merge_into === undefined) fail(G, `${where}: \`merge\` requires \`merge_into\``);
+    }
+    // `undecided` may sit on the disposition or on `dimensioned`; either way it owes a live blocker.
+    if (a.disposition === "undecided" || a.dimensioned === "undecided") {
+      if (!a.reason) fail(G, `${where}: \`undecided\` requires a \`reason\``);
+      checkBlockers(a.blocked_by, where);
+    }
+    // A reclassification against the live chart must be loud, or it is a silent restatement.
+    if (a.class_live !== undefined) {
+      if (String(a.class_live).toLowerCase() === String(a.class).toLowerCase()) {
+        fail(G, `${where}: \`class_live\` equals \`class\` — drop it, it records no difference`);
+      } else if (!a.note) {
+        fail(G, `${where}: \`class_live\` differs from \`class\` and needs a \`note\` explaining the correction`);
+      }
+    }
+    // 10d — source form. An undated claim silently becomes a lie.
+    if (a.source && !/^(api|code):\d{4}-\d{2}-\d{2}:/.test(a.source) && !/^ADR-\d{4}$/.test(a.source)) {
+      fail(G, `${where}: source "${a.source}" is not \`api:<date>:<query>\`, \`code:<date>:<pin>\` or an ADR id`);
+    }
+  }
+  for (const a of accounts) {
+    if (a.disposition === "merge" && a.merge_into !== undefined && !byCode.has(a.merge_into)) {
+      fail(G, `chart-of-accounts code ${a.code}: merge_into ${a.merge_into} does not resolve to an account`);
+    }
+  }
+
+  // ── posting rules ─────────────────────────────────────────────────────────
+  interface Rule {
+    id?: string;
+    status?: string;
+    trigger?: { event?: string; source_document?: string };
+    accounting_date?: string;
+    posting_timestamp?: string;
+    postings?: { debit_account?: unknown; credit_account?: unknown; amount?: string; dimensions?: unknown }[];
+    no_postings_reason?: string;
+    control_total?: string | null;
+    blocked_by?: string[];
+  }
+  const prY = await readYaml<{
+    rules?: Rule[];
+    no_posting?: { event?: string; reason?: string }[];
+    unwritten?: { event?: string; issue?: string; proposed_rule?: string }[];
+  }>(`${ROOT}/ledger/posting-rules.yaml`);
+  const rules = prY?.rules ?? [];
+  const noPosting = prY?.no_posting ?? [];
+  const unwritten = prY?.unwritten ?? [];
+  const ruleById = new Map<string, Rule>();
+
+  const CLOCK_WORDS = /\b(now|today|current_date|current_timestamp|sysdate)\b/i;
+
+  for (const r of rules) {
+    const where = `posting-rules "${r.id ?? "(no id)"}"`;
+    if (!r.id || !/^[a-z][a-z0-9_]*$/.test(r.id)) fail(G, `${where}: id must be snake_case`);
+    else if (ruleById.has(r.id)) fail(G, `posting-rules: rule id "${r.id}" is duplicated`);
+    else ruleById.set(r.id, r);
+
+    if (!r.status || !RULE_STATUS.includes(r.status)) {
+      fail(G, `${where}: status "${r.status}" not one of ${RULE_STATUS.join(" | ")}`);
+    }
+    const ev = r.trigger?.event;
+    if (!ev) fail(G, `${where}: no trigger.event`);
+    else if (!evts.some((e) => e.id === ev)) fail(G, `${where}: trigger.event "${ev}" does not resolve`);
+    if (!r.trigger?.source_document) fail(G, `${where}: no trigger.source_document`);
+
+    // CLAUDE.md rule 8, executable for the first time.
+    if (!r.accounting_date) fail(G, `${where}: no \`accounting_date\``);
+    else if (CLOCK_WORDS.test(r.accounting_date)) {
+      fail(G, `${where}: accounting_date "${r.accounting_date}" reads a clock — it must name a field of the source document`);
+    }
+    if (r.posting_timestamp !== "assigned_by_ledger") {
+      fail(G, `${where}: posting_timestamp must be the literal \`assigned_by_ledger\` (ADR-0010)`);
+    }
+
+    if (r.status === "blocked") {
+      checkBlockers(r.blocked_by, where);
+      if ((r.postings ?? []).length > 0) {
+        fail(G, `${where}: blocked rules must have \`postings: []\` — a guessed posting will be believed`);
+      }
+    }
+    if (r.status === "specified" && (r.postings ?? []).length === 0 && !r.no_postings_reason) {
+      fail(G, `${where}: specified with no postings and no \`no_postings_reason\``);
+    }
+
+    // 10e — no arithmetic in an amount. Every rounding decision stays upstream.
+    for (const [j, p] of (r.postings ?? []).entries()) {
+      const amt = String(p.amount ?? "");
+      if (!amt) fail(G, `${where} posting[${j}]: no \`amount\``);
+      else if (!/^[a-z_][a-z0-9_]*(\.[a-z0-9_]+)*$/.test(amt)) {
+        fail(G, `${where} posting[${j}]: amount "${amt}" must be a dotted path with no arithmetic`);
+      }
+      for (const side of ["debit_account", "credit_account"] as const) {
+        const v = p[side];
+        if (v === undefined) fail(G, `${where} posting[${j}]: no \`${side}\``);
+        else if (typeof v === "number" && !byCode.has(v)) {
+          fail(G, `${where} posting[${j}]: ${side} ${v} is not an account in the chart`);
+        }
+      }
+    }
+  }
+
+  // 10f — coverage. Every event the ledger produces or consumes lands in exactly one bucket.
+  // This is what makes m3's "posting rules for every source document type" falsifiable: the
+  // previous revision named six rules in a comment against 24 real events.
+  {
+    const ledgerEvents = evts.filter((e) => e.producer === "ledger" || (e.consumers ?? []).includes("ledger"));
+    const seen = new Map<string, string[]>();
+    const claim = (id: unknown, bucket: string) => {
+      const s = String(id ?? "");
+      if (!s) return;
+      seen.set(s, [...(seen.get(s) ?? []), bucket]);
+    };
+    for (const r of rules) claim(r.trigger?.event, `rule "${r.id}"`);
+    for (const n of noPosting) claim(n.event, "no_posting");
+    for (const u of unwritten) claim(u.event, "unwritten");
+
+    for (const e of ledgerEvents) {
+      const buckets = seen.get(e.id) ?? [];
+      if (buckets.length === 0) {
+        fail(G, `${e.id} (${e.name}) reaches the ledger but has no posting rule, no_posting entry or unwritten entry`);
+      } else if (buckets.length > 1) {
+        fail(G, `${e.id} appears in more than one bucket: ${buckets.join(", ")}`);
+      }
+    }
+    for (const [id] of seen) {
+      if (!evts.some((e) => e.id === id)) fail(G, `posting-rules references event "${id}" which does not exist`);
+      else if (!ledgerEvents.some((e) => e.id === id)) {
+        fail(G, `posting-rules covers "${id}", which neither produces to nor consumes from the ledger`);
+      }
+    }
+    for (const n of noPosting) if (!n.reason) fail(G, `no_posting "${n.event}": needs a \`reason\``);
+    // `unwritten` is the honest bucket, not a dumping ground — each entry owes a tracked issue.
+    for (const u of unwritten) {
+      if (!u.issue || !/^[\w.-]+#\d+$/.test(String(u.issue))) {
+        fail(G, `unwritten "${u.event}": needs an \`issue\` like \`erp-spec#5\``);
+      }
+    }
+  }
+
+  // ── golden vectors ────────────────────────────────────────────────────────
+  interface Vector {
+    name?: string;
+    posting_rule?: string;
+    kind?: string;
+    source?: string;
+    differs_from?: string;
+    differs_in?: string[];
+    given?: Record<string, unknown>;
+    expect?: { transfers?: Record<string, unknown>[]; rejects?: unknown[] };
+    _file: string;
+  }
+  const vectors: Vector[] = [];
+  for (const f of await filesIn("ledger/vectors", ".yaml")) {
+    const y = await readYaml<Vector>(f);
+    if (y) vectors.push({ ...y, _file: f });
+  }
+
+  const dimY = await readYaml<{ dimensions?: { id?: string; values?: string[]; required_on?: string[] }[] }>(
+    `${ROOT}/ledger/dimensions.yaml`,
+  );
+  const dimValues = new Map<string, Set<string>>();
+  for (const d of dimY?.dimensions ?? []) {
+    if (d.id) dimValues.set(d.id, new Set(d.values ?? []));
+  }
+
+  /** Resolve `a.b[0].c` inside a plain object. Returns `undefined` for any missing step. */
+  const at = (obj: unknown, path: string): unknown => {
+    let cur: unknown = obj;
+    for (const seg of path.split(".")) {
+      const m = seg.match(/^([^[\]]+)((\[\d+\])*)$/);
+      if (!m) return undefined;
+      if (cur === null || typeof cur !== "object") return undefined;
+      cur = (cur as Record<string, unknown>)[m[1]];
+      for (const idx of m[2].matchAll(/\[(\d+)\]/g)) {
+        if (!Array.isArray(cur)) return undefined;
+        cur = cur[Number(idx[1])];
+      }
+    }
+    return cur;
+  };
+
+  const byRuleVectors = new Map<string, Vector[]>();
+  for (const v of vectors) {
+    const where = rel(v._file);
+    const dir = basename(v._file.replace(/\/[^/]+$/, ""));
+
+    if (!v.name) fail(G, `${where}: no \`name\``);
+    if (!v.source) fail(G, `${where}: no \`source\` — a vector with no provenance is a fixture`);
+    if (!v.kind || !["accept", "reject"].includes(v.kind)) {
+      fail(G, `${where}: kind "${v.kind}" not accept | reject`);
+    }
+    const rid = v.posting_rule;
+    if (!rid) fail(G, `${where}: no \`posting_rule\``);
+    else if (!ruleById.has(rid)) fail(G, `${where}: posting_rule "${rid}" does not resolve`);
+    else if (dir !== rid) fail(G, `${where}: lives in ledger/vectors/${dir}/ but names rule "${rid}"`);
+    if (rid) byRuleVectors.set(rid, [...(byRuleVectors.get(rid) ?? []), v]);
+
+    const transfers = v.expect?.transfers ?? [];
+    const rejects = (v.expect?.rejects ?? []) as unknown[];
+    if (v.kind === "accept" && rejects.length > 0) fail(G, `${where}: an accept vector must expect no rejects`);
+    if (v.kind === "reject") {
+      if (rejects.length === 0) fail(G, `${where}: a reject vector must state at least one \`rejects\` reason`);
+      if (transfers.length > 0) {
+        fail(G, `${where}: a reject vector must expect no transfers — refusal is all-or-nothing`);
+      }
+    }
+
+    // 10g — every account a vector names must exist in the chart.
+    for (const [j, t] of transfers.entries()) {
+      for (const side of ["debit_account", "credit_account"] as const) {
+        const c = t[side];
+        if (typeof c !== "number") fail(G, `${where} transfer[${j}]: ${side} must be a GL code`);
+        else if (!byCode.has(c)) fail(G, `${where} transfer[${j}]: ${side} ${c} is not an account in the chart`);
+      }
+      // 10h — dimension obligation, derived from the chart and dimensions.yaml, NOT from the rule.
+      const sides = [t.debit_account, t.credit_account].map((c) => byCode.get(Number(c))).filter(Boolean) as Account[];
+      const dimensioned = sides.filter((a) => a.dimensioned === true);
+      const undecided = sides.some((a) => a.dimensioned === "undecided");
+      if (!undecided) {
+        const required = new Set<string>();
+        for (const a of dimensioned) {
+          required.add("product_line");
+          if (a.class === "expense") required.add("cost_type");
+        }
+        for (const dim of ["product_line", "cost_type"]) {
+          const present = t[dim] !== undefined && t[dim] !== null && String(t[dim]) !== "";
+          if (required.has(dim) && !present) {
+            fail(G, `${where} transfer[${j}]: posts to a dimensioned account but carries no \`${dim}\` (REQ-LED-001)`);
+          }
+          if (!required.has(dim) && t[dim] !== undefined) {
+            fail(G, `${where} transfer[${j}]: carries \`${dim}\` but neither account requires it`);
+          }
+          if (present && dimValues.has(dim) && !dimValues.get(dim)!.has(String(t[dim]))) {
+            fail(G, `${where} transfer[${j}]: ${dim} "${t[dim]}" is not a declared value in ledger/dimensions.yaml`);
+          }
+        }
+      }
+    }
+
+    // 10i — control total. THIS is the balance check, and unlike "Σ debits == Σ credits" it can
+    // fail: the target is a field of the source document named by the RULE, not by this vector.
+    // (Σ debits == Σ credits is vacuous here — every transfer is a {debit, credit, amount} triple,
+    // so it contributes the same amount to both sides for any input whatsoever. Do not add it.)
+    if (v.kind === "accept" && rid) {
+      const ct = ruleById.get(rid)?.control_total;
+      if (ct) {
+        const target = at(v.given, ct);
+        if (typeof target !== "number") {
+          fail(G, `${where}: rule declares control_total "${ct}" but the vector's \`given\` has no number there`);
+        } else {
+          const sum = transfers.reduce((n, t) => n + Number(t.amount_minor ?? 0), 0);
+          if (sum !== target) {
+            fail(G, `${where}: transfers sum to ${sum} but control_total ${ct} is ${target}`);
+          }
+        }
+      } else if (transfers.length > 0) {
+        warn(G, `${where}: rule "${rid}" declares no control_total, so the amounts are unchecked`);
+      }
+    }
+
+    // 10j — reject vectors are minimal pairs. A reject sharing nothing with an accept proves only
+    // that SOMETHING was refused, not that the rule discriminates on the field it claims to.
+    if (v.kind === "reject") {
+      const base = (byRuleVectors.get(rid ?? "") ?? vectors).find(
+        (x) => x.name === v.differs_from && x.posting_rule === rid,
+      ) ?? vectors.find((x) => x.name === v.differs_from && x.posting_rule === rid);
+      if (!v.differs_from) fail(G, `${where}: a reject vector must name \`differs_from\``);
+      else if (!base) fail(G, `${where}: differs_from "${v.differs_from}" is not a vector of rule "${rid}"`);
+      else if (base.kind !== "accept") fail(G, `${where}: differs_from "${v.differs_from}" is not an accept vector`);
+      if (!Array.isArray(v.differs_in) || v.differs_in.length === 0) {
+        fail(G, `${where}: a reject vector must name \`differs_in\``);
+      } else if (base) {
+        for (const p of v.differs_in) {
+          const a = JSON.stringify(at(base.given, p) ?? null);
+          const b = JSON.stringify(at(v.given, p) ?? null);
+          if (a === b) {
+            fail(G, `${where}: declares it differs in "${p}", but that path is identical in "${v.differs_from}"`);
+          }
+        }
+      }
+    }
+  }
+
+  // 10k — vector coverage per rule status.
+  for (const r of rules) {
+    const vs = byRuleVectors.get(r.id ?? "") ?? [];
+    if (r.status === "specified") {
+      if (!vs.some((v) => v.kind === "accept")) fail(G, `posting-rules "${r.id}": specified with no accept vector`);
+      if (!vs.some((v) => v.kind === "reject")) {
+        fail(G, `posting-rules "${r.id}": specified with no REJECT vector — the failure cases are the enforcement`);
+      }
+    } else if (vs.length > 0) {
+      fail(G, `posting-rules "${r.id}": status ${r.status} but has ${vs.length} vector(s)`);
+    }
+  }
+
+  // 10l — money and dates, across every YAML under ledger/.
+  // A `*_minor` that is a float or a string, or ANY parsed Date, is the bug class this repo has
+  // already paid for: YAML turns an unquoted `2026-08-08` into a JS Date whose String() renders in
+  // the runner's timezone.
+  {
+    const walkValue = (node: unknown, path: string, where: string) => {
+      if (node instanceof Date) {
+        fail(G, `${where}: ${path} parsed as a Date — quote it, or it renders in the runner's timezone`);
+        return;
+      }
+      if (Array.isArray(node)) {
+        node.forEach((v, i) => walkValue(v, `${path}[${i}]`, where));
+        return;
+      }
+      if (node && typeof node === "object") {
+        for (const [k, v] of Object.entries(node as Record<string, unknown>)) {
+          if (/_minor$/.test(k) && v !== null && v !== undefined) {
+            if (typeof v !== "number" || !Number.isInteger(v)) {
+              fail(G, `${where}: ${path}.${k} = ${JSON.stringify(v)} — money is an integer count of minor units`);
+            } else if (v < 0) {
+              fail(G, `${where}: ${path}.${k} is negative — use the opposite side, not a negative amount`);
+            }
+          }
+          walkValue(v, `${path}.${k}`, where);
+        }
+      }
+    };
+    for (const f of await filesIn("ledger", ".yaml")) {
+      const y = await readYaml(f);
+      if (y) walkValue(y, "$", rel(f));
+    }
+  }
+}
+
+// ── gate 11: repo paths cited in prose resolve ──────────────────────────────
+/**
+ * erp-spec#4: nothing verified that a path named from an ADR or a spike still exists, which is how
+ * ADR-0003 kept pointing at `formal/two-store-commit.tla` through the Quint migration that deleted
+ * it. Only repo-rooted paths are checked — a bare `matrix.ts` in prose is not a claim about a
+ * location.
+ */
+{
+  const G = "11";
+  const TOP = /^(adr|contexts|formal|inbox|ledger|migration|reporting|research-drop|roadmap|spikes|tools|traceability)\//;
+
+  /**
+   * Each exemption states WHY the dead path is allowed to stand, and is itself checked: if the
+   * path comes back, the exemption fails. An allowlist that cannot expire is how a gate rots into
+   * decoration.
+   */
+  const EXEMPT: { file: string; path: string; why: string }[] = [
+    {
+      file: "adr/ADR-0003-mongodb-documents-tigerbeetle-ledger.md",
+      path: "formal/two-store-commit.tla",
+      why: "ADR-0003 is `accepted` and therefore immutable. erp-spec#4 — the m5 formal-methods ADR supersedes the clause.",
+    },
+    {
+      file: "adr/ADR-0016-quint-over-tla.md",
+      path: "formal/two-store-commit.tla",
+      why: "ADR-0016 IS the decision that deleted these files. Naming what it replaced is historically accurate, not stale.",
+    },
+    {
+      file: "adr/ADR-0016-quint-over-tla.md",
+      path: "formal/period-close.tla",
+      why: "As above — ADR-0016's Context section describes the state it superseded.",
+    },
+  ];
+  const used = new Set<string>();
+
+  for (const f of [...(await filesIn("adr", ".md")), ...(await filesIn("spikes", ".md"))]) {
+    const text = await Deno.readTextFile(f);
+    const relFile = rel(f);
+    for (const m of text.matchAll(/`([A-Za-z0-9_./-]+\.[A-Za-z0-9]+)`/g)) {
+      const p = m[1];
+      if (!TOP.test(p)) continue;
+      const key = `${relFile}::${p}`;
+      let exists = true;
+      try {
+        await Deno.stat(`${ROOT}/${p}`);
+      } catch {
+        exists = false;
+      }
+      const ex = EXEMPT.find((e) => e.file === relFile && e.path === p);
+      if (ex) used.add(key);
+      if (exists) continue;
+      if (ex) continue;
+      fail(G, `${relFile}: cites \`${p}\`, which does not exist`);
+    }
+  }
+
+  for (const e of EXEMPT) {
+    const key = `${e.file}::${e.path}`;
+    let exists = true;
+    try {
+      await Deno.stat(`${ROOT}/${e.path}`);
+    } catch {
+      exists = false;
+    }
+    if (exists) {
+      fail(G, `exemption for ${e.file} -> \`${e.path}\` is obsolete: the path now resolves. Delete the exemption.`);
+    } else if (!used.has(key)) {
+      fail(G, `exemption for ${e.file} -> \`${e.path}\` matched nothing: the citation is gone. Delete the exemption.`);
+    }
+  }
+}
+
 // ── report ──────────────────────────────────────────────────────────────────
 const GATE_NAMES: Record<string, string> = {
   "1": "ids unique and well-formed",
@@ -486,6 +1005,8 @@ const GATE_NAMES: Record<string, string> = {
   "7": "open questions have an owner and a decide-by",
   "8": "glossary",
   "9": "inbox triage staleness",
+  "10": "ledger content — chart, posting rules, golden vectors",
+  "11": "repo paths cited in prose resolve",
   xref: "cross-references resolve",
   parse: "files parse",
 };

@@ -9,7 +9,7 @@ dimensions:
     description: What category of goods or service the line belongs to.
     required_on: [revenue, cogs]
     nullable: false
-    source: "verified:2026-08-08:db_tracking_categories_query (21 values in the current system)"
+    source: "api:2026-08-08:db_tracking_categories_query (21 values in the current system)"
     values:
       - Crafty
       - Surface Protection
@@ -34,7 +34,11 @@ dimensions:
       - Tents
     note: >-
       Carried over as-is for now. Whether the new system keeps all 21 — and whether "Other" should
-      exist at all, given a non-nullable dimension makes it the new null — is m3 work.
+      exist at all, given a non-nullable dimension makes it the new null — is **OQ-022**, which
+      ADR-0020 deferred to m3 and m3 is not able to answer on its own. ADR-0020 names the exact
+      population that needs a value: facility and professional services with no equipment category
+      (Warehouse Rental, Office Rental, Indoor Parking, Location Scouting, Security, Safety &
+      Security Assessment). Every other undimensioned line restates mechanically.
 
   - id: cost_type
     description: What kind of work a labour posting represents.
@@ -43,6 +47,20 @@ dimensions:
     source: inbox/2026-08-08-two-reporting-dimensions.md
     values: [delivery, counter, warehouse]
 
-# Cardinality note for ADR-0008: 21 product lines x 3 cost types = 63 combinations per dimensioned
-# GL code. Across the dimensioned accounts above that is several hundred TigerBeetle accounts.
-# Verify this stays tractable before accepting ADR-0008.
+# Cardinality is no longer a concern, and the reason is worth keeping. ADR-0008 exploded these
+# dimensions into account identity — 21 product lines x 3 cost types = 63 accounts per dimensioned
+# GL code — so a third dimension would have multiplied again. **ADR-0018 superseded it**: the chart
+# stays plain and dimensions ride on the posting, so cardinality now grows by ADDITION and adding a
+# product line stops being a migration.
+#
+# What that costs: with dimensions off account identity, **nothing structural catches a missing
+# one**. Under ADR-0008 a posting with no product line had no account to land in. Now it has one,
+# and only the `nullable: false` rule above stands between REQ-LED-001 and a silent null. That is
+# why the rejection vectors in `ledger/vectors/` are not optional decoration — they are the entire
+# enforcement of this file.
+#
+# ⚠️ **HOT-011 is open against `required_on`.** REQ-LED-001 states that every revenue AND COGS
+# posting carries BOTH dimensions, which is wider than this file: `cost_type` is described here as
+# a LABOUR dimension (delivery / counter / warehouse) and has no defensible value for a rental
+# revenue posting or for `5000 Cost of Goods Sold: Retail Inventory`. `ledger/chart-of-accounts.yaml`
+# is written on this file's narrower reading. OQ-021 settles which is authoritative.

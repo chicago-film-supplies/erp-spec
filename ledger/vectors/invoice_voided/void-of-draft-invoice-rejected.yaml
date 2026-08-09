@@ -1,0 +1,34 @@
+name: void-of-draft-invoice-rejected
+posting_rule: invoice_voided
+kind: reject
+source: >-
+  ADR-0022 — `lifecycle` is derived from posting history, and `draft` MEANS "no AR posting exists".
+
+differs_from: reversal-of-issued-invoice
+differs_in: [original_journal_entry]
+
+given:
+  ledger_state:
+    closed_periods: []
+  invoice:
+    id: INV-VEC-0007
+    total_minor: 100031
+  void:
+    accounting_date: "2026-07-31"
+    reason: "operator pressed void on a draft"
+  original_journal_entry: null
+
+derivation: >-
+  Identical to `reversal-of-issued-invoice` except that no original entry exists. **There is nothing
+  to reverse**, and inventing a reversal would post a credit to AR for an invoice that never debited
+  it — manufacturing a negative receivable out of a document that was only ever a draft.
+  This is ADR-0022 made executable. Under the old single `status` enum a draft could be marked void
+  and the two facts sat in one field with no invariant relating them. Here `lifecycle` is derived
+  from the postings, so "void a draft" is not a state transition the model can express, and the
+  right answer is refusal rather than a no-op that reports success.
+  Discarding the draft document itself is a separate action and not a ledger event at all.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "no AR posting exists for INV-VEC-0007 — it is a draft document, not an issued invoice (ADR-0022)"

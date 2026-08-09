@@ -1,15 +1,98 @@
-# TigerBeetle account mapping. Blocked on ADR-0008 (proposed) and HOT-005 / OQ-009.
+# TigerBeetle representation of the chart of accounts.
 #
-# The proposed model is dimension-exploded: one TB account per
-# (GL code x product line x cost type). Transfer `user_data` is RESERVED for high-cardinality
-# references and must never become part of account identity:
+# **This file holds NO account list, deliberately.** ADR-0018 keeps the chart plain — one account
+# per GL code — so the TigerBeetle account tree is a total function of
+# `ledger/chart-of-accounts.yaml`. A second hand-maintained copy of ~110 accounts would be a second
+# thing to keep in agreement, and the workspace rule is to prefer a single source of truth over a
+# parity assertion between two hand-maintained lists. What this file holds is the rules that
+# compute the tree.
 #
-#   user_data_128 -> journal_entry_id
-#   user_data_64  -> source_document ref
-#   user_data_32  -> posting_rule id
-#
-# Do not populate this file until ADR-0008 is accepted. If DuckDB becomes the reporting source of
-# truth (OQ-009), real-time dimensional balances may be solving a problem nobody has, and a much
-# smaller account tree wins.
+# ── the premise that died ────────────────────────────────────────────────────────────────────────
+# The previous revision said "Blocked on ADR-0008 (proposed)" and described a dimension-exploded
+# model: one TB account per (GL code x product line x cost type). **ADR-0008 is superseded by
+# ADR-0018**, which decided the opposite, so the blocker named a decision that had already been
+# reversed and the file's premise was dead. The blocker is gone; the exploded model is gone.
 
-accounts: []
+ledger_id: 1
+currency: USD
+asset_scale: 2
+
+notes:
+  asset_scale: >-
+    Cents. Money is integer minor units everywhere (charter fence), so the scale is fixed at
+    ledger creation and a change is a new ledger plus a migration, not a config edit.
+
+# ── how a GL account becomes a TigerBeetle account ──────────────────────────────────────────────
+account_id_rule: >-
+  TB account id = the GL `code` from `ledger/chart-of-accounts.yaml`, widened to u128. Deterministic,
+  so the entire account tree rebuilds from the chart with no id registry that can be lost or drift.
+  Codes are unique in the chart and the gate enforces it, which is what makes this safe.
+
+account_code_rule: >-
+  TB account `code` (u16) = the GL code. Live codes top out at 8200, so they fit with room to spare.
+  `code` is the only classifier TigerBeetle itself can group on.
+
+# ⚠️ The single most expensive thing to get wrong in this file.
+flags_rule: >-
+  **NO balance-direction flag on any GL account.** `debits_must_not_exceed_credits` and
+  `credits_must_not_exceed_debits` make an overdraw unrepresentable — which is exactly right for
+  the inventory-custody ledger, where EVT-FUL-005 says in terms that this is what makes overselling
+  physical custody unrepresentable rather than merely checked (ADR-0015) — and **wrong for a general
+  ledger**. A revenue account legitimately goes debit-side on a reversal (`invoice_voided`), and
+  Accounts Receivable legitimately goes credit-side on a customer overpayment. Setting these flags
+  per normal balance would make correct entries fail at the database.
+  `normal_balance` in the chart of accounts is a REPORTING property, not a constraint.
+
+separate_ledgers: >-
+  The GL and the inventory-custody ledger are different TigerBeetle ledgers. Physical custody and
+  money obey different rules — custody must not go negative, money must — and one ledger cannot
+  hold both policies.
+
+# ── the transfer field budget ───────────────────────────────────────────────────────────────────
+# Three `user_data` fields, four claimants. This is erp-spec#3, and it is NOT closed here.
+transfer_field_budget:
+  status: proposed
+  blocked_by: [SPIKE-003]
+  issue: erp-spec#3
+
+  assignment:
+    user_data_128: journal_entry_id
+    user_data_64: source_document_ref
+    user_data_32: accounting_date
+
+  accounting_date_encoding: >-
+    Packed `YYYYMMDD` as an integer — 2026-07-31 is `20260731`. **Not epoch seconds**: u32 epoch
+    seconds hits the 2038/2106 cliff inside an asset's useful life, and an instant invites a reader
+    re-deriving a local calendar day from it, which is wrong across midnight and is the exact bug
+    class the workspace already pays for in `toChicagoStartOfDay`. An accounting date is a calendar
+    day and nothing else (ADR-0010).
+
+  evicted:
+    posting_rule: >-
+      Recoverable from `(source_document_ref, journal_entry_id)` through the MongoDB projection.
+      The ledger's job is balances; which rule produced an entry is a reporting concern, and
+      ADR-0017 already makes MongoDB load-bearing for the accounting record. Evicting it is what
+      lets `accounting_date` take `user_data_32` at no cost.
+
+  # The finding that closed the other escape hatch.
+  journal_entry_id_is_not_derivable: >-
+    erp-spec#3 asked whether `journal_entry_id` could be derived as (source document, posting event)
+    under ADR-0014 and the field thereby freed. **It cannot.** `EVT-BIL-006 CreditNoteAllocated`
+    states outright that a credit note applied across several invoices "is the case that may span
+    source documents, which is why journal-entry grouping cannot simply be derived from a single
+    source document reference". `EVT-BIL-003 SettlementRecorded` has the same shape — one payment
+    allocated across several invoices. One journal entry, several source documents, so the grouping
+    is not a function of the source document reference. The field stays reserved.
+
+  why_this_is_not_an_adr: >-
+    ADR-0010 says in terms that which field carries the accounting date is blocked on SPIKE-003,
+    and SPIKE-003 is open. Recording the working assignment here as `status: proposed` with its
+    blocker named is the honest form; minting an ADR would assert a decision the spike has not
+    supplied the evidence for.
+
+  what_spike_003_still_owes: >-
+    Whether TigerBeetle 0.16.x/0.17.x offers any transfer query at all is unsettled —
+    `research-drop/reference/tigerbeetle.md` says "no queries", erp-spec#3 believes there is a
+    limited equality-plus-timestamp-range form. **Neither gives a range filter on `user_data`**, so
+    the assignment above holds either way and periodisation still comes from the projection
+    (ADR-0017). What the spike changes is how much the projection has to carry, not this table.

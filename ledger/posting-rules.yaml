@@ -1,25 +1,386 @@
 # Posting rules — the ONLY place a business event becomes debits and credits.
 #
-# Past this boundary the ledger knows nothing about discounts, legs or rentals. Each rule names
-# its trigger, its source document, and the balanced set of postings it produces.
+# Past this boundary the ledger knows nothing about discounts, legs or rentals. Each rule names its
+# trigger, its source document, and the balanced set of postings it produces.
 #
-# m3 work. Skeleton only — every rule below needs golden vectors in ledger/vectors/ before it
-# counts as specified.
-
-rules: []
-
-# Rules that must exist, from the events already identified:
+# ── coverage is measured against the event storm, not against a list someone typed ──────────────
+# The previous revision of this file carried a trailing comment naming **six** rules that "must
+# exist". Counting events with `ledger` as producer or consumer across `contexts/*/events.yaml`
+# gives **24** (measured 2026-08-09, `code:2026-08-09:erp-spec:contexts/*/events.yaml`). The comment
+# predated the m1 event storm and was never revisited, so m3's exit criterion — "posting rules
+# defined for every source document type" — was not merely unmet, it was unmeasurable.
 #
-#   invoice_issued        <- EVT-BIL-  : Dr Accounts Receivable / Cr Revenue (by product line) / Cr Tax Payable
-#   invoice_voided        <- EVT-BIL-  : reversal. NOT a delete — REQ-BIL-001 and the no-hard-delete fence.
-#   shift_recorded        <- EVT-FUL-002: Dr COGS-Labour Absorbed (ACTUAL rate, dimensioned)
-#                                          Dr COGS-Unabsorbed Labour (residual, undimensioned)
-#                                          Cr Accrued Labour
-#     ADR-0019: costing is ACTUAL, from the per-contact wage. There is no standard rate, so the
-#     absorbed/unabsorbed split measures UTILISATION — guaranteed-but-unworked hours are a real
-#     cost attributable to no job. A `labour_variance` RATE-variance rule was listed here and is
-#     removed: with no standard rate it could never fire. Overtime allocation across jobs is
-#     OQ-018; the consecutive-day rule is OQ-019.
-#   depreciation_run      <- EVT-FA-   : Dr Depreciation Expense / Cr Accumulated Depreciation. PER BOOK.
-#   bank_transaction_matched <- EVT-BNK-: Dr/Cr Cash against the matched posting
-#   period_closed         <- EVT-LED-002: no postings; writes the close record incl. Parquet hash
+# Every one of the 24 now appears below in exactly one of four buckets, and gate 10e fails if any
+# event is missing from all of them or present in more than one:
+#
+#   rules[] status: specified   3   fully written, with golden vectors
+#   rules[] status: blocked     4   named blocker that is genuinely still open; NO postings written
+#   no_posting[]               10   produces no GL posting at all, with the reason
+#   unwritten[]                 7   in scope, no blocker, not yet specified — each names an issue
+#
+# `unwritten` is the honest bucket. These rules have nothing blocking them; this pass simply did
+# not write them. Calling them `blocked` would need a fake blocker, and leaving them out would make
+# criterion 3 look met. Gate 10e requires each to name a GitHub issue.
+#
+# ── rule shape ──────────────────────────────────────────────────────────────────────────────────
+#   id                       snake_case, unique
+#   status                   specified | blocked | unwritten
+#   trigger.event            an EVT- id that resolves
+#   trigger.source_document  the document the rule reads
+#   accounting_date          a NAMED FIELD of the source document. Never a clock word — the date a
+#                            transaction belongs to is business data (ADR-0010, charter fence).
+#   posting_timestamp        always the literal `assigned_by_ledger`. Monotonic, never back-dated.
+#   postings[]               paired transfers, matching TigerBeetle's model and the vector shape:
+#                              debit_account / credit_account   a GL code, or a dotted path
+#                              per                              fans the posting over a collection
+#                              amount                           a dotted path — NEVER an expression
+#                              dimensions                       `none`, or a map of dimension paths
+#   control_total            a field of the source document the transfer amounts must sum to
+#   invariants[]             what must hold, in prose, each traceable to a REQ/ADR
+#   vectors_dir              ledger/vectors/<id>/
+#
+# **`amount:` is a path, never arithmetic.** Gate 10l forbids `+ - * / %` in it. This is a fence,
+# not formatting: every rounding decision stays upstream in the source document where the money
+# rules already apply, so a posting rule can never become the place a rate gets quantized. It is
+# also what stops OQ-018's overtime-premium allocation from quietly landing inside a posting rule
+# instead of inside the shift record.
+#
+# **Dimensions ride on the transfer, not the account** (ADR-0018). A transfer carries the dimensions
+# required by its dimensioned side; if neither side is dimensioned it carries none; if both are,
+# they must agree. Gate 10g checks this against `chart-of-accounts.yaml`'s `dimensioned:` flag and
+# `dimensions.yaml`'s value sets — two files the rule does not control, so the check is independent
+# of the rule that it checks.
+
+rules:
+  # ══════════════════════════════════════════════════════════════════════════════════════════════
+  - id: invoice_issued
+    status: specified
+    trigger:
+      event: EVT-BIL-001
+      source_document: invoice
+    accounting_date: invoice.invoice_date
+    posting_timestamp: assigned_by_ledger
+    journal_entry:
+      spans_multiple_source_documents: false
+    postings:
+      - debit_account: 1200
+        credit_account: line.revenue_account
+        per: invoice.lines
+        amount: line.net_minor
+        dimensions:
+          product_line: line.product_line
+      - debit_account: 1200
+        credit_account: tax_component.payable_account
+        per: invoice.tax_components
+        amount: tax_component.amount_minor
+        dimensions: none
+    control_total: invoice.total_minor
+    invariants:
+      - >-
+        A transfer whose dimensioned side is a `dimensioned: true` account carries every dimension
+        `dimensions.yaml` requires for that account's class — `product_line` on revenue, both
+        `product_line` and `cost_type` on COGS — or the posting is REFUSED rather than recorded
+        (REQ-LED-001). Refusal is not substitution: there is no fallback value, an empty string is
+        not a dimension value, and a value outside the declared set is not a value.
+        ⚠️ REQ-LED-001's own text says *both* dimensions on revenue as well; that is HOT-011, and
+        this rule follows `dimensions.yaml`'s narrower reading until OQ-021 settles it.
+      - >-
+        No posting takes an accounting date inside a closed period (ADR-0010, ADR-0017). The check
+        is on accounting date, never on posting timestamp.
+      - >-
+        The credit account is determined by the item's TYPE, not by which product the operator
+        picked — a `surcharge` books to 4110 and a `service` to 4100, always (ADR-0021).
+      - >-
+        This posting is what MAKES the invoice issued (ADR-0022). `lifecycle` is derived from the
+        existence of this AR posting, never assigned.
+    relates_to: [REQ-LED-001, ADR-0010, ADR-0017, ADR-0018, ADR-0021, ADR-0022]
+    vectors_dir: ledger/vectors/invoice_issued/
+
+  # ══════════════════════════════════════════════════════════════════════════════════════════════
+  - id: invoice_voided
+    status: specified
+    trigger:
+      event: EVT-BIL-002
+      source_document: invoice
+    accounting_date: void.accounting_date
+    posting_timestamp: assigned_by_ledger
+    journal_entry:
+      spans_multiple_source_documents: false
+    postings:
+      - debit_account: original_transfer.credit_account
+        credit_account: original_transfer.debit_account
+        per: original_journal_entry.transfers
+        amount: original_transfer.amount_minor
+        dimensions:
+          product_line: original_transfer.product_line
+          cost_type: original_transfer.cost_type
+    control_total: invoice.total_minor
+    invariants:
+      - >-
+        **A reversal, never a delete** (REQ-BIL-001, the no-hard-deletes fence). Every transfer of
+        the original entry reappears with its two accounts exchanged and its amount and dimensions
+        unchanged — so the reversal carries the same dimensions as what it reverses, and a
+        dimensional report nets to zero rather than losing both sides.
+      - >-
+        **If the original's period is closed, the reversal takes an accounting date in an OPEN
+        period** (ADR-0017, EVT-BIL-002). A closed period's Parquet artifact is immutable and
+        hashed; restating it would break the hash, which is the guarantee. The reversal is a new
+        entry in an open period, not an edit of a sealed one.
+      - >-
+        An invoice with no AR posting is a draft document and there is nothing to reverse
+        (ADR-0022). Voiding one is refused.
+      - >-
+        Voiding is not a bad-debt write-off. A void says the sale did not happen; a write-off says
+        it happened and the money did not arrive, and that debits 6900 instead.
+    relates_to: [ADR-0010, ADR-0017, ADR-0022]
+    vectors_dir: ledger/vectors/invoice_voided/
+
+  # ══════════════════════════════════════════════════════════════════════════════════════════════
+  - id: period_closed
+    status: specified
+    trigger:
+      event: EVT-LED-002
+      source_document: period_close_request
+    accounting_date: period.last_day
+    posting_timestamp: assigned_by_ledger
+    journal_entry:
+      spans_multiple_source_documents: false
+    postings: []
+    no_postings_reason: >-
+      Closing a period moves no money. It seals one — freezing the accounting-date range and
+      recording the hash of the period's Parquet artifact. A close that posted anything would be
+      changing the figures it is meant to be fixing.
+    writes:
+      close_record:
+        period: period.id
+        closed_at: assigned_by_ledger
+        parquet_sha256: artifact.sha256
+    control_total: null
+    invariants:
+      - >-
+        The close record carries the **sha256 of the period's Parquet artifact** (EVT-LED-002,
+        ADR-0017). Without it a closed period has no drift guarantee at all, so a close with no
+        hash is refused.
+      - >-
+        After close, no posting may take an accounting date inside the period — regardless of its
+        posting timestamp (ADR-0010). This is the invariant `formal/period-close.qnt` model-checks
+        in m5; the vector and the model are two independent expressions of it, and if they disagree
+        one of them is wrong.
+      - >-
+        Parquet is exported from MongoDB, not from TigerBeetle — Mongo holds the accounting date
+        and is queryable, and TigerBeetle has no bulk export (ADR-0017).
+      - >-
+        A period with zero postings still closes and still produces a hashed artifact. A close that
+        only works when there is activity is a hole, not a simplification.
+    relates_to: [ADR-0010, ADR-0017]
+    vectors_dir: ledger/vectors/period_closed/
+
+  # ══════════════════════════════════════════════════════════════════════════════════════════════
+  # BLOCKED — the blocker is named, is genuinely open, and NO postings are invented.
+  # Gate 10h requires `postings: []` and zero vectors on these: a blocked rule cannot dodge the
+  # vector requirement by half-specifying itself, and a plausible guess in a golden vector is worse
+  # than a blank because it will be believed.
+  # ══════════════════════════════════════════════════════════════════════════════════════════════
+  - id: shift_recorded
+    status: blocked
+    blocked_by: [OQ-018, OQ-019, OQ-024]
+    trigger:
+      event: EVT-FUL-002
+      source_document: shift
+    accounting_date: shift.date
+    posting_timestamp: assigned_by_ledger
+    postings: []
+    known:
+      - >-
+        Dr **5800 COGS – Labour Absorbed** — hours actually worked on a causal job, at that
+        person's ACTUAL per-contact wage, dimensioned. There is no standard rate (ADR-0019).
+      - >-
+        Dr **5801 COGS – Unabsorbed Labour** — guaranteed-but-unworked hours and idle time,
+        UNDIMENSIONED by design. This account IS the idle-capacity KPI, not a plug, and the gap
+        between the two accounts measures UTILISATION rather than rate deviation.
+      - >-
+        Cr — **undecided, see OQ-024.** Cost flows from the purchase order / bill that labour
+        scheduling generates (ADR-0019), which points at 2000 Accounts Payable, but that is an
+        inference from account status rather than a decision.
+    unknown:
+      - >-
+        **OQ-018** — which causal job absorbs the overtime premium when a shift spans several. The
+        TOTAL is known from the bill; the ALLOCATION is not, so 5800's split across jobs cannot be
+        written. Guessing it is exactly the "distributing OT" guesswork OQ-008 set out to remove.
+      - >-
+        **OQ-019** — what a consecutive day is, and whether the 6th/7th-day 1.5x compounds with the
+        after-8-hours 1.5x. This decides the TOTAL, not merely its split.
+      - >-
+        **OQ-024** — the credit leg has no account. Every payroll liability in the live chart
+        (2160, 2170, 2180, 2190) is Archived and proposed for drop, and 6600 Wages is an expense.
+        The rule cannot balance even in principle until this is named.
+    relates_to: [ADR-0019, REQ-LED-001]
+
+  - id: depreciation_run
+    status: blocked
+    blocked_by: [SPIKE-005]
+    trigger:
+      event: EVT-FA-002
+      source_document: depreciation_schedule
+    accounting_date: period.last_day
+    posting_timestamp: assigned_by_ledger
+    postings: []
+    known:
+      - "Dr 7000 Depreciation Expense / Cr the matching `Less-Accumulated Depreciation` account."
+      - >-
+        **PER BOOK** — GAAP and tax bases run separately and the deferred difference between them is
+        itself reportable (charter, ADR-0007). Two postings per asset per period, not one.
+    unknown:
+      - >-
+        **SPIKE-005** — hand-roll versus library. The conventions the engine applies (mid-month,
+        half-year), the class lives (GDS vs ADS), and §179 and bonus effects on basis all change
+        the AMOUNT, so no vector can be written until the engine is chosen and graded against its
+        corpus. Errors here have filing consequences, not just reporting ones.
+    relates_to: [ADR-0007]
+
+  - id: bank_transaction_matched
+    status: blocked
+    blocked_by: [SPIKE-004]
+    trigger:
+      event: EVT-BNK-002
+      source_document: bank_transaction
+    accounting_date: bank_transaction.posted_date
+    posting_timestamp: assigned_by_ledger
+    postings: []
+    known:
+      - "Dr/Cr the cash account for the instrument, against the posting the transaction matched."
+    unknown:
+      - >-
+        **SPIKE-004** — what Plaid actually provides. Pending-versus-posted semantics decide which
+        date is the accounting date and whether a pending row may post at all; transaction-id
+        stability decides whether match state can be keyed on it without corrupting silently. Plaid
+        is a consumer-fintech product, not an accounting bank feed, and the gap is the deliverable.
+      - >-
+        Whether an unmatched transaction rests in **2500 Suspense** is the same spike's question —
+        which is why 2500's disposition in the chart of accounts is `undecided` rather than a guess.
+    relates_to: [ADR-0002, ADR-0009]
+
+  - id: asset_acquired
+    status: blocked
+    blocked_by: [OQ-020]
+    trigger:
+      event: EVT-FA-001
+      source_document: purchase_order
+    accounting_date: acquisition.in_service_date
+    posting_timestamp: assigned_by_ledger
+    postings: []
+    known:
+      - "Dr the 15xx/16xx/17xx asset account (or 1999 Fixed Asset Clearing until in service) / Cr 2000 Accounts Payable."
+      - "Cost basis is recorded PER BOOK, because useful life and basis differ by book (ADR-0007)."
+    unknown:
+      - >-
+        **OQ-020** — no context owns purchase orders. The source document of this rule therefore has
+        no owning context, and writing the rule would place procurement in the ledger by default,
+        which is the arbitrary placement `contexts/ledger/events.yaml` explicitly refuses to make.
+    relates_to: [ADR-0007]
+
+# ══════════════════════════════════════════════════════════════════════════════════════════════════
+# NO POSTING — these reach the ledger context but produce no GL entry. Each says why.
+# ══════════════════════════════════════════════════════════════════════════════════════════════════
+no_posting:
+  - event: EVT-LED-001
+    reason: >-
+      Emitted BY the ledger as the consequence of a rule that already posted. A posting rule
+      triggered by it would recurse.
+
+  - event: EVT-FUL-003
+    reason: >-
+      Grouping destinations into a run moves no money. The travel cost a shared trip splits across
+      the jobs that caused it arrives through the shifts and legs the trip generates, not through
+      the plan.
+
+  - event: EVT-FUL-004
+    reason: >-
+      A TigerBeetle PENDING transfer on the **inventory-custody** ledger (ADR-0015), not a GL
+      posting. Physical custody and money are different ledgers with different rules — custody must
+      not go negative, money must.
+
+  - event: EVT-FUL-005
+    reason: >-
+      The custody pending transfer POSTS. Revenue is recognised when the invoice posts
+      (EVT-BIL-001), not when units leave the building, so there is no GL consequence here.
+
+  - event: EVT-FUL-006
+    reason: >-
+      Units return to custody. A damaged return opens an out-of-service record; if it becomes a
+      billable replacement that is an invoice line against 4210, reaching the GL through
+      `invoice_issued`.
+
+  - event: EVT-FUL-007
+    reason: "The custody pending transfer VOIDS, by cancellation or timeout. Nothing ever left, so nothing posts."
+
+  - event: EVT-BNK-001
+    reason: >-
+      An import asserts that money moved at the bank, not what it was for. The GL consequence
+      arrives at EVT-BNK-002, once the transaction is matched to something.
+
+  - event: EVT-BNK-003
+    reason: "Withdraws a match. Changes reconciliation state; moves no money."
+
+  - event: EVT-TAX-001
+    reason: >-
+      An INPUT to `invoice_issued`'s tax leg, not a rule of its own — it supplies the taxable base
+      and the rounded tax amount. Rounding happens here, before posting, which is what keeps every
+      posting exact in integer minor units.
+
+  - event: EVT-TAX-002
+    reason: >-
+      Determines that no tax leg exists. Nothing to post — but the REASON is carried, because
+      "no tax" and "no tax BECAUSE" audit differently.
+
+# ══════════════════════════════════════════════════════════════════════════════════════════════════
+# UNWRITTEN — in scope, nothing blocking them, not written in this pass. Each names its issue.
+# This bucket is why m3's criterion 3 is honestly reported as NOT met rather than appearing met.
+# ══════════════════════════════════════════════════════════════════════════════════════════════════
+unwritten:
+  - event: EVT-FUL-001
+    proposed_rule: leg_completed
+    issue: erp-spec#5
+    note: >-
+      A completed leg carries actor, clock-in and clock-out — the facts labour cost attaches to. Whether
+      it posts on its own or only through the shift it belongs to depends on the many-to-many
+      leg↔shift relation OQ-005 established, and is entangled with `shift_recorded`.
+
+  - event: EVT-BIL-003
+    proposed_rule: settlement_recorded
+    issue: erp-spec#5
+    note: >-
+      Dr cash / Cr 1200. **`spans_multiple_source_documents: true`** — one payment may be allocated
+      across several invoices, which is half the evidence that `journal_entry_id` is not derivable
+      (erp-spec#3).
+
+  - event: EVT-BIL-004
+    proposed_rule: settlement_reversed
+    issue: erp-spec#5
+    note: "Dr 1200 / Cr cash. A bounced payment asserts the money never arrived — distinct from a credit note."
+
+  - event: EVT-BIL-005
+    proposed_rule: credit_note_issued
+    issue: erp-spec#5
+    note: >-
+      Dr revenue / Cr — the credit side has **no account in the live chart**, so this needs either a
+      new liability account or a decision to credit 1200 directly. Not blocked, but not free either.
+
+  - event: EVT-BIL-006
+    proposed_rule: credit_note_allocated
+    issue: erp-spec#5
+    note: >-
+      **`spans_multiple_source_documents: true`** — the other half of the erp-spec#3 evidence, and
+      the reason `journal_entry_id` keeps `user_data_128`.
+
+  - event: EVT-FA-003
+    proposed_rule: asset_disposed
+    issue: erp-spec#5
+    note: >-
+      Gain or loss is proceeds less net book value, and NBV differs by book, so the gain differs by
+      book. Lands in 1998, whose live classification as an Asset is itself corrected in the chart.
+
+  - event: EVT-FA-004
+    proposed_rule: asset_basis_adjusted
+    issue: erp-spec#5
+    note: "Changes the remaining schedule from the effective date forward. Explicitly NOT a restatement of prior periods."

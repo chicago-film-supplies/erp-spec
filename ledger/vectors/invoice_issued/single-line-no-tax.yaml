@@ -1,0 +1,27 @@
+name: single-line-no-tax
+posting_rule: invoice_issued
+kind: accept
+source: >-
+  Shape from a real single-line untaxed service invoice — `api:2026-08-09:db_invoices_query`, 999
+  invoices in prod. Amounts synthetic. 4100 carries `default_tax_profile: tax_none` live, which is
+  what makes an untaxed service line the ordinary case rather than an edge one.
+
+given:
+  ledger_state:
+    closed_periods: []
+  invoice:
+    id: INV-VEC-0001
+    invoice_date: "2026-07-15"
+    total_minor: 50000
+    lines:
+      - { net_minor: 50000, revenue_account: 4100, product_line: "Crew" }
+    tax_components: []
+
+derivation: >-
+  One service line, $500.00 → 50000 minor. No tax profile applies, so there is no tax component and
+  no second transfer. `control_total` = 50000 = the single transfer amount.
+
+expect:
+  transfers:
+    - { debit_account: 1200, credit_account: 4100, amount_minor: 50000, accounting_date: "2026-07-15", product_line: "Crew" }
+  rejects: []

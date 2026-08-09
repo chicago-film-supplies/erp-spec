@@ -1,0 +1,33 @@
+name: close-without-artifact-hash-rejected
+posting_rule: period_closed
+kind: reject
+source: "EVT-LED-002 carries `parquet_sha256`; ADR-0017 makes the hashed artifact the closed-period authority."
+
+differs_from: close-writes-parquet-hash
+differs_in: [artifact.sha256]
+
+given:
+  ledger_state:
+    closed_periods: []
+  period:
+    id: "2026-07"
+    last_day: "2026-07-31"
+    posting_count: 1284
+  artifact:
+    format: parquet
+    exported_from: mongodb
+    sha256: null
+
+derivation: >-
+  Identical to `close-writes-parquet-hash` except the artifact export produced no digest.
+  **A close record without the hash is a period that is sealed but not attested.** It would answer
+  "is this period closed?" with yes and "can these figures have changed since?" with nothing at all
+  — which is precisely the guarantee ADR-0017 chose this design to buy over recompute-and-compare.
+  Closing anyway and backfilling the hash later is the tempting wrong answer: between the two
+  writes the period reports as closed while still being silently mutable, and nothing marks the
+  window. So the close is refused and the period stays open, which is the honest state.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "close of 2026-07 has no parquet_sha256 — a closed period with no artifact hash has no drift guarantee (EVT-LED-002, ADR-0017)"
