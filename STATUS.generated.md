@@ -15,7 +15,7 @@ is `deno task validate`'s judgement, not this file's.
 | Conflicts (HOT) | 10 | 1 open |
 | Decisions (ADR) | 21 | 6 in force · 13 proposed |
 | Spikes | 12 | 12 open |
-| Requirements | 2 | 2 without a scenario |
+| Requirements | 2 | 0 without a scenario |
 | Inbox | 32 | 22 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 23 | 0 still `TODO` |
@@ -93,5 +93,5 @@ None — every open question has an owner and a decide-by date.
 ## Coverage gaps
 
 - Contexts with no requirements yet: `fulfillment`, `fixed-assets`, `ordering`, `availability`, `banking`, `tax`
-- Requirements with no Gherkin scenario: `REQ-BIL-001`, `REQ-LED-001`
+- Requirements with no Gherkin scenario: none
 - Glossary terms still `TODO`: none

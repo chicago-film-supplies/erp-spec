@@ -19,7 +19,13 @@
       "inbox_source": "inbox/2026-08-08-void-invoices-not-filtered.md",
       "adrs": [],
       "events": [],
-      "scenarios": []
+      "scenarios": [
+        "contexts/billing/features/voided-documents-excluded.feature",
+        "contexts/billing/features/voided-documents-excluded.feature",
+        "contexts/billing/features/voided-documents-excluded.feature",
+        "contexts/billing/features/voided-documents-excluded.feature",
+        "contexts/billing/features/voided-documents-excluded.feature"
+      ]
     },
     {
       "id": "REQ-LED-001",
@@ -36,14 +42,17 @@
         "EVT-LED-001",
         "EVT-LED-002"
       ],
-      "scenarios": []
+      "scenarios": [
+        "contexts/ledger/features/dimensional-postings.feature",
+        "contexts/ledger/features/dimensional-postings.feature",
+        "contexts/ledger/features/dimensional-postings.feature",
+        "contexts/ledger/features/dimensional-postings.feature",
+        "contexts/ledger/features/dimensional-postings.feature"
+      ]
     }
   ],
   "gaps": {
-    "requirements_without_scenarios": [
-      "REQ-BIL-001",
-      "REQ-LED-001"
-    ],
+    "requirements_without_scenarios": [],
     "requirements_without_adr": [
       "REQ-BIL-001"
     ],
