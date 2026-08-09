@@ -1,6 +1,52 @@
 # Domain events for FA.
 #
 # Every event needs a producer and at least one consumer, or `terminal: true`.
-# An event with no consumer that is not terminal is a design smell the validator will catch.
+#
+# Dual GAAP and tax basis with a reportable deferred difference (ADR-0007). Every event below is
+# therefore PER BOOK where it touches value — one economic event, two sets of numbers, and the
+# difference between them is itself reportable rather than incidental.
 
-events: []
+events:
+  - id: EVT-FA-001
+    name: AssetAcquired
+    description: >-
+      An asset entered the register with its cost basis, in-service date and useful life, per book.
+      Acquisition normally arrives via a purchase order — see the note in
+      `contexts/ledger/events.yaml` on OQ-020, which is unresolved about which context owns POs.
+    producer: fixed-assets
+    consumers: [ledger, availability]
+    terminal: false
+    carries: [asset_id, cost_basis_minor, in_service_date, useful_life_gaap, useful_life_tax, product_ref]
+    blocked_by: [OQ-020]
+
+  - id: EVT-FA-002
+    name: DepreciationRun
+    description: >-
+      A period's depreciation was computed and posted — Dr Depreciation Expense, Cr Accumulated
+      Depreciation, PER BOOK. Two postings per asset per period, not one.
+    producer: fixed-assets
+    consumers: [ledger]
+    terminal: false
+    carries: [period, asset_refs, gaap_amount_minor, tax_amount_minor, deferred_difference_minor]
+    blocked_by: [SPIKE-005]
+
+  - id: EVT-FA-003
+    name: AssetDisposed
+    description: >-
+      An asset left the register — sold, scrapped or written off. Gain or loss is the difference
+      between proceeds and net book value, and net book value differs BY BOOK, so the gain differs
+      by book too.
+    producer: fixed-assets
+    consumers: [ledger, availability, tax]
+    terminal: false
+    carries: [asset_id, disposal_date, proceeds_minor, nbv_gaap_minor, nbv_tax_minor, method]
+
+  - id: EVT-FA-004
+    name: AssetBasisAdjusted
+    description: >-
+      A capital improvement or a basis correction changed an asset's carrying value, changing the
+      remaining depreciation schedule from that point forward. Not a restatement of prior periods.
+    producer: fixed-assets
+    consumers: [ledger]
+    terminal: false
+    carries: [asset_id, adjustment_minor, effective_date, book, reason]

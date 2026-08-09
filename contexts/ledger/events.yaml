@@ -1,5 +1,13 @@
 # Domain events for LED.
 # Every event needs a producer and at least one consumer, or `terminal: true`.
+#
+# ⚠️ PURCHASE ORDERS HAVE NO CONTEXT. OQ-008 made POs first-class in v2 with two use cases —
+# the document labour scheduling generates and costs flow from, and inventory acquisition (retail
+# stock, and fixed assets for rental or internal ops). None of the eight contexts owns procurement:
+# ledger records the consequence, fixed-assets receives the asset, availability receives the stock,
+# but nothing owns the inbound document. Placing PO events in any of them would be arbitrary, so
+# they are deliberately absent pending OQ-020. Note a ninth context would change m2's exit criterion,
+# which names eight.
 
 events:
   - id: EVT-LED-001

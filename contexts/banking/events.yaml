@@ -1,6 +1,40 @@
 # Domain events for BNK.
 #
 # Every event needs a producer and at least one consumer, or `terminal: true`.
-# An event with no consumer that is not terminal is a design smell the validator will catch.
+#
+# Feed is Plaid, one Chase account (ADR-0002). Plaid's model is a consumer-fintech model, not an
+# accounting bank feed — SPIKE-004 decides what it actually provides against what reconciliation
+# actually needs, so the `carries` lists below are provisional on that.
 
-events: []
+events:
+  - id: EVT-BNK-001
+    name: BankTransactionImported
+    description: >-
+      A transaction appeared on the bank feed. Unmatched on arrival; it asserts only that money
+      moved at the bank, not what it was for.
+    producer: banking
+    consumers: [ledger]
+    terminal: false
+    carries: [bank_transaction_id, posted_date, amount_minor, direction, description, external_ref]
+    blocked_by: [SPIKE-004]
+
+  - id: EVT-BNK-002
+    name: BankTransactionMatched
+    description: >-
+      A bank transaction was matched to a posting — Dr/Cr Cash against the matched entry. The match
+      is the point cash becomes reconciled; import alone is not.
+    producer: banking
+    consumers: [ledger]
+    terminal: false
+    carries: [bank_transaction_id, matched_posting_ref, accounting_date, amount_minor]
+
+  - id: EVT-BNK-003
+    name: BankTransactionUnmatched
+    description: >-
+      A match was withdrawn. Exists because a wrong match is worse than no match — it reports cash
+      as reconciled against the wrong entry, and silently correcting it would lose the fact that
+      the reconciliation once claimed otherwise.
+    producer: banking
+    consumers: [ledger]
+    terminal: false
+    carries: [bank_transaction_id, previous_posting_ref, unmatched_at, reason]

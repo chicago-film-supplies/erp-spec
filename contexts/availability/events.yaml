@@ -1,6 +1,49 @@
 # Domain events for AVL.
 #
 # Every event needs a producer and at least one consumer, or `terminal: true`.
-# An event with no consumer that is not terminal is a design smell the validator will catch.
+#
+# THE BOUNDARY THAT SHAPES THIS FILE (ADR-0015): a forward booking is NOT a TigerBeetle transfer.
+# TB balances are point-in-time; rental availability is interval-based, and a booking six months
+# out must not consume stock today. So everything here is interval math over booking records, and
+# the TB pending/post/void pair lives in FUL, over the operational window only.
 
-events: []
+events:
+  - id: EVT-AVL-001
+    name: BookingMade
+    description: >-
+      Units of a product were booked over a date interval for an order. Consumes no ledger balance
+      — it constrains future availability, nothing more.
+    producer: availability
+    consumers: [ordering, fulfillment]
+    terminal: false
+    carries: [booking_id, order_ref, product_ref, quantity, interval_start, interval_end]
+
+  - id: EVT-AVL-002
+    name: BookingReleased
+    description: >-
+      A booking stopped constraining availability — cancelled, or superseded by an item change.
+      Distinct from completion, which is a fulfillment outcome.
+    producer: availability
+    consumers: [ordering, fulfillment]
+    terminal: false
+    carries: [booking_id, order_ref, product_ref, released_at, reason]
+
+  - id: EVT-AVL-003
+    name: OutOfServiceOpened
+    description: >-
+      Units left the available pool without being booked — damage, maintenance, loss. Open-ended
+      intervals are meaningful here: `end: null` means indefinitely.
+    producer: availability
+    consumers: [fulfillment]
+    terminal: false
+    carries: [oos_id, product_ref, quantity, interval_start, interval_end, reason]
+
+  - id: EVT-AVL-004
+    name: OutOfServiceClosed
+    description: >-
+      Units returned to the available pool. If the units were written off rather than repaired, a
+      fixed-asset disposal follows — the two are not the same event.
+    producer: availability
+    consumers: [fulfillment, fixed-assets]
+    terminal: false
+    carries: [oos_id, product_ref, quantity, closed_at, disposition]

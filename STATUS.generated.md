@@ -11,7 +11,7 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 19 | **0 with no owner or no decide-by** |
+| Open questions | 20 | **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 10 | 0 open |
 | Decisions (ADR) | 22 | 6 in force · 14 proposed |
 | Spikes | 12 | 12 open |

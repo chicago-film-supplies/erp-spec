@@ -55,7 +55,7 @@
           <outline text="`deno task gen` produces no diff."/>
         </outline>
       </outline>
-      <outline text="Open questions (0 of 19 undecided)" _note="The bottleneck. Each blocks what is listed under it.">
+      <outline text="Open questions (0 of 20 undecided)" _note="The bottleneck. Each blocks what is listed under it.">
         <outline text="OQ-001 — Are fulfillment legs first-class recorded events with their own identity, or derived from the order…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-007"/>
           <outline text="blocks ADR-0011"/>
@@ -118,6 +118,9 @@
         </outline>
         <outline text="OQ-019 — What defines a &quot;consecutive day&quot; for the 6th/7th-day 1.5x rule, and does it compound with the after…" _note="owner: alex · decide by: 2026-09-15">
           <outline text="blocks REQ-LED"/>
+        </outline>
+        <outline text="OQ-020 — Which context owns purchase orders — or is procurement a ninth bounded context?" _note="owner: alex · decide by: 2026-09-15">
+          <outline text="blocks EVT-FA-001"/>
         </outline>
       </outline>
       <outline text="Conflicts (0 open)">
@@ -311,18 +314,52 @@
           <outline text="EVT-LED-001 — JournalEntryPosted" _note="ledger → banking"/>
           <outline text="EVT-LED-002 — PeriodClosed" _note="ledger → fixed-assets, billing, tax"/>
         </outline>
-        <outline text="fulfillment (FUL)" _note="0 requirement(s) · 2 event(s)">
-          <outline text="EVT-FUL-001 — LegCompleted" _note="fulfillment → billing, availability"/>
+        <outline text="fulfillment (FUL)" _note="0 requirement(s) · 7 event(s)">
+          <outline text="EVT-FUL-001 — LegCompleted" _note="fulfillment → billing, availability, ledger"/>
           <outline text="EVT-FUL-002 — ShiftRecorded" _note="fulfillment → ledger"/>
+          <outline text="EVT-FUL-003 — TripPlanned" _note="fulfillment → ledger"/>
+          <outline text="EVT-FUL-004 — UnitsCommitted" _note="fulfillment → availability, ledger"/>
+          <outline text="EVT-FUL-005 — UnitsCheckedOut" _note="fulfillment → availability, billing, ledger"/>
+          <outline text="EVT-FUL-006 — UnitsReturned" _note="fulfillment → availability, billing, ledger"/>
+          <outline text="EVT-FUL-007 — CommitmentVoided" _note="fulfillment → availability, ledger"/>
         </outline>
-        <outline text="billing (BIL)" _note="1 requirement(s) · 0 event(s)">
+        <outline text="billing (BIL)" _note="1 requirement(s) · 6 event(s)">
           <outline text="REQ-BIL-001 — A voided source document shall be excluded from every default aggregate, and its inclusion shall re…"/>
+          <outline text="EVT-BIL-001 — InvoiceIssued" _note="billing → ledger, tax"/>
+          <outline text="EVT-BIL-002 — InvoiceVoided" _note="billing → ledger, tax"/>
+          <outline text="EVT-BIL-003 — SettlementRecorded" _note="billing → ledger, banking"/>
+          <outline text="EVT-BIL-004 — SettlementReversed" _note="billing → ledger, banking"/>
+          <outline text="EVT-BIL-005 — CreditNoteIssued" _note="billing → ledger"/>
+          <outline text="EVT-BIL-006 — CreditNoteAllocated" _note="billing → ledger"/>
         </outline>
-        <outline text="fixed-assets (FA)" _note="0 requirement(s) · 0 event(s)"/>
-        <outline text="ordering (ORD)" _note="0 requirement(s) · 0 event(s)"/>
-        <outline text="availability (AVL)" _note="0 requirement(s) · 0 event(s)"/>
-        <outline text="banking (BNK)" _note="0 requirement(s) · 0 event(s)"/>
-        <outline text="tax (TAX)" _note="0 requirement(s) · 0 event(s)"/>
+        <outline text="fixed-assets (FA)" _note="0 requirement(s) · 4 event(s)">
+          <outline text="EVT-FA-001 — AssetAcquired" _note="fixed-assets → ledger, availability"/>
+          <outline text="EVT-FA-002 — DepreciationRun" _note="fixed-assets → ledger"/>
+          <outline text="EVT-FA-003 — AssetDisposed" _note="fixed-assets → ledger, availability, tax"/>
+          <outline text="EVT-FA-004 — AssetBasisAdjusted" _note="fixed-assets → ledger"/>
+        </outline>
+        <outline text="ordering (ORD)" _note="0 requirement(s) · 4 event(s)">
+          <outline text="EVT-ORD-001 — OrderPlaced" _note="ordering → availability, billing"/>
+          <outline text="EVT-ORD-002 — OrderConfirmed" _note="ordering → availability, fulfillment, billing"/>
+          <outline text="EVT-ORD-003 — OrderItemsChanged" _note="ordering → availability, fulfillment, billing"/>
+          <outline text="EVT-ORD-004 — OrderCancelled" _note="ordering → availability, billing, fulfillment"/>
+        </outline>
+        <outline text="availability (AVL)" _note="0 requirement(s) · 4 event(s)">
+          <outline text="EVT-AVL-001 — BookingMade" _note="availability → ordering, fulfillment"/>
+          <outline text="EVT-AVL-002 — BookingReleased" _note="availability → ordering, fulfillment"/>
+          <outline text="EVT-AVL-003 — OutOfServiceOpened" _note="availability → fulfillment"/>
+          <outline text="EVT-AVL-004 — OutOfServiceClosed" _note="availability → fulfillment, fixed-assets"/>
+        </outline>
+        <outline text="banking (BNK)" _note="0 requirement(s) · 3 event(s)">
+          <outline text="EVT-BNK-001 — BankTransactionImported" _note="banking → ledger"/>
+          <outline text="EVT-BNK-002 — BankTransactionMatched" _note="banking → ledger"/>
+          <outline text="EVT-BNK-003 — BankTransactionUnmatched" _note="banking → ledger"/>
+        </outline>
+        <outline text="tax (TAX)" _note="0 requirement(s) · 3 event(s)">
+          <outline text="EVT-TAX-001 — TaxDetermined" _note="tax → billing, ledger"/>
+          <outline text="EVT-TAX-002 — TaxExemptionApplied" _note="tax → billing, ledger"/>
+          <outline text="EVT-TAX-003 — TaxRateSuperseded" _note="tax → billing"/>
+        </outline>
       </outline>
       <outline text="Capture (22 unpromoted of 32)" _note="no drops pending">
         <outline text="Actor per leg, clock in/out per stop, crew size per trip" _note="inbox/2026-08-08-actor-and-clock-per-leg.md"/>

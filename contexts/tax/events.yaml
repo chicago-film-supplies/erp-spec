@@ -1,6 +1,40 @@
 # Domain events for TAX.
 #
 # Every event needs a producer and at least one consumer, or `terminal: true`.
-# An event with no consumer that is not terminal is a design smell the validator will catch.
+#
+# Scope is sales tax and the Chicago Personal Property Lease Transaction Tax. SPIKE-008 is still
+# open on how the Chicago lease tax and Illinois home-rule rates actually compose, so the
+# determination event's shape is provisional on it.
 
-events: []
+events:
+  - id: EVT-TAX-001
+    name: TaxDetermined
+    description: >-
+      A line's tax treatment was decided — which taxes apply, at what rate, on what base. Emitted
+      at invoice issue, before posting, because the Cr Tax Payable leg depends on it.
+    producer: tax
+    consumers: [billing, ledger]
+    terminal: false
+    carries: [line_ref, applied_tax_refs, taxable_base_minor, tax_amount_minor, jurisdiction]
+    blocked_by: [SPIKE-008]
+
+  - id: EVT-TAX-002
+    name: TaxExemptionApplied
+    description: >-
+      A line was determined non-taxable for a stated reason — an exempt customer, or the
+      out-of-state engagement of OQ-015, where exclusion reaches tax determination and not just
+      reporting. The reason is carried because "no tax" and "no tax BECAUSE" audit differently.
+    producer: tax
+    consumers: [billing, ledger]
+    terminal: false
+    carries: [line_ref, exemption_reason, evidence_ref, jurisdiction]
+
+  - id: EVT-TAX-003
+    name: TaxRateSuperseded
+    description: >-
+      A rate changed with an effective date. Past postings are NOT restated — a closed period's
+      artifact is immutable (ADR-0017), and a rate change is not a correction of history.
+    producer: tax
+    consumers: [billing]
+    terminal: false
+    carries: [tax_ref, previous_rate, new_rate, effective_from]

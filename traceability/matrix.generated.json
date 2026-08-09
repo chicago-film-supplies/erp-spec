@@ -4,7 +4,7 @@
     "requirements": 2,
     "adrs": 22,
     "adrs_accepted": 6,
-    "events": 4,
+    "events": 33,
     "inbox": 32,
     "inbox_promoted": 10
   },
@@ -18,7 +18,14 @@
       "statement": "A voided source document shall be excluded from every default aggregate, and its inclusion shall require an explicit opt-in at the point of query.",
       "inbox_source": "inbox/2026-08-08-void-invoices-not-filtered.md",
       "adrs": [],
-      "events": [],
+      "events": [
+        "EVT-BIL-001",
+        "EVT-BIL-002",
+        "EVT-BIL-003",
+        "EVT-BIL-004",
+        "EVT-BIL-005",
+        "EVT-BIL-006"
+      ],
       "scenarios": [
         "contexts/billing/features/voided-documents-excluded.feature",
         "contexts/billing/features/voided-documents-excluded.feature",

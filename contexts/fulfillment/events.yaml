@@ -1,25 +1,85 @@
 # Domain events for FUL.
 # Every event needs a producer and at least one consumer, or `terminal: true`.
+#
+# THE BOUNDARY (ADR-0015): the TigerBeetle pending/post/void pair covers the OPERATIONAL window
+# only — units committed to a fulfillment in progress. Forward bookings stay interval math in AVL,
+# because a booking six months out must not consume a point-in-time balance today.
 
 events:
   - id: EVT-FUL-001
     name: LegCompleted
     description: >-
       One directed movement between CFS and a destination finished, with its actor, clock-in and
-      clock-out recorded.
+      clock-out recorded. First-class, not derived (ADR-0011) — a derived leg could carry none of
+      those.
     producer: fulfillment
-    consumers: [billing, availability]
+    consumers: [billing, availability, ledger]
     terminal: false
-    carries: [leg_id, shift_id, actor_id, destination_ref, direction, clock_in, clock_out]
-    blocked_by: [HOT-007]
+    carries: [leg_id, trip_ref, shift_id, actor_id, destination_ref, direction, clock_in, clock_out]
 
   - id: EVT-FUL-002
     name: ShiftRecorded
     description: >-
-      A person's paid span for one day closed, naming its causal job. Byproduct work performed
-      during the shift absorbs no incremental cost.
+      One PERSON's paid span for one day closed, naming its causal job (OQ-005 — per person, not
+      per crew, so leg->shift is many-to-many). Costed at that person's ACTUAL wage (ADR-0019);
+      there is no standard rate. Byproduct work performed during the shift absorbs no incremental
+      cost (OQ-006).
     producer: fulfillment
     consumers: [ledger]
     terminal: false
-    carries: [shift_id, causal_job_ref, crew_size, clock_in, clock_out]
-    blocked_by: [OQ-005]
+    carries: [shift_id, person_ref, causal_job_ref, wage_rate_minor, clock_in, clock_out, overtime_hours]
+    blocked_by: [OQ-018, OQ-019]
+
+  - id: EVT-FUL-003
+    name: TripPlanned
+    description: >-
+      A set of destinations sharing a date and direction was grouped into one run. A trip MAY span
+      orders (OQ-002), so it is a top-level aggregate that legs point at — it cannot live under an
+      order, and that is what lets a shared run split its travel cost across the jobs that caused it.
+    producer: fulfillment
+    consumers: [ledger]
+    terminal: false
+    carries: [trip_id, destination_refs, order_refs, date, direction]
+
+  - id: EVT-FUL-004
+    name: UnitsCommitted
+    description: >-
+      Units were committed to a fulfillment in progress — the TigerBeetle PENDING transfer
+      (ADR-0015). The transfer timeout is the compensation mechanism SPIKE-002 relies on: an
+      orphaned commitment expires on its own.
+    producer: fulfillment
+    consumers: [availability, ledger]
+    terminal: false
+    carries: [fulfillment_ref, product_ref, quantity, pending_transfer_ref]
+    blocked_by: [SPIKE-012]
+
+  - id: EVT-FUL-005
+    name: UnitsCheckedOut
+    description: >-
+      Custody transferred to the customer — the pending transfer POSTED. This is the point
+      `debits_must_not_exceed_credits` makes overselling physical custody unrepresentable rather
+      than merely checked.
+    producer: fulfillment
+    consumers: [availability, billing, ledger]
+    terminal: false
+    carries: [fulfillment_ref, product_ref, quantity, posted_transfer_ref, checked_out_at]
+
+  - id: EVT-FUL-006
+    name: UnitsReturned
+    description: >-
+      Units came back into CFS custody. Condition on return is carried because a damaged return
+      opens an out-of-service record rather than restoring the unit to the pool.
+    producer: fulfillment
+    consumers: [availability, billing, ledger]
+    terminal: false
+    carries: [fulfillment_ref, product_ref, quantity, condition, returned_at]
+
+  - id: EVT-FUL-007
+    name: CommitmentVoided
+    description: >-
+      A commitment was released without a checkout — the pending transfer VOIDED, whether by
+      cancellation or by timeout. Distinct from a return: nothing ever left.
+    producer: fulfillment
+    consumers: [availability, ledger]
+    terminal: false
+    carries: [fulfillment_ref, product_ref, quantity, voided_transfer_ref, reason]

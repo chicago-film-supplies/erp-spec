@@ -302,3 +302,19 @@ open_questions:
       different answers for someone working Thursday through Wednesday. And if a person works ten
       hours on their sixth consecutive day, is that 1.5x throughout or 1.5x for eight hours and 2x
       for the last two? Both are defensible; only one can be implemented.
+
+  - id: OQ-020
+    question: >-
+      Which context owns purchase orders — or is procurement a ninth bounded context?
+    owner: alex
+    decide_by: 2026-09-15
+    blocks: [EVT-FA-001]
+    status: open
+    notes: >-
+      Raised by OQ-008, which made purchase orders first-class in v2 with two use cases: the
+      document labour scheduling generates and costs flow from, and inventory acquisition (retail
+      stock, and fixed assets bought for rental or internal ops). None of the eight existing
+      contexts owns procurement — ledger records the consequence, fixed-assets receives the asset,
+      availability receives the stock, but nothing owns the inbound document. Placing PO events in
+      one of them arbitrarily is the failure to avoid. A ninth context is the obvious answer and
+      also the expensive one: m2's exit criterion names eight, so adding one reopens m2.

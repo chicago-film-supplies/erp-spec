@@ -2,5 +2,52 @@
 #
 # Every event needs a producer and at least one consumer, or `terminal: true`.
 # An event with no consumer that is not terminal is a design smell the validator will catch.
+#
+# DELIBERATELY EXCLUDED (m1 requires CRMS/Xero-only events be excluded, not carried forward):
+#   - OpportunityWebhookReceived, OpportunityReconciled — exist only because CRMS is the upstream
+#     system of record. CRMS is retired at cutover; an order is placed here, not mirrored.
+#   - OrderNumberMinted-from-CRMS — v2 mints its own numbers.
 
-events: []
+events:
+  - id: EVT-ORD-001
+    name: OrderPlaced
+    description: >-
+      A customer order came into existence with its organization, destinations and items. Draft —
+      it reserves nothing and commits nothing.
+    producer: ordering
+    consumers: [availability, billing]
+    terminal: false
+    carries: [order_id, organization_ref, destination_refs, item_refs, placed_at]
+
+  - id: EVT-ORD-002
+    name: OrderConfirmed
+    description: >-
+      The order became a commitment. This is the point bookings become real and the order stops
+      being freely editable without consequence.
+    producer: ordering
+    consumers: [availability, fulfillment, billing]
+    terminal: false
+    carries: [order_id, confirmed_at, dates]
+
+  - id: EVT-ORD-003
+    name: OrderItemsChanged
+    description: >-
+      The item list moved — quantity, addition or removal. Consumed by fulfillment because a
+      fulfillment must maintain item-list parity with its order (ADR-0011); by availability
+      because bookings derive from items; and by billing because an issued invoice's lines may
+      already reflect the old list.
+    producer: ordering
+    consumers: [availability, fulfillment, billing]
+    terminal: false
+    carries: [order_id, added_item_refs, removed_item_refs, changed_item_refs, version]
+
+  - id: EVT-ORD-004
+    name: OrderCancelled
+    description: >-
+      The order will not be fulfilled. Soft — the order remains addressable per the no-hard-deletes
+      fence. Whether it has a ledger consequence depends on whether anything posted first, which is
+      the ADR-0014 boundary rule applied to a cancellation.
+    producer: ordering
+    consumers: [availability, billing, fulfillment]
+    terminal: false
+    carries: [order_id, cancelled_at, reason]

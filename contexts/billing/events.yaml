@@ -1,6 +1,77 @@
 # Domain events for BIL.
 #
 # Every event needs a producer and at least one consumer, or `terminal: true`.
-# An event with no consumer that is not terminal is a design smell the validator will catch.
+#
+# DELIBERATELY EXCLUDED (CRMS/Xero-only — m1 requires these be named as excluded):
+#   - XeroInvoicePushed / XeroWebhookReceived / XeroSettlementSynced — the entire Xero sync surface
+#     exists because the ledger was rented. ADR-0001 brings it in-house; there is no push.
+#   - InvoiceNumberMintedFromCRMS — v2 mints its own.
+#
+# NOTE ON STATUS: ADR-0022 retires the single `invoice.status` enum. Nothing here emits a status
+# change, because status is DERIVED — `lifecycle` from posting history, `settlement` from the AR
+# balance. An event named InvoiceMarkedPaid would be exactly the assigned-state mistake ADR-0014
+# forbids; `SettlementRecorded` moves the balance and the status follows.
 
-events: []
+events:
+  - id: EVT-BIL-001
+    name: InvoiceIssued
+    description: >-
+      An invoice posted to the ledger — Dr Accounts Receivable, Cr Revenue by product line, Cr Tax
+      Payable. This posting IS what makes the invoice issued (ADR-0022); an invoice that has not
+      posted is a draft document.
+    producer: billing
+    consumers: [ledger, tax]
+    terminal: false
+    carries: [invoice_id, order_refs, accounting_date, line_refs, dimension_set]
+
+  - id: EVT-BIL-002
+    name: InvoiceVoided
+    description: >-
+      A reversal was posted against an issued invoice. NOT a delete — REQ-BIL-001 and the
+      no-hard-deletes fence. If the invoice's period is already closed, ADR-0017 requires the
+      reversal to take an accounting date in an OPEN period rather than restating a sealed one.
+    producer: billing
+    consumers: [ledger, tax]
+    terminal: false
+    carries: [invoice_id, reversal_journal_entry_ref, accounting_date]
+
+  - id: EVT-BIL-003
+    name: SettlementRecorded
+    description: >-
+      Money moved against an invoice. The invoice's `settlement` projection is recomputed from the
+      resulting AR balance rather than assigned by this event.
+    producer: billing
+    consumers: [ledger, banking]
+    terminal: false
+    carries: [settlement_id, invoice_ref, amount_minor, accounting_date, instrument]
+
+  - id: EVT-BIL-004
+    name: SettlementReversed
+    description: >-
+      A recorded settlement was undone — a bounced payment or a misapplied receipt. Distinct from
+      a credit note: this asserts the money never arrived, not that it is being given back.
+    producer: billing
+    consumers: [ledger, banking]
+    terminal: false
+    carries: [settlement_id, invoice_ref, amount_minor, accounting_date, reason]
+
+  - id: EVT-BIL-005
+    name: CreditNoteIssued
+    description: >-
+      A credit was raised against a customer. Unallocated on issue — allocation is its own event,
+      because one credit note may be applied across several invoices.
+    producer: billing
+    consumers: [ledger]
+    terminal: false
+    carries: [credit_note_id, organization_ref, amount_minor, accounting_date]
+
+  - id: EVT-BIL-006
+    name: CreditNoteAllocated
+    description: >-
+      Part or all of a credit note was applied to an invoice. This is the case that may span source
+      documents, which is why journal-entry grouping cannot simply be derived from a single source
+      document reference (erp-spec#3).
+    producer: billing
+    consumers: [ledger]
+    terminal: false
+    carries: [credit_note_ref, invoice_ref, amount_minor, accounting_date]
