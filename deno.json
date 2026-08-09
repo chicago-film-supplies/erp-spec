@@ -7,6 +7,7 @@
     "triage": "deno run --allow-read --allow-env=SPEC_TODAY tools/validate.ts --triage-only",
     "gen": "deno run --allow-read --allow-write tools/generate.ts",
     "ingest": "deno run --allow-read --allow-write tools/ingest.ts",
+    "view": "deno run --allow-read --allow-run --allow-net --allow-env=SPEC_TODAY tools/view.ts",
     "fetch-llms-docs": "deno run --allow-read=.claude/docs --allow-write=.claude/docs --allow-net=docs.deno.com,docs.tigerbeetle.com,duckdb.org,hono.dev,quint.sh,www.mongodb.com,zod.dev tools/fetch-llms-docs.ts"
   },
   "imports": {
