@@ -13,8 +13,8 @@ is `deno task validate`'s judgement, not this file's.
 |---|---:|---|
 | Open questions | 20 | **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 10 | 0 open |
-| Decisions (ADR) | 23 | 6 in force · 15 proposed |
-| Spikes | 12 | 11 open |
+| Decisions (ADR) | 24 | 6 in force · 16 proposed |
+| Spikes | 12 | 10 open |
 | Requirements | 2 | 0 without a scenario |
 | Inbox | 33 | 22 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
@@ -39,7 +39,7 @@ None.
 - `ADR-0005` — Retain SolidJS clients
 - `ADR-0007` — Replace asset.accountant; dual GAAP/tax basis in scope
 
-### Proposed (15)
+### Proposed (16)
 
 | ADR | Title | Review by | Blocked on |
 |---|---|---|---|
@@ -58,6 +58,7 @@ None.
 | `ADR-0021` | Item type determines the revenue account; duplicate charge products are canonicalized | 2026-09-01 | `HOT-008` `OQ-014` |
 | `ADR-0022` | Invoice status decomposes into two derived projections | 2026-09-01 | `HOT-009` |
 | `ADR-0023` | Native Node-API addons load under Deno; the deployment unit is a self-extracting compiled binary | 2026-10-01 | `SPIKE-001` `SPIKE-007` `SPIKE-010` |
+| `ADR-0024` | DuckDB is reached natively and server-side; client-side reporting is rejected | 2026-10-01 | `SPIKE-007` |
 
 ## Spikes
 
@@ -69,7 +70,7 @@ None.
 | `SPIKE-004` | What does Plaid actually provide, and what does bank reconciliation actually ne… | 3 days | _new ADR_ | open |
 | `SPIKE-005` | Hand-roll the depreciation engine, or adopt a library? | 1 week | _new ADR_ | open |
 | `SPIKE-006` | How lossy is translating JSON Schema 2020-12 to MongoDB's `$jsonSchema`, and wh… | 2 days | _new ADR_ | open |
-| `SPIKE-007` | Which access path reaches DuckDB from Deno — the native addon or WASM — and can… | 2 days | _new ADR_ | in_progress |
+| `SPIKE-007` | Which access path reaches DuckDB from Deno — the native addon or WASM — and can… | 2 days | `ADR-0024` | closed |
 | `SPIKE-008` | How do the Chicago Personal Property Lease Transaction Tax and Illinois home-ru… | 1 week | _new ADR_ | open |
 | `SPIKE-009` | What replaces Firestore real-time listeners — MongoDB change streams plus a soc… | 1 week | _new ADR_ | open |
 | `SPIKE-010` | Does a production-grade Valkey queue client run under Deno, and can it express… | 3 days | `ADR-0012` | open |

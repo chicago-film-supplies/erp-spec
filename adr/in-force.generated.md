@@ -59,3 +59,4 @@ Accepted and not superseded, as of the last `deno task gen`.
 | [ADR-0021](ADR-0021-charge-product-canonicalization.md) | Item type determines the revenue account; duplicate charge products are canonicalized | 2026-09-01 | HOT-008, OQ-014 |
 | [ADR-0022](ADR-0022-invoice-status-decomposed.md) | Invoice status decomposes into two derived projections | 2026-09-01 | HOT-009 |
 | [ADR-0023](ADR-0023-native-addons-under-deno-self-extracting-binary.md) | Native Node-API addons load under Deno; the deployment unit is a self-extracting compiled binary | 2026-10-01 | SPIKE-001, SPIKE-007, SPIKE-010 |
+| [ADR-0024](ADR-0024-duckdb-native-server-side-no-client-side-reporting.md) | DuckDB is reached natively and server-side; client-side reporting is rejected | 2026-10-01 | SPIKE-007 |
