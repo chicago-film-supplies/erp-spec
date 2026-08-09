@@ -58,6 +58,12 @@ Accepted and not superseded, as of the last `deno task gen`.
 
 > **In the context of** deciding where order and invoice status live, **facing** a v1 corpus where stored status drifts from the facts that determine it, **we decided** that lifecycle state is derived from the ledger and materialized into MongoDB as a rebuildable projection, **to achieve** a stale status that is unrepresentable rather than merely monitored, **accepting** that a transition with no ledger consequence still needs a recorded fact.
 
+## [ADR-0016](ADR-0016-quint-over-tla.md) — Quint replaces TLA+ for the formal specs
+
+**Contexts:** ledger, ordering · **Decided:** 2026-08-09
+
+> **In the context of** two formal specs that exist as never-executed stubs, **facing** a choice between TLA+ and Quint before either is written for real, **we decided** to use Quint, **to achieve** specs a one-person team will actually maintain and traces that can be replayed against the implementation, **accepting** a smaller ecosystem than TLA+'s.
+
 ## [ADR-0017](ADR-0017-reporting-authority-by-period-state.md) — Reporting authority is split by period state
 
 **Contexts:** ledger, banking, billing · **Decided:** 2026-08-09
@@ -102,7 +108,6 @@ Accepted and not superseded, as of the last `deno task gen`.
 | [ADR-0010](ADR-0010-accounting-date-vs-posting-timestamp.md) | Accounting date vs posting timestamp policy | 2026-11-01 | HOT-005, OQ-009, SPIKE-003 |
 | [ADR-0013](ADR-0013-linode-self-hosted.md) | Self-host on Linode, with Caddy fronting TLS | 2026-10-01 | SPIKE-011 |
 | [ADR-0015](ADR-0015-reservations-as-pending-transfers.md) | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-11-01 | SPIKE-002, SPIKE-012 |
-| [ADR-0016](ADR-0016-quint-over-tla.md) | Quint replaces TLA+ for the formal specs | 2026-09-01 | SPIKE-002 |
 | [ADR-0019](ADR-0019-labour-costing-is-actual.md) | Labour costing is actual; absorption measures utilisation, not rate variance | 2026-10-01 | HOT-003, HOT-004, HOT-010, OQ-005, OQ-006, OQ-008, OQ-011, OQ-017, OQ-018, OQ-019 |
 | [ADR-0020](ADR-0020-xero-history-is-restated.md) | Xero history is restated, not imported as-is | 2026-10-15 | HOT-006, OQ-012 |
 | [ADR-0025](ADR-0025-dimension-obligation-is-per-account.md) | The dimension obligation is per account, and what is refused is absence rather than null | 2026-10-01 | HOT-011, OQ-021, OQ-022, OQ-025 |

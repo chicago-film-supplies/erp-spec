@@ -967,12 +967,12 @@ for (const i of inbox) {
     {
       file: "adr/ADR-0016-quint-over-tla.md",
       path: "formal/two-store-commit.tla",
-      why: "ADR-0016 IS the decision that deleted these files. Naming what it replaced is historically accurate, not stale.",
+      why: "ADR-0016 IS the decision that deleted these files; naming what it replaced is historically accurate. PERMANENT — ADR-0016 is accepted and therefore immutable, so unlike the ADR-0003 entry this one is never cleared by an edit.",
     },
     {
       file: "adr/ADR-0016-quint-over-tla.md",
       path: "formal/period-close.tla",
-      why: "As above — ADR-0016's Context section describes the state it superseded.",
+      why: "As above. Permanent for the same reason — the ADR is accepted.",
     },
   ];
   const used = new Set<string>();

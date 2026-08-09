@@ -13,7 +13,7 @@ is `deno task validate`'s judgement, not this file's.
 |---|---:|---|
 | Open questions | 26 | **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 11 | 0 open |
-| Decisions (ADR) | 25 | 15 in force · 8 proposed |
+| Decisions (ADR) | 25 | 16 in force · 7 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 2 | 0 without a scenario |
 | Inbox | 33 | 22 unpromoted |
@@ -30,7 +30,7 @@ None.
 
 ## Decisions
 
-### In force (15)
+### In force (16)
 
 - `ADR-0001` — Replace Xero with an in-house ledger
 - `ADR-0002` — Bank feed sourced from Plaid, single Chase account
@@ -41,6 +41,7 @@ None.
 - `ADR-0011` — Fulfillment legs are first-class recorded events
 - `ADR-0012` — Valkey-backed queues with in-process workers, replacing Cloud Tasks
 - `ADR-0014` — Lifecycle state is derived from the ledger, never assigned
+- `ADR-0016` — Quint replaces TLA+ for the formal specs
 - `ADR-0017` — Reporting authority is split by period state
 - `ADR-0018` — A plain chart of accounts, with dimensions carried on the posting
 - `ADR-0021` — Item type determines the revenue account; duplicate charge products are canonicalized
@@ -48,7 +49,7 @@ None.
 - `ADR-0023` — Native Node-API addons load under Deno; the deployment unit is a self-extracting compiled binary
 - `ADR-0024` — DuckDB is reached natively and server-side; client-side reporting is rejected
 
-### Proposed (8)
+### Proposed (7)
 
 | ADR | Title | Review by | Blocked on |
 |---|---|---|---|
@@ -56,7 +57,6 @@ None.
 | `ADR-0010` | Accounting date vs posting timestamp policy | 2026-11-01 | `HOT-005` `OQ-009` `SPIKE-003` |
 | `ADR-0013` | Self-host on Linode, with Caddy fronting TLS | 2026-10-01 | `SPIKE-011` |
 | `ADR-0015` | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-11-01 | `SPIKE-002` `SPIKE-012` |
-| `ADR-0016` | Quint replaces TLA+ for the formal specs | 2026-09-01 | `SPIKE-002` |
 | `ADR-0019` | Labour costing is actual; absorption measures utilisation, not rate variance | 2026-10-01 | `HOT-003` `HOT-004` `HOT-010` `OQ-005` `OQ-006` `OQ-008` `OQ-011` `OQ-017` `OQ-018` `OQ-019` |
 | `ADR-0020` | Xero history is restated, not imported as-is | 2026-10-15 | `HOT-006` `OQ-012` |
 | `ADR-0025` | The dimension obligation is per account, and what is refused is absence rather than null | 2026-10-01 | `HOT-011` `OQ-021` `OQ-022` `OQ-025` |
