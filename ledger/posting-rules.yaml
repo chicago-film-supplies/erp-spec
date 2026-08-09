@@ -81,10 +81,12 @@ rules:
         `ledger/dimensions.yaml`, or the posting is REFUSED rather than recorded (REQ-LED-001,
         ADR-0025). For a revenue transfer that is `product_line`; `cost_type` is a labour dimension
         and appears on 5800 alone.
-        Refusal is not substitution: there is no fallback value, an empty string is not a dimension
-        value, a value outside the declared set is not a value, and there is no `Other` to fall
-        back on — a line that maps to no product line is coded to 4800 Other Income, which requires
-        no dimension, rather than posted here without one.
+        **What is refused is ABSENCE, not null** (ADR-0025). An explicit `product_line: null`
+        records that no tracked product line applies and is recorded; a missing key means nobody
+        decided and is refused. An empty string is refused as well — it passes a naive NOT NULL
+        check while meaning nothing — and so is a value outside the declared set. There is no
+        `Other` to fall back on, and a receipt that is not a categorised sale at all belongs in
+        4800 Other Income, which requires no dimension.
       - >-
         No posting takes an accounting date inside a closed period (ADR-0010, ADR-0017). The check
         is on accounting date, never on posting timestamp.

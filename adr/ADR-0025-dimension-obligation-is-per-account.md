@@ -1,6 +1,6 @@
 ---
 id: ADR-0025
-title: The dimension obligation is stated per account, and the escape hatch is an account
+title: The dimension obligation is per account, and what is refused is absence rather than null
 status: proposed
 date: 2026-08-09
 review_by: 2026-10-01
@@ -13,10 +13,10 @@ superseded_by:
 
 > **In the context of** three spec statements disagreeing about which postings must carry which
 > dimensions, **facing** a chart with revenue and COGS accounts for which neither dimension has a
-> defensible value, **we decided** to state the obligation per account and to make an undimensioned
-> *account* the escape hatch rather than an `Other` dimension value, **to achieve** a non-nullable
-> dimension that never has to be faked, **accepting** that an uncategorised receipt now changes
-> which account it lands in rather than merely which bucket it reports under.
+> defensible value, **we decided** to state the obligation per account and to refuse ABSENCE rather
+> than null, **to achieve** a dimension that never has to be faked and whose gaps are countable,
+> **accepting** that "how much revenue has no product line" becomes a number someone must keep
+> watching rather than an error the system cannot represent.
 
 ## Context
 
@@ -33,9 +33,9 @@ are `type: Other Income` live and arise from no sale at all
 (`api:2026-08-09:db_chart_of_accounts_query`, 134 accounts).
 
 ADR-0018 removed the structural backstop: with dimensions off account identity, a posting missing
-one has an account to land in, so **only the non-null rule stands between REQ-LED-001 and a silent
-null**. `ledger/dimensions.yaml` had already flagged the trap — a non-nullable dimension makes
-`Other` the new null.
+one has an account to land in, so **only this rule stands between REQ-LED-001 and a silent gap**.
+`ledger/dimensions.yaml` had already flagged the trap — a non-nullable dimension makes `Other` the
+new null, so forbidding null outright does not remove the gap, it renames it.
 
 ## Decision
 
@@ -45,20 +45,28 @@ null**. `ledger/dimensions.yaml` had already flagged the trap — a non-nullable
 
 **`Other` is deleted from the `product_line` value set** — 21 values become 20.
 
-**The escape hatch is an account, not a value.** A one-off product or service that maps to no
-product line is coded to **4800 Other Income**, which requires no dimension.
+**Two mechanisms replace `Other`, stating different facts.** `product_line: null` on a dimensioned
+account says "this is a categorised kind of sale and no tracked product line applies". **4800 Other
+Income**, which requires no dimension at all, says "this was not a categorised sale" — interest,
+cashback, a vendor refund, a one-off oddity. Neither substitutes for the other: coding a real
+service to 4800 understates operating revenue, and nulling a genuine one-off on 4100 overstates it.
 
-REQ-LED-001 is amended to match and keeps its teeth: a posting to an account whose `dimensions`
-list names a dimension is **rejected** if it lacks one.
+REQ-LED-001 is amended to match and keeps its teeth, with the boundary drawn at **absence rather
+than null** (OQ-025): a posting to an account whose `dimensions` list names a dimension must
+DECLARE it — a value from the declared set, or an explicit `null` recording that no tracked value
+applies. A posting that does not declare it is **rejected**, and so is one declaring `""`.
 
 ## Considered options
 
 - **Widen the requirement** — require `cost_type` everywhere and mint a "not labour" value for it.
   Rejected: that value is a null with a name, and it would be the majority value.
-- **Permit a null `product_line` on revenue.** Rejected on ADR-0009's ground: a null meaning "we
-  could not categorise this" is indistinguishable from one meaning "this legitimately has no
-  category", and once written the distinction is gone. It also re-permits the exact population
-  REQ-LED-001 was written to stop — 28.74% of line revenue, measured.
+- **Permit an absent `product_line` on revenue.** Rejected: it re-permits the exact population
+  REQ-LED-001 was written to stop — 28.74% of line revenue, measured — and on ADR-0009's ground,
+  a value that is simply missing cannot be told apart from an oversight.
+  ⚠️ An **explicit null is not this option** and is permitted. The distinction is the one ADR-0009
+  actually draws: what it forbids is a null nobody wrote down. A declared null is a determination —
+  "no tracked product line applies" — and it is countable, reportable, and attributable, exactly
+  as `EVT-TAX-002` carries a reason because "no tax" and "no tax BECAUSE" audit differently.
 - **Keep `Other`.** Rejected: it reads as a category and means "nobody chose". A line in 4800
   asserts *this was not a categorised sale*, which is a fact about the transaction. A line in 4100
   tagged `Other` asserts *this was a categorised sale* and then names no category, which is not.
@@ -74,15 +82,21 @@ list names a dimension is **rejected** if it lacks one.
   which postings owe a dimension; `dimensions.yaml` says which values it may take. Gate 10 checks
   every golden vector against both — and therefore against neither the rule nor the vector it is
   checking, which is the independent-property discipline this repo requires.
-- **An uncategorised receipt now moves account, not just bucket.** That is the real cost of this
+- **A null is a population that must be watched.** "Share of revenue with a null product line" is a
+  number the read side can produce at any time. The current system's equivalent was invisible until
+  someone measured it and found 28.7%. If it grows, the answer is a new product line or a real
+  decision — never a default value.
+- **A non-operating receipt now moves account, not just bucket.** That is the real cost of this
   decision and it should be stated plainly: revenue mix on the P&L changes shape, because what used
   to sit in operating revenue under `Other` now sits in Other Income. That is the intent — it is
   visible on the face of the statement rather than inside a dimension nobody reads — but it is a
   reporting change, not only a data-model one.
-- **It does not settle the history.** ADR-0020 restates every undimensioned line before import, and
-  the residue — facility and professional services with no equipment category, on 4100 Service
-  Income — now has no `Other` to fall back on. Reassigning it to 4800 would move money between P&L
-  sections, which ADR-0020 forbids ("the restatement must not alter any amount"). **OQ-025.**
+- **It settles the history too** (OQ-025). ADR-0020's restatement residue — facility and
+  professional services with no equipment category, on 4100 Service Income — takes
+  `product_line: null` and stays on 4100. They do not map to a tracked product line, so null is the
+  true statement about them. Crucially this keeps the restatement to **assigning a dimension** and
+  moves no money between P&L sections, which is what ADR-0020 requires ("the restatement must not
+  alter any amount"). Reassigning them to 4800 would have.
 - **`cost_type` has exactly one account today.** A dimension with one consumer is worth re-examining
   when the labour rules land: if `shift_recorded` (blocked on OQ-018, OQ-019, OQ-024) ends up
   splitting across more accounts, the set grows; if it does not, `cost_type` may be a property of

@@ -1,14 +1,26 @@
 # Dimensions — axes a balance can be sliced by, carried ON the posting, never derived later.
 #
-# REQ-LED-001: both mandatory dimensions are NOT NULLABLE on revenue and COGS postings.
-# A posting missing either is rejected, not recorded. The current system's optional dimension is
-# why 28.7% of line revenue has none.
+# REQ-LED-001: a posting to an account that names a dimension must DECLARE it. What is refused is
+# ABSENCE, not null.
+#
+#   product_line: "Crew"   a tracked value
+#   product_line: null     a determination — no tracked product line applies to this line
+#   (key absent)           REFUSED
+#   product_line: ""       REFUSED — it satisfies a naive NOT NULL check and means nothing
+#
+# The distinction is the whole requirement. The current system's 28.7% of untracked line revenue
+# came from postings where **nobody decided** and the field was quietly left empty. An explicit
+# null is a decision: it is countable, reportable, and shows up as a number someone can be asked
+# about. Absence is not, and it is indistinguishable from an oversight.
+# The same shape the tax context already uses — EVT-TAX-002 carries an exemption REASON, because
+# "no tax" and "no tax BECAUSE" audit differently.
 
 dimensions:
   - id: product_line
     description: What category of goods or service the line belongs to.
     required_on: [revenue, cogs]
-    nullable: false
+    declaration: required        # the KEY must be present on every posting to an account naming it
+    null_permitted: true         # as an explicit determination that no tracked value applies
     source: "api:2026-08-08:db_tracking_categories_query (21 values in the current system)"
     values:
       - Crafty
@@ -32,21 +44,28 @@ dimensions:
       - Crew
       - Tents
     note: >-
-      **20 values — `Other` was deleted** (OQ-022). A non-nullable dimension makes `Other` the new
-      null: the bucket that reads as a category and means "nobody chose". The escape hatch is an
-      ACCOUNT, not a value — a one-off product or service that maps to no product line is coded to
-      4800 Other Income, which requires no dimension. So an uncategorised receipt is visibly
-      uncategorised on the face of the P&L instead of hiding inside operating revenue.
-      ⚠️ This leaves ADR-0020's restatement residue without a target: Warehouse Rental, Office
-      Rental, Indoor Parking, Location Scouting, Security and Safety & Security Assessment are
-      historical lines on 4100 Service Income with no product line and no `Other` to fall back on.
-      Moving them to 4800 reassigns an account rather than assigning a dimension, and that moves
-      money between P&L sections. **OQ-025.**
+      **20 values — `Other` was deleted** (OQ-022). It read as a category and meant "nobody chose",
+      which is the one thing a non-nullable dimension must not let back in.
+      Two mechanisms replace it, and they state DIFFERENT facts — that is why there are two:
+        · `product_line: null` on a dimensioned account — "this IS a categorised kind of sale, and
+          no tracked product line applies to it". The line stays where it belongs on the P&L.
+        · **4800 Other Income** — "this was not a categorised sale at all": interest, cashback, a
+          vendor refund, a one-off oddity. The account requires no dimension, so the receipt is
+          visibly non-operating on the face of the statement rather than hiding inside revenue.
+      Neither is a fallback for the other. Coding a real service to 4800 would understate operating
+      revenue; nulling a genuine one-off on 4100 would overstate it.
+      ADR-0020's restatement residue — Warehouse Rental, Office Rental, Indoor Parking, Location
+      Scouting, Security, Safety & Security Assessment — takes **`product_line: null`** (OQ-025).
+      They do not map to a tracked product line, so null is the true statement about them; it is
+      not a fallback and not a bucket. They stay on 4100 Service Income, which keeps the
+      restatement to assigning a dimension and moves no money between P&L sections — the thing
+      ADR-0020 forbids.
 
   - id: cost_type
     description: What kind of work a labour posting represents.
     required_on: [labour_cogs]
-    nullable: false
+    declaration: required
+    null_permitted: true
     source: inbox/2026-08-08-two-reporting-dimensions.md
     values: [delivery, counter, warehouse]
     note: >-
@@ -65,9 +84,14 @@ dimensions:
 #
 # What that costs: with dimensions off account identity, **nothing structural catches a missing
 # one**. Under ADR-0008 a posting with no product line had no account to land in. Now it has one,
-# and only the `nullable: false` rule above stands between REQ-LED-001 and a silent null. That is
-# why the rejection vectors in `ledger/vectors/` are not optional decoration — they are the entire
+# and only the declaration rule above stands between REQ-LED-001 and a silent absence. That is why
+# the rejection vectors in `ledger/vectors/` are not optional decoration — they are the entire
 # enforcement of this file.
+#
+# **A null is a reportable population, and should be reported.** "Share of revenue with a null
+# product line" is a number the read side can produce at any time; the current system's equivalent
+# was invisible until someone went looking and found 28.7%. Watch it, and if it grows, the answer is
+# a new product line or a real decision — never a default value.
 #
 # HOT-011 is **resolved** (OQ-021). Revenue accounts carry a product line; `cost_type` is labour
 # only; and REQ-LED-001's statement was amended to match rather than left contradicting this file.

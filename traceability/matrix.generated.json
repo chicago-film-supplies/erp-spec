@@ -40,7 +40,7 @@
       "context_code": "LED",
       "status": "draft",
       "priority": "must",
-      "statement": "Every posting to an account whose chart entry names a required dimension shall carry that dimension, with a value drawn from that dimension's declared set, and a posting missing one shall be rejected rather than recorded.",
+      "statement": "Every posting to an account whose chart entry names a required dimension shall DECLARE that dimension — either a value drawn from the dimension's declared set, or an explicit null recording that no tracked value applies — and a posting that does not declare it shall be rejected rather than recorded.",
       "inbox_source": "inbox/2026-08-08-untracked-revenue-share.md",
       "adrs": [
         "ADR-0009",

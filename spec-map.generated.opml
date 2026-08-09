@@ -269,7 +269,7 @@
           <outline text="ADR-0024 — DuckDB is reached natively and server-side; client-side reporting is rejected" _note="review by: 2026-10-01 · **In the context of** sealed-period Parquet as the closed-period reporting authority (ADR-0017), **facing** a choice between the native DuckDB addon, WASM in the API process, and WASM in the browser, **we decided** to reach DuckDB natively and server-side and to reject client-side reporting, **to achieve** exact integer reporting over an artifact the server controls, **accepting** that reporting stays an API surface we have to build.">
             <outline text="blocked on SPIKE-007"/>
           </outline>
-          <outline text="ADR-0025 — The dimension obligation is stated per account, and the escape hatch is an account" _note="review by: 2026-10-01 · **In the context of** three spec statements disagreeing about which postings must carry which dimensions, **facing** a chart with revenue and COGS accounts for which neither dimension has a defensible value, **we decided** to state the obligation per account and to make an undimensioned *account* the escape hatch rather than an `Other` dimension value, **to achieve** a non-nullable dimension that never has to be faked, **accepting** that an uncategorised receipt now changes which account it lands in rather than merely which bucket it reports under.">
+          <outline text="ADR-0025 — The dimension obligation is per account, and what is refused is absence rather than null" _note="review by: 2026-10-01 · **In the context of** three spec statements disagreeing about which postings must carry which dimensions, **facing** a chart with revenue and COGS accounts for which neither dimension has a defensible value, **we decided** to state the obligation per account and to refuse ABSENCE rather than null, **to achieve** a dimension that never has to be faked and whose gaps are countable, **accepting** that &quot;how much revenue has no product line&quot; becomes a number someone must keep watching rather than an error the system cannot represent.">
             <outline text="blocked on HOT-011"/>
             <outline text="blocked on OQ-021"/>
             <outline text="blocked on OQ-022"/>
@@ -348,7 +348,7 @@
       </outline>
       <outline text="Contexts (8)">
         <outline text="ledger (LED)" _note="1 requirement(s) · 2 event(s)">
-          <outline text="REQ-LED-001 — Every posting to an account whose chart entry names a required dimension shall carry that dimension…"/>
+          <outline text="REQ-LED-001 — Every posting to an account whose chart entry names a required dimension shall DECLARE that dimensi…"/>
           <outline text="EVT-LED-001 — JournalEntryPosted" _note="ledger → banking"/>
           <outline text="EVT-LED-002 — PeriodClosed" _note="ledger → fixed-assets, billing, tax"/>
         </outline>

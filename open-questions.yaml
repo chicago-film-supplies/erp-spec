@@ -435,7 +435,17 @@ open_questions:
     owner: alex
     decide_by: 2026-09-15
     blocks: [REQ-LED]
-    status: open
+    status: answered
+    answer: >-
+      **`product_line: null`**, and they stay on 4100 Service Income. They do not map to a tracked
+      product line, so null is the true statement about them — not a fallback, not a bucket, and
+      explicitly not `undefined`.
+      This settles the tension the question was asked about: reassigning them to 4800 Other Income
+      would have moved money between P&L sections, which ADR-0020 forbids outright ("the
+      restatement must not alter any amount"). Leaving them on 4100 with a declared null keeps the
+      restatement to assigning a dimension, which is all ADR-0020 ever asked for.
+      Generalised in ADR-0025: what REQ-LED-001 refuses is ABSENCE, not null. A missing key means
+      nobody decided; a declared null is a decision.
     notes: >-
       OQ-022 deleted `Other` and made 4800 Other Income the escape hatch for NEW postings. History
       is the harder half. ADR-0020 restates every undimensioned line before import, and most of it

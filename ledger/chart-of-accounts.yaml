@@ -45,17 +45,25 @@
 #    note with it. HOT-010 and ADR-0019 killed the rate variance — with no standard rate it could
 #    never fire — but only `posting-rules.yaml`'s comment followed; the accounts did not.
 #
-# ── the dimension rule, settled (OQ-021, OQ-022 — resolves HOT-011) ─────────────────────────────
+# ── the dimension rule, settled (OQ-021, OQ-022, OQ-025 — ADR-0025, resolves HOT-011) ───────────
 # **Revenue accounts carry a product line.** `cost_type` is a LABOUR dimension — its values are
 # delivery / counter / warehouse — so it applies to 5800 alone and to no revenue account and no
-# non-labour COGS account. REQ-LED-001's statement was amended to match.
+# non-labour COGS account.
 #
-# **There is no `Other` product line, and no null in a required field.** A one-off product or
-# service that maps to no product line is coded to **4800 Other Income**, which requires no
-# dimension at all. So the absence is carried by the ACCOUNT, where it is a visible structural
-# fact, rather than by a magic dimension value that reads as a category and means "nobody chose".
-# Tax and liability postings — the bottled water tax among them — carry no dimension for the same
-# reason: 2200 and 2210 require none.
+# **There is no `Other` product line. What is refused is ABSENCE, not null.** A posting to an
+# account that names a dimension must DECLARE it — a value from the declared set, or an explicit
+# `null` meaning "no tracked value applies". A missing key means nobody decided and is refused; so
+# is `""`, which passes a naive NOT NULL check while meaning nothing.
+#
+# Two mechanisms, stating different facts, and neither substitutes for the other:
+#   · `product_line: null` on an operating revenue account — "this IS a categorised kind of sale
+#     and no tracked product line applies". Where ADR-0020's restatement residue lands.
+#   · **4800 Other Income**, which names no dimension — "this was not a categorised sale at all".
+# Coding a real service to 4800 understates operating revenue; nulling a genuine one-off on 4100
+# overstates it.
+#
+# Tax and liability postings — the bottled water tax among them — carry no dimension at all,
+# because 2200 and 2210 name none. That is a third thing again: not a null, but no obligation.
 
 accounts:
   # ══ ASSETS ═══════════════════════════════════════════════════════════════════════════════════
@@ -923,12 +931,12 @@ accounts:
     note: >-
       One of the five `name: "TODO"` accounts. Non-operating — 4800–4840 are all `type: Other
       Income` live and none arises from a sale, so none carries a product line.
-      **This account is the escape hatch that lets `Other` be deleted from the product_line value
-      set** (OQ-022): a one-off product or service that maps to no product line is coded here,
-      where no dimension is required, instead of being booked to an operating revenue account under
-      a bucket named `Other`. The distinction is the point — a line in 4800 says "this was not a
-      categorised sale", which is a fact; a line in 4100 tagged `Other` says "this was a
-      categorised sale" and then names no category, which is not.
+      **One of the two mechanisms that let `Other` be deleted** (OQ-022, ADR-0025) — and the two
+      state different facts. A line HERE says "this was not a categorised sale at all". A line on an
+      operating revenue account with `product_line: null` says "this IS a categorised kind of sale
+      and no tracked product line applies" (OQ-025). Neither substitutes for the other: coding a
+      real service here understates operating revenue, and nulling a genuine one-off on 4100
+      overstates it.
 
   - code: 4810
     name: "Cashback Income"

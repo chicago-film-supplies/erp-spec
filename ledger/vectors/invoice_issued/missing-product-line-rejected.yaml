@@ -29,8 +29,14 @@ given:
       - { payable_account: 2200, amount_minor: 1281 }
 
 derivation: >-
-  Identical to `two-lines-two-product-lines-with-tax` in every field except that line 2 has no
-  `product_line`. 4200 is `dimensioned: true`, so REQ-LED-001 refuses the posting.
+  Identical to `two-lines-two-product-lines-with-tax` in every field except that line 2's
+  `product_line` KEY IS ABSENT. 4200 names `product_line` in its chart entry, so REQ-LED-001
+  refuses the posting.
+  **This is the case a declared null is NOT.** See `declared-null-product-line-recorded`, which is
+  accepted: there, someone determined that no tracked product line applies and wrote it down. Here
+  nobody decided anything, and an undecided field is indistinguishable from an oversight — which is
+  precisely how 28.74% of line revenue came to carry no product line in the current system. The
+  boundary the rule draws is absence versus null, not empty versus non-empty.
   **The whole entry is refused, not the offending line.** A partial posting would leave AR debited
   for a total the revenue side does not add up to — the control total is what makes that visible,
   and it is why rejection has to be all-or-nothing.
@@ -38,5 +44,5 @@ derivation: >-
 expect:
   transfers: []
   rejects:
-    - reason: "missing product_line dimension on a posting to 4200, which is dimensioned: true (REQ-LED-001)"
+    - reason: "product_line is not declared on a posting to 4200, whose chart entry requires it — absence is refused, an explicit null is not (REQ-LED-001, ADR-0025)"
       line: 1

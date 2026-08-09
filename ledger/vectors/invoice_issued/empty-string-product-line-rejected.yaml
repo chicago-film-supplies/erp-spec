@@ -32,8 +32,11 @@ derivation: >-
   input and records a posting whose product line is the empty string — a dimension that exists,
   reports as a distinct bucket, and means nothing. The current system's untracked revenue is a null;
   this is how the same defect comes back wearing a value.
-  Refusal is not substitution: there is no coercion to `"Other"`, which would be the same lie with a
-  friendlier name (see OQ-022 on whether `Other` should survive at all).
+  Nor is it coerced to `"Other"` — that value no longer exists (OQ-022, ADR-0025), because a bucket
+  that reads as a category and means "nobody chose" is the same lie with a friendlier name.
+  **The correct way to say "none applies" is an explicit null**, which IS accepted — see
+  `declared-null-product-line-recorded`. `""` is refused precisely because it is neither: not a
+  value, and not a stated determination.
 
 expect:
   transfers: []

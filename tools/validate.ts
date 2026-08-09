@@ -828,15 +828,24 @@ for (const i of inbox) {
           for (const d of Array.isArray(a.dimensions) ? a.dimensions : []) required.add(String(d));
         }
         for (const dim of dimValues.keys()) {
-          const present = t[dim] !== undefined && t[dim] !== null && String(t[dim]) !== "";
-          if (required.has(dim) && !present) {
-            fail(G, `${where} transfer[${j}]: posts to a dimensioned account but carries no \`${dim}\` (REQ-LED-001)`);
+          // ABSENT vs NULL is the whole distinction, and it is not a nicety. The 28.7% of untracked
+          // revenue came from postings where nobody decided; an explicit `null` IS a decision —
+          // "no tracked value applies" — and is countable, reportable and auditable. So a missing
+          // KEY is refused and a null VALUE is recorded. An empty string is neither: it satisfies
+          // a naive NOT NULL check while meaning nothing, so it stays refused.
+          const declared = Object.prototype.hasOwnProperty.call(t, dim);
+          if (required.has(dim) && !declared) {
+            fail(G, `${where} transfer[${j}]: posts to a dimensioned account but does not declare \`${dim}\` — absence is refused; an explicit null is not (REQ-LED-001)`);
           }
-          if (!required.has(dim) && t[dim] !== undefined) {
-            fail(G, `${where} transfer[${j}]: carries \`${dim}\` but neither account requires it`);
+          if (!required.has(dim) && declared) {
+            fail(G, `${where} transfer[${j}]: declares \`${dim}\` but neither account requires it`);
           }
-          if (present && dimValues.has(dim) && !dimValues.get(dim)!.has(String(t[dim]))) {
-            fail(G, `${where} transfer[${j}]: ${dim} "${t[dim]}" is not a declared value in ledger/dimensions.yaml`);
+          if (declared && t[dim] !== null) {
+            if (String(t[dim]) === "") {
+              fail(G, `${where} transfer[${j}]: ${dim} is the empty string — write an explicit null to record that none applies`);
+            } else if (!dimValues.get(dim)!.has(String(t[dim]))) {
+              fail(G, `${where} transfer[${j}]: ${dim} "${t[dim]}" is not a declared value in ledger/dimensions.yaml`);
+            }
           }
         }
       }

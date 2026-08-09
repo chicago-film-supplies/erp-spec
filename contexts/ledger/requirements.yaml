@@ -8,9 +8,10 @@
 requirements:
   - id: REQ-LED-001
     statement: >-
-      Every posting to an account whose chart entry names a required dimension shall carry that
-      dimension, with a value drawn from that dimension's declared set, and a posting missing one
-      shall be rejected rather than recorded.
+      Every posting to an account whose chart entry names a required dimension shall DECLARE that
+      dimension — either a value drawn from the dimension's declared set, or an explicit null
+      recording that no tracked value applies — and a posting that does not declare it shall be
+      rejected rather than recorded.
     rationale: >-
       A dimension that may be absent will be absent. Measured 2026-08-08 on the current system:
       28.7% of line revenue ($485,821.72 of $1,689,895.68) carries no product line, concentrated
@@ -20,7 +21,11 @@ requirements:
       wrong in both directions: `cost_type` describes labour, so no value of it is true of a rental
       revenue posting, while several revenue accounts arise from no sale and carry no product line
       either. Naming the obligation on the ACCOUNT keeps the rule enforceable without weakening it,
-      and the escape hatch for an uncategorisable line is 4800 Other Income, not a null.
+      and the escape hatch for an uncategorisable line is 4800 Other Income.
+      Amended again the same day per OQ-025: what is refused is ABSENCE, not null. The measured
+      failure was postings where nobody decided and the field was quietly left empty — an explicit
+      null is a decision, and a countable, reportable one. An empty string is refused alongside
+      absence, because it passes a naive NOT NULL check while meaning nothing.
     source: inbox/2026-08-08-untracked-revenue-share.md
     priority: must
     verification_method: test

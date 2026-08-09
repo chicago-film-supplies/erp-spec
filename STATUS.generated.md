@@ -59,7 +59,7 @@ None.
 | `ADR-0022` | Invoice status decomposes into two derived projections | 2026-09-01 | `HOT-009` |
 | `ADR-0023` | Native Node-API addons load under Deno; the deployment unit is a self-extracting compiled binary | 2026-10-01 | `SPIKE-001` `SPIKE-007` `SPIKE-010` |
 | `ADR-0024` | DuckDB is reached natively and server-side; client-side reporting is rejected | 2026-10-01 | `SPIKE-007` |
-| `ADR-0025` | The dimension obligation is stated per account, and the escape hatch is an account | 2026-10-01 | `HOT-011` `OQ-021` `OQ-022` `OQ-025` |
+| `ADR-0025` | The dimension obligation is per account, and what is refused is absence rather than null | 2026-10-01 | `HOT-011` `OQ-021` `OQ-022` `OQ-025` |
 
 ## Spikes
 
