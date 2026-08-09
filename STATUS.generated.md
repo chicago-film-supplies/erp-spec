@@ -13,7 +13,7 @@ is `deno task validate`'s judgement, not this file's.
 |---|---:|---|
 | Open questions | 29 | **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 11 | 0 open |
-| Decisions (ADR) | 26 | 16 in force · 8 proposed |
+| Decisions (ADR) | 26 | 17 in force · 7 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 2 | 0 without a scenario |
 | Inbox | 38 | 27 unpromoted |
@@ -30,7 +30,7 @@ None.
 
 ## Decisions
 
-### In force (16)
+### In force (17)
 
 - `ADR-0001` — Replace Xero with an in-house ledger
 - `ADR-0002` — Bank feed sourced from Plaid, single Chase account
@@ -48,8 +48,9 @@ None.
 - `ADR-0022` — Invoice status decomposes into two derived projections
 - `ADR-0023` — Native Node-API addons load under Deno; the deployment unit is a self-extracting compiled binary
 - `ADR-0024` — DuckDB is reached natively and server-side; client-side reporting is rejected
+- `ADR-0026` — The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time
 
-### Proposed (8)
+### Proposed (7)
 
 | ADR | Title | Review by | Blocked on |
 |---|---|---|---|
@@ -60,7 +61,6 @@ None.
 | `ADR-0019` | Labour costing is actual; absorption measures utilisation, not rate variance | 2026-10-01 | `HOT-003` `HOT-004` `HOT-010` `OQ-005` `OQ-006` `OQ-008` `OQ-011` `OQ-017` `OQ-018` `OQ-019` |
 | `ADR-0020` | Xero history is restated, not imported as-is | 2026-10-15 | `HOT-006` `OQ-012` |
 | `ADR-0025` | The dimension obligation is per account, and what is refused is absence rather than null | 2026-10-01 | `HOT-011` `OQ-021` `OQ-022` `OQ-025` |
-| `ADR-0026` | The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time | 2026-10-01 | `SPIKE-005` `OQ-027` `OQ-029` |
 
 ## Spikes
 

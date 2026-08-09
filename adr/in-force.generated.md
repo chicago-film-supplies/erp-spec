@@ -100,6 +100,12 @@ Accepted and not superseded, as of the last `deno task gen`.
 
 > **In the context of** sealed-period Parquet as the closed-period reporting authority (ADR-0017), **facing** a choice between the native DuckDB addon, WASM in the API process, and WASM in the browser, **we decided** to reach DuckDB natively and server-side and to reject client-side reporting, **to achieve** exact integer reporting over an artifact the server controls, **accepting** that reporting stays an API surface we have to build.
 
+## [ADR-0026](ADR-0026-tax-basis-is-a-non-posting-derived-book.md) — The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time
+
+**Contexts:** fixed-assets, ledger, tax · **Decided:** 2026-08-09
+
+> **In the context of** a fixed-asset register that must produce a full P&L *and balance sheet* on both a GAAP and a tax basis across years, **facing** a fleet where a §179 election expenses an asset in year 1 that GAAP carries for 5, 10 or 20, **we decided** that only the GAAP book posts to the general ledger and the tax book is derived at report time from the register's per-book schedules, **to achieve** two complete sets of statements without a second write path, **accepting** that the tax book has no double-entry enforcement of its own and is only as good as its derivation.
+
 # Proposed, not yet in force
 
 | ADR | Title | Review by | Blocked on |
@@ -111,4 +117,3 @@ Accepted and not superseded, as of the last `deno task gen`.
 | [ADR-0019](ADR-0019-labour-costing-is-actual.md) | Labour costing is actual; absorption measures utilisation, not rate variance | 2026-10-01 | HOT-003, HOT-004, HOT-010, OQ-005, OQ-006, OQ-008, OQ-011, OQ-017, OQ-018, OQ-019 |
 | [ADR-0020](ADR-0020-xero-history-is-restated.md) | Xero history is restated, not imported as-is | 2026-10-15 | HOT-006, OQ-012 |
 | [ADR-0025](ADR-0025-dimension-obligation-is-per-account.md) | The dimension obligation is per account, and what is refused is absence rather than null | 2026-10-01 | HOT-011, OQ-021, OQ-022, OQ-025 |
-| [ADR-0026](ADR-0026-tax-basis-is-a-non-posting-derived-book.md) | The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time | 2026-10-01 | SPIKE-005, OQ-027, OQ-029 |

@@ -157,12 +157,15 @@ Three things the survey is for, and only the first is obvious:
   model**, so following the criterion and departing from the default was the correct read. A survey
   that only collects defaults gets this backwards.
 - **The MIGRATION DELTA, which only Xero can tell you.** ADR-0001 replaces Xero, so a departure from
-  it has to be carried across history rather than merely designed. The credit-note decision is the
-  live example: Xero credits AR at issue and 2050 does not, so the migration has to decide what a
-  historical credit note becomes — and whether that costs anything turns on a measurable fact,
-  namely whether any note was unallocated across a period boundary. **State the delta and what would
-  measure it; do not assert its size until it is measured.** ADR-0020 governs how history is
-  restated, and its rule that a restatement must not alter any amount is what makes the size matter.
+  it has to be carried across history rather than merely designed. **State the delta, state what
+  would measure it, then go and measure it** — an unmeasured migration cost is the kind of claim
+  that hardens into a reason not to do something.
+  The credit-note decision is the worked example, end to end. Xero credits AR at issue and 2050 does
+  not, so the two disagree only while a note is unallocated; the measurable fact is whether any note
+  was ever unallocated across a period boundary; and the measurement came back **zero** — 9 of 9
+  allocations in the same month as issue. The delta that looked like a cost is nil, and the same
+  query turned up a real defect on the way (api-cloudrun#469). ADR-0020's "the restatement must not
+  alter any amount" is what makes the size matter.
 
 Practitioner material counts and is sometimes the best evidence: a consultancy publishing *how to
 work around* a product's default is a measurement of what that default costs. Cite it.

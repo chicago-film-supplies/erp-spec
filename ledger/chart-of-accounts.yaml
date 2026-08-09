@@ -451,9 +451,22 @@ accounts:
       `settlements` row that may split it across invoices. CN-1015: $259.74 issued, $247.75 to
       invoice 1767 and $11.99 to invoice 1751 (`api:2026-08-09:get_settlements`). At issue it is
       attached to nothing, which is the deposit side of the line, not the credit-memo side.
-      ⚠️ A `disposition: new` is a PROPOSAL for the owner, like every other disposition in this
-      file. The alternative — credit 1200 at issue, Xero's model and what the live GL does today —
-      would make `credit_note_allocated` post nothing and move EVT-BIL-006 to `no_posting`.
+      **ACCEPTED by the owner 2026-08-09**, on the survey rather than on the first argument offered
+      for it — see the withdrawal note in
+      `inbox/2026-08-09-customer-credit-balances-across-four-suites.md`. The alternative considered
+      and rejected: credit 1200 at issue, which is Xero's model and what the live GL does today. It
+      would have made `credit_note_allocated` post nothing and moved EVT-BIL-006 to `no_posting`.
+      **The migration delta that choice creates is ZERO, measured rather than assumed.** Xero
+      credits AR at issue and this account does not, so the two designs disagree only while a note
+      is unallocated. Every one of the **9** resolvable allocations in the corpus happened in the
+      **same month** the note was issued — none crosses a month-end — so at every historical period
+      boundary 2050 and 1200 give identical closing balances and ADR-0020's "the restatement must
+      not alter any amount" is satisfied trivially (`api:2026-08-09:search_credit_notes` +
+      `get_settlements`, 13 notes / 9 allocations / 0 crossings).
+      ⚠️ Two `applied` notes — CN-1013 and CN-1016 — have **no allocation row at all**, so they are
+      outside that measurement rather than inside it. That is a defect in the current journal, filed
+      as api-cloudrun#469; it does not change the delta unless the missing rows turn out to cross a
+      boundary.
     source: "api:2026-08-09:search_credit_notes"
     note: >-
       13 credit notes live, 10 `applied` / 3 `void`, and **none currently unallocated** — every

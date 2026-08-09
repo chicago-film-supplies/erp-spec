@@ -194,8 +194,8 @@
           <outline text="blocks OQ-021"/>
         </outline>
       </outline>
-      <outline text="Decisions (16 in force, 8 proposed)">
-        <outline text="In force (16)">
+      <outline text="Decisions (17 in force, 7 proposed)">
+        <outline text="In force (17)">
           <outline text="ADR-0001 — Replace Xero with an in-house ledger" _note="**In the context of** owning the order-to-invoice path but renting the ledger, **facing** a tracking-dimension defect that Xero silently absorbs and a costing model Xero cannot express, **we decided** to build the general ledger in-house, **to achieve** dimensional postings that cannot be null and a labour-absorption model we control, **accepting** that a large amount of unglamorous accounting surface area becomes ours to build and keep correct."/>
           <outline text="ADR-0002 — Bank feed sourced from Plaid, single Chase account" _note="**In the context of** needing bank transactions now that Xero's feed goes away, **facing** one bank and one account, **we decided** to source the feed from Plaid, **to achieve** a working feed without a bank-specific integration, **accepting** that Plaid's transaction model is a consumer-fintech model, not an accounting bank feed."/>
           <outline text="ADR-0003 — MongoDB for documents and masterfiles; TigerBeetle for the ledger" _note="**In the context of** replacing Firestore, **facing** two genuinely different storage problems — nested mutable business documents and an immutable balance-bearing ledger — **we decided** to use MongoDB for documents and TigerBeetle for the ledger, **to achieve** a ledger with enforced double-entry and real throughput alongside a document store that fits the order shape, **accepting** a two-store commit problem that has to be specified formally."/>
@@ -212,8 +212,9 @@
           <outline text="ADR-0022 — Invoice status decomposes into two derived projections" _note="**In the context of** an invoice status field that carries two different kinds of fact at once, **facing** two live defect populations that are one of each, **we decided** to decompose it into two independently derived projections, **to achieve** a state that cannot go stale and a voided invoice that cannot hold a balance, **accepting** that the single `status` enum every reader knows is retired."/>
           <outline text="ADR-0023 — Native Node-API addons load under Deno; the deployment unit is a self-extracting compiled binary" _note="**In the context of** a Deno API that must load three npm packages with native or native-adjacent dependencies, **facing** a `deno compile` deployment unit whose Node-API support was entirely unmeasured, **we decided** to ship a `deno compile --self-extracting` binary and forbid `--bundle`, **to achieve** a single deployable artifact on plain VMs, **accepting** a ~364 MB binary, a first-run extraction step, and a flag whose necessity nothing type-checks."/>
           <outline text="ADR-0024 — DuckDB is reached natively and server-side; client-side reporting is rejected" _note="**In the context of** sealed-period Parquet as the closed-period reporting authority (ADR-0017), **facing** a choice between the native DuckDB addon, WASM in the API process, and WASM in the browser, **we decided** to reach DuckDB natively and server-side and to reject client-side reporting, **to achieve** exact integer reporting over an artifact the server controls, **accepting** that reporting stays an API surface we have to build."/>
+          <outline text="ADR-0026 — The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time" _note="**In the context of** a fixed-asset register that must produce a full P&amp;L *and balance sheet* on both a GAAP and a tax basis across years, **facing** a fleet where a §179 election expenses an asset in year 1 that GAAP carries for 5, 10 or 20, **we decided** that only the GAAP book posts to the general ledger and the tax book is derived at report time from the register's per-book schedules, **to achieve** two complete sets of statements without a second write path, **accepting** that the tax book has no double-entry enforcement of its own and is only as good as its derivation."/>
         </outline>
-        <outline text="Proposed (8)">
+        <outline text="Proposed (7)">
           <outline text="ADR-0009 — Anticorruption layer — foreign identifiers never enter domain models" _note="review by: 2026-09-15 · **In the context of** integrating Plaid and any surviving external system, **facing** a tracking-id drift that silently cost 28.7% of revenue its dimension, **we decided** that foreign identifiers never enter domain models and an unresolvable id is a hard error, **to achieve** failures that are loud at the boundary instead of silent in the data, **accepting** that ingestion will refuse work that the current system would have accepted.">
             <outline text="blocked on HOT-006"/>
           </outline>
@@ -250,11 +251,6 @@
             <outline text="blocked on OQ-021"/>
             <outline text="blocked on OQ-022"/>
             <outline text="blocked on OQ-025"/>
-          </outline>
-          <outline text="ADR-0026 — The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time" _note="review by: 2026-10-01 · **In the context of** a fixed-asset register that must produce a full P&amp;L *and balance sheet* on both a GAAP and a tax basis across years, **facing** a fleet where a §179 election expenses an asset in year 1 that GAAP carries for 5, 10 or 20, **we decided** that only the GAAP book posts to the general ledger and the tax book is derived at report time from the register's per-book schedules, **to achieve** two complete sets of statements without a second write path, **accepting** that the tax book has no double-entry enforcement of its own and is only as good as its derivation.">
-            <outline text="blocked on SPIKE-005"/>
-            <outline text="blocked on OQ-027"/>
-            <outline text="blocked on OQ-029"/>
           </outline>
         </outline>
       </outline>

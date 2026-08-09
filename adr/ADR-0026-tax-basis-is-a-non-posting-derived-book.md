@@ -1,9 +1,8 @@
 ---
 id: ADR-0026
 title: The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time
-status: proposed
+status: accepted
 date: 2026-08-09
-review_by: 2026-10-01
 deciders: [repo owner]
 contexts: [fixed-assets, ledger, tax]
 relates_to: [ADR-0007, ADR-0017, ADR-0018, SPIKE-005, OQ-027, OQ-029]
@@ -74,13 +73,13 @@ superseded_by:
 The **tax book is produced by the read side** (ADR-0017: MongoDB for open periods, the sealed
 Parquet artifact for closed ones) as a set of balanced **tax-book entries** derived from **one**
 source: the fixed-asset register's per-asset tax schedule. **Depreciation is the only legitimate
-difference between the two books.**
+difference between the two books.** Those entries use the same chart of accounts — 7001 Section 179
+Depreciation Expense, the `Less-Accumulated Depreciation` accounts, 1998 Gain/Loss On Asset
+Disposal — and they are entries in the projection, never transfers in the ledger.
 
-The statements as filed carry a second one — retail-inventory costing, $259.13 cumulative — and the
-owner has ruled it **an error to be corrected, not a difference in basis** (OQ-029). The migration
-carries one retail-inventory cost on both bases. They use the same chart of accounts — 7001
-Section 179 Depreciation Expense, the `Less-Accumulated Depreciation` accounts, 1998 Gain/Loss On
-Asset Disposal — and they are entries in the projection, never transfers in the ledger.
+The statements as filed carry a second difference — retail-inventory costing, $259.13 cumulative —
+and the owner has ruled it **an error to be corrected, not a difference in basis** (OQ-029). The
+migration carries one retail-inventory cost on both bases.
 
 A statement is then a query over a book scope:
 
