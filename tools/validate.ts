@@ -502,7 +502,7 @@ for (const i of inbox) {
     class?: string;
     normal_balance?: string;
     contra?: boolean;
-    dimensioned?: unknown;
+    dimensions?: unknown;
     disposition?: string;
     status_live?: string;
     class_live?: string;
@@ -552,7 +552,7 @@ for (const i of inbox) {
     for (const f of ["code", "name", "class", "normal_balance", "disposition", "source"] as const) {
       if (a[f] === undefined || a[f] === null || a[f] === "") fail(G, `${where}: missing \`${f}\``);
     }
-    if (a.dimensioned === undefined) fail(G, `${where}: missing \`dimensioned\``);
+    if (a.dimensions === undefined) fail(G, `${where}: missing \`dimensions\``);
     if (typeof a.code !== "number" || !Number.isInteger(a.code)) {
       fail(G, `${where}: \`code\` must be an integer`);
     } else if (byCode.has(a.code)) {
@@ -569,8 +569,8 @@ for (const i of inbox) {
     if (a.disposition && !DISPOSITIONS.includes(a.disposition)) {
       fail(G, `${where}: disposition "${a.disposition}" not one of ${DISPOSITIONS.join(" | ")}`);
     }
-    if (a.dimensioned !== undefined && typeof a.dimensioned !== "boolean" && a.dimensioned !== "undecided") {
-      fail(G, `${where}: dimensioned must be true | false | undecided`);
+    if (a.dimensions !== undefined && !Array.isArray(a.dimensions) && a.dimensions !== "undecided") {
+      fail(G, `${where}: dimensions must be a list of dimension ids, or \`undecided\``);
     }
 
     // 10b — normal_balance follows class, inverted by `contra`. Both arms are exercised by the
@@ -596,7 +596,7 @@ for (const i of inbox) {
       if (a.merge_into === undefined) fail(G, `${where}: \`merge\` requires \`merge_into\``);
     }
     // `undecided` may sit on the disposition or on `dimensioned`; either way it owes a live blocker.
-    if (a.disposition === "undecided" || a.dimensioned === "undecided") {
+    if (a.disposition === "undecided" || a.dimensions === "undecided") {
       if (!a.reason) fail(G, `${where}: \`undecided\` requires a \`reason\``);
       checkBlockers(a.blocked_by, where);
     }
@@ -757,6 +757,17 @@ for (const i of inbox) {
     if (d.id) dimValues.set(d.id, new Set(d.values ?? []));
   }
 
+  // Every dimension an account demands must be a dimension that exists. Without this the chart
+  // could require `cost_typ` forever and no vector would ever be asked for it.
+  for (const a of accounts) {
+    if (!Array.isArray(a.dimensions)) continue;
+    for (const d of a.dimensions) {
+      if (!dimValues.has(String(d))) {
+        fail(G, `chart-of-accounts code ${a.code}: requires dimension "${d}", which ledger/dimensions.yaml does not define`);
+      }
+    }
+  }
+
   /** Resolve `a.b[0].c` inside a plain object. Returns `undefined` for any missing step. */
   const at = (obj: unknown, path: string): unknown => {
     let cur: unknown = obj;
@@ -806,17 +817,17 @@ for (const i of inbox) {
         if (typeof c !== "number") fail(G, `${where} transfer[${j}]: ${side} must be a GL code`);
         else if (!byCode.has(c)) fail(G, `${where} transfer[${j}]: ${side} ${c} is not an account in the chart`);
       }
-      // 10h — dimension obligation, derived from the chart and dimensions.yaml, NOT from the rule.
+      // 10h — dimension obligation. The requirement is READ OFF each account's own `dimensions`
+      // list, never inferred from its class: `cost_type` describes labour and applies to 5800
+      // alone, so "is this COGS" is not a rule that can produce the right answer.
       const sides = [t.debit_account, t.credit_account].map((c) => byCode.get(Number(c))).filter(Boolean) as Account[];
-      const dimensioned = sides.filter((a) => a.dimensioned === true);
-      const undecided = sides.some((a) => a.dimensioned === "undecided");
+      const undecided = sides.some((a) => a.dimensions === "undecided");
       if (!undecided) {
         const required = new Set<string>();
-        for (const a of dimensioned) {
-          required.add("product_line");
-          if (a.class === "expense") required.add("cost_type");
+        for (const a of sides) {
+          for (const d of Array.isArray(a.dimensions) ? a.dimensions : []) required.add(String(d));
         }
-        for (const dim of ["product_line", "cost_type"]) {
+        for (const dim of dimValues.keys()) {
           const present = t[dim] !== undefined && t[dim] !== null && String(t[dim]) !== "";
           if (required.has(dim) && !present) {
             fail(G, `${where} transfer[${j}]: posts to a dimensioned account but carries no \`${dim}\` (REQ-LED-001)`);

@@ -45,15 +45,18 @@ Feature: Revenue and COGS postings carry both mandatory dimensions
   @REQ-LED-001
   Scenario Outline: Unabsorbed labour is the one posting exempt from the cost-type rule
     ADR-0019: guaranteed-but-unworked hours are a real cost attributable to no job, so
-    COGS-Unabsorbed Labour is undimensioned BY DESIGN. If the rule above had no exemption, the
-    unabsorbed posting could not be written at all — and the pressure would be to invent a
-    dimension value for it, which is the failure this scenario exists to forbid.
+    5801 Cost of Goods Sold: Wages (Unabsorbed) is undimensioned BY DESIGN. If the rule above had
+    no exemption, the unabsorbed posting could not be written at all — and the pressure would be to
+    invent a dimension value for it, which is the failure this scenario exists to forbid.
+    ADR-0025 is what makes the exemption expressible rather than special-cased: the obligation is
+    read off each account's own `dimensions` list in ledger/chart-of-accounts.yaml, and 5801's is
+    empty. 5800 is the only account in the chart that names `cost_type` at all.
 
     Given a COGS posting to <account>
     When the posting is submitted to the ledger with no cost type
     Then the posting is <outcome>
 
     Examples:
-      | account                 | outcome  |
-      | COGS-Labour Absorbed    | rejected |
-      | COGS-Unabsorbed Labour  | recorded |
+      | account                                    | outcome  |
+      | 5800 Cost of Goods Sold: Wages (Absorbed)   | rejected |
+      | 5801 Cost of Goods Sold: Wages (Unabsorbed) | recorded |

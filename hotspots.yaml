@@ -211,4 +211,5 @@ hotspots:
       (`api:2026-08-09:db_chart_of_accounts_query`, 134 accounts). Forcing a product line onto them
       makes `Other` the new null, which `dimensions.yaml`'s own note already warns against.
     blocks: [OQ-021]
-    status: open
+    status: resolved
+    resolved_by: ADR-0025

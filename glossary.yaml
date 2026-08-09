@@ -156,41 +156,55 @@ terms:
     source: "verified:2026-08-08:db_tracking_categories_query"
     verified: true
     notes: >-
-      In the current system this is the Xero tracking category. 21 exist: Crafty, Surface
-      Protection, Traffic Safety & Signage, Replacements, Delivery, Wardrobe, Fans & Heaters,
-      Office Supplies, Hair & Makeup, Transport, Power Lights & Tools, Trash & Cleanup, Janitorial,
-      Other, Transaction Fees, Walkies & Hotspots, Carts & Ramps, Expendables, Tables & Chairs,
-      Crew, Tents. 28.7% of historical line revenue carries none.
+      In the current system this is the Xero tracking category, and 21 exist. **The target set is
+      20** — ADR-0025 deletes `Other`, because a non-nullable dimension makes it the new null. The
+      escape hatch for an uncategorisable line is the account 4800 Other Income, which requires no
+      dimension, not a value that reads as a category and means "nobody chose".
+      The 20: Crafty, Surface Protection, Traffic Safety & Signage, Replacements, Delivery,
+      Wardrobe, Fans & Heaters, Office Supplies, Hair & Makeup, Transport, Power Lights & Tools,
+      Trash & Cleanup, Janitorial, Transaction Fees, Walkies & Hotspots, Carts & Ramps, Expendables,
+      Tables & Chairs, Crew, Tents. 28.7% of historical line revenue carries none.
 
   - term: standard cost
     definition: >-
       A predetermined per-unit labour cost applied to a job when it is performed, rather than the
-      actual cost of the crew-day. The difference between standard applied and actual incurred is
-      the variance.
+      actual cost of the crew-day. **CFS does not use standard labour rates and the target system
+      does not implement this** — ADR-0019 costs labour at actual, from a per-contact wage. The
+      term is kept because it is needed to read the charter's earlier wording and the inbox note
+      that introduced it, not because it describes anything CFS does.
     aliases: [applied cost]
     contexts: [ledger]
     source: inbox/2026-08-08-standard-cost-with-variance.md
-    open_questions: [OQ-008]
-    notes: The rates themselves are unset, and who sets them (and how often) is undecided.
+    notes: >-
+      Retired by ADR-0019 (HOT-010). The wage is $30/hr with a guaranteed 8 hours, 1.5x after 8 in
+      a day and 1.5x on a 6th/7th consecutive day, carried per contact and overridable — so there
+      is no standard to apply and no rate to set. OQ-008, which asked who sets the rates, is
+      answered: nobody, because there are none.
 
   - term: variance
     definition: >-
-      Actual labour cost incurred minus standard cost absorbed, posted as its own line rather than
-      spread pro-rata across jobs.
+      Actual labour cost incurred minus standard cost absorbed. **No such quantity exists in the
+      target system** — a rate variance cannot exist where there is no standard rate (ADR-0019,
+      HOT-010), and the `labour_variance` posting rule that would have computed it was removed
+      because it could never fire. What survives is UTILISATION: the split between absorbed and
+      unabsorbed labour, which measures how much paid time reached a job, not how far a rate
+      deviated.
     aliases: [labour variance, absorption variance]
     contexts: [ledger]
     source: inbox/2026-08-08-standard-cost-with-variance.md
-    verified: false
+    verified: true
 
   - term: unabsorbed labour
     definition: >-
-      The residual labour cost that no causal job absorbed, posted to an untracked
-      `COGS – Unabsorbed Labour` account. This account IS the idle-capacity KPI — it is not a
-      plug or a rounding sink.
+      The residual labour cost that no causal job absorbed — guaranteed-but-unworked hours and
+      idle time — posted to `5801 Cost of Goods Sold: Wages (Unabsorbed)`, which is undimensioned
+      by design. This account IS the idle-capacity KPI: it is not a plug or a rounding sink, and a
+      dimension on it would let idle time be attributed to a product line, which is the exact lie
+      to avoid.
     aliases: [idle capacity, unabsorbed]
     contexts: [ledger]
-    source: inbox/2026-08-08-standard-cost-with-variance.md
-    verified: false
+    source: adr/ADR-0019-labour-costing-is-actual.md
+    verified: true
 
   # ── Accounting core ─────────────────────────────────────────────────────────
 

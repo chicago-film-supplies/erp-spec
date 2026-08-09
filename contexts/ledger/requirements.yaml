@@ -8,14 +8,21 @@
 requirements:
   - id: REQ-LED-001
     statement: >-
-      Every revenue and COGS posting shall carry both a product line and a cost type, and a
-      posting missing either shall be rejected rather than recorded.
+      Every posting to an account whose chart entry names a required dimension shall carry that
+      dimension, with a value drawn from that dimension's declared set, and a posting missing one
+      shall be rejected rather than recorded.
     rationale: >-
       A dimension that may be absent will be absent. Measured 2026-08-08 on the current system:
       28.7% of line revenue ($485,821.72 of $1,689,895.68) carries no product line, concentrated
       in service lines at 71.9%. The dimension was optional and that is the entire cause.
+      Amended 2026-08-09 per ADR-0025. The previous wording — "every revenue and COGS posting
+      shall carry both a product line and a cost type" — named the two dimensions directly and was
+      wrong in both directions: `cost_type` describes labour, so no value of it is true of a rental
+      revenue posting, while several revenue accounts arise from no sale and carry no product line
+      either. Naming the obligation on the ACCOUNT keeps the rule enforceable without weakening it,
+      and the escape hatch for an uncategorisable line is 4800 Other Income, not a null.
     source: inbox/2026-08-08-untracked-revenue-share.md
     priority: must
     verification_method: test
     status: draft
-    relates_to: [ADR-0009, HOT-006]
+    relates_to: [ADR-0009, ADR-0018, ADR-0025, HOT-006, HOT-011]

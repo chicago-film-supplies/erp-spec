@@ -326,7 +326,15 @@ open_questions:
     owner: alex
     decide_by: 2026-09-15
     blocks: [REQ-LED, HOT-011]
-    status: open
+    status: answered
+    answer: >-
+      Revenue accounts carry a **product line**. `cost_type` is a **labour** dimension — its values
+      are delivery / counter / warehouse — so it applies to 5800 Cost of Goods Sold: Wages
+      (Absorbed) alone, and to no revenue account and no non-labour COGS account.
+      REQ-LED-001's statement is amended to match; `ledger/dimensions.yaml` moves `cost_type` from
+      `required_on: [cogs]` to `[labour_cogs]`; and the chart of accounts now states the obligation
+      **per account** as an explicit `dimensions:` list rather than leaving it to be inferred from
+      class. Resolves HOT-011.
     notes: >-
       Three statements disagree and all three are load-bearing. REQ-LED-001 says both dimensions on
       every revenue and COGS posting; `ledger/dimensions.yaml` says `product_line` on revenue and
@@ -345,7 +353,15 @@ open_questions:
     owner: alex
     decide_by: 2026-09-15
     blocks: [REQ-LED]
-    status: open
+    status: answered
+    answer: >-
+      **`Other` is deleted from the product_line value set** — 21 values become 20. The escape
+      hatch for a one-off product or service that maps to no product line is an ACCOUNT, not a
+      value: it is coded to **4800 Other Income**, which requires no dimension. Tax and liability
+      postings — the bottled water tax among them — likewise carry no dimension, because 2200 and
+      2210 require none.
+      REQ-LED-001 is unaffected: a posting to an account whose `dimensions` list names
+      `product_line` is still REJECTED if it lacks one. There is no null in a required field.
     notes: >-
       ADR-0020 deferred this to m3 explicitly and m3 cannot answer it — it is a taxonomy decision,
       not a finding. A non-nullable dimension makes `Other` the new null: the bucket that means
@@ -355,7 +371,14 @@ open_questions:
       category. Every other undimensioned line restates mechanically (Trash Removal and Walk Around
       Trash Sweep to `Trash & Cleanup`, Trucking to `Transport`, Contract Labor to `Crew`), so this
       residue is the whole of the judgement. Deciding it late means restating the restatement.
-
+      —
+      The reason the answer works where a bare null would not is ADR-0009's: a null that means "we could
+      not categorise this" is indistinguishable from a null that means "this legitimately has no
+      category", and once written the distinction is gone. Carrying the absence on the ACCOUNT
+      keeps it visible — a line in 4800 asserts "this was not a categorised sale", which is a fact
+      about the transaction, where a line in 4100 tagged `Other` asserts "this was a categorised
+      sale" and then names no category, which is not.
+      ⚠️ It leaves ADR-0020's restatement residue without a target — see OQ-025.
   - id: OQ-023
     question: >-
       What posts to `5400 Cost of Goods Sold: Job Costs` today, and does own-crew labour cost belong
@@ -363,7 +386,15 @@ open_questions:
     owner: alex
     decide_by: 2026-09-15
     blocks: [REQ-LED]
-    status: open
+    status: answered
+    answer: >-
+      **5400 is a dead account.** It was a catchall for one-off project job costs. In v2 that
+      population is captured by the specific COGS accounts instead — wages to 5800/5801,
+      subcontractors to 5200, equipment rental to 5100 — so 5400 takes no new postings and its
+      `disposition` is `drop`. It stays `Active` in the live chart, so its history still imports
+      under ADR-0020.
+      This also settles the duplication risk the question was asked about: 5800 does not compete
+      with 5400 for the same money, because 5400 stops receiving any.
     notes: >-
       ADR-0019 moves own-crew cost out of 6600 Wages into "a dimensioned COGS account beside the
       existing 5200", and `ledger/chart-of-accounts.yaml` mints 5800 for it. But 5400 already exists,
@@ -373,7 +404,13 @@ open_questions:
       competing for the same money. **Not answerable from the CFS API**: the GL line detail is in
       Xero, and this repo may not reach Xero (single-tenant, live, shared daily quota). It needs
       someone to look at the Xero account activity directly.
-
+      —
+      Answered without needing that: the account is dead. The answer named the future taxonomy
+      directly — "cogs: wages, cogs: subcontractors, cogs:
+      equipment rental" — which is why 5800/5801 are named `Cost of Goods Sold: Wages (Absorbed)`
+      and `(Unabsorbed)` in the live house style rather than the invented `COGS – ` form.
+      A catchall sitting beside specific COGS accounts is where cost goes to avoid being
+      classified, which is the failure the dimensioned COGS block exists to prevent.
   - id: OQ-024
     question: What is the CREDIT leg of a labour cost posting?
     owner: alex
@@ -390,3 +427,45 @@ open_questions:
       order / bill that labour scheduling generates, which points at 2000 Accounts Payable — but
       that is an inference from account status, not a decision, and it interacts with OQ-020 since
       nothing yet owns purchase orders.
+
+  - id: OQ-025
+    question: >-
+      With `Other` deleted, where does ADR-0020's restatement residue land — historical revenue
+      lines that have no product line and no bucket to fall back on?
+    owner: alex
+    decide_by: 2026-09-15
+    blocks: [REQ-LED]
+    status: open
+    notes: >-
+      OQ-022 deleted `Other` and made 4800 Other Income the escape hatch for NEW postings. History
+      is the harder half. ADR-0020 restates every undimensioned line before import, and most of it
+      is mechanical — Trash Removal and Walk Around Trash Sweep to `Trash & Cleanup`, Trucking to
+      `Transport`, Contract Labor to `Crew`. The residue is one kind of thing: facility and
+      professional services with no equipment category — Warehouse Rental, Office Rental, Indoor
+      Parking, Location Scouting, Security, Safety & Security Assessment — sitting on 4100 Service
+      Income, which requires a product line.
+      Two options and they are not equivalent. Reassigning them to 4800 Other Income **moves money
+      between P&L sections** and restates reported revenue mix, which ADR-0021 already flagged as a
+      different kind of change from assigning a dimension. Minting a real product line for them
+      (`Facilities & Professional Services`) leaves the accounts alone and changes only the
+      dimension — but adds a 21st value that OQ-022 was trying to avoid needing.
+      ADR-0020 asserts the restatement must not alter any amount; only the first option can.
+
+  - id: OQ-026
+    question: >-
+      Is a supplier discount other income (4300) or a contra-COGS (5001), and which of the two
+      accounts survives?
+    owner: alex
+    decide_by: 2026-09-15
+    blocks: [REQ-LED]
+    status: open
+    notes: >-
+      `4300 Discounts Received` (Revenue) and `5001 Cost of Goods Sold: Purchase Discounts`
+      (contra-Expense) record the same economic event on opposite sides of the P&L, and **both are
+      Active today** — so the treatment is currently whichever account the operator picked.
+      It changes reported **gross margin** without changing net income, which makes it a
+      presentation decision for the owner and the CPA rather than a mechanical one. Both accounts
+      carry `dimensions: undecided` until it is settled, because the dimension follows the answer:
+      a discount recorded against COGS plausibly inherits the product line of the goods it
+      discounts, where one recorded as other income has no customer product line at all.
+      Split out of OQ-021, which settled the dimension rule but not this.

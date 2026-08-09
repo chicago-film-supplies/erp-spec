@@ -45,11 +45,10 @@
 # also what stops OQ-018's overtime-premium allocation from quietly landing inside a posting rule
 # instead of inside the shift record.
 #
-# **Dimensions ride on the transfer, not the account** (ADR-0018). A transfer carries the dimensions
-# required by its dimensioned side; if neither side is dimensioned it carries none; if both are,
-# they must agree. Gate 10g checks this against `chart-of-accounts.yaml`'s `dimensioned:` flag and
-# `dimensions.yaml`'s value sets — two files the rule does not control, so the check is independent
-# of the rule that it checks.
+# **Dimensions ride on the transfer, not the account** (ADR-0018) — but WHICH dimensions a transfer
+# owes is read off its accounts' own `dimensions:` lists in `chart-of-accounts.yaml` (ADR-0025),
+# never inferred from a class. Gate 10 checks that against `dimensions.yaml`'s value sets — two
+# files the rule does not control, so the check is independent of the rule it is checking.
 
 rules:
   # ══════════════════════════════════════════════════════════════════════════════════════════════
@@ -77,13 +76,15 @@ rules:
     control_total: invoice.total_minor
     invariants:
       - >-
-        A transfer whose dimensioned side is a `dimensioned: true` account carries every dimension
-        `dimensions.yaml` requires for that account's class — `product_line` on revenue, both
-        `product_line` and `cost_type` on COGS — or the posting is REFUSED rather than recorded
-        (REQ-LED-001). Refusal is not substitution: there is no fallback value, an empty string is
-        not a dimension value, and a value outside the declared set is not a value.
-        ⚠️ REQ-LED-001's own text says *both* dimensions on revenue as well; that is HOT-011, and
-        this rule follows `dimensions.yaml`'s narrower reading until OQ-021 settles it.
+        A transfer carries every dimension named by its accounts' own `dimensions:` lists in
+        `ledger/chart-of-accounts.yaml`, with a value from that dimension's declared set in
+        `ledger/dimensions.yaml`, or the posting is REFUSED rather than recorded (REQ-LED-001,
+        ADR-0025). For a revenue transfer that is `product_line`; `cost_type` is a labour dimension
+        and appears on 5800 alone.
+        Refusal is not substitution: there is no fallback value, an empty string is not a dimension
+        value, a value outside the declared set is not a value, and there is no `Other` to fall
+        back on — a line that maps to no product line is coded to 4800 Other Income, which requires
+        no dimension, rather than posted here without one.
       - >-
         No posting takes an accounting date inside a closed period (ADR-0010, ADR-0017). The check
         is on accounting date, never on posting timestamp.
@@ -192,10 +193,10 @@ rules:
     postings: []
     known:
       - >-
-        Dr **5800 COGS – Labour Absorbed** — hours actually worked on a causal job, at that
+        Dr **5800 Cost of Goods Sold: Wages (Absorbed)** — hours actually worked on a causal job, at that
         person's ACTUAL per-contact wage, dimensioned. There is no standard rate (ADR-0019).
       - >-
-        Dr **5801 COGS – Unabsorbed Labour** — guaranteed-but-unworked hours and idle time,
+        Dr **5801 Cost of Goods Sold: Wages (Unabsorbed)** — guaranteed-but-unworked hours and idle time,
         UNDIMENSIONED by design. This account IS the idle-capacity KPI, not a plug, and the gap
         between the two accounts measures UTILISATION rather than rate deviation.
       - >-

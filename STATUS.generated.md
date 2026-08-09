@@ -11,9 +11,9 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 24 | **0 with no owner or no decide-by** |
-| Conflicts (HOT) | 11 | 1 open |
-| Decisions (ADR) | 24 | 6 in force · 16 proposed |
+| Open questions | 26 | **0 with no owner or no decide-by** |
+| Conflicts (HOT) | 11 | 0 open |
+| Decisions (ADR) | 25 | 6 in force · 17 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 2 | 0 without a scenario |
 | Inbox | 33 | 22 unpromoted |
@@ -26,9 +26,7 @@ None — every open question has an owner and a decide-by date.
 
 ## Open conflicts
 
-| HOT | Statement | Blocks |
-|---|---|---|
-| `HOT-011` | REQ-LED-001 and ADR-0018 require BOTH dimensions on every revenue and COGS posting; `ledger/dimensions.yaml`… | `OQ-021` |
+None.
 
 ## Decisions
 
@@ -41,7 +39,7 @@ None — every open question has an owner and a decide-by date.
 - `ADR-0005` — Retain SolidJS clients
 - `ADR-0007` — Replace asset.accountant; dual GAAP/tax basis in scope
 
-### Proposed (16)
+### Proposed (17)
 
 | ADR | Title | Review by | Blocked on |
 |---|---|---|---|
@@ -61,6 +59,7 @@ None — every open question has an owner and a decide-by date.
 | `ADR-0022` | Invoice status decomposes into two derived projections | 2026-09-01 | `HOT-009` |
 | `ADR-0023` | Native Node-API addons load under Deno; the deployment unit is a self-extracting compiled binary | 2026-10-01 | `SPIKE-001` `SPIKE-007` `SPIKE-010` |
 | `ADR-0024` | DuckDB is reached natively and server-side; client-side reporting is rejected | 2026-10-01 | `SPIKE-007` |
+| `ADR-0025` | The dimension obligation is stated per account, and the escape hatch is an account | 2026-10-01 | `HOT-011` `OQ-021` `OQ-022` `OQ-025` |
 
 ## Spikes
 

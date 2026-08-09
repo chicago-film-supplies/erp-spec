@@ -24,7 +24,6 @@ dimensions:
       - Power, Lights & Tools
       - Trash & Cleanup
       - Janitorial
-      - Other
       - Transaction Fees
       - Walkies & Hotspots
       - Carts & Ramps
@@ -33,22 +32,33 @@ dimensions:
       - Crew
       - Tents
     note: >-
-      Carried over as-is for now. Whether the new system keeps all 21 — and whether "Other" should
-      exist at all, given a non-nullable dimension makes it the new null — is **OQ-022**, which
-      ADR-0020 deferred to m3 and m3 is not able to answer on its own. ADR-0020 names the exact
-      population that needs a value: facility and professional services with no equipment category
-      (Warehouse Rental, Office Rental, Indoor Parking, Location Scouting, Security, Safety &
-      Security Assessment). Every other undimensioned line restates mechanically.
+      **20 values — `Other` was deleted** (OQ-022). A non-nullable dimension makes `Other` the new
+      null: the bucket that reads as a category and means "nobody chose". The escape hatch is an
+      ACCOUNT, not a value — a one-off product or service that maps to no product line is coded to
+      4800 Other Income, which requires no dimension. So an uncategorised receipt is visibly
+      uncategorised on the face of the P&L instead of hiding inside operating revenue.
+      ⚠️ This leaves ADR-0020's restatement residue without a target: Warehouse Rental, Office
+      Rental, Indoor Parking, Location Scouting, Security and Safety & Security Assessment are
+      historical lines on 4100 Service Income with no product line and no `Other` to fall back on.
+      Moving them to 4800 reassigns an account rather than assigning a dimension, and that moves
+      money between P&L sections. **OQ-025.**
 
   - id: cost_type
     description: What kind of work a labour posting represents.
-    required_on: [cogs]
+    required_on: [labour_cogs]
     nullable: false
     source: inbox/2026-08-08-two-reporting-dimensions.md
     values: [delivery, counter, warehouse]
+    note: >-
+      **Labour only** (OQ-021, resolving HOT-011). `required_on: [labour_cogs]` means the accounts
+      whose `dimensions` list in `ledger/chart-of-accounts.yaml` names `cost_type` — today that is
+      5800 alone. It was previously `[cogs]`, which required a "kind of work" on
+      `5000 Cost of Goods Sold: Retail Inventory`, where none of delivery / counter / warehouse is
+      true, and REQ-LED-001's text required one on every rental revenue posting as well. The chart
+      states the obligation per account precisely so that no rule has to infer it from a class.
 
 # Cardinality is no longer a concern, and the reason is worth keeping. ADR-0008 exploded these
-# dimensions into account identity — 21 product lines x 3 cost types = 63 accounts per dimensioned
+# dimensions into account identity — 20 product lines x 3 cost types = 60 accounts per dimensioned
 # GL code — so a third dimension would have multiplied again. **ADR-0018 superseded it**: the chart
 # stays plain and dimensions ride on the posting, so cardinality now grows by ADDITION and adding a
 # product line stops being a migration.
@@ -59,8 +69,9 @@ dimensions:
 # why the rejection vectors in `ledger/vectors/` are not optional decoration — they are the entire
 # enforcement of this file.
 #
-# ⚠️ **HOT-011 is open against `required_on`.** REQ-LED-001 states that every revenue AND COGS
-# posting carries BOTH dimensions, which is wider than this file: `cost_type` is described here as
-# a LABOUR dimension (delivery / counter / warehouse) and has no defensible value for a rental
-# revenue posting or for `5000 Cost of Goods Sold: Retail Inventory`. `ledger/chart-of-accounts.yaml`
-# is written on this file's narrower reading. OQ-021 settles which is authoritative.
+# HOT-011 is **resolved** (OQ-021). Revenue accounts carry a product line; `cost_type` is labour
+# only; and REQ-LED-001's statement was amended to match rather than left contradicting this file.
+# Two authorities, deliberately split: the per-account `dimensions` list in
+# `ledger/chart-of-accounts.yaml` says WHICH postings owe a dimension, and this file says which
+# VALUES it may take. Gate 10 checks every vector against both — and therefore against neither the
+# rule nor the vector it is checking.
