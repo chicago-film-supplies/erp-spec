@@ -483,3 +483,52 @@ open_questions:
       a discount recorded against COGS plausibly inherits the product line of the goods it
       discounts, where one recorded as other income has no customer product line at all.
       Split out of OQ-021, which settled the dimension rule but not this.
+
+  - id: OQ-027
+    question: >-
+      Is the tax basis accrual or cash — and what else besides depreciation differs between the two
+      books?
+    owner: alex
+    decide_by: 2026-09-15
+    blocks: [ADR-0026]
+    status: open
+    notes: >-
+      ADR-0026 fixes WHERE the tax book lives — derived at report time, never posted — but not what
+      is in it. Depreciation and §179 are the differences the fixed-asset register can supply on its
+      own. Two families it cannot:
+      **Basis of accounting.** If CFS files on a cash basis, the tax balance sheet carries no
+      Accounts Receivable and no Accounts Payable at all, and the overlay is then far larger than a
+      per-asset schedule — it restates working capital. If it files accrual, depreciation may be the
+      whole of it.
+      **Permanent and timing differences on the P&L** — meals disallowance, accrued-but-unpaid
+      items, prepaid timing. Each is small and each is a rule someone has to state.
+      A question for the owner and the CPA, not one the repo can measure: the answer is in how the
+      1065 has actually been filed. It does not block ADR-0026 (the mechanism is the same either
+      way) but it decides how much the derivation has to do, and therefore whether the non-posting
+      book stays cheap.
+
+  - id: OQ-028
+    question: >-
+      Where does a customer overpayment land — money received that exceeds what the invoices it was
+      sent for are owed?
+    owner: alex
+    decide_by: 2026-09-15
+    blocks: [REQ-LED]
+    status: open
+    notes: >-
+      Surfaced by writing `settlement_recorded`, whose control total requires a session's rows to sum
+      to the money that arrived. If a customer pays more than the invoices in that session are owed,
+      the remainder has nowhere to go and the whole entry is refused — so the deposit cannot be
+      recorded at all until someone decides.
+      **The current system has the same hole and hides it better**: every `settlements` row names an
+      invoice (`uid_invoice` is required), so an overpayment is not representable and in practice
+      gets over-applied to an invoice or left off the books. Xero models it as a first-class
+      `Overpayment` object, which CFS does not mirror.
+      Three candidates, and they are not equivalent. **2050 Customer Credits (Unallocated)** — the
+      account minted for credit notes — states the same fact (value owed to a customer, not yet
+      applied) and needs no new account, but merges two populations an operator may want to see
+      apart. A **new customer-deposits liability** keeps them separate at the cost of another
+      account. **2500 Suspense** is the wrong answer that will be reached for by default; its own
+      disposition is already `undecided` pending SPIKE-004.
+      Not a blocker on `settlement_recorded`: refusing is a defensible rule and matches today's
+      model. It is a gap in what the system can record, which is why it is a question and not a bug.

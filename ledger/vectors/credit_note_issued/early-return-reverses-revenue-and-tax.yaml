@@ -1,0 +1,57 @@
+name: early-return-reverses-revenue-and-tax
+posting_rule: credit_note_issued
+kind: accept
+source: >-
+  Shape from live CN-1015 — `reason: early_return`, `total_cents: 25974`, four rental lines all
+  coded `coa_revenue: 4000`, e.g. "Metro Rack 24\" - Returned Early - 2/04"
+  (`api:2026-08-09:search_credit_notes`, 13 notes). Collapsed to two lines and given a tax component;
+  amounts synthetic. Tax rate live and pinned: Chicago Rental Tax **15%**
+  (`api:2026-08-09:db_taxes_query`).
+
+given:
+  ledger_state:
+    closed_periods: []
+  credit_note:
+    id: CN-VEC-0001
+    number: "CN-2001"
+    date: "2026-08-04"
+    reason: early_return
+    organization: ORG-VEC-0001
+    total_minor: 23000
+    revenue_reversal_lines:
+      - net_minor: 15000
+        revenue_account: 4000
+        product_line: "Carts & Ramps"
+        description: "Metro Rack 24\" — returned early"
+      - net_minor: 5000
+        revenue_account: 4000
+        product_line: "Tables & Chairs"
+        description: "6' Folding Table — returned early"
+    write_off_lines: []
+    tax_components:
+      - { payable_account: 2200, amount_minor: 3000, tax: "Chicago Rental Tax", rate_percent: 15, base_minor: 20000 }
+
+derivation: >-
+  **Hand-computed.** Revenue reversed: 15000 + 5000 = 20000. Chicago Rental Tax at 15% on 20000 =
+  20000 × 15 / 100 = **3000** exactly, no rounding decision. `control_total` = 20000 + 3000 =
+  **23000**, and the three transfers sum to the same number.
+  **The credit side is 2050, three times.** The customer is owed $230.00 and no invoice has been
+  named yet — allocation is `credit_note_allocated`, a separate event, and until it happens this
+  balance belongs to the organization rather than to any receivable. Crediting 1200 here instead
+  would put $230.00 into the AR control account that no invoice in the subledger carries.
+  **Each reversal carries the product line of the sale it reverses.** 4000 names `product_line` in
+  its chart entry, and the two lines carry different values on purpose: a reversal that dropped them
+  would net the company total to zero while leaving `Carts & Ramps` and `Tables & Chairs` revenue
+  standing in every dimensional report. The tax transfer carries none — 2200 and 2050 both name no
+  dimension.
+  **An early return is a revenue reversal, not a bad debt.** The customer never owed the money for
+  days the equipment was not out, so the sale itself is undone. Contrast
+  `bad-debt-write-off-debits-6900`, which is the same document shape asserting the opposite economic
+  fact.
+
+expect:
+  transfers:
+    - { debit_account: 4000, credit_account: 2050, amount_minor: 15000, accounting_date: "2026-08-04", product_line: "Carts & Ramps" }
+    - { debit_account: 4000, credit_account: 2050, amount_minor: 5000, accounting_date: "2026-08-04", product_line: "Tables & Chairs" }
+    - { debit_account: 2200, credit_account: 2050, amount_minor: 3000, accounting_date: "2026-08-04" }
+  rejects: []

@@ -1,0 +1,51 @@
+name: second-disposal-of-one-asset-rejected
+posting_rule: asset_disposed
+kind: reject
+source: >-
+  The redelivery shape the workspace already pays for elsewhere — a webhook replayed, a retry after a
+  timeout, an operator repeating an action they were not sure had landed. `EVT-FA-003` has three
+  consumers (ledger, availability, tax) and no idempotency key of its own.
+
+differs_from: sale-of-partly-depreciated-rental-asset
+differs_in: [ledger_state.disposed_assets]
+
+given:
+  ledger_state:
+    closed_periods: []
+    disposed_assets: [FA-VEC-0001]
+  asset:
+    id: FA-VEC-0001
+    description: "Magliner U-Boat, in service 2024-03"
+    asset_account: 1500
+    accumulated_depreciation_account: 1501
+    cost_minor: 100000
+  disposal:
+    accounting_date: "2026-08-07"
+    disposal_date: "2026-08-07"
+    method: sold
+    proceeds_minor: 45000
+    accumulated_gaap_minor: 60000
+    nbv_gaap_minor: 40000
+    accumulated_tax_minor: 100000
+    nbv_tax_minor: 0
+
+derivation: >-
+  Byte-identical to the accept vector except that FA-VEC-0001 has already been disposed of. Every
+  amount is right and the control total is satisfied; the refusal is on **ledger state**, so this is
+  a minimal pair with the accept and not a second arithmetic test.
+  Posting it a second time credits 1500 for another 100000 — an asset account driven **negative** by
+  50000 across the two entries — and debits 1501 for accumulated depreciation that has already been
+  relieved. It also books a second $50.00 gain on one sale.
+  ⚠️ **TigerBeetle will not stop this.** The GL deliberately sets no balance-direction flag on any
+  account, because a revenue account legitimately goes debit-side on a reversal and AR legitimately
+  goes credit-side on an overpayment (`ledger/tigerbeetle-accounts.yaml`). A negative asset balance
+  is representable by design, so "the store would refuse it" is not available here and the rule has
+  to.
+  The right response to a redelivered disposal is nothing at all. **Idempotency is a property of the
+  rule, not of the transport**, and the state it consults — has this asset already left the register
+  — is the register's, not the document's.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "FA-VEC-0001 has already been disposed of — a second disposal drives 1500 negative and books a second gain on one sale"

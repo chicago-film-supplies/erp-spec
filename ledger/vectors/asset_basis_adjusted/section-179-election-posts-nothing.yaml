@@ -1,0 +1,50 @@
+name: section-179-election-posts-nothing
+posting_rule: asset_basis_adjusted
+kind: accept
+source: >-
+  ADR-0026, and the owner's statement it was drafted from: "many take sec 179 for tax purpose and are
+  fully depreciated in year 1 but for gaap are 5/10/20 years"
+  (`inbox/2026-08-09-tax-and-gaap-statements-are-both-required.md`). 7001 Section 179 Depreciation
+  Expense exists in the live chart, Archived and adopted anyway
+  (`api:2026-08-09:db_chart_of_accounts_query`).
+
+given:
+  ledger_state:
+    closed_periods: ["2026-07"]
+    last_depreciation_posted: "2026-07-31"
+  asset:
+    id: FA-VEC-0005
+    description: "24 x Metro Rack 24\", in service 2026-08"
+    asset_account: 1500
+    accumulated_depreciation_account: 1501
+    cost_minor: 2400000
+  adjustment:
+    effective_date: "2026-08-12"
+    book: tax
+    reason: "§179 election — full basis expensed in year 1 for tax"
+    capitalised_minor: 0
+    capitalisations: []
+
+derivation: >-
+  **The vector that makes ADR-0026 executable.** A §179 election expenses $24,000.00 of rental racks
+  in year 1 for tax while GAAP carries them over five. It is a real, dated, consequential decision —
+  and it produces **no GL transfer at all**.
+  `capitalisations` is empty, so the fan produces nothing; `control_total` = `adjustment.capitalised_minor`
+  = **0**, and zero transfers sum to zero. The entry is accepted and writes nothing.
+  **"No effect on the ledger" is not "no effect", and `book` is what keeps them apart.** The register
+  records a tax basis fully expensed and a GAAP basis of 2400000 depreciating over five years, and
+  from 2026-08-12 the two schedules diverge for the rest of the asset's life. The tax P&L shows
+  $24,000.00 of §179 expense against 7001 and the tax balance sheet shows the racks at zero — both
+  produced by the read side from this register fact, neither by a TigerBeetle transfer.
+  **This is where a parallel posting ledger would have been.** Posting the tax book means Dr 7001 /
+  Cr 1501 here, in a second ledger that must then carry every other transaction to produce a balance
+  sheet at all — for a fleet where most assets take this election, most of the time. SAP calls the
+  alternative a non-posting depreciation area, NetSuite an alternate method not linked to journal
+  postings, Sage a non-posting book. This vector is that choice, made concrete.
+  ⚠️ An accept vector expecting **zero transfers** is not a no-op test. It asserts that the ledger is
+  *reached* and *declines to post*, which is a different outcome from the document being rejected
+  (`retroactive-adjustment-rejected`) and from it never arriving at all.
+
+expect:
+  transfers: []
+  rejects: []

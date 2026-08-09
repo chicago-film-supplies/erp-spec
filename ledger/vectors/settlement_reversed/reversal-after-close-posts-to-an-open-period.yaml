@@ -1,0 +1,43 @@
+name: reversal-after-close-posts-to-an-open-period
+posting_rule: settlement_reversed
+kind: accept
+source: >-
+  ADR-0017 — a closed period's Parquet artifact is immutable and hashed into the close record. The
+  same manoeuvre `invoice_voided/void-in-closed-period-posts-to-open-period` performs, applied to
+  cash. A bounce arrives days or weeks after the deposit, so straddling a month close is the
+  ordinary case for this rule rather than an exotic one.
+
+given:
+  ledger_state:
+    closed_periods: ["2026-08"]
+    retracted_settlements: []
+  reversal:
+    id: REV-VEC-0002
+    accounting_date: "2026-09-03"
+    reason: bounced
+    amount_minor: 100031
+    retracted_transfers:
+      - { settlement: SET-VEC-0002, debit_account: 1001, credit_account: 1200, amount_minor: 100031 }
+
+derivation: >-
+  Same retraction, same amount, same accounts as `bounced-payment-retracts-the-whole-row` — but
+  August is closed and the expected `accounting_date` is **2026-09-03**, not the original's
+  2026-08-05.
+  A naive implementation retracts "the original transfer" and inherits its date, landing inside a
+  sealed period. That would change August's cash and receivables after August's Parquet artifact was
+  hashed, breaking the one guarantee ADR-0017 buys.
+  So August keeps the receipt it reported and September carries the bounce. **That is not a
+  workaround — it is what a bounced deposit looks like in a closed-books world**, and it is why
+  `accounting_date: reversal.accounting_date` in the rule is not interchangeable with the retracted
+  transfer's date.
+  ⚠️ The bank statement disagrees with the ledger for one period, deliberately: the money left the
+  account in August, and the ledger says September. The reconciliation carries the difference as an
+  outstanding item, which is a normal reconciling item and not a drift — and it is why
+  `bank_transaction_matched` needs SPIKE-004's pending-versus-posted semantics before it can be
+  written.
+  Control total unchanged at 100031 — the period moved, the money did not.
+
+expect:
+  transfers:
+    - { debit_account: 1200, credit_account: 1001, amount_minor: 100031, accounting_date: "2026-09-03" }
+  rejects: []

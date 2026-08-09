@@ -1,0 +1,48 @@
+name: two-notes-one-invoice-one-session
+posting_rule: credit_note_allocated
+kind: accept
+source: >-
+  **Measured, not constructed.** Invoice 1767 carries two `type: credit` settlements sharing one
+  `uid_session` `e3ee4106-e4c7-41a1-84af-19fd10e53553` — $247.75 from CN-1015 and $27.26 from
+  CN-1017, totalling the invoice's `amount_credited_cents` of 27501
+  (`api:2026-08-09:get_settlements`). Amounts are the live ones.
+
+given:
+  ledger_state:
+    closed_periods: []
+    ar_posted_invoices: [INV-VEC-1767]
+    remaining_credit:
+      - { credit_note: CN-VEC-1015, remaining_minor: 25974 }
+      - { credit_note: CN-VEC-1017, remaining_minor: 2726 }
+  session:
+    id: SES-VEC-0004
+    accounting_date: "2026-05-09"
+    amount_minor: 27501
+    allocations:
+      - { credit_note: CN-VEC-1015, invoice: INV-VEC-1767, amount_minor: 24775 }
+      - { credit_note: CN-VEC-1017, invoice: INV-VEC-1767, amount_minor: 2726 }
+
+derivation: >-
+  **One journal entry, two credit notes.** This is the vector erp-spec#3 is waiting on. The entry
+  debits 2050 twice and credits 1200 twice, and it references CN-VEC-1015 and CN-VEC-1017 — so
+  `journal_entry_id` is not a function of any single source-document reference, and it keeps
+  `user_data_128`. `settlement_recorded/one-payment-across-two-invoices` is the same conclusion from
+  the cash side; between them the claim rests on two written rules rather than on two event
+  descriptions.
+  The corpus carries the mirror shape too: **CN-1015's $259.74 is split across two invoices**, 24775
+  to 1767 and 1199 to 1751 — one note, two receivables, two sessions.
+  `control_total` = 24775 + 2726 = **27501** = the money applied, and the two transfers sum to it.
+  **The accounting date is 2026-05-09 — `max(credit_note.date, invoice.date)`, not the notes' own.**
+  It is the only date on which both facts are true: the invoice exists and the credit exists.
+  Verified 6 of 6 on prod and already load-bearing in the current system, where an allocation carries
+  its own date because Xero must post journals on both a cash and an accrual basis when an allocation
+  is made (`code:2026-08-09:core@33f5654:src/schemas/settlement.ts`).
+  Neither leg carries a dimension: 2050 and 1200 both name none. The product lines were reversed when
+  each note was **issued**; re-carrying them here would double the reversal in every dimensional
+  report.
+
+expect:
+  transfers:
+    - { debit_account: 2050, credit_account: 1200, amount_minor: 24775, accounting_date: "2026-05-09" }
+    - { debit_account: 2050, credit_account: 1200, amount_minor: 2726, accounting_date: "2026-05-09" }
+  rejects: []

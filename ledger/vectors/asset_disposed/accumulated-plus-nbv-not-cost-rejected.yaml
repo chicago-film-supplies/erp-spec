@@ -1,0 +1,51 @@
+name: accumulated-plus-nbv-not-cost-rejected
+posting_rule: asset_disposed
+kind: reject
+source: >-
+  The failure mode ADR-0007's own consequence names: "a depreciation run posts for hundreds of assets
+  at once and still needs a per-asset audit trail". A register that has drifted from the ledger on
+  one asset among hundreds is invisible until that asset is disposed of.
+
+differs_from: sale-of-partly-depreciated-rental-asset
+differs_in: ["disposal.accumulated_gaap_minor"]
+
+given:
+  ledger_state:
+    closed_periods: []
+    disposed_assets: []
+  asset:
+    id: FA-VEC-0003
+    description: "Magliner U-Boat, in service 2024-03"
+    asset_account: 1500
+    accumulated_depreciation_account: 1501
+    cost_minor: 100000
+  disposal:
+    accounting_date: "2026-08-07"
+    disposal_date: "2026-08-07"
+    method: sold
+    proceeds_minor: 45000
+    accumulated_gaap_minor: 55000
+    nbv_gaap_minor: 40000
+    accumulated_tax_minor: 100000
+    nbv_tax_minor: 0
+
+derivation: >-
+  Identical to the accept vector except that the register reports 55000 of accumulated depreciation
+  against a 40000 net book value on a 100000 asset. 55000 + 40000 = 95000, and **$50.00 of this
+  asset is unaccounted for**.
+  Both numbers are individually plausible — legal integers, right order of magnitude, right sign —
+  and each of the two transfers is by itself a perfectly good posting. It is only the pair against
+  `asset.cost_minor` that fails, which is why the control total is the check that can fail here and
+  "debits equal credits" is the check that never could.
+  **Posting it leaves 5000 stranded in 1500** for an asset that no longer exists, and the balance
+  sheet carries a phantom asset for as long as anyone believes the disposal succeeded. Plugging the
+  difference into 1998 instead would clear the balance sheet and quietly misstate the gain by the
+  size of the register's error — the worse failure, because it looks like it worked.
+  So the disposal is refused and the register is reconciled first. **The entry is the wrong place to
+  discover the drift and the right place to stop it**: this is the only moment the two stores are
+  forced to agree about one asset.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "accumulated 55000 + NBV 40000 = 95000 against a cost of 100000 — the register disagrees with the ledger by 5000 and the disposal cannot relieve the asset"

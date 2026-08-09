@@ -1,0 +1,44 @@
+name: partial-retraction-rejected
+posting_rule: settlement_reversed
+kind: reject
+source: >-
+  `SETTLEMENT_CONTRACTS` in the current system pairs every applying type with a `*_reversal` whose
+  `reverses` is required, and the live reversal carries the retracted row's amount exactly — 203480
+  against 203480 (`api:2026-08-09:get_settlements`, invoice 1689). No partial form exists.
+
+differs_from: bounced-payment-retracts-the-whole-row
+differs_in: ["reversal.retracted_transfers[0].amount_minor", "reversal.amount_minor"]
+
+given:
+  ledger_state:
+    closed_periods: []
+    retracted_settlements: []
+  reversal:
+    id: REV-VEC-0003
+    accounting_date: "2026-08-09"
+    reason: bounced
+    amount_minor: 60000
+    retracted_transfers:
+      - { settlement: SET-VEC-0002, debit_account: 1001, credit_account: 1200, amount_minor: 60000 }
+
+derivation: >-
+  Identical to the accept vector except that it retracts $600.00 of a $1,000.31 settlement. The entry
+  balances perfectly and its control total is satisfied — it is refused on the **relationship to the
+  row it names**, which is the discrimination this rule owes and which no amount check can make.
+  **"The payment partly arrived" is not a fact a bounce can assert.** A cheque clears or it does not.
+  What is left behind is a settlement that is half-retracted with no record of which half, and an
+  invoice whose settlement projection is a fold over rows that no longer describe any event that
+  happened.
+  The two things a partial retraction is usually reaching for are both representable already, and
+  both differently: a **smaller payment than was recorded** is a full retraction plus a new
+  settlement for the true amount, which leaves both facts on the record; and a **partial refund** is
+  money going back to the customer, which is a credit note, not the assertion that a receipt never
+  occurred.
+  ⚠️ Note what is NOT the reason for refusal. The amount is a legal `*_minor` integer, the accounts
+  are right, the direction is right and the period is open. Only the comparison against the retracted
+  row fails — so an implementation that validated the entry in isolation would accept this.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "retraction of 60000 against a settlement of 100031 — a retraction carries the whole amount of the row it retracts, or the row is half-standing with no record of which half"

@@ -1,0 +1,47 @@
+name: over-allocation-beyond-remaining-credit-rejected
+posting_rule: credit_note_allocated
+kind: reject
+source: >-
+  `credit-notes.remaining_credit_cents` is the live counterpart of 2050's per-note balance, and the
+  lifecycle enum is `issued | applied | void` with **no `part_applied`** precisely because the
+  remaining balance carries that distinction (`code:2026-08-09:core@33f5654:src/schemas/credit-note.ts`).
+  Live shape: CN-1015 is genuinely applied in two parts, 24775 + 1199 = its full 25974
+  (`api:2026-08-09:get_settlements`).
+
+differs_from: two-notes-one-invoice-one-session
+differs_in: ["ledger_state.remaining_credit[1].remaining_minor"]
+
+given:
+  ledger_state:
+    closed_periods: []
+    ar_posted_invoices: [INV-VEC-1767]
+    remaining_credit:
+      - { credit_note: CN-VEC-1015, remaining_minor: 25974 }
+      - { credit_note: CN-VEC-1017, remaining_minor: 1000 }
+  session:
+    id: SES-VEC-0005
+    accounting_date: "2026-05-09"
+    amount_minor: 27501
+    allocations:
+      - { credit_note: CN-VEC-1015, invoice: INV-VEC-1767, amount_minor: 24775 }
+      - { credit_note: CN-VEC-1017, invoice: INV-VEC-1767, amount_minor: 2726 }
+
+derivation: >-
+  Same session as the accept vector, but CN-VEC-1017 has only **$10.00** left — $17.26 of it was
+  already applied elsewhere — and this session tries to apply $27.26 of it again.
+  The entry balances and the control total is satisfied. It is refused on **the note's remaining
+  balance**, which lives outside the document being posted, and that is what makes it a minimal pair:
+  every field of the session is legal in isolation.
+  Posting it drives 2050's balance for that note **negative** — the ledger asserting the business
+  gave back more credit than it ever issued — while relieving a receivable that was never covered.
+  The invoice reports as settled and the liability reports as a debit balance, and neither is true.
+  **This is the check that makes 2050 a real account rather than a bookkeeping stop.** Under the
+  alternative design, where a credit note credits 1200 directly at issue, there is no per-note
+  balance to exceed: the over-allocation just moves AR against itself and disappears. Here it has a
+  balance to violate, and violating it is visible.
+  The right answer is a smaller allocation, or a second credit note if more credit is genuinely owed.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "allocation of 2726 against CN-VEC-1017, which has 1000 of remaining credit — an allocation may not exceed the note's balance"

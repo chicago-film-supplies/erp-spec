@@ -11,12 +11,12 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 26 | **0 with no owner or no decide-by** |
+| Open questions | 28 | **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 11 | 0 open |
-| Decisions (ADR) | 25 | 16 in force · 7 proposed |
+| Decisions (ADR) | 26 | 16 in force · 8 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 2 | 0 without a scenario |
-| Inbox | 33 | 22 unpromoted |
+| Inbox | 35 | 24 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 23 | 0 still `TODO` |
 
@@ -49,7 +49,7 @@ None.
 - `ADR-0023` — Native Node-API addons load under Deno; the deployment unit is a self-extracting compiled binary
 - `ADR-0024` — DuckDB is reached natively and server-side; client-side reporting is rejected
 
-### Proposed (7)
+### Proposed (8)
 
 | ADR | Title | Review by | Blocked on |
 |---|---|---|---|
@@ -60,6 +60,7 @@ None.
 | `ADR-0019` | Labour costing is actual; absorption measures utilisation, not rate variance | 2026-10-01 | `HOT-003` `HOT-004` `HOT-010` `OQ-005` `OQ-006` `OQ-008` `OQ-011` `OQ-017` `OQ-018` `OQ-019` |
 | `ADR-0020` | Xero history is restated, not imported as-is | 2026-10-15 | `HOT-006` `OQ-012` |
 | `ADR-0025` | The dimension obligation is per account, and what is refused is absence rather than null | 2026-10-01 | `HOT-011` `OQ-021` `OQ-022` `OQ-025` |
+| `ADR-0026` | The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time | 2026-10-01 | `SPIKE-005` `OQ-027` |
 
 ## Spikes
 
@@ -88,19 +89,17 @@ it is counted separately on purpose, and a milestone is not done because its che
 | `m0` | Charter and non-goals | — | 0 | — | 3 | — |
 | `m1` | Big-picture event storm | `m0` | 1 | — | 2 | — |
 | `m2` | Context map and glossary v1 | `m1` | 2 | — | 1 | — |
-| `m3` | Ledger core | `m2` | 2 | 2 | — | — |
+| `m3` | Ledger core | `m2` | 4 | — | — | — |
 | `m4` | All spikes closed by ADR | `m3` | 1 | 1 | — | 1 |
 | `m5` | Formal specs checking clean | `m4` | 1 | — | 2 | — |
 | `m6` | Migration field map complete | `m2` | 0 | — | 3 | — |
 | `m7` | Walking skeleton defined | `m3` `m5` `m6` | 0 | — | 3 | — |
 | `spec-v1` | Tag spec-v1 | `m0` `m1` `m2` `m3` `m4` `m5` `m6` `m7` | 1 | — | 3 | 1 |
 
-### Machine-checkable criteria not yet met (3)
+### Machine-checkable criteria not yet met (1)
 
 | Milestone | Criterion | Check | Measured |
 |---|---|---|---|
-| `m3` | Posting rules defined for every source document type. | `posting_rules_cover_events` | 24 ledger events, 0 in no bucket, 3 specified, 7 unwritten |
-| `m3` | Golden input->expected-transfer vectors exist for every posting rule,… | `vectors_cover_rules` | 13 vectors over 3 specified rules; 0 lack an accept or a reject; 7 rules unwritten |
 | `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 12 spikes, 9 open, 0 closed without naming an ADR |
 
 ## Coverage gaps

@@ -813,6 +813,17 @@ for (const i of inbox) {
 
     // 10g — every account a vector names must exist in the chart.
     for (const [j, t] of transfers.entries()) {
+      // 10m — a transfer amount is never zero. A TigerBeetle transfer carries a non-zero amount, so
+      // a zero-value leg is an ABSENCE and writing one is a different claim from omitting it: a
+      // fully depreciated asset is disposed of with one relief leg, not two. Scoped to transfers on
+      // purpose — 10l's walker must keep allowing a zero `control_total` or a zero
+      // `capitalised_minor`, which is how `asset_basis_adjusted` says a §179 election posts nothing.
+      // Landed red against a deliberately zero-amount leg in
+      // `asset_disposed/fully-depreciated-scrap-writes-one-transfer`, which 10i could not see: a
+      // zero adds nothing to the control total, so the sum still matched.
+      if (t.amount_minor === 0) {
+        fail(G, `${where} transfer[${j}]: amount_minor is 0 — a zero-value leg is an absence, not a transfer; omit it`);
+      }
       for (const side of ["debit_account", "credit_account"] as const) {
         const c = t[side];
         if (typeof c !== "number") fail(G, `${where} transfer[${j}]: ${side} must be a GL code`);

@@ -1,0 +1,49 @@
+name: bad-debt-note-reversing-tax-rejected
+posting_rule: credit_note_issued
+kind: reject
+source: >-
+  The miscoding class already in the corpus: CN-1010/1011/1012 carry a *purchase* tax type (`INPUT`)
+  on a receivable-side note (`code:2026-08-09:core@33f5654:src/schemas/credit-note.ts`, recorded
+  from the live tenant). A tax leg on a write-off is the same error with a plausible-looking account.
+
+differs_from: bad-debt-write-off-debits-6900
+differs_in: [credit_note.tax_components, credit_note.total_minor]
+
+given:
+  ledger_state:
+    closed_periods: []
+  credit_note:
+    id: CN-VEC-0003
+    number: "CN-2003"
+    date: "2026-08-04"
+    reason: bad_debt
+    organization: ORG-VEC-0002
+    total_minor: 26450
+    revenue_reversal_lines: []
+    write_off_lines:
+      - net_minor: 23000
+        description: "Uncollectible — invoice 1322, no response after 180 days"
+    tax_components:
+      - { payable_account: 2200, amount_minor: 3450, tax: "Chicago Rental Tax", rate_percent: 15, base_minor: 23000 }
+
+derivation: >-
+  Identical to the accept vector plus a tax leg — the entry balances, the control total is
+  consistent at 26450, and every account resolves. It is refused on **what a write-off asserts**,
+  which no structural check can see.
+  A bad debt says the sale happened and the customer did not pay. The sale being real, **the tax on
+  it is real and was remitted**; reversing 2200 debits a liability the business genuinely owes the
+  city, understating it by $34.50 against a sale that still stands on the P&L. Relief for tax paid on
+  an uncollectible receivable is claimed on the **return** — a tax-context filing position, not a
+  reversal of this posting.
+  **The contrast is the whole point of the pair.** `early-return-reverses-revenue-and-tax` reverses
+  its tax and is accepted, because there the sale itself is undone and the tax with it. Same document
+  type, same accounts available, opposite answers — decided by `reason`, which is why `reason` is a
+  closed enum in the current system rather than free text.
+  ⚠️ The seductive version of this bug is not a hand-written vector like this one but a shared code
+  path: a credit note that builds its tax leg from the invoice it credits, whatever the reason. That
+  fires correctly on every early return and wrongly on every write-off.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "a bad_debt note carries a tax component — the sale stands, so its tax stands; relief is a return position, not a reversal (EVT-TAX-001)"

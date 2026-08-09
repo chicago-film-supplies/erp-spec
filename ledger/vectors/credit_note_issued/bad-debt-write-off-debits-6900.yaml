@@ -1,0 +1,48 @@
+name: bad-debt-write-off-debits-6900
+posting_rule: credit_note_issued
+kind: accept
+source: >-
+  Live population: 4 of 13 credit notes carry `reason: bad_debt` — CN-1007 ($4,495.62), CN-1009
+  ($2,196.00), CN-1024 ($150.00), CN-1026 ($40.90) (`api:2026-08-09:search_credit_notes`). Amounts
+  synthetic. The rule itself is `deriveCreditPostingAccount`
+  (`code:2026-08-09:core@33f5654:src/schemas/credit-note.ts`), whose `COA_BAD_DEBT` is 6900.
+
+given:
+  ledger_state:
+    closed_periods: []
+  credit_note:
+    id: CN-VEC-0002
+    number: "CN-2002"
+    date: "2026-08-04"
+    reason: bad_debt
+    organization: ORG-VEC-0002
+    total_minor: 23000
+    revenue_reversal_lines: []
+    write_off_lines:
+      - net_minor: 23000
+        description: "Uncollectible — invoice 1322, no response after 180 days"
+    tax_components: []
+
+derivation: >-
+  **The same $230.00 as `early-return-reverses-revenue-and-tax`, posted to a different account,
+  because it is a different economic fact.** The sale happened; the money did not arrive. So revenue
+  stands and the loss is an expense: Dr **6900 Bad Debt** / Cr 2050, one transfer, control total
+  23000.
+  **No product line, and that is not an omission.** 6900 and 2050 both name no dimension in the
+  chart, so declaring one here would be refused just as firmly as omitting one on a 4000 reversal —
+  the obligation is read off the accounts, never off the class or the document type (ADR-0025). A
+  write-off is a company-level loss and does not belong to the product line that generated the sale.
+  **No tax component, and this one IS a decision.** The taxable sale occurred and the tax was
+  remitted, so nothing here reverses it; relief for tax on an uncollectible receivable is claimed on
+  the return, which is the tax context's business. Reversing 2200 here would understate the
+  liability against a sale that still stands. See `bad-debt-note-reversing-tax-rejected`.
+  ⚠️ **History does not obey this rule.** CN-1007 is a bad-debt write-off booked to **4210 Replacement
+  Sales Income** — a revenue reversal — and CN-1010/1011/1012 book customer credits to 6000 General
+  Operating Expenses on lines whose Xero `TaxType` is `INPUT`, a purchase tax type on a receivable.
+  4 of 12 miscoded, ruled historic rather than sanctioned. This vector is what stops the class
+  regrowing, and ADR-0020 restates the history.
+
+expect:
+  transfers:
+    - { debit_account: 6900, credit_account: 2050, amount_minor: 23000, accounting_date: "2026-08-04" }
+  rejects: []

@@ -1,0 +1,49 @@
+name: fully-depreciated-scrap-writes-one-transfer
+posting_rule: asset_disposed
+kind: accept
+source: >-
+  The ordinary end of a rental asset's life: hundreds of individually low-value items, straight-line,
+  scrapped once they are past repair (`inbox/2026-08-08-fixed-assets-dual-basis.md`). Amounts
+  synthetic; the accounts are the same live pair as the sale vector.
+
+given:
+  ledger_state:
+    closed_periods: []
+    disposed_assets: []
+  asset:
+    id: FA-VEC-0002
+    description: "Metro Rack 24\", in service 2019-06"
+    asset_account: 1500
+    accumulated_depreciation_account: 1501
+    cost_minor: 100000
+  disposal:
+    accounting_date: "2026-08-07"
+    disposal_date: "2026-08-07"
+    method: scrapped
+    proceeds_minor: 0
+    accumulated_gaap_minor: 100000
+    nbv_gaap_minor: 0
+    accumulated_tax_minor: 100000
+    nbv_tax_minor: 0
+
+derivation: >-
+  Same cost, same accounts, past the end of its GAAP life — accumulated depreciation equals cost and
+  net book value is zero.
+  **ONE transfer, not two with a zero.** The second leg's amount is 0, and a zero-amount posting is
+  not written: a TigerBeetle transfer carries a non-zero amount, so a zero-value leg is an absence
+  rather than a transfer. `control_total` = 100000 = the single transfer, and the identity
+  accumulated + NBV = cost still holds with NBV at zero.
+  **This is the arm that would go unexercised.** A rule written against the sale vector alone reads
+  as "always two legs", and the implementation that follows it either emits a zero-amount transfer —
+  which the store rejects, so the disposal fails at the worst moment — or emits nothing and silently
+  skips the relief. Fully depreciated assets are the *common* case in a fleet of low-value rental
+  items, so this is the path most disposals take.
+  **Nothing lands in 1998 and nothing should.** There is no gain and no loss: the asset was already
+  written down to nothing and no proceeds arrived. A rule that always touched 1998 would post a zero
+  gain here, and "zero gain" and "no disposal result at all" would become indistinguishable in the
+  disposal account.
+
+expect:
+  transfers:
+    - { debit_account: 1501, credit_account: 1500, amount_minor: 100000, accounting_date: "2026-08-07" }
+  rejects: []

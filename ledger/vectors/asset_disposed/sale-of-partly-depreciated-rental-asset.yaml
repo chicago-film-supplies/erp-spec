@@ -1,0 +1,54 @@
+name: sale-of-partly-depreciated-rental-asset
+posting_rule: asset_disposed
+kind: accept
+source: >-
+  ADR-0007 (dual basis) and ADR-0026 (only the GAAP book posts). The asset shape is
+  `contexts/fixed-assets/entities/asset.yaml`; the accounts are live — 1500 Rental Inventory Assets,
+  1501 Less-Accumulated Depreciation: Rental Inventory, 1998 Gain/Loss On Asset Disposal
+  (`api:2026-08-09:db_chart_of_accounts_query`). Amounts synthetic, and chosen so the two books
+  disagree the way this fleet actually does.
+
+given:
+  ledger_state:
+    closed_periods: []
+    disposed_assets: []
+  asset:
+    id: FA-VEC-0001
+    description: "Magliner U-Boat, in service 2024-03"
+    asset_account: 1500
+    accumulated_depreciation_account: 1501
+    cost_minor: 100000
+  disposal:
+    accounting_date: "2026-08-07"
+    disposal_date: "2026-08-07"
+    method: sold
+    proceeds_minor: 45000
+    accumulated_gaap_minor: 60000
+    nbv_gaap_minor: 40000
+    accumulated_tax_minor: 100000
+    nbv_tax_minor: 0
+
+derivation: >-
+  A $1,000.00 cart, three years into a five-year GAAP life, sold for $450.00.
+  **Two transfers, and between them the asset account goes to zero.** Dr 1501 / Cr 1500 for the
+  accumulated 60000 leaves 40000 standing; Dr 1998 / Cr 1500 for the NBV 40000 clears it.
+  `control_total` = `asset.cost_minor` = **100000** = 60000 + 40000, which is the arithmetic identity
+  the control total exists to check: if the register's accumulated and NBV do not add up to what the
+  ledger thinks the asset cost, the entry is refused rather than plugged.
+  **The proceeds are NOT here.** The $450.00 arrives through the sale document — an invoice line
+  coded to 1998 (ADR-0021) or a bank receipt — and posting it here as well would debit cash twice.
+  1998 therefore ends up holding the 40000 NBV as a debit and the 45000 proceeds as a credit, and
+  **its balance IS the $50.00 gain** without any leg of this rule computing one. That is why no
+  posting here needs a condition on whether the sale was at a gain or a loss, and why `amount:` never
+  has to become an expression.
+  **The tax book disagrees violently and posts nothing** (ADR-0026). §179 expensed this cart in year
+  1, so `nbv_tax_minor` is 0 and the tax result is a $450.00 §1245 recapture against a $50.00 book
+  gain. The register carries both numbers — the event declares `nbv_tax_minor` for exactly this
+  reason — and the read side reports the tax basis. No tax value reaches TigerBeetle.
+  No dimension: 1500, 1501 and 1998 all name none.
+
+expect:
+  transfers:
+    - { debit_account: 1501, credit_account: 1500, amount_minor: 60000, accounting_date: "2026-08-07" }
+    - { debit_account: 1998, credit_account: 1500, amount_minor: 40000, accounting_date: "2026-08-07" }
+  rejects: []

@@ -1,0 +1,44 @@
+name: allocations-short-of-the-money-received-rejected
+posting_rule: settlement_recorded
+kind: reject
+source: >-
+  The overpayment hole, stated as a refusal rather than left to a default — OQ-028. No live
+  population: `settlements.uid_invoice` is required in the current system
+  (`code:2026-08-09:core@33f5654:src/schemas/settlement.ts`), so an unallocatable remainder cannot be
+  recorded there either.
+
+differs_from: one-payment-across-two-invoices
+differs_in: ["session.settlements[1].amount_minor"]
+
+given:
+  ledger_state:
+    closed_periods: []
+    ar_posted_invoices: [INV-VEC-0001, INV-VEC-0002]
+  session:
+    id: SES-VEC-0002
+    accounting_date: "2026-08-05"
+    deposit_account: 1001
+    amount_minor: 150031
+    instrument: check
+    settlements:
+      - { id: SET-VEC-0001, invoice: INV-VEC-0001, amount_minor: 50000 }
+      - { id: SET-VEC-0002, invoice: INV-VEC-0002, amount_minor: 90031 }
+
+derivation: >-
+  Identical to the accept vector except that the second row applies $900.31 of a $1,500.31 check.
+  $100.00 of real money has arrived and is credited to nothing.
+  **The tempting wrong answer is to post what balances and carry on** — two transfers totalling
+  140031 against a 150031 deposit. That is not a smaller entry, it is a false one: the bank has
+  150031 and the ledger says 140031, so the account will never reconcile and the difference is
+  invisible because nothing recorded that it existed.
+  The second tempting answer is to over-apply the remainder to whichever invoice is nearest,
+  producing a negative receivable on a document nobody owes.
+  So the entry is refused whole, and the honest consequence is that **the deposit cannot be recorded
+  until someone decides where an overpayment lands** — 2050, a new customer-deposit liability, or
+  2500 Suspense. That is OQ-028, and it is a gap in what the system can record rather than a bug in
+  this rule. Refusing is the same answer the current model gives by making the field required.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "session settlements sum to 140031 but 150031 was received — the 10000 remainder is an overpayment with no account (OQ-028)"

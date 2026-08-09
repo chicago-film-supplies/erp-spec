@@ -1,0 +1,44 @@
+name: one-payment-across-two-invoices
+posting_rule: settlement_recorded
+kind: accept
+source: >-
+  Shape from `settlements.uid_session` — "one per operator action — groups a batch payment or a
+  multi-invoice allocation" (`code:2026-08-09:core@33f5654:src/schemas/settlement.ts`). The
+  multi-document grouping is measured on the credit side (invoice 1767 takes two credit notes in one
+  session, `api:2026-08-09:get_settlements`); this is the cash side of the same shape. Amounts
+  synthetic.
+
+given:
+  ledger_state:
+    closed_periods: []
+    ar_posted_invoices: [INV-VEC-0001, INV-VEC-0002]
+  session:
+    id: SES-VEC-0001
+    accounting_date: "2026-08-05"
+    deposit_account: 1001
+    amount_minor: 150031
+    instrument: check
+    settlements:
+      - { id: SET-VEC-0001, invoice: INV-VEC-0001, amount_minor: 50000 }
+      - { id: SET-VEC-0002, invoice: INV-VEC-0002, amount_minor: 100031 }
+
+derivation: >-
+  **One entry, two source documents.** A single check for $1,500.31 clears two invoices — the
+  $500.00 of `invoice_issued/single-line-no-tax` and the $1,000.31 of
+  `two-lines-two-product-lines-with-tax`. Both invoices have posted AR, so both have a receivable to
+  relieve.
+  The fan is over the session's rows, so the entry is two transfers debiting **one** deposit account
+  and crediting 1200 twice. `control_total` = 50000 + 100031 = **150031** = the money that arrived.
+  **This is the evidence, not an illustration.** erp-spec#3 asks whether `journal_entry_id` can be
+  derived as (source document, posting event) and freed from `user_data_128`. Here one journal entry
+  references two invoices, so the grouping is not a function of any single source-document
+  reference, and the field stays reserved. `credit_note_allocated` is the other half.
+  Neither account carries a dimension — 1001 and 1200 both name none in the chart. Settlement moves
+  money that was dimensioned when it was earned; re-dimensioning it here would double-count every
+  product line on the cash side.
+
+expect:
+  transfers:
+    - { debit_account: 1001, credit_account: 1200, amount_minor: 50000, accounting_date: "2026-08-05" }
+    - { debit_account: 1001, credit_account: 1200, amount_minor: 100031, accounting_date: "2026-08-05" }
+  rejects: []

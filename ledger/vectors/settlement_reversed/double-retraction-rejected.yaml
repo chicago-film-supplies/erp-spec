@@ -1,0 +1,44 @@
+name: double-retraction-rejected
+posting_rule: settlement_reversed
+kind: reject
+source: >-
+  The failure mode an append-only journal invites: nothing about a second reversal row is malformed,
+  and `reverses` is provenance rather than state
+  (`code:2026-08-09:core@33f5654:src/schemas/settlement.ts`). Live near-miss — invoice 1689 carries
+  **two** `payment` rows of 203480 with different `xero_payment_id`s and one `payment_reversal`
+  (`api:2026-08-09:get_settlements`); retracting the same row twice rather than each row once is the
+  same shape with the wrong target.
+
+differs_from: bounced-payment-retracts-the-whole-row
+differs_in: [ledger_state.retracted_settlements]
+
+given:
+  ledger_state:
+    closed_periods: []
+    retracted_settlements: [SET-VEC-0002]
+  reversal:
+    id: REV-VEC-0004
+    accounting_date: "2026-08-09"
+    reason: bounced
+    amount_minor: 100031
+    retracted_transfers:
+      - { settlement: SET-VEC-0002, debit_account: 1001, credit_account: 1200, amount_minor: 100031 }
+
+derivation: >-
+  Byte-identical to the accept vector except that `SET-VEC-0002` has already been retracted. The
+  entry is well-formed and balanced; it is refused on **ledger state**, which is what makes it a
+  minimal pair with the accept rather than a second amount test.
+  Posting it debits AR twice for one bounce. The invoice then reports **more owed than was ever
+  billed**, and the bank reconciliation shows a credit to cash that never left the account. Neither
+  side of that is a number anyone can find their way back from without reading the journal by hand.
+  **This is exactly the failure an append-only log with no status field is exposed to.** There is no
+  flag on the retracted row to consult — deliberately, because a status flag AND a reverser link is
+  two sources of truth — so "already retracted" is a question about the log, and the rule has to ask
+  it. An implementation that validated each reversal on its own would accept this every time.
+  The right response to a bounce that was already recorded is nothing at all: the first retraction
+  said it.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "SET-VEC-0002 has already been retracted — a settlement is retracted at most once, or AR is debited twice for one bounce"

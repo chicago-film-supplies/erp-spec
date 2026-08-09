@@ -1,0 +1,43 @@
+name: settlement-against-draft-invoice-rejected
+posting_rule: settlement_recorded
+kind: reject
+source: >-
+  ADR-0022 — `lifecycle` is derived from posting history, and `draft` MEANS "no AR posting exists".
+  The same discrimination `invoice_voided/void-of-draft-invoice-rejected` makes on the reversal side.
+
+differs_from: one-payment-across-two-invoices
+differs_in: [ledger_state.ar_posted_invoices]
+
+given:
+  ledger_state:
+    closed_periods: []
+    ar_posted_invoices: [INV-VEC-0001]
+  session:
+    id: SES-VEC-0003
+    accounting_date: "2026-08-05"
+    deposit_account: 1001
+    amount_minor: 150031
+    instrument: check
+    settlements:
+      - { id: SET-VEC-0001, invoice: INV-VEC-0001, amount_minor: 50000 }
+      - { id: SET-VEC-0002, invoice: INV-VEC-0002, amount_minor: 100031 }
+
+derivation: >-
+  Byte-identical to the accept vector except that INV-VEC-0002 has **no AR posting** — it is a draft
+  document. Every amount balances and the control total is satisfied, so the refusal is on invoice
+  state alone, which is what makes this a minimal pair rather than a second control-total test.
+  Crediting 1200 for a document that never debited it manufactures a **negative receivable** out of a
+  draft. Under a single `status` enum this was expressible — an invoice could be `draft` and carry a
+  payment, with no invariant relating the two — and ADR-0022 exists because that is not a state the
+  model should be able to represent.
+  **The money is real, and refusing the settlement does not deny it.** A deposit taken before the
+  invoice exists is a customer prepayment, which is a different fact with a different account, and
+  the remedy is to issue the invoice or record the prepayment — not to settle against nothing.
+  ⚠️ The whole session is refused, not the offending row. A partial acceptance would debit the bank
+  for 150031 while crediting 50000 of AR, which is the same unreconcilable state
+  `allocations-short-of-the-money-received-rejected` refuses, arrived at from the other side.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "INV-VEC-0002 has no AR posting — it is a draft document and has no receivable to relieve (ADR-0022)"

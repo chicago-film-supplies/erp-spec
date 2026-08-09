@@ -8,6 +8,11 @@
 # 22 Archived**. Every one of the 134 appears below. `code` is a NUMBER in the live collection —
 # a string filter silently returns 0 rows.
 #
+# **137 entries**, because three are minted rather than carried across — each `disposition: new`,
+# `status_live: absent`, with the rule that needs it named in its `reason`: 5800/5801 for
+# absorbed/unabsorbed labour (ADR-0019), and **2050 Customer Credits (Unallocated)** for
+# `credit_note_issued`, which had no credit-side account at all (erp-spec#5).
+#
 # A `disposition` is a PROPOSAL for the cutover, with a reason, for the owner to review. It is not
 # a decision already taken. Where no defensible proposal exists the value is `undecided` and the
 # entry names what would settle it.
@@ -416,6 +421,38 @@ accounts:
       Archived live, and gift cards appear nowhere in the charter's in-scope list. Reinstating the
       product is an ADR, and the account follows it rather than sitting ready.
     source: "api:2026-08-09:db_chart_of_accounts_query"
+
+  - code: 2050
+    name: "Customer Credits (Unallocated)"
+    class: liability
+    normal_balance: credit
+    dimensions: []
+    disposition: new
+    status_live: absent
+    reason: >-
+      **`credit_note_issued` had no credit-side account and this is it** (erp-spec#5). A credit note
+      is issued against an ORGANIZATION and allocated to invoices afterwards — one note may be split
+      across several, and one operator action may draw on several notes. Between the two the credit
+      is a dated, numbered obligation to a customer attached to no invoice, and it has to sit
+      somewhere.
+      **Not 1200.** Crediting Accounts Receivable at issue puts the unallocated credit in the
+      control account while no invoice in the subledger carries it, so AR stops tying to the sum of
+      open invoices by exactly the unallocated total — with nothing on the face of either to show
+      it. A control account that does not reconcile to its subledger is the defect a control account
+      exists to prevent.
+      The current system already holds this balance: `credit-notes.remaining_credit_cents` per note,
+      and an invoice's `totals.amount_credited_cents` moves only when a `settlements` row of
+      `type: credit` exists — at ALLOCATION, not at issue
+      (`code:2026-08-09:core@33f5654:src/schemas/settlement.ts`). This account is the ledger-side
+      name for a number CFS already keeps.
+      ⚠️ A `disposition: new` is a PROPOSAL for the owner, like every other disposition in this
+      file. The alternative — credit 1200 at issue, Xero's model and what the live GL does today —
+      would make `credit_note_allocated` post nothing and move EVT-BIL-006 to `no_posting`.
+    source: "api:2026-08-09:search_credit_notes"
+    note: >-
+      13 credit notes live, 10 `applied` / 3 `void`, and none currently unallocated — so this
+      account's balance is $0.00 at cutover and the design is being chosen for the state the model
+      permits rather than for one the corpus is sitting in today.
 
   - code: 2160
     name: "Payroll Wages Payable"

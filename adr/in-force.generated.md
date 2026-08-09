@@ -111,3 +111,4 @@ Accepted and not superseded, as of the last `deno task gen`.
 | [ADR-0019](ADR-0019-labour-costing-is-actual.md) | Labour costing is actual; absorption measures utilisation, not rate variance | 2026-10-01 | HOT-003, HOT-004, HOT-010, OQ-005, OQ-006, OQ-008, OQ-011, OQ-017, OQ-018, OQ-019 |
 | [ADR-0020](ADR-0020-xero-history-is-restated.md) | Xero history is restated, not imported as-is | 2026-10-15 | HOT-006, OQ-012 |
 | [ADR-0025](ADR-0025-dimension-obligation-is-per-account.md) | The dimension obligation is per account, and what is refused is absence rather than null | 2026-10-01 | HOT-011, OQ-021, OQ-022, OQ-025 |
+| [ADR-0026](ADR-0026-tax-basis-is-a-non-posting-derived-book.md) | The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time | 2026-10-01 | SPIKE-005, OQ-027 |

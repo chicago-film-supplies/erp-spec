@@ -1,0 +1,49 @@
+name: retroactive-adjustment-rejected
+posting_rule: asset_basis_adjusted
+kind: reject
+source: >-
+  `EVT-FA-004` states it outright — the adjustment changes the remaining schedule "from that point
+  forward. Not a restatement of prior periods." ADR-0017 is why: a closed period's Parquet artifact
+  is immutable and hashed into the close record.
+
+differs_from: capital-improvement-is-capitalised
+differs_in: ["adjustment.effective_date"]
+
+given:
+  ledger_state:
+    closed_periods: ["2026-07"]
+    last_depreciation_posted: "2026-07-31"
+  asset:
+    id: FA-VEC-0006
+    description: "Box truck, in service 2022-05"
+    asset_account: 1700
+    accumulated_depreciation_account: 1701
+    cost_minor: 4500000
+  adjustment:
+    effective_date: "2026-05-01"
+    book: both
+    reason: "replacement lift gate — invoice found while reconciling, dated May"
+    capitalised_minor: 250000
+    capitalisations:
+      - { asset_account: 1700, funding_account: 2000, amount_minor: 250000 }
+
+derivation: >-
+  Identical to the accept vector except that the effective date is **2026-05-01** — before the last
+  depreciation posted (2026-07-31) and inside a closed period.
+  This is the ordinary way the case arises: the bill for the lift gate surfaces months later during a
+  reconciliation, and the honest instinct is to date the improvement when it happened.
+  **Accepting it obliges the ledger to restate.** Three months of depreciation on this truck were
+  computed on the old carrying value and are already posted; two of those periods are sealed and
+  hashed. Recomputing them breaks the artifact hash, which is the whole of ADR-0017's guarantee.
+  Posting only the capitalisation and leaving the depreciation alone is the quieter wrong answer:
+  the asset's carrying value jumps by $2,500.00 in May and the depreciation charged against it never
+  reflects it, so the schedule and the balance sheet disagree from then on with nothing marking why.
+  **The remedy is not to refuse the improvement, only its date.** It takes effect in the current open
+  period, and the remaining schedule absorbs the whole change from there — which is what "prospective"
+  means and why `EVT-FA-004` says so. Same manoeuvre as `invoice_voided` and `settlement_reversed`:
+  the event is real, and it lands where the books are still open.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "effective_date 2026-05-01 precedes the last posted depreciation (2026-07-31) and falls inside closed period 2026-07 — a basis adjustment is prospective (EVT-FA-004, ADR-0017)"

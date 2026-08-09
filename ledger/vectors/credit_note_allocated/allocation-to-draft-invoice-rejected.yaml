@@ -1,0 +1,45 @@
+name: allocation-to-draft-invoice-rejected
+posting_rule: credit_note_allocated
+kind: reject
+source: >-
+  ADR-0022 — `lifecycle` is derived from posting history, and `draft` MEANS "no AR posting exists".
+  The third instance of one discrimination: `invoice_voided/void-of-draft-invoice-rejected` on the
+  reversal side, `settlement_recorded/settlement-against-draft-invoice-rejected` on the cash side.
+
+differs_from: two-notes-one-invoice-one-session
+differs_in: [ledger_state.ar_posted_invoices]
+
+given:
+  ledger_state:
+    closed_periods: []
+    ar_posted_invoices: []
+    remaining_credit:
+      - { credit_note: CN-VEC-1015, remaining_minor: 25974 }
+      - { credit_note: CN-VEC-1017, remaining_minor: 2726 }
+  session:
+    id: SES-VEC-0006
+    accounting_date: "2026-05-09"
+    amount_minor: 27501
+    allocations:
+      - { credit_note: CN-VEC-1015, invoice: INV-VEC-1767, amount_minor: 24775 }
+      - { credit_note: CN-VEC-1017, invoice: INV-VEC-1767, amount_minor: 2726 }
+
+derivation: >-
+  Byte-identical to the accept vector except that INV-VEC-1767 has no AR posting. Both notes have
+  ample credit, the control total is satisfied, and the refusal is on invoice state alone.
+  There is **no receivable to relieve**. Crediting 1200 against a draft manufactures a negative
+  receivable, exactly as a cash settlement against a draft would — the credit is real, the document
+  it is being applied to is not yet a claim on anyone.
+  **The credit is not lost by refusing.** It stays on 2050 as the note's remaining balance, which is
+  the honest state: the business owes the customer value, and no invoice has yet been issued for it
+  to reduce. That is the case ADR-0022 makes representable and a single `status` enum could not —
+  under the old model an invoice could be `draft` and carry an applied credit, with no invariant
+  relating the two.
+  Allocating against a draft is also the shape that looks most like a helpful automation: apply the
+  customer's outstanding credits the moment a document is drafted. It would report every draft as
+  part-settled before it was ever issued.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "INV-VEC-1767 has no AR posting — it is a draft document, and there is no receivable for a credit to relieve (ADR-0022)"

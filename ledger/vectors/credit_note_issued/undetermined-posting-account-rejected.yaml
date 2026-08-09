@@ -1,0 +1,56 @@
+name: undetermined-posting-account-rejected
+posting_rule: credit_note_issued
+kind: reject
+source: >-
+  `deriveCreditPostingAccount` returns **null** for `correction` and `unspecified`, deliberately and
+  with the reason recorded: a correction "is bidirectional — an operator may be adding a credit they
+  missed or removing one that never happened — so its posting depends on what is being corrected.
+  Callers must supply it." (`code:2026-08-09:core@33f5654:src/schemas/credit-note.ts`)
+
+differs_from: early-return-reverses-revenue-and-tax
+differs_in: ["credit_note.reason", "credit_note.revenue_reversal_lines[0].revenue_account", "credit_note.revenue_reversal_lines[1].revenue_account"]
+
+given:
+  ledger_state:
+    closed_periods: []
+  credit_note:
+    id: CN-VEC-0004
+    number: "CN-2004"
+    date: "2026-08-04"
+    reason: correction
+    organization: ORG-VEC-0001
+    total_minor: 23000
+    revenue_reversal_lines:
+      - net_minor: 15000
+        revenue_account: null
+        product_line: "Carts & Ramps"
+        description: "Metro Rack 24\" — correction"
+      - net_minor: 5000
+        revenue_account: null
+        product_line: "Tables & Chairs"
+        description: "6' Folding Table — correction"
+    write_off_lines: []
+    tax_components:
+      - { payable_account: 2200, amount_minor: 3000, tax: "Chicago Rental Tax", rate_percent: 15, base_minor: 20000 }
+
+derivation: >-
+  Same document as the accept vector with `reason: correction`, for which the derivation rule has no
+  opinion and the operator supplied no account.
+  **A correction is bidirectional and that is why no default is safe.** It may be adding a credit
+  somebody forgot or removing one that never should have existed, and those debit different
+  accounts. Any default the rule invented would be right about half the time and indistinguishable
+  from a decision the rest.
+  **The available wrong answers are each worse than refusing.** Falling back to the line's revenue
+  account books a revenue reversal for a correction that may be the opposite. Falling back to 6900
+  calls it a bad debt. Falling back to 6000 General Operating Expenses is what the live tenant
+  actually did on CN-1010/1011/1012 — three notes booked to an operating expense, which is neither a
+  revenue reversal nor a write-off and shows up in neither analysis.
+  So the entry is refused and the operator states the account. **`null` here is an absence of a
+  decision, not a decision** — the same distinction REQ-LED-001 draws for dimensions, arriving on the
+  account instead: an explicit product line of `null` is recorded because someone determined it, and
+  a posting account of `null` is refused because nobody has.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "credit note reason \"correction\" determines no posting account and none was supplied — a correction is bidirectional, so no default is safe"

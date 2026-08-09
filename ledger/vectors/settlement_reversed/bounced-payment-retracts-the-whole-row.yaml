@@ -1,0 +1,42 @@
+name: bounced-payment-retracts-the-whole-row
+posting_rule: settlement_reversed
+kind: accept
+source: >-
+  A real reversal, live: settlement `4ab47fcb6d599e406636` on invoice 1689 — `type:
+  payment_reversal`, `reason: source_retracted`, `amount_cents: 203480`, retracting
+  `441cb6e9177eaf7085a1` (`api:2026-08-09:get_settlements`). Retracts one row of the entry
+  `settlement_recorded/one-payment-across-two-invoices` produces; amounts follow that vector.
+
+given:
+  ledger_state:
+    closed_periods: []
+    retracted_settlements: []
+  reversal:
+    id: REV-VEC-0001
+    accounting_date: "2026-08-09"
+    reason: bounced
+    amount_minor: 100031
+    retracted_transfers:
+      - { settlement: SET-VEC-0002, debit_account: 1001, credit_account: 1200, amount_minor: 100031 }
+
+derivation: >-
+  The check cleared and then bounced. One row of the original two-invoice entry is retracted, so one
+  transfer reappears with its accounts **exchanged**: Dr 1200 / Cr 1001, same amount.
+  **Only the bounced row.** The other invoice's $500.00 was paid by the same check but is not part of
+  this event — a retraction names the rows it retracts, and a bounce of the whole check would name
+  both. Reversing the entire session because one row bounced would relieve a payment that stands.
+  **A new entry, not an edit.** The current system already holds this shape: `settlements` is
+  append-only, and `reverses` is "provenance only, never arithmetic" — the totals are a signed fold
+  over every row, so a reversal contributes by BEING a `*_reversal`, not by being pointed at
+  (`code:2026-08-09:core@33f5654:src/schemas/settlement.ts`). Both rows stand; the invoice's
+  settlement projection follows from the fold.
+  **The accounting date is the reversal's own** — 2026-08-09, not the original's 2026-08-05. Here
+  both are open so it changes nothing, which is exactly why
+  `reversal-after-close-posts-to-an-open-period` exists: a rule that inherited the original's date
+  would pass this vector and break the next one.
+  `control_total` = 100031 = the single transfer. Neither 1200 nor 1001 names a dimension.
+
+expect:
+  transfers:
+    - { debit_account: 1200, credit_account: 1001, amount_minor: 100031, accounting_date: "2026-08-09" }
+  rejects: []
