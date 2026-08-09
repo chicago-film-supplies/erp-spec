@@ -15,10 +15,14 @@ jobs:
         with:
           deno-version: v2.x
 
-      # `validate` is expected to fail until the seeded worklist is cleared. The steps below use
-      # `if: always()` so the stale-generated-file gate still executes and can still fail on its
-      # own terms — otherwise it would be dead code for as long as validate stays red, which is
-      # exactly the "guarantee nothing executes" failure this repo is meant to avoid.
+      # `validate` has been green since 2026-08-09 — a failure here is a real regression, not the
+      # seeded day-one worklist it used to be.
+      #
+      # The steps below keep `if: always()` anyway, and that is deliberate: the moment validate
+      # goes red again, the stale-generated-file gate must still run and still be able to fail on
+      # its own terms. Gating it behind validate's success would make it dead code for exactly as
+      # long as something else was broken — the "a guarantee nothing executes is not a guarantee"
+      # failure this repo exists to avoid.
       - name: Validate
         id: validate
         run: deno task validate

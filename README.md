@@ -23,17 +23,23 @@ Target stack: Deno/Hono API · MongoDB (documents) · TigerBeetle (ledger) · Du
 | [`CLAUDE.md`](CLAUDE.md) | What are the rules for changing anything here? |
 | [`adr/in-force.generated.md`](adr/in-force.generated.md) | What has already been decided? |
 
-## The four commands
+## The five commands
 
 ```
-deno task validate    # every gate. exits 1 while anything is unresolved — that list is the worklist
+deno task validate    # every gate. exits 1 on any failure
 deno task triage      # just the inbox items not yet promoted into the spec
 deno task ingest      # absorb research-drop/*.md into the spec
 deno task gen         # rewrite the four generated files. run before every commit
+deno task view        # local read-only viewer on localhost:8000 — reads source, not the generated files
 ```
 
-`validate` is **expected to fail** until the seeded worklist is cleared. That is not a broken
-repo — it is the repo telling you what has not been decided yet.
+**`validate` is green as of 2026-08-09, and a failure is now a real regression.** It was seeded
+red on purpose and stayed red while the day-one worklist was open; that is finished. If it goes
+red, something broke — read the failures rather than assuming they are expected.
+
+The gates are meant to be *landed* red, though, and that has not changed: a new gate goes in
+against data that still violates it, is watched to fail, and only then is the data fixed. A gate
+first seen passing has never been shown to be a gate.
 
 ---
 
@@ -46,7 +52,7 @@ Everything is in exactly one. Mixing them is the main mistake to avoid.
 | Directory | Lifecycle | In practice |
 |---|---|---|
 | `inbox/`, `research-drop/` | **append-only** | Write once, never edit. A correction is a *new* file. |
-| `contexts/`, `ledger/`, `migration/`, `roadmap/` | **refactor freely** | The real spec. Rewrite whenever understanding improves. |
+| `contexts/`, `ledger/`, `migration/`, `roadmap/`, `spikes/` | **refactor freely** | The real spec. Rewrite whenever understanding improves. |
 | `adr/` | **immutable once `accepted`** | Never edited. Superseded by a new ADR. |
 
 ### How a thought becomes spec
