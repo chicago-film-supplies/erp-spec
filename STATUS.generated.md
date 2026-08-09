@@ -11,37 +11,18 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 16 | **16 with no owner or no decide-by** |
-| Conflicts (HOT) | 9 | 9 open |
+| Open questions | 19 | **0 with no owner or no decide-by** |
+| Conflicts (HOT) | 10 | 10 open |
 | Decisions (ADR) | 15 | 7 in force · 8 proposed |
 | Spikes | 12 | 12 open |
 | Requirements | 2 | 2 without a scenario |
-| Inbox | 29 | 22 unpromoted |
+| Inbox | 32 | 22 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
-| Glossary terms | 23 | 1 still `TODO` |
+| Glossary terms | 23 | 0 still `TODO` |
 
 ## The bottleneck: undecided questions
 
-16 of 16 open questions have no owner or no decide-by date. Everything downstream of them is parked.
-
-| OQ | Question | Owner | Decide by | Blocks |
-|---|---|---|---|---|
-| `OQ-001` | Are fulfillment legs first-class recorded events with their own identity, or derived from… | **unset** | **unset** | `HOT-007` `ADR-0011` `REQ-FUL` |
-| `OQ-002` | What is the grouping key for a trip, and may one trip span destinations belonging to diff… | **unset** | **unset** | `HOT-007` |
-| `OQ-003` | Is `fulfillment_mode` a property of the order, or of each destination? | **unset** | **unset** | `ADR-0011` |
-| `OQ-004` | Who assigns a product's `handling_bucket`, and is it revisable per order? | **unset** | **unset** | — |
-| `OQ-005` | Is a shift per-person or per-crew? | **unset** | **unset** | `REQ-FUL` `REQ-LED` |
-| `OQ-006` | Should a long-haul run absorb a byproduct-loss premium on top of the person-day, mirrorin… | **unset** | **unset** | `HOT-004` |
-| `OQ-007` | Should the collecting/returning flags become per-leg in the new system, given they are pe… | **unset** | **unset** | `HOT-002` `ADR-0011` |
-| `OQ-008` | Who sets standard labour rates, how often are they revised, and what happens to in-flight… | **unset** | **unset** | `REQ-LED` |
-| `OQ-009` | Is TigerBeetle or DuckDB the reporting source of truth, given TB timestamps are posting t… | **unset** | **unset** | `HOT-005` `ADR-0008` `ADR-0010` |
-| `OQ-010` | Does `Trucking` mean third-party freight (no wage labour) or an own long-haul run (labour… | **unset** | **unset** | `HOT-001` `ADR-0011` |
-| `OQ-011` | Is any labour COST recorded anywhere in the current system today, or only billable labour… | **unset** | **unset** | `HOT-003` `REQ-LED` |
-| `OQ-012` | Xero history — import the known-defective lines as-is, or restate them? | **unset** | **unset** | `HOT-006` `REQ-LED` |
-| `OQ-013` | Do the 55 order uids referenced by invoices but absent from `orders` actually not exist,… | **unset** | **unset** | — |
-| `OQ-014` | For each pair of duplicate active charge products, which is canonical — and does a surcha… | **unset** | **unset** | `HOT-008` `REQ-LED` `REQ-BIL` |
-| `OQ-015` | What identifies the one-off out-of-state engagement, and what is the exclusion flag's sem… | **unset** | **unset** | `REQ-BIL` |
-| `OQ-016` | Does the repo require the `spec` CI check to pass before merge, given `deno task validate… | **unset** | **unset** | — |
+None — every open question has an owner and a decide-by date.
 
 ## Open conflicts
 
@@ -56,6 +37,7 @@ is `deno task validate`'s judgement, not this file's.
 | `HOT-007` | Are fulfillment legs first-class recorded events, or derived from orders? The current system derives them, wh… | `OQ-001` `ADR-0011` |
 | `HOT-008` | Duplicate ACTIVE charge products book the same economic event to different revenue accounts, so the source da… | `OQ-014` |
 | `HOT-009` | `invoice.status` carries two different semantics in one field — an assigned lifecycle fact (draft / issued /… | `ADR-0014` |
+| `HOT-010` | The charter and `posting-rules.yaml` specify standard-cost absorption with a `labour_variance` posting rule,… | `OQ-018` `OQ-019` |
 
 ## Decisions
 
@@ -117,4 +99,4 @@ is `deno task validate`'s judgement, not this file's.
 
 - Contexts with no requirements yet: `fulfillment`, `fixed-assets`, `ordering`, `availability`, `banking`, `tax`
 - Requirements with no Gherkin scenario: `REQ-BIL-001`, `REQ-LED-001`
-- Glossary terms still `TODO`: `trucking`
+- Glossary terms still `TODO`: none

@@ -55,62 +55,72 @@
           <outline text="`deno task gen` produces no diff."/>
         </outline>
       </outline>
-      <outline text="Open questions (16 of 16 undecided)" _note="The bottleneck. Each blocks what is listed under it.">
-        <outline text="OQ-001 — Are fulfillment legs first-class recorded events with their own identity, or derived from the order…" _note="owner: UNSET · decide by: UNSET">
+      <outline text="Open questions (0 of 19 undecided)" _note="The bottleneck. Each blocks what is listed under it.">
+        <outline text="OQ-001 — Are fulfillment legs first-class recorded events with their own identity, or derived from the order…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-007"/>
           <outline text="blocks ADR-0011"/>
           <outline text="blocks REQ-FUL"/>
         </outline>
-        <outline text="OQ-002 — What is the grouping key for a trip, and may one trip span destinations belonging to different orde…" _note="owner: UNSET · decide by: UNSET">
+        <outline text="OQ-002 — What is the grouping key for a trip, and may one trip span destinations belonging to different orde…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-007"/>
         </outline>
-        <outline text="OQ-003 — Is `fulfillment_mode` a property of the order, or of each destination?" _note="owner: UNSET · decide by: UNSET">
+        <outline text="OQ-003 — Is `fulfillment_mode` a property of the order, or of each destination?" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks ADR-0011"/>
         </outline>
-        <outline text="OQ-004 — Who assigns a product's `handling_bucket`, and is it revisable per order?" _note="owner: UNSET · decide by: UNSET"/>
-        <outline text="OQ-005 — Is a shift per-person or per-crew?" _note="owner: UNSET · decide by: UNSET">
+        <outline text="OQ-004 — Who assigns a product's `handling_bucket`, and is it revisable per order?" _note="owner: alex · decide by: 2026-08-09"/>
+        <outline text="OQ-005 — Is a shift per-person or per-crew?" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks REQ-FUL"/>
           <outline text="blocks REQ-LED"/>
         </outline>
-        <outline text="OQ-006 — Should a long-haul run absorb a byproduct-loss premium on top of the person-day, mirroring what the…" _note="owner: UNSET · decide by: UNSET">
+        <outline text="OQ-006 — Should a long-haul run absorb a byproduct-loss premium on top of the person-day, mirroring what the…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-004"/>
         </outline>
-        <outline text="OQ-007 — Should the collecting/returning flags become per-leg in the new system, given they are per-destinat…" _note="owner: UNSET · decide by: UNSET">
+        <outline text="OQ-007 — Should the collecting/returning flags become per-leg in the new system, given they are per-destinat…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-002"/>
           <outline text="blocks ADR-0011"/>
         </outline>
-        <outline text="OQ-008 — Who sets standard labour rates, how often are they revised, and what happens to in-flight jobs when…" _note="owner: UNSET · decide by: UNSET">
+        <outline text="OQ-008 — Who sets standard labour rates, how often are they revised, and what happens to in-flight jobs when…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks REQ-LED"/>
         </outline>
-        <outline text="OQ-009 — Is TigerBeetle or DuckDB the reporting source of truth, given TB timestamps are posting time and re…" _note="owner: UNSET · decide by: UNSET">
+        <outline text="OQ-009 — Is TigerBeetle or DuckDB the reporting source of truth, given TB timestamps are posting time and re…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-005"/>
           <outline text="blocks ADR-0008"/>
           <outline text="blocks ADR-0010"/>
         </outline>
-        <outline text="OQ-010 — Does `Trucking` mean third-party freight (no wage labour) or an own long-haul run (labour-bearing)?" _note="owner: UNSET · decide by: UNSET">
+        <outline text="OQ-010 — Does `Trucking` mean third-party freight (no wage labour) or an own long-haul run (labour-bearing)?" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-001"/>
           <outline text="blocks ADR-0011"/>
         </outline>
-        <outline text="OQ-011 — Is any labour COST recorded anywhere in the current system today, or only billable labour revenue?" _note="owner: UNSET · decide by: UNSET">
+        <outline text="OQ-011 — Is any labour COST recorded anywhere in the current system today, or only billable labour revenue?" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-003"/>
           <outline text="blocks REQ-LED"/>
         </outline>
-        <outline text="OQ-012 — Xero history — import the known-defective lines as-is, or restate them?" _note="owner: UNSET · decide by: UNSET">
+        <outline text="OQ-012 — Xero history — import the known-defective lines as-is, or restate them?" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-006"/>
           <outline text="blocks REQ-LED"/>
         </outline>
-        <outline text="OQ-013 — Do the 55 order uids referenced by invoices but absent from `orders` actually not exist, and is the…" _note="owner: UNSET · decide by: UNSET"/>
-        <outline text="OQ-014 — For each pair of duplicate active charge products, which is canonical — and does a surcharge post t…" _note="owner: UNSET · decide by: UNSET">
+        <outline text="OQ-013 — Do the 55 order uids referenced by invoices but absent from `orders` actually not exist, and is the…" _note="owner: alex · decide by: 2026-08-09"/>
+        <outline text="OQ-014 — For each pair of duplicate active charge products, which is canonical — and does a surcharge post t…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-008"/>
           <outline text="blocks REQ-LED"/>
           <outline text="blocks REQ-BIL"/>
         </outline>
-        <outline text="OQ-015 — What identifies the one-off out-of-state engagement, and what is the exclusion flag's semantics — e…" _note="owner: UNSET · decide by: UNSET">
+        <outline text="OQ-015 — What identifies the one-off out-of-state engagement, and what is the exclusion flag's semantics — e…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks REQ-BIL"/>
         </outline>
-        <outline text="OQ-016 — Does the repo require the `spec` CI check to pass before merge, given `deno task validate` is red b…" _note="owner: UNSET · decide by: UNSET"/>
+        <outline text="OQ-016 — Does the repo require the `spec` CI check to pass before merge, given `deno task validate` is red b…" _note="owner: alex · decide by: 2026-08-09"/>
+        <outline text="OQ-017 — Is an employee a distinct record, or a role attached to a person who may also be a customer contact?" _note="owner: alex · decide by: 2026-08-09">
+          <outline text="blocks REQ-FUL"/>
+          <outline text="blocks REQ-LED"/>
+        </outline>
+        <outline text="OQ-018 — When a shift spans several jobs and crosses into overtime, which job absorbs the overtime premium?" _note="owner: alex · decide by: 2026-09-15">
+          <outline text="blocks REQ-LED"/>
+        </outline>
+        <outline text="OQ-019 — What defines a &quot;consecutive day&quot; for the 6th/7th-day 1.5x rule, and does it compound with the after…" _note="owner: alex · decide by: 2026-09-15">
+          <outline text="blocks REQ-LED"/>
+        </outline>
       </outline>
-      <outline text="Conflicts (9 open)">
+      <outline text="Conflicts (10 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labour) or an own long-haul run (labour-bearing)?…" _note="Decides whether a trucked fulfillment absorbs labour cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
           <outline text="blocks OQ-010"/>
           <outline text="blocks ADR-0011"/>
@@ -142,6 +152,10 @@
         </outline>
         <outline text="HOT-009 — `invoice.status` carries two different semantics in one field — an assigned lifecycle fact (draft /…" _note="ADR-0014 makes derived state a rebuildable projection and assigned state a recorded fact. A field that is both cannot be either, and the two live defect populations are one of each: the derived half going stale, and the lifecycle half disagreeing with the balance. Decomposing the field is a precondition for applying ADR-0014 to invoices at all.">
           <outline text="blocks ADR-0014"/>
+        </outline>
+        <outline text="HOT-010 — The charter and `posting-rules.yaml` specify standard-cost absorption with a `labour_variance` post…" _note="A rate variance cannot exist where there is no standard rate, so `labour_variance` as specified has no input and would be a posting rule that can never fire. Absorption itself survives and must not be discarded with it: a guaranteed 8 hours means paid-but-unworked time is a real cost attributable to no job, so `COGS-Labour Absorbed` and `COGS-Unabsorbed Labour` both stand. What they measure is UTILISATION, not rate deviation, and the posting rules must say which.">
+          <outline text="blocks OQ-018"/>
+          <outline text="blocks OQ-019"/>
         </outline>
       </outline>
       <outline text="Decisions (7 in force, 8 proposed)">
@@ -278,7 +292,7 @@
         <outline text="banking (BNK)" _note="0 requirement(s) · 0 event(s)"/>
         <outline text="tax (TAX)" _note="0 requirement(s) · 0 event(s)"/>
       </outline>
-      <outline text="Capture (22 unpromoted of 29)" _note="no drops pending">
+      <outline text="Capture (22 unpromoted of 32)" _note="no drops pending">
         <outline text="Actor per leg, clock in/out per stop, crew size per trip" _note="inbox/2026-08-08-actor-and-clock-per-leg.md"/>
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>

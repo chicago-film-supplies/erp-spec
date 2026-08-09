@@ -272,18 +272,19 @@ terms:
       "Book" and "basis" are used interchangeably in conversation. Here `book` is the set
       (gaap|tax) and `basis` is the carrying amount within a book. Do not introduce a third term.
 
-  # ── Terms deliberately left open ────────────────────────────────────────────
-
   - term: trucking
-    definition: TODO
+    definition: >-
+      An own long-haul run, crewed by CFS. Labour-bearing — it absorbs a person-day into COGS and
+      generates a shift, unlike `shipping`, which is third-party freight and carries no wage
+      labour.
     aliases: [long haul]
     contexts: [fulfillment, ordering]
-    source: "verified:2026-08-08:db_products_query tracking_category_name=Transport"
-    verified: false
-    open_questions: [OQ-010]
+    source: "OQ-010 (repo owner, 2026-08-09); api:2026-08-08:db_products_query tracking_category_name=Transport"
+    verified: true
+    open_questions: []
     notes: >-
-      HOT-001. Evidence, not proof: `Trucking` and `Shipping` are both products in the `Transport`
-      product line, but `Trucking` books to COA 4100 — the same revenue account as Crew labour and
-      Delivery services — while `Shipping` books to its own COA 4150. That grouping suggests
-      Trucking is an own-crew long-haul run (labour-bearing) and Shipping is third-party freight.
-      Not confirmed. The answer decides whether trucking absorbs a person-day.
+      Resolved OQ-010 / HOT-001 on 2026-08-09. The supporting evidence: `Trucking` and `Shipping`
+      are both products in the `Transport` product line, but `Trucking` books to COA 4100 — the
+      same revenue account as Crew labour and Delivery services — while `Shipping` books to its
+      own COA 4150. Per OQ-006 the person-day it absorbs is the ACTUAL cost; the premium the
+      customer pays for a long haul is margin, not cost.

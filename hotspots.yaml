@@ -146,3 +146,25 @@ hotspots:
       state the balance contradicts.
     blocks: [ADR-0014]
     status: open
+
+  - id: HOT-010
+    statement: >-
+      The charter and `posting-rules.yaml` specify standard-cost absorption with a
+      `labour_variance` posting rule, but CFS does not use standard labour rates — costing is
+      actual, from a per-contact wage and a deterministic overtime rule.
+    contexts: [ledger, fulfillment]
+    why_it_matters: >-
+      A rate variance cannot exist where there is no standard rate, so `labour_variance` as
+      specified has no input and would be a posting rule that can never fire. Absorption itself
+      survives and must not be discarded with it: a guaranteed 8 hours means paid-but-unworked
+      time is a real cost attributable to no job, so `COGS-Labour Absorbed` and
+      `COGS-Unabsorbed Labour` both stand. What they measure is UTILISATION, not rate deviation,
+      and the posting rules must say which.
+    evidence: >-
+      Repo owner, 2026-08-09 (OQ-008): default wage $30/hr with a guaranteed 8 hours, 1.5x after 8
+      in a day, 1.5x all day on a 6th and/or 7th consecutive day; one person at $36/hr. The wage
+      is carried per contact and overridable, and cost flows from the purchase order / bill that
+      labour scheduling generates. Against `charter.md` ("standard-cost absorption into COGS") and
+      `ledger/posting-rules.yaml` (`labour_variance <- period : Dr/Cr COGS-Labour Variance`).
+    blocks: [OQ-018, OQ-019]
+    status: open

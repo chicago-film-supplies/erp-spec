@@ -2,9 +2,9 @@
 #
 # An OQ is a DECISION, not work. Work is a GitHub issue. A conflict is a HOT-.
 #
-# `deno task validate` FAILS on any entry missing `owner` or `decide_by`. Every entry below is
-# seeded TBD/TBD on purpose — filling them in is the first real act of planning, and the failure
-# list is the day-one worklist.
+# `deno task validate` FAILS on any entry missing `owner` or `decide_by`. The seeded TBD/TBD
+# worklist was cleared 2026-08-09 — OQ-001..016 were decided in one session; `answer` records what
+# was decided and `decide_by` is the date it was decided on.
 #
 # status: open | answered | dropped
 # Dates are ISO calendar dates (America/Chicago).
@@ -14,173 +14,291 @@ open_questions:
     question: >-
       Are fulfillment legs first-class recorded events with their own identity, or derived from
       the order's destinations at read time?
-    owner: TBD
-    decide_by: TBD
+    owner: alex
+    decide_by: 2026-08-09
     blocks: [HOT-007, ADR-0011, REQ-FUL]
-    status: open
+    status: answered
+    answer: >-
+      First-class recorded events, each with its own identity, able to carry an actor, a clock-in
+      and a shift id. A derived leg can carry none of those, which would defeat the charter's
+      labour-costing purpose.
     notes: >-
-      Everything in the labour-costing design depends on this. A derived leg cannot carry an
-      actor, a clock-in, or a shift id. SPIKE-none — this is a design decision, not an
-      investigation.
+      Everything in the labour-costing design depends on this. Resolves HOT-007 and unblocks
+      ADR-0011.
 
   - id: OQ-002
     question: >-
       What is the grouping key for a trip, and may one trip span destinations belonging to
       different orders?
-    owner: TBD
-    decide_by: TBD
+    owner: alex
+    decide_by: 2026-08-09
     blocks: [HOT-007]
-    status: open
+    status: answered
+    answer: >-
+      A trip MAY span orders. It is therefore a fulfillment-level aggregate with its own identity
+      that legs point at — it cannot live under an order.
     notes: >-
-      "Destinations sharing a date and direction" is the stated rule. If a trip may cross orders,
-      trip is a fulfillment aggregate and cannot live under an order.
+      Consequence: a shared van run serving two customers is one trip, so its travel cost can be
+      split across the jobs that caused it rather than duplicated or arbitrarily assigned.
 
   - id: OQ-003
     question: >-
       Is `fulfillment_mode` a property of the order, or of each destination?
-    owner: TBD
-    decide_by: TBD
+    owner: alex
+    decide_by: 2026-08-09
     blocks: [ADR-0011]
-    status: open
+    status: answered
+    answer: Per destination.
     notes: >-
-      Newly live: multi-destination orders are now possible, so one order can plausibly have a
-      counter pickup for one destination and a delivery for another. The seeded design puts the
-      enum on the order.
+      Multi-destination orders are live, so one order can have a counter pickup for one
+      destination and a delivery for another. The seeded design put the enum on the order; that is
+      superseded.
 
   - id: OQ-004
     question: Who assigns a product's `handling_bucket`, and is it revisable per order?
-    owner: TBD
-    decide_by: TBD
+    owner: alex
+    decide_by: 2026-08-09
     blocks: []
-    status: open
+    status: answered
+    answer: >-
+      Set on the product as a default, overridable per order line. An override must be recorded AS
+      an override so costing can distinguish standard from exceptional handling.
 
   - id: OQ-005
     question: Is a shift per-person or per-crew?
-    owner: TBD
-    decide_by: TBD
+    owner: alex
+    decide_by: 2026-08-09
     blocks: [REQ-FUL, REQ-LED]
-    status: open
-    notes: >-
-      Material because `shift_id` goes on every leg. A crew-level shift makes leg→shift
-      many-to-one; a person-level shift makes it many-to-many and needs a join.
+    status: answered
+    answer: >-
+      Per person. leg→shift is therefore many-to-many and needs a join. This is the only shape
+      that allocates a specific person's cost to a specific job, and it is required by OQ-008's
+      per-contact wage.
 
   - id: OQ-006
     question: >-
       Should a long-haul run absorb a byproduct-loss premium on top of the person-day, mirroring
       what the customer is charged?
-    owner: TBD
-    decide_by: TBD
+    owner: alex
+    decide_by: 2026-08-09
     blocks: [HOT-004]
-    status: open
+    status: answered
+    answer: >-
+      No. Cost is the actual person-day. The premium the customer pays is margin, not cost;
+      absorbing it would book a cost never incurred and overstate COGS.
+    notes: Resolves HOT-004.
 
   - id: OQ-007
     question: >-
       Should the collecting/returning flags become per-leg in the new system, given they are
       per-destination today?
-    owner: TBD
-    decide_by: TBD
+    owner: alex
+    decide_by: 2026-08-09
     blocks: [HOT-002, ADR-0011]
-    status: open
+    status: answered
+    answer: Per leg.
     notes: >-
-      Verified 2026-08-08 that they are per-destination in the current system. The question is
-      forward-looking, and it decides whether leg history can be backfilled at migration or only
-      accumulated going forward.
+      Consequence: per-destination history cannot be split into legs retroactively, so leg history
+      starts empty at cutover and accumulates forward. Resolves HOT-002.
 
   - id: OQ-008
     question: Who sets standard labour rates, how often are they revised, and what happens to
       in-flight jobs when a rate changes?
-    owner: TBD
-    decide_by: TBD
+    owner: alex
+    decide_by: 2026-08-09
     blocks: [REQ-LED]
-    status: open
+    status: answered
+    answer: >-
+      The question's premise does not hold — CFS does not use standard labour rates. Costing is
+      ACTUAL, from a labour scheduling module: scheduling a contact adds them to the labour
+      calendar, the contact carries a wage (default $30/hr, overridable per contact — one person
+      is $36/hr), and cost flows from the purchase order / bill that scheduling generates. Rules:
+      guaranteed 8 hours; 1.5x after 8 in a day; 1.5x all day on a 6th and/or 7th consecutive day.
+    notes: >-
+      Two consequences. (1) There is no rate variance, so a `labour_variance` posting rule as
+      RATE variance is wrong — HOT-010. Absorption survives, because guaranteed-but-unworked hours
+      are a real cost attributable to no job, so `COGS-Labour Absorbed` and `COGS-Unabsorbed
+      Labour` both stand; the gap they measure is UTILISATION. (2) Purchase orders are new in v2
+      and are not in the charter's in-scope list — second use case is inventory acquisition
+      (retail, and fixed assets for rental or internal ops). Residual questions: OQ-018, OQ-019.
 
   - id: OQ-009
     question: >-
       Is TigerBeetle or DuckDB the reporting source of truth, given TB timestamps are posting time
       and reporting is periodised by accounting date?
-    owner: TBD
-    decide_by: TBD
+    owner: alex
+    decide_by: 2026-08-09
     blocks: [HOT-005, ADR-0008, ADR-0010]
-    status: open
-    notes: Informed by SPIKE-003, but the split is a decision, not a finding.
+    status: answered
+    answer: >-
+      Split by period state. TigerBeetle is balance-integrity truth. An OPEN period is reported
+      live from MongoDB. A CLOSED period is sealed to Parquet, monthly, and that file — hashed
+      into the close record — is the reporting truth and the audit artifact. DuckDB reads sealed
+      periods and ad-hoc analysis.
+    notes: >-
+      A closed period cannot drift, because the artifact is immutable and hashed; an open period
+      is not expected to be stable. Consequences: ADR-0008's dimension-exploded account tree is
+      superseded by a plain COA with dimensions carried on the posting, and ADR-0006 narrows from
+      "the read side" to "the sealed-period artifact". Monthly granularity follows the close
+      cadence, to be confirmed when close is specified in m3. Resolves HOT-005.
 
   - id: OQ-010
     question: >-
       Does `Trucking` mean third-party freight (no wage labour) or an own long-haul run
       (labour-bearing)?
-    owner: TBD
-    decide_by: TBD
+    owner: alex
+    decide_by: 2026-08-09
     blocks: [HOT-001, ADR-0011]
-    status: open
+    status: answered
+    answer: An own long-haul run. Labour-bearing — it absorbs a crew-day into COGS.
     notes: >-
-      Evidence 2026-08-08: `Trucking` books to COA 4100 alongside Crew labour and Delivery
-      services; `Shipping` books to its own COA 4150. Suggestive of own-run vs freight.
+      Consistent with the evidence that `Trucking` books to COA 4100 alongside Crew labour while
+      `Shipping` has its own COA 4150. Resolves HOT-001 and clears the last `definition: TODO` in
+      the glossary, which was m2's remaining exit criterion.
 
   - id: OQ-011
     question: >-
       Is any labour COST recorded anywhere in the current system today, or only billable labour
       revenue?
-    owner: TBD
-    decide_by: TBD
+    owner: alex
+    decide_by: 2026-08-09
     blocks: [HOT-003, REQ-LED]
-    status: open
+    status: answered
+    answer: >-
+      Yes — own wages are recorded to COA 6600 Wages Expense, in general operating expenses.
+      Verified in the live chart of accounts, which also holds 6720 Payroll Tax Expense, 2160/2170/
+      2180/2190 payroll liabilities, 4120 Contract Labor Income, and — already on the COGS side —
+      5200 "Cost of Goods Sold: Subcontractors, Sales Commissions".
     notes: >-
-      Verified 2026-08-08 that the `Crew` product line carries three billable service products,
-      all revenue at COA 4100. Cost side unexamined. Answering this decides whether the migration
-      has any labour cost history to carry, or starts from zero.
+      So two labour cost treatments already coexist: own wages in opex (6600), subcontractors in
+      COGS (5200). The charter's absorption model is therefore a MOVE of own-crew cost from 6600
+      into a dimensioned COGS account beside the existing 5200 — not a from-scratch invention.
+      There is cost history to carry, but it is undimensioned and unallocated to jobs.
+      Resolves HOT-003.
 
   - id: OQ-012
     question: Xero history — import the known-defective lines as-is, or restate them?
-    owner: TBD
-    decide_by: TBD
+    owner: alex
+    decide_by: 2026-08-09
     blocks: [HOT-006, REQ-LED]
-    status: open
+    status: answered
+    answer: Restate all.
     notes: >-
-      ~90% of historical Xero lines sit behind the 2025-12-31 lock. Verified 2026-08-08 that
-      28.7% of CFS line revenue carries no product-line dimension — whatever is imported inherits
-      that.
+      Measured 2026-08-09 (see inbox/2026-08-09-product-line-dimension-coverage.md): 383 of 9,197
+      invoice line items carry no `tracking_category` — 4.16% of lines but 28.74% of revenue,
+      which confirms the charter's 28.7% figure exactly and establishes it was always a REVENUE
+      share, not a line count. Restating is mostly mechanical because the values already exist
+      (Trash Removal → Trash & Cleanup, Trucking → Transport, Contract Labor → Crew); the
+      ambiguous residue is facility and professional-services lines. Resolves HOT-006.
 
   - id: OQ-013
     question: >-
       Do the 55 order uids referenced by invoices but absent from `orders` actually not exist, and
       is the count still 55?
-    owner: TBD
-    decide_by: TBD
+    owner: alex
+    decide_by: 2026-08-09
     blocks: []
-    status: open
+    status: answered
+    answer: >-
+      No. The count is ZERO, not 55. Measured 2026-08-09 against prod across all five
+      order↔invoice reference paths; every reference resolves.
     notes: >-
-      Unverified as of 2026-08-08 — checking it means cross-referencing every invoice's
-      `query_by_orders` against the orders collection. This is the evidence for the "no hard
-      deletes, ever" fence, so it is worth confirming rather than inheriting.
+      See inbox/2026-08-09-hard-deleted-order-uids-do-not-reproduce.md. This matters beyond the
+      question: the charter cites these 55 as the evidence for the "no hard deletes, ever" fence,
+      and m0 requires every fence to be traceable to a finding. The fence may still be right on
+      other grounds, but its cited evidence measures 0.
 
   - id: OQ-014
     question: >-
       For each pair of duplicate active charge products, which is canonical — and does a surcharge
       post to COA 4100 or 4110?
-    owner: TBD
-    decide_by: TBD
+    owner: alex
+    decide_by: 2026-08-09
     blocks: [HOT-008, REQ-LED, REQ-BIL]
-    status: open
+    status: answered
+    answer: >-
+      Type determines the account: a `surcharge` books to 4110, a `service` to 4100 — always. The
+      correctly-typed member of each duplicate pair is canonical; the other is deactivated.
+    notes: >-
+      Gives the posting engine a mechanical rule instead of a per-pair judgement, which is what
+      makes the ambiguity non-recurring. Resolves HOT-008.
 
   - id: OQ-015
     question: >-
       What identifies the one-off out-of-state engagement, and what is the exclusion flag's
       semantics — excluded from run-rate reporting only, or from more?
-    owner: TBD
-    decide_by: TBD
+    owner: alex
+    decide_by: 2026-08-09
     blocks: [REQ-BIL]
-    status: open
+    status: answered
+    answer: >-
+      Excluded from run-rate reporting AND from tax determination — out-of-state work is not a
+      Chicago transaction.
+    notes: >-
+      This makes the flag load-bearing for tax, not merely a reporting lens, so it needs a
+      documented determination rule rather than an operator toggle. What IDENTIFIES the engagement
+      is still unstated and is m3/SPIKE-008 work.
 
   - id: OQ-016
     question: >-
       Does the repo require the `spec` CI check to pass before merge, given `deno task validate`
       is red by design until the seeded worklist is cleared?
-    owner: TBD
-    decide_by: TBD
+    owner: alex
+    decide_by: 2026-08-09
     blocks: []
+    status: answered
+    answer: >-
+      Yes, required — enabled once `deno task validate` is green, not before. A required check
+      that fails by design would block every merge from day one.
+    notes: >-
+      Clearing OQ-001..016 removes 32 of the 34 seeded failures. The remaining 2 are REQ-BIL-001
+      and REQ-LED-001 lacking Gherkin scenarios. Enable with
+      `gh api -X PUT repos/chicago-film-supplies/erp-spec/branches/main/protection` at that point.
+
+  - id: OQ-017
+    question: >-
+      Is an employee a distinct record, or a role attached to a person who may also be a customer
+      contact?
+    owner: alex
+    decide_by: 2026-08-09
+    blocks: [REQ-FUL, REQ-LED]
+    status: answered
+    answer: >-
+      One person, many roles. A single party record per human carries role attachments (employee,
+      organization contact); the same human is one record whether they are crew or a customer
+      contact.
+    notes: >-
+      Raised by OQ-008 — many CFS crew are also contacts at customer organizations. The role model
+      is also what gives wage data an access-control boundary: a wage attaches to the employee
+      role, not to the customer-facing contact record. Supersedes the "extend contact with
+      employee fields" option, which would have put payroll data on a record readable by people
+      who should not see it.
+
+  - id: OQ-018
+    question: >-
+      When a shift spans several jobs and crosses into overtime, which job absorbs the overtime
+      premium?
+    owner: alex
+    decide_by: 2026-09-15
+    blocks: [REQ-LED]
     status: open
     notes: >-
-      Left unprotected at seed time: a required check that fails by design blocks every merge from
-      day one. Enable with
-      `gh api -X PUT repos/chicago-film-supplies/erp-spec/branches/main/protection` once validate
-      is green. See inbox/2026-08-08-ci-red-by-design.md.
+      OQ-008 gives the total from the PO/bill, but not its allocation. Chronological (the premium
+      lands on whichever job the clock was on after hour 8) is simple but arbitrary — the same two
+      jobs in the opposite order produce different COGS. Pro-rata across the shift's jobs is
+      fairer but detaches the premium from the hours that actually caused it. This is precisely
+      the "distributing OT" guesswork OQ-008 aims to remove, so it needs a stated rule.
+
+  - id: OQ-019
+    question: >-
+      What defines a "consecutive day" for the 6th/7th-day 1.5x rule, and does it compound with
+      the after-8-hours 1.5x?
+    owner: alex
+    decide_by: 2026-09-15
+    blocks: [REQ-LED]
+    status: open
+    notes: >-
+      Consecutive within what window — a fixed payroll week, or a rolling 7 days? The two give
+      different answers for someone working Thursday through Wednesday. And if a person works ten
+      hours on their sixth consecutive day, is that 1.5x throughout or 1.5x for eight hours and 2x
+      for the last two? Both are defensible; only one can be implemented.
