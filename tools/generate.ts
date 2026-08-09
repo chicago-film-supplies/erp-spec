@@ -9,6 +9,7 @@
  * a permanently red build that looks like a stale file.
  */
 import { parse as parseYaml } from "@std/yaml";
+import { evaluateMilestones } from "./milestone-checks.ts";
 import { walk } from "@std/fs";
 import { basename, relative } from "@std/path";
 
@@ -352,11 +353,25 @@ for (const s of spikes) {
   } | ${s.status ?? "open"} |\n`;
 }
 st += `\n## Roadmap\n\n`;
-st += `| Milestone | Title | Depends on | Exit criteria |\n|---|---|---|---:|\n`;
-for (const m of milestones) {
-  st += `| \`${m.id}\` | ${m.title ?? ""} | ${
-    (m.depends_on ?? []).map((d) => `\`${d}\``).join(" ") || "—"
-  } | ${(m.exit_criteria ?? []).length} |\n`;
+// Clock-free: `adr_review_by_current` needs today's date, so it reports as `validate` here and is
+// decided by `deno task validate`, which writes nothing and may read the real clock.
+const ms = await evaluateMilestones(ROOT, null);
+st += `**\`prose\` is not \`met\`.** A criterion no tool can decide is one somebody has to assert —\n`;
+st += `it is counted separately on purpose, and a milestone is not done because its checkable half is.\n\n`;
+st += `| Milestone | Title | Depends on | met | unmet | prose | validate |\n|---|---|---|---:|---:|---:|---:|\n`;
+for (const m of ms) {
+  st += `| \`${m.id}\` | ${m.title} | ${
+    m.depends_on.map((d) => `\`${d}\``).join(" ") || "—"
+  } | ${m.met} | ${m.unmet || "—"} | ${m.prose || "—"} | ${m.deferred || "—"} |\n`;
+}
+const unmetAll = ms.flatMap((m) => m.criteria.filter((c) => c.verdict === "unmet").map((c) => ({ m, c })));
+st += `\n### Machine-checkable criteria not yet met (${unmetAll.length})\n\n`;
+if (unmetAll.length === 0) st += `None.\n`;
+else {
+  st += `| Milestone | Criterion | Check | Measured |\n|---|---|---|---|\n`;
+  for (const { m, c } of unmetAll) {
+    st += `| \`${m.id}\` | ${trunc(oneLine(c.text), 70)} | \`${c.check}\` | ${c.detail} |\n`;
+  }
 }
 
 st += `\n## Coverage gaps\n\n`;

@@ -11,6 +11,7 @@
 import { parse as parseYaml } from "@std/yaml";
 import { walk } from "@std/fs";
 import { basename, relative } from "@std/path";
+import { CHECKS, CLOCK_DEPENDENT, evaluateMilestones } from "./milestone-checks.ts";
 
 const ROOT = new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const TRIAGE_ONLY = Deno.args.includes("--triage-only");
@@ -1014,6 +1015,80 @@ for (const i of inbox) {
   }
 }
 
+// ── gate 12: milestone exit criteria are wired to something ─────────────────
+/**
+ * erp-spec#9. `roadmap/milestones.yaml` is the top-level assertion of the whole spec and nothing
+ * read it beyond the parse sweep, so milestone state was assessed by a human reading prose — and
+ * one such assessment was wrong.
+ *
+ * This gate does NOT fail on an unmet criterion. Unmet is the normal state of a spec in progress;
+ * failing on it would make CI red until spec-v1 and the gate would be turned off. It fails on the
+ * REGISTRY being incoherent: a criterion wired to nothing, or to a check that does not exist.
+ *
+ * `adr_review_by_current` reads the same fact as gate 6. That is one enforcer plus one reporter,
+ * not two oracles: **gate 6 is what fails**, and the milestone entry reports the same number so
+ * STATUS and the gate cannot tell different stories.
+ */
+{
+  const G = "12";
+  const raw = await readYaml<{ milestones?: Record<string, unknown>[] }>(`${ROOT}/roadmap/milestones.yaml`);
+  const ms = raw?.milestones ?? [];
+  const ids = new Set(ms.map((m) => String(m.id)));
+
+  for (const m of ms) {
+    const where = `milestone "${m.id ?? "(no id)"}"`;
+    if (!m.id) fail(G, `${where}: missing id`);
+    for (const d of (m.depends_on as string[] | undefined) ?? []) {
+      if (!ids.has(String(d))) fail(G, `${where}: depends_on "${d}" is not a milestone`);
+    }
+    const crit = (m.exit_criteria as Record<string, unknown>[] | undefined) ?? [];
+    if (crit.length === 0) fail(G, `${where}: no exit criteria`);
+    for (const [i, c] of crit.entries()) {
+      const at = `${where} criterion[${i}]`;
+      if (typeof c === "string") {
+        fail(G, `${at}: is a bare string — it must declare \`check:\` or \`prose_only: true\``);
+        continue;
+      }
+      if (!c.text) fail(G, `${at}: missing \`text\``);
+      const hasCheck = typeof c.check === "string";
+      const isProse = c.prose_only === true;
+      if (hasCheck === isProse) {
+        fail(G, `${at}: must declare exactly one of \`check:\` or \`prose_only: true\` (has ${hasCheck ? "both" : "neither"})`);
+      }
+      if (isProse && !c.reason) {
+        fail(G, `${at}: \`prose_only\` requires a \`reason\` — say why no tool can decide it`);
+      }
+      if (hasCheck && !CHECKS[String(c.check)]) {
+        fail(G, `${at}: check "${c.check}" is not defined in tools/milestone-checks.ts`);
+      }
+    }
+  }
+
+  // A checker nobody names is a checker that silently rots.
+  const named = new Set(
+    ms.flatMap((m) => ((m.exit_criteria as Record<string, unknown>[] | undefined) ?? []).map((c) => String(c?.check))),
+  );
+  for (const name of Object.keys(CHECKS)) {
+    if (!named.has(name)) warn(G, `check "${name}" is defined but no milestone criterion names it`);
+  }
+
+  // The load-bearing property: generate.ts writes a file, so it must read no clock. Evaluating with
+  // no clock MUST leave every clock-dependent check undecided — if one ever returned a verdict from
+  // a null clock, STATUS would change on its own and the stale-file gate would go red on unrelated
+  // pushes. Asserted here rather than trusted, because it is invisible until it breaks.
+  if (CLOCK_DEPENDENT.size === 0) {
+    fail(G, "CLOCK_DEPENDENT is empty — either delete the mechanism or the clock rule is unenforced");
+  }
+  const clockFree = await evaluateMilestones(ROOT, null);
+  for (const m of clockFree) {
+    for (const c of m.criteria) {
+      if (c.check && CLOCK_DEPENDENT.has(c.check) && c.verdict !== "deferred") {
+        fail(G, `${m.id}: clock-dependent check "${c.check}" returned "${c.verdict}" with no clock — generate.ts would read a clock`);
+      }
+    }
+  }
+}
+
 // ── report ──────────────────────────────────────────────────────────────────
 const GATE_NAMES: Record<string, string> = {
   "1": "ids unique and well-formed",
@@ -1027,6 +1102,7 @@ const GATE_NAMES: Record<string, string> = {
   "9": "inbox triage staleness",
   "10": "ledger content — chart, posting rules, golden vectors",
   "11": "repo paths cited in prose resolve",
+  "12": "milestone exit criteria are wired to a check or declared prose",
   xref: "cross-references resolve",
   parse: "files parse",
 };

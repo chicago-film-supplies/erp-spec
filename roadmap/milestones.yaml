@@ -1,76 +1,170 @@
 # Milestones to spec-v1. Exit criteria are falsifiable statements, not activities.
+#
+# ── every criterion declares what decides it (erp-spec#9) ───────────────────────────────────────
+# Each entry carries `text` plus EXACTLY ONE of:
+#
+#   check: <name>       a checker in tools/milestone-checks.ts. Gate 12 fails if the name does not
+#                       resolve, so a typo cannot leave a criterion silently unchecked forever.
+#   prose_only: true    no tool can decide it. Requires a `reason` saying why.
+#
+# Gate 12 fails on a criterion that declares neither, so "nobody wired this up" is visible rather
+# than silent — which is the whole point, because this file was read by nothing until now and
+# milestone state was assessed by a human reading prose. One such assessment was already wrong.
+#
+# ⚠️ **`prose_only` never counts toward met.** A criterion a machine cannot decide is not one that
+# passes; it is one somebody has to assert. STATUS reports the count of those separately, and that
+# number is itself the interesting one.
 
 milestones:
   - id: m0
     title: Charter and non-goals
     depends_on: []
     exit_criteria:
-      - charter.md scope and non-goals list has stopped changing across two consecutive sessions.
-      - Every non-goal states why it is out, not just that it is.
-      - The fences (no hard deletes, integer minor units, distinct date fields, no foreign ids in domain) are each traceable to a finding.
+      - text: charter.md scope and non-goals list has stopped changing across two consecutive sessions.
+        prose_only: true
+        reason: >-
+          A judgement about git history across sessions, and about intent rather than content. A
+          tool could count commits touching the file; it could not tell a settled list from one
+          nobody happened to edit.
+      - text: Every non-goal states why it is out, not just that it is.
+        prose_only: true
+        reason: Requires reading whether a sentence gives a reason. Substance, not structure.
+      - text: >-
+          The fences (no hard deletes, integer minor units, distinct date fields, no foreign ids in
+          domain) are each traceable to a finding.
+        prose_only: true
+        reason: >-
+          Traceability to a FINDING, not to an id. The no-hard-deletes fence is the live example —
+          its original evidence measured 0 and the fence was retained deliberately on other grounds,
+          which no checker could have judged.
 
   - id: m1
     title: Big-picture event storm
     depends_on: [m0]
     exit_criteria:
-      - Every domain event in the order-to-cash and fulfillment paths is named and placed on a timeline.
-      - Each event has a declared producer and at least one consumer, or is marked terminal.
-      - Events that only exist because of CRMS or Xero are explicitly excluded, not carried forward.
+      - text: Every domain event in the order-to-cash and fulfillment paths is named and placed on a timeline.
+        prose_only: true
+        reason: >-
+          Completeness against reality. Nothing in the repo knows what events exist in the business
+          but not in the file — that is the gap the storm session exists to close.
+      - text: Each event has a declared producer and at least one consumer, or is marked terminal.
+        check: events_have_producer_and_consumer
+      - text: Events that only exist because of CRMS or Xero are explicitly excluded, not carried forward.
+        prose_only: true
+        reason: >-
+          The exclusions are recorded as prose comments in each context's events.yaml. Checking that
+          a comment exists would not check that it names the right events.
 
   - id: m2
     title: Context map and glossary v1
     depends_on: [m1]
     exit_criteria:
-      - All eight contexts have a context.md stating their responsibility and their boundary.
-      - "Zero glossary terms with `definition: TODO`."
-      - Every glossary term used in a requirement statement resolves, and no two terms are near-duplicates.
+      - text: All eight contexts have a context.md stating their responsibility and their boundary.
+        check: contexts_have_context_md
+      - text: "Zero glossary terms with `definition: TODO`."
+        check: glossary_no_todo
+      - text: Every glossary term used in a requirement statement resolves, and no two terms are near-duplicates.
+        prose_only: true
+        reason: >-
+          Gate 8b warns on near-variants heuristically. "No two terms are near-duplicates" is a
+          judgement about meaning, and a checker that decided it would be asserting a synonym table
+          nobody wrote.
 
   - id: m3
     title: Ledger core
     depends_on: [m2]
     exit_criteria:
-      - Chart of accounts complete, including the COGS and unabsorbed-labour accounts.
-      - "Dimensions defined with their full value sets and their nullability rule (which is: not nullable)."
-      - Posting rules defined for every source document type.
-      - Golden input->expected-transfer vectors exist for every posting rule, including the failure cases.
+      - text: Chart of accounts complete, including the COGS and unabsorbed-labour accounts.
+        check: coa_complete
+      - text: Dimensions defined with their full value sets and their declaration rule.
+        check: dimensions_defined
+      - text: Posting rules defined for every source document type.
+        check: posting_rules_cover_events
+      - text: Golden input->expected-transfer vectors exist for every posting rule, including the failure cases.
+        check: vectors_cover_rules
 
   - id: m4
     title: All spikes closed by ADR
     depends_on: [m3]
     exit_criteria:
-      - Every SPIKE- has status closed and names the ADR it produced.
-      - No ADR remains `proposed` past its review_by date.
-      - Every HOT- is resolved or has an ADR that consciously defers it with a stated reason.
+      - text: Every SPIKE- has status closed and names the ADR it produced.
+        check: spikes_closed_with_adr
+      - text: No ADR remains `proposed` past its review_by date.
+        check: adr_review_by_current
+      - text: Every HOT- is resolved or has an ADR that consciously defers it with a stated reason.
+        check: hotspots_resolved
 
   - id: m5
     title: Formal specs checking clean
     depends_on: [m4]
     exit_criteria:
-      - two-store-commit.qnt model checks clean against its three failure questions.
-      - period-close.qnt model checks clean, including the back-dated-posting-into-closed-period case.
-      - Both specs have been run, not merely written — with the model-checker output recorded.
+      - text: two-store-commit.qnt model checks clean against its three failure questions.
+        prose_only: true
+        reason: >-
+          Deciding it means running Apalache, which validate.ts will not do — it must stay fast,
+          hermetic and dependency-free. The evidence is the recorded run in formal/README.md, and
+          `formal_specs_present_and_recorded` checks that the record exists, not that it is true.
+      - text: period-close.qnt model checks clean, including the back-dated-posting-into-closed-period case.
+        prose_only: true
+        reason: Same — the model checker is the oracle, and it is not run from here.
+      - text: Both specs have been run, not merely written — with the model-checker output recorded.
+        check: formal_specs_present_and_recorded
 
   - id: m6
     title: Migration field map complete
     depends_on: [m2]
     exit_criteria:
-      - Every current Firestore path maps to a new field, an explicit drop, or a quarantine.
-      - The defective paths are mapped as defective — untracked lines, hard-deleted order refs, duplicate active products — not silently normalized.
-      - A decision exists for Xero history (OQ-012) and its consequence is reflected in the map.
+      - text: Every current Firestore path maps to a new field, an explicit drop, or a quarantine.
+        prose_only: true
+        reason: >-
+          "Every current path" is defined by the LIVE database, which this repo cannot enumerate
+          offline. A checker would compare the map against itself and always pass.
+      - text: >-
+          The defective paths are mapped as defective — untracked lines, hard-deleted order refs,
+          duplicate active products — not silently normalized.
+        prose_only: true
+        reason: Whether a mapping is honest about a defect is a reading of its `reason`, not a shape.
+      - text: A decision exists for Xero history (OQ-012) and its consequence is reflected in the map.
+        prose_only: true
+        reason: >-
+          The first half is checkable (OQ-012 answered); the second is not, and splitting the
+          criterion to check only the easy half would report the whole as met.
 
   - id: m7
     title: Walking skeleton defined
     depends_on: [m3, m5, m6]
     exit_criteria:
-      - One order -> one fulfillment -> one invoice -> one posting -> one report is specified end to end.
-      - Every step names its requirements, its events, and its posting rule.
-      - The skeleton exercises both reporting dimensions and at least one labour absorption.
+      - text: One order -> one fulfillment -> one invoice -> one posting -> one report is specified end to end.
+        prose_only: true
+        reason: End-to-end coherence across five contexts. No structural check decides it.
+      - text: Every step names its requirements, its events, and its posting rule.
+        prose_only: true
+        reason: >-
+          Becomes checkable once the skeleton document exists and has a shape. It does not yet, and
+          inventing a check for a file nobody has written would be a gate over nothing.
+      - text: The skeleton exercises both reporting dimensions and at least one labour absorption.
+        prose_only: true
+        reason: Same — depends on a document that does not exist yet.
 
   - id: spec-v1
     title: Tag spec-v1
     depends_on: [m0, m1, m2, m3, m4, m5, m6, m7]
     exit_criteria:
-      - All prior milestone exit criteria met.
-      - Zero open questions without an owner and a decide_by date.
-      - Clean `deno task validate`.
-      - "`deno task gen` produces no diff."
+      - text: All prior milestone exit criteria met.
+        prose_only: true
+        reason: >-
+          Deliberately NOT auto-derived. Every prior milestone carries prose criteria that no tool
+          decides, so a derived "all met" would be reporting the machine-checkable subset as the
+          whole — the precise mistake this file was restructured to prevent.
+      - text: Zero open questions without an owner and a decide_by date.
+        check: oq_all_owned
+      - text: Every requirement has a Gherkin scenario.
+        check: requirements_all_have_scenarios
+      - text: Clean `deno task validate`.
+        prose_only: true
+        reason: >-
+          The run itself decides it. A check asserting "validate is clean" from inside validate
+          would be a guard consulting its own oracle, and would pass by construction.
+      - text: "`deno task gen` produces no diff."
+        prose_only: true
+        reason: CI decides it, by regenerating and diffing. A generator cannot check its own staleness.

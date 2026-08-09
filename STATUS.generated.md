@@ -80,17 +80,28 @@ None.
 
 ## Roadmap
 
-| Milestone | Title | Depends on | Exit criteria |
-|---|---|---|---:|
-| `m0` | Charter and non-goals | — | 3 |
-| `m1` | Big-picture event storm | `m0` | 3 |
-| `m2` | Context map and glossary v1 | `m1` | 3 |
-| `m3` | Ledger core | `m2` | 4 |
-| `m4` | All spikes closed by ADR | `m3` | 3 |
-| `m5` | Formal specs checking clean | `m4` | 3 |
-| `m6` | Migration field map complete | `m2` | 3 |
-| `m7` | Walking skeleton defined | `m3` `m5` `m6` | 3 |
-| `spec-v1` | Tag spec-v1 | `m0` `m1` `m2` `m3` `m4` `m5` `m6` `m7` | 4 |
+**`prose` is not `met`.** A criterion no tool can decide is one somebody has to assert —
+it is counted separately on purpose, and a milestone is not done because its checkable half is.
+
+| Milestone | Title | Depends on | met | unmet | prose | validate |
+|---|---|---|---:|---:|---:|---:|
+| `m0` | Charter and non-goals | — | 0 | — | 3 | — |
+| `m1` | Big-picture event storm | `m0` | 1 | — | 2 | — |
+| `m2` | Context map and glossary v1 | `m1` | 2 | — | 1 | — |
+| `m3` | Ledger core | `m2` | 2 | 2 | — | — |
+| `m4` | All spikes closed by ADR | `m3` | 1 | 1 | — | 1 |
+| `m5` | Formal specs checking clean | `m4` | 1 | — | 2 | — |
+| `m6` | Migration field map complete | `m2` | 0 | — | 3 | — |
+| `m7` | Walking skeleton defined | `m3` `m5` `m6` | 0 | — | 3 | — |
+| `spec-v1` | Tag spec-v1 | `m0` `m1` `m2` `m3` `m4` `m5` `m6` `m7` | 1 | — | 3 | 1 |
+
+### Machine-checkable criteria not yet met (3)
+
+| Milestone | Criterion | Check | Measured |
+|---|---|---|---|
+| `m3` | Posting rules defined for every source document type. | `posting_rules_cover_events` | 24 ledger events, 0 in no bucket, 3 specified, 7 unwritten |
+| `m3` | Golden input->expected-transfer vectors exist for every posting rule,… | `vectors_cover_rules` | 13 vectors over 3 specified rules; 0 lack an accept or a reject; 7 rules unwritten |
+| `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 12 spikes, 9 open, 0 closed without naming an ADR |
 
 ## Coverage gaps
 

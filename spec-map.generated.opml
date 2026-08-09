@@ -8,51 +8,52 @@
     <outline text="CFS ERP — spec-v1" _note="Generated view of erp-spec. Edit the YAML, not the map.">
       <outline text="Roadmap (9)">
         <outline text="m0 — Charter and non-goals" _note="depends on: nothing · 3 exit criteria">
-          <outline text="charter.md scope and non-goals list has stopped changing across two consecutive sessions."/>
-          <outline text="Every non-goal states why it is out, not just that it is."/>
-          <outline text="The fences (no hard deletes, integer minor units, distinct date fields, no foreign ids in domain) are each traceable to a finding."/>
+          <outline text="[object Object]"/>
+          <outline text="[object Object]"/>
+          <outline text="[object Object]"/>
         </outline>
         <outline text="m1 — Big-picture event storm" _note="depends on: m0 · 3 exit criteria">
-          <outline text="Every domain event in the order-to-cash and fulfillment paths is named and placed on a timeline."/>
-          <outline text="Each event has a declared producer and at least one consumer, or is marked terminal."/>
-          <outline text="Events that only exist because of CRMS or Xero are explicitly excluded, not carried forward."/>
+          <outline text="[object Object]"/>
+          <outline text="[object Object]"/>
+          <outline text="[object Object]"/>
         </outline>
         <outline text="m2 — Context map and glossary v1" _note="depends on: m1 · 3 exit criteria">
-          <outline text="All eight contexts have a context.md stating their responsibility and their boundary."/>
-          <outline text="Zero glossary terms with `definition: TODO`."/>
-          <outline text="Every glossary term used in a requirement statement resolves, and no two terms are near-duplicates."/>
+          <outline text="[object Object]"/>
+          <outline text="[object Object]"/>
+          <outline text="[object Object]"/>
         </outline>
         <outline text="m3 — Ledger core" _note="depends on: m2 · 4 exit criteria">
-          <outline text="Chart of accounts complete, including the COGS and unabsorbed-labour accounts."/>
-          <outline text="Dimensions defined with their full value sets and their nullability rule (which is: not nullable)."/>
-          <outline text="Posting rules defined for every source document type."/>
-          <outline text="Golden input-&gt;expected-transfer vectors exist for every posting rule, including the failure cases."/>
+          <outline text="[object Object]"/>
+          <outline text="[object Object]"/>
+          <outline text="[object Object]"/>
+          <outline text="[object Object]"/>
         </outline>
         <outline text="m4 — All spikes closed by ADR" _note="depends on: m3 · 3 exit criteria">
-          <outline text="Every SPIKE- has status closed and names the ADR it produced."/>
-          <outline text="No ADR remains `proposed` past its review_by date."/>
-          <outline text="Every HOT- is resolved or has an ADR that consciously defers it with a stated reason."/>
+          <outline text="[object Object]"/>
+          <outline text="[object Object]"/>
+          <outline text="[object Object]"/>
         </outline>
         <outline text="m5 — Formal specs checking clean" _note="depends on: m4 · 3 exit criteria">
-          <outline text="two-store-commit.qnt model checks clean against its three failure questions."/>
-          <outline text="period-close.qnt model checks clean, including the back-dated-posting-into-closed-period case."/>
-          <outline text="Both specs have been run, not merely written — with the model-checker output recorded."/>
+          <outline text="[object Object]"/>
+          <outline text="[object Object]"/>
+          <outline text="[object Object]"/>
         </outline>
         <outline text="m6 — Migration field map complete" _note="depends on: m2 · 3 exit criteria">
-          <outline text="Every current Firestore path maps to a new field, an explicit drop, or a quarantine."/>
-          <outline text="The defective paths are mapped as defective — untracked lines, hard-deleted order refs, duplicate active products — not silently normalized."/>
-          <outline text="A decision exists for Xero history (OQ-012) and its consequence is reflected in the map."/>
+          <outline text="[object Object]"/>
+          <outline text="[object Object]"/>
+          <outline text="[object Object]"/>
         </outline>
         <outline text="m7 — Walking skeleton defined" _note="depends on: m3, m5, m6 · 3 exit criteria">
-          <outline text="One order -&gt; one fulfillment -&gt; one invoice -&gt; one posting -&gt; one report is specified end to end."/>
-          <outline text="Every step names its requirements, its events, and its posting rule."/>
-          <outline text="The skeleton exercises both reporting dimensions and at least one labour absorption."/>
+          <outline text="[object Object]"/>
+          <outline text="[object Object]"/>
+          <outline text="[object Object]"/>
         </outline>
-        <outline text="spec-v1 — Tag spec-v1" _note="depends on: m0, m1, m2, m3, m4, m5, m6, m7 · 4 exit criteria">
-          <outline text="All prior milestone exit criteria met."/>
-          <outline text="Zero open questions without an owner and a decide_by date."/>
-          <outline text="Clean `deno task validate`."/>
-          <outline text="`deno task gen` produces no diff."/>
+        <outline text="spec-v1 — Tag spec-v1" _note="depends on: m0, m1, m2, m3, m4, m5, m6, m7 · 5 exit criteria">
+          <outline text="[object Object]"/>
+          <outline text="[object Object]"/>
+          <outline text="[object Object]"/>
+          <outline text="[object Object]"/>
+          <outline text="[object Object]"/>
         </outline>
       </outline>
       <outline text="Open questions (0 of 26 undecided)" _note="The bottleneck. Each blocks what is listed under it.">
