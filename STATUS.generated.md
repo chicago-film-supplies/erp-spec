@@ -12,8 +12,8 @@ is `deno task validate`'s judgement, not this file's.
 | | Count | |
 |---|---:|---|
 | Open questions | 19 | **0 with no owner or no decide-by** |
-| Conflicts (HOT) | 10 | 1 open |
-| Decisions (ADR) | 21 | 6 in force · 13 proposed |
+| Conflicts (HOT) | 10 | 0 open |
+| Decisions (ADR) | 22 | 6 in force · 14 proposed |
 | Spikes | 12 | 12 open |
 | Requirements | 2 | 0 without a scenario |
 | Inbox | 32 | 22 unpromoted |
@@ -26,9 +26,7 @@ None — every open question has an owner and a decide-by date.
 
 ## Open conflicts
 
-| HOT | Statement | Blocks |
-|---|---|---|
-| `HOT-009` | `invoice.status` carries two different semantics in one field — an assigned lifecycle fact (draft / issued /… | `ADR-0014` |
+None.
 
 ## Decisions
 
@@ -41,7 +39,7 @@ None — every open question has an owner and a decide-by date.
 - `ADR-0005` — Retain SolidJS clients
 - `ADR-0007` — Replace asset.accountant; dual GAAP/tax basis in scope
 
-### Proposed (13)
+### Proposed (14)
 
 | ADR | Title | Review by | Blocked on |
 |---|---|---|---|
@@ -58,6 +56,7 @@ None — every open question has an owner and a decide-by date.
 | `ADR-0019` | Labour costing is actual; absorption measures utilisation, not rate variance | 2026-10-15 | `HOT-003` `HOT-004` `HOT-010` `OQ-005` `OQ-006` `OQ-008` `OQ-011` `OQ-017` `OQ-018` `OQ-019` |
 | `ADR-0020` | Xero history is restated, not imported as-is | 2026-10-15 | `HOT-006` `OQ-012` |
 | `ADR-0021` | Item type determines the revenue account; duplicate charge products are canonicalized | 2026-10-15 | `HOT-008` `OQ-014` |
+| `ADR-0022` | Invoice status decomposes into two derived projections | 2026-10-15 | `HOT-009` |
 
 ## Spikes
 

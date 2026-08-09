@@ -57,3 +57,4 @@ Accepted and not superseded, as of the last `deno task gen`.
 | [ADR-0019](ADR-0019-labour-costing-is-actual.md) | Labour costing is actual; absorption measures utilisation, not rate variance | 2026-10-15 | HOT-003, HOT-004, HOT-010, OQ-005, OQ-006, OQ-008, OQ-011, OQ-017, OQ-018, OQ-019 |
 | [ADR-0020](ADR-0020-xero-history-is-restated.md) | Xero history is restated, not imported as-is | 2026-10-15 | HOT-006, OQ-012 |
 | [ADR-0021](ADR-0021-charge-product-canonicalization.md) | Item type determines the revenue account; duplicate charge products are canonicalized | 2026-10-15 | HOT-008, OQ-014 |
+| [ADR-0022](ADR-0022-invoice-status-decomposed.md) | Invoice status decomposes into two derived projections | 2026-10-15 | HOT-009 |

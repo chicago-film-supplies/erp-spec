@@ -120,7 +120,7 @@
           <outline text="blocks REQ-LED"/>
         </outline>
       </outline>
-      <outline text="Conflicts (1 open)">
+      <outline text="Conflicts (0 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labour) or an own long-haul run (labour-bearing)?…" _note="Decides whether a trucked fulfillment absorbs labour cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
           <outline text="blocks OQ-010"/>
           <outline text="blocks ADR-0011"/>
@@ -158,7 +158,7 @@
           <outline text="blocks OQ-019"/>
         </outline>
       </outline>
-      <outline text="Decisions (6 in force, 13 proposed)">
+      <outline text="Decisions (6 in force, 14 proposed)">
         <outline text="In force (6)">
           <outline text="ADR-0001 — Replace Xero with an in-house ledger" _note="**In the context of** owning the order-to-invoice path but renting the ledger, **facing** a tracking-dimension defect that Xero silently absorbs and a costing model Xero cannot express, **we decided** to build the general ledger in-house, **to achieve** dimensional postings that cannot be null and a labour-absorption model we control, **accepting** that a large amount of unglamorous accounting surface area becomes ours to build and keep correct."/>
           <outline text="ADR-0002 — Bank feed sourced from Plaid, single Chase account" _note="**In the context of** needing bank transactions now that Xero's feed goes away, **facing** one bank and one account, **we decided** to source the feed from Plaid, **to achieve** a working feed without a bank-specific integration, **accepting** that Plaid's transaction model is a consumer-fintech model, not an accounting bank feed."/>
@@ -167,7 +167,7 @@
           <outline text="ADR-0005 — Retain SolidJS clients" _note="**In the context of** rebuilding the API underneath the operator UI, **facing** a working SolidJS manager app, **we decided** to keep SolidJS, **to achieve** reuse of the existing client and its component work, **accepting** that the reactive data layer must be rebuilt regardless because Firestore's real-time listeners go away."/>
           <outline text="ADR-0007 — Replace asset.accountant; dual GAAP/tax basis in scope" _note="**In the context of** building our own ledger, **facing** a separate hosted tool holding the asset register, **we decided** to bring fixed assets in-house with both GAAP and tax basis, **to achieve** depreciation postings that originate in the same ledger as everything else and a reportable deferred difference, **accepting** a genuinely intricate tax-depreciation rules problem."/>
         </outline>
-        <outline text="Proposed (13)">
+        <outline text="Proposed (14)">
           <outline text="ADR-0009 — Anticorruption layer — foreign identifiers never enter domain models" _note="review by: 2026-10-15 · **In the context of** integrating Plaid and any surviving external system, **facing** a tracking-id drift that silently cost 28.7% of revenue its dimension, **we decided** that foreign identifiers never enter domain models and an unresolvable id is a hard error, **to achieve** failures that are loud at the boundary instead of silent in the data, **accepting** that ingestion will refuse work that the current system would have accepted.">
             <outline text="blocked on HOT-006"/>
           </outline>
@@ -231,6 +231,9 @@
           <outline text="ADR-0021 — Item type determines the revenue account; duplicate charge products are canonicalized" _note="review by: 2026-10-15 · **In the context of** duplicate active charge products booking the same economic event to different revenue accounts, **facing** posting rules that must map a billed line to exactly one account, **we decided** that the item type determines the account and the correctly-typed duplicate is canonical, **to achieve** a rule a posting engine can enforce, **accepting** that some historical revenue moves account under ADR-0020's restatement.">
             <outline text="blocked on HOT-008"/>
             <outline text="blocked on OQ-014"/>
+          </outline>
+          <outline text="ADR-0022 — Invoice status decomposes into two derived projections" _note="review by: 2026-10-15 · **In the context of** an invoice status field that carries two different kinds of fact at once, **facing** two live defect populations that are one of each, **we decided** to decompose it into two independently derived projections, **to achieve** a state that cannot go stale and a voided invoice that cannot hold a balance, **accepting** that the single `status` enum every reader knows is retired.">
+            <outline text="blocked on HOT-009"/>
           </outline>
         </outline>
       </outline>

@@ -153,7 +153,8 @@ hotspots:
       a population recorded as GROWING rather than historical — the lifecycle half asserting a
       state the balance contradicts.
     blocks: [ADR-0014]
-    status: open
+    status: resolved
+    resolved_by: ADR-0022
 
   - id: HOT-010
     statement: >-
