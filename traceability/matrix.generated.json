@@ -5,8 +5,8 @@
     "adrs": 22,
     "adrs_accepted": 6,
     "events": 33,
-    "inbox": 32,
-    "inbox_promoted": 10
+    "inbox": 33,
+    "inbox_promoted": 11
   },
   "requirements": [
     {

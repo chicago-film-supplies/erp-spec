@@ -39,6 +39,12 @@ hotspots:
       NOT yet reproduced and remains unverified.
     blocks: [OQ-007, ADR-0011]
     status: resolved
+    measured: >-
+      2026-08-09, prod, all 977 orders: asymmetric combinations are 2.77% of revenue (2.74% CFS-
+      delivers/customer-returns + 0.03% the reverse), 26 orders. The ~2% figure is CONFIRMED. The
+      pattern it supposedly contradicted is not real — 97.2% of revenue is SYMMETRIC (55.92%
+      customer both ways, 41.29% CFS both ways), so deliver-out/customer-returns was never the
+      norm. See inbox/2026-08-09-asymmetric-collecting-returning-share.md.
     resolved_by: ADR-0011
 
   - id: HOT-003

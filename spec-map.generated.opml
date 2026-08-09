@@ -361,7 +361,7 @@
           <outline text="EVT-TAX-003 — TaxRateSuperseded" _note="tax → billing"/>
         </outline>
       </outline>
-      <outline text="Capture (22 unpromoted of 32)" _note="no drops pending">
+      <outline text="Capture (22 unpromoted of 33)" _note="no drops pending">
         <outline text="Actor per leg, clock in/out per stop, crew size per trip" _note="inbox/2026-08-08-actor-and-clock-per-leg.md"/>
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
