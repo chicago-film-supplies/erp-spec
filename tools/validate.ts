@@ -406,14 +406,33 @@ for (const i of inbox) {
 }
 
 // ── spike hygiene (supports milestone m4) ───────────────────────────────────
-for (const s of spikes) {
-  if (!s.closes_adr) {
-    fail("1", `${s.id}: no closes_adr — every spike must close with an ADR`);
-  } else if (s.closes_adr !== "new" && !adrs.some((a) => a.id === s.closes_adr)) {
-    fail("1", `${s.id}: closes_adr "${s.closes_adr}" does not resolve (use \`new\` if it mints one)`);
-  }
-  if (!Array.isArray(s.exit_criteria) || s.exit_criteria.length === 0) {
-    fail("1", `${s.id}: no exit_criteria`);
+{
+  // The enum existed only as a comment in `spikes/_TEMPLATE.md`. A typo'd status passed CI and
+  // then read as OPEN everywhere downstream, because generate.ts counts `(status ?? "open") !==
+  // "closed"` — so `status: closd` silently kept a finished spike on the open list forever.
+  const SPIKE_STATUS = ["open", "in_progress", "closed", "abandoned"];
+
+  for (const s of spikes) {
+    if (!s.status || !SPIKE_STATUS.includes(String(s.status))) {
+      fail("1", `${s.id}: status "${s.status}" not one of ${SPIKE_STATUS.join(" | ")}`);
+    }
+    if (!s.closes_adr) {
+      fail("1", `${s.id}: no closes_adr — every spike must close with an ADR`);
+    } else if (s.closes_adr !== "new" && !adrs.some((a) => a.id === s.closes_adr)) {
+      fail("1", `${s.id}: closes_adr "${s.closes_adr}" does not resolve (use \`new\` if it mints one)`);
+    }
+    // Milestone m4: "every SPIKE- has status closed and names the ADR it produced". `new` is a
+    // placeholder for a spike still in flight; at close it must have been replaced by the real id,
+    // or m4's criterion is satisfied by a spike that names nothing. Enforced by nothing until now.
+    if (String(s.status) === "closed" && s.closes_adr === "new") {
+      fail(
+        "1",
+        `${s.id}: closed with \`closes_adr: new\` — a closed spike must name the ADR it produced (m4)`,
+      );
+    }
+    if (!Array.isArray(s.exit_criteria) || s.exit_criteria.length === 0) {
+      fail("1", `${s.id}: no exit_criteria`);
+    }
   }
 }
 
