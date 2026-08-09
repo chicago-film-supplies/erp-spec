@@ -1,9 +1,8 @@
 ---
 id: ADR-0017
 title: Reporting authority is split by period state
-status: proposed
+status: accepted
 date: 2026-08-09
-review_by: 2026-09-01
 deciders: [repo owner]
 contexts: [ledger, banking, billing]
 relates_to: [HOT-005, OQ-009, ADR-0003, ADR-0010, ADR-0014, ADR-0018]

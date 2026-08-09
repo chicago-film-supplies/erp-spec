@@ -1,9 +1,8 @@
 ---
 id: ADR-0023
 title: Native Node-API addons load under Deno; the deployment unit is a self-extracting compiled binary
-status: proposed
+status: accepted
 date: 2026-08-09
-review_by: 2026-10-01
 deciders: [repo owner]
 contexts: [ledger, billing, ordering]
 relates_to: [SPIKE-001, SPIKE-007, SPIKE-010, ADR-0003, ADR-0004, ADR-0012, ADR-0013]

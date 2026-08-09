@@ -1,9 +1,8 @@
 ---
 id: ADR-0021
 title: Item type determines the revenue account; duplicate charge products are canonicalized
-status: proposed
+status: accepted
 date: 2026-08-09
-review_by: 2026-09-01
 deciders: [repo owner]
 contexts: [ledger, billing]
 relates_to: [HOT-008, OQ-014]

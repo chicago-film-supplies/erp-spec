@@ -40,24 +40,69 @@ Accepted and not superseded, as of the last `deno task gen`.
 
 > **In the context of** building our own ledger, **facing** a separate hosted tool holding the asset register, **we decided** to bring fixed assets in-house with both GAAP and tax basis, **to achieve** depreciation postings that originate in the same ledger as everything else and a reportable deferred difference, **accepting** a genuinely intricate tax-depreciation rules problem.
 
+## [ADR-0011](ADR-0011-fulfillment-legs-first-class.md) — Fulfillment legs are first-class recorded events
+
+**Contexts:** fulfillment, ledger · **Decided:** 2026-08-08
+
+> **In the context of** wanting COGS labour allocation, **facing** a current system that derives legs from order flags, **we decided** to record legs as first-class events, **to achieve** an actor, a clock and a shift on every movement, **accepting** that legs become data to be captured in the field rather than inferred for free.
+
+## [ADR-0012](ADR-0012-valkey-queues-in-process-workers.md) — Valkey-backed queues with in-process workers, replacing Cloud Tasks
+
+**Contexts:** ordering, billing, fulfillment · **Decided:** 2026-08-09
+
+> **In the context of** leaving Cloud Tasks along with the rest of the GCP platform, **facing** 16 queues whose config largely encodes HTTP-delivery hazards rather than domain requirements, **we decided** to run queues on Valkey with in-process workers and serialize on a per-entity lock, **to achieve** the removal of the duplicate-dispatch lease and its coupled-knobs invariant, **accepting** that durability becomes a configuration decision and worker liveness becomes ours to monitor.
+
+## [ADR-0014](ADR-0014-lifecycle-state-is-derived.md) — Lifecycle state is derived from the ledger, never assigned
+
+**Contexts:** ordering, billing, ledger, fulfillment · **Decided:** 2026-08-09
+
+> **In the context of** deciding where order and invoice status live, **facing** a v1 corpus where stored status drifts from the facts that determine it, **we decided** that lifecycle state is derived from the ledger and materialized into MongoDB as a rebuildable projection, **to achieve** a stale status that is unrepresentable rather than merely monitored, **accepting** that a transition with no ledger consequence still needs a recorded fact.
+
+## [ADR-0017](ADR-0017-reporting-authority-by-period-state.md) — Reporting authority is split by period state
+
+**Contexts:** ledger, banking, billing · **Decided:** 2026-08-09
+
+> **In the context of** a ledger whose timestamps are posting time and reporting that is periodised by accounting date, **facing** a requirement that reported figures must not drift, **we decided** to split reporting authority by period state, **to achieve** closed-period figures that cannot drift at all, **accepting** that open-period figures come from the document store rather than the ledger.
+
+## [ADR-0018](ADR-0018-plain-coa-dimensions-on-the-posting.md) — A plain chart of accounts, with dimensions carried on the posting
+
+**Contexts:** ledger · **Decided:** 2026-08-09
+
+> **In the context of** needing balances sliced by product line and cost type, **facing** a ledger with no dimension fields, **we decided** to keep the chart of accounts plain and carry dimensions on the posting, **to achieve** an account tree an auditor can read and a dimension set that grows by addition, **accepting** that a dimensional balance is answered by the read side rather than by a single account read.
+
+## [ADR-0021](ADR-0021-charge-product-canonicalization.md) — Item type determines the revenue account; duplicate charge products are canonicalized
+
+**Contexts:** ledger, billing · **Decided:** 2026-08-09
+
+> **In the context of** duplicate active charge products booking the same economic event to different revenue accounts, **facing** posting rules that must map a billed line to exactly one account, **we decided** that the item type determines the account and the correctly-typed duplicate is canonical, **to achieve** a rule a posting engine can enforce, **accepting** that some historical revenue moves account under ADR-0020's restatement.
+
+## [ADR-0022](ADR-0022-invoice-status-decomposed.md) — Invoice status decomposes into two derived projections
+
+**Contexts:** billing, ledger · **Decided:** 2026-08-09
+
+> **In the context of** an invoice status field that carries two different kinds of fact at once, **facing** two live defect populations that are one of each, **we decided** to decompose it into two independently derived projections, **to achieve** a state that cannot go stale and a voided invoice that cannot hold a balance, **accepting** that the single `status` enum every reader knows is retired.
+
+## [ADR-0023](ADR-0023-native-addons-under-deno-self-extracting-binary.md) — Native Node-API addons load under Deno; the deployment unit is a self-extracting compiled binary
+
+**Contexts:** ledger, billing, ordering · **Decided:** 2026-08-09
+
+> **In the context of** a Deno API that must load three npm packages with native or native-adjacent dependencies, **facing** a `deno compile` deployment unit whose Node-API support was entirely unmeasured, **we decided** to ship a `deno compile --self-extracting` binary and forbid `--bundle`, **to achieve** a single deployable artifact on plain VMs, **accepting** a ~364 MB binary, a first-run extraction step, and a flag whose necessity nothing type-checks.
+
+## [ADR-0024](ADR-0024-duckdb-native-server-side-no-client-side-reporting.md) — DuckDB is reached natively and server-side; client-side reporting is rejected
+
+**Contexts:** ledger, billing, banking · **Decided:** 2026-08-09
+
+> **In the context of** sealed-period Parquet as the closed-period reporting authority (ADR-0017), **facing** a choice between the native DuckDB addon, WASM in the API process, and WASM in the browser, **we decided** to reach DuckDB natively and server-side and to reject client-side reporting, **to achieve** exact integer reporting over an artifact the server controls, **accepting** that reporting stays an API surface we have to build.
+
 # Proposed, not yet in force
 
 | ADR | Title | Review by | Blocked on |
 |---|---|---|---|
 | [ADR-0009](ADR-0009-anticorruption-layer.md) | Anticorruption layer — foreign identifiers never enter domain models | 2026-09-15 | HOT-006 |
 | [ADR-0010](ADR-0010-accounting-date-vs-posting-timestamp.md) | Accounting date vs posting timestamp policy | 2026-11-01 | HOT-005, OQ-009, SPIKE-003 |
-| [ADR-0011](ADR-0011-fulfillment-legs-first-class.md) | Fulfillment legs are first-class recorded events | 2026-09-01 | HOT-007, HOT-001, HOT-002, OQ-001, OQ-002, OQ-003, OQ-005, OQ-007, OQ-010 |
-| [ADR-0012](ADR-0012-valkey-queues-in-process-workers.md) | Valkey-backed queues with in-process workers, replacing Cloud Tasks | 2026-10-01 | SPIKE-010 |
 | [ADR-0013](ADR-0013-linode-self-hosted.md) | Self-host on Linode, with Caddy fronting TLS | 2026-10-01 | SPIKE-011 |
-| [ADR-0014](ADR-0014-lifecycle-state-is-derived.md) | Lifecycle state is derived from the ledger, never assigned | 2026-09-01 | HOT-005, HOT-009 |
 | [ADR-0015](ADR-0015-reservations-as-pending-transfers.md) | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-11-01 | SPIKE-002, SPIKE-012 |
 | [ADR-0016](ADR-0016-quint-over-tla.md) | Quint replaces TLA+ for the formal specs | 2026-09-01 | SPIKE-002 |
-| [ADR-0017](ADR-0017-reporting-authority-by-period-state.md) | Reporting authority is split by period state | 2026-09-01 | HOT-005, OQ-009 |
-| [ADR-0018](ADR-0018-plain-coa-dimensions-on-the-posting.md) | A plain chart of accounts, with dimensions carried on the posting | 2026-09-01 | HOT-005, OQ-009 |
 | [ADR-0019](ADR-0019-labour-costing-is-actual.md) | Labour costing is actual; absorption measures utilisation, not rate variance | 2026-10-01 | HOT-003, HOT-004, HOT-010, OQ-005, OQ-006, OQ-008, OQ-011, OQ-017, OQ-018, OQ-019 |
 | [ADR-0020](ADR-0020-xero-history-is-restated.md) | Xero history is restated, not imported as-is | 2026-10-15 | HOT-006, OQ-012 |
-| [ADR-0021](ADR-0021-charge-product-canonicalization.md) | Item type determines the revenue account; duplicate charge products are canonicalized | 2026-09-01 | HOT-008, OQ-014 |
-| [ADR-0022](ADR-0022-invoice-status-decomposed.md) | Invoice status decomposes into two derived projections | 2026-09-01 | HOT-009 |
-| [ADR-0023](ADR-0023-native-addons-under-deno-self-extracting-binary.md) | Native Node-API addons load under Deno; the deployment unit is a self-extracting compiled binary | 2026-10-01 | SPIKE-001, SPIKE-007, SPIKE-010 |
-| [ADR-0024](ADR-0024-duckdb-native-server-side-no-client-side-reporting.md) | DuckDB is reached natively and server-side; client-side reporting is rejected | 2026-10-01 | SPIKE-007 |
 | [ADR-0025](ADR-0025-dimension-obligation-is-per-account.md) | The dimension obligation is per account, and what is refused is absence rather than null | 2026-10-01 | HOT-011, OQ-021, OQ-022, OQ-025 |

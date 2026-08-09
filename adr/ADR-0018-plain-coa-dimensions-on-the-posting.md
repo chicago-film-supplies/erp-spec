@@ -1,9 +1,8 @@
 ---
 id: ADR-0018
 title: A plain chart of accounts, with dimensions carried on the posting
-status: proposed
+status: accepted
 date: 2026-08-09
-review_by: 2026-09-01
 deciders: [repo owner]
 contexts: [ledger]
 relates_to: [HOT-005, OQ-009, ADR-0017, ADR-0003]

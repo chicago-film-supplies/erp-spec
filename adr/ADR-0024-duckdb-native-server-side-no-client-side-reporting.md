@@ -1,9 +1,8 @@
 ---
 id: ADR-0024
 title: DuckDB is reached natively and server-side; client-side reporting is rejected
-status: proposed
+status: accepted
 date: 2026-08-09
-review_by: 2026-10-01
 deciders: [repo owner]
 contexts: [ledger, billing, banking]
 relates_to: [SPIKE-007, ADR-0017, ADR-0008, ADR-0010, ADR-0023]
