@@ -14,7 +14,7 @@ is `deno task validate`'s judgement, not this file's.
 | Open questions | 20 | **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 10 | 0 open |
 | Decisions (ADR) | 24 | 6 in force · 16 proposed |
-| Spikes | 12 | 10 open |
+| Spikes | 12 | 9 open |
 | Requirements | 2 | 0 without a scenario |
 | Inbox | 33 | 22 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
@@ -73,7 +73,7 @@ None.
 | `SPIKE-007` | Which access path reaches DuckDB from Deno — the native addon or WASM — and can… | 2 days | `ADR-0024` | closed |
 | `SPIKE-008` | How do the Chicago Personal Property Lease Transaction Tax and Illinois home-ru… | 1 week | _new ADR_ | open |
 | `SPIKE-009` | What replaces Firestore real-time listeners — MongoDB change streams plus a soc… | 1 week | _new ADR_ | open |
-| `SPIKE-010` | Does a production-grade Valkey queue client run under Deno, and can it express… | 3 days | `ADR-0012` | open |
+| `SPIKE-010` | Does a production-grade Valkey queue client run under Deno, and can it express… | 3 days | `ADR-0012` | closed |
 | `SPIKE-011` | Does TigerBeetle meet its durability and latency expectations on Linode block s… | 3 days | `ADR-0013` | open |
 | `SPIKE-012` | At which fulfillment moment does a booking become a TigerBeetle pending transfe… | 1 week | `ADR-0015` | open |
 

@@ -248,7 +248,7 @@
           </outline>
         </outline>
       </outline>
-      <outline text="Spikes (10 open)">
+      <outline text="Spikes (9 open)">
         <outline text="SPIKE-001 — Does the TigerBeetle client load and run under Deno via node-api compatibility?" _note="timebox: 2 days · closes: ADR-0023 · closed">
           <outline text="A Deno process creates accounts and posts a two-phase transfer against a real TigerBeetle cluster."/>
           <outline text="The same code path runs under `deno test` and under `deno compile`."/>
@@ -297,7 +297,7 @@
           <outline text="An honest inventory of manager-side listener dependencies, with per-site effort — not a single aggregate estimate."/>
           <outline text="[object Object]"/>
         </outline>
-        <outline text="SPIKE-010 — Does a production-grade Valkey queue client run under Deno, and can it express per-entity serializa…" _note="timebox: 3 days · closes: ADR-0012 · open">
+        <outline text="SPIKE-010 — Does a production-grade Valkey queue client run under Deno, and can it express per-entity serializa…" _note="timebox: 3 days · closes: ADR-0012 · closed">
           <outline text="A Deno process enqueues, consumes, retries and inspects a failed job against a real Valkey."/>
           <outline text="Per-entity serialization demonstrated under concurrent workers, with a test that fails without it."/>
           <outline text="Repeatable jobs verified, including what is observable when the worker is down."/>
