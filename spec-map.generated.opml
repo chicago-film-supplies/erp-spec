@@ -277,10 +277,11 @@
           <outline text="A stated split — what the database enforces vs what the application enforces — with no construct unenforced in both."/>
           <outline text="A decision on whether the application schema or the Mongo validator is generated from the other."/>
         </outline>
-        <outline text="SPIKE-007 — How is DuckDB reached from Deno — native addon or WASM — and can the client query directly?" _note="timebox: 2 days · closes: a new ADR · open">
-          <outline text="Both access paths working from Deno, with query latency measured on a realistic corpus rather than a toy one."/>
-          <outline text="A decision, with the memory ceiling of the WASM path stated as a number."/>
+        <outline text="SPIKE-007 — Which access path reaches DuckDB from Deno — the native addon or WASM — and can a browser query a s…" _note="timebox: 2 days · closes: a new ADR · in_progress">
+          <outline text="Both access paths working from Deno, with the mode matrix filled in for the native path."/>
+          <outline text="A decision on the access path, with the memory ceiling of the WASM path stated as a number."/>
           <outline text="A verdict on client-side reporting via duckdb-wasm — viable or not, and at what corpus size it stops being viable."/>
+          <outline text="An explicit fallback stated for the case where the native addon cannot be used, since no ADR names one today."/>
         </outline>
         <outline text="SPIKE-008 — How do the Chicago Personal Property Lease Transaction Tax and Illinois home-rule sales tax apply a…" _note="timebox: 1 week · closes: a new ADR · open">
           <outline text="Decision table covering every product type in the catalogue, including the mixed-regime case."/>

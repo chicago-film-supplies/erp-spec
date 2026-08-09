@@ -69,7 +69,7 @@ None.
 | `SPIKE-004` | What does Plaid actually provide, and what does bank reconciliation actually ne… | 3 days | _new ADR_ | open |
 | `SPIKE-005` | Hand-roll the depreciation engine, or adopt a library? | 1 week | _new ADR_ | open |
 | `SPIKE-006` | How lossy is translating JSON Schema 2020-12 to MongoDB's `$jsonSchema`, and wh… | 2 days | _new ADR_ | open |
-| `SPIKE-007` | How is DuckDB reached from Deno — native addon or WASM — and can the client que… | 2 days | _new ADR_ | open |
+| `SPIKE-007` | Which access path reaches DuckDB from Deno — the native addon or WASM — and can… | 2 days | _new ADR_ | in_progress |
 | `SPIKE-008` | How do the Chicago Personal Property Lease Transaction Tax and Illinois home-ru… | 1 week | _new ADR_ | open |
 | `SPIKE-009` | What replaces Firestore real-time listeners — MongoDB change streams plus a soc… | 1 week | _new ADR_ | open |
 | `SPIKE-010` | Does a production-grade Valkey queue client run under Deno, and can it express… | 3 days | `ADR-0012` | open |
