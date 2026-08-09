@@ -128,27 +128,41 @@ Both are already enforced in the `~/cfs` workspace and both are load-bearing her
 ## Accounting decisions: survey before deciding
 
 **Standing instruction from the owner, 2026-08-09.** Any decision about where something posts, what
-an account means, how two books relate, or how a document is presented is researched against **five
+an account means, how two books relate, or how a document is presented is researched against **six
 references before a recommendation is made**:
 
 | | What it settles |
 |---|---|
 | **GAAP** | what the presentation rule actually requires — and it is usually narrower or stricter than the shape everyone builds |
+| **Xero** | **the incumbent — what CFS's own books say TODAY.** Not one vendor opinion among five: it is the current state, so departing from it is a migration cost and not only a design choice |
 | **SAP S/4HANA** | the most configurable answer; its *mechanisms* (special G/L indicators, non-posting depreciation areas, ledger groups) name the distinctions worth having |
 | **NetSuite** | the mid-market default, and its docs state GL impact per transaction type explicitly |
 | **Sage Intacct** | the same tier, different opinions — where it and NetSuite disagree there is a real choice |
 | **Odoo** | the open-source answer, and the one whose *absence* of a feature is informative: its documented workarounds show what the shape costs when it is not built in |
 
-Two things the survey is for, and only the first is obvious:
+⚠️ **Xero is researched from its documentation and from CFS data already mirrored into Firestore —
+never by calling the Xero API from this repo.** The tenant is single, live, and its daily quota is a
+shared exhaustible resource (*Verification etiquette*, and the workspace `CLAUDE.md`). The CFS API's
+read-only `db_*` tools already carry the Xero-derived fields, which is where a claim about the live
+books comes from.
 
-- **The default.** What four systems do by default is not automatically right, but differing from all
-  four is a claim that needs an argument.
+Three things the survey is for, and only the first is obvious:
+
+- **The default.** What five systems do by default is not automatically right, but differing from all
+  five is a claim that needs an argument.
 - **The CRITERION.** More valuable than the default. The tax-book survey found the systems split on
   whether a tax book posts — but agreed on *why* (does the book need its own trial balance). The
   credit-balance survey found all four put a credit note in AR — but the line they all drew was "is
   this value attached to a billed sale", and **CFS's credit notes fail that test on their own data
   model**, so following the criterion and departing from the default was the correct read. A survey
   that only collects defaults gets this backwards.
+- **The MIGRATION DELTA, which only Xero can tell you.** ADR-0001 replaces Xero, so a departure from
+  it has to be carried across history rather than merely designed. The credit-note decision is the
+  live example: Xero credits AR at issue and 2050 does not, so the migration has to decide what a
+  historical credit note becomes — and whether that costs anything turns on a measurable fact,
+  namely whether any note was unallocated across a period boundary. **State the delta and what would
+  measure it; do not assert its size until it is measured.** ADR-0020 governs how history is
+  restated, and its rule that a restatement must not alter any amount is what makes the size matter.
 
 Practitioner material counts and is sometimes the best evidence: a consultancy publishing *how to
 work around* a product's default is a measurement of what that default costs. Cite it.

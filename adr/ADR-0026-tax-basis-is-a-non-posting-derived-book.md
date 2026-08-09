@@ -48,6 +48,13 @@ superseded_by:
   both the total-asset and the total-equity difference, and **total liabilities agree to the cent**.
   So a derived tax book is not merely defensible — it is what CFS's own two statements already are.
   Measured 2026-08-09; `inbox/2026-08-09-book-to-tax-difference-is-exactly-two-accounts.md`.
+- **And one of those two accounts turned out to be a defect**, which is an argument for this decision
+  that the first draft did not have. The retail-inventory divergence was invisible until the two
+  statements were diffed line by line: 0.6% of the balance, growing across three years, flagged by
+  nothing. Two independently maintained sets of statements can drift in any account without either
+  one looking wrong. A tax book **derived** from the GAAP ledger by a stated rule cannot — a
+  difference in an account the derivation does not name is a difference nobody authored, and it has
+  nowhere to hide (OQ-029).
 - **The tax basis is accrual** (OQ-027): AR 25,824.26 and AP 30,240.04 appear identically on both
   balance sheets, so the overlay does not have to restate working capital.
 - **The tax depreciation figure is already produced this way, by hand.** The tax P&L annotates 7000
@@ -65,10 +72,13 @@ superseded_by:
 **TigerBeetle holds one book: GAAP.** No tax-basis value is ever posted to it.
 
 The **tax book is produced by the read side** (ADR-0017: MongoDB for open periods, the sealed
-Parquet artifact for closed ones) as a set of balanced **tax-book entries** derived from two
-sources, which the measurement above shows are the only two that exist: the fixed-asset register's
-per-asset tax schedule, and the retail-inventory costing difference (**OQ-029** — immaterial at
-$259.13 cumulative, unexplained, and growing). They use the same chart of accounts — 7001
+Parquet artifact for closed ones) as a set of balanced **tax-book entries** derived from **one**
+source: the fixed-asset register's per-asset tax schedule. **Depreciation is the only legitimate
+difference between the two books.**
+
+The statements as filed carry a second one — retail-inventory costing, $259.13 cumulative — and the
+owner has ruled it **an error to be corrected, not a difference in basis** (OQ-029). The migration
+carries one retail-inventory cost on both bases. They use the same chart of accounts — 7001
 Section 179 Depreciation Expense, the `Less-Accumulated Depreciation` accounts, 1998 Gain/Loss On
 Asset Disposal — and they are entries in the projection, never transfers in the ledger.
 

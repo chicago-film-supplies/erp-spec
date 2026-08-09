@@ -503,8 +503,9 @@ open_questions:
       summing to the net-income difference of 63,659.08 with **zero residual**. On the balance sheet,
       accumulated depreciation (467,638.68) plus 1400 Retail Inventory (259.13) equals the total
       asset difference and the total equity difference exactly.
-      So ADR-0026's overlay has **two** components rather than one, and the second is not the
-      fixed-asset register. Why the two books cost retail inventory differently is **OQ-029**.
+      The retail-inventory half is **not a basis difference at all** — the owner ruled it an error to
+      be corrected (OQ-029). So **depreciation is the only legitimate difference between the books**,
+      and ADR-0026's overlay derives from the fixed-asset register alone.
       **Permanent differences are in neither book**: meals, political expenditures and vehicle
       tickets are identical on both statements and are Schedule M-1 adjustments on the return. The
       ledger should carry no M-1 logic at all.
@@ -569,7 +570,24 @@ open_questions:
     owner: alex
     decide_by: 2026-09-15
     blocks: [ADR-0026]
-    status: open
+    status: answered
+    answer: >-
+      **They should not differ — the divergence is an error in the current books, and v2 carries one
+      retail-inventory cost on both bases** (owner, 2026-08-09: "retail costing should be the same
+      between them, that outage is a mistake we will correct").
+      So **ADR-0026's overlay has ONE source**, the fixed-asset register, and depreciation is the
+      only legitimate book difference. The question's premise — that this was a costing-basis choice
+      — does not hold.
+      Consequence for m6: **the migration must not carry the divergence across.** Whether the prior
+      years are corrected in the existing books or the difference is simply not imported is an
+      accounting call for the owner and the CPA, not a spec decision.
+      ⚠️ Worth keeping from the measurement: the defect was **invisible until the two statements were
+      diffed line by line** — 0.6% of the balance, growing across three years, flagged by nothing. A
+      tax book produced from one ledger by a stated derivation cannot drift this way silently,
+      because a difference in an account the derivation does not name is a difference nobody
+      authored. That is an argument FOR ADR-0026 which the ADR did not have, and it comes from the
+      defect rather than the design.
+      Evidence: `inbox/2026-08-09-retail-inventory-book-difference-is-an-error.md`.
     notes: >-
       Measured 2026-08-09 across both 2025 statements: after depreciation, the **only** other
       book-to-tax difference is retail inventory. 5000 Cost of Goods Sold: Retail Inventory is
