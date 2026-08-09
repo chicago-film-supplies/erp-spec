@@ -229,7 +229,6 @@ source: ${source}
 confidence: medium
 promotes_to: []
 verified: false
-triage_count: 0
 ---
 
 ${text}

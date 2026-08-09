@@ -277,6 +277,11 @@ try {
 } catch { /* absent */ }
 
 const oqBlocked = oqs.filter((q) => unset(q.owner) || unset(q.decide_by));
+// erp-spec#7: `oqBlocked` answers "does it have an owner?", which is NOT what "undecided" means.
+// Reporting it under a heading that asks what is undecided printed "None" over five genuinely open
+// questions, two of which block a written posting rule. Openness is `status`.
+const oqOpen = oqs.filter((q) => String(q.status ?? "open") === "open");
+const oqAnswered = oqs.filter((q) => String(q.status ?? "open") === "answered");
 const hotOpen = hots.filter((h) => (h.status ?? "open") === "open");
 const spikeOpen = spikes.filter((s) => (s.status ?? "open") !== "closed");
 const glossTodo = glossary.filter((t) => String(t.definition ?? "").trim() === "TODO");
@@ -290,7 +295,7 @@ st += `is \`deno task validate\`'s judgement, not this file's.\n\n`;
 
 st += `## At a glance\n\n`;
 st += `| | Count | |\n|---|---:|---|\n`;
-st += `| Open questions | ${oqs.length} | **${oqBlocked.length} with no owner or no decide-by** |\n`;
+st += `| Open questions | ${oqOpen.length} open | ${oqAnswered.length} answered of ${oqs.length} · **${oqBlocked.length} with no owner or no decide-by** |\n`;
 st += `| Conflicts (HOT) | ${hots.length} | ${hotOpen.length} open |\n`;
 st += `| Decisions (ADR) | ${adrs.length} | ${inForce.length} in force · ${proposed.length} proposed |\n`;
 st += `| Spikes | ${spikes.length} | ${spikeOpen.length} open |\n`;
@@ -302,20 +307,27 @@ st += `| Drops awaiting \`deno task ingest\` | ${dropsPending} | |\n`;
 st += `| Glossary terms | ${glossary.length} | ${glossTodo.length} still \`TODO\` |\n\n`;
 
 st += `## The bottleneck: undecided questions\n\n`;
-if (oqBlocked.length === 0) {
-  st += `None — every open question has an owner and a decide-by date.\n\n`;
+if (oqOpen.length === 0) {
+  st += `None — every question carries an answer.\n\n`;
 } else {
-  st += `${oqBlocked.length} of ${oqs.length} open questions have no owner or no decide-by date. `;
-  st += `Everything downstream of them is parked.\n\n`;
+  st += `**${oqOpen.length} of ${oqs.length} still open**, soonest decide-by first.`;
+  st += oqBlocked.length > 0 ? ` ${oqBlocked.length} have no owner or no decide-by date.\n\n` : `\n\n`;
   st += `| OQ | Question | Owner | Decide by | Blocks |\n|---|---|---|---|---|\n`;
-  for (const q of oqBlocked) {
+  // Sorted on the calendar day, never on the rendered string: an unquoted YAML date is a JS Date
+  // and `String()` on one renders in the runner's timezone. `ymd` reduces it for display; this
+  // sorts on the same reduction so the order cannot go machine-dependent either.
+  const byDate = [...oqOpen].sort((a, b) =>
+    (ymd(a.decide_by) + a.id).localeCompare(ymd(b.decide_by) + b.id)
+  );
+  for (const q of byDate) {
     st += `| \`${q.id}\` | ${trunc(oneLine(q.question), 90)} | ${
       unset(q.owner) ? "**unset**" : oneLine(q.owner)
     } | ${unset(q.decide_by) ? "**unset**" : ymd(q.decide_by)} | ${
       (q.blocks ?? []).map((b) => `\`${b}\``).join(" ") || "—"
     } |\n`;
   }
-  st += `\n`;
+  st += `\nWhether any of these dates has PASSED is \`deno task validate\`'s judgement — gate 7 fails `;
+  st += `on an open question past its decide-by. This file reads no clock and so cannot say.\n\n`;
 }
 
 st += `## Open conflicts\n\n`;
@@ -417,7 +429,7 @@ const tree: Node = {
       })),
     },
     {
-      text: `Open questions (${oqBlocked.length} of ${oqs.length} undecided)`,
+      text: `Open questions (${oqOpen.length} of ${oqs.length} still open)`,
       note: "The bottleneck. Each blocks what is listed under it.",
       children: oqs.map((q) => ({
         text: `${q.id} — ${trunc(oneLine(q.question), 100)}`,
@@ -514,5 +526,5 @@ await Deno.writeTextFile(`${ROOT}/spec-map.generated.opml`, opml);
 
 console.log(`traceability/matrix.generated.json  ${rows.length} requirement(s)`);
 console.log(`adr/in-force.generated.md           ${inForce.length} in force, ${proposed.length} proposed`);
-console.log(`STATUS.generated.md                 ${oqBlocked.length} undecided, ${hotOpen.length} conflicts open`);
+console.log(`STATUS.generated.md                 ${oqOpen.length} open, ${hotOpen.length} conflicts open`);
 console.log(`spec-map.generated.opml             ${opml.split("<outline").length - 1} nodes`);

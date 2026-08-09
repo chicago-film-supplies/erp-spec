@@ -121,7 +121,6 @@ interface Inbox {
   title?: string;
   contexts?: string[];
   promotes_to?: string[];
-  triage_count?: number;
 }
 interface Term {
   term: string;
@@ -216,7 +215,6 @@ async function loadSpec(): Promise<Spec> {
         title: fm.title as string | undefined,
         contexts: fm.contexts as string[] | undefined,
         promotes_to: Array.isArray(fm.promotes_to) ? (fm.promotes_to as string[]) : [],
-        triage_count: Number(fm.triage_count ?? 0),
       });
     }
   }
@@ -619,7 +617,7 @@ function renderInbox(s: Spec): string {
       }</td><td>${
         promoted
           ? chips(i.promotes_to)
-          : `<span class="pill">unpromoted${i.triage_count ? ` ×${i.triage_count}` : ""}</span>`
+          : `<span class="pill">unpromoted</span>`
       }</td></tr>`;
     })
     .join("");

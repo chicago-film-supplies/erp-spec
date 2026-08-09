@@ -29,6 +29,17 @@ const isTemplate = (p: string) => basename(p).startsWith("_") || basename(p).inc
 const rel = (p: string) => relative(ROOT, p);
 
 /**
+ * An unquoted YAML date (`decide_by: 2026-09-15`, `review_by: 2026-10-01`) parses to a JS Date, and
+ * `String()` on one renders in the RUNNER's timezone — so gate 6 spent its whole life reporting
+ * "ADR-0009: proposed past its review_by (Mon Sep 14 2026 19:00:00 GMT-0500)" for a date that IS
+ * the 15th. Off by a day, and machine-dependent besides. `generate.ts` has carried this reduction
+ * since the bug bit there; validate needs it for the same reason on the printing side, even though
+ * it writes no files. **Comparing a Date is fine. Printing one is the bug.**
+ */
+const ymdUTC = (v: unknown): string =>
+  v instanceof Date ? v.toISOString().slice(0, 10) : String(v ?? "").trim();
+
+/**
  * Parsed once per path. Several gates read the same file — without the cache a single unparseable
  * vector reported its failure once per reader, which reads as several broken files.
  */
@@ -200,9 +211,13 @@ if (TRIAGE_ONLY) {
     return !Array.isArray(p) || p.length === 0;
   });
   console.log(`\nUnpromoted inbox items: ${unpromoted.length} of ${inbox.length}\n`);
+  // Age, not `triage_count` — the counter was written as 0 and incremented by nothing, so it
+  // printed the same "(triaged 0x)" for a note dropped today and one ignored for a month
+  // (erp-spec#7). The date in the filename is the one age signal every inbox file carries.
   for (const i of unpromoted) {
-    const tc = Number(i.fm.triage_count ?? 0);
-    console.log(`  ${rel(i.file)}${tc > 0 ? `  (triaged ${tc}x)` : ""}`);
+    const m = basename(i.file).match(/^(\d{4}-\d{2}-\d{2})-/);
+    const days = m ? Math.floor((Date.now() - new Date(`${m[1]}T00:00:00Z`).getTime()) / 86_400_000) : null;
+    console.log(`  ${rel(i.file)}${days === null ? "" : `  (${days}d)`}`);
     console.log(`      ${i.fm.title ?? "(no title)"}`);
   }
   console.log("");
@@ -338,7 +353,7 @@ for (const e of evts) {
       if (!a.review_by) {
         fail("6", `${a.id}: proposed ADRs must carry a \`review_by\` date`);
       } else if (new Date(String(a.review_by)) < now) {
-        fail("6", `${a.id}: proposed past its review_by (${a.review_by})`);
+        fail("6", `${a.id}: proposed past its review_by (${ymdUTC(a.review_by)})`);
       }
     }
 
@@ -359,11 +374,43 @@ for (const e of evts) {
   }
 }
 
-// ── gate 7: open questions need an owner and a decide-by ────────────────────
-for (const q of oqs) {
+// ── gate 7: open questions need an owner, a decide-by, and a status that means something ────
+/**
+ * erp-spec#7: this gate checked only that the two fields were PRESENT. It never read `status` and
+ * never compared `decide_by` to today — so an open question could sail past its date forever with
+ * CI green, and a question could claim `answered` while carrying no answer. Gate 6 has done the
+ * date comparison for an ADR's `review_by` since the beginning, `SPEC_TODAY` and all; this is the
+ * same mechanic on the other deadline.
+ *
+ * Time-dependent judgement lives HERE and not in `generate.ts`, which may read no clock — so
+ * STATUS lists open questions soonest-first and says nothing about overdue, and this decides it.
+ */
+{
+  const OQ_STATUS = ["open", "answered", "dropped"];
+  const envToday = Deno.env.get("SPEC_TODAY");
+  const now = envToday ? new Date(envToday) : new Date();
   const bad = (v: unknown) => v === undefined || v === null || v === "" || String(v).trim() === "TBD";
-  if (bad(q.owner)) fail("7", `${q.id}: no owner`);
-  if (bad(q.decide_by)) fail("7", `${q.id}: no decide_by`);
+
+  for (const q of oqs) {
+    if (bad(q.owner)) fail("7", `${q.id}: no owner`);
+    if (bad(q.decide_by)) fail("7", `${q.id}: no decide_by`);
+
+    const status = String((q as { status?: unknown }).status ?? "open");
+    if (!OQ_STATUS.includes(status)) {
+      fail("7", `${q.id}: status "${status}" not one of ${OQ_STATUS.join(" | ")}`);
+    }
+    // An `answered` with no answer is the same defect class as a spike `closed` with
+    // `closes_adr: new` — a status asserting a conclusion nobody wrote down.
+    if (status === "answered" && bad((q as { answer?: unknown }).answer)) {
+      fail("7", `${q.id}: status answered but no \`answer\` — the status asserts a conclusion nobody wrote`);
+    }
+    if (status === "dropped" && bad((q as { notes?: unknown }).notes)) {
+      fail("7", `${q.id}: status dropped with no \`notes\` saying why it stopped mattering`);
+    }
+    if (status === "open" && !bad(q.decide_by) && new Date(String(q.decide_by)) < now) {
+      fail("7", `${q.id}: still open and past its decide_by (${ymdUTC(q.decide_by)}) — decide it, drop it, or move the date deliberately`);
+    }
+  }
 }
 
 // ── gate 8: glossary ────────────────────────────────────────────────────────
@@ -413,13 +460,39 @@ for (const q of oqs) {
   }
 }
 
-// ── gate 9: inbox items that have survived three triages unpromoted ─────────
-for (const i of inbox) {
-  const p = i.fm.promotes_to;
-  const unpromoted = !Array.isArray(p) || p.length === 0;
-  const tc = Number(i.fm.triage_count ?? 0);
-  if (unpromoted && tc >= 3) {
-    warn("9", `${rel(i.file)}: unpromoted after ${tc} triages — promote it or write down why not`);
+// ── gate 9: inbox items left unpromoted too long ────────────────────────────
+/**
+ * erp-spec#7: this gate warned when `triage_count >= 3`, and **`triage_count` is written as 0 by
+ * `tools/ingest.ts` and incremented by nothing**. The condition could never be true, so 27
+ * unpromoted notes generated exactly zero pressure while the gate reported green.
+ *
+ * Re-based on the note's AGE, taken from its filename — the one date every inbox file carries.
+ * The alternative was to have `deno task triage` increment the counter, which would have cost the
+ * property that makes validate trustworthy: it writes nothing, and therefore may read the real
+ * clock. Age keeps that.
+ *
+ * ⚠️ **This cannot fire until 2026-08-22**, because the oldest note in the repo is dated
+ * 2026-08-08. It is landed knowingly green rather than proven red on real data — the exception to
+ * this repo's usual rule, and the reason is that a two-day-old corpus has nothing stale in it yet.
+ * What IS proven is that it bites: `SPEC_TODAY=2026-09-01 deno task validate` warns on all 27.
+ * A gate that cannot fire yet beats a gate that can never fire.
+ */
+{
+  const STALE_DAYS = 14;
+  const envToday = Deno.env.get("SPEC_TODAY");
+  const now = envToday ? new Date(envToday) : new Date();
+  for (const i of inbox) {
+    const p = i.fm.promotes_to;
+    if (Array.isArray(p) && p.length > 0) continue;
+    const m = basename(i.file).match(/^(\d{4}-\d{2}-\d{2})-/);
+    if (!m) {
+      warn("9", `${rel(i.file)}: filename does not start with a date, so its age cannot be judged`);
+      continue;
+    }
+    const days = Math.floor((now.getTime() - new Date(`${m[1]}T00:00:00Z`).getTime()) / 86_400_000);
+    if (days >= STALE_DAYS) {
+      warn("9", `${rel(i.file)}: unpromoted after ${days} days — promote it or write down why not`);
+    }
   }
 }
 
