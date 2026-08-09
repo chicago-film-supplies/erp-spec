@@ -23,17 +23,26 @@ tighter than `or`. The assignment silently kept the old value and the `or` becam
 boolean, so the violation counter could never be set. Only the companion's failure to fail exposed
 it. A single-module spec would have reported "no violation found" and been believed.
 
-## Status — run 2026-08-09, quint 0.32.0
+## Status — run 2026-08-09, quint 0.32.0. Re-run 2026-08-09, reproduced.
 
 Both **simulated** (randomised, 20,000 traces × 20 steps) and **verified** (Apalache symbolic
 bounded model checking, default 10 steps, Java 21).
 
-| Module | Expected | Apalache | Simulation |
-|---|---|---|---|
-| `two_store_commit` | hold | `NoError` (8,883 ms) | no violation |
-| `naive_sweeper` | **fail** | `Error` — counterexample (5,011 ms) | violation at 4 states |
-| `period_close` | hold | `NoError` (19,508 ms) | no violation |
-| `validate_then_commit` | **fail** | `Error` — counterexample (4,174 ms) | violation at 4 states |
+| Module | Expected | Apalache | Re-run | Simulation | Re-run |
+|---|---|---|---|---|---|
+| `two_store_commit` | hold | `NoError` (8,883 ms) | `NoError` (5,195 ms) | no violation | no violation (324 ms) |
+| `naive_sweeper` | **fail** | `Error` — counterexample (5,011 ms) | `Error` (3,895 ms) | violation at 4 states | violation (18 ms) |
+| `period_close` | hold | `NoError` (19,508 ms) | `NoError` (3,816 ms) | no violation | no violation (72 ms) |
+| `validate_then_commit` | **fail** | `Error` — counterexample (4,174 ms) | `Error` (3,707 ms) | violation | violation (19 ms) |
+
+**All eight runs reproduced their recorded outcome.** The re-run exists because a recorded result
+nobody has repeated is a claim, not a measurement — the same reason a spike's `## Notes` must be
+re-runnable rather than believed.
+
+⚠️ **The timings did not reproduce and that is expected** — `period_close` verified in 19.5 s
+originally and 3.8 s on the re-run, a 5x spread from machine, JIT and Apalache-download warmth.
+**The outcome is the measurement here; the timing is not.** Do not treat a timing change as a
+finding, and do not tune anything on these numbers.
 
 **This is bounded verification, not proof.** Apalache checks to a step bound; a violation needing
 more steps than the bound is not found. Raising `--max-steps` is the lever.
