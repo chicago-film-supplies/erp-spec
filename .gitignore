@@ -6,8 +6,15 @@ deno.lock
 # Spike harness (spikes/harness/) — measurement code, not spec, not the target system.
 # Its npm pins are exact in deno.json precisely because deno.lock is ignored above.
 node_modules/
-spikes/harness/.bin/      # compiled probe binaries, ~200-370 MB each
-spikes/harness/.data/     # TigerBeetle cluster files, Valkey RDB/AOF, downloaded archives
+# NOTE: git does NOT support trailing comments on a pattern line — a `#` only starts a comment
+# at the START of a line. These two were first written as `spikes/harness/.bin/  # binaries`,
+# which git read as a literal pattern including the spaces and the text, so it matched nothing
+# and a 1.1 GB TigerBeetle data file plus four ~355 MB compiled binaries went into the history.
+# Keep every comment on its own line.
+# compiled probe binaries, ~200-370 MB each
+spikes/harness/.bin/
+# TigerBeetle cluster files, Valkey RDB/AOF, downloaded archives
+spikes/harness/.data/
 
 # Cached upstream stack docs — refetched by `deno task fetch-llms-docs` (24h).
 # Upstream is the source; this is a local copy, never a spec input.
