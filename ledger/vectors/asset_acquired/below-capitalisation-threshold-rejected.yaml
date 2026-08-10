@@ -1,0 +1,45 @@
+name: below-capitalisation-threshold-rejected
+posting_rule: asset_acquired
+kind: reject
+source: >-
+  The live chart draws the capitalisation line in the account names themselves — **6300 Tools,
+  Machinery & Equipment (Less Than 1K)**, 6204 Building: Improvements (Less Than 1K), 6500 Rental
+  Inventory (less than 1K) (`api:2026-08-09:db_chart_of_accounts_query`). The threshold is $1,000 and
+  it is already policy; this vector is what stops it being bypassed by routing a cheap purchase
+  through the register.
+
+differs_from: in-service-on-acquisition
+differs_in: ["acquisition.cost_minor"]
+
+given:
+  ledger_state:
+    closed_periods: []
+  acquisition:
+    asset_id: FA-VEC-0013
+    description: "1 x Metro Rack 24\""
+    acquired_on: "2026-08-03"
+    in_service_on: "2026-08-03"
+    debit_account: 1500
+    cost_minor: 40000
+    basis_gaap_minor: 40000
+    basis_tax_minor: 40000
+
+derivation: >-
+  One rack at **$400.00**, below the $1,000 capitalisation threshold. Structurally identical to the
+  accept vector — same accounts, same dates, same shape — and refused on the amount alone.
+  **It is not an asset acquisition; it is an expense.** The right posting is 6500 Rental Inventory
+  (less than 1K), through whatever rule owns purchases, and it never enters the fixed-asset register
+  at all.
+  **The failure this prevents is quiet and compounding.** A $400 asset gets a useful life, a
+  depreciation schedule per book, a disposal that must eventually be recorded, and a row in a
+  register that the owner has already said runs to *thousands* of low-value rental items. Multiply
+  it by the population and the register stops being maintainable — which is precisely why a
+  threshold exists.
+  ⚠️ **The threshold is a POLICY and this vector pins the one the live chart already implies.** If
+  it moves, it moves here and in three account names together; a threshold that lives only in an
+  operator's habit is not a threshold.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "acquisition of 40000 is below the $1,000 capitalisation threshold — a purchase this size is an expense to 6500, not a fixed asset with a schedule"

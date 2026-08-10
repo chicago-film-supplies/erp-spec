@@ -13,8 +13,8 @@
 # Every one of the 24 now appears below in exactly one of four buckets, and gate 10e fails if any
 # event is missing from all of them or present in more than one:
 #
-#   rules[] status: specified  10   fully written, with golden vectors
-#   rules[] status: blocked     3   named blocker that is genuinely still open; NO postings written
+#   rules[] status: specified  11   fully written, with golden vectors
+#   rules[] status: blocked     2   named blocker that is genuinely still open; NO postings written
 #   no_posting[]               11   produces no GL posting at all, with the reason
 #   unwritten[]                 0   in scope, no blocker, not yet specified — each names an issue
 #
@@ -552,6 +552,18 @@ rules:
         whichever job was on the clock after hour eight. Chronological attribution would make the
         same two jobs in the opposite order produce different COGS.
       - >-
+        **A labour posting takes the product line of the REVENUE it serves** — not of the goods that
+        happened to be on the order. That is what makes gross margin by product line computable at
+        all, which is the entire reason `product_line` sits on revenue and COGS alike. Delivery
+        labour serving a delivery charge is `Delivery`; crew prepping a table rental is
+        `Tables & Chairs`.
+        **It is NOT allocated across the order's goods** (ADR-0029). A delivery serving a mixed
+        order posts to `Delivery` whole, because allocation is destructive and the official
+        product-line P&L can spread it afterwards — where posting it spread cannot be undone.
+        Measured: `Delivery` is the largest tracked line in the business at $216,050 and 12.8% of
+        revenue, so this rule decides where a large number lands
+        (`inbox/2026-08-09-product-line-by-revenue-account-matrix.md`).
+      - >-
         **The allocation is performed in the SHIFT RECORD, never here.** `amount:` is a dotted path
         with no arithmetic, so the pro-rata rounding — and the residual cent when hours do not
         divide the premium evenly — is decided upstream, in the document, where the money rules
@@ -627,23 +639,57 @@ rules:
     relates_to: [ADR-0002, ADR-0009]
 
   - id: asset_acquired
-    status: blocked
-    blocked_by: [OQ-020]
+    status: specified
     trigger:
       event: EVT-FA-001
       source_document: purchase_order
-    accounting_date: acquisition.in_service_date
+    accounting_date: acquisition.acquired_on
     posting_timestamp: assigned_by_ledger
-    postings: []
-    known:
-      - "Dr the 15xx/16xx/17xx asset account (or 1999 Fixed Asset Clearing until in service) / Cr 2000 Accounts Payable."
-      - "Cost basis is recorded PER BOOK, because useful life and basis differ by book (ADR-0007)."
-    unknown:
+    journal_entry:
+      spans_multiple_source_documents: false
+    postings:
+      - debit_account: acquisition.debit_account
+        credit_account: 2000
+        amount: acquisition.cost_minor
+        dimensions: none
+    control_total: acquisition.cost_minor
+    invariants:
       - >-
-        **OQ-020** — no context owns purchase orders. The source document of this rule therefore has
-        no owning context, and writing the rule would place procurement in the ledger by default,
-        which is the arbitrary placement `contexts/ledger/events.yaml` explicitly refuses to make.
-    relates_to: [ADR-0007]
+        **Unblocked by OQ-020, which gave procurement an owner.** The rule was blocked because no
+        context owned purchase orders, so writing it would have placed procurement in the ledger by
+        default — the arbitrary placement `contexts/ledger/events.yaml` refuses to make. Procurement
+        is now the ninth context and owns the inbound document.
+      - >-
+        **The GAAP book posts and only the GAAP book** (ADR-0026). Cost basis is carried per book —
+        §179 and bonus change the tax basis on day one for most of this fleet — but the tax basis is
+        a fixed-asset register fact that the read side reports, never a transfer. An acquisition that
+        posted both books would double the balance sheet.
+      - >-
+        **The debit is the asset account if the asset is in service, and 1999 Fixed Asset Clearing if
+        it is not.** `in_service_on` is distinct from `acquired_on`
+        (`contexts/fixed-assets/entities/asset.yaml`) and drives the depreciation convention, not
+        this posting. 1999's balance at period end is therefore a real signal — assets bought and not
+        yet capitalised — rather than a rounding account.
+      - >-
+        **The accounting date is when the asset was ACQUIRED, not when it entered service.** The
+        obligation to the vendor arises on acquisition; depreciation starts on the in-service date.
+        Conflating them would either delay a liability that exists or start depreciating an asset
+        that is still in a crate.
+      - >-
+        **Credit 2000 Accounts Payable.** Under procurement's three-stage lifecycle (OQ-020) a
+        receipt that precedes its invoice accrues first and reclassifies to AP when the bill arrives;
+        that stage is procurement's to specify and is not modelled here yet.
+      - >-
+        **Below the capitalisation threshold there is no acquisition at all.** The live chart draws
+        the line at $1,000 in the account names themselves — 6300 Tools, Machinery & Equipment (Less
+        Than 1K), 6204 Building: Improvements (Less Than 1K), 6500 Rental Inventory (less than 1K).
+        A cheap purchase is an expense, never an asset with a schedule, and routing one here would
+        create a depreciating asset out of a box of clamps.
+      - >-
+        No dimension: asset accounts, 1999 and 2000 all name none. An acquisition is not a sale and
+        has no product line — the goods acquire one when they earn revenue (ADR-0029).
+    relates_to: [ADR-0007, ADR-0026, ADR-0029]
+    vectors_dir: ledger/vectors/asset_acquired/
 
 # ══════════════════════════════════════════════════════════════════════════════════════════════════
 # NO POSTING — these reach the ledger context but produce no GL entry. Each says why.

@@ -119,3 +119,5 @@ Accepted and not superseded, as of the last `deno task gen`.
 | [ADR-0025](ADR-0025-dimension-obligation-is-per-account.md) | The dimension obligation is per account, and what is refused is absence rather than null | 2026-10-01 | HOT-011, OQ-021, OQ-022, OQ-025 |
 | [ADR-0027](ADR-0027-retain-mapbox-and-resend-at-the-boundary.md) | Retain Mapbox for geocoding and Resend for transactional email, at the boundary | 2026-10-01 | — |
 | [ADR-0028](ADR-0028-self-hosted-tier-gotenberg-and-victoria.md) | The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability | 2026-10-01 | — |
+| [ADR-0029](ADR-0029-the-ledger-records-unallocated-facts.md) | The ledger records un-allocated facts; allocation is a specified reporting act | 2026-10-01 | OQ-006, OQ-018 |
+| [ADR-0030](ADR-0030-vehicle-cost-moves-into-cogs.md) | Vehicle cost moves from operating expense into COGS, absorbed and unabsorbed | 2026-11-01 | SPIKE-005 |

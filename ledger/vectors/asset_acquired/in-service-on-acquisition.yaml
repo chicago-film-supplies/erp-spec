@@ -1,0 +1,39 @@
+name: in-service-on-acquisition
+posting_rule: asset_acquired
+kind: accept
+source: >-
+  ADR-0007 (register in-house, dual basis) and ADR-0026 (only the GAAP book posts). Accounts live —
+  1500 Rental Inventory Assets, 2000 Accounts Payable (`api:2026-08-09:db_chart_of_accounts_query`).
+  Amounts synthetic; the tax basis is §179'd to zero in year 1, which is the ordinary case for this
+  fleet.
+
+given:
+  ledger_state:
+    closed_periods: []
+  acquisition:
+    asset_id: FA-VEC-0010
+    description: "12 x Metro Rack 24\""
+    acquired_on: "2026-08-03"
+    in_service_on: "2026-08-03"
+    debit_account: 1500
+    cost_minor: 1200000
+    basis_gaap_minor: 1200000
+    basis_tax_minor: 1200000
+    section_179_minor: 1200000
+
+derivation: >-
+  $12,000.00 of racks, bought and put straight to work. One transfer: Dr 1500 / Cr 2000, and
+  `control_total` = 1200000.
+  **In service on the day it was acquired, so the debit is the asset account** — 1999 Fixed Asset
+  Clearing is for the gap between buying and using, and here there is none.
+  **The tax basis is recorded and NOT posted** (ADR-0026). `section_179_minor` expenses the whole
+  $12,000 for tax in year 1 while GAAP carries it over five, so the two books diverge from this
+  moment — but only the GAAP figure reaches TigerBeetle. A second transfer for the tax basis would
+  double the balance sheet, which is why the parallel-ledger option was rejected.
+  No dimension: 1500 and 2000 both name none. An acquisition is not a sale, and the racks acquire a
+  product line when they earn revenue, not when they are bought.
+
+expect:
+  transfers:
+    - { debit_account: 1500, credit_account: 2000, amount_minor: 1200000, accounting_date: "2026-08-03" }
+  rejects: []

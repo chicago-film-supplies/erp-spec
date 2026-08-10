@@ -11,22 +11,21 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 3 open | 27 answered of 30 · **0 with no owner or no decide-by** |
+| Open questions | 2 open | 28 answered of 30 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 11 | 0 open |
-| Decisions (ADR) | 28 | 17 in force · 9 proposed |
+| Decisions (ADR) | 30 | 17 in force · 11 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 2 | 0 without a scenario |
-| Inbox | 42 | 31 unpromoted |
+| Inbox | 43 | 32 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 23 | 0 still `TODO` |
 
 ## The bottleneck: undecided questions
 
-**3 of 30 still open**, soonest decide-by first.
+**2 of 30 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
-| `OQ-020` | Which context owns purchase orders — or is procurement a ninth bounded context? | alex | 2026-09-15 | `EVT-FA-001` |
 | `OQ-026` | Is a supplier discount other income (4300) or a contra-COGS (5001), and which of the two… | alex | 2026-09-15 | `REQ-LED` |
 | `OQ-030` | Does CFS introduce a forced-call (short-turnaround) premium, and if so what is the turnar… | alex | 2026-10-15 | `REQ-LED` |
 
@@ -58,7 +57,7 @@ None.
 - `ADR-0024` — DuckDB is reached natively and server-side; client-side reporting is rejected
 - `ADR-0026` — The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time
 
-### Proposed (9)
+### Proposed (11)
 
 | ADR | Title | Review by | Blocked on |
 |---|---|---|---|
@@ -71,6 +70,8 @@ None.
 | `ADR-0025` | The dimension obligation is per account, and what is refused is absence rather than null | 2026-10-01 | `HOT-011` `OQ-021` `OQ-022` `OQ-025` |
 | `ADR-0027` | Retain Mapbox for geocoding and Resend for transactional email, at the boundary | 2026-10-01 | — |
 | `ADR-0028` | The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability | 2026-10-01 | — |
+| `ADR-0029` | The ledger records un-allocated facts; allocation is a specified reporting act | 2026-10-01 | `OQ-006` `OQ-018` |
+| `ADR-0030` | Vehicle cost moves from operating expense into COGS, absorbed and unabsorbed | 2026-11-01 | `SPIKE-005` |
 
 ## Spikes
 

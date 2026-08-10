@@ -353,7 +353,29 @@ open_questions:
     owner: alex
     decide_by: 2026-09-15
     blocks: [EVT-FA-001]
-    status: open
+    status: answered
+    answer: >-
+      **Procurement is the ninth bounded context.** Owner, 2026-08-09. It owns the inbound document
+      in all its forms — labour purchase orders, inventory purchase orders, and recurring bills —
+      and the payables lifecycle those documents drive.
+      **What made it worth the cost is the forecasting surface, which no existing context owns.** The
+      procure-to-pay cycle has three stages and each answers a different question: a **PO** is
+      committed-not-yet-incurred (spend forecast); an **accrual** is incurred-not-yet-invoiced
+      (amount known, date unknown); an **invoice** is dated with terms (cashflow forecast). CFS's
+      current system holds only the third, which is why "AP is underutilized today" — there is
+      nowhere to record a commitment and nowhere to record work done but not yet billed.
+      This also refines OQ-024's answer. `shift_recorded` credits Accounts Payable, but the EOR has
+      not invoiced on the shift date — so the accurate credit leg is an **accrued labour liability**
+      that the EOR's invoice later reclassifies into 2000. That is procurement's lifecycle, and it is
+      why a wages liability has a purpose in v2 even though CFS has never had one.
+      ⚠️ **This reopens m2.** Its exit criterion reads "All eight contexts have a context.md",
+      `contexts_have_context_md` counts eight, and the context tables in `tools/validate.ts` and
+      `tools/generate.ts` are hardcoded to eight. Accepting a ninth means editing a milestone that
+      currently reads met. That is the honest cost and it is not a reason to place procurement
+      arbitrarily in an existing context — which is the failure `contexts/ledger/events.yaml`
+      explicitly refuses to make.
+      The scaffolding — context directory, code, events, and the tooling's context tables — is WORK
+      rather than decision, and is tracked as a GitHub issue.
     notes: >-
       Raised by OQ-008, which made purchase orders first-class in v2 with two use cases: the
       document labour scheduling generates and costs flow from, and inventory acquisition (retail

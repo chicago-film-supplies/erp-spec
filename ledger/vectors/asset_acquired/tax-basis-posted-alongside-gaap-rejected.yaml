@@ -1,0 +1,45 @@
+name: tax-basis-posted-alongside-gaap-rejected
+posting_rule: asset_acquired
+kind: reject
+source: >-
+  ADR-0026 — the general ledger is the GAAP book and no tax-basis value is ever posted to it. The
+  companion to `asset_basis_adjusted/section-179-election-posts-nothing`, which asserts the same
+  fence from the side where the tax book moves and the GAAP book does not.
+
+differs_from: in-service-on-acquisition
+differs_in: ["acquisition.basis_tax_minor", "acquisition.post_per_book"]
+
+given:
+  ledger_state:
+    closed_periods: []
+  acquisition:
+    asset_id: FA-VEC-0012
+    description: "12 x Metro Rack 24\""
+    acquired_on: "2026-08-03"
+    in_service_on: "2026-08-03"
+    debit_account: 1500
+    cost_minor: 1200000
+    basis_gaap_minor: 1200000
+    basis_tax_minor: 1080000
+    section_179_minor: 1080000
+    post_per_book: true
+
+derivation: >-
+  The same racks, with a tax basis of $10,800.00 against a GAAP basis of $12,000.00 — they differ
+  because a trade-in reduced the tax basis — and an instruction to post both books.
+  **Two transfers would put $22,800.00 of racks on a balance sheet holding $12,000.00 of racks.** The
+  asset exists once. ADR-0026 settles where the second set of numbers lives: the fixed-asset register
+  carries the tax basis, the read side reports the tax-basis statements, and TigerBeetle holds one
+  book.
+  **This is the tempting error precisely because ADR-0007 says "per book" everywhere.** Cost basis IS
+  recorded per book — that sentence is true and it is about the register, not about the ledger. The
+  ADR that reads as licence to post twice is the one that has to be read with ADR-0026 beside it.
+  ⚠️ Note what a naive check would make of this input: two well-formed transfers, both accounts
+  resolving, no dimension required or declared, and a control total that could be made to balance by
+  summing the two bases. Nothing about the ENTRY is malformed. It is refused for asserting something
+  about the world — that there are two assets — which only the rule knows is false.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "an acquisition posting the tax basis as well as the GAAP basis — the general ledger holds one book and the tax basis is a register fact (ADR-0026)"

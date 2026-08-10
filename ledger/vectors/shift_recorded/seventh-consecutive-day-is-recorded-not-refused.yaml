@@ -30,7 +30,7 @@ given:
       approved_by: USR-VEC-0001
       reason: "customer wrap moved; no relief driver available"
     absorbed_allocations:
-      - { causal_job: ORD-VEC-0004, hours: 8, base_minor: 24000, premium_share_minor: 12000, amount_minor: 36000, product_line: "Transport", cost_type: delivery }
+      - { causal_job: ORD-VEC-0004, hours: 8, base_minor: 24000, premium_share_minor: 12000, amount_minor: 36000, product_line: "Delivery", cost_type: delivery }
 
 derivation: >-
   A seventh consecutive day worked. Eight hours at $30.00, the whole day at the 1.5x consecutive-day
@@ -56,5 +56,5 @@ derivation: >-
 
 expect:
   transfers:
-    - { debit_account: 5800, credit_account: 2000, amount_minor: 36000, accounting_date: "2026-08-09", product_line: "Transport", cost_type: delivery }
+    - { debit_account: 5800, credit_account: 2000, amount_minor: 36000, accounting_date: "2026-08-09", product_line: "Delivery", cost_type: delivery }
   rejects: []
