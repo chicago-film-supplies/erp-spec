@@ -30,6 +30,13 @@ bases:
       mileage or distance, and the only coordinates in the system live in an expiring geocode cache.
       The driver is not merely unchosen, it is uncaptured — so this basis is what remains, not what
       is best. See `inbox/2026-08-09-allocation-bases-measured-only-goods-revenue-survives.md`.
+      ⚠️ **This basis has an expiry.** Owner 2026-08-09: the shipping specs will be populated this
+      year. Because the allocation spreads ONE order's pool across THAT order's lines, only
+      line-level facts can matter — distance, crew and drive time are order-level and cancel out
+      entirely — so a populated weight-and-dimensions spec closes the cause-and-effect gap
+      COMPLETELY rather than merely narrowing it. Which physical measure becomes v2, and the
+      coverage precondition that must gate it, is OQ-033. Do not retire v1: historical periods have
+      no physical data and must keep resolving the basis that produced them.
     scope: causal_order
     base: goods_line.subtotal_discounted_minor
     rounding: largest_remainder

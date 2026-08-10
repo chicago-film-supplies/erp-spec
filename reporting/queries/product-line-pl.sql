@@ -85,7 +85,7 @@ allocated AS (
 ),
 
 -- ── the pool that has no base at all ──────────────────────────────────────────────────────────
--- Measured 2026-08-09: 15 order-groups, $12,410.25, 5.7% of delivery revenue. It gets a ROW, not a
+-- Measured 2026-08-09: 11 order-groups ex-void, $11,150.00, 5.16% of delivery revenue. A ROW, not a
 -- silent division by zero and not a helpful spread across every line.
 unallocated AS (
     SELECT p.pool_id, SUM(p.pool_revenue_minor) AS unallocated_minor

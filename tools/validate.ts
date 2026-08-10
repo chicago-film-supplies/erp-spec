@@ -1739,7 +1739,7 @@ for (const e of evts) {
       checkPl(g as Record<string, unknown>, `${where} goods[${i}]`);
     }
 
-    // A zero base is the degenerate population ADR-0031 refuses to let vanish: 5.7% of measured
+    // A zero base is the degenerate population ADR-0031 refuses to let vanish: 5.16% of measured
     // delivery revenue. If a vector has no positive base it must leave the WHOLE pool unallocated.
     const denom = goods.reduce((n, g) => n + Number(g.revenue_minor ?? 0), 0);
     if (denom <= 0) {
@@ -1765,7 +1765,7 @@ for (const e of evts) {
     } else if (!sawUnallocated) {
       fail(
         G,
-        "reporting/vectors: no `unallocated` vector — the zero-base case is 5.7% of measured delivery revenue and nothing pins it",
+        "reporting/vectors: no `unallocated` vector — the zero-base case is 5.16% of measured delivery revenue and nothing pins it",
       );
     }
   }

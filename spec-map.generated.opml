@@ -56,7 +56,7 @@
           <outline text="[object Object]"/>
         </outline>
       </outline>
-      <outline text="Open questions (3 of 31 still open)" _note="The bottleneck. Each blocks what is listed under it.">
+      <outline text="Open questions (5 of 33 still open)" _note="The bottleneck. Each blocks what is listed under it.">
         <outline text="OQ-001 — Are fulfillment legs first-class recorded events with their own identity, or derived from the order…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-007"/>
           <outline text="blocks ADR-0011"/>
@@ -156,6 +156,12 @@
           <outline text="blocks REQ-LED"/>
         </outline>
         <outline text="OQ-031 — Do `Crew` and `Trash &amp; Cleanup` revenue and cost spread across the goods on the order, the way `Del…" _note="owner: alex · decide by: 2026-10-15">
+          <outline text="blocks ADR-0031"/>
+        </outline>
+        <outline text="OQ-032 — Does `Distance Charge` belong on 4110, given that 4110 is defined as a premium nobody performs — an…" _note="owner: alex · decide by: 2026-10-15">
+          <outline text="blocks ADR-0031"/>
+        </outline>
+        <outline text="OQ-033 — Once the shipping specs are populated, which physical basis becomes allocation basis v2 — weight, c…" _note="owner: alex · decide by: 2026-12-15">
           <outline text="blocks ADR-0031"/>
         </outline>
       </outline>
@@ -267,10 +273,12 @@
           <outline text="ADR-0030 — Vehicle cost moves from operating expense into COGS, absorbed and unabsorbed" _note="review by: 2026-11-01 · **In the context of** delivery being the largest tracked product line and carrying almost no cost, **facing** vehicle running costs sitting in operating expenses where no product line can see them, **we decided** to move vehicle cost into COGS on the same absorbed/unabsorbed shape ADR-0019 gave labour, **to achieve** a delivery cost that is complete enough to allocate, **accepting** a second utilisation measure to maintain and a mileage-or-hours basis that has to be captured.">
             <outline text="blocked on SPIKE-005"/>
           </outline>
-          <outline text="ADR-0031 — The official product-line P&amp;L allocates by goods revenue on the causal order, declared as a proxy" _note="review by: 2026-11-01 · **In the context of** ADR-0029 promising exactly one official allocation and not saying what it is, **facing** three candidate bases that reassign up to a third of the largest product line's revenue between them, **we decided** to allocate by goods revenue on the causal order and to record in the report that this is a proxy rather than a cost driver, **to achieve** one reproducible margin per product line, **accepting** that the basis is the weakest tier in the standard criterion and stays that way until a physical driver is captured.">
+          <outline text="ADR-0031 — The official product-line P&amp;L allocates by goods revenue on the causal order, declared as a proxy" _note="review by: 2026-11-01 · **In the context of** ADR-0029 promising exactly one official allocation and not saying what it is, **facing** three candidate bases that reassign up to a third of the largest product line's revenue between them, **we decided** to allocate by goods revenue on the causal order and to record in the report that this is a proxy rather than a cost driver, **to achieve** one reproducible margin per product line, **accepting** that the basis is the weakest tier in the standard criterion and stays that way until the shipping specs are populated this year.">
             <outline text="blocked on OQ-006"/>
             <outline text="blocked on OQ-018"/>
             <outline text="blocked on OQ-031"/>
+            <outline text="blocked on OQ-032"/>
+            <outline text="blocked on OQ-033"/>
           </outline>
         </outline>
       </outline>
@@ -396,7 +404,7 @@
           <outline text="EVT-TAX-003 — TaxRateSuperseded" _note="tax → billing"/>
         </outline>
       </outline>
-      <outline text="Capture (35 unpromoted of 46)" _note="no drops pending">
+      <outline text="Capture (38 unpromoted of 49)" _note="no drops pending">
         <outline text="Actor per leg, clock in/out per stop, crew size per trip" _note="inbox/2026-08-08-actor-and-clock-per-leg.md"/>
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
@@ -419,16 +427,19 @@
         <outline text="Two reporting dimensions are required simultaneously — product line AND cost type" _note="inbox/2026-08-08-two-reporting-dimensions.md"/>
         <outline text="Two distinct tracking defects with different signatures, separable in the data" _note="inbox/2026-08-08-two-tracking-defects.md"/>
         <outline text="What the 2026-08-08 verification pass checked, and what it could not" _note="inbox/2026-08-08-verification-pass-summary.md"/>
+        <outline text="4110 is a third Distance Charges — so &quot;a premium nobody performs&quot; is false for a third of the accou…" _note="inbox/2026-08-09-4110-is-a-third-distance-charges-and-distance-is-performed.md"/>
         <outline text="Allocation bases measured against the whole corpus — weight and volume are uniformly zero, quantity…" _note="inbox/2026-08-09-allocation-bases-measured-only-goods-revenue-survives.md"/>
         <outline text="Allocation basis for a product-line P&amp;L, surveyed across six references — all six agree on the CRIT…" _note="inbox/2026-08-09-allocation-basis-survey-six-references.md"/>
         <outline text="The whole book-to-tax difference is two accounts — depreciation and retail inventory — and it recon…" _note="inbox/2026-08-09-book-to-tax-difference-is-exactly-two-accounts.md"/>
         <outline text="Correction — the 4100/4110 split explains two accounts, and says nothing about the allocation basis" _note="inbox/2026-08-09-correction-the-surcharge-split-is-not-an-allocation-rule.md"/>
+        <outline text="Correction — the unallocable population is 12 groups / $11,400 under the spec's own base, not 15 /…" _note="inbox/2026-08-09-correction-the-unallocable-population-is-smaller-and-is-one-customer.md"/>
         <outline text="Where a credit note and an advance sit — SAP, NetSuite, Sage Intacct and Odoo all draw the same lin…" _note="inbox/2026-08-09-customer-credit-balances-across-four-suites.md"/>
         <outline text="Two external services carry into v2 — Mapbox for geocoding and Resend for transactional email" _note="inbox/2026-08-09-external-boundary-services-mapbox-and-resend.md"/>
         <outline text="What the 6th/7th day actually is, who bears an overtime premium, and where a labour credit leg lands" _note="inbox/2026-08-09-labour-premium-rules-survey.md"/>
         <outline text="Product line by revenue account, measured across all 9,194 revenue lines — Delivery is the largest…" _note="inbox/2026-08-09-product-line-by-revenue-account-matrix.md"/>
         <outline text="Retail inventory costing is the same on both bases — the measured divergence is a mistake, not a bo…" _note="inbox/2026-08-09-retail-inventory-book-difference-is-an-error.md"/>
         <outline text="The self-hosted service tier carries into v2 — Gotenberg for PDF and the full Victoria stack for ob…" _note="inbox/2026-08-09-self-hosted-tier-gotenberg-and-the-victoria-stack.md"/>
+        <outline text="Shipping specs will be populated this year — so the allocation proxy has an expiry, a physical basi…" _note="inbox/2026-08-09-shipping-specs-are-scheduled-so-the-proxy-has-an-expiry.md"/>
         <outline text="Both a tax-basis and a GAAP-basis P&amp;L and balance sheet are required, across years" _note="inbox/2026-08-09-tax-and-gaap-statements-are-both-required.md"/>
         <outline text="An unallocated credit note has no home in Accounts Receivable — the control account and the subledg…" _note="inbox/2026-08-09-unallocated-credit-has-no-home-in-ar.md"/>
         <outline text="The 28.8% untracked figure is three populations, and only 4.0% is unambiguously undecided" _note="inbox/2026-08-09-untracked-revenue-decomposes-into-three-populations.md"/>

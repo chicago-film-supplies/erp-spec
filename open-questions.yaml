@@ -748,3 +748,69 @@ open_questions:
       splitting the answer would leave the pair inconsistent for no reason.
       ⚠️ The answer is a **criterion**, not two verdicts — the next activity line to appear will ask
       the same question, and `Transport` shows a value can sit unused for years and then matter.
+
+  - id: OQ-032
+    question: >-
+      Does `Distance Charge` belong on 4110, given that 4110 is defined as a premium nobody
+      performs — and does `Rush Charge` move to 4110 to match the stated rule?
+    owner: alex
+    decide_by: 2026-10-15
+    blocks: [ADR-0031]
+    status: open
+    notes: >-
+      **4110 is not homogeneous.** Measured 2026-08-09 across the whole corpus
+      (`inbox/2026-08-09-4110-is-a-third-distance-charges-and-distance-is-performed.md`): of
+      $45,776.06 on the account, **Distance Charge is 33.3%** ($15,250.00, 41 lines), Off Hours
+      37.2%, Weekend 22.9%, Rush 1.1%, and `Card Fee` 4.3% — a payment fee inside delivery revenue.
+      **Distance is performed.** Somebody drives the extra miles; it burns fuel and crew hours and is
+      the clearest cost driver in the whole delivery pool. So ADR-0029's "4110 is off-hours, rush or
+      weekend, which nobody performs" is true of 62.3% of the account and false of a third of it.
+      The consequence is a forecasting one and it **inverts**: distance causes both the charge and
+      the cost, so distance-surcharge revenue is the *best* available proxy for the driver nothing
+      else records. A model predicting delivery cost from 4100 volume alone under-predicts in a
+      long-haul period — the opposite of the error ADR-0029 warns about, from the same account.
+      ⚠️ **The coding is inconsistent in both directions and that corrupts the ratio.** `Rush Charge`
+      is on 4100 for **12 of 13 lines and $3,000 of $3,500 — 86% by value** — against a stated rule
+      that puts rush on 4110; `Distance Charge` leaks onto 4100 on 3 lines / $950.00. So the measured
+      79.8% / 20.0% split is that split *plus* an unmeasured coding error, and anything reasoning
+      from the ratio inherits it.
+      Two coherent answers. **Move distance to 4100** and 4110 becomes homogeneous and means
+      something; or **redefine 4110** as "surcharges" without the not-performed claim and drop the
+      forecasting consequence. The first is a restatement under ADR-0020 and is in scope — moving a
+      line between two revenue accounts alters no amount, which is the only thing ADR-0020 forbids.
+      Nothing about ADR-0031's allocation basis turns on this: both accounts pool together and
+      spread as one. What turns on it is what the un-allocated view can be READ as, which ADR-0029
+      says is the whole purpose of keeping it.
+
+  - id: OQ-033
+    question: >-
+      Once the shipping specs are populated, which physical basis becomes allocation basis v2 —
+      weight, cube, or dimensional weight — and what coverage precondition gates its activation?
+    owner: alex
+    decide_by: 2026-12-15
+    blocks: [ADR-0031]
+    status: open
+    notes: >-
+      Owner, 2026-08-09: **product shipping specs will be populated this year**, which gives
+      ADR-0031's `ability_to_bear` proxy an expiry date rather than an indefinite life
+      (`inbox/2026-08-09-shipping-specs-are-scheduled-so-the-proxy-has-an-expiry.md`).
+      **A physical spec is SUFFICIENT here, not merely better.** The official allocation spreads one
+      order's pool across that order's lines, so only what varies *between lines of the same order*
+      matters. Distance, crew size and drive time are order-level and cancel out entirely; weight
+      and cube are the only line-level physical facts. Distance stays necessary for `trip_travel`
+      (erp-spec#12), which is a different allocation.
+      **The basis is probably neither weight nor cube alone.** A truck runs out of mass or space,
+      whichever comes first, which is why carriers bill on **dimensional weight** —
+      `max(actual weight, volume ÷ dimensional factor)`. It matters for this catalogue specifically:
+      tents, tables, wardrobe rails and surface protection are bulky and light, a walkie case or a
+      Duradeck sheet is dense and small. `shipping` carries weight AND all three dimensions, so both
+      inputs arrive together and the choice is real.
+      ⚠️ **The activation precondition is the load-bearing half.** Uniform zero fails loudly — every
+      denominator is zero and the whole pool lands in the unallocated bucket. **Partial population
+      fails silently**: an unmeasured line absorbs zero cost, the shares still sum exactly to the
+      pool, the control total passes, and the least-maintained catalogue entries report the best
+      margins. So v2 must require every goods line in an order's base to carry a non-zero driver, or
+      degrade that whole order to the unallocated bucket — never spread over the measured subset.
+      Blocked in practice on **core#51**: `shipping.weight` is a bare `z.number()`, so `0` means both
+      "weighs nothing" and "not yet weighed", and the precondition cannot be evaluated correctly
+      until "unmeasured" is representable.

@@ -5,7 +5,7 @@
     "adrs": 31,
     "adrs_accepted": 17,
     "events": 33,
-    "inbox": 46,
+    "inbox": 49,
     "inbox_promoted": 11
   },
   "requirements": [
@@ -96,16 +96,19 @@
       "inbox/2026-08-08-two-reporting-dimensions.md",
       "inbox/2026-08-08-two-tracking-defects.md",
       "inbox/2026-08-08-verification-pass-summary.md",
+      "inbox/2026-08-09-4110-is-a-third-distance-charges-and-distance-is-performed.md",
       "inbox/2026-08-09-allocation-bases-measured-only-goods-revenue-survives.md",
       "inbox/2026-08-09-allocation-basis-survey-six-references.md",
       "inbox/2026-08-09-book-to-tax-difference-is-exactly-two-accounts.md",
       "inbox/2026-08-09-correction-the-surcharge-split-is-not-an-allocation-rule.md",
+      "inbox/2026-08-09-correction-the-unallocable-population-is-smaller-and-is-one-customer.md",
       "inbox/2026-08-09-customer-credit-balances-across-four-suites.md",
       "inbox/2026-08-09-external-boundary-services-mapbox-and-resend.md",
       "inbox/2026-08-09-labour-premium-rules-survey.md",
       "inbox/2026-08-09-product-line-by-revenue-account-matrix.md",
       "inbox/2026-08-09-retail-inventory-book-difference-is-an-error.md",
       "inbox/2026-08-09-self-hosted-tier-gotenberg-and-the-victoria-stack.md",
+      "inbox/2026-08-09-shipping-specs-are-scheduled-so-the-proxy-has-an-expiry.md",
       "inbox/2026-08-09-tax-and-gaap-statements-are-both-required.md",
       "inbox/2026-08-09-unallocated-credit-has-no-home-in-ar.md",
       "inbox/2026-08-09-untracked-revenue-decomposes-into-three-populations.md"

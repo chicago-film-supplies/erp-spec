@@ -91,10 +91,21 @@ report:
         4110 Delivery Surcharges is off-hours, rush or weekend, which nobody performs. Measured
         79.8% / 20.0%. They are two accounts because the two revenues have different COST CAUSATION,
         not because they are different product lines — so both are pooled and both spread.
-        The split is for FORECASTING, not for the basis: delivery cost scales with 4100 volume, so a
-        model predicting cost from total delivery revenue over-predicts in a surcharge-heavy period
-        (OQ-006, and the correction in
-        `inbox/2026-08-09-correction-the-surcharge-split-is-not-an-allocation-rule.md`).
+        ⚠️ **The "nobody performs it" premise holds for 62.3% of 4110 and NOT for a third of it.**
+        Measured 2026-08-09 by line name across the whole account ($45,776.06): Off Hours 37.2%,
+        **Distance Charge 33.3%**, Weekend 22.9%, Card Fee 4.3%, Rush 1.1%. Distance IS performed —
+        somebody drives the extra miles — and it is the clearest cost driver in the pool. The
+        forecasting consequence therefore **inverts** for that third: distance causes both the charge
+        and the cost, so predicting delivery cost from 4100 volume alone UNDER-predicts in a
+        long-haul period, rather than over-predicting as a uniform reading of the split suggests.
+        The coding is inconsistent besides — `Rush Charge` sits on 4100 for 86% of its value against
+        a rule that puts it on 4110 — so the 79.8/20.0 ratio is that split plus an unmeasured error.
+        → **OQ-032**. None of this touches the basis: both accounts pool and spread as one, which is
+        the whole point of
+        `inbox/2026-08-09-correction-the-surcharge-split-is-not-an-allocation-rule.md`. It touches
+        what the un-allocated view can be READ as.
+        (OQ-006, and
+        `inbox/2026-08-09-4110-is-a-third-distance-charges-and-distance-is-performed.md`.)
         Cost joins this pool as it arrives: labour COGS carrying `cost_type: delivery` (ADR-0019,
         5800/5801) is in the ledger now; vehicle COGS is ADR-0030 and its accounts are unchosen.
 
@@ -188,10 +199,19 @@ report:
     unallocated_row_shown: true
     unallocated_row_reason: >-
       An order carrying activity revenue and NO goods line has no denominator, under every basis.
-      Measured 2026-08-09: 15 order-groups, **$12,410.25 — 5.7% of delivery revenue**. It is
-      reported on its own row, never forced onto an arbitrary line, never spread across all lines,
-      and never dropped. If the row grows, that is a signal about how work is being booked; a bucket
-      is how it stays visible instead of becoming a rounding difference.
+      Measured 2026-08-09 **under this file's own base definition** — null-product-line goods
+      included, voids excluded: **11 order-groups, $11,150.00, 5.16% of delivery revenue**
+      (12 / $11,400.00 / 5.28% including the one void). It is reported on its own row, never forced
+      onto an arbitrary line, never spread across all lines, and never dropped.
+      ⚠️ **These are service-only JOBS, not orphaned deliveries**, and the row should be read that
+      way: CFS sold labour — install, tear-out, relocate, trash removal — with no rental or retail
+      goods on the order at all, so there is genuinely no product line the pool belongs to. That is
+      the argument FOR the row rather than a defect it records. **85.5% of it is one customer, one
+      service, five weeks**: five Netflix `Duradeck Install / Tear Out / Relocate` invoices totalling
+      $9,750.00 between 2025-02-28 and 2025-04-04. 2024 contains none at all and 2026 contains one
+      $250 line, so it is not a standing practice.
+      Watch the row for service-only work becoming a larger share of the business — not for booking
+      errors. (`inbox/2026-08-09-correction-the-unallocable-population-is-smaller-and-is-one-customer.md`)
 
     null_product_line_row_shown: true
     null_product_line_row_reason: >-

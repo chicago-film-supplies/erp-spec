@@ -6,7 +6,19 @@ date: 2026-08-09
 review_by: 2026-11-01
 deciders: [repo owner]
 contexts: [ledger, billing, fulfillment]
-relates_to: [ADR-0017, ADR-0019, ADR-0024, ADR-0025, ADR-0029, ADR-0030, OQ-006, OQ-018, OQ-031]
+relates_to: [
+  ADR-0017,
+  ADR-0019,
+  ADR-0024,
+  ADR-0025,
+  ADR-0029,
+  ADR-0030,
+  OQ-006,
+  OQ-018,
+  OQ-031,
+  OQ-032,
+  OQ-033,
+]
 supersedes:
 superseded_by:
 ---
@@ -16,7 +28,7 @@ superseded_by:
 > revenue between them, **we decided** to allocate by goods revenue on the causal order and to
 > record in the report that this is a proxy rather than a cost driver, **to achieve** one
 > reproducible margin per product line, **accepting** that the basis is the weakest tier in the
-> standard criterion and stays that way until a physical driver is captured.
+> standard criterion and stays that way until the shipping specs are populated this year.
 
 ## Context
 
@@ -86,13 +98,13 @@ revenue on the causal order**.
 
 ## Considered options
 
-| basis                     |                                                                                                                                                                                    why not |
-| ------------------------- | -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| **weight / cubic volume** |           The cause-and-effect answer, and **structurally unavailable**: 0 of 549 products carry a non-zero shipping dimension, and no historical order records what was physically moved. |
-| **distance travelled**    |              Also cause-and-effect, and unavailable historically — no stored coordinates, geocodes live in an expiring cache. Available _going forward_ if captured; see the consequences. |
-| **item count (quantity)** | Available, and **not commensurable** — a 52× spread in units per revenue dollar between Expendables and Office Supplies. It would allocate delivery cost by how finely a line is packaged. |
-| **line count**            |                Available, and a line is a **data-entry artifact**: `splitItem` divides one line into two, which would move money between product lines without anything physical changing. |
-| **goods revenue**         |                                                                                                          **Chosen.** The weakest defensible criterion, and the only one the data supports. |
+| basis                     |                                                                                                                                                                                                                                                                                                  why not |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| **weight / cubic volume** | The cause-and-effect answer, and **structurally unavailable TODAY**: 0 of 549 products carry a non-zero shipping dimension. **Scheduled for population this year**, at which point it becomes basis v2 — OQ-033. Historical periods stay on v1 regardless, because no past order records what was moved. |
+| **distance travelled**    |                                                                                                                            Also cause-and-effect, and unavailable historically — no stored coordinates, geocodes live in an expiring cache. Available _going forward_ if captured; see the consequences. |
+| **item count (quantity)** |                                                                                                               Available, and **not commensurable** — a 52× spread in units per revenue dollar between Expendables and Office Supplies. It would allocate delivery cost by how finely a line is packaged. |
+| **line count**            |                                                                                                                              Available, and a line is a **data-entry artifact**: `splitItem` divides one line into two, which would move money between product lines without anything physical changing. |
+| **goods revenue**         |                                                                                                                                                                                                                        **Chosen.** The weakest defensible criterion, and the only one the data supports. |
 
 ## Consequences
 
@@ -104,15 +116,36 @@ revenue on the causal order**.
   **Where a pool exceeds its base, pro-rata spreading does not adjust a product line's margin — it
   replaces it.** The report must therefore show own and allocated amounts as separate figures, never
   only their sum, or a reader cannot tell a product's economics from an activity's.
-- **$12,410.25 — 5.7% of delivery revenue, 15 order-groups — is structurally unallocable** under
-  every basis, because those orders carry no goods line at all. It becomes a visible number rather
-  than a rounding difference. If it grows, that is a signal about how work is being booked, and a
-  bucket is how it stays visible.
-- **This makes capturing a physical driver a funded requirement rather than an aspiration**, and it
-  is the same requirement ADR-0030 already places on vehicle absorption ("a data-capture requirement
-  before it is an accounting one"). One capture — what a leg physically moved and how far — answers
-  the vehicle absorption basis and upgrades this allocation from tier 4 to tier 1. **The two should
-  be specified together and are the strongest argument for doing so.**
+- **$11,150.00 — 5.16% of delivery revenue, 11 order-groups ex-void — is structurally unallocable**
+  under every basis, because those orders carry no goods line at all. It becomes a visible number
+  rather than a rounding difference. If it grows, that is a signal about how work is being booked,
+  and a bucket is how it stays visible.
+- **The proxy has an expiry, and it is this year.** Owner, 2026-08-09: the product shipping specs
+  will be populated. That makes this basis explicitly interim-with-a-date rather than interim in
+  principle, and it is why `basis_version` exists.
+- **A populated shipping spec is SUFFICIENT here, not merely better** — and this corrects the
+  assumption that one capture serves both this allocation and vehicle absorption. The official
+  allocation spreads **one order's** pool across **that order's** lines, so only what varies
+  _between lines of the same order_ can matter. Distance, crew size, stop count and drive time are
+  **order-level and cancel out entirely**. Weight and cube are the only line-level physical facts.
+  So the shipping spec closes the cause-and-effect gap for this allocation completely, and distance
+  remains necessary only for `trip_travel` — the _inter_-order allocation of a shared run
+  (erp-spec#12), which is a different allocation running before this one. **The two captures are
+  separable, and the one that is already scheduled is the one this ADR needs.**
+- **Which physical basis, and when it activates, is OQ-033.** Probably neither weight nor cube
+  alone: a truck runs out of mass or space, whichever comes first, which is why carriers bill on
+  **dimensional weight**. ⚠️ The activation precondition is the load-bearing half — uniform zero
+  fails loudly (every denominator zero, whole pool to the bucket) while **partial population fails
+  silently**: an unmeasured line absorbs zero cost, the shares still sum exactly to the pool, the
+  control total passes, and the least-maintained catalogue entries report the best margins. v2 must
+  require every line in an order's base to carry a non-zero driver or degrade that whole order to
+  the bucket. Blocked in practice on **core#51** — `shipping.weight` is a bare `z.number()`, so `0`
+  means both "weighs nothing" and "not yet weighed".
+- ⚠️ **The 4110 rationale quoted above is true of 62.3% of that account and not of a third of it.**
+  Measured after this ADR was drafted: `Distance Charge` is **33.3% of 4110**, and distance is
+  performed and is the pool's clearest cost driver. The forecasting consequence inverts for that
+  third. The basis is unaffected — both accounts pool and spread as one — but the reasoning attached
+  to the split is not. → **OQ-032**.
 - **A second basis version is now a schema concern, not a code change.** Because the basis is
   versioned and recorded, adding a driver-based basis later means running both over an open period
   and comparing, rather than a migration.
