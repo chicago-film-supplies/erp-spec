@@ -74,13 +74,17 @@ Both views are legitimate and they answer different questions:
   chosen per report, or two reports will disagree about the margin on the same product line. That is
   the real cost of this decision and the reason the allocation is *specified* rather than merely
   *permitted*.
-- **A surcharge is margin, not a cost driver, so it is not an allocation base.** Owner, 2026-08-09:
-  4100 Service Income is the delivery/setup/removal charge — a service performed by a person, and
-  labour-bearing; 4110 Delivery Surcharges is off-hours, rush or weekend — part of the Delivery line
-  but **not a service performed by a person**. Measured, Delivery is 79.8% 4100 and 20.0% 4110. The
-  same crew does the same delivery on a Saturday, so the surcharge adds revenue and no cost —
-  exactly OQ-006's ruling that "the premium the customer pays is margin, not cost". **Allocating
-  delivery COGS in proportion to total Delivery revenue would misallocate by the surcharge share.**
+- **Delivery revenue spans two accounts and BOTH are the Delivery product line.** Owner,
+  2026-08-09: 4100 Service Income is the delivery/setup/removal charge — a service performed by a
+  person, and labour-bearing; 4110 Delivery Surcharges is off-hours, rush or weekend, which nobody
+  performs. Measured 79.8% / 20.0%. The two accounts exist because the two revenues have different
+  **cost causation**, not because they are different product lines: the same crew does the same
+  delivery on a Saturday, so the surcharge adds revenue and no cost — OQ-006's ruling that "the
+  premium the customer pays is margin, not cost".
+  So the delivery line's margin includes **both**, and both are allocated across the order's goods
+  by whatever basis the official P&L states. What the split is good for is **forecasting**: delivery
+  cost scales with the 4100 service volume, and a model predicting cost from total delivery revenue
+  will over-predict in a surcharge-heavy period.
 - **Activity product lines are kept, not dropped.** `Delivery` is where the un-allocated activity
   revenue and its cost meet; deleting it would force the allocation into the posting, which is the
   destructive direction. The mixed-basis taxonomy is tolerable *because* the ledger does not

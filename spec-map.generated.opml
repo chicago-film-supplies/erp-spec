@@ -388,7 +388,7 @@
           <outline text="EVT-TAX-003 — TaxRateSuperseded" _note="tax → billing"/>
         </outline>
       </outline>
-      <outline text="Capture (32 unpromoted of 43)" _note="no drops pending">
+      <outline text="Capture (33 unpromoted of 44)" _note="no drops pending">
         <outline text="Actor per leg, clock in/out per stop, crew size per trip" _note="inbox/2026-08-08-actor-and-clock-per-leg.md"/>
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
@@ -412,6 +412,7 @@
         <outline text="Two distinct tracking defects with different signatures, separable in the data" _note="inbox/2026-08-08-two-tracking-defects.md"/>
         <outline text="What the 2026-08-08 verification pass checked, and what it could not" _note="inbox/2026-08-08-verification-pass-summary.md"/>
         <outline text="The whole book-to-tax difference is two accounts — depreciation and retail inventory — and it recon…" _note="inbox/2026-08-09-book-to-tax-difference-is-exactly-two-accounts.md"/>
+        <outline text="Correction — the 4100/4110 split explains two accounts, and says nothing about the allocation basis" _note="inbox/2026-08-09-correction-the-surcharge-split-is-not-an-allocation-rule.md"/>
         <outline text="Where a credit note and an advance sit — SAP, NetSuite, Sage Intacct and Odoo all draw the same lin…" _note="inbox/2026-08-09-customer-credit-balances-across-four-suites.md"/>
         <outline text="Two external services carry into v2 — Mapbox for geocoding and Resend for transactional email" _note="inbox/2026-08-09-external-boundary-services-mapbox-and-resend.md"/>
         <outline text="What the 6th/7th day actually is, who bears an overtime premium, and where a labour credit leg lands" _note="inbox/2026-08-09-labour-premium-rules-survey.md"/>

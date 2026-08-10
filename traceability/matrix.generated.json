@@ -5,7 +5,7 @@
     "adrs": 30,
     "adrs_accepted": 17,
     "events": 33,
-    "inbox": 43,
+    "inbox": 44,
     "inbox_promoted": 11
   },
   "requirements": [
@@ -97,6 +97,7 @@
       "inbox/2026-08-08-two-tracking-defects.md",
       "inbox/2026-08-08-verification-pass-summary.md",
       "inbox/2026-08-09-book-to-tax-difference-is-exactly-two-accounts.md",
+      "inbox/2026-08-09-correction-the-surcharge-split-is-not-an-allocation-rule.md",
       "inbox/2026-08-09-customer-credit-balances-across-four-suites.md",
       "inbox/2026-08-09-external-boundary-services-mapbox-and-resend.md",
       "inbox/2026-08-09-labour-premium-rules-survey.md",
