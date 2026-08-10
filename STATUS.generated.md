@@ -11,18 +11,18 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 5 open | 28 answered of 33 · **0 with no owner or no decide-by** |
+| Open questions | 6 open | 28 answered of 34 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 11 | 0 open |
 | Decisions (ADR) | 31 | 17 in force · 12 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 2 | 0 without a scenario |
-| Inbox | 49 | 38 unpromoted |
+| Inbox | 50 | 39 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 23 | 0 still `TODO` |
 
 ## The bottleneck: undecided questions
 
-**5 of 33 still open**, soonest decide-by first.
+**6 of 34 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
@@ -30,6 +30,7 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-030` | Does CFS introduce a forced-call (short-turnaround) premium, and if so what is the turnar… | alex | 2026-10-15 | `REQ-LED` |
 | `OQ-031` | Do `Crew` and `Trash & Cleanup` revenue and cost spread across the goods on the order, th… | alex | 2026-10-15 | `ADR-0031` |
 | `OQ-032` | Does `Distance Charge` belong on 4110, given that 4110 is defined as a premium nobody per… | alex | 2026-10-15 | `ADR-0031` |
+| `OQ-034` | Is `Transport` restored as a product line, now that the measurement it was dropped on tur… | alex | 2026-10-15 | `ADR-0020` `ADR-0031` |
 | `OQ-033` | Once the shipping specs are populated, which physical basis becomes allocation basis v2 —… | alex | 2026-12-15 | `ADR-0031` |
 
 Whether any of these dates has PASSED is `deno task validate`'s judgement — gate 7 fails on an open question past its decide-by. This file reads no clock and so cannot say.

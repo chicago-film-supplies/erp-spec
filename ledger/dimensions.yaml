@@ -8,10 +8,21 @@
 #   (key absent)           REFUSED
 #   product_line: ""       REFUSED — it satisfies a naive NOT NULL check and means nothing
 #
-# The distinction is the whole requirement. The current system's 28.7% of untracked line revenue
-# came from postings where **nobody decided** and the field was quietly left empty. An explicit
-# null is a decision: it is countable, reportable, and shows up as a number someone can be asked
-# about. Absence is not, and it is indistinguishable from an oversight.
+# The distinction is the whole requirement. An explicit null is a decision: it is countable,
+# reportable, and shows up as a number someone can be asked about. Absence is not, and it is
+# indistinguishable from an oversight.
+#
+# ⚠️ **The 28.7% was NOT "nobody decided" — that reading is retracted, measured 2026-08-09.**
+# Joining every untracked line to its product master
+# (`inbox/2026-08-09-untracked-revenue-is-mostly-a-denorm-failure-not-an-undecided-dimension.md`):
+# **51.8% ($252,161.36) is a DENORMALISATION FAILURE** — the product is categorised and the line is
+# not; 48.0% is custom lines with no product record at all; and **0.1% ($688.00, 35 lines) is
+# genuinely undecided**. Exactly one line in the corpus disagrees with its master rather than being
+# empty.
+# The requirement is unchanged and its target moves: refusing absence is still right, but the defect
+# it guards against is PROPAGATION, not an operator failing to choose. A posting rule that refuses
+# an absent dimension is satisfied by a system that reliably copies the product's category — which
+# is the actual fix, and it is api-cloudrun#473.
 # The same shape the tax context already uses — EVT-TAX-002 carries an exemption REASON, because
 # "no tax" and "no tax BECAUSE" audit differently.
 
@@ -47,7 +58,15 @@ dimensions:
       which is the one thing a non-nullable dimension must not let back in. **`Transport` was
       dropped 2026-08-09** (owner) on the measurement in
       `inbox/2026-08-09-product-line-by-revenue-account-matrix.md`: **zero lines and zero revenue
-      across all 9,194 revenue-bearing lines in the corpus.** It had never once been used.
+      across all 9,194 revenue-bearing lines in the corpus.**
+      ⚠️ **THAT MEASUREMENT READ THE WRONG FIELD AND THE DROP RESTS ON AN ARTIFACT — OQ-034.**
+      Re-measured 2026-08-09 at the PRODUCT master rather than the line denorm
+      (`inbox/2026-08-09-untracked-revenue-is-mostly-a-denorm-failure-not-an-undecided-dimension.md`):
+      the products `Trucking` (7 lines, $34,000.00) and `Shipping` (16 lines, $5,665.00) both carry
+      `Transport` — **23 lines and $39,665.00**, used continuously, none of which ever reached a
+      line because the line-level `tracking_category` is not derived from the product. The value is
+      left dropped pending OQ-034 rather than silently restored, but the stated reason for dropping
+      it is retracted, and so is the explanation built on top of it below.
       Why it was never used is the part worth keeping. **Activity lines and goods lines compete for
       the same line item, and goods lines win**: shipping a walkie is categorised `Walkies &
       Hotspots` (699 lines, $175,015), by what was shipped rather than by the shipping. `Delivery`

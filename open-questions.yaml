@@ -738,16 +738,54 @@ open_questions:
       performed after a wrap, may each be a service that stands on its own margin — in which case
       spreading them would move a real profit or loss onto goods that did not cause it, which is the
       same error in the opposite direction.
-      Both are small: measured 2026-08-09, `Crew` is 7 lines / $2,625.00 and `Trash & Cleanup` is 2
-      lines / $1,750.00, together 0.3% of revenue
-      (`inbox/2026-08-09-product-line-by-revenue-account-matrix.md`). Small enough that the answer
-      barely moves a number today, and exactly the shape that gets decided by default if nobody
-      names it — which is why the two pools in `reporting/product-line-pl.yaml` are `blocked` rather
-      than quietly following `Delivery`.
+      ⚠️ **The "both are small" premise is RETRACTED for `Trash & Cleanup`, by roughly 83x.** It was
+      measured off the invoice-line denorm at 2 lines / $1,750.00. Measured at the product master
+      instead
+      (`inbox/2026-08-09-untracked-revenue-is-mostly-a-denorm-failure-not-an-undecided-dimension.md`),
+      `Trash Removal` (40 lines, $111,175.00) and `Walk Around Trash Sweep` (28 lines, $32,050.00)
+      both carry `Trash & Cleanup` and neither ever reached a line. True size: **70 lines,
+      $144,975.00 — 8.6% of revenue, the THIRD-LARGEST product line**, behind `Delivery` and
+      `Walkies & Hotspots` and ahead of `Wardrobe`.
+      So this is one of the larger decisions in the reporting spec, not a tidy-up. `Crew` really is
+      small (7 lines / $2,625.00) and is still worth answering with it, because the two share a
+      criterion — but the two must no longer be reasoned about as a pair of rounding errors.
+      They stay `blocked` in `reporting/product-line-pl.yaml` rather than quietly following
+      `Delivery`, which was the right call for a better reason than the one originally given.
+      Depends on api-cloudrun#473: until the denorm is fixed the pool cannot actually be assembled,
+      whatever this decides.
       Answer them together. Both are "a service a person performs, sold to the customer", and
       splitting the answer would leave the pair inconsistent for no reason.
       ⚠️ The answer is a **criterion**, not two verdicts — the next activity line to appear will ask
       the same question, and `Transport` shows a value can sit unused for years and then matter.
+
+  - id: OQ-034
+    question: >-
+      Is `Transport` restored as a product line, now that the measurement it was dropped on turns
+      out to have read the wrong field?
+    owner: alex
+    decide_by: 2026-10-15
+    blocks: [ADR-0020, ADR-0031]
+    status: open
+    notes: >-
+      `ledger/dimensions.yaml` dropped `Transport` on 2026-08-09 because
+      `inbox/2026-08-09-product-line-by-revenue-account-matrix.md` measured **zero lines and zero
+      revenue across all 9,194 revenue-bearing lines** — "it had never once been used" — and a
+      paragraph was written explaining why activity lines lose to goods lines.
+      **That measurement read `items[].tracking_category`, the line denorm.** At the PRODUCT master,
+      `Trucking` (7 lines, $34,000.00) and `Shipping` (16 lines, $5,665.00) both carry `Transport`:
+      **23 lines, $39,665.00**, in continuous use, none of which ever reached a line because nothing
+      derives the line's category from the product (api-cloudrun#473, and
+      `inbox/2026-08-09-untracked-revenue-is-mostly-a-denorm-failure-not-an-undecided-dimension.md`).
+      The value is left DROPPED for now rather than silently restored — deleting it was the owner's
+      call and reversing it is too — but the stated reason is retracted and the explanation built on
+      top of it explains an artifact.
+      ⚠️ **ADR-0020's restatement needs the answer.** OQ-025 lists "Trucking to `Transport`" among
+      the mechanical mappings, and that target was deleted for being empty. If `Transport` stays
+      dropped, those 23 lines need a different home stated before the restatement runs; if it is
+      restored, `reporting/product-line-pl.yaml` must classify it `goods` or `activity` — gate 13
+      fails until it does, which is the gate working.
+      Restoring is cheap by design: ADR-0018 took dimensions off account identity precisely so
+      cardinality grows by addition.
 
   - id: OQ-032
     question: >-
