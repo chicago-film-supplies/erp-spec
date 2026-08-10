@@ -87,6 +87,8 @@ allocated AS (
 -- ── the pool that has no base at all ──────────────────────────────────────────────────────────
 -- Measured 2026-08-09: 11 order-groups ex-void, $11,150.00, 5.16% of delivery revenue. A ROW, not a
 -- silent division by zero and not a helpful spread across every line.
+-- ⚠️ Pre-repair figure, pending re-run (erp-spec#15) and expected to fall sharply — several groups
+-- qualified on NULL goods lines rather than absent ones (api-cloudrun#473). The query is unchanged.
 unallocated AS (
     SELECT p.pool_id, SUM(p.pool_revenue_minor) AS unallocated_minor
     FROM pool p
@@ -99,6 +101,8 @@ unallocated AS (
 -- OWN and ALLOCATED are separate columns and are never summed away. On 41.4% of measured delivery
 -- revenue the pool exceeds its base, where spreading REPLACES a line's margin rather than adjusting
 -- it — a reader who cannot separate the two cannot tell a product's economics from an activity's.
+-- ⚠️ 41.4% is a pre-repair figure pending re-run (erp-spec#15) and must fall. The rule does not
+-- depend on it: one such group is enough to require the columns stay separate.
 SELECT
     b.product_line,
     SUM(b.base_minor)                                  AS own_revenue_minor,

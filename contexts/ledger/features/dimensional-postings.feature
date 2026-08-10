@@ -4,9 +4,20 @@ Feature: Revenue and COGS postings carry both mandatory dimensions
   rule the ONLY thing enforcing dimensionality. Nothing structural catches a missing dimension
   any more — there is no account whose absence would fail the write.
 
-  Measured on the current system 2026-08-09: 383 of 9,197 invoice line items carry no product
-  line — 4.16% of lines but 28.74% of revenue ($485,821.72 of $1,689,895.68). The dimension was
-  optional, and that is the entire cause.
+  Measured on the current system 2026-08-10, joined to the product master: 15.00% of line revenue
+  ($253,306.59 of $1,688,980.87) carries no product line, and all of it is custom lines with no
+  product master or products nobody categorised. The dimension was optional, and that is the cause.
+
+  This paragraph read "383 of 9,197 line items — 4.16% of lines but 28.74% of revenue" until
+  2026-08-10. That counted the invoice-line denorm, which was null on 227 lines whose product WAS
+  categorised (api-cloudrun#473, repaired). Of the untracked population only $688.00 — 0.041% of all
+  line revenue — was ever an operator declining to classify.
+
+  ⚠️ The scenario below uses the product line "Transport", which `ledger/dimensions.yaml` currently
+  does NOT declare — it was dropped 2026-08-09 on a measurement that read the wrong field, and
+  whether it is restored is OQ-034. Nothing in `deno task validate` checks a .feature file's
+  dimension values against the declared set (erp-spec#16), which is why this contradiction was
+  invisible.
 
   @REQ-LED-001
   Scenario: A revenue posting carrying both dimensions is recorded

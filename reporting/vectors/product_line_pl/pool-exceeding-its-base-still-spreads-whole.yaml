@@ -3,6 +3,13 @@
 # Measured 2026-08-09: 115 of 305 allocable delivery-bearing order-groups, holding $89,425 — 41.4%
 # of all delivery revenue. Ratio median 0.775, p90 3.13, max 25.0.
 #
+# ⚠️ **Pre-repair measurement, pending re-run (erp-spec#15).** The probe read a line denorm null on
+# 227 categorised lines (api-cloudrun#473), so those lines counted toward no base. The share must
+# FALL. **Re-check the worked example below specifically**: "$800.00 of Crafty as the ONLY goods on
+# the order" may be an artifact — if the order's other lines were untracked rather than absent, they
+# are goods now and the ratio changes. The VECTOR is unaffected either way; it pins that a pool
+# exceeding its base still spreads whole, which is a rule about arithmetic, not about frequency.
+#
 # This vector is invoice 1616's shape verbatim: a $2,500.00 delivery against $800.00 of Crafty as
 # the ONLY goods on the order. The whole pool lands on one product line, at 312% of that line's own
 # revenue. Five near-identical invoices (1616, 1617, 1678, 1679, 1680) are why `Crafty` receives

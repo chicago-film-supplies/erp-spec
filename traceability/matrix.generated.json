@@ -5,7 +5,7 @@
     "adrs": 31,
     "adrs_accepted": 17,
     "events": 36,
-    "inbox": 50,
+    "inbox": 52,
     "inbox_promoted": 11
   },
   "requirements": [
@@ -41,7 +41,7 @@
       "status": "draft",
       "priority": "must",
       "statement": "Every posting to an account whose chart entry names a required dimension shall DECLARE that dimension — either a value drawn from the dimension's declared set, or an explicit null recording that no tracked value applies — and a posting that does not declare it shall be rejected rather than recorded.",
-      "inbox_source": "inbox/2026-08-08-untracked-revenue-share.md",
+      "inbox_source": "inbox/2026-08-10-the-untracked-revenue-denorm-is-repaired-and-28-7-percent-is-now-15-percent.md",
       "adrs": [
         "ADR-0009",
         "ADR-0018",
@@ -113,7 +113,9 @@
       "inbox/2026-08-09-tax-and-gaap-statements-are-both-required.md",
       "inbox/2026-08-09-unallocated-credit-has-no-home-in-ar.md",
       "inbox/2026-08-09-untracked-revenue-decomposes-into-three-populations.md",
-      "inbox/2026-08-09-untracked-revenue-is-mostly-a-denorm-failure-not-an-undecided-dimension.md"
+      "inbox/2026-08-09-untracked-revenue-is-mostly-a-denorm-failure-not-an-undecided-dimension.md",
+      "inbox/2026-08-10-correction-the-nobody-decided-share-is-quoted-against-two-different-bases.md",
+      "inbox/2026-08-10-the-untracked-revenue-denorm-is-repaired-and-28-7-percent-is-now-15-percent.md"
     ]
   }
 }

@@ -30,9 +30,12 @@ derivation: >-
     · `empty-string-product-line-rejected` — `""`. Passes a naive NOT NULL check, means nothing. Refused.
     · `unknown-product-line-rejected`      — a value outside the declared set. Refused.
   Only the declared null is recorded, and the difference between it and the first is the entire
-  content of REQ-LED-001. The measured 28.7% of untracked revenue was the first case: postings
-  where the field was quietly left empty and the system accepted them. A declared null is a
-  decision — countable, reportable, and attributable to whoever made it.
+  content of REQ-LED-001. ⚠️ This read "the measured 28.7% of untracked revenue was the first case"
+  until 2026-08-10; **it was not**. Re-measured against the product master, the first case is
+  **$688.00 — 0.041% of all line revenue** — the rest was a derivation that never ran
+  (api-cloudrun#473). A declared
+  null is a decision — countable, reportable, and attributable to whoever made it — and that is
+  true at any population size.
   **The line stays on 4100, not 4800.** Warehouse Rental is operating service revenue; moving it to
   Other Income to avoid the null would understate operating revenue and, for the historical
   population, would move money between P&L sections — which ADR-0020 forbids outright.

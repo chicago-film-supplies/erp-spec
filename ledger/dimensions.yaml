@@ -19,6 +19,16 @@
 # not; 48.0% is custom lines with no product record at all; and **0.1% ($688.00, 35 lines) is
 # genuinely undecided**. Exactly one line in the corpus disagrees with its master rather than being
 # empty.
+# ✅ **The propagation defect is FIXED, measured 2026-08-10** (api-cloudrun#473,
+# `inbox/2026-08-10-the-untracked-revenue-denorm-is-repaired-and-28-7-percent-is-now-15-percent.md`).
+# `tracking_missing` 227 → **0**; a dry re-run of the repair touches 0 invoices. Untracked line
+# revenue is now **15.00%** ($253,306.59 of $1,688,980.87), and what remains is the two populations
+# that were never defects: 128 custom lines with no product master ($233,667.63) and 170 lines on
+# genuinely uncategorised products ($19,638.96).
+# ⚠️ That $19,638.96 is NOT comparable to the $688.00 above — `Other` was retired at the product
+# master in the same sitting, moving 12 products and ~135 lines out of a named category. **$688.00
+# is the number to cite for "how often did an operator decline to classify".**
+#
 # The requirement is unchanged and its target moves: refusing absence is still right, but the defect
 # it guards against is PROPAGATION, not an operator failing to choose. A posting rule that refuses
 # an absent dimension is satisfied by a system that reliably copies the product's category — which
@@ -55,7 +65,11 @@ dimensions:
       - Tents
     note: >-
       **19 values.** `Other` was deleted by OQ-022 — it read as a category and meant "nobody chose",
-      which is the one thing a non-nullable dimension must not let back in. **`Transport` was
+      which is the one thing a non-nullable dimension must not let back in. ✅ **The source system
+      reached the same conclusion independently on 2026-08-10**: `Other` was retired at the product
+      master (12 products) and stripped from the historical CFS lines and the Xero ledger. Its
+      revenue is now *unallocated*, which is honest, rather than *allocated to a bucket naming
+      nothing*. **`Transport` was
       dropped 2026-08-09** (owner) on the measurement in
       `inbox/2026-08-09-product-line-by-revenue-account-matrix.md`: **zero lines and zero revenue
       across all 9,194 revenue-bearing lines in the corpus.**
@@ -67,11 +81,19 @@ dimensions:
       line because the line-level `tracking_category` is not derived from the product. The value is
       left dropped pending OQ-034 rather than silently restored, but the stated reason for dropping
       it is retracted, and so is the explanation built on top of it below.
+      ⚠️ **Since 2026-08-10 those 23 lines DO carry `Transport` in CFS** — the derivation was
+      repaired (api-cloudrun#473), so this file now omits a value the source system actively writes.
+      **Two independent systems of record already agreed and neither was the one being read**: the
+      product master carried `Transport` throughout, and so did Xero — prod invoice #1987's
+      `Trucking` line was tagged `Transport` in the Xero ledger while the CFS line was null. At
+      $39,665.00 / **2.35%** it is the 14th largest line of 20. OQ-034 is the owner's to decide; the
+      evidence for it is now complete.
       Why it was never used is the part worth keeping. **Activity lines and goods lines compete for
       the same line item, and goods lines win**: shipping a walkie is categorised `Walkies &
       Hotspots` (699 lines, $175,015), by what was shipped rather than by the shipping. `Delivery`
-      survives — 473 lines and $216,050, the largest tracked line in the business — only because a
-      delivery line has no product to be categorised as instead.
+      survives — **534 lines and $234,987.75, 13.91%**, the largest tracked line in the business
+      (re-measured 2026-08-10) — only because a delivery line has no product to be categorised as
+      instead.
       If one-off long-haul trucking ever needs its own line, **adding one back is cheap by design**:
       ADR-0018 took dimensions off account identity precisely so cardinality grows by addition and a
       new product line stops being a migration. Dropping an unused value costs nothing and stating a
@@ -121,10 +143,14 @@ dimensions:
 # the rejection vectors in `ledger/vectors/` are not optional decoration — they are the entire
 # enforcement of this file.
 #
-# **A null is a reportable population, and should be reported.** "Share of revenue with a null
-# product line" is a number the read side can produce at any time; the current system's equivalent
-# was invisible until someone went looking and found 28.7%. Watch it, and if it grows, the answer is
-# a new product line or a real decision — never a default value.
+# **A null is a reportable population, and should be reported — off the AUTHORITATIVE field.**
+# "Share of revenue with a null product line" is a number the read side can produce at any time; the
+# current system's equivalent was invisible until someone went looking and found 28.7%. ⚠️ **That
+# number was wrong**: it counted the invoice-line denorm, not the product master behind it, and the
+# share that actually meant "nobody decided" was **$688.00 — 0.041% of all line revenue** (0.141% of
+# the untracked population; cite the base). Watch the population, and if it grows,
+# the answer is a new product line or a real decision — never a default value. But a watch pointed
+# at a derived copy measures the derivation, not the decision.
 #
 # HOT-011 is **resolved** (OQ-021). Revenue accounts carry a product line; `cost_type` is labour
 # only; and REQ-LED-001's statement was amended to match rather than left contradicting this file.

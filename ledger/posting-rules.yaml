@@ -560,9 +560,12 @@ rules:
           **It is NOT allocated across the order's goods** (ADR-0029). A delivery serving a mixed
           order posts to `Delivery` whole, because allocation is destructive and the official
           product-line P&L can spread it afterwards — where posting it spread cannot be undone.
-          Measured: `Delivery` is the largest tracked line in the business at $216,050 and 12.8% of
-          revenue, so this rule decides where a large number lands
-          (`inbox/2026-08-09-product-line-by-revenue-account-matrix.md`).
+          Measured: `Delivery` is the largest tracked line in the business at **$234,987.75 and
+          13.91% of revenue**, so this rule decides where a large number lands
+          (re-measured 2026-08-10,
+          `inbox/2026-08-10-the-untracked-revenue-denorm-is-repaired-and-28-7-percent-is-now-15-percent.md`;
+          read $216,050 / 12.8% until then, off a line denorm that was null on 227 categorised
+          lines — api-cloudrun#473).
       - >-
           **The allocation is performed in the SHIFT RECORD, never here.** `amount:` is a dotted path
           with no arithmetic, so the pro-rata rounding — and the residual cent when hours do not

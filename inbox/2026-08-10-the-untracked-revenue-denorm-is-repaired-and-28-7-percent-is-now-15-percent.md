@@ -27,14 +27,14 @@ That was never an operator declining to classify. It was a derivation that never
 
 ## The corrected split, measured before the repair
 
-Revenue is **tax-exclusive** (`subtotal_discounted_cents`). The first pass of this measurement summed
-`total_cents` and produced $255,086.18; tax is a liability CFS collects, not revenue it earns, so
-attributing it to a product line overstates every category by its tax rate. The tax-exclusive figure
-is $252,161.36 — which matches the original #473 report to the cent, confirming that report was
-always tax-exclusive.
+Revenue is **tax-exclusive** (`subtotal_discounted_cents`). The first pass of this measurement
+summed `total_cents` and produced $255,086.18; tax is a liability CFS collects, not revenue it
+earns, so attributing it to a product line overstates every category by its tax rate. The
+tax-exclusive figure is $252,161.36 — which matches the original #473 report to the cent, confirming
+that report was always tax-exclusive.
 
-| population                                              | lines |     revenue |
-| ------------------------------------------------------- | ----: | ----------: |
+| population                                               | lines |     revenue |
+| -------------------------------------------------------- | ----: | ----------: |
 | **Denorm failure** — product IS categorised, line null   |   227 | $252,161.36 |
 | **No product** — custom/one-off line, nothing to inherit |   128 | $233,667.63 |
 | **Genuinely uncategorised product** — nobody decided     |    35 |     $688.00 |
@@ -45,8 +45,8 @@ three-population note attributed to service revenue where "a declared null may b
 
 ## After the repair
 
-`tracking_missing` 227 → **0**. `crms_id_missing` 3 → **0**. `tracking_stale` 0, `tracking_orphan` 0.
-A dry re-run of the repair touches 0 invoices.
+`tracking_missing` 227 → **0**. `crms_id_missing` 3 → **0**. `tracking_stale` 0,
+`tracking_orphan` 0. A dry re-run of the repair touches 0 invoices.
 
 Untracked line revenue is now **15.00%** ($253,306.59 of $1,688,980.87), and what remains is exactly
 the two populations that are not defects: 128 custom lines with no product master ($233,667.63) and
@@ -99,8 +99,8 @@ spec was reading the one broken copy.
 **`Other` must be dropped from the dimension list.** Retired at the product master 2026-08-10 (12
 products) and stripped from the historical CFS lines and the Xero ledger. It is not a product line —
 it is the absence of one wearing a name, and it reports as a bucket while saying nothing about what
-was sold. The revenue it held is now *unallocated*, which is an honest answer, rather than
-*allocated to "Other"*, which was not. It no longer appears in the table above.
+was sold. The revenue it held is now _unallocated_, which is an honest answer, rather than
+_allocated to "Other"_, which was not. It no longer appears in the table above.
 
 ## The methodological point, which outlives the numbers
 

@@ -55,7 +55,9 @@ superseded_by:
   to 59.88 (Expendables) — a **52× spread**. A box of tape and a cart are both "1 unit".
 - **The choice is load-bearing.** Allocating each order's delivery revenue over its goods, the three
   bases disagree by **27.4% (revenue vs lines), 31.5% (revenue vs quantity) and 33.5% (lines vs
-  quantity)** of all delivery revenue.
+  quantity)** of all delivery revenue. ⚠️ **Measured on the pre-repair corpus — pending
+  re-measurement, see the note under Consequences.** The direction of change is not predictable
+  here; that the bases disagree materially is not in doubt.
 - **Xero performs no allocation at all** — tracking categories tag, nothing spreads — so the
   migration delta is a report that has never existed rather than a report whose numbers change.
   Nothing has to be carried across history.
@@ -107,6 +109,29 @@ revenue on the causal order**.
 | **goods revenue**         |                                                                                                                                                                                                                        **Chosen.** The weakest defensible criterion, and the only one the data supports. |
 
 ## Consequences
+
+> ⚠️ **Every measured figure in this section was taken on the pre-repair corpus and is pending
+> re-measurement.** `spikes/harness/allocation-basis-probe.ts` read `items[].tracking_category`,
+> which was null on 227 lines whose product master **was** categorised (api-cloudrun#473, repaired
+> 2026-08-10). Those lines were therefore counted as neither goods nor activity — they fell out of
+> the base entirely. Re-running the probe is blocked on erp-spec#15: its documented `CFS_API_TOKEN`
+> auth path no longer authenticates against `/mcp/cfs`.
+>
+> **Two directions are predictable and one is not:**
+>
+> - **Pool-exceeds-base (41.4%) must FALL.** Lines that were invisible to the base now count toward
+>   it, so the base grows on exactly the groups where it was thinnest.
+> - **Structurally unallocable (5.16%) must FALL.** A group qualified only if it carried no goods
+>   line at all; several qualified solely because their goods lines were null. The five Netflix
+>   Duradeck orders stop qualifying once Duradeck reads `Surface Protection`.
+> - **Inter-basis divergence — unknown.** More lines in the base cuts both ways.
+>
+> A third change is not a re-measurement but a re-scoping: **`Trash & Cleanup` is an activity pool
+> this ADR spreads, and it grew from $1,750 to $144,975** — 83×, the third largest line in the
+> business. The pool-exceeds-base and unallocable analyses were performed for `Delivery` alone, on
+> the reasoning that the other activity lines were rounding errors. **That reasoning no longer
+> holds**, and OQ-031 — which asks whether `Trash & Cleanup` spreads at all — is now a materially
+> larger question than when it was written.
 
 - ⚠️ **On 38% of delivery-bearing orders the pool is LARGER than the base it spreads over.**
   Measured: 115 of 305 allocable order-groups, holding **$89,425 — 41.4% of all delivery revenue**;

@@ -22,12 +22,26 @@ mappings:
 
   - from: invoices.items[].tracking_category
     to: posting.product_line
-    disposition: defective
+    disposition: map
     reason: >-
-      Null on 28.7% of line revenue. Two separable classes — 254 lines recoverable from
-      xero_tracking_option_id, 129 lines not recoverable at all. Must be migrated as two
-      populations, not one.
-    blocked_by: [OQ-012]
+      **Repaired at source 2026-08-10** (api-cloudrun#473): the native invoice writer never derived
+      this field from the product, leaving 227 lines null whose product master WAS categorised.
+      `tracking_missing` 227 → 0, and a dry re-run of the repair touches 0 invoices. What remains
+      null is 15.00% of line revenue and is not a defect — 128 custom lines with no product master
+      ($233,667.63) and 170 lines on genuinely uncategorised products ($19,638.96). Those carry
+      `product_line: null`, which ADR-0025 makes a legal determination rather than an absence.
+      ⚠️ **The migration does NOT read original values, and that is a restatement fact ADR-0020
+      owns.** The repair back-filled historical lines, including inside the 2025-12-31 lock, so a
+      line's category today may not be what the document carried when it was issued. It moves no
+      money — a dimension is a reporting attribute — but "the restatement must not alter any amount"
+      has to be asserted against the repaired corpus, not the original one.
+      ⚠️ **`Transport` has no target while OQ-034 is open.** 23 lines / $39,665.00 now carry a value
+      `ledger/dimensions.yaml` does not declare.
+      This entry read `disposition: defective`, "Null on 28.7% of line revenue. Two separable
+      classes — 254 lines recoverable from xero_tracking_option_id, 129 lines not recoverable at
+      all", until 2026-08-10. Both the share and the two-class split were artifacts of counting the
+      denorm rather than joining to the master.
+    blocked_by: [OQ-012, OQ-034]
 
   - from: invoices.items[].xero_tracking_option_id
     to: null
@@ -38,8 +52,18 @@ mappings:
 
   - from: invoices.query_by_orders
     to: invoice.order_refs
-    disposition: defective
-    reason: "55 referenced order uids reportedly do not exist. Unverified — OQ-013. Unresolvable refs quarantine, never null (ADR-0009)."
+    disposition: map
+    reason: >-
+      **OQ-013 answered: the count is ZERO, not 55.** Measured 2026-08-09 against prod across all
+      five order↔invoice reference paths; every reference resolves
+      (`inbox/2026-08-09-hard-deleted-order-uids-do-not-reproduce.md`). This entry read
+      `disposition: defective` on the strength of "55 referenced order uids reportedly do not
+      exist", which was never verified and measures 0.
+      **The handling rule is retained on its own merits** — an unresolvable ref quarantines and is
+      never nulled (ADR-0009) — by the same reasoning `charter.md` applies to the no-hard-deletes
+      fence, whose cited evidence is this same non-reproducing 55. A migration needs a defined
+      behaviour for a broken ref whether or not the corpus currently contains one; what is retracted
+      is the claim that it does.
 
   - from: invoices.status == "void"
     to: invoice.status

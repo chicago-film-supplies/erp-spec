@@ -159,10 +159,14 @@ terms:
       20** — ADR-0025 deletes `Other`, because a non-nullable dimension makes it the new null. The
       escape hatch for an uncategorisable line is the account 4800 Other Income, which requires no
       dimension, not a value that reads as a category and means "nobody chose".
-      The 20: Crafty, Surface Protection, Traffic Safety & Signage, Replacements, Delivery,
-      Wardrobe, Fans & Heaters, Office Supplies, Hair & Makeup, Transport, Power Lights & Tools,
-      Trash & Cleanup, Janitorial, Transaction Fees, Walkies & Hotspots, Carts & Ramps, Expendables,
-      Tables & Chairs, Crew, Tents. 28.7% of historical line revenue carries none.
+      ⚠️ **This list has 20 entries and `ledger/dimensions.yaml` declares 19** — it omits
+      `Transport`, dropped 2026-08-09 on a measurement that read the invoice-line denorm instead of
+      the product master. Re-measured 2026-08-10, `Transport` is 23 lines / $39,665.00 / 2.35%, and
+      whether it is restored is **OQ-034**. `ledger/dimensions.yaml` is the authority; this entry is
+      left at 20 because the value is live in the source system and the omission is the thing under
+      review. Nothing validates the two against each other (erp-spec#16).
+      **15.00% of historical line revenue carries none** (re-measured 2026-08-10; read 28.7% until
+      then, off the broken denorm — api-cloudrun#473).
 
   - term: standard cost
     definition: >-
@@ -257,8 +261,10 @@ terms:
     source: ledger/dimensions.yaml
     verified: false
     notes: >-
-      The current system's equivalent is the Xero tracking option, and 28.7% of line revenue
-      carries none. A dimension that can be null is a dimension that will be null.
+      The current system's equivalent is the Xero tracking option, and **15.00% of line revenue
+      carries none** (re-measured 2026-08-10; read 28.7% until then, off an invoice-line denorm that
+      was null on 227 categorised lines — api-cloudrun#473). A dimension that can be null is a
+      dimension that will be null.
 
   - term: period close
     definition: >-

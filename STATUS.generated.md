@@ -12,11 +12,11 @@ is `deno task validate`'s judgement, not this file's.
 | | Count | |
 |---|---:|---|
 | Open questions | 6 open | 28 answered of 34 · **0 with no owner or no decide-by** |
-| Conflicts (HOT) | 11 | 0 open |
+| Conflicts (HOT) | 12 | 1 open |
 | Decisions (ADR) | 31 | 17 in force · 12 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 2 | 0 without a scenario |
-| Inbox | 50 | 39 unpromoted |
+| Inbox | 52 | 41 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 23 | 0 still `TODO` |
 
@@ -37,7 +37,9 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 
 ## Open conflicts
 
-None.
+| HOT | Statement | Blocks |
+|---|---|---|
+| `HOT-012` | `ADR-0001` is `accepted` and therefore immutable, and its Context states a number that has been retracted and… | — |
 
 ## Decisions
 
@@ -106,19 +108,20 @@ it is counted separately on purpose, and a milestone is not done because its che
 | `m1` | Big-picture event storm | `m0` | 1 | — | 2 | — |
 | `m2` | Context map and glossary v1 | `m1` | 2 | — | 1 | — |
 | `m3` | Ledger core | `m2` | 2 | 2 | — | — |
-| `m4` | All spikes closed by ADR | `m3` | 1 | 1 | — | 1 |
+| `m4` | All spikes closed by ADR | `m3` | 0 | 2 | — | 1 |
 | `m5` | Formal specs checking clean | `m4` | 1 | — | 2 | — |
 | `m6` | Migration field map complete | `m2` | 0 | — | 3 | — |
 | `m7` | Walking skeleton defined | `m3` `m5` `m6` | 0 | — | 3 | — |
 | `spec-v1` | Tag spec-v1 | `m0` `m1` `m2` `m3` `m4` `m5` `m6` `m7` | 1 | — | 3 | 1 |
 
-### Machine-checkable criteria not yet met (3)
+### Machine-checkable criteria not yet met (4)
 
 | Milestone | Criterion | Check | Measured |
 |---|---|---|---|
 | `m3` | Posting rules defined for every source document type. | `posting_rules_cover_events` | 27 ledger events, 0 in no bucket, 11 specified, 2 unwritten |
 | `m3` | Golden input->expected-transfer vectors exist for every posting rule,… | `vectors_cover_rules` | 44 vectors over 11 specified rules; 0 lack an accept or a reject; 2 rules unwritten |
 | `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 12 spikes, 9 open, 0 closed without naming an ADR |
+| `m4` | Every HOT- is resolved or has an ADR that consciously defers it with… | `hotspots_resolved` | 12 hotspots, 1 unresolved |
 
 ## Coverage gaps
 

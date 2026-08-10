@@ -55,8 +55,14 @@ Each of these is a deliberate decision, not an oversight. Reversing one is an AD
 - **Money is integer minor units** in every schema, wire format, and stored document.
 - **Accounting date and posting timestamp are distinct fields** on every posting.
 - **Foreign-system identifiers never enter domain models** (`ADR-0009`). Translation happens at the
-  boundary; an unresolvable ID is a hard error, never a null. The current system's 28.7% untracked
-  revenue is what the opposite policy costs.
+  boundary; an unresolvable ID is a hard error, never a null. ⚠️ **The 28.7% untracked revenue
+  originally cited for this fence was measuring something else** — re-measured against the product
+  master on 2026-08-10, 227 of those lines were a CFS-side derivation that never ran and only
+  $688.00 (0.041% of line revenue) was an undecided dimension (api-cloudrun#473). Like the
+  no-hard-deletes fence above, this one is **retained on its own merits**: Xero's drop-an-
+  unresolvable-id-and-return-success behaviour is real independently of what it cost CFS, and a null
+  meaning "could not translate" is indistinguishable from one meaning "no value applies" at any
+  population size.
 
 ## Success criteria for `spec-v1`
 

@@ -190,6 +190,14 @@ open_questions:
       share, not a line count. Restating is mostly mechanical because the values already exist
       (Trash Removal → Trash & Cleanup, Trucking → Transport, Contract Labor → Crew); the
       ambiguous residue is facility and professional-services lines. Resolves HOT-006.
+      ⚠️ **"Confirms the charter's figure" was wrong, 2026-08-10.** Both numbers counted
+      `tracking_category` on the invoice line, so this was one measurement taken twice — and the
+      field was null on 227 lines whose product master WAS categorised. Two readings of one broken
+      source do not confirm each other. The REVENUE-not-lines point stands.
+      ✅ **The mechanical mapping named here was right, and the source system has since applied it**
+      (api-cloudrun#473, 2026-08-10) — those products carried their categories at the master all
+      along. The answer "restate all" therefore now covers a much smaller population; ADR-0020
+      carries the re-scoping, and `Trucking → Transport` still needs OQ-034 to give it a target.
 
   - id: OQ-013
     question: >-
@@ -747,12 +755,18 @@ open_questions:
       $144,975.00 — 8.6% of revenue, the THIRD-LARGEST product line**, behind `Delivery` and
       `Walkies & Hotspots` and ahead of `Wardrobe`.
       So this is one of the larger decisions in the reporting spec, not a tidy-up. `Crew` really is
-      small (7 lines / $2,625.00) and is still worth answering with it, because the two share a
-      criterion — but the two must no longer be reasoned about as a pair of rounding errors.
+      small (**9 lines / $3,550.00 / 0.21%**, re-measured 2026-08-10) and is still worth answering
+      with it, because the two share a criterion — but the two must no longer be reasoned about as a
+      pair of rounding errors.
       They stay `blocked` in `reporting/product-line-pl.yaml` rather than quietly following
       `Delivery`, which was the right call for a better reason than the one originally given.
-      Depends on api-cloudrun#473: until the denorm is fixed the pool cannot actually be assembled,
-      whatever this decides.
+      ✅ **api-cloudrun#473 is FIXED (2026-08-10) and this is no longer blocked on it.** The denorm
+      is repaired (`tracking_missing` 227 → 0), so the pool can now be assembled and the confirmed
+      size is **70 lines / $144,975.00 / 8.58%**. Nothing external blocks this question any more —
+      it is waiting on a decision, and it is the largest one outstanding in the reporting spec.
+      ⚠️ **`Delivery` and `Trash & Cleanup` together are 22.5% of revenue.** "Answer them together
+      for consistency" is still right on the criterion, but the cost of waiting is no longer
+      symmetric between the pair.
       Answer them together. Both are "a service a person performs, sold to the customer", and
       splitting the answer would leave the pair inconsistent for no reason.
       ⚠️ The answer is a **criterion**, not two verdicts — the next activity line to appear will ask
@@ -786,6 +800,18 @@ open_questions:
       fails until it does, which is the gate working.
       Restoring is cheap by design: ADR-0018 took dimensions off account identity precisely so
       cardinality grows by addition.
+      ✅ **The evidence for this question is now complete, 2026-08-10 — three independent sources
+      agree and the spec is the only one that disagrees.** (1) The **product master** carried
+      `Transport` throughout. (2) **Xero** did too — prod invoice #1987's `Trucking` line was tagged
+      `Transport` in the Xero ledger while the CFS line was null. (3) Since api-cloudrun#473 the
+      **CFS lines themselves** carry it, so `ledger/dimensions.yaml` now omits a value the source
+      system actively writes. At **$39,665.00 / 2.35%** it is the 14th largest of 20 lines — above
+      `Expendables`, `Carts & Ramps` and `Janitorial`, all of which are declared.
+      Nothing further needs measuring. **This is a decision waiting on its owner, not on evidence.**
+      One consequence to weigh with it: if restored, is `Transport` a **fifth activity line**?
+      Trucking and shipping are things performed, not things supplied, which is the ACTIVITY test
+      ADR-0031 uses — and `spikes/harness/allocation-basis-probe.ts` currently classifies it as
+      goods by omission.
 
   - id: OQ-032
     question: >-

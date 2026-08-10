@@ -5,6 +5,13 @@
 # 11 order-groups, $11,150.00 — 5.16% of all delivery revenue. Invoice 1856 is the
 # largest at $3,250.00.
 #
+# ⚠️ **Pre-repair measurement, pending re-run (erp-spec#15), and this one may collapse.** A group
+# qualified only by carrying no goods line at all — but several qualified because their goods lines
+# were NULL, not absent. The five Netflix Duradeck orders (85.5% of the population) carry
+# `Surface Protection` at the product master, so after api-cloudrun#473 they have a denominator.
+# The VECTOR is retained regardless: a zero base must produce a row rather than a NaN, a spread or a
+# silent drop, and that is a rule about arithmetic. What is pending is only how often it fires.
+#
 # The failure mode this pins is silent absorption: an implementation that divides by a zero base and
 # gets NaN, or that "helpfully" spreads the pool evenly across all product lines, or that drops the
 # pool and still balances because nothing was expecting it. All three look fine on a green run.

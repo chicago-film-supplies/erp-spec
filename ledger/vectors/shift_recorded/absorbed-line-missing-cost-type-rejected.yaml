@@ -61,8 +61,10 @@ derivation: >-
   5800's chart entry names **both** `product_line` and `cost_type`, so a posting to it owes both.
   **What is refused is ABSENCE, not null** (ADR-0025): had someone determined that no kind of work
   applies and written `cost_type: null`, that is a decision and would be recorded. A missing key
-  means nobody decided, and an undecided field is indistinguishable from an oversight — which is
-  precisely how 28.7% of line revenue came to carry no product line in the current system.
+  means nobody decided, and an undecided field is indistinguishable from an oversight — which is how
+  **$688.00 — 0.041% of all line revenue —** came to carry no product line in the current system
+  (re-measured 2026-08-10 at the product master; this read "28.7%" until then, off a denorm that was
+  null on 227 categorised lines — api-cloudrun#473).
   **This is the only place `cost_type` is exercised in the entire spec.** `ledger/dimensions.yaml`
   declares it with three values and says it applies to 5800 alone; before this vector that
   declaration was enforced by nothing, because no other rule posts to a labour account. A dimension

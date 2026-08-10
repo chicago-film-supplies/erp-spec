@@ -34,14 +34,26 @@ superseded_by:
 - **Delivery is not a severable business.** Owner, 2026-08-09: "we wouldn't do a delivery with no
   products, we would rent far fewer products if we weren't delivering them." Delivery cost is a
   **joint cost** of the product revenue, not the cost of a product called delivery.
-- Measured 2026-08-09 across all 9,194 revenue-bearing lines
-  (`inbox/2026-08-09-product-line-by-revenue-account-matrix.md`): **`Delivery` is the largest
-  tracked product line in the business — 473 lines, $216,050, 12.8% of revenue.** It currently has
-  almost no cost against it, because labour and vehicle costs are not in the ledger yet.
+- **`Delivery` is the largest tracked product line in the business — 534 lines, $234,987.75, 13.91%
+  of revenue** (re-measured 2026-08-10,
+  `inbox/2026-08-10-the-untracked-revenue-denorm-is-repaired-and-28-7-percent-is-now-15-percent.md`).
+  It currently has almost no cost against it, because labour and vehicle costs are not in the ledger
+  yet. ⚠️ The figures first written here — 473 lines, $216,050, 12.8% — came from
+  `inbox/2026-08-09-product-line-by-revenue-account-matrix.md`, which counted `tracking_category` on
+  the invoice line. That denorm was null on 227 lines whose product master **was** categorised
+  (api-cloudrun#473, repaired 2026-08-10). The rank is unchanged and the conclusion below is
+  unaffected; the size is not.
 - The taxonomy mixes categories of **goods** with categories of **activity**, and the mix is not
-  stable: of four activity lines one carries 12.8%, two are rounding errors, and `Transport` had
-  never been used at all and has been dropped. An operator facing a line that has a product picks
-  the product.
+  stable: of four activity lines **two are material** — `Delivery` 13.91% and `Trash & Cleanup`
+  8.58%, together 22.5% of revenue — and two are small (`Crew` 0.21%, `Transaction Fees` 0.29%). An
+  operator facing a line that has a product picks the product. ⚠️ This bullet originally read "one
+  carries 12.8%, two are rounding errors, and `Transport` had never been used at all and has been
+  dropped." All three clauses were artifacts of the same broken denorm. `Trash & Cleanup` is not a
+  rounding error — it is **70 lines, $144,975.00, the third largest line in the business**, measured
+  at $1,750 only because its lines were among the 227. `Transport` was used continuously — 23 lines,
+  $39,665.00, 2.35% — and whether it is restored, and whether it is a fifth activity line, is
+  OQ-034. **The argument this bullet supports gets stronger, not weaker:** two material activity
+  lines make the allocation question larger than it looked.
 
 ## Decision
 

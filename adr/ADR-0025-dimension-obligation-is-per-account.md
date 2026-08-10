@@ -61,12 +61,14 @@ posting that does not declare it is **rejected**, and so is one declaring `""`.
 - **Widen the requirement** — require `cost_type` everywhere and mint a "not labour" value for it.
   Rejected: that value is a null with a name, and it would be the majority value.
 - **Permit an absent `product_line` on revenue.** Rejected: it re-permits the exact population
-  REQ-LED-001 was written to stop — 28.74% of line revenue, measured — and on ADR-0009's ground, a
-  value that is simply missing cannot be told apart from an oversight. ⚠️ An **explicit null is not
-  this option** and is permitted. The distinction is the one ADR-0009 actually draws: what it
-  forbids is a null nobody wrote down. A declared null is a determination — "no tracked product line
-  applies" — and it is countable, reportable, and attributable, exactly as `EVT-TAX-002` carries a
-  reason because "no tax" and "no tax BECAUSE" audit differently.
+  REQ-LED-001 was written to stop — **15.00% of line revenue, re-measured 2026-08-10** — and on
+  ADR-0009's ground, a value that is simply missing cannot be told apart from an oversight. ⚠️ Read
+  28.74% here until 2026-08-10; that figure counted a line denorm that was null on 227 categorised
+  lines (api-cloudrun#473). ⚠️ An **explicit null is not this option** and is permitted. The
+  distinction is the one ADR-0009 actually draws: what it forbids is a null nobody wrote down. A
+  declared null is a determination — "no tracked product line applies" — and it is countable,
+  reportable, and attributable, exactly as `EVT-TAX-002` carries a reason because "no tax" and "no
+  tax BECAUSE" audit differently.
 - **Keep `Other`.** Rejected: it reads as a category and means "nobody chose". A line in 4800
   asserts _this was not a categorised sale_, which is a fact about the transaction. A line in 4100
   tagged `Other` asserts _this was a categorised sale_ and then names no category, which is not.
@@ -82,10 +84,15 @@ posting that does not declare it is **rejected**, and so is one declaring `""`.
   which postings owe a dimension; `dimensions.yaml` says which values it may take. Gate 10 checks
   every golden vector against both — and therefore against neither the rule nor the vector it is
   checking, which is the independent-property discipline this repo requires.
-- **A null is a population that must be watched.** "Share of revenue with a null product line" is a
-  number the read side can produce at any time. The current system's equivalent was invisible until
-  someone measured it and found 28.7%. If it grows, the answer is a new product line or a real
-  decision — never a default value.
+- **A null is a population that must be watched — and the watch must read the authoritative field.**
+  "Share of revenue with a null product line" is a number the read side can produce at any time. The
+  current system's equivalent was invisible until someone measured it and found 28.7% — and ⚠️
+  **that measurement was itself wrong**, because it counted a denorm on the invoice line rather than
+  the product master behind it. The share that meant "an operator declined to classify" was
+  **$688.00 — 0.041% of all line revenue**; the rest was a derivation that never ran
+  (api-cloudrun#473, repaired 2026-08-10). If the population grows, the answer is a new product line
+  or a real decision — never a default value — but first confirm the number is measuring a decision
+  and not a defect.
 - **A non-operating receipt now moves account, not just bucket.** That is the real cost of this
   decision and it should be stated plainly: revenue mix on the P&L changes shape, because what used
   to sit in operating revenue under `Other` now sits in Other Income. That is the intent — it is
