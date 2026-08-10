@@ -1,0 +1,10 @@
+# Revisions git blame should skip: whole-repo mechanical reformats, no content changes.
+#
+# Enable locally (once):
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+#
+# GitHub picks this file up automatically at the repo root.
+
+# style: run deno fmt across the repo, once (2026-08-09)
+# `deno.json` declared fmt settings that nothing checked; 147 files had drifted.
+0c3c6ef619b3e3b295bfe937db058786b342c271

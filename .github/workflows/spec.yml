@@ -27,6 +27,18 @@ jobs:
         id: validate
         run: deno task validate
 
+      # `deno.json` declared fmt settings from the seed commit and nothing checked them, so 147
+      # files drifted (reformatted in 0c3c6ef). The cost was never aesthetic: running the formatter
+      # a configured repo obviously invites you to run produces a diff that swamps the actual
+      # change, so every session either reverts the churn or lands it on top of unrelated work.
+      #
+      # `--check` writes nothing, which is why it can sit ABOVE the stale-generated-file step —
+      # that step diffs the whole working tree, and a formatter that edited files in place would
+      # make the two gates report each other's failures.
+      - name: Formatting
+        if: always()
+        run: deno fmt --check
+
       - name: Regenerate
         if: always()
         run: deno task gen
