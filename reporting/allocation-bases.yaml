@@ -1,0 +1,50 @@
+# Allocation bases — the registry of ways a pooled amount may be spread over a base.
+#
+# A basis is VERSIONED, and a report pins `(id, version)`. That is not ceremony: ADR-0017 makes a
+# closed period's Parquet artifact immutable and hashed, so a report over a sealed period must be
+# reproducible. A basis that changed between runs would break that guarantee while every individual
+# run still looked internally consistent — the worst shape of wrong.
+#
+# ⚠️ **`criterion` is the field that keeps this honest.** Horngren's ranking is cause_and_effect >
+# benefits_received > fairness > ability_to_bear, and a revenue basis is the LAST of those. Naming
+# the tier in the data — rather than in prose nobody re-reads — is what stops "the basis we could
+# compute" from quietly becoming "the basis that is right". Gate 13 refuses any basis below
+# cause_and_effect that does not declare the driver it is standing in for.
+#
+# Adding a basis is cheap. REPLACING one is not: bump `version`, leave the old entry in place with
+# `status: superseded`, and every historical report still resolves the basis that made it.
+
+bases:
+  - id: goods_revenue_on_causal_order
+    version: 1
+    status: active
+    source: ADR-0031
+    description: >-
+      Spread the pool over the discounted revenue of the goods lines on the order that caused it,
+      in proportion to `subtotal_discounted_minor`.
+    criterion: ability_to_bear
+    proxy_for: >-
+      The physical movement the activity performed — weight, cubic volume or distance. Measured
+      2026-08-09: `products.shipping.weight` is present on 531 of 549 products and **zero on all
+      549**; height, width and length likewise; no order, destination or fulfillment record carries
+      mileage or distance, and the only coordinates in the system live in an expiring geocode cache.
+      The driver is not merely unchosen, it is uncaptured — so this basis is what remains, not what
+      is best. See `inbox/2026-08-09-allocation-bases-measured-only-goods-revenue-survives.md`.
+    scope: causal_order
+    base: goods_line.subtotal_discounted_minor
+    rounding: largest_remainder
+    zero_base: unallocated_bucket
+    note: >-
+      **Scope is the ORDER, not the invoice** — ADR-0029's "the orders that caused them". Measured
+      2026-08-09: 0 of 999 invoices bill more than one order and 969 carry exactly one, so the two
+      scopes coincide on today's corpus and choosing the order costs nothing. It is the only scope
+      that stays correct when a multi-order invoice first appears, and by then the reports it would
+      change are already sealed.
+      **`largest_remainder` is a decision, not a detail.** The shares must sum to the pool exactly;
+      independent rounding of each share does not, and the residual cent has to land somewhere
+      stated. Same discipline as OQ-018's pro-rata premium split, which put the rounding in the
+      shift record rather than the posting rule.
+      **A goods line with `product_line: null` is still part of the base.** It is goods that nobody
+      categorised (ADR-0025 makes null a legal determination), and excluding it would concentrate
+      the whole pool onto the tracked lines and overstate their absorbed cost. It reports in the
+      null row.

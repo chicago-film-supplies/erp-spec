@@ -1,0 +1,35 @@
+# A pool that does NOT divide evenly. This is the case an implementation gets wrong, and it is the
+# reason `rounding: largest_remainder` is a stated property of the basis rather than an
+# implementation detail.
+#
+# Three equal goods lines, one cent that cannot be split three ways. Independent rounding of each
+# share gives 3 x 33 = 99 and loses a cent; rounding the last share to absorb the residual makes the
+# result depend on line order. Largest remainder is deterministic AND sums exactly.
+#
+# Same discipline as OQ-018's pro-rata overtime premium, which put the rounding in the shift record
+# rather than the posting rule, and as `ledger/vectors/shift_recorded/`'s deliberately non-dividing
+# case.
+name: residual-cent-lands-by-largest-remainder
+report: product_line_pl
+basis: goods_revenue_on_causal_order
+basis_version: 1
+kind: accept
+source: ADR-0031
+
+given:
+  pool_minor: 100 # $1.00 over three identical bases
+  goods:
+    - { product_line: Crafty, revenue_minor: 1000 }
+    - { product_line: Janitorial, revenue_minor: 1000 }
+    - { product_line: Tents, revenue_minor: 1000 }
+
+# raw = 33.333... each. Floors are 33/33/33 = 99, leaving a residual of 1.
+# All three remainders are equal, so the tie breaks on the base's own order and the FIRST line takes
+# it. A tie-break that depended on hash or map iteration order would make the report
+# non-reproducible over a sealed period, which ADR-0017 forbids.
+expect:
+  shares:
+    - { product_line: Crafty, minor: 34 }
+    - { product_line: Janitorial, minor: 33 }
+    - { product_line: Tents, minor: 33 }
+  unallocated_minor: 0

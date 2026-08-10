@@ -25,7 +25,8 @@
     "tb-test": "deno test --allow-read --allow-env --allow-ffi --allow-net tb-probe_test.ts",
     "duckdb": "deno run --allow-read --allow-write --allow-env --allow-ffi duckdb-probe.ts",
     "duckdb-wasm": "deno run --allow-read --allow-env --allow-net --allow-sys --allow-ffi duckdb-wasm-probe.ts",
-    "valkey": "deno run --allow-read --allow-env --allow-net --allow-sys valkey-queue-probe.ts"
+    "valkey": "deno run --allow-read --allow-env --allow-net --allow-sys valkey-queue-probe.ts",
+    "allocation": "deno run --allow-env=CFS_API_TOKEN --allow-net=api.chicagofilmsupplies.com allocation-basis-probe.ts"
   },
 
   "fmt": { "lineWidth": 100 },

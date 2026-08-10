@@ -11,23 +11,24 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 2 open | 28 answered of 30 · **0 with no owner or no decide-by** |
+| Open questions | 3 open | 28 answered of 31 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 11 | 0 open |
-| Decisions (ADR) | 30 | 17 in force · 11 proposed |
+| Decisions (ADR) | 31 | 17 in force · 12 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 2 | 0 without a scenario |
-| Inbox | 44 | 33 unpromoted |
+| Inbox | 46 | 35 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 23 | 0 still `TODO` |
 
 ## The bottleneck: undecided questions
 
-**2 of 30 still open**, soonest decide-by first.
+**3 of 31 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
 | `OQ-026` | Is a supplier discount other income (4300) or a contra-COGS (5001), and which of the two… | alex | 2026-09-15 | `REQ-LED` |
 | `OQ-030` | Does CFS introduce a forced-call (short-turnaround) premium, and if so what is the turnar… | alex | 2026-10-15 | `REQ-LED` |
+| `OQ-031` | Do `Crew` and `Trash & Cleanup` revenue and cost spread across the goods on the order, th… | alex | 2026-10-15 | `ADR-0031` |
 
 Whether any of these dates has PASSED is `deno task validate`'s judgement — gate 7 fails on an open question past its decide-by. This file reads no clock and so cannot say.
 
@@ -57,7 +58,7 @@ None.
 - `ADR-0024` — DuckDB is reached natively and server-side; client-side reporting is rejected
 - `ADR-0026` — The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time
 
-### Proposed (11)
+### Proposed (12)
 
 | ADR | Title | Review by | Blocked on |
 |---|---|---|---|
@@ -72,6 +73,7 @@ None.
 | `ADR-0028` | The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability | 2026-10-01 | — |
 | `ADR-0029` | The ledger records un-allocated facts; allocation is a specified reporting act | 2026-10-01 | `OQ-006` `OQ-018` |
 | `ADR-0030` | Vehicle cost moves from operating expense into COGS, absorbed and unabsorbed | 2026-11-01 | `SPIKE-005` |
+| `ADR-0031` | The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy | 2026-11-01 | `OQ-006` `OQ-018` `OQ-031` |
 
 ## Spikes
 

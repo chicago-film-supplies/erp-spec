@@ -1,0 +1,23 @@
+# The degenerate case, and the one this whole bucket exists for.
+#
+# An order carrying delivery revenue and NO goods line has no denominator under any basis. Measured
+# 2026-08-09: 15 order-groups, $12,410.25 — 5.7% of all delivery revenue. Invoice 1856 is the
+# largest at $3,250.00.
+#
+# The failure mode this pins is silent absorption: an implementation that divides by a zero base and
+# gets NaN, or that "helpfully" spreads the pool evenly across all product lines, or that drops the
+# pool and still balances because nothing was expecting it. All three look fine on a green run.
+name: no-goods-line-leaves-the-whole-pool-unallocated
+report: product_line_pl
+basis: goods_revenue_on_causal_order
+basis_version: 1
+kind: unallocated
+source: "api:2026-08-09:db_invoices_query — 15 groups, $12,410.25; largest is invoice 1856 at $3,250.00"
+
+given:
+  pool_minor: 325000 # invoice 1856
+  goods: []
+
+expect:
+  shares: []
+  unallocated_minor: 325000

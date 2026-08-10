@@ -720,3 +720,31 @@ open_questions:
       Not urgent — nothing depends on it, and `shift_recorded` is specified without it. It becomes
       real the day a turnaround policy is stated.
       Evidence: `inbox/2026-08-09-labour-premium-rules-survey.md`.
+
+  - id: OQ-031
+    question: >-
+      Do `Crew` and `Trash & Cleanup` revenue and cost spread across the goods on the order, the way
+      `Delivery` does — or are they severable services that keep their own margin?
+    owner: alex
+    decide_by: 2026-10-15
+    blocks: [ADR-0031]
+    status: open
+    notes: >-
+      ADR-0029's argument for spreading `Delivery` is **severability**, in the owner's words: "we
+      wouldn't do a delivery with no products, we would rent far fewer products if we weren't
+      delivering them." Delivery cost is therefore a JOINT cost of the product revenue, and leaving
+      it on its own line reports a loss that is an artefact of the grouping.
+      That argument does not obviously transfer. Crew hired out to a customer, and a cleanup
+      performed after a wrap, may each be a service that stands on its own margin — in which case
+      spreading them would move a real profit or loss onto goods that did not cause it, which is the
+      same error in the opposite direction.
+      Both are small: measured 2026-08-09, `Crew` is 7 lines / $2,625.00 and `Trash & Cleanup` is 2
+      lines / $1,750.00, together 0.3% of revenue
+      (`inbox/2026-08-09-product-line-by-revenue-account-matrix.md`). Small enough that the answer
+      barely moves a number today, and exactly the shape that gets decided by default if nobody
+      names it — which is why the two pools in `reporting/product-line-pl.yaml` are `blocked` rather
+      than quietly following `Delivery`.
+      Answer them together. Both are "a service a person performs, sold to the customer", and
+      splitting the answer would leave the pair inconsistent for no reason.
+      ⚠️ The answer is a **criterion**, not two verdicts — the next activity line to appear will ask
+      the same question, and `Transport` shows a value can sit unused for years and then matter.

@@ -1,0 +1,24 @@
+# The ordinary case. Median shape: 4 distinct product lines on a delivery-bearing order.
+name: spreads-over-four-goods-lines-by-revenue
+report: product_line_pl
+basis: goods_revenue_on_causal_order
+basis_version: 1
+kind: accept
+source: "api:2026-08-09:db_invoices_query — median group shape, 4 distinct product lines"
+
+given:
+  pool_minor: 50000 # $500.00 of delivery revenue on the causal order
+  goods:
+    - { product_line: Wardrobe, revenue_minor: 100000 }
+    - { product_line: Tents, revenue_minor: 50000 }
+    - { product_line: Tables & Chairs, revenue_minor: 30000 }
+    - { product_line: Expendables, revenue_minor: 20000 }
+
+# base = 200000. Shares are pool x revenue / base, and here every one divides exactly.
+expect:
+  shares:
+    - { product_line: Wardrobe, minor: 25000 }
+    - { product_line: Tents, minor: 12500 }
+    - { product_line: Tables & Chairs, minor: 7500 }
+    - { product_line: Expendables, minor: 5000 }
+  unallocated_minor: 0

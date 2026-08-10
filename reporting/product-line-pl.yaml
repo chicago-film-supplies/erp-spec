@@ -1,0 +1,221 @@
+# The official product-line P&L — the ONE allocation ADR-0029 promises.
+#
+# ADR-0029: the ledger records un-allocated facts and never allocates; allocation happens once, in
+# a specified report, "stated once rather than chosen per report, or two reports will disagree
+# about the margin on the same product line". ADR-0031 states the basis.
+#
+# ⚠️ **Two views exist and only one is the managed number.** The ledger's own grouping shows
+# `Delivery` at a structural loss BY CONSTRUCTION — delivery revenue is a surcharge, delivery cost
+# is crew plus vehicle, and the two were never meant to cover each other. Reading that as a managed
+# P&L concludes delivery should be cut, which would cut product revenue. This report is the answer
+# to that, and it is why the un-allocated view must never be published as the product-line margin.
+
+report:
+  id: product_line_pl
+  title: Product-line P&L (official)
+  authority: ADR-0029
+  basis: goods_revenue_on_causal_order
+  basis_version: 1
+
+  period_source: >-
+    ADR-0017. Open periods read MongoDB live; a closed period reads its sealed, hashed Parquet
+    artifact, queried through DuckDB (ADR-0024). Periodised by ACCOUNTING DATE, never posting
+    timestamp (ADR-0010) — reading it over posting timestamp misfiles every late entry and the
+    result still balances, which is what makes the mistake survivable and therefore dangerous.
+
+  sealed_at_close: false
+  sealed_at_close_reason: >-
+    The allocated view is RECOMPUTED on demand from sealed inputs, not sealed as its own artifact.
+    Sealing it would create a second immutable object that can disagree with the first, and the
+    reconciliation between them would have no authority to appeal to. Recomputation is safe only
+    because the basis is versioned and the inputs are hashed: `(sealed period artifact, basis
+    version)` determines the output, so reproducibility is a property of two recorded facts rather
+    than of a stored copy.
+    ⚠️ This is the load-bearing dependency on `basis_version`. If a basis is ever mutated in place
+    instead of superseded, this decision silently becomes wrong for every historical period.
+
+  excludes:
+    - what: void documents
+      reason: >-
+        A voided invoice is not revenue and its delivery line is not a pool. Measured 2026-08-09:
+        41 of 999 invoices are void and carry $5,750.00 of delivery revenue, 2.7% of the total —
+        the $216,050.25 headline figure includes them.
+        (`inbox/2026-08-08-void-invoices-not-filtered.md`)
+
+  # ── which product lines are goods, and which are activity ────────────────────────────────────
+  # The taxonomy mixes categories of GOODS with categories of ACTIVITY, and the mix is not stable:
+  # of the four activity lines one carries 12.8% of revenue and two are rounding errors. That is
+  # tolerable only because the ledger does not allocate — this file is where the distinction is
+  # made, and it is made HERE rather than in `ledger/dimensions.yaml` because ADR-0018 keeps the
+  # chart plain expressly so it does not explode into reporting axes.
+  #
+  # Gate 13 requires every declared product line to appear exactly once. Adding a value to
+  # `ledger/dimensions.yaml` without deciding its kind is a build break, not a silent default —
+  # which matters because the default would be "goods", and a goods line silently starts absorbing
+  # delivery cost.
+  line_kinds:
+    Carts & Ramps: goods
+    Crafty: goods
+    Expendables: goods
+    Fans & Heaters: goods
+    Hair & Makeup: goods
+    Janitorial: goods
+    Office Supplies: goods
+    Power, Lights & Tools: goods
+    Replacements: goods
+    Surface Protection: goods
+    Tables & Chairs: goods
+    Tents: goods
+    Traffic, Safety & Signage: goods
+    Walkies & Hotspots: goods
+    Wardrobe: goods
+    Crew: activity
+    Delivery: activity
+    Trash & Cleanup: activity
+    Transaction Fees: activity
+
+  # ── the pools ────────────────────────────────────────────────────────────────────────────────
+  # One entry per ACTIVITY line, and every one of them lands in exactly one bucket — the same
+  # coverage discipline `ledger/posting-rules.yaml` applies to events. "Nobody decided" is not a
+  # state this file can be in.
+  pools:
+    - id: delivery
+      product_line: Delivery
+      status: allocated
+      basis: goods_revenue_on_causal_order
+      basis_version: 1
+      accounts: [4100, 4110]
+      note: >-
+        **Both accounts, and the delivery line's margin includes both.** 4100 Service Income is the
+        delivery / setup / removal charge, a service a person performs and therefore labour-bearing;
+        4110 Delivery Surcharges is off-hours, rush or weekend, which nobody performs. Measured
+        79.8% / 20.0%. They are two accounts because the two revenues have different COST CAUSATION,
+        not because they are different product lines — so both are pooled and both spread.
+        The split is for FORECASTING, not for the basis: delivery cost scales with 4100 volume, so a
+        model predicting cost from total delivery revenue over-predicts in a surcharge-heavy period
+        (OQ-006, and the correction in
+        `inbox/2026-08-09-correction-the-surcharge-split-is-not-an-allocation-rule.md`).
+        Cost joins this pool as it arrives: labour COGS carrying `cost_type: delivery` (ADR-0019,
+        5800/5801) is in the ledger now; vehicle COGS is ADR-0030 and its accounts are unchosen.
+
+    - id: transaction_fees
+      product_line: Transaction Fees
+      status: not_allocated
+      accounts: [4700]
+      reason: >-
+        A card fee is caused by the PAYMENT METHOD, not by the goods. It varies with how the
+        customer chose to settle and not with what was supplied or moved, so spreading it over goods
+        would make a product look expensive because someone paid by card. It stays on its own line,
+        below the allocated margin. Measured 2026-08-09: 72 lines, $2,581.98, 0.2% of revenue.
+        Consistent with api-cloudrun#401, which moves Card Fee off a `sale` line and onto a real
+        `transaction_fee` — a fee is not a sale, and it is not a product line's cost either.
+
+    - id: crew
+      product_line: Crew
+      status: blocked
+      blocked_by: [OQ-031]
+      accounts: [4100]
+      note: >-
+        Measured 2026-08-09: 7 lines, $2,625.00, 0.2% of revenue. Blocked rather than guessed
+        because ADR-0029's argument for spreading Delivery does not obviously transfer.
+        The delivery argument is severability — "we wouldn't do a delivery with no products, we
+        would rent far fewer products if we weren't delivering them", so delivery cost is a JOINT
+        cost of product revenue. Crew hired out to a customer may be a severable service that stands
+        on its own margin, in which case spreading it would move a real profit or loss onto goods
+        that did not cause it. Small enough to be unimportant and exactly the shape that gets
+        decided by default if nobody names it.
+
+    - id: trash_cleanup
+      product_line: Trash & Cleanup
+      status: blocked
+      blocked_by: [OQ-031]
+      accounts: [4100]
+      note: >-
+        Measured 2026-08-09: 2 lines, $1,750.00, 0.1% of revenue. Same question as `crew` and
+        deliberately blocked on the same OQ — both are "a service a person performs, sold to the
+        customer", and answering one without the other would leave the pair inconsistent.
+
+  # ── pools that are the same shape and are NOT yet expressible ────────────────────────────────
+  # `pools` above is keyed by an ACTIVITY PRODUCT LINE, because that is what today's data has: an
+  # activity's revenue and cost meet on a line an operator picked. The pools below have no product
+  # line and in some cases no accounts, so the schema cannot express them yet and inventing a shape
+  # for them would be guessing.
+  #
+  # This is the honest bucket, on the same terms as `unwritten` in `ledger/posting-rules.yaml`:
+  # every entry owes a tracked issue, and gate 13 fails on one that does not carry it. A deferral
+  # that nobody is holding is indistinguishable from an omission.
+  deferred_pools:
+    - id: vehicle_cogs
+      issue: erp-spec#12
+      reason: >-
+        ADR-0030 moves vehicle running cost into COGS on the 5800/5801 absorbed/unabsorbed pattern,
+        and explicitly does NOT choose the accounts — "the chart picks the next free pair". With no
+        accounts there is nothing to pool. 2025 actuals across 6400–6404 total $21,844.77.
+        It is also the pool that most changes this report: `Delivery` currently carries almost no
+        cost, which is exactly why the un-allocated view shows it at a loss.
+
+    - id: trip_travel
+      issue: erp-spec#12
+      reason: >-
+        The cost of a shared run that served several jobs. It is a sub-allocation INSIDE delivery
+        cost — from one trip to the several orders it served — before this report's allocation from
+        an order to its goods. Two chained allocations, and the inner one has no basis stated and no
+        data: nothing records which orders shared a run.
+
+    - id: warehouse_overhead
+      issue: erp-spec#12
+      reason: >-
+        Still an operating expense, not COGS, so it is below the gross margin this report presents
+        and there is no pool to spread. It becomes real only if a decision moves it into COGS, which
+        no ADR has made. `cost_type: warehouse` already exists on 5800 for labour, which is the
+        narrower thing and is not the same claim.
+
+  # ── presentation ─────────────────────────────────────────────────────────────────────────────
+  presentation:
+    own_and_allocated_shown_separately: true
+    own_and_allocated_reason: >-
+      ⚠️ **The single most important rule on this report, and it is a measurement, not a
+      preference.** On 115 of 305 delivery-bearing order-groups — holding $89,425, **41.4% of all
+      delivery revenue** — the pool is LARGER than the goods revenue it spreads over. Ratio median
+      0.775, p90 3.13, max 25.0.
+      Where a pool exceeds its base, pro-rata spreading does not adjust a product line's margin, it
+      REPLACES it. `Crafty` receives $21,958 of allocated delivery revenue against $11,735 of its
+      own — 187% — from five near-identical invoices where a $1,500–$2,500 delivery sits against
+      $480–$800 of Crafty as the only goods on the order.
+      So every figure appears twice, own and allocated, and never only as their sum. A reader who
+      cannot separate them cannot tell a product's economics from an activity's.
+
+    unallocated_row_shown: true
+    unallocated_row_reason: >-
+      An order carrying activity revenue and NO goods line has no denominator, under every basis.
+      Measured 2026-08-09: 15 order-groups, **$12,410.25 — 5.7% of delivery revenue**. It is
+      reported on its own row, never forced onto an arbitrary line, never spread across all lines,
+      and never dropped. If the row grows, that is a signal about how work is being booked; a bucket
+      is how it stays visible instead of becoming a rounding difference.
+
+    null_product_line_row_shown: true
+    null_product_line_row_reason: >-
+      `product_line: null` is a legal determination, not an absence (ADR-0025, REQ-LED-001), so it
+      is a countable population and gets a row. Goods-account revenue carrying null is part of the
+      allocation BASE and absorbs its share; service and other revenue carrying null is neither pool
+      nor base and reports below the allocated margin.
+      Measured 2026-08-09 the untracked share is 28.8% of line revenue, and it decomposes: 2.8%
+      correctly dimensionless, 22.1% service revenue where null is the decided answer, and **4.0% —
+      143 lines, $67,156 — on rental, retail and replacement accounts where a product line
+      obviously applies and nobody set one**. The last number is the one to watch.
+      (`inbox/2026-08-09-untracked-revenue-decomposes-into-three-populations.md`)
+
+  # ── revenue with no line-level representation ────────────────────────────────────────────────
+  revenue_without_line_representation: >-
+    **The report is built from POSTINGS, not from invoice lines, and that is what closes this hole.**
+    REQ-LED-001 refuses a posting to a dimensioned account that does not DECLARE its product line,
+    so in the target system there is no revenue invisible to this report: every revenue posting
+    carries a product line or an explicit null, and both have rows here.
+    ⚠️ The hole is real in HISTORY. The 2023 P&L shows 4120 Contract Labor Income of $156,500 while
+    only $31,570 across 3 lines appears in the invoice corpus carrying line-level tracking — the
+    rest is not in those 999 invoices at all. That revenue cannot be given a product line by this
+    report, because the documents that would say do not exist. It belongs to ADR-0020's restatement,
+    which forbids altering any amount, so the restated postings will carry `product_line: null` and
+    land in the null row. **A pre-cutover period's null row is therefore not comparable to a
+    post-cutover one**, and the report must say which side of the cutover a period falls on rather
+    than let a reader compare across it.

@@ -1173,6 +1173,460 @@ for (const e of evts) {
   }
 }
 
+// ── gate 13: reporting content — bases, pools, classification, golden vectors ────
+/**
+ * erp-spec#11. ADR-0029 promised "exactly ONE official allocation" and `reporting/` held a stub
+ * trial balance. ADR-0031 states the basis; this is what makes the statement fail when the spec
+ * stops matching it.
+ *
+ * The shape deliberately mirrors gate 10, because the failure modes are the same ones:
+ *
+ * - **Coverage, as in 10f.** Every product line the ledger can post is classified as goods or
+ *   activity exactly once, and every activity line lands in exactly one pool bucket. Adding a
+ *   product line to `ledger/dimensions.yaml` without deciding whether delivery cost spreads onto
+ *   it is then a build break, not a silent default.
+ * - **A control total, as in 10i.** Shares + unallocated == pool. Unlike "the shares are
+ *   proportional", this can fail — proportionality is defined in terms of the spreading rule and
+ *   would only ever agree with it. **This is the independent property the repo's guard rule
+ *   demands**, and the largest-remainder residual is exactly where an implementation drifts.
+ * - **Live blockers, as in 10a.** A pool blocked on a closed question is a pool nobody re-decided.
+ *
+ * Money is walked by the same `*_minor` integer rule 10l applies to `ledger/`.
+ */
+{
+  const G = "13";
+  const CRITERIA = ["cause_and_effect", "benefits_received", "fairness", "ability_to_bear"];
+  const POOL_STATUS = ["allocated", "not_allocated", "blocked"];
+  const LINE_KINDS = ["goods", "activity"];
+
+  interface Basis {
+    id?: string;
+    version?: number;
+    criterion?: string;
+    proxy_for?: string;
+    scope?: string;
+    base?: string;
+    rounding?: string;
+    zero_base?: string;
+    status?: string;
+    source?: string;
+  }
+  interface Pool {
+    id?: string;
+    product_line?: string;
+    accounts?: number[];
+    status?: string;
+    basis?: string;
+    basis_version?: number;
+    reason?: string;
+    blocked_by?: string[];
+  }
+
+  const basesY = await readYaml<{ bases?: Basis[] }>(`${ROOT}/reporting/allocation-bases.yaml`);
+  const reportY = await readYaml<{
+    report?: {
+      id?: string;
+      authority?: string;
+      basis?: string;
+      basis_version?: number;
+      excludes?: unknown[];
+      line_kinds?: Record<string, string>;
+      pools?: Pool[];
+      presentation?: Record<string, unknown>;
+    };
+  }>(`${ROOT}/reporting/product-line-pl.yaml`);
+
+  const bases = basesY?.bases ?? [];
+  const report = reportY?.report;
+
+  // Resolve a basis by (id, version) — a basis is versioned precisely so a report pins one.
+  const basisKey = (id: unknown, v: unknown) => `${id}@${v}`;
+  const basisByKey = new Map<string, Basis>();
+
+  // 13a — basis registry
+  if (bases.length === 0) {
+    fail(G, "reporting/allocation-bases.yaml defines no bases — ADR-0031 states one");
+  }
+  for (const b of bases) {
+    const where = `allocation-bases "${b.id ?? "(no id)"}"`;
+    for (
+      const f of [
+        "id",
+        "version",
+        "criterion",
+        "scope",
+        "base",
+        "rounding",
+        "zero_base",
+        "status",
+        "source",
+      ] as const
+    ) {
+      if (b[f] === undefined || b[f] === null || b[f] === "") fail(G, `${where}: missing \`${f}\``);
+    }
+    if (typeof b.version !== "number" || !Number.isInteger(b.version)) {
+      fail(G, `${where}: \`version\` must be an integer`);
+    }
+    if (b.criterion && !CRITERIA.includes(b.criterion)) {
+      fail(G, `${where}: criterion "${b.criterion}" not one of ${CRITERIA.join(" | ")}`);
+    }
+    // The whole point of ADR-0031 is that the basis is a PROXY and says so. A basis that is not
+    // cause-and-effect and does not name what it stands in for has quietly promoted itself.
+    if (b.criterion && b.criterion !== "cause_and_effect" && !b.proxy_for) {
+      fail(
+        G,
+        `${where}: criterion "${b.criterion}" is not cause_and_effect and declares no \`proxy_for\` — say what driver it stands in for (ADR-0031)`,
+      );
+    }
+    if (
+      b.source && !/^ADR-\d{4}$/.test(String(b.source)) &&
+      !/^(api|code):\d{4}-\d{2}-\d{2}:/.test(String(b.source))
+    ) {
+      fail(
+        G,
+        `${where}: source "${b.source}" is not an ADR id, \`api:<date>:<query>\` or \`code:<date>:<pin>\``,
+      );
+    }
+    const k = basisKey(b.id, b.version);
+    if (basisByKey.has(k)) fail(G, `allocation-bases: "${k}" is duplicated`);
+    else basisByKey.set(k, b);
+  }
+
+  // 13b — the report itself
+  if (!report) {
+    fail(
+      G,
+      "reporting/product-line-pl.yaml defines no `report` — ADR-0029 promises exactly one official allocation",
+    );
+  } else {
+    for (const f of ["id", "authority", "basis", "basis_version"] as const) {
+      if (report[f] === undefined || report[f] === null || report[f] === "") {
+        fail(G, `product-line-pl: missing \`${f}\``);
+      }
+    }
+    const rk = basisKey(report.basis, report.basis_version);
+    if (report.basis && !basisByKey.has(rk)) {
+      fail(G, `product-line-pl: basis "${rk}" does not resolve in reporting/allocation-bases.yaml`);
+    }
+
+    // 13c — every product line the ledger can post is classified exactly once.
+    // Without this, adding a value to ledger/dimensions.yaml silently defaults it to goods and
+    // starts absorbing delivery cost with nobody deciding.
+    const dimY = await readYaml<{ dimensions?: { id?: string; values?: string[] }[] }>(
+      `${ROOT}/ledger/dimensions.yaml`,
+    );
+    const plValues = (dimY?.dimensions ?? []).find((d) => d.id === "product_line")?.values ?? [];
+    const kinds = report.line_kinds ?? {};
+    for (const v of plValues) {
+      const k = kinds[v];
+      if (!k) {
+        fail(
+          G,
+          `product-line-pl: product line "${v}" is not classified in \`line_kinds\` — say goods or activity`,
+        );
+      } else if (!LINE_KINDS.includes(k)) {
+        fail(
+          G,
+          `product-line-pl: line_kinds["${v}"] = "${k}" not one of ${LINE_KINDS.join(" | ")}`,
+        );
+      }
+    }
+    for (const v of Object.keys(kinds)) {
+      if (!plValues.includes(v)) {
+        fail(
+          G,
+          `product-line-pl: \`line_kinds\` classifies "${v}", which ledger/dimensions.yaml does not define`,
+        );
+      }
+    }
+
+    // 13d — every ACTIVITY line lands in exactly one pool, and every pool is a real activity line.
+    const activity = plValues.filter((v) => kinds[v] === "activity");
+    const pools = report.pools ?? [];
+    const claimed = new Map<string, string[]>();
+    for (const p of pools) {
+      const where = `product-line-pl pool "${p.id ?? "(no id)"}"`;
+      if (!p.id || !/^[a-z][a-z0-9_]*$/.test(String(p.id))) {
+        fail(G, `${where}: id must be snake_case`);
+      }
+      if (!p.product_line) fail(G, `${where}: no \`product_line\``);
+      else {claimed.set(String(p.product_line), [
+          ...(claimed.get(String(p.product_line)) ?? []),
+          String(p.id),
+        ]);}
+      if (!p.status || !POOL_STATUS.includes(String(p.status))) {
+        fail(G, `${where}: status "${p.status}" not one of ${POOL_STATUS.join(" | ")}`);
+      }
+      if (p.status === "allocated") {
+        const pk = basisKey(p.basis ?? report.basis, p.basis_version ?? report.basis_version);
+        if (!basisByKey.has(pk)) fail(G, `${where}: basis "${pk}" does not resolve`);
+      }
+      // A pool that does NOT allocate is a decision, and a decision owes a reason. This is the
+      // same shape as `no_posting` in posting-rules.yaml.
+      if (p.status === "not_allocated" && !p.reason) {
+        fail(G, `${where}: \`not_allocated\` requires a \`reason\` — not allocating is a decision`);
+      }
+      if (p.status === "blocked") {
+        checkReportingBlockers(p.blocked_by, where);
+        if (p.basis) {
+          fail(G, `${where}: a blocked pool must name no basis — a guessed basis will be believed`);
+        }
+      }
+    }
+    for (const a of activity) {
+      const c = claimed.get(a) ?? [];
+      if (c.length === 0) {
+        fail(
+          G,
+          `product-line-pl: activity line "${a}" has no pool — say whether it allocates, does not, or is blocked`,
+        );
+      } else if (c.length > 1) {
+        fail(
+          G,
+          `product-line-pl: activity line "${a}" is claimed by more than one pool: ${c.join(", ")}`,
+        );
+      }
+    }
+    for (const [pl, ids] of claimed) {
+      if (kinds[pl] !== "activity") {
+        fail(
+          G,
+          `product-line-pl: pool(s) ${ids.join(", ")} target "${pl}", which is classified "${
+            kinds[pl] ?? "(unclassified)"
+          }" — only an activity line has a pool`,
+        );
+      }
+    }
+
+    // 13d(ii) — the honest bucket. A pool that is deferred rather than decided owes a tracked
+    // issue, the same terms `unwritten` carries in ledger/posting-rules.yaml. Without this it is a
+    // dumping ground, and a deferral nobody holds reads exactly like an omission.
+    const deferred =
+      (report as { deferred_pools?: { id?: string; issue?: string; reason?: string }[] })
+        .deferred_pools ?? [];
+    for (const d of deferred) {
+      const where = `product-line-pl deferred_pool "${d.id ?? "(no id)"}"`;
+      if (!d.id || !/^[a-z][a-z0-9_]*$/.test(String(d.id))) {
+        fail(G, `${where}: id must be snake_case`);
+      }
+      if (!d.reason) fail(G, `${where}: needs a \`reason\``);
+      if (!d.issue || !/^[\w.-]+#\d+$/.test(String(d.issue))) {
+        fail(G, `${where}: needs an \`issue\` like \`erp-spec#12\``);
+      }
+      if (claimed.has(String(d.id))) {
+        fail(G, `${where}: also appears in \`pools\` — a pool is deferred or decided, not both`);
+      }
+    }
+  }
+
+  // Same predicate gate 10 uses: a blocker that has closed is a block that expired.
+  function checkReportingBlockers(ids: unknown, where: string) {
+    if (!Array.isArray(ids) || ids.length === 0) {
+      fail(G, `${where}: needs a non-empty \`blocked_by\``);
+      return;
+    }
+    for (const raw of ids) {
+      const id = String(raw);
+      if (!/^(OQ|SPIKE|HOT)-\d{3}$/.test(id)) {
+        fail(G, `${where}: blocker "${id}" is not an OQ-/SPIKE-/HOT- id`);
+        continue;
+      }
+      const q = oqs.find((x) => x.id === id);
+      const s = spikes.find((x) => x.id === id);
+      const h = hots.find((x) => x.id === id);
+      const open = q
+        ? String(q.status ?? "open") !== "answered"
+        : s
+        ? !["closed", "abandoned"].includes(String(s.status ?? "open"))
+        : h
+        ? String(h.status ?? "open") !== "resolved"
+        : null;
+      if (open === null) fail(G, `${where}: blocker "${id}" does not resolve`);
+      else if (!open) {
+        fail(G, `${where}: blocker "${id}" is no longer open — the block has expired`);
+      }
+    }
+  }
+
+  // ── 13e — golden allocation vectors ───────────────────────────────────────
+  interface RVector {
+    name?: string;
+    report?: string;
+    basis?: string;
+    basis_version?: number;
+    kind?: string;
+    source?: string;
+    given?: { pool_minor?: number; goods?: { product_line?: string; revenue_minor?: number }[] };
+    expect?: { shares?: { product_line?: string; minor?: number }[]; unallocated_minor?: number };
+    _file: string;
+  }
+  const rvectors: RVector[] = [];
+  for (const f of await filesIn("reporting/vectors", ".yaml")) {
+    const y = await readYaml<RVector>(f);
+    if (y) rvectors.push({ ...y, _file: f });
+  }
+
+  const dimY2 = await readYaml<{ dimensions?: { id?: string; values?: string[] }[] }>(
+    `${ROOT}/ledger/dimensions.yaml`,
+  );
+  const plSet = new Set(
+    (dimY2?.dimensions ?? []).find((d) => d.id === "product_line")?.values ?? [],
+  );
+
+  const VKIND = ["accept", "unallocated"];
+  let sawUnallocated = false;
+  for (const v of rvectors) {
+    const where = rel(v._file);
+    if (!v.name) fail(G, `${where}: no \`name\``);
+    if (!v.source) fail(G, `${where}: no \`source\` — a vector with no provenance is a fixture`);
+    if (!v.kind || !VKIND.includes(String(v.kind))) {
+      fail(G, `${where}: kind "${v.kind}" not ${VKIND.join(" | ")}`);
+    }
+    if (String(v.kind) === "unallocated") sawUnallocated = true;
+    if (v.report !== report?.id) {
+      fail(G, `${where}: report "${v.report}" is not the official report "${report?.id}"`);
+    }
+    const vk = basisKey(v.basis, v.basis_version);
+    if (!basisByKey.has(vk)) fail(G, `${where}: basis "${vk}" does not resolve`);
+
+    const pool = v.given?.pool_minor;
+    const goods = v.given?.goods ?? [];
+    const shares = v.expect?.shares ?? [];
+    const unalloc = v.expect?.unallocated_minor;
+    if (typeof pool !== "number") {
+      fail(G, `${where}: \`given.pool_minor\` must be a number`);
+      continue;
+    }
+    if (typeof unalloc !== "number") {
+      fail(
+        G,
+        `${where}: \`expect.unallocated_minor\` must be a number — an omitted zero is not the same claim as a stated one`,
+      );
+      continue;
+    }
+
+    // THE control total. Independent of how the spread is computed, and it can fail.
+    const sum = shares.reduce((n, s) => n + Number(s.minor ?? 0), 0);
+    if (sum + unalloc !== pool) {
+      fail(
+        G,
+        `${where}: shares sum to ${sum} plus unallocated ${unalloc} = ${
+          sum + unalloc
+        }, but the pool is ${pool} — an allocation neither creates nor destroys money`,
+      );
+    }
+
+    /**
+     * ABSENT vs NULL, the same distinction REQ-LED-001 draws on a posting and gate 10h enforces on
+     * a transfer. A missing KEY is refused; an explicit `null` is a determination — "no tracked
+     * product line applies" — and is a legal row on this report as well as a legal member of the
+     * base. An empty string is neither: it satisfies a naive check and means nothing.
+     *
+     * This gate got it wrong on the share side first and the null vector is what caught it, which
+     * is the argument for having written that vector.
+     */
+    const checkPl = (row: Record<string, unknown>, whereRow: string) => {
+      if (!Object.prototype.hasOwnProperty.call(row, "product_line")) {
+        fail(
+          G,
+          `${whereRow}: no \`product_line\` key — absence is refused; an explicit null is not (ADR-0025)`,
+        );
+        return;
+      }
+      const v = row.product_line;
+      if (v === null) return;
+      if (String(v) === "") {
+        fail(
+          G,
+          `${whereRow}: product_line is the empty string — write an explicit null to record that none applies`,
+        );
+      } else if (!plSet.has(String(v))) {
+        fail(
+          G,
+          `${whereRow}: product_line "${v}" is not a declared value in ledger/dimensions.yaml`,
+        );
+      }
+    };
+    for (const [i, s] of shares.entries()) {
+      checkPl(s as Record<string, unknown>, `${where} share[${i}]`);
+    }
+    for (const [i, g] of goods.entries()) {
+      checkPl(g as Record<string, unknown>, `${where} goods[${i}]`);
+    }
+
+    // A zero base is the degenerate population ADR-0031 refuses to let vanish: 5.7% of measured
+    // delivery revenue. If a vector has no positive base it must leave the WHOLE pool unallocated.
+    const denom = goods.reduce((n, g) => n + Number(g.revenue_minor ?? 0), 0);
+    if (denom <= 0) {
+      if (shares.length > 0) {
+        fail(G, `${where}: the base sums to ${denom}, so nothing can be spread — expect no shares`);
+      }
+      if (unalloc !== pool) {
+        fail(
+          G,
+          `${where}: the base is zero, so the whole pool (${pool}) must be unallocated, found ${unalloc}`,
+        );
+      }
+    } else if (String(v.kind) === "unallocated") {
+      fail(G, `${where}: kind "unallocated" but the base sums to ${denom} > 0 — it is allocable`);
+    }
+  }
+
+  // 13f — coverage of the vectors themselves. The degenerate case is the one an implementation
+  // gets wrong, so its absence is a failure rather than a gap in a nice-to-have.
+  if (report) {
+    if (rvectors.length === 0) {
+      fail(G, "reporting/vectors: no allocation vectors — the spreading rule is unenforced");
+    } else if (!sawUnallocated) {
+      fail(
+        G,
+        "reporting/vectors: no `unallocated` vector — the zero-base case is 5.7% of measured delivery revenue and nothing pins it",
+      );
+    }
+  }
+
+  // 13g — money and dates across reporting/, the same walk 10l applies to ledger/.
+  {
+    const walkValue = (node: unknown, path: string, where: string) => {
+      if (node instanceof Date) {
+        fail(
+          G,
+          `${where}: ${path} parsed as a Date — quote it, or it renders in the runner's timezone`,
+        );
+        return;
+      }
+      if (Array.isArray(node)) {
+        node.forEach((v, i) => walkValue(v, `${path}[${i}]`, where));
+        return;
+      }
+      if (node && typeof node === "object") {
+        for (const [k, v] of Object.entries(node as Record<string, unknown>)) {
+          if (/_minor$/.test(k) && v !== null && v !== undefined) {
+            if (typeof v !== "number" || !Number.isInteger(v)) {
+              fail(
+                G,
+                `${where}: ${path}.${k} = ${
+                  JSON.stringify(v)
+                } — money is an integer count of minor units`,
+              );
+            } else if (v < 0) {
+              fail(
+                G,
+                `${where}: ${path}.${k} is negative — use the opposite side, not a negative amount`,
+              );
+            }
+          }
+          walkValue(v, `${path}.${k}`, where);
+        }
+      }
+    };
+    for (const f of await filesIn("reporting", ".yaml")) {
+      const y = await readYaml(f);
+      if (y) walkValue(y, "$", rel(f));
+    }
+  }
+}
+
 // ── report ──────────────────────────────────────────────────────────────────
 const GATE_NAMES: Record<string, string> = {
   "1": "ids unique and well-formed",
@@ -1187,6 +1641,7 @@ const GATE_NAMES: Record<string, string> = {
   "10": "ledger content — chart, posting rules, golden vectors",
   "11": "repo paths cited in prose resolve",
   "12": "milestone exit criteria are wired to a check or declared prose",
+  "13": "reporting content — allocation bases, pools, line classification, golden vectors",
   xref: "cross-references resolve",
   parse: "files parse",
 };

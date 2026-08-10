@@ -1,9 +1,17 @@
 # Spike harness
 
-Measurement code for SPIKE-001, SPIKE-007 and SPIKE-010. **Not spec, and not the target system.**
-It implements nothing that will ship; it exists to turn predictions about Deno's native-addon
-support into measured cells. Same category as `tools/` — it is here so a claim in a spike's
-`## Notes` can be re-run instead of believed.
+Measurement code. **Not spec, and not the target system.** It implements nothing that will ship;
+it exists so a claim made elsewhere in this repo can be re-run instead of believed. Same category
+as `tools/`.
+
+Two kinds live here, and the second arrived later:
+
+- **Stack probes** — SPIKE-001, SPIKE-007, SPIKE-010: does a native npm dependency load and keep
+  working under Deno, across `deno run`, `deno test` and `deno compile`? Everything below about the
+  matrix, the staging directory and the compile entrypoints is about these.
+- **Corpus measurements** — `allocation-basis-probe.ts` (`deno task allocation`), evidence for
+  ADR-0031. Read-only `db_*` queries against the prod CFS API, aggregated locally; the token comes
+  from `CFS_API_TOKEN` and is never in this repo. These need no `node_modules` and no staging.
 
 The underscore prefix on this file keeps it out of `validate.ts`, which walks `spikes/`
 recursively and requires front matter on every `.md` it finds.

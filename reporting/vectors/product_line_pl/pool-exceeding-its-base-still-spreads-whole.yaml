@@ -1,0 +1,30 @@
+# The pool is LARGER than the base it spreads over — and this is not an edge case.
+#
+# Measured 2026-08-09: 115 of 305 allocable delivery-bearing order-groups, holding $89,425 — 41.4%
+# of all delivery revenue. Ratio median 0.775, p90 3.13, max 25.0.
+#
+# This vector is invoice 1616's shape verbatim: a $2,500.00 delivery against $800.00 of Crafty as
+# the ONLY goods on the order. The whole pool lands on one product line, at 312% of that line's own
+# revenue. Five near-identical invoices (1616, 1617, 1678, 1679, 1680) are why `Crafty` receives
+# $21,958 of allocated delivery against $11,735 of its own revenue corpus-wide.
+#
+# ⚠️ Nothing here is clamped, capped or spilled into the unallocated bucket. The arithmetic is
+# correct and the RESULT is misleading, which is a presentation problem and not a basis problem —
+# `presentation.own_and_allocated_shown_separately` is what answers it. A vector that capped the
+# share would be encoding a silent second rule that no ADR states.
+name: pool-exceeding-its-base-still-spreads-whole
+report: product_line_pl
+basis: goods_revenue_on_causal_order
+basis_version: 1
+kind: accept
+source: "api:2026-08-09:db_invoices_query — invoice 1616"
+
+given:
+  pool_minor: 250000 # $2,500.00 delivery
+  goods:
+    - { product_line: Crafty, revenue_minor: 80000 } # $800.00, the only goods on the order
+
+expect:
+  shares:
+    - { product_line: Crafty, minor: 250000 }
+  unallocated_minor: 0

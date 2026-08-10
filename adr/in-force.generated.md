@@ -121,3 +121,4 @@ Accepted and not superseded, as of the last `deno task gen`.
 | [ADR-0028](ADR-0028-self-hosted-tier-gotenberg-and-victoria.md) | The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability | 2026-10-01 | — |
 | [ADR-0029](ADR-0029-the-ledger-records-unallocated-facts.md) | The ledger records un-allocated facts; allocation is a specified reporting act | 2026-10-01 | OQ-006, OQ-018 |
 | [ADR-0030](ADR-0030-vehicle-cost-moves-into-cogs.md) | Vehicle cost moves from operating expense into COGS, absorbed and unabsorbed | 2026-11-01 | SPIKE-005 |
+| [ADR-0031](ADR-0031-allocation-basis-is-goods-revenue-on-the-causal-order.md) | The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy | 2026-11-01 | OQ-006, OQ-018, OQ-031 |
