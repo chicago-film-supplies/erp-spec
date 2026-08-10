@@ -1,0 +1,53 @@
+name: idle-hours-absorbed-into-a-job-rejected
+posting_rule: shift_recorded
+kind: reject
+source: >-
+  The failure the absorbed/unabsorbed split exists to catch, approached from the side the dimension
+  gate cannot see. ADR-0019 makes the gap between 5800 and 5801 the utilisation measure; a rule that
+  only checked dimensions would accept this input without a murmur.
+
+differs_from: guaranteed-hours-unworked-land-in-5801
+differs_in: ["shift.absorbed_allocations[0].hours", "shift.unabsorbed_minor"]
+
+given:
+  ledger_state:
+    closed_periods: []
+    consecutive_days_worked: 2
+  shift:
+    id: SH-VEC-0006
+    person: PER-VEC-0001
+    date: "2026-08-06"
+    wage_minor_per_hour: 3000
+    hours_guaranteed: 8
+    hours_worked: 5
+    hours_idle: 3
+    hours_at_premium: 0
+    premium_minor: 0
+    base_minor: 24000
+    cost_minor: 24000
+    unabsorbed_minor: 0
+    absorbed_allocations:
+      - { causal_job: ORD-VEC-0001, hours: 8, base_minor: 24000, premium_share_minor: 0, amount_minor: 24000, product_line: "Delivery", cost_type: delivery }
+
+derivation: >-
+  The same eight-hour guaranteed day with the same five hours of causal work — but all eight hours
+  are absorbed against the job and `unabsorbed_minor` is zero.
+  **Every check the ledger can perform on its own passes.** One transfer, both required dimensions
+  present and valid, amount a legal integer, control total satisfied at 24000, accounts resolving.
+  It is refused because the allocation contradicts the shift it is drawn from: `hours_worked` is 5
+  and `hours_idle` is 3, and 8 absorbed hours cannot come out of a day that recorded five worked.
+  **This is the input that quietly destroys the KPI**, and it is the tempting one — it makes
+  utilisation read 100%, it makes a job look fully staffed, and every number in it is internally
+  consistent. Nothing about the posting looks wrong; the wrongness is in its relationship to the
+  timesheet, which is why the rule has to consult the source document rather than only the entry.
+  **The dimension gate cannot catch it, and that is the point of writing it down.** The three other
+  rejects for this rule are all dimension failures; this one has perfect dimensions. A guard that
+  only checks what a transfer declares would certify it, which is the repo's own rule about a guard
+  that can only consult its own oracle.
+  The honest posting is the accept vector: 15000 absorbed, 9000 unabsorbed, and a utilisation
+  number that says five of eight.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "8 absorbed hours against a shift recording 5 worked and 3 idle — absorbed hours may not exceed hours worked, or 5801 stops measuring anything (ADR-0019)"

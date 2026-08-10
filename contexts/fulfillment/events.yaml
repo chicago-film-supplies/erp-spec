@@ -28,7 +28,6 @@ events:
     consumers: [ledger]
     terminal: false
     carries: [shift_id, person_ref, causal_job_ref, wage_rate_minor, clock_in, clock_out, overtime_hours]
-    blocked_by: [OQ-018, OQ-019]
 
   - id: EVT-FUL-003
     name: TripPlanned

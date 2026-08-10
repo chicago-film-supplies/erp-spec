@@ -281,7 +281,26 @@ open_questions:
     owner: alex
     decide_by: 2026-09-15
     blocks: [REQ-LED]
-    status: open
+    status: answered
+    answer: >-
+      **The overtime hour splits in two, and the halves are treated differently.** The BASE rate for
+      every hour — overtime hours included — is direct labour, charged to the causal job actually
+      worked. The **PREMIUM** is allocated **pro-rata by hours across the causal jobs of that day**.
+      Owner, 2026-08-09, and it is the standard cost-accounting convention rather than a house rule:
+      the premium is caused by the day's volume in aggregate, not by whichever job happened to be on
+      the clock after hour eight
+      (`inbox/2026-08-09-labour-premium-rules-survey.md`).
+      **Pro-rata by HOURS, the same base as the direct half**, so one rule drives both halves of the
+      hour and no second allocation basis has to be agreed.
+      The convention's one exception is retained and narrowed: overtime **specifically requested by
+      a customer** is charged direct to the order that asked, and — following OQ-004's treatment of
+      `handling_bucket` — **an override must be recorded AS an override**, so costing can tell a
+      stated exception from the default.
+      **The allocation happens in the SHIFT RECORD, never in the posting rule.** `amount:` is a
+      dotted path with no arithmetic (gate 10), so the rounding of a pro-rata share — and the
+      residual cent when hours do not divide the premium evenly — is decided upstream where the
+      money rules already apply. `ledger/vectors/shift_recorded/` carries a deliberately
+      non-dividing case for exactly this reason.
     notes: >-
       OQ-008 gives the total from the PO/bill, but not its allocation. Chronological (the premium
       lands on whichever job the clock was on after hour 8) is simple but arbitrary — the same two
@@ -296,7 +315,32 @@ open_questions:
     owner: alex
     decide_by: 2026-09-15
     blocks: [REQ-LED]
-    status: open
+    status: answered
+    answer: >-
+      **Six consecutive calendar days WORKED — a rolling count, not a payroll week.** Owner,
+      2026-08-09: "it's really just whether you have worked six consecutive calendar days." That is
+      the industry convention rather than the statutory one, and the two genuinely differ: Entertainment
+      Partners defines a sixth day as "where a crew member works six days **in a row**", while the
+      legal baseline Wrapbook implements for non-union work is workweek-relative — California's
+      seventh-day rule triggers on the seventh consecutive day *within the employer-defined
+      workweek*. CFS is **non-union**, so nothing forces the workweek reading, and consecutive-days-worked
+      is both simpler and how crew actually experience it.
+      **The 6th day is 1.5x for the whole day.** It does not compound with the after-eight-hours
+      1.5x — an hour is premium once. A tenth hour on a sixth day is 1.5x, not 2.25x.
+      ⚠️ **THE SEVENTH DAY IS NOT A RATE, IT IS A COMPLIANCE FAILURE.** Illinois **ODRISA**, amended
+      effective 2023-01-01, requires **24 consecutive hours of rest in every consecutive seven-day
+      period** — changed from "one day per calendar week" precisely to stop scheduling across a week
+      boundary. Civil penalties to **$250 per offence, each seven-day period a separate offence**,
+      with narrow exemptions (part-time ≤20 hrs/week, breakdown or emergency, seasonal agriculture).
+      So a seventh consecutive day is generally unlawful here, and pricing it invites it. **The
+      SCHEDULER refuses a seventh consecutive day, with an audited override**; the ledger does not.
+      **The ledger RECORDS a seventh day if one happens** — see
+      `ledger/vectors/shift_recorded/seventh-consecutive-day-is-recorded-not-refused`. Work that was
+      performed is a cost that was incurred; refusing to post it would understate COGS and hide the
+      breach in the one system that noticed it. Same reasoning as OQ-028's overpayment: a control
+      belongs where the action is taken, not where the fact is recorded.
+      Whether the ODRISA obligation sits with CFS or with the employer of record is a legal question
+      and is deliberately not answered here.
     notes: >-
       Consecutive within what window — a fixed payroll week, or a rolling 7 days? The two give
       different answers for someone working Thursday through Wednesday. And if a person works ten
@@ -420,7 +464,28 @@ open_questions:
     owner: alex
     decide_by: 2026-09-15
     blocks: [REQ-LED, EVT-FUL-002]
-    status: open
+    status: answered
+    answer: >-
+      **2000 Accounts Payable. The question's premise was wrong: there is no payroll liability to
+      find, because CFS has never had one.**
+      Measured on CFS's own balance sheet at 2025-12-31, on both bases — current liabilities are
+      2000 Accounts Payable, the 2100 credit-card block, 2200 Sales Tax, 2600 Rounding and
+      2801/2802 PSA. **No payroll liability of any kind, in any of four comparative years**, which
+      is exactly consistent with all four payroll accounts (2160, 2170, 2180, 2190) being Archived
+      in the live chart.
+      That follows from the charter, which makes payroll processing a **non-goal**: an external
+      **employer of record** stays, and CFS "does not calculate withholding, file payroll tax, or
+      move payroll money". **An EOR is not payroll — it is a vendor that invoices.** So a labour
+      cost posting is an ordinary vendor bill: Dr 5800 / 5801, Cr 2000.
+      ADR-0019 already pointed here — "cost flows from the purchase order / bill that labour
+      scheduling generates" — but called it an inference from account status. It is no longer an
+      inference: a company that owed wages would show the liability, and this one shows none across
+      four years of statements.
+      Consequence worth stating: **CFS's ledger never carries gross-to-net.** Withholding, employer
+      taxes and benefits are the EOR's ledger, and what reaches CFS is one invoiced amount. 6720
+      Payroll Tax Expense stays in the chart for historical periods and takes no new posting.
+      Evidence: `inbox/2026-08-09-labour-premium-rules-survey.md`,
+      `inbox/2026-08-09-book-to-tax-difference-is-exactly-two-accounts.md`.
     notes: >-
       ADR-0019 names both debit legs — 5800 absorbed, 5801 unabsorbed — and no credit. Without one
       `shift_recorded` cannot balance even in principle, which makes this a third blocker on that
@@ -604,3 +669,32 @@ open_questions:
       Not answerable from the repo or the CFS API: the GL line detail is in Xero and the tax figure
       comes from the tax package. A question for the owner and the CPA.
       Evidence: `inbox/2026-08-09-book-to-tax-difference-is-exactly-two-accounts.md`.
+
+  - id: OQ-030
+    question: >-
+      Does CFS introduce a forced-call (short-turnaround) premium, and if so what is the turnaround
+      threshold and does the penalty behave as hours or as a flat amount?
+    owner: alex
+    decide_by: 2026-10-15
+    blocks: [REQ-LED]
+    status: open
+    notes: >-
+      Raised by the owner 2026-08-09 while settling OQ-019 — "I may be interested in introducing
+      forced calls." Held separate from OQ-019 deliberately: a forced call is a different mechanism
+      from a consecutive-day premium and it interacts with a different constraint.
+      A **forced call** is a short turnaround — a crew member called back with less than the agreed
+      rest between wrap and the next call. Union thresholds are **12 hours** (SAG-AFTRA, sometimes
+      11) and **10 hours** (FIST). **Non-union has no statutory turnaround rule at all**, so any CFS
+      threshold is policy rather than compliance.
+      **The two penalty SHAPES are not equivalent, and this is the decision.** SAG-AFTRA pays a
+      **flat amount per violation** (day performer: the lesser of daily rate or $900). FIST treats
+      the shortfall as **overtime HOURS**. Only the second flows through the machinery that already
+      exists — it becomes premium hours, allocated by OQ-018's pro-rata rule, absorbed into 5800
+      like any other premium. A flat penalty is a new kind of cost that belongs to no causal job and
+      would need its own account and its own allocation answer.
+      ⚠️ **Distinct from ODRISA and not a substitute for it.** A 10-hour turnaround and a
+      24-consecutive-hour weekly rest are different constraints; satisfying one says nothing about
+      the other. See OQ-019.
+      Not urgent — nothing depends on it, and `shift_recorded` is specified without it. It becomes
+      real the day a turnaround policy is stated.
+      Evidence: `inbox/2026-08-09-labour-premium-rules-survey.md`.

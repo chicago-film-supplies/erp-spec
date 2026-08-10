@@ -11,7 +11,7 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 5 open | 24 answered of 29 · **0 with no owner or no decide-by** |
+| Open questions | 3 open | 27 answered of 30 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 11 | 0 open |
 | Decisions (ADR) | 28 | 17 in force · 9 proposed |
 | Spikes | 12 | 9 open |
@@ -22,15 +22,13 @@ is `deno task validate`'s judgement, not this file's.
 
 ## The bottleneck: undecided questions
 
-**5 of 29 still open**, soonest decide-by first.
+**3 of 30 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
-| `OQ-018` | When a shift spans several jobs and crosses into overtime, which job absorbs the overtime… | alex | 2026-09-15 | `REQ-LED` |
-| `OQ-019` | What defines a "consecutive day" for the 6th/7th-day 1.5x rule, and does it compound with… | alex | 2026-09-15 | `REQ-LED` |
 | `OQ-020` | Which context owns purchase orders — or is procurement a ninth bounded context? | alex | 2026-09-15 | `EVT-FA-001` |
-| `OQ-024` | What is the CREDIT leg of a labour cost posting? | alex | 2026-09-15 | `REQ-LED` `EVT-FUL-002` |
 | `OQ-026` | Is a supplier discount other income (4300) or a contra-COGS (5001), and which of the two… | alex | 2026-09-15 | `REQ-LED` |
+| `OQ-030` | Does CFS introduce a forced-call (short-turnaround) premium, and if so what is the turnar… | alex | 2026-10-15 | `REQ-LED` |
 
 Whether any of these dates has PASSED is `deno task validate`'s judgement — gate 7 fails on an open question past its decide-by. This file reads no clock and so cannot say.
 

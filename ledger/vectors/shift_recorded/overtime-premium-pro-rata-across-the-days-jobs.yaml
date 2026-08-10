@@ -1,0 +1,59 @@
+name: overtime-premium-pro-rata-across-the-days-jobs
+posting_rule: shift_recorded
+kind: accept
+source: >-
+  OQ-018, answered 2026-08-09 on the standard cost-accounting convention surveyed in
+  `inbox/2026-08-09-labour-premium-rules-survey.md`. Wage is the live default from ADR-0019/OQ-008 —
+  $30.00/hr, overridable per contact. Hours are synthetic and chosen so the pro-rata share does
+  **not** divide evenly.
+
+given:
+  ledger_state:
+    closed_periods: []
+    consecutive_days_worked: 3
+  shift:
+    id: SH-VEC-0001
+    person: PER-VEC-0001
+    date: "2026-08-06"
+    wage_minor_per_hour: 3000
+    hours_worked: 11
+    hours_at_straight_time: 8
+    hours_at_premium: 3
+    premium_minor: 4500
+    base_minor: 33000
+    cost_minor: 37500
+    unabsorbed_minor: 0
+    absorbed_allocations:
+      - { causal_job: ORD-VEC-0001, hours: 5, base_minor: 15000, premium_share_minor: 2046, amount_minor: 17046, product_line: "Delivery", cost_type: delivery }
+      - { causal_job: ORD-VEC-0002, hours: 4, base_minor: 12000, premium_share_minor: 1636, amount_minor: 13636, product_line: "Crew", cost_type: counter }
+      - { causal_job: ORD-VEC-0003, hours: 2, base_minor: 6000, premium_share_minor: 818, amount_minor: 6818, product_line: "Tables & Chairs", cost_type: warehouse }
+
+derivation: >-
+  **Hand-computed, and the residual is the point.** One person, eleven hours at $30.00, across three
+  causal jobs — 5h, 4h, 2h.
+  Base: 11 x 3000 = **33000**, charged to the job actually worked, overtime hours included.
+  Premium: 3 hours past eight at half the rate again = 3 x 1500 = **4500**.
+  Pro-rata by hours, which is the same base the direct half uses:
+    4500 x 5/11 = 2045.45…  4500 x 4/11 = 1636.36…  4500 x 2/11 = 818.18…
+  Truncated those are 2045 + 1636 + 818 = 4499, so **one cent is left over**. It goes to the largest
+  share, giving 2046 / 1636 / 818 = 4500 exactly.
+  Line totals: 15000+2046 = 17046, 12000+1636 = 13636, 6000+818 = 6818. `control_total` =
+  33000 + 4500 = **37500**, and the three transfers sum to it.
+  **Where that cent was decided is the whole reason this vector exists.** `amount:` is a dotted path
+  with no arithmetic, so the ledger receives 17046 and never computes it. The rounding happens in
+  the shift record, upstream, where the money rules already apply — the same fence that keeps a tax
+  rate from being quantized inside `invoice_issued`.
+  **Chronological attribution is what this refuses.** Under it the premium would land entirely on
+  whichever job the clock was on after hour eight, so running ORD-VEC-0003 first instead of last
+  would change all three jobs' COGS without changing a single hour worked.
+  **This is the only vector in the spec that exercises `cost_type`**, and it uses all three declared
+  values. Both dimensions are required here because 5800 is the one account in the chart naming
+  `cost_type`; 2000 names none, so the union is exactly what each transfer declares.
+  No unabsorbed leg: `unabsorbed_minor` is 0 and a zero-amount posting is not written.
+
+expect:
+  transfers:
+    - { debit_account: 5800, credit_account: 2000, amount_minor: 17046, accounting_date: "2026-08-06", product_line: "Delivery", cost_type: delivery }
+    - { debit_account: 5800, credit_account: 2000, amount_minor: 13636, accounting_date: "2026-08-06", product_line: "Crew", cost_type: counter }
+    - { debit_account: 5800, credit_account: 2000, amount_minor: 6818, accounting_date: "2026-08-06", product_line: "Tables & Chairs", cost_type: warehouse }
+  rejects: []

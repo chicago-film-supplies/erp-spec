@@ -1,0 +1,51 @@
+name: guaranteed-hours-unworked-land-in-5801
+posting_rule: shift_recorded
+kind: accept
+source: >-
+  ADR-0019 and OQ-008 — a scheduled person is **guaranteed 8 hours** whether or not the work fills
+  them, so the unworked balance is a real cost attributable to no job. Wage is the live default,
+  $30.00/hr. Hours synthetic.
+
+given:
+  ledger_state:
+    closed_periods: []
+    consecutive_days_worked: 2
+  shift:
+    id: SH-VEC-0002
+    person: PER-VEC-0001
+    date: "2026-08-06"
+    wage_minor_per_hour: 3000
+    hours_guaranteed: 8
+    hours_worked: 5
+    hours_idle: 3
+    hours_at_premium: 0
+    premium_minor: 0
+    base_minor: 24000
+    cost_minor: 24000
+    unabsorbed_minor: 9000
+    absorbed_allocations:
+      - { causal_job: ORD-VEC-0001, hours: 5, base_minor: 15000, premium_share_minor: 0, amount_minor: 15000, product_line: "Delivery", cost_type: delivery }
+
+derivation: >-
+  A guaranteed eight-hour day with five hours of causal work in it. 5 x 3000 = **15000** absorbs
+  into 5800 against the job; the remaining 3 x 3000 = **9000** is owed to the person, caused by no
+  job, and lands in 5801. `control_total` = 24000 = the day's cost, and the two transfers sum to it.
+  **The gap between the two accounts IS the utilisation number** (ADR-0019). Not a rate variance —
+  costing is actual at that person's own wage, so no standard rate exists to deviate from, which is
+  what HOT-010 settled. What these two accounts measure is how much of a guaranteed day found work.
+  **5801 carries NO dimension, and that is the design rather than an omission.** Its chart entry
+  names none, so declaring one would be refused exactly as omitting one on 5800 would be — the
+  obligation is read off the accounts (ADR-0025). Idle time belongs to no product line and to no
+  kind of work; giving it either would turn the account into a plug that quietly absorbs whatever
+  the allocation could not place, and the KPI would stop meaning anything. See
+  `product-line-on-unabsorbed-hours-rejected`.
+  The absorbed line carries both dimensions, because 5800 names both.
+  Contrast `overtime-premium-pro-rata-across-the-days-jobs`, where the day overflowed instead of
+  underflowing: same account pair, opposite direction, and only one of the two legs is written in
+  each.
+
+expect:
+  transfers:
+    - { debit_account: 5800, credit_account: 2000, amount_minor: 15000, accounting_date: "2026-08-06", product_line: "Delivery", cost_type: delivery }
+    - { debit_account: 5801, credit_account: 2000, amount_minor: 9000, accounting_date: "2026-08-06" }
+  rejects: []

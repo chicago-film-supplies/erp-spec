@@ -13,8 +13,8 @@
 # Every one of the 24 now appears below in exactly one of four buckets, and gate 10e fails if any
 # event is missing from all of them or present in more than one:
 #
-#   rules[] status: specified   9   fully written, with golden vectors
-#   rules[] status: blocked     4   named blocker that is genuinely still open; NO postings written
+#   rules[] status: specified  10   fully written, with golden vectors
+#   rules[] status: blocked     3   named blocker that is genuinely still open; NO postings written
 #   no_posting[]               11   produces no GL posting at all, with the reason
 #   unwritten[]                 0   in scope, no blocker, not yet specified — each names an issue
 #
@@ -501,39 +501,82 @@ rules:
   # than a blank because it will be believed.
   # ══════════════════════════════════════════════════════════════════════════════════════════════
   - id: shift_recorded
-    status: blocked
-    blocked_by: [OQ-018, OQ-019, OQ-024]
+    status: specified
     trigger:
       event: EVT-FUL-002
       source_document: shift
     accounting_date: shift.date
     posting_timestamp: assigned_by_ledger
-    postings: []
-    known:
+    journal_entry:
+      spans_multiple_source_documents: false
+    postings:
+      - debit_account: 5800
+        credit_account: 2000
+        per: shift.absorbed_allocations
+        amount: allocation.amount_minor
+        dimensions:
+          product_line: allocation.product_line
+          cost_type: allocation.cost_type
+      - debit_account: 5801
+        credit_account: 2000
+        amount: shift.unabsorbed_minor
+        dimensions: none
+    control_total: shift.cost_minor
+    invariants:
       - >-
-        Dr **5800 Cost of Goods Sold: Wages (Absorbed)** — hours actually worked on a causal job, at that
-        person's ACTUAL per-contact wage, dimensioned. There is no standard rate (ADR-0019).
+        **The credit leg is 2000 Accounts Payable, because CFS has no payroll liability and never
+        has** (OQ-024). Payroll processing is a charter non-goal: an external employer of record
+        stays, and CFS "does not calculate withholding, file payroll tax, or move payroll money".
+        **An EOR is not payroll — it is a vendor that invoices.** Measured on CFS's own balance
+        sheet at 2025-12-31 on both bases: current liabilities are 2000, the 2100 credit-card block,
+        2200, 2600 and the two PSA accounts, and **no payroll liability in any of four comparative
+        years** — consistent with 2160/2170/2180/2190 all being Archived. The ledger therefore never
+        carries gross-to-net; withholding and employer taxes are the EOR's ledger.
       - >-
-        Dr **5801 Cost of Goods Sold: Wages (Unabsorbed)** — guaranteed-but-unworked hours and idle time,
-        UNDIMENSIONED by design. This account IS the idle-capacity KPI, not a plug, and the gap
-        between the two accounts measures UTILISATION rather than rate deviation.
+        **5800 absorbed / 5801 unabsorbed measures UTILISATION, not rate deviation** (ADR-0019).
+        Costing is ACTUAL at that person's per-contact wage, so there is no standard rate and no
+        rate variance to compute — HOT-010. Hours worked on a causal job absorb into 5800; the
+        guaranteed-but-unworked balance of the day lands in 5801, and the gap between the two IS the
+        idle-capacity number.
       - >-
-        Cr — **undecided, see OQ-024.** Cost flows from the purchase order / bill that labour
-        scheduling generates (ADR-0019), which points at 2000 Accounts Payable, but that is an
-        inference from account status rather than a decision.
-    unknown:
+        **5801 is undimensioned BY DESIGN and that is load-bearing.** Its chart entry names no
+        dimension, so a posting to it may not declare one — idle time belongs to no product line and
+        no kind of work, and letting it carry either would make it a plug that absorbs whatever the
+        allocation could not place. 5800 names **both** `product_line` and `cost_type`; it is the
+        only account in the chart that names `cost_type` at all (ADR-0025).
       - >-
-        **OQ-018** — which causal job absorbs the overtime premium when a shift spans several. The
-        TOTAL is known from the bill; the ALLOCATION is not, so 5800's split across jobs cannot be
-        written. Guessing it is exactly the "distributing OT" guesswork OQ-008 set out to remove.
+        **The overtime hour splits in two** (OQ-018). The BASE rate for every hour, overtime
+        included, is direct labour charged to the causal job worked. The **PREMIUM** is allocated
+        **pro-rata by hours across that day's causal jobs** — the standard cost-accounting
+        convention, because the premium is caused by the day's volume in aggregate rather than by
+        whichever job was on the clock after hour eight. Chronological attribution would make the
+        same two jobs in the opposite order produce different COGS.
       - >-
-        **OQ-019** — what a consecutive day is, and whether the 6th/7th-day 1.5x compounds with the
-        after-8-hours 1.5x. This decides the TOTAL, not merely its split.
+        **The allocation is performed in the SHIFT RECORD, never here.** `amount:` is a dotted path
+        with no arithmetic, so the pro-rata rounding — and the residual cent when hours do not
+        divide the premium evenly — is decided upstream, in the document, where the money rules
+        already apply. This is the fence that keeps a posting rule from becoming the place a rate
+        gets quantized, and `overtime-premium-pro-rata-across-the-days-jobs` is a deliberately
+        non-dividing case.
       - >-
-        **OQ-024** — the credit leg has no account. Every payroll liability in the live chart
-        (2160, 2170, 2180, 2190) is Archived and proposed for drop, and 6600 Wages is an expense.
-        The rule cannot balance even in principle until this is named.
-    relates_to: [ADR-0019, REQ-LED-001]
+        **Overtime a customer specifically asked for is charged direct to the order that asked, and
+        the override is recorded AS an override** — the same shape OQ-004 gave a `handling_bucket`
+        override, so costing can always tell a stated exception from the default.
+      - >-
+        **A sixth consecutive day worked is 1.5x for the whole day, and premium applies once**
+        (OQ-019). The 6th-day multiplier does not compound with the after-eight-hours multiplier: a
+        tenth hour on a sixth day is 1.5x, not 2.25x. "Consecutive" is a rolling count of calendar
+        days worked, not a position within a payroll week — the industry convention, and CFS is
+        non-union so nothing forces the statutory workweek reading.
+      - >-
+        ⚠️ **A seventh consecutive day POSTS. It is a compliance failure, not a rate** (OQ-019).
+        Illinois ODRISA requires 24 consecutive hours of rest in every consecutive seven-day period,
+        so the SCHEDULER refuses one with an audited override. The ledger records what happened —
+        work performed is cost incurred, and refusing to post it would understate COGS and hide the
+        breach in the one system that noticed it. The control belongs where the action is taken, not
+        where the fact is recorded, which is the same reasoning OQ-028 applied to an overpayment.
+    relates_to: [ADR-0019, ADR-0025, REQ-LED-001]
+    vectors_dir: ledger/vectors/shift_recorded/
 
   - id: depreciation_run
     status: blocked

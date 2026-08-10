@@ -1,0 +1,57 @@
+name: product-line-on-unabsorbed-hours-rejected
+posting_rule: shift_recorded
+kind: reject
+source: >-
+  ADR-0019 — 5801 is undimensioned by design and **IS the idle-capacity KPI, not a plug**. ADR-0025
+  makes the obligation per account, so an account naming no dimension refuses one just as firmly as
+  an account naming one refuses its absence.
+
+differs_from: guaranteed-hours-unworked-land-in-5801
+differs_in: ["shift.unabsorbed_product_line"]
+
+given:
+  ledger_state:
+    closed_periods: []
+    consecutive_days_worked: 2
+  shift:
+    id: SH-VEC-0005
+    person: PER-VEC-0001
+    date: "2026-08-06"
+    wage_minor_per_hour: 3000
+    hours_guaranteed: 8
+    hours_worked: 5
+    hours_idle: 3
+    hours_at_premium: 0
+    premium_minor: 0
+    base_minor: 24000
+    cost_minor: 24000
+    unabsorbed_minor: 9000
+    unabsorbed_product_line: "Delivery"
+    absorbed_allocations:
+      - { causal_job: ORD-VEC-0001, hours: 5, base_minor: 15000, premium_share_minor: 0, amount_minor: 15000, product_line: "Delivery", cost_type: delivery }
+
+derivation: >-
+  Identical to `guaranteed-hours-unworked-land-in-5801` except that the idle three hours are handed
+  a product line — "Delivery", the same one the worked hours carry, which is what makes it plausible
+  rather than obviously wrong. Amounts balance and the control total is satisfied. It is refused on
+  the dimension alone.
+  **5801 names no dimension, so a posting to it may declare none.** The obligation is read off the
+  accounts, and neither 5801 nor 2000 requires one — declaring an unrequired dimension is the same
+  class of error as omitting a required one, and the gate treats it the same way.
+  **The reason is not tidiness.** Idle time is caused by no job; that is the definition of
+  unabsorbed. Attaching a product line to it asserts that three unworked hours belong to the
+  delivery line, which would inflate delivery's cost with capacity it never consumed and — worse —
+  make the account *look* attributable. **5801 is the one account whose value comes from being
+  un-attributable**: the gap between it and 5800 is the utilisation number, and it only means
+  something if nothing can be quietly pushed across the boundary.
+  Once 5801 can carry a dimension it becomes a plug — a place to put whatever the allocation could
+  not place, dressed as an allocation. The next step down that path is deciding idle time "really
+  belonged" to a job after all, and then the KPI reports zero forever.
+  The right way to say these hours were caused by delivery work is to have worked them: absorb them
+  into 5800 against a causal job, which `guaranteed-hours-unworked-land-in-5801` does with the five
+  hours that were.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "the unabsorbed leg declares product_line, and neither 5801 nor 2000 requires a dimension — 5801 is the idle-capacity KPI and must not become a plug (ADR-0019, ADR-0025)"

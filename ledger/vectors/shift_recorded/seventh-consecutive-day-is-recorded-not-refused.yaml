@@ -1,0 +1,60 @@
+name: seventh-consecutive-day-is-recorded-not-refused
+posting_rule: shift_recorded
+kind: accept
+source: >-
+  OQ-019 and Illinois ODRISA as amended 2023-01-01 — 24 consecutive hours of rest in every
+  consecutive seven-day period, civil penalties to $250 per offence with each seven-day period a
+  separate offence
+  (<https://labor.illinois.gov/content/dam/soi/en/web/idol/laws-rules/fls/odrisa/One%20Day%20Rest%20in%20Seven%20Act%20Eff.%20Jan%201%202023.pdf>).
+  Wage is the live default. Hours synthetic.
+
+given:
+  ledger_state:
+    closed_periods: []
+    consecutive_days_worked: 7
+  shift:
+    id: SH-VEC-0003
+    person: PER-VEC-0001
+    date: "2026-08-09"
+    wage_minor_per_hour: 3000
+    hours_guaranteed: 8
+    hours_worked: 8
+    hours_at_premium: 8
+    premium_multiplier: 1.5
+    premium_minor: 12000
+    base_minor: 24000
+    cost_minor: 36000
+    unabsorbed_minor: 0
+    scheduling_override:
+      rule: odrisa_seventh_consecutive_day
+      approved_by: USR-VEC-0001
+      reason: "customer wrap moved; no relief driver available"
+    absorbed_allocations:
+      - { causal_job: ORD-VEC-0004, hours: 8, base_minor: 24000, premium_share_minor: 12000, amount_minor: 36000, product_line: "Transport", cost_type: delivery }
+
+derivation: >-
+  A seventh consecutive day worked. Eight hours at $30.00, the whole day at the 1.5x consecutive-day
+  multiplier: base 24000 plus premium 12000 = **36000**, all of it absorbed against the one causal
+  job. `control_total` = 36000.
+  **The premium applies ONCE.** These eight hours are at 1.5x because of the consecutive-day rule,
+  not 2.25x from compounding it with the after-eight-hours rule (OQ-019). An hour is premium or it
+  is not.
+  ⚠️ **This vector exists to assert what the ledger does NOT do.** A seventh consecutive day is
+  generally unlawful in Illinois — ODRISA has required 24 consecutive hours of rest in every rolling
+  seven-day period since 2023, and it was amended from "per calendar week" precisely to close the
+  across-the-boundary schedule this shift represents. The control therefore lives in **scheduling**,
+  which refuses the seventh day and records `scheduling_override` when a human overrides it.
+  **The ledger posts anyway, and refusing would be the worse answer.** The work was performed and
+  the person is owed for it, so the cost was incurred. A ledger that declined to record it would
+  understate COGS, break the tie to the EOR's invoice, and erase the one durable trace that the
+  breach happened — in the system most likely to be looked at afterwards. **A control belongs where
+  the action is taken, not where the fact is recorded**; the same reasoning settled OQ-028's
+  overpayment, where refusing the entry would have put the ledger further from the bank rather than
+  closer.
+  So the compliance signal is the `scheduling_override` on the shift and the consecutive-day count
+  in ledger state — both queryable, both attributable — and not a missing journal entry.
+
+expect:
+  transfers:
+    - { debit_account: 5800, credit_account: 2000, amount_minor: 36000, accounting_date: "2026-08-09", product_line: "Transport", cost_type: delivery }
+  rejects: []
