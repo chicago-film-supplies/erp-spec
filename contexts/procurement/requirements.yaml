@@ -1,0 +1,15 @@
+# Requirements for PRO. Nothing lands here directly — everything is promoted from inbox/.
+#
+# Required per requirement: id, statement, rationale, source, priority, verification_method, status.
+# verification_method: inspection | analysis | demonstration | test
+# priority: must | should | could
+# status: draft | agreed | superseded
+#
+# Statements are implementation-free. "The system shall record the acting crew member on every
+# leg" — not "add an actor_id column".
+#
+# Empty on purpose. The context was scaffolded from an answered decision (OQ-020), and promoting a
+# requirement is a separate act with its own evidence — see erp-spec#6, the promotion backlog.
+# Ids will be `REQ-PRO-001` onward.
+
+requirements: []

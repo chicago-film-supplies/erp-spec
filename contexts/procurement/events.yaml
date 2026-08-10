@@ -1,0 +1,69 @@
+# Domain events for PRO.
+#
+# Every event needs a producer and at least one consumer, or `terminal: true`.
+#
+# These three are the three STAGES of the procure-to-pay cycle (OQ-020), not an arbitrary cut. Each
+# answers a different forecasting question, and the reason procurement is a ninth context at all is
+# that CFS's current system records only the last of them.
+#
+# ⚠️ They moved here from a deliberate GAP in `contexts/ledger/events.yaml`, whose header recorded
+# that purchase-order events belonged to no context and were absent pending OQ-020. That gap is now
+# closed; the header there is updated rather than left describing a state that no longer holds.
+#
+# What is deliberately NOT here yet: bill payment (Banking owns what leaves the account), PO
+# amendment and cancellation, and the receipt/matching step between a PO and a bill. Three-way
+# matching is a real procurement concern and is not modelled until someone asks it to be — inventing
+# the event now would be inventing the lifecycle it belongs to.
+
+events:
+  - id: EVT-PRO-001
+    name: PurchaseOrderIssued
+    description: >-
+      A commitment to buy was authorised — labour, inventory, or a fixed asset. Committed, not
+      incurred: nothing has been received and nothing is owed.
+    producer: procurement
+    consumers: [ledger]
+    terminal: false
+    carries: [purchase_order_id, vendor_ref, kind, committed_amount_minor, expected_date]
+    note: >-
+      **Posts nothing, and that is the decision rather than an omission.** A commitment is not a
+      transaction: no asset has been received and no liability has arisen, so there is no entry that
+      would balance. Recording it in the ledger anyway is the mistake that makes a commitment look
+      like a payable. It is recorded in `no_posting` with that reason, so the coverage gate can tell
+      "decided not to post" from "nobody wrote the rule".
+      Its value is entirely forecasting — this is the stage that answers *what have we committed to
+      spend*, which nothing in the current system can answer.
+
+  - id: EVT-PRO-002
+    name: ObligationAccrued
+    description: >-
+      Goods or services were received, or work was performed, and no vendor invoice has arrived.
+      The amount is known; the invoice date is not.
+    producer: procurement
+    consumers: [ledger]
+    terminal: false
+    carries: [obligation_id, purchase_order_id, accrual_date, amount_minor, source_document_ref]
+    note: >-
+      **The stage CFS has never had, and the one that makes the ledger accurate on the shift date.**
+      `shift_recorded` credits 2000 Accounts Payable today, but the EOR has not invoiced yet — so
+      the accurate credit is an accrued liability, not a payable. Same shape for `asset_acquired`.
+      Its posting rule is `unwritten` (erp-spec#14) and the accrued-expense account it needs does
+      not exist in the chart.
+
+  - id: EVT-PRO-003
+    name: VendorBillReceived
+    description: >-
+      A vendor invoice arrived, carrying a date and payment terms. Where an obligation was already
+      accrued, this RECLASSIFIES it from the accrued liability into Accounts Payable rather than
+      recording the cost a second time.
+    producer: procurement
+    consumers: [ledger, banking]
+    terminal: false
+    carries: [bill_id, vendor_ref, obligation_id, bill_date, due_date, amount_minor, terms]
+    note: >-
+      **The reclassification is the whole difficulty.** A bill that matches an accrual must move the
+      liability, and a bill with no accrual behind it must book the cost — one event, two postings,
+      discriminated by whether `obligation_id` resolves. Getting that wrong double-counts the
+      expense, and it double-counts it in a way that still balances.
+      This is also the stage that answers *what leaves the bank and when*, which is the only one of
+      the three the current system holds.

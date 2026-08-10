@@ -12,6 +12,7 @@ import { parse as parseYaml } from "@std/yaml";
 import { walk } from "@std/fs";
 import { basename, relative } from "@std/path";
 import { CHECKS, CLOCK_DEPENDENT, evaluateMilestones } from "./milestone-checks.ts";
+import { CONTEXT_CODE_ALTERNATION, CONTEXT_DIRS } from "./contexts.ts";
 
 const ROOT = new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const TRIAGE_ONLY = Deno.args.includes("--triage-only");
@@ -87,22 +88,12 @@ async function filesIn(dir: string, ext: string): Promise<string[]> {
 }
 
 // ── load the world ──────────────────────────────────────────────────────────
-const CONTEXT_CODES: Record<string, string> = {
-  LED: "ledger",
-  FUL: "fulfillment",
-  BIL: "billing",
-  FA: "fixed-assets",
-  ORD: "ordering",
-  AVL: "availability",
-  BNK: "banking",
-  TAX: "tax",
-};
-const CONTEXT_DIRS = new Set(Object.values(CONTEXT_CODES));
-
+// The registry lives in `tools/contexts.ts` — see the note there on why these were four
+// hand-maintained lists and are now one.
 const PATTERNS: Record<string, RegExp> = {
-  REQ: /^REQ-(LED|FUL|BIL|FA|ORD|AVL|BNK|TAX)-\d{3}$/,
+  REQ: new RegExp(`^REQ-(${CONTEXT_CODE_ALTERNATION})-\\d{3}$`),
   ADR: /^ADR-\d{4}$/,
-  EVT: /^EVT-(LED|FUL|BIL|FA|ORD|AVL|BNK|TAX)-\d{3}$/,
+  EVT: new RegExp(`^EVT-(${CONTEXT_CODE_ALTERNATION})-\\d{3}$`),
   HOT: /^HOT-\d{3}$/,
   OQ: /^OQ-\d{3}$/,
   SPIKE: /^SPIKE-\d{3}$/,

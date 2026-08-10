@@ -355,7 +355,7 @@
           <outline text="A count of orders in the replay whose status could NOT be derived, with the reason for each."/>
         </outline>
       </outline>
-      <outline text="Contexts (8)">
+      <outline text="Contexts (9)">
         <outline text="ledger (LED)" _note="1 requirement(s) · 2 event(s)">
           <outline text="REQ-LED-001 — Every posting to an account whose chart entry names a required dimension shall DECLARE that dimensi…"/>
           <outline text="EVT-LED-001 — JournalEntryPosted" _note="ledger → banking"/>
@@ -406,6 +406,11 @@
           <outline text="EVT-TAX-001 — TaxDetermined" _note="tax → billing, ledger"/>
           <outline text="EVT-TAX-002 — TaxExemptionApplied" _note="tax → billing, ledger"/>
           <outline text="EVT-TAX-003 — TaxRateSuperseded" _note="tax → billing"/>
+        </outline>
+        <outline text="procurement (PRO)" _note="0 requirement(s) · 3 event(s)">
+          <outline text="EVT-PRO-001 — PurchaseOrderIssued" _note="procurement → ledger"/>
+          <outline text="EVT-PRO-002 — ObligationAccrued" _note="procurement → ledger"/>
+          <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
       <outline text="Capture (39 unpromoted of 50)" _note="no drops pending">

@@ -59,7 +59,13 @@ milestones:
     title: Context map and glossary v1
     depends_on: [m1]
     exit_criteria:
-      - text: All eight contexts have a context.md stating their responsibility and their boundary.
+      - text: All nine contexts have a context.md stating their responsibility and their boundary.
+        # Was "eight". OQ-020 made procurement the ninth bounded context on 2026-08-09, and this
+        # criterion read MET at the time — editing a met criterion is the honest cost of accepting
+        # a ninth context, and it was named as such in the decision rather than discovered later.
+        # The checker counts `tools/contexts.ts`, so the number in this text is prose and the
+        # registry is what decides. They are kept in step by hand; if that ever drifts, the checker
+        # wins and this sentence is the thing that is wrong.
         check: contexts_have_context_md
       - text: "Zero glossary terms with `definition: TODO`."
         check: glossary_no_todo

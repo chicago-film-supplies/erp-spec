@@ -1,13 +1,15 @@
 # Domain events for LED.
 # Every event needs a producer and at least one consumer, or `terminal: true`.
 #
-# ⚠️ PURCHASE ORDERS HAVE NO CONTEXT. OQ-008 made POs first-class in v2 with two use cases —
-# the document labour scheduling generates and costs flow from, and inventory acquisition (retail
-# stock, and fixed assets for rental or internal ops). None of the eight contexts owns procurement:
-# ledger records the consequence, fixed-assets receives the asset, availability receives the stock,
-# but nothing owns the inbound document. Placing PO events in any of them would be arbitrary, so
-# they are deliberately absent pending OQ-020. Note a ninth context would change m2's exit criterion,
-# which names eight.
+# ✅ PURCHASE ORDERS NOW HAVE A CONTEXT. This header used to record a deliberate gap: POs were
+# first-class in v2 (OQ-008) and none of the eight contexts owned them, so placing their events in
+# any of them would have been arbitrary and they were left absent pending OQ-020.
+# OQ-020 answered it — **procurement is the ninth bounded context** — and the events live in
+# `contexts/procurement/events.yaml` as EVT-PRO-001..003, the three stages of the procure-to-pay
+# cycle. m2's exit criterion was edited from eight to nine, which the decision named as its cost.
+# What the ledger still owes them: EVT-PRO-002 and EVT-PRO-003 are in `unwritten` (erp-spec#14),
+# and the accrued-expense account they need is not in the chart. `shift_recorded` and
+# `asset_acquired` credit 2000 Accounts Payable today and should credit that accrual once it exists.
 
 events:
   - id: EVT-LED-001

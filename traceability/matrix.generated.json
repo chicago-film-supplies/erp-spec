@@ -4,7 +4,7 @@
     "requirements": 2,
     "adrs": 31,
     "adrs_accepted": 17,
-    "events": 33,
+    "events": 36,
     "inbox": 50,
     "inbox_promoted": 11
   },
@@ -71,7 +71,8 @@
       "ordering",
       "availability",
       "banking",
-      "tax"
+      "tax",
+      "procurement"
     ],
     "inbox_unpromoted": [
       "inbox/2026-08-08-actor-and-clock-per-leg.md",

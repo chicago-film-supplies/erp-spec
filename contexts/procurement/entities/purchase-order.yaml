@@ -1,0 +1,47 @@
+# EXAMPLE ENTITY — one per context, to fix the shape. Not a schema. Not exhaustive.
+entity: PurchaseOrder
+description: >-
+  An authorised commitment to buy. The first of the three procure-to-pay stages, and the one no
+  existing CFS document can express — it is committed, not incurred, so it owes nothing and posts
+  nothing.
+fields:
+  purchase_order_id: { type: uuid, required: true }
+  vendor_ref: { type: contact_id, required: true }
+  kind: {
+    type: enum,
+    values: [labour, inventory, fixed_asset, recurring],
+    required: true,
+    note: "OQ-008 gave POs two use cases and OQ-020 added recurring bills. `labour` is the document labour scheduling generates and EOR cost flows from; an EOR is a vendor, not payroll (OQ-024).",
+  }
+  committed_amount_minor: {
+    type: int64,
+    required: true,
+    note: "integer minor units. never a float, never a decimal string",
+  }
+  order_date: {
+    type: date,
+    required: true,
+    note: "when the commitment was made. NOT an accounting date — this document posts nothing, so it has no period",
+  }
+  expected_date: {
+    type: date,
+    required: false,
+    note: "what the spend forecast is built on. deliberately nullable — a commitment with no expected date is still a commitment",
+  }
+  status: {
+    type: enum,
+    values: [open, partially_received, received, cancelled],
+    required: true,
+    note: "DERIVED, not assigned — ADR-0014. Computed from the obligations accrued against it, never set by a writer.",
+  }
+  obligations: {
+    type: list,
+    of: obligation_ref,
+    required: true,
+    note: "the accruals raised against this PO. the join that makes `status` derivable and lets a partially-received order be reported as such",
+  }
+  source_document: {
+    type: document_ref,
+    required: false,
+    note: "the scheduling record or replenishment decision that caused it. nullable because a PO may be raised directly.",
+  }

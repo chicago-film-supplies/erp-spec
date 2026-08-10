@@ -695,6 +695,15 @@ rules:
 # NO POSTING — these reach the ledger context but produce no GL entry. Each says why.
 # ══════════════════════════════════════════════════════════════════════════════════════════════════
 no_posting:
+  - event: EVT-PRO-001
+    reason: >-
+      **A commitment is not a transaction.** Nothing has been received and no liability has arisen,
+      so there is no entry that would balance. Posting one anyway is what makes a commitment look
+      like a payable — the precise confusion procurement exists to remove (OQ-020).
+      Its value is entirely forecasting: this is the stage that answers "what have we committed to
+      spend", which nothing in the current system can answer. That belongs to the read side, not to
+      the ledger.
+
   - event: EVT-LED-001
     reason: >-
       Emitted BY the ledger as the consequence of a rule that already posted. A posting rule
@@ -779,4 +788,21 @@ no_posting:
 # The list stays here rather than being deleted: it is where the next uncovered event goes, and an
 # empty bucket is a claim gate 10e can check. Nothing may be parked here without a GitHub issue.
 # ══════════════════════════════════════════════════════════════════════════════════════════════════
-unwritten: []
+unwritten:
+  - event: EVT-PRO-002
+    issue: erp-spec#14
+    proposed_rule: >-
+      Dr the expense or asset, Cr an **accrued liability**. The account does not exist — the live
+      chart has no accrued-expense account, and the archived payroll liabilities are NOT it (CFS has
+      no payroll liability across four years and payroll is a charter non-goal; the EOR is a vendor
+      that invoices — OQ-024). So this rule pulls a chart entry with it.
+
+  - event: EVT-PRO-003
+    issue: erp-spec#14
+    proposed_rule: >-
+      Where an obligation was accrued, **reclassify**: Dr the accrued liability, Cr 2000 Accounts
+      Payable — the cost is already booked and must not be booked again. Where none was, book the
+      cost directly. One event, two postings, discriminated by whether `obligation_id` resolves.
+      ⚠️ Getting this wrong double-counts the expense **in a way that still balances**, so no balance
+      check catches it. It is the strongest reject-vector candidate in the whole ledger: an
+      accrued-then-billed obligation whose bill re-books instead of reclassifying, asserted refused.

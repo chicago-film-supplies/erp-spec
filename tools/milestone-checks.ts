@@ -88,16 +88,7 @@ interface World {
   unwrittenRules: number;
 }
 
-const CONTEXTS = [
-  "ledger",
-  "fulfillment",
-  "billing",
-  "fixed-assets",
-  "ordering",
-  "availability",
-  "banking",
-  "tax",
-];
+import { CONTEXTS } from "./contexts.ts";
 
 async function readYaml<T>(p: string): Promise<T | null> {
   try {
