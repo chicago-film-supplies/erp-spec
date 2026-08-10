@@ -26,6 +26,19 @@ requirements:
       failure was postings where nobody decided and the field was quietly left empty — an explicit
       null is a decision, and a countable, reportable one. An empty string is refused alongside
       absence, because it passes a naive NOT NULL check while meaning nothing.
+      ⚠️ **The 28.7% headline overstates the defect, and the correction matters because the number
+      is what justifies the rule.** It was measured on 2026-08-08, BEFORE ADR-0025 made a declared
+      null a legal answer — so "carries no product line" and "is a defect" were the same statement
+      then and are not now. Decomposed by account on 2026-08-09 across all 9,194 revenue-bearing
+      lines (`inbox/2026-08-09-untracked-revenue-decomposes-into-three-populations.md`):
+      **2.8%** sits on accounts that name no dimension at all (4800 Other Income, 2210, 2800) —
+      a dimension there would be REFUSED, so it is not a defect in any reading;
+      **22.1%** is service revenue where OQ-025 already ruled a declared null is the correct answer,
+      though some of it is certainly undecided too and no line-level measure can separate them;
+      **4.0% — 143 lines, $67,156 — is on rental, retail and replacement accounts where a product
+      line obviously applies and nobody set one.** That last figure is the defect, and it is the one
+      to watch. The requirement is unchanged: absence must still be refused, and a dimension that
+      may be absent will be absent.
     source: inbox/2026-08-08-untracked-revenue-share.md
     priority: must
     verification_method: test
