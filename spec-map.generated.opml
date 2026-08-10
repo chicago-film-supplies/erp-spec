@@ -381,7 +381,7 @@
           <outline text="EVT-TAX-003 — TaxRateSuperseded" _note="tax → billing"/>
         </outline>
       </outline>
-      <outline text="Capture (30 unpromoted of 41)" _note="no drops pending">
+      <outline text="Capture (31 unpromoted of 42)" _note="no drops pending">
         <outline text="Actor per leg, clock in/out per stop, crew size per trip" _note="inbox/2026-08-08-actor-and-clock-per-leg.md"/>
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
@@ -408,6 +408,7 @@
         <outline text="Where a credit note and an advance sit — SAP, NetSuite, Sage Intacct and Odoo all draw the same lin…" _note="inbox/2026-08-09-customer-credit-balances-across-four-suites.md"/>
         <outline text="Two external services carry into v2 — Mapbox for geocoding and Resend for transactional email" _note="inbox/2026-08-09-external-boundary-services-mapbox-and-resend.md"/>
         <outline text="What the 6th/7th day actually is, who bears an overtime premium, and where a labour credit leg lands" _note="inbox/2026-08-09-labour-premium-rules-survey.md"/>
+        <outline text="Product line by revenue account, measured across all 9,194 revenue lines — Delivery is the largest…" _note="inbox/2026-08-09-product-line-by-revenue-account-matrix.md"/>
         <outline text="Retail inventory costing is the same on both bases — the measured divergence is a mistake, not a bo…" _note="inbox/2026-08-09-retail-inventory-book-difference-is-an-error.md"/>
         <outline text="The self-hosted service tier carries into v2 — Gotenberg for PDF and the full Victoria stack for ob…" _note="inbox/2026-08-09-self-hosted-tier-gotenberg-and-the-victoria-stack.md"/>
         <outline text="Both a tax-basis and a GAAP-basis P&amp;L and balance sheet are required, across years" _note="inbox/2026-08-09-tax-and-gaap-statements-are-both-required.md"/>
