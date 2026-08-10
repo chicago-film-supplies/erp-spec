@@ -2,8 +2,8 @@
 
 ## Responsibility
 
-Turning fulfilled work into money owed. Owns invoices, credit notes, line items, discounts,
-pricing application, and the invoice lifecycle including void.
+Turning fulfilled work into money owed. Owns invoices, credit notes, line items, discounts, pricing
+application, and the invoice lifecycle including void.
 
 ## Boundary
 

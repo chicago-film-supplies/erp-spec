@@ -1,15 +1,15 @@
 # Formal specs
 
-Two protocols are specified because their failure modes are **interleavings**, and interleavings
-are not reachable by testing or by reading.
+Two protocols are specified because their failure modes are **interleavings**, and interleavings are
+not reachable by testing or by reading.
 
 Written in **Quint** (`ADR-0016`). The `.tla` stubs these replaced were never executed and were
 deleted rather than ported — nothing was sunk.
 
-| Spec | Question |
-|---|---|
+| Spec                   | Question                                                                       |
+| ---------------------- | ------------------------------------------------------------------------------ |
 | `two-store-commit.qnt` | Can a MongoDB write and a TigerBeetle posting disagree across crash and retry? |
-| `period-close.qnt` | Can a posting land in a closed period? |
+| `period-close.qnt`     | Can a posting land in a closed period?                                         |
 
 ## Every spec has a fail-closed companion
 
@@ -28,12 +28,12 @@ it. A single-module spec would have reported "no violation found" and been belie
 Both **simulated** (randomised, 20,000 traces × 20 steps) and **verified** (Apalache symbolic
 bounded model checking, default 10 steps, Java 21).
 
-| Module | Expected | Apalache | Re-run | Simulation | Re-run |
-|---|---|---|---|---|---|
-| `two_store_commit` | hold | `NoError` (8,883 ms) | `NoError` (5,195 ms) | no violation | no violation (324 ms) |
-| `naive_sweeper` | **fail** | `Error` — counterexample (5,011 ms) | `Error` (3,895 ms) | violation at 4 states | violation (18 ms) |
-| `period_close` | hold | `NoError` (19,508 ms) | `NoError` (3,816 ms) | no violation | no violation (72 ms) |
-| `validate_then_commit` | **fail** | `Error` — counterexample (4,174 ms) | `Error` (3,707 ms) | violation | violation (19 ms) |
+| Module                 | Expected | Apalache                            | Re-run               | Simulation            | Re-run                |
+| ---------------------- | -------- | ----------------------------------- | -------------------- | --------------------- | --------------------- |
+| `two_store_commit`     | hold     | `NoError` (8,883 ms)                | `NoError` (5,195 ms) | no violation          | no violation (324 ms) |
+| `naive_sweeper`        | **fail** | `Error` — counterexample (5,011 ms) | `Error` (3,895 ms)   | violation at 4 states | violation (18 ms)     |
+| `period_close`         | hold     | `NoError` (19,508 ms)               | `NoError` (3,816 ms) | no violation          | no violation (72 ms)  |
+| `validate_then_commit` | **fail** | `Error` — counterexample (4,174 ms) | `Error` (3,707 ms)   | violation             | violation (19 ms)     |
 
 **All eight runs reproduced their recorded outcome.** The re-run exists because a recorded result
 nobody has repeated is a claim, not a measurement — the same reason a spike's `## Notes` must be
@@ -49,14 +49,13 @@ more steps than the bound is not found. Raising `--max-steps` is the lever.
 
 ### What the companions actually found
 
-- **`naive_sweeper`** — `reserve → writeDoc → blindTimeout`. A recovery sweeper that voids a
-  pending transfer on timeout *without reading Mongo* leaves a written document behind a voided
-  transfer. That is SPIKE-002's failure mode 2, and blind-timeout is the obvious implementation.
-  The fix is in the protocol: recovery reads Mongo and either voids (document absent) or posts
-  (document present).
-- **`validate_then_commit`** — `validate(period 0) → close(0) → commit`. Checking the period only
-  at validation time lands a posting in a period closed underneath it. Time-of-check/time-of-use.
-  The fix is a re-check at commit, and `refuse` exists so a posting whose period closed is refused
+- **`naive_sweeper`** — `reserve → writeDoc → blindTimeout`. A recovery sweeper that voids a pending
+  transfer on timeout _without reading Mongo_ leaves a written document behind a voided transfer.
+  That is SPIKE-002's failure mode 2, and blind-timeout is the obvious implementation. The fix is in
+  the protocol: recovery reads Mongo and either voids (document absent) or posts (document present).
+- **`validate_then_commit`** — `validate(period 0) → close(0) → commit`. Checking the period only at
+  validation time lands a posting in a period closed underneath it. Time-of-check/time-of-use. The
+  fix is a re-check at commit, and `refuse` exists so a posting whose period closed is refused
   rather than silently dropped or silently landed.
 
 ## Running

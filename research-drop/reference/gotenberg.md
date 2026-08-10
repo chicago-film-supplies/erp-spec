@@ -17,9 +17,9 @@ new choice.
 - **It fails QUIET.** With `GOTENBERG_URL` unset the v1 client returns a **placeholder blank PDF**
   rather than erroring, so an environment that renders nothing looks healthy. Any liveness check
   must assert on content, not on a 200.
-- **The 65s client deadline is deliberate and load-bearing.** It exceeds Gotenberg's own ~60s
-  render timeout because a cold-start render under concurrency=1 / scale-to-zero legitimately runs
-  tens of seconds; aborting below 60s reproduced 502s an infra fix had already eliminated. Under
+- **The 65s client deadline is deliberate and load-bearing.** It exceeds Gotenberg's own ~60s render
+  timeout because a cold-start render under concurrency=1 / scale-to-zero legitimately runs tens of
+  seconds; aborting below 60s reproduced 502s an infra fix had already eliminated. Under
   self-hosting the cold-start profile changes — **re-derive the number, do not copy it**.
 - **v1 auth does not survive the move.** The client mints a Cloud Run ID token; on Linode there is
   no metadata server. The service carries over, its front door does not.

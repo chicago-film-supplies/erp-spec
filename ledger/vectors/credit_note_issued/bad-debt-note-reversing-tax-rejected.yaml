@@ -24,7 +24,13 @@ given:
       - net_minor: 23000
         description: "Uncollectible — invoice 1322, no response after 180 days"
     tax_components:
-      - { payable_account: 2200, amount_minor: 3450, tax: "Chicago Rental Tax", rate_percent: 15, base_minor: 23000 }
+      - {
+          payable_account: 2200,
+          amount_minor: 3450,
+          tax: "Chicago Rental Tax",
+          rate_percent: 15,
+          base_minor: 23000,
+        }
 
 derivation: >-
   Identical to the accept vector plus a tax leg — the entry balances, the control total is

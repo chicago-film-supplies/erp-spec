@@ -10,32 +10,40 @@ triage_count: 0
 ---
 
 Surveyed to settle the credit side of `credit_note_issued` (erp-spec#5) — a new liability account,
-or credit 1200 directly. The survey changed the *reasoning* and confirmed the *answer*.
+or credit 1200 directly. The survey changed the _reasoning_ and confirmed the _answer_.
 
 ## What the four do
 
-| | credit note / memo | value received in advance |
-|---|---|---|
-| **SAP S/4HANA** | the customer's ordinary **reconciliation account** — "when you enter a customer invoice or customer credit memo in accounts receivable, [it] is posted to the created reconciliation account in the same way" | a **special G/L indicator** routes it to an **alternative reconciliation account**, expressly because "down payments may not be presented in the balance sheet together with receivables and payables for goods and services" |
-| **NetSuite** | **Dr Sales Income / Cr Accounts Receivable**. An unapplied credit memo is a negative receivable | **Customer Deposits**, an Other Current Liability — "they don't affect the customer's accounts receivable balance" |
-| **Sage Intacct** | an AR adjustment | an unapplied payment becomes an **AR Advance**, a distinct object |
-| **Odoo** | "a reverse entry that cancels out the journal items from the original invoice" — so it credits the receivable | a **down-payment product configured to book into a Current Liabilities account** |
+|                  | credit note / memo                                                                                                                                                                                            | value received in advance                                                                                                                                                                                                     |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **SAP S/4HANA**  | the customer's ordinary **reconciliation account** — "when you enter a customer invoice or customer credit memo in accounts receivable, [it] is posted to the created reconciliation account in the same way" | a **special G/L indicator** routes it to an **alternative reconciliation account**, expressly because "down payments may not be presented in the balance sheet together with receivables and payables for goods and services" |
+| **NetSuite**     | **Dr Sales Income / Cr Accounts Receivable**. An unapplied credit memo is a negative receivable                                                                                                               | **Customer Deposits**, an Other Current Liability — "they don't affect the customer's accounts receivable balance"                                                                                                            |
+| **Sage Intacct** | an AR adjustment                                                                                                                                                                                              | an unapplied payment becomes an **AR Advance**, a distinct object                                                                                                                                                             |
+| **Odoo**         | "a reverse entry that cancels out the journal items from the original invoice" — so it credits the receivable                                                                                                 | a **down-payment product configured to book into a Current Liabilities account**                                                                                                                                              |
 
 Sources:
-- SAP special G/L: <https://learning.sap.com/courses/configuring-additional-settings-in-financial-accounting-in-sap-s-4hana/managing-the-application-view-for-special-general-ledger-transactions>
-- NetSuite GL impact per transaction type: <https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/section_N1460914.html>
-- NetSuite customer deposits: <https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/section_N1296349.html>
-- Prolecto (NetSuite practice): <https://blog.prolecto.com/2022/05/22/how-to-convert-netsuite-accounts-receivable-credits-to-customer-deposits/>
-- Sage Intacct advances: <https://ethosystems.com/blog/how-advances-work-in-sage-intacct-makeyourforemanhappy/>
-- Odoo credit notes: <https://www.odoo.com/documentation/18.0/applications/finance/accounting/customer_invoices/credit_notes.html>
-- Odoo "deposits which are liabilities, not AR credits": <https://www.odoo.com/forum/help-1/how-can-i-handle-in-advance-customer-payments-deposits-which-are-liabilities-not-ar-credits-142687>
+
+- SAP special G/L:
+  <https://learning.sap.com/courses/configuring-additional-settings-in-financial-accounting-in-sap-s-4hana/managing-the-application-view-for-special-general-ledger-transactions>
+- NetSuite GL impact per transaction type:
+  <https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/section_N1460914.html>
+- NetSuite customer deposits:
+  <https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/section_N1296349.html>
+- Prolecto (NetSuite practice):
+  <https://blog.prolecto.com/2022/05/22/how-to-convert-netsuite-accounts-receivable-credits-to-customer-deposits/>
+- Sage Intacct advances:
+  <https://ethosystems.com/blog/how-advances-work-in-sage-intacct-makeyourforemanhappy/>
+- Odoo credit notes:
+  <https://www.odoo.com/documentation/18.0/applications/finance/accounting/customer_invoices/credit_notes.html>
+- Odoo "deposits which are liabilities, not AR credits":
+  <https://www.odoo.com/forum/help-1/how-can-i-handle-in-advance-customer-payments-deposits-which-are-liabilities-not-ar-credits-142687>
 
 ## The criterion, which matters more than the default
 
 **All four put a credit memo in receivables.** Taken as a vote, that is 4–0 against a new account.
 
 But the line they are all drawing is **"is this value attached to a sale that has been billed?"** In
-every one of those systems a credit memo is raised *against an invoice*, so it belongs with that
+every one of those systems a credit memo is raised _against an invoice_, so it belongs with that
 invoice's receivable. An advance is attached to nothing, so it gets a liability — and each of the
 four built a dedicated mechanism to keep it off trade receivables, with the balance-sheet
 presentation as the stated reason.
@@ -52,12 +60,12 @@ that had only collected defaults would have got this backwards.
 
 ## Practitioner material is evidence, not colour
 
-A consultancy publishing *how to work around* a product's default measures what that default costs.
+A consultancy publishing _how to work around_ a product's default measures what that default costs.
 Prolecto, a NetSuite practice, publishes a procedure for converting AR credits into customer
 deposits to "avoid net accounts receivable credits and instead have these re-classed as customer
 deposits" in "the current liability section", noting that credits floating in AR aging "obscure the
-true financial position". The Odoo forum question is titled, in the asker's own words, *"deposits
-which are liabilities, not AR credits"*.
+true financial position". The Odoo forum question is titled, in the asker's own words, _"deposits
+which are liabilities, not AR credits"_.
 
 ## GAAP, which is the reason any of them bother
 

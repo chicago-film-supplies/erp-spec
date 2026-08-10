@@ -29,7 +29,13 @@ given:
         description: "6' Folding Table — returned early"
     write_off_lines: []
     tax_components:
-      - { payable_account: 2200, amount_minor: 3000, tax: "Chicago Rental Tax", rate_percent: 15, base_minor: 20000 }
+      - {
+          payable_account: 2200,
+          amount_minor: 3000,
+          tax: "Chicago Rental Tax",
+          rate_percent: 15,
+          base_minor: 20000,
+        }
 
 derivation: >-
   **Hand-computed.** Revenue reversed: 15000 + 5000 = 20000. Chicago Rental Tax at 15% on 20000 =
@@ -51,7 +57,24 @@ derivation: >-
 
 expect:
   transfers:
-    - { debit_account: 4000, credit_account: 2050, amount_minor: 15000, accounting_date: "2026-08-04", product_line: "Carts & Ramps" }
-    - { debit_account: 4000, credit_account: 2050, amount_minor: 5000, accounting_date: "2026-08-04", product_line: "Tables & Chairs" }
-    - { debit_account: 2200, credit_account: 2050, amount_minor: 3000, accounting_date: "2026-08-04" }
+    - {
+        debit_account: 4000,
+        credit_account: 2050,
+        amount_minor: 15000,
+        accounting_date: "2026-08-04",
+        product_line: "Carts & Ramps",
+      }
+    - {
+        debit_account: 4000,
+        credit_account: 2050,
+        amount_minor: 5000,
+        accounting_date: "2026-08-04",
+        product_line: "Tables & Chairs",
+      }
+    - {
+        debit_account: 2200,
+        credit_account: 2050,
+        amount_minor: 3000,
+        accounting_date: "2026-08-04",
+      }
   rejects: []

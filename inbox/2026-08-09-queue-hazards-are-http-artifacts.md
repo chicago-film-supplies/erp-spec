@@ -9,16 +9,16 @@ verified: true
 triage_count: 0
 ---
 
-Cloud Tasks delivers by HTTP POST to a Cloud Run URL. Five of the seven documented platform
-hazards — each of which caused an incident — exist only because of that transport, and disappear
-under an in-process worker:
+Cloud Tasks delivers by HTTP POST to a Cloud Run URL. Five of the seven documented platform hazards
+— each of which caused an incident — exist only because of that transport, and disappear under an
+in-process worker:
 
 1. **A non-2xx is a retry.** A malformed payload is redelivered up to `max_attempts` (15) against a
    body malformed on every attempt. The whole `taskHandler` "parse, then return 200 and log" dance
    exists to defuse this. In-process, a parse failure just returns.
 2. **No dead-letter queue.** Today's substitute is the 200-drop plus an alert on the error log.
 3. **`Retry-After` is inert** — only the queue's `RetryConfig` governs timing, so the Xero 60s
-   backoff floors *approximate* "wait out the rate window". In-process it can be honoured exactly.
+   backoff floors _approximate_ "wait out the rate window". In-process it can be honoured exactly.
 4. **A framework timeout returns 504 without cancelling the handler**, so the platform dispatches a
    duplicate against work still running.
 5. **CPU is throttled the instant the response is sent**, so post-response fan-out can be starved

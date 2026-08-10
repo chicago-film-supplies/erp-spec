@@ -18,7 +18,7 @@ status: open
 
 ## Notes
 
-This is the load-bearing consequence of ADR-0003. If the protocol cannot be made safe, the
-two-store split is wrong and ADR-0003 needs superseding rather than patching.
+This is the load-bearing consequence of ADR-0003. If the protocol cannot be made safe, the two-store
+split is wrong and ADR-0003 needs superseding rather than patching.
 
 If SPIKE-001 forces a Go sidecar, the extra network hop belongs in this model.

@@ -21,9 +21,9 @@ actions), with modern syntax and a real CLI. The candidate modern path for the `
 **Correction, 2026-08-09.** This note previously credited `quint-co/quint-llm-kit` with shipping
 installable Claude Code skills named `quint-lang`, `quint-modeling` and `quint-execute-spec`. Two of
 those three claims are wrong. The kit is a **Docker** development environment (Quint CLI + LSP + MCP
-servers + `agentic/agents/*.md`) and contains **no `skills/` directory**; the installable skills live
-in the main `quint-co/quint` repo, and there are **2**, not 3 — `quint-execute-spec` does not exist.
-Source: `api:2026-08-09:github-trees:quint-co/quint@main` (970 paths, `skills/quint-lang` +
+servers + `agentic/agents/*.md`) and contains **no `skills/` directory**; the installable skills
+live in the main `quint-co/quint` repo, and there are **2**, not 3 — `quint-execute-spec` does not
+exist. Source: `api:2026-08-09:github-trees:quint-co/quint@main` (970 paths, `skills/quint-lang` +
 `skills/quint-modeling`, plus `.claude-plugin/marketplace.json` declaring **1** plugin named
 `quint`) and `api:2026-08-09:github-trees:quint-co/quint-llm-kit@main` (0 paths under `skills/`).
 The kit remains interesting if containerised Quint work starts — it is not a skills source.
@@ -42,7 +42,8 @@ The kit remains interesting if containerised Quint work starts — it is not a s
 ## CFS-specific gotchas / fit
 
 - **Same checker underneath.** Quint transpiles to TLA+ and drives Apalache, so adopting Quint does
-  **not** abandon the TLA+ toolchain in `formal/` — it is a nicer front end to the same verification.
+  **not** abandon the TLA+ toolchain in `formal/` — it is a nicer front end to the same
+  verification.
 - **The `formal/` rule holds either way:** "a spec that has never been model-checked is prose with
   angle brackets." Milestone `m5`'s exit criterion is a **recorded checker run**, not a written
   spec. `quint verify` is what produces that artifact.
@@ -53,7 +54,8 @@ The kit remains interesting if containerised Quint work starts — it is not a s
 
 ## Decision status
 
-- `formal/` uses TLA+ today (run via `tla2tools.jar`). Introducing Quint is **not yet ADR'd** —
-  open one before migrating the specs, so the choice is recorded rather than drifted into.
+- `formal/` uses TLA+ today (run via `tla2tools.jar`). Introducing Quint is **not yet ADR'd** — open
+  one before migrating the specs, so the choice is recorded rather than drifted into.
 
-Cross-refs: [[SPIKE-002]] · `formal/two-store-commit.qnt` · `formal/period-close.qnt` · [[ADR-0004]] · [[ADR-0016]]
+Cross-refs: [[SPIKE-002]] · `formal/two-store-commit.qnt` · `formal/period-close.qnt` · [[ADR-0004]]
+· [[ADR-0016]]

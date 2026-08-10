@@ -3,8 +3,16 @@ entity: TaxDetermination
 description: The result of applying rules to a line, retained so a historical invoice can explain itself.
 fields:
   determination_id: { type: uuid, required: true }
-  line_ref:         { type: invoice_line_id, required: true }
-  regime:           { type: enum, values: [chicago_lease_transaction, il_home_rule_sales, exempt], required: true }
-  rate:             { type: decimal4, required: true, note: "a RATE, not an amount. 4dp. no _minor suffix" }
-  amount_minor:     { type: int64, required: true }
-  rule_version:     { type: string, required: true, note: "rates change. a determination must name the version it used" }
+  line_ref: { type: invoice_line_id, required: true }
+  regime: {
+    type: enum,
+    values: [chicago_lease_transaction, il_home_rule_sales, exempt],
+    required: true,
+  }
+  rate: { type: decimal4, required: true, note: "a RATE, not an amount. 4dp. no _minor suffix" }
+  amount_minor: { type: int64, required: true }
+  rule_version: {
+    type: string,
+    required: true,
+    note: "rates change. a determination must name the version it used",
+  }

@@ -24,8 +24,20 @@ given:
         product_line: "Expendables"
         basis: "10 units x $12.50"
     tax_components:
-      - { payable_account: 2200, amount_minor: 11250, tax: "Chicago Rental Tax", rate_percent: 15, base_minor: 75000 }
-      - { payable_account: 2200, amount_minor: 1281, tax: "Chicago Sales Tax", rate_percent: 10.25, base_minor: 12500 }
+      - {
+          payable_account: 2200,
+          amount_minor: 11250,
+          tax: "Chicago Rental Tax",
+          rate_percent: 15,
+          base_minor: 75000,
+        }
+      - {
+          payable_account: 2200,
+          amount_minor: 1281,
+          tax: "Chicago Sales Tax",
+          rate_percent: 10.25,
+          base_minor: 12500,
+        }
 
 derivation: >-
   **Hand-computed, so the expectation does not restate the rule.**
@@ -44,8 +56,30 @@ derivation: >-
 
 expect:
   transfers:
-    - { debit_account: 1200, credit_account: 4000, amount_minor: 75000, accounting_date: "2026-07-31", product_line: "Power, Lights & Tools" }
-    - { debit_account: 1200, credit_account: 4200, amount_minor: 12500, accounting_date: "2026-07-31", product_line: "Expendables" }
-    - { debit_account: 1200, credit_account: 2200, amount_minor: 11250, accounting_date: "2026-07-31" }
-    - { debit_account: 1200, credit_account: 2200, amount_minor: 1281, accounting_date: "2026-07-31" }
+    - {
+        debit_account: 1200,
+        credit_account: 4000,
+        amount_minor: 75000,
+        accounting_date: "2026-07-31",
+        product_line: "Power, Lights & Tools",
+      }
+    - {
+        debit_account: 1200,
+        credit_account: 4200,
+        amount_minor: 12500,
+        accounting_date: "2026-07-31",
+        product_line: "Expendables",
+      }
+    - {
+        debit_account: 1200,
+        credit_account: 2200,
+        amount_minor: 11250,
+        accounting_date: "2026-07-31",
+      }
+    - {
+        debit_account: 1200,
+        credit_account: 2200,
+        amount_minor: 1281,
+        accounting_date: "2026-07-31",
+      }
   rejects: []

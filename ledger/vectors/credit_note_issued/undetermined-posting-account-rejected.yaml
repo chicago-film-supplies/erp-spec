@@ -8,7 +8,11 @@ source: >-
   Callers must supply it." (`code:2026-08-09:core@33f5654:src/schemas/credit-note.ts`)
 
 differs_from: early-return-reverses-revenue-and-tax
-differs_in: ["credit_note.reason", "credit_note.revenue_reversal_lines[0].revenue_account", "credit_note.revenue_reversal_lines[1].revenue_account"]
+differs_in: [
+  "credit_note.reason",
+  "credit_note.revenue_reversal_lines[0].revenue_account",
+  "credit_note.revenue_reversal_lines[1].revenue_account",
+]
 
 given:
   ledger_state:
@@ -31,7 +35,13 @@ given:
         description: "6' Folding Table — correction"
     write_off_lines: []
     tax_components:
-      - { payable_account: 2200, amount_minor: 3000, tax: "Chicago Rental Tax", rate_percent: 15, base_minor: 20000 }
+      - {
+          payable_account: 2200,
+          amount_minor: 3000,
+          tax: "Chicago Rental Tax",
+          rate_percent: 15,
+          base_minor: 20000,
+        }
 
 derivation: >-
   Same document as the accept vector with `reason: correction`, for which the derivation rule has no

@@ -1,10 +1,10 @@
 # EXAMPLE ENTITY — one per context, to fix the shape. Not a schema. Not exhaustive.
 entity: Booking
 fields:
-  booking_id:   { type: uuid, required: true }
-  product_ref:  { type: product_id, required: true }
-  quantity:     { type: int32, required: true }
-  starts_on:    { type: timestamp, required: true }
-  ends_on:      { type: timestamp, required: true }
-  order_ref:    { type: order_id, required: true }
-  status:       { type: enum, values: [held, confirmed, released], required: true }
+  booking_id: { type: uuid, required: true }
+  product_ref: { type: product_id, required: true }
+  quantity: { type: int32, required: true }
+  starts_on: { type: timestamp, required: true }
+  ends_on: { type: timestamp, required: true }
+  order_ref: { type: order_id, required: true }
+  status: { type: enum, values: [held, confirmed, released], required: true }

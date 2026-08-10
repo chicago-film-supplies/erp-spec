@@ -9,8 +9,8 @@ verified: false
 triage_count: 0
 ---
 
-Jobs absorb labour at a standard cost. The difference between standard absorbed and actual
-incurred posts as its own variance line — never spread pro-rata across jobs.
+Jobs absorb labour at a standard cost. The difference between standard absorbed and actual incurred
+posts as its own variance line — never spread pro-rata across jobs.
 
 The residual goes to an untracked `COGS – Unabsorbed Labour` account. That account **is** the
 idle-capacity KPI, not a plug: a number that grows when the crew is paid and not earning. Rate

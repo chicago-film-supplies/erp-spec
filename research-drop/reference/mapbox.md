@@ -14,7 +14,7 @@ Geocoding for destination addresses, behind a Firestore cache. **Adopted by [[AD
 ## CFS-specific gotchas
 
 - **⚠️ Tests must never reach it.** `api-cloudrun/tests/helpers/forbiddenHosts.ts` denies Mapbox by
-  default, alongside Xero and CRMS. The fence exists because these hosts *were* being reached.
+  default, alongside Xero and CRMS. The fence exists because these hosts _were_ being reached.
 - **Geocoding is cached in Firestore** (`cache-geocodes`, one-year TTL), so an address is geocoded
   once. The dependency is off the hot path for every repeat destination, and a provider swap
   re-geocodes rather than losing history.
@@ -25,7 +25,7 @@ Geocoding for destination addresses, behind a Firestore cache. **Adopted by [[AD
 - **A Mapbox place id is a foreign identifier** and [[ADR-0009]] fences those out of domain models —
   the same rule that keeps `xero_id` out of the chart of accounts.
 - **Cost and rate limits are unmeasured for v2 scale** ([[ADR-0027]]). Recorded as unknown, not as
-  benign; the Xero lesson is that a shared external limit becomes an incident before anyone
-  measures it.
+  benign; the Xero lesson is that a shared external limit becomes an incident before anyone measures
+  it.
 
 Cross-refs: [[ADR-0027]] · [[ADR-0009]] · [[ADR-0011]]

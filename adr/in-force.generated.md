@@ -104,7 +104,7 @@ Accepted and not superseded, as of the last `deno task gen`.
 
 **Contexts:** fixed-assets, ledger, tax · **Decided:** 2026-08-09
 
-> **In the context of** a fixed-asset register that must produce a full P&L *and balance sheet* on both a GAAP and a tax basis across years, **facing** a fleet where a §179 election expenses an asset in year 1 that GAAP carries for 5, 10 or 20, **we decided** that only the GAAP book posts to the general ledger and the tax book is derived at report time from the register's per-book schedules, **to achieve** two complete sets of statements without a second write path, **accepting** that the tax book has no double-entry enforcement of its own and is only as good as its derivation.
+> **In the context of** a fixed-asset register that must produce a full P&L _and balance sheet_ on both a GAAP and a tax basis across years, **facing** a fleet where a §179 election expenses an asset in year 1 that GAAP carries for 5, 10 or 20, **we decided** that only the GAAP book posts to the general ledger and the tax book is derived at report time from the register's per-book schedules, **to achieve** two complete sets of statements without a second write path, **accepting** that the tax book has no double-entry enforcement of its own and is only as good as its derivation.
 
 # Proposed, not yet in force
 

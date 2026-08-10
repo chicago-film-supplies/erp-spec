@@ -14,13 +14,13 @@ and `verified: false`.
 
 Measured across **all five** order↔invoice reference paths, not just the denormalized array:
 
-| Direction | Path | Refs | Dangling |
-|---|---|---:|---:|
-| invoice → order | `query_by_orders[]` | 969 | 0 |
-| invoice → order | `items[type=order].uid` (the divider's uid IS the order doc-id) | 969 | 0 |
-| invoice → order | `destinations[].uid_order` | 970 | 0 |
-| order → invoice | `invoices[]` | 1159 | 0 |
-| order → invoice | `query_by_invoices[]` | 1159 | 0 |
+| Direction       | Path                                                            | Refs | Dangling |
+| --------------- | --------------------------------------------------------------- | ---: | -------: |
+| invoice → order | `query_by_orders[]`                                             |  969 |        0 |
+| invoice → order | `items[type=order].uid` (the divider's uid IS the order doc-id) |  969 |        0 |
+| invoice → order | `destinations[].uid_order`                                      |  970 |        0 |
+| order → invoice | `invoices[]`                                                    | 1159 |        0 |
+| order → invoice | `query_by_invoices[]`                                           | 1159 |        0 |
 
 The first pass checked only `query_by_orders` and would have missed a dangling ref on either of the
 other two invoice-side paths. Checking one path and reporting "clean" is the failure this table

@@ -13,5 +13,5 @@ Each product carries a handling bucket: `bag` | `two_person_lift` | `needs_cart_
 Drives crew sizing and vehicle capacity planning.
 
 Exists precisely because dimensional data does not — see
-[[2026-08-08-product-weight-dimensions-empty]]. A coarse bucket someone will actually fill in
-beats a precise field that has been zero for 549 products.
+[[2026-08-08-product-weight-dimensions-empty]]. A coarse bucket someone will actually fill in beats
+a precise field that has been zero for 549 products.

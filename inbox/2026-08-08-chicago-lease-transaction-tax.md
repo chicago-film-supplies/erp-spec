@@ -14,5 +14,5 @@ problem distinct from sales tax, plus Illinois home-rule sales tax, 1099s and W-
 
 Verified shape in the current system: rental lines carry "Chicago Rental Tax" at 11% while sale
 lines on the same invoice carry "Chicago Sales Tax" at 10.25% — two different regimes applied
-line-by-line within one document, discriminated by item type. Invoices and organizations both
-carry a `tax_profile` field.
+line-by-line within one document, discriminated by item type. Invoices and organizations both carry
+a `tax_profile` field.

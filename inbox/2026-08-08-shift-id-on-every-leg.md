@@ -13,5 +13,5 @@ Every leg carries a `shift_id`. This one field subsumes person-day inference, tr
 piggyback-delivery marking, morning/evening splits, and byproduct identification — each of which
 would otherwise need its own heuristic over data that does not exist.
 
-Depends on legs being first-class (HOT-007). Whether a shift is per-person or per-crew is
-undecided (OQ-005) and changes the cardinality of this reference.
+Depends on legs being first-class (HOT-007). Whether a shift is per-person or per-crew is undecided
+(OQ-005) and changes the cardinality of this reference.

@@ -25,7 +25,8 @@ const notes: string[] = [];
 
 // ── helpers ─────────────────────────────────────────────────────────────────
 /** Templates (`_`-prefixed) and generated artifacts are never inputs to validation. */
-const isTemplate = (p: string) => basename(p).startsWith("_") || basename(p).includes(".generated.");
+const isTemplate = (p: string) =>
+  basename(p).startsWith("_") || basename(p).includes(".generated.");
 const rel = (p: string) => relative(ROOT, p);
 
 /**
@@ -143,7 +144,13 @@ const evts: Evt[] = [];
 const adrs: Adr[] = [];
 const hots: { id: string; status?: string; contexts?: string[]; blocks?: string[] }[] = [];
 const oqs: { id: string; owner?: unknown; decide_by?: unknown; status?: string }[] = [];
-const spikes: { id: string; closes_adr?: string; status?: string; exit_criteria?: unknown[]; _file: string }[] = [];
+const spikes: {
+  id: string;
+  closes_adr?: string;
+  status?: string;
+  exit_criteria?: unknown[];
+  _file: string;
+}[] = [];
 const inbox: { file: string; fm: Record<string, unknown> }[] = [];
 
 // contexts/*/requirements.yaml + events.yaml
@@ -188,7 +195,9 @@ for (const f of await filesIn("inbox", ".md")) {
 // gate below inspects its contents. roadmap/milestones.yaml shipped broken in the seed commit
 // precisely because nothing read it — an unquoted `: ` inside a sequence scalar. A file no tool
 // opens is a file with no guarantees.
-for (const p of ["roadmap/milestones.yaml", "glossary.yaml", "hotspots.yaml", "open-questions.yaml"]) {
+for (
+  const p of ["roadmap/milestones.yaml", "glossary.yaml", "hotspots.yaml", "open-questions.yaml"]
+) {
   await readYaml(`${ROOT}/${p}`);
 }
 for await (const e of walk(`${ROOT}/ledger`, { exts: [".yaml"], includeDirs: false })) {
@@ -199,7 +208,9 @@ const hotY = await readYaml<{ hotspots?: typeof hots }>(`${ROOT}/hotspots.yaml`)
 hots.push(...(hotY?.hotspots ?? []));
 const oqY = await readYaml<{ open_questions?: typeof oqs }>(`${ROOT}/open-questions.yaml`);
 oqs.push(...(oqY?.open_questions ?? []));
-const glossY = await readYaml<{ terms?: { term: string; aliases?: string[]; contexts?: string[]; definition?: string }[] }>(
+const glossY = await readYaml<
+  { terms?: { term: string; aliases?: string[]; contexts?: string[]; definition?: string }[] }
+>(
   `${ROOT}/glossary.yaml`,
 );
 const terms = glossY?.terms ?? [];
@@ -216,7 +227,9 @@ if (TRIAGE_ONLY) {
   // (erp-spec#7). The date in the filename is the one age signal every inbox file carries.
   for (const i of unpromoted) {
     const m = basename(i.file).match(/^(\d{4}-\d{2}-\d{2})-/);
-    const days = m ? Math.floor((Date.now() - new Date(`${m[1]}T00:00:00Z`).getTime()) / 86_400_000) : null;
+    const days = m
+      ? Math.floor((Date.now() - new Date(`${m[1]}T00:00:00Z`).getTime()) / 86_400_000)
+      : null;
     console.log(`  ${rel(i.file)}${days === null ? "" : `  (${days}d)`}`);
     console.log(`      ${i.fm.title ?? "(no title)"}`);
   }
@@ -232,7 +245,9 @@ if (TRIAGE_ONLY) {
       fail("1", `${where}: missing id`);
       return;
     }
-    if (!PATTERNS[kind].test(id)) fail("1", `${where}: id "${id}" does not match ${PATTERNS[kind]}`);
+    if (!PATTERNS[kind].test(id)) {
+      fail("1", `${where}: id "${id}" does not match ${PATTERNS[kind]}`);
+    }
     if (seen.has(id)) fail("1", `id "${id}" reused: ${seen.get(id)} and ${where}`);
     else seen.set(id, where);
   };
@@ -266,11 +281,23 @@ if (TRIAGE_ONLY) {
   const PRI = ["must", "should", "could"];
   const ST = ["draft", "agreed", "superseded"];
   for (const r of reqs) {
-    for (const f of ["statement", "rationale", "source", "priority", "verification_method", "status"] as const) {
+    for (
+      const f of [
+        "statement",
+        "rationale",
+        "source",
+        "priority",
+        "verification_method",
+        "status",
+      ] as const
+    ) {
       if (!r[f]) fail("2", `${r.id}: missing \`${f}\``);
     }
     if (r.verification_method && !VM.includes(r.verification_method)) {
-      fail("2", `${r.id}: verification_method "${r.verification_method}" not one of ${VM.join(" | ")}`);
+      fail(
+        "2",
+        `${r.id}: verification_method "${r.verification_method}" not one of ${VM.join(" | ")}`,
+      );
     }
     if (r.priority && !PRI.includes(r.priority)) {
       fail("2", `${r.id}: priority "${r.priority}" not one of ${PRI.join(" | ")}`);
@@ -317,7 +344,9 @@ for (const e of evts) {
 
 // ── gate 5: entity <-> OpenAPI cross-reference ──────────────────────────────
 {
-  const openapi = (await filesIn("contexts", ".yaml")).filter((f) => basename(f).includes("openapi"));
+  const openapi = (await filesIn("contexts", ".yaml")).filter((f) =>
+    basename(f).includes("openapi")
+  );
   const entityFiles = (await filesIn("contexts", ".yaml")).filter((f) => f.includes("/entities/"));
   if (openapi.length === 0) {
     notes.push(`gate 5: no OpenAPI documents yet — ${entityFiles.length} entity file(s) unchecked`);
@@ -325,7 +354,9 @@ for (const e of evts) {
     const blob = (await Promise.all(openapi.map((f) => Deno.readTextFile(f)))).join("\n");
     for (const ef of entityFiles) {
       const name = basename(ef).replace(/\.yaml$/, "");
-      if (!blob.includes(name)) warn("5", `${rel(ef)}: entity is not referenced by any OpenAPI path`);
+      if (!blob.includes(name)) {
+        warn("5", `${rel(ef)}: entity is not referenced by any OpenAPI path`);
+      }
     }
   }
 }
@@ -357,19 +388,31 @@ for (const e of evts) {
       }
     }
 
-    for (const [k, inverse] of [["supersedes", "superseded_by"], ["superseded_by", "supersedes"]] as const) {
+    for (
+      const [k, inverse] of [["supersedes", "superseded_by"], [
+        "superseded_by",
+        "supersedes",
+      ]] as const
+    ) {
       const target = a[k];
       if (!target) continue;
       const other = byId.get(String(target));
       if (!other) {
         fail("6", `${a.id}: ${k} "${target}" does not resolve`);
       } else if (String(other[inverse] ?? "") !== a.id) {
-        fail("6", `${a.id}: ${k} "${target}" is not symmetric (${target}.${inverse} = ${other[inverse] ?? "unset"})`);
+        fail(
+          "6",
+          `${a.id}: ${k} "${target}" is not symmetric (${target}.${inverse} = ${
+            other[inverse] ?? "unset"
+          })`,
+        );
       }
     }
 
     for (const c of a.contexts ?? []) {
-      if (!CONTEXT_DIRS.has(c)) fail("6", `${a.id}: context "${c}" does not resolve to a context directory`);
+      if (!CONTEXT_DIRS.has(c)) {
+        fail("6", `${a.id}: context "${c}" does not resolve to a context directory`);
+      }
     }
   }
 }
@@ -389,7 +432,8 @@ for (const e of evts) {
   const OQ_STATUS = ["open", "answered", "dropped"];
   const envToday = Deno.env.get("SPEC_TODAY");
   const now = envToday ? new Date(envToday) : new Date();
-  const bad = (v: unknown) => v === undefined || v === null || v === "" || String(v).trim() === "TBD";
+  const bad = (v: unknown) =>
+    v === undefined || v === null || v === "" || String(v).trim() === "TBD";
 
   for (const q of oqs) {
     if (bad(q.owner)) fail("7", `${q.id}: no owner`);
@@ -402,13 +446,21 @@ for (const e of evts) {
     // An `answered` with no answer is the same defect class as a spike `closed` with
     // `closes_adr: new` — a status asserting a conclusion nobody wrote down.
     if (status === "answered" && bad((q as { answer?: unknown }).answer)) {
-      fail("7", `${q.id}: status answered but no \`answer\` — the status asserts a conclusion nobody wrote`);
+      fail(
+        "7",
+        `${q.id}: status answered but no \`answer\` — the status asserts a conclusion nobody wrote`,
+      );
     }
     if (status === "dropped" && bad((q as { notes?: unknown }).notes)) {
       fail("7", `${q.id}: status dropped with no \`notes\` saying why it stopped mattering`);
     }
     if (status === "open" && !bad(q.decide_by) && new Date(String(q.decide_by)) < now) {
-      fail("7", `${q.id}: still open and past its decide_by (${ymdUTC(q.decide_by)}) — decide it, drop it, or move the date deliberately`);
+      fail(
+        "7",
+        `${q.id}: still open and past its decide_by (${
+          ymdUTC(q.decide_by)
+        }) — decide it, drop it, or move the date deliberately`,
+      );
     }
   }
 }
@@ -430,7 +482,9 @@ for (const e of evts) {
     const cs = i.fm.contexts;
     if (!Array.isArray(cs)) continue;
     for (const c of cs) {
-      if (!CONTEXT_DIRS.has(String(c))) fail("8", `${rel(i.file)}: context "${c}" does not resolve`);
+      if (!CONTEXT_DIRS.has(String(c))) {
+        fail("8", `${rel(i.file)}: context "${c}" does not resolve`);
+      }
     }
   }
 
@@ -446,7 +500,10 @@ for (const e of evts) {
     for (const t of terms) {
       for (const v of variants(t.term.toLowerCase())) {
         if (v !== t.term.toLowerCase() && !known.has(v) && stmt.includes(v)) {
-          warn("8", `${r.id}: uses "${v}" — glossary defines "${t.term}". Prefer the defined term.`);
+          warn(
+            "8",
+            `${r.id}: uses "${v}" — glossary defines "${t.term}". Prefer the defined term.`,
+          );
         }
       }
     }
@@ -510,7 +567,10 @@ for (const e of evts) {
     if (!s.closes_adr) {
       fail("1", `${s.id}: no closes_adr — every spike must close with an ADR`);
     } else if (s.closes_adr !== "new" && !adrs.some((a) => a.id === s.closes_adr)) {
-      fail("1", `${s.id}: closes_adr "${s.closes_adr}" does not resolve (use \`new\` if it mints one)`);
+      fail(
+        "1",
+        `${s.id}: closes_adr "${s.closes_adr}" does not resolve (use \`new\` if it mints one)`,
+      );
     }
     // Milestone m4: "every SPIKE- has status closed and names the ADR it produced". `new` is a
     // placeholder for a spike still in flight; at close it must have been replaced by the real id,
@@ -554,7 +614,9 @@ for (const e of evts) {
   for (const q of oqs) refCheck((q as { blocks?: unknown }).blocks, q.id);
   for (const a of adrs) refCheck(a.relates_to, a.id);
   for (const r of reqs) refCheck((r as { relates_to?: unknown }).relates_to, r.id);
-  for (const t of terms) refCheck((t as { open_questions?: unknown }).open_questions, `glossary "${t.term}"`);
+  for (const t of terms) {
+    refCheck((t as { open_questions?: unknown }).open_questions, `glossary "${t.term}"`);
+  }
 }
 
 // ── gate 10: ledger content ─────────────────────────────────────────────────
@@ -616,7 +678,9 @@ for (const e of evts) {
       }
       const open = isOpenBlocker(id);
       if (open === null) fail(G, `${where}: blocker "${id}" does not resolve`);
-      else if (!open) fail(G, `${where}: blocker "${id}" is no longer open — the block has expired`);
+      else if (!open) {
+        fail(G, `${where}: blocker "${id}" is no longer open — the block has expired`);
+      }
     }
   };
 
@@ -636,14 +700,18 @@ for (const e of evts) {
     if (/^TODO$/i.test(String(a.name ?? "").trim())) {
       fail(G, `${where}: name is "TODO" — an account nobody has identified is not a chart entry`);
     }
-    if (a.class && !CLASSES.includes(a.class)) fail(G, `${where}: class "${a.class}" not one of ${CLASSES.join(" | ")}`);
+    if (a.class && !CLASSES.includes(a.class)) {
+      fail(G, `${where}: class "${a.class}" not one of ${CLASSES.join(" | ")}`);
+    }
     if (a.normal_balance && !["debit", "credit"].includes(a.normal_balance)) {
       fail(G, `${where}: normal_balance "${a.normal_balance}" not debit | credit`);
     }
     if (a.disposition && !DISPOSITIONS.includes(a.disposition)) {
       fail(G, `${where}: disposition "${a.disposition}" not one of ${DISPOSITIONS.join(" | ")}`);
     }
-    if (a.dimensions !== undefined && !Array.isArray(a.dimensions) && a.dimensions !== "undecided") {
+    if (
+      a.dimensions !== undefined && !Array.isArray(a.dimensions) && a.dimensions !== "undecided"
+    ) {
       fail(G, `${where}: dimensions must be a list of dimension ids, or \`undecided\``);
     }
 
@@ -656,7 +724,9 @@ for (const e of evts) {
       if (a.normal_balance !== expected) {
         fail(
           G,
-          `${where}: class "${a.class}"${a.contra ? " with contra: true" : ""} implies normal_balance ` +
+          `${where}: class "${a.class}"${
+            a.contra ? " with contra: true" : ""
+          } implies normal_balance ` +
             `"${expected}", found "${a.normal_balance}"`,
         );
       }
@@ -679,17 +749,28 @@ for (const e of evts) {
       if (String(a.class_live).toLowerCase() === String(a.class).toLowerCase()) {
         fail(G, `${where}: \`class_live\` equals \`class\` — drop it, it records no difference`);
       } else if (!a.note) {
-        fail(G, `${where}: \`class_live\` differs from \`class\` and needs a \`note\` explaining the correction`);
+        fail(
+          G,
+          `${where}: \`class_live\` differs from \`class\` and needs a \`note\` explaining the correction`,
+        );
       }
     }
     // 10d — source form. An undated claim silently becomes a lie.
-    if (a.source && !/^(api|code):\d{4}-\d{2}-\d{2}:/.test(a.source) && !/^ADR-\d{4}$/.test(a.source)) {
-      fail(G, `${where}: source "${a.source}" is not \`api:<date>:<query>\`, \`code:<date>:<pin>\` or an ADR id`);
+    if (
+      a.source && !/^(api|code):\d{4}-\d{2}-\d{2}:/.test(a.source) && !/^ADR-\d{4}$/.test(a.source)
+    ) {
+      fail(
+        G,
+        `${where}: source "${a.source}" is not \`api:<date>:<query>\`, \`code:<date>:<pin>\` or an ADR id`,
+      );
     }
   }
   for (const a of accounts) {
     if (a.disposition === "merge" && a.merge_into !== undefined && !byCode.has(a.merge_into)) {
-      fail(G, `chart-of-accounts code ${a.code}: merge_into ${a.merge_into} does not resolve to an account`);
+      fail(
+        G,
+        `chart-of-accounts code ${a.code}: merge_into ${a.merge_into} does not resolve to an account`,
+      );
     }
   }
 
@@ -700,7 +781,12 @@ for (const e of evts) {
     trigger?: { event?: string; source_document?: string };
     accounting_date?: string;
     posting_timestamp?: string;
-    postings?: { debit_account?: unknown; credit_account?: unknown; amount?: string; dimensions?: unknown }[];
+    postings?: {
+      debit_account?: unknown;
+      credit_account?: unknown;
+      amount?: string;
+      dimensions?: unknown;
+    }[];
     no_postings_reason?: string;
     control_total?: string | null;
     blocked_by?: string[];
@@ -728,13 +814,18 @@ for (const e of evts) {
     }
     const ev = r.trigger?.event;
     if (!ev) fail(G, `${where}: no trigger.event`);
-    else if (!evts.some((e) => e.id === ev)) fail(G, `${where}: trigger.event "${ev}" does not resolve`);
+    else if (!evts.some((e) => e.id === ev)) {
+      fail(G, `${where}: trigger.event "${ev}" does not resolve`);
+    }
     if (!r.trigger?.source_document) fail(G, `${where}: no trigger.source_document`);
 
     // CLAUDE.md rule 8, executable for the first time.
     if (!r.accounting_date) fail(G, `${where}: no \`accounting_date\``);
     else if (CLOCK_WORDS.test(r.accounting_date)) {
-      fail(G, `${where}: accounting_date "${r.accounting_date}" reads a clock — it must name a field of the source document`);
+      fail(
+        G,
+        `${where}: accounting_date "${r.accounting_date}" reads a clock — it must name a field of the source document`,
+      );
     }
     if (r.posting_timestamp !== "assigned_by_ledger") {
       fail(G, `${where}: posting_timestamp must be the literal \`assigned_by_ledger\` (ADR-0010)`);
@@ -743,7 +834,10 @@ for (const e of evts) {
     if (r.status === "blocked") {
       checkBlockers(r.blocked_by, where);
       if ((r.postings ?? []).length > 0) {
-        fail(G, `${where}: blocked rules must have \`postings: []\` — a guessed posting will be believed`);
+        fail(
+          G,
+          `${where}: blocked rules must have \`postings: []\` — a guessed posting will be believed`,
+        );
       }
     }
     if (r.status === "specified" && (r.postings ?? []).length === 0 && !r.no_postings_reason) {
@@ -771,7 +865,9 @@ for (const e of evts) {
   // This is what makes m3's "posting rules for every source document type" falsifiable: the
   // previous revision named six rules in a comment against 24 real events.
   {
-    const ledgerEvents = evts.filter((e) => e.producer === "ledger" || (e.consumers ?? []).includes("ledger"));
+    const ledgerEvents = evts.filter((e) =>
+      e.producer === "ledger" || (e.consumers ?? []).includes("ledger")
+    );
     const seen = new Map<string, string[]>();
     const claim = (id: unknown, bucket: string) => {
       const s = String(id ?? "");
@@ -785,18 +881,27 @@ for (const e of evts) {
     for (const e of ledgerEvents) {
       const buckets = seen.get(e.id) ?? [];
       if (buckets.length === 0) {
-        fail(G, `${e.id} (${e.name}) reaches the ledger but has no posting rule, no_posting entry or unwritten entry`);
+        fail(
+          G,
+          `${e.id} (${e.name}) reaches the ledger but has no posting rule, no_posting entry or unwritten entry`,
+        );
       } else if (buckets.length > 1) {
         fail(G, `${e.id} appears in more than one bucket: ${buckets.join(", ")}`);
       }
     }
     for (const [id] of seen) {
-      if (!evts.some((e) => e.id === id)) fail(G, `posting-rules references event "${id}" which does not exist`);
-      else if (!ledgerEvents.some((e) => e.id === id)) {
-        fail(G, `posting-rules covers "${id}", which neither produces to nor consumes from the ledger`);
+      if (!evts.some((e) => e.id === id)) {
+        fail(G, `posting-rules references event "${id}" which does not exist`);
+      } else if (!ledgerEvents.some((e) => e.id === id)) {
+        fail(
+          G,
+          `posting-rules covers "${id}", which neither produces to nor consumes from the ledger`,
+        );
       }
     }
-    for (const n of noPosting) if (!n.reason) fail(G, `no_posting "${n.event}": needs a \`reason\``);
+    for (const n of noPosting) {
+      if (!n.reason) fail(G, `no_posting "${n.event}": needs a \`reason\``);
+    }
     // `unwritten` is the honest bucket, not a dumping ground — each entry owes a tracked issue.
     for (const u of unwritten) {
       if (!u.issue || !/^[\w.-]+#\d+$/.test(String(u.issue))) {
@@ -823,7 +928,9 @@ for (const e of evts) {
     if (y) vectors.push({ ...y, _file: f });
   }
 
-  const dimY = await readYaml<{ dimensions?: { id?: string; values?: string[]; required_on?: string[] }[] }>(
+  const dimY = await readYaml<
+    { dimensions?: { id?: string; values?: string[]; required_on?: string[] }[] }
+  >(
     `${ROOT}/ledger/dimensions.yaml`,
   );
   const dimValues = new Map<string, Set<string>>();
@@ -837,7 +944,10 @@ for (const e of evts) {
     if (!Array.isArray(a.dimensions)) continue;
     for (const d of a.dimensions) {
       if (!dimValues.has(String(d))) {
-        fail(G, `chart-of-accounts code ${a.code}: requires dimension "${d}", which ledger/dimensions.yaml does not define`);
+        fail(
+          G,
+          `chart-of-accounts code ${a.code}: requires dimension "${d}", which ledger/dimensions.yaml does not define`,
+        );
       }
     }
   }
@@ -871,14 +981,20 @@ for (const e of evts) {
     const rid = v.posting_rule;
     if (!rid) fail(G, `${where}: no \`posting_rule\``);
     else if (!ruleById.has(rid)) fail(G, `${where}: posting_rule "${rid}" does not resolve`);
-    else if (dir !== rid) fail(G, `${where}: lives in ledger/vectors/${dir}/ but names rule "${rid}"`);
+    else if (dir !== rid) {
+      fail(G, `${where}: lives in ledger/vectors/${dir}/ but names rule "${rid}"`);
+    }
     if (rid) byRuleVectors.set(rid, [...(byRuleVectors.get(rid) ?? []), v]);
 
     const transfers = v.expect?.transfers ?? [];
     const rejects = (v.expect?.rejects ?? []) as unknown[];
-    if (v.kind === "accept" && rejects.length > 0) fail(G, `${where}: an accept vector must expect no rejects`);
+    if (v.kind === "accept" && rejects.length > 0) {
+      fail(G, `${where}: an accept vector must expect no rejects`);
+    }
     if (v.kind === "reject") {
-      if (rejects.length === 0) fail(G, `${where}: a reject vector must state at least one \`rejects\` reason`);
+      if (rejects.length === 0) {
+        fail(G, `${where}: a reject vector must state at least one \`rejects\` reason`);
+      }
       if (transfers.length > 0) {
         fail(G, `${where}: a reject vector must expect no transfers — refusal is all-or-nothing`);
       }
@@ -895,17 +1011,24 @@ for (const e of evts) {
       // `asset_disposed/fully-depreciated-scrap-writes-one-transfer`, which 10i could not see: a
       // zero adds nothing to the control total, so the sum still matched.
       if (t.amount_minor === 0) {
-        fail(G, `${where} transfer[${j}]: amount_minor is 0 — a zero-value leg is an absence, not a transfer; omit it`);
+        fail(
+          G,
+          `${where} transfer[${j}]: amount_minor is 0 — a zero-value leg is an absence, not a transfer; omit it`,
+        );
       }
       for (const side of ["debit_account", "credit_account"] as const) {
         const c = t[side];
         if (typeof c !== "number") fail(G, `${where} transfer[${j}]: ${side} must be a GL code`);
-        else if (!byCode.has(c)) fail(G, `${where} transfer[${j}]: ${side} ${c} is not an account in the chart`);
+        else if (!byCode.has(c)) {
+          fail(G, `${where} transfer[${j}]: ${side} ${c} is not an account in the chart`);
+        }
       }
       // 10h — dimension obligation. The requirement is READ OFF each account's own `dimensions`
       // list, never inferred from its class: `cost_type` describes labour and applies to 5800
       // alone, so "is this COGS" is not a rule that can produce the right answer.
-      const sides = [t.debit_account, t.credit_account].map((c) => byCode.get(Number(c))).filter(Boolean) as Account[];
+      const sides = [t.debit_account, t.credit_account].map((c) => byCode.get(Number(c))).filter(
+        Boolean,
+      ) as Account[];
       const undecided = sides.some((a) => a.dimensions === "undecided");
       if (!undecided) {
         const required = new Set<string>();
@@ -920,16 +1043,27 @@ for (const e of evts) {
           // a naive NOT NULL check while meaning nothing, so it stays refused.
           const declared = Object.prototype.hasOwnProperty.call(t, dim);
           if (required.has(dim) && !declared) {
-            fail(G, `${where} transfer[${j}]: posts to a dimensioned account but does not declare \`${dim}\` — absence is refused; an explicit null is not (REQ-LED-001)`);
+            fail(
+              G,
+              `${where} transfer[${j}]: posts to a dimensioned account but does not declare \`${dim}\` — absence is refused; an explicit null is not (REQ-LED-001)`,
+            );
           }
           if (!required.has(dim) && declared) {
             fail(G, `${where} transfer[${j}]: declares \`${dim}\` but neither account requires it`);
           }
           if (declared && t[dim] !== null) {
             if (String(t[dim]) === "") {
-              fail(G, `${where} transfer[${j}]: ${dim} is the empty string — write an explicit null to record that none applies`);
+              fail(
+                G,
+                `${where} transfer[${j}]: ${dim} is the empty string — write an explicit null to record that none applies`,
+              );
             } else if (!dimValues.get(dim)!.has(String(t[dim]))) {
-              fail(G, `${where} transfer[${j}]: ${dim} "${t[dim]}" is not a declared value in ledger/dimensions.yaml`);
+              fail(
+                G,
+                `${where} transfer[${j}]: ${dim} "${
+                  t[dim]
+                }" is not a declared value in ledger/dimensions.yaml`,
+              );
             }
           }
         }
@@ -945,7 +1079,10 @@ for (const e of evts) {
       if (ct) {
         const target = at(v.given, ct);
         if (typeof target !== "number") {
-          fail(G, `${where}: rule declares control_total "${ct}" but the vector's \`given\` has no number there`);
+          fail(
+            G,
+            `${where}: rule declares control_total "${ct}" but the vector's \`given\` has no number there`,
+          );
         } else {
           const sum = transfers.reduce((n, t) => n + Number(t.amount_minor ?? 0), 0);
           if (sum !== target) {
@@ -964,8 +1101,11 @@ for (const e of evts) {
         (x) => x.name === v.differs_from && x.posting_rule === rid,
       ) ?? vectors.find((x) => x.name === v.differs_from && x.posting_rule === rid);
       if (!v.differs_from) fail(G, `${where}: a reject vector must name \`differs_from\``);
-      else if (!base) fail(G, `${where}: differs_from "${v.differs_from}" is not a vector of rule "${rid}"`);
-      else if (base.kind !== "accept") fail(G, `${where}: differs_from "${v.differs_from}" is not an accept vector`);
+      else if (!base) {
+        fail(G, `${where}: differs_from "${v.differs_from}" is not a vector of rule "${rid}"`);
+      } else if (base.kind !== "accept") {
+        fail(G, `${where}: differs_from "${v.differs_from}" is not an accept vector`);
+      }
       if (!Array.isArray(v.differs_in) || v.differs_in.length === 0) {
         fail(G, `${where}: a reject vector must name \`differs_in\``);
       } else if (base) {
@@ -973,7 +1113,10 @@ for (const e of evts) {
           const a = JSON.stringify(at(base.given, p) ?? null);
           const b = JSON.stringify(at(v.given, p) ?? null);
           if (a === b) {
-            fail(G, `${where}: declares it differs in "${p}", but that path is identical in "${v.differs_from}"`);
+            fail(
+              G,
+              `${where}: declares it differs in "${p}", but that path is identical in "${v.differs_from}"`,
+            );
           }
         }
       }
@@ -984,9 +1127,14 @@ for (const e of evts) {
   for (const r of rules) {
     const vs = byRuleVectors.get(r.id ?? "") ?? [];
     if (r.status === "specified") {
-      if (!vs.some((v) => v.kind === "accept")) fail(G, `posting-rules "${r.id}": specified with no accept vector`);
+      if (!vs.some((v) => v.kind === "accept")) {
+        fail(G, `posting-rules "${r.id}": specified with no accept vector`);
+      }
       if (!vs.some((v) => v.kind === "reject")) {
-        fail(G, `posting-rules "${r.id}": specified with no REJECT vector — the failure cases are the enforcement`);
+        fail(
+          G,
+          `posting-rules "${r.id}": specified with no REJECT vector — the failure cases are the enforcement`,
+        );
       }
     } else if (vs.length > 0) {
       fail(G, `posting-rules "${r.id}": status ${r.status} but has ${vs.length} vector(s)`);
@@ -1000,7 +1148,10 @@ for (const e of evts) {
   {
     const walkValue = (node: unknown, path: string, where: string) => {
       if (node instanceof Date) {
-        fail(G, `${where}: ${path} parsed as a Date — quote it, or it renders in the runner's timezone`);
+        fail(
+          G,
+          `${where}: ${path} parsed as a Date — quote it, or it renders in the runner's timezone`,
+        );
         return;
       }
       if (Array.isArray(node)) {
@@ -1011,9 +1162,17 @@ for (const e of evts) {
         for (const [k, v] of Object.entries(node as Record<string, unknown>)) {
           if (/_minor$/.test(k) && v !== null && v !== undefined) {
             if (typeof v !== "number" || !Number.isInteger(v)) {
-              fail(G, `${where}: ${path}.${k} = ${JSON.stringify(v)} — money is an integer count of minor units`);
+              fail(
+                G,
+                `${where}: ${path}.${k} = ${
+                  JSON.stringify(v)
+                } — money is an integer count of minor units`,
+              );
             } else if (v < 0) {
-              fail(G, `${where}: ${path}.${k} is negative — use the opposite side, not a negative amount`);
+              fail(
+                G,
+                `${where}: ${path}.${k} is negative — use the opposite side, not a negative amount`,
+              );
             }
           }
           walkValue(v, `${path}.${k}`, where);
@@ -1036,7 +1195,8 @@ for (const e of evts) {
  */
 {
   const G = "11";
-  const TOP = /^(adr|contexts|formal|inbox|ledger|migration|reporting|research-drop|roadmap|spikes|tools|traceability)\//;
+  const TOP =
+    /^(adr|contexts|formal|inbox|ledger|migration|reporting|research-drop|roadmap|spikes|tools|traceability)\//;
 
   /**
    * Each exemption states WHY the dead path is allowed to stand, and is itself checked: if the
@@ -1047,12 +1207,14 @@ for (const e of evts) {
     {
       file: "adr/ADR-0003-mongodb-documents-tigerbeetle-ledger.md",
       path: "formal/two-store-commit.tla",
-      why: "ADR-0003 is `accepted` and therefore immutable. erp-spec#4 — the m5 formal-methods ADR supersedes the clause.",
+      why:
+        "ADR-0003 is `accepted` and therefore immutable. erp-spec#4 — the m5 formal-methods ADR supersedes the clause.",
     },
     {
       file: "adr/ADR-0016-quint-over-tla.md",
       path: "formal/two-store-commit.tla",
-      why: "ADR-0016 IS the decision that deleted these files; naming what it replaced is historically accurate. PERMANENT — ADR-0016 is accepted and therefore immutable, so unlike the ADR-0003 entry this one is never cleared by an edit.",
+      why:
+        "ADR-0016 IS the decision that deleted these files; naming what it replaced is historically accurate. PERMANENT — ADR-0016 is accepted and therefore immutable, so unlike the ADR-0003 entry this one is never cleared by an edit.",
     },
     {
       file: "adr/ADR-0016-quint-over-tla.md",
@@ -1092,9 +1254,15 @@ for (const e of evts) {
       exists = false;
     }
     if (exists) {
-      fail(G, `exemption for ${e.file} -> \`${e.path}\` is obsolete: the path now resolves. Delete the exemption.`);
+      fail(
+        G,
+        `exemption for ${e.file} -> \`${e.path}\` is obsolete: the path now resolves. Delete the exemption.`,
+      );
     } else if (!used.has(key)) {
-      fail(G, `exemption for ${e.file} -> \`${e.path}\` matched nothing: the citation is gone. Delete the exemption.`);
+      fail(
+        G,
+        `exemption for ${e.file} -> \`${e.path}\` matched nothing: the citation is gone. Delete the exemption.`,
+      );
     }
   }
 }
@@ -1115,7 +1283,9 @@ for (const e of evts) {
  */
 {
   const G = "12";
-  const raw = await readYaml<{ milestones?: Record<string, unknown>[] }>(`${ROOT}/roadmap/milestones.yaml`);
+  const raw = await readYaml<{ milestones?: Record<string, unknown>[] }>(
+    `${ROOT}/roadmap/milestones.yaml`,
+  );
   const ms = raw?.milestones ?? [];
   const ids = new Set(ms.map((m) => String(m.id)));
 
@@ -1137,7 +1307,12 @@ for (const e of evts) {
       const hasCheck = typeof c.check === "string";
       const isProse = c.prose_only === true;
       if (hasCheck === isProse) {
-        fail(G, `${at}: must declare exactly one of \`check:\` or \`prose_only: true\` (has ${hasCheck ? "both" : "neither"})`);
+        fail(
+          G,
+          `${at}: must declare exactly one of \`check:\` or \`prose_only: true\` (has ${
+            hasCheck ? "both" : "neither"
+          })`,
+        );
       }
       if (isProse && !c.reason) {
         fail(G, `${at}: \`prose_only\` requires a \`reason\` — say why no tool can decide it`);
@@ -1150,7 +1325,11 @@ for (const e of evts) {
 
   // A checker nobody names is a checker that silently rots.
   const named = new Set(
-    ms.flatMap((m) => ((m.exit_criteria as Record<string, unknown>[] | undefined) ?? []).map((c) => String(c?.check))),
+    ms.flatMap((m) =>
+      ((m.exit_criteria as Record<string, unknown>[] | undefined) ?? []).map((c) =>
+        String(c?.check)
+      )
+    ),
   );
   for (const name of Object.keys(CHECKS)) {
     if (!named.has(name)) warn(G, `check "${name}" is defined but no milestone criterion names it`);
@@ -1161,13 +1340,19 @@ for (const e of evts) {
   // a null clock, STATUS would change on its own and the stale-file gate would go red on unrelated
   // pushes. Asserted here rather than trusted, because it is invisible until it breaks.
   if (CLOCK_DEPENDENT.size === 0) {
-    fail(G, "CLOCK_DEPENDENT is empty — either delete the mechanism or the clock rule is unenforced");
+    fail(
+      G,
+      "CLOCK_DEPENDENT is empty — either delete the mechanism or the clock rule is unenforced",
+    );
   }
   const clockFree = await evaluateMilestones(ROOT, null);
   for (const m of clockFree) {
     for (const c of m.criteria) {
       if (c.check && CLOCK_DEPENDENT.has(c.check) && c.verdict !== "deferred") {
-        fail(G, `${m.id}: clock-dependent check "${c.check}" returned "${c.verdict}" with no clock — generate.ts would read a clock`);
+        fail(
+          G,
+          `${m.id}: clock-dependent check "${c.check}" returned "${c.verdict}" with no clock — generate.ts would read a clock`,
+        );
       }
     }
   }

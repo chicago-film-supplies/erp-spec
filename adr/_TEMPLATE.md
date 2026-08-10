@@ -1,12 +1,12 @@
 ---
 id: ADR-0000
 title:
-status: proposed        # proposed | accepted | rejected | superseded
+status: proposed # proposed | accepted | rejected | superseded
 date: 2026-08-08
-review_by:              # REQUIRED while proposed. validate fails once this date passes.
+review_by: # REQUIRED while proposed. validate fails once this date passes.
 deciders: [repo owner]
 contexts: []
-relates_to: []          # HOT-/OQ-/SPIKE-/REQ- ids
+relates_to: [] # HOT-/OQ-/SPIKE-/REQ- ids
 supersedes:
 superseded_by:
 ---

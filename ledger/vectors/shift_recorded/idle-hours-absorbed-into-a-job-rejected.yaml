@@ -27,7 +27,15 @@ given:
     cost_minor: 24000
     unabsorbed_minor: 0
     absorbed_allocations:
-      - { causal_job: ORD-VEC-0001, hours: 8, base_minor: 24000, premium_share_minor: 0, amount_minor: 24000, product_line: "Delivery", cost_type: delivery }
+      - {
+          causal_job: ORD-VEC-0001,
+          hours: 8,
+          base_minor: 24000,
+          premium_share_minor: 0,
+          amount_minor: 24000,
+          product_line: "Delivery",
+          cost_type: delivery,
+        }
 
 derivation: >-
   The same eight-hour guaranteed day with the same five hours of causal work — but all eight hours

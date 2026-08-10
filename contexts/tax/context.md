@@ -9,7 +9,7 @@ rental-vs-sales regime split, exemptions, and the 1099/W-9 contractor surface.
 
 - Does **not** own the invoice line — Billing does. Tax determines an amount; Billing carries it.
 - Does **not** own the posting — Ledger does.
-- Does **not** own the tax *basis* of an asset — Fixed Assets does. Different meaning of "tax".
+- Does **not** own the tax _basis_ of an asset — Fixed Assets does. Different meaning of "tax".
 
 ## Upstream / downstream
 

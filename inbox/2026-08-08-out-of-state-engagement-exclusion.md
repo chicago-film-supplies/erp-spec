@@ -9,7 +9,7 @@ verified: false
 triage_count: 0
 ---
 
-A single out-of-state engagement distorts run-rate analysis. It must carry a first-class
-exclusion flag on the source document — not a note in a document, not a hardcoded uid in a query.
+A single out-of-state engagement distorts run-rate analysis. It must carry a first-class exclusion
+flag on the source document — not a note in a document, not a hardcoded uid in a query.
 
 Semantics undecided: excluded from run-rate reporting only, or from more? Tracked as OQ-015.

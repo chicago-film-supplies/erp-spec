@@ -23,10 +23,10 @@ vmagent/vmalert/vmauth `v1.148.0`, otel-collector-contrib `0.157.0`, alertmanage
 
 ## CFS-specific gotchas
 
-- **The app speaks OTLP, never Victoria.** Instrumentation goes to an OpenTelemetry collector,
-  which fans out to the three stores. That vendor-neutrality is the reason this could be adopted
-  without a spike, and a direct Victoria client library in application code would silently spend
-  it. Treat "the app knows the backend's name" as a defect.
+- **The app speaks OTLP, never Victoria.** Instrumentation goes to an OpenTelemetry collector, which
+  fans out to the three stores. That vendor-neutrality is the reason this could be adopted without a
+  spike, and a direct Victoria client library in application code would silently spend it. Treat
+  "the app knows the backend's name" as a defect.
 - **LogsQL is not PromQL and not Lucene.** VictoriaLogs has its own query language; reaching for
   Prometheus syntax against the log store is the usual first mistake.
 - **It fails quiet.** A missing or misconfigured collector drops telemetry, and the thing that has

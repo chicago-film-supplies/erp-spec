@@ -19,9 +19,9 @@ superseded_by:
 
 ## Context
 
-- The two-phase transfer maps onto fulfillment almost exactly: reserve → pending, check out →
-  post, cancel → void, with the transfer timeout as built-in expiry. `debits_must_not_exceed_credits`
-  then makes overselling a database-level impossibility rather than an application check.
+- The two-phase transfer maps onto fulfillment almost exactly: reserve → pending, check out → post,
+  cancel → void, with the transfer timeout as built-in expiry. `debits_must_not_exceed_credits` then
+  makes overselling a database-level impossibility rather than an application check.
 - **But TigerBeetle balances are point-in-time and rental availability is not.** A booking six
   months out must not consume stock today, and two bookings on non-overlapping dates do not compete
   at all. A pending transfer has no date range, so a naive mapping draws both against the same
@@ -36,11 +36,11 @@ superseded_by:
 Reservations are TigerBeetle two-phase transfers **scoped to the operational window** — units
 committed to a fulfillment that is in progress:
 
-| Phase | Meaning |
-|---|---|
+| Phase   | Meaning                                                                |
+| ------- | ---------------------------------------------------------------------- |
 | pending | committed to an in-progress fulfillment (picked / staged, not yet out) |
-| post | checked out — custody transferred |
-| void | pick cancelled or expired |
+| post    | checked out — custody transferred                                      |
+| void    | pick cancelled or expired                                              |
 
 **Future-dated bookings are not transfers.** They remain interval records, and availability over a
 window remains interval math. The stock position TigerBeetle holds is physical custody, not the

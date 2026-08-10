@@ -45,9 +45,9 @@ spread across the goods delivered — and the official product-line P&L performs
 - **6400–6404 stop taking new postings** and stay in the chart for historical periods, the same
   treatment 6600 Wages receives under ADR-0019.
 - **The absorption basis is unresolved and is the real work.** Labour had an obvious one — hours,
-  which the shift already records. A vehicle's is mileage, or hours in service, or trips, and
-  **none of those is captured today**. Choosing it decides what the fulfillment context must record
-  on a leg, so it is a data-capture requirement before it is an accounting one.
+  which the shift already records. A vehicle's is mileage, or hours in service, or trips, and **none
+  of those is captured today**. Choosing it decides what the fulfillment context must record on a
+  leg, so it is a data-capture requirement before it is an accounting one.
 - **A second utilisation number appears**, and it is genuinely useful: the gap between absorbed and
   unabsorbed vehicle cost is fleet utilisation, the same shape as crew utilisation. It is also a
   second thing to keep honest, with the same trap — an unabsorbed account that can be dimensioned

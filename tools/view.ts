@@ -615,9 +615,7 @@ function renderInbox(s: Spec): string {
       }</td><td>${
         (i.contexts ?? []).map((c) => `<span class="tag">${esc(c)}</span>`).join(" ")
       }</td><td>${
-        promoted
-          ? chips(i.promotes_to)
-          : `<span class="pill">unpromoted</span>`
+        promoted ? chips(i.promotes_to) : `<span class="pill">unpromoted</span>`
       }</td></tr>`;
     })
     .join("");

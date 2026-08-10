@@ -1,8 +1,8 @@
 # Spike harness
 
-Measurement code. **Not spec, and not the target system.** It implements nothing that will ship;
-it exists so a claim made elsewhere in this repo can be re-run instead of believed. Same category
-as `tools/`.
+Measurement code. **Not spec, and not the target system.** It implements nothing that will ship; it
+exists so a claim made elsewhere in this repo can be re-run instead of believed. Same category as
+`tools/`.
 
 Two kinds live here, and the second arrived later:
 
@@ -13,15 +13,15 @@ Two kinds live here, and the second arrived later:
   ADR-0031. Read-only `db_*` queries against the prod CFS API, aggregated locally; the token comes
   from `CFS_API_TOKEN` and is never in this repo. These need no `node_modules` and no staging.
 
-The underscore prefix on this file keeps it out of `validate.ts`, which walks `spikes/`
-recursively and requires front matter on every `.md` it finds.
+The underscore prefix on this file keeps it out of `validate.ts`, which walks `spikes/` recursively
+and requires front matter on every `.md` it finds.
 
 ## Why it exists
 
-Three spikes asked the same question in three costumes: *does a native npm dependency load and
-keep working under Deno, across `deno run`, `deno test` and `deno compile`?* Three packages ×
-three modes is nine cells and not one had ever been filled in. Every statement in this repo about
-native addons under Deno was a prediction, including several that turned out to be wrong.
+Three spikes asked the same question in three costumes: _does a native npm dependency load and keep
+working under Deno, across `deno run`, `deno test` and `deno compile`?_ Three packages × three modes
+is nine cells and not one had ever been filled in. Every statement in this repo about native addons
+under Deno was a prediction, including several that turned out to be wrong.
 
 ## Running it
 
@@ -51,8 +51,8 @@ HUGEINT round-trips exactly rather than arriving as a float.
 **Each package gets its own compile entrypoint** (`entry-*.ts`, importing `probe-*.ts` directly and
 never `napi-probe.ts`). `deno compile` embeds every statically-reachable literal `import()`, so a
 shared entrypoint puts all three dependency trees in every binary: measured before the split, all
-three binaries came out at an identical 364 MB and every `--bundle` cell failed on BullMQ's
-optional `pg` peer, masking the DuckDB question entirely.
+three binaries came out at an identical 364 MB and every `--bundle` cell failed on BullMQ's optional
+`pg` peer, masking the DuckDB question entirely.
 
 ## The staging directory, and the trap that forced it
 
@@ -65,21 +65,21 @@ with `Import "pgpass" not a dependency and not in import map`. Staged under `/va
 cell compiles and passes.
 
 That was very nearly written down as "BullMQ cannot be bundled". It is a property of the machine,
-not of BullMQ. A harness whose results depend on what else is installed in the home directory is
-not a measurement, so the staging is load-bearing rather than tidiness.
+not of BullMQ. A harness whose results depend on what else is installed in the home directory is not
+a measurement, so the staging is load-bearing rather than tidiness.
 
 ## Versions this was measured against
 
-| | version | note |
-|---|---|---|
-| Deno | 2.9.2 | `aarch64-apple-darwin` |
-| `tigerbeetle-node` | 0.17.9 | client and server ship in lockstep — pin both |
-| TigerBeetle server | 0.17.9 | `tigerbeetle-universal-macos.zip` release asset, no container |
-| `@duckdb/node-api` | 1.5.5-r.3 | DuckDB v1.5.5 |
-| `@duckdb/duckdb-wasm` | 1.33.1-dev57.0 | |
-| `bullmq` | 6.0.9 | |
-| `ioredis` | 6.0.0 | |
-| `msgpackr` | 2.0.5 | transitive via bullmq; pinned so the probe can import it directly |
+|                       | version        | note                                                              |
+| --------------------- | -------------- | ----------------------------------------------------------------- |
+| Deno                  | 2.9.2          | `aarch64-apple-darwin`                                            |
+| `tigerbeetle-node`    | 0.17.9         | client and server ship in lockstep — pin both                     |
+| TigerBeetle server    | 0.17.9         | `tigerbeetle-universal-macos.zip` release asset, no container     |
+| `@duckdb/node-api`    | 1.5.5-r.3      | DuckDB v1.5.5                                                     |
+| `@duckdb/duckdb-wasm` | 1.33.1-dev57.0 |                                                                   |
+| `bullmq`              | 6.0.9          |                                                                   |
+| `ioredis`             | 6.0.0          |                                                                   |
+| `msgpackr`            | 2.0.5          | transitive via bullmq; pinned so the probe can import it directly |
 
 `deno.lock` is gitignored repo-wide, so **`deno.json` is the lockfile** — every npm specifier is an
 exact version, never a caret range.
@@ -87,7 +87,7 @@ exact version, never a caret range.
 ## This will rot, and that is fine
 
 It pins six npm packages against one Deno version on one platform. Its value is reproducibility at
-the *next* Deno upgrade, not perpetual green: when Deno 2.10 lands, re-run `deno task matrix` and
+the _next_ Deno upgrade, not perpetual green: when Deno 2.10 lands, re-run `deno task matrix` and
 diff the table. Nothing in CI runs it, deliberately — a spike harness that gates the build would
 make an upstream change break an unrelated push.
 

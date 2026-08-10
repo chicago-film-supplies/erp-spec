@@ -21,12 +21,12 @@ superseded_by:
 
 Measured 2026-08-09 against prod, over 9,197 non-divider invoice line items totalling $1,689,895.68:
 
-| Missing | Lines | % of lines | Revenue | % of revenue |
-|---|---:|---:|---:|---:|
-| `tracking_category` | 383 | 4.16% | $485,821.72 | **28.74%** |
-| `xero_tracking_option_id` | 129 | 1.40% | $234,960.36 | 13.90% |
+| Missing                   | Lines | % of lines |     Revenue | % of revenue |
+| ------------------------- | ----: | ---------: | ----------: | -----------: |
+| `tracking_category`       |   383 |      4.16% | $485,821.72 |   **28.74%** |
+| `xero_tracking_option_id` |   129 |      1.40% | $234,960.36 |       13.90% |
 
-- This **confirms** the charter's 28.7% figure, and settles that it was always a share of *revenue*,
+- This **confirms** the charter's 28.7% figure, and settles that it was always a share of _revenue_,
   not of lines.
 - Undimensioned lines average ~$1,268 against a $184 overall average — roughly 7x. The gap is
   concentrated in big-ticket items, not scattered across small ones.

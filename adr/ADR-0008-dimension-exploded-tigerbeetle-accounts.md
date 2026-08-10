@@ -14,8 +14,8 @@ superseded_by: ADR-0018
 > **In the context of** needing real-time balances sliced by dimension, **facing** TigerBeetle's
 > fixed account model with no native dimension support, **we decided** to explode dimensions into
 > the account identity — one account per (GL code × product line × cost type) — **to achieve**
-> dimensional balances that are read directly rather than aggregated, **accepting** a
-> multiplicative account count and a migration cost whenever a dimension value is added.
+> dimensional balances that are read directly rather than aggregated, **accepting** a multiplicative
+> account count and a migration cost whenever a dimension value is added.
 
 ## Context
 
@@ -37,6 +37,6 @@ source document, posting rule — which must not become part of account identity
   tractable before accepting.
 - Adding a product line means minting accounts, not altering rows. That is cheap, but it is a
   migration step that must exist.
-- **Blocked on HOT-005 / OQ-009.** If DuckDB is the reporting source of truth, real-time
-  dimensional balances in TigerBeetle may be solving a problem nobody has — and the simpler
-  account tree would win. Do not accept this ADR before that split is settled.
+- **Blocked on HOT-005 / OQ-009.** If DuckDB is the reporting source of truth, real-time dimensional
+  balances in TigerBeetle may be solving a problem nobody has — and the simpler account tree would
+  win. Do not accept this ADR before that split is settled.

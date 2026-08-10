@@ -9,10 +9,10 @@ verified: true
 triage_count: 0
 ---
 
-The seeded claim was "hand-entered and unvalidated". Partly refuted: addresses carry a
-`mapbox_id` and `address_coordinates`, so they pass through geocoding.
+The seeded claim was "hand-entered and unvalidated". Partly refuted: addresses carry a `mapbox_id`
+and `address_coordinates`, so they pass through geocoding.
 
 What is real is inconsistent normalization — on invoice #2128 the destination address stores
 `region: "Illinois"` while the same organization's billing address stores `region: "IL"`. Two
-representations of one state coexist inside one document. Misspellings and mismatched city/ZIP
-were not checked corpus-wide.
+representations of one state coexist inside one document. Misspellings and mismatched city/ZIP were
+not checked corpus-wide.

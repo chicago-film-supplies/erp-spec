@@ -23,15 +23,15 @@ superseded_by:
   (api-cloudrun#436, a population that is **growing**, not historical).
 - Both are what a stored copy of a derived value costs. Neither is a logic bug — the derivation is
   correct, the copy is stale.
-- In double-entry, most of what an invoice's status *means* is already a fact about postings.
-  `paid` is an AR balance of zero. `issued` is "has posted to AR". `voided` is "a reversal exists".
-  An invoice that has not posted is not an issued invoice; it is a draft document.
+- In double-entry, most of what an invoice's status _means_ is already a fact about postings. `paid`
+  is an AR balance of zero. `issued` is "has posted to AR". `voided` is "a reversal exists". An
+  invoice that has not posted is not an issued invoice; it is a draft document.
 
 ## Decision
 
-**Lifecycle state is derived.** Where a transition has a ledger or inventory consequence, the
-status is computed from that consequence and **materialized into MongoDB as a rebuildable
-projection**. Nothing assigns it.
+**Lifecycle state is derived.** Where a transition has a ledger or inventory consequence, the status
+is computed from that consequence and **materialized into MongoDB as a rebuildable projection**.
+Nothing assigns it.
 
 **The boundary rule: a lifecycle field is derivable exactly when its transition has a ledger or
 inventory consequence.** Transitions with no such consequence — a cancellation before anything
@@ -41,14 +41,14 @@ empty.
 
 **Never mint a posting solely to make a status derivable.** A zero-amount transfer whose only
 purpose is to mark a state change corrupts the ledger's meaning: it stops recording that money or
-stock moved and starts recording that things happened. An assigned field is the correct answer
-where no real consequence exists.
+stock moved and starts recording that things happened. An assigned field is the correct answer where
+no real consequence exists.
 
 ## Consequences
 
 - **Materialization is mandatory, not an optimization.** TigerBeetle answers no queries, so "every
-  invoice that is part-paid" cannot be asked of it. Deriving on read is not available at list
-  scale; the projection in MongoDB is how the state becomes queryable.
+  invoice that is part-paid" cannot be asked of it. Deriving on read is not available at list scale;
+  the projection in MongoDB is how the state becomes queryable.
 - **The rebuild must stay cheap enough to run as an audit.** A full recompute is both the recovery
   path and the check, so its cost bounds how often correctness can be confirmed.
 - **The audit is independent, which is the point.** "Recompute from TigerBeetle and compare" is not

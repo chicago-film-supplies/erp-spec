@@ -10,8 +10,8 @@ supersedes:
 superseded_by:
 ---
 
-> **In the context of** building our own ledger, **facing** a separate hosted tool holding the
-> asset register, **we decided** to bring fixed assets in-house with both GAAP and tax basis, **to
+> **In the context of** building our own ledger, **facing** a separate hosted tool holding the asset
+> register, **we decided** to bring fixed assets in-house with both GAAP and tax basis, **to
 > achieve** depreciation postings that originate in the same ledger as everything else and a
 > reportable deferred difference, **accepting** a genuinely intricate tax-depreciation rules
 > problem.
@@ -26,8 +26,8 @@ superseded_by:
 
 ## Decision
 
-Replace asset.accountant. The fixed-asset register is in-house, carrying dual GAAP and tax basis
-per asset.
+Replace asset.accountant. The fixed-asset register is in-house, carrying dual GAAP and tax basis per
+asset.
 
 ## Consequences
 

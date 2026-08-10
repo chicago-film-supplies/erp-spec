@@ -2,16 +2,20 @@
 entity: Asset
 description: Carries a basis in EVERY book simultaneously. A single-basis asset is a bug.
 fields:
-  asset_id:        { type: uuid, required: true }
-  acquired_on:     { type: date, required: true }
-  in_service_on:   { type: date, required: true, note: "distinct from acquired_on. drives convention" }
-  cost_minor:      { type: int64, required: true }
+  asset_id: { type: uuid, required: true }
+  acquired_on: { type: date, required: true }
+  in_service_on: {
+    type: date,
+    required: true,
+    note: "distinct from acquired_on. drives convention",
+  }
+  cost_minor: { type: int64, required: true }
   bases:
     type: map
     key: { type: enum, values: [gaap, tax] }
     value:
-      class_life:          { type: years, required: true }
-      convention:          { type: enum, values: [mid_month, half_year, mid_quarter], required: true }
-      accumulated_minor:   { type: int64, required: true }
-      section_179_minor:   { type: int64, required: false, note: "tax book only" }
-      bonus_minor:         { type: int64, required: false, note: "tax book only" }
+      class_life: { type: years, required: true }
+      convention: { type: enum, values: [mid_month, half_year, mid_quarter], required: true }
+      accumulated_minor: { type: int64, required: true }
+      section_179_minor: { type: int64, required: false, note: "tax book only" }
+      bonus_minor: { type: int64, required: false, note: "tax book only" }

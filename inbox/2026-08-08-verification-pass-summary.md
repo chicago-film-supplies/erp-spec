@@ -21,6 +21,5 @@ inconsistent region normalization.
 **Newly found:** duplicate ACTIVE charge products booking one event to two accounts (HOT-008).
 
 **Could not verify:** the 55 hard-deleted order uids (OQ-013) · the ~2% asymmetric
-collecting/returning share (HOT-002) · the ~90% Xero-behind-lock figure (deliberately not
-queried — Xero is single-tenant, live, and quota-limited) · whether any labour COST exists today
-(OQ-011).
+collecting/returning share (HOT-002) · the ~90% Xero-behind-lock figure (deliberately not queried —
+Xero is single-tenant, live, and quota-limited) · whether any labour COST exists today (OQ-011).

@@ -16,7 +16,14 @@ events:
     producer: fixed-assets
     consumers: [ledger, availability]
     terminal: false
-    carries: [asset_id, cost_basis_minor, in_service_date, useful_life_gaap, useful_life_tax, product_ref]
+    carries: [
+      asset_id,
+      cost_basis_minor,
+      in_service_date,
+      useful_life_gaap,
+      useful_life_tax,
+      product_ref,
+    ]
     blocked_by: [OQ-020]
 
   - id: EVT-FA-002

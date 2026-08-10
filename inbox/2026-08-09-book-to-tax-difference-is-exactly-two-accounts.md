@@ -15,24 +15,24 @@ differ in **exactly two accounts**, and every other difference is those two flow
 
 ## P&L, year ended 2025-12-31 — 52 of 60 lines byte-identical
 
-| | tax | GAAP | Δ |
-|---|---:|---:|---:|
-| 7000 Depreciation Expense | 115,606.29 | 52,052.81 | 63,553.48 |
-| 5000 COGS: Retail Inventory | 36,985.62 | 36,880.02 | (105.60) |
-| **Net Income** | **19,443.71** | **83,102.79** | **63,659.08** |
+|                             |           tax |          GAAP |             Δ |
+| --------------------------- | ------------: | ------------: | ------------: |
+| 7000 Depreciation Expense   |    115,606.29 |     52,052.81 |     63,553.48 |
+| 5000 COGS: Retail Inventory |     36,985.62 |     36,880.02 |      (105.60) |
+| **Net Income**              | **19,443.71** | **83,102.79** | **63,659.08** |
 
-63,553.48 + 105.60 = **63,659.08**. Zero residual. Holds for 2024 (−22,132.79 + 152.87 =
-−21,979.92) and 2023 (225,274.77 + 0.66 = 225,275.43) as well.
+63,553.48 + 105.60 = **63,659.08**. Zero residual. Holds for 2024 (−22,132.79 + 152.87 = −21,979.92)
+and 2023 (225,274.77 + 0.66 = 225,275.43) as well.
 
 ## Balance sheet, 2025-12-31
 
-| | tax | GAAP | Δ |
-|---|---:|---:|---:|
-| accumulated depreciation, six accounts | (579,442.99) | (111,804.31) | 467,638.68 |
-| 1400 Retail Inventory | 43,392.63 | 43,651.76 | 259.13 |
-| **Total Assets** | **824,225.75** | **1,292,123.56** | **467,897.81** |
-| **Total Liabilities** | **502,453.95** | **502,453.95** | **0.00** |
-| **Total Equity** | **321,771.80** | **789,669.61** | **467,897.81** |
+|                                        |            tax |             GAAP |              Δ |
+| -------------------------------------- | -------------: | ---------------: | -------------: |
+| accumulated depreciation, six accounts |   (579,442.99) |     (111,804.31) |     467,638.68 |
+| 1400 Retail Inventory                  |      43,392.63 |        43,651.76 |         259.13 |
+| **Total Assets**                       | **824,225.75** | **1,292,123.56** | **467,897.81** |
+| **Total Liabilities**                  | **502,453.95** |   **502,453.95** |       **0.00** |
+| **Total Equity**                       | **321,771.80** |   **789,669.61** | **467,897.81** |
 
 467,638.68 + 259.13 = 467,897.81 = the assets difference = the equity difference. **Liabilities are
 identical to the cent.** The cumulative inventory difference of 259.13 is exactly the fold of the
@@ -60,10 +60,10 @@ three annual COGS differences (0.66 + 152.87 + 105.60).
 - **Opening equity differs by book.** 3000 Member Equity / Opening Balance is 266,586.46 on the tax
   basis and 467,529.68 on GAAP; 3100 Retained Earnings is 35,741.63 against 239,037.14. Opening
   balances load per book, and the difference is the accumulated basis divergence of prior years.
-- **The tax depreciation number is produced by hand today.** The tax P&L annotates 7000 with
-  "** From Tax Depreciation Schedule in Asset Accountant" — the hosted register ADR-0007 replaces.
-  The architecture ADR-0026 describes is what CFS already does manually: the register supplies the
-  tax number and it is substituted into the statements.
+- **The tax depreciation number is produced by hand today.** The tax P&L annotates 7000 with "**
+  From Tax Depreciation Schedule in Asset Accountant" — the hosted register ADR-0007 replaces. The
+  architecture ADR-0026 describes is what CFS already does manually: the register supplies the tax
+  number and it is substituted into the statements.
 
 ## Reproducing this
 

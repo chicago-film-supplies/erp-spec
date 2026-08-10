@@ -14,8 +14,8 @@ superseded_by:
 > **In the context of** integrating Plaid and any surviving external system, **facing** a
 > tracking-id drift that silently cost 28.7% of revenue its dimension, **we decided** that foreign
 > identifiers never enter domain models and an unresolvable id is a hard error, **to achieve**
-> failures that are loud at the boundary instead of silent in the data, **accepting** that
-> ingestion will refuse work that the current system would have accepted.
+> failures that are loud at the boundary instead of silent in the data, **accepting** that ingestion
+> will refuse work that the current system would have accepted.
 
 ## Context
 
@@ -41,7 +41,7 @@ the boundary fails CI. A decision with no enforcement is a comment.
 
 - Ingestion refuses work it cannot translate. That is the intent, and it will be inconvenient in
   exactly the moments it matters.
-- Every boundary needs a translation table and an explicit unmapped-value path — a quarantine, not
-  a null.
-- The fitness function has to be landed **red** against a deliberate violation and seen to fail,
-  or it is not known to be a guard.
+- Every boundary needs a translation table and an explicit unmapped-value path — a quarantine, not a
+  null.
+- The fitness function has to be landed **red** against a deliberate violation and seen to fail, or
+  it is not known to be a guard.

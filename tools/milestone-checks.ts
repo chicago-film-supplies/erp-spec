@@ -88,7 +88,16 @@ interface World {
   unwrittenRules: number;
 }
 
-const CONTEXTS = ["ledger", "fulfillment", "billing", "fixed-assets", "ordering", "availability", "banking", "tax"];
+const CONTEXTS = [
+  "ledger",
+  "fulfillment",
+  "billing",
+  "fixed-assets",
+  "ordering",
+  "availability",
+  "banking",
+  "tax",
+];
 
 async function readYaml<T>(p: string): Promise<T | null> {
   try {
@@ -115,7 +124,9 @@ async function loadWorld(root: string): Promise<World> {
     for (const e of ey?.events ?? []) events.push(e);
     try {
       const s = await Deno.stat(`${root}/contexts/${c}/context.md`);
-      if (s.isFile && (await Deno.readTextFile(`${root}/contexts/${c}/context.md`)).trim().length > 0) {
+      if (
+        s.isFile && (await Deno.readTextFile(`${root}/contexts/${c}/context.md`)).trim().length > 0
+      ) {
         contextsWithDoc.push(c);
       }
     } catch { /* absent */ }
@@ -125,7 +136,13 @@ async function loadWorld(root: string): Promise<World> {
   const spikes: World["spikes"] = [];
   for (const [dir, sink] of [["adr", adrs], ["spikes", spikes]] as const) {
     try {
-      for await (const e of walk(`${root}/${dir}`, { exts: [".md"], includeDirs: false, skip: [/node_modules/] })) {
+      for await (
+        const e of walk(`${root}/${dir}`, {
+          exts: [".md"],
+          includeDirs: false,
+          skip: [/node_modules/],
+        })
+      ) {
         if (basename(e.path).startsWith("_") || basename(e.path).includes(".generated.")) continue;
         const fm = frontMatter(await Deno.readTextFile(e.path));
         if (fm) (sink as Record<string, unknown>[]).push(fm);
@@ -133,16 +150,23 @@ async function loadWorld(root: string): Promise<World> {
     } catch { /* absent */ }
   }
 
-  const hots = (await readYaml<{ hotspots?: World["hots"] }>(`${root}/hotspots.yaml`))?.hotspots ?? [];
-  const oqs = (await readYaml<{ open_questions?: World["oqs"] }>(`${root}/open-questions.yaml`))?.open_questions ?? [];
-  const glossary = (await readYaml<{ terms?: World["glossary"] }>(`${root}/glossary.yaml`))?.terms ?? [];
-  const coa = await readYaml<{ accounts?: Record<string, unknown>[] }>(`${root}/ledger/chart-of-accounts.yaml`);
+  const hots = (await readYaml<{ hotspots?: World["hots"] }>(`${root}/hotspots.yaml`))?.hotspots ??
+    [];
+  const oqs = (await readYaml<{ open_questions?: World["oqs"] }>(`${root}/open-questions.yaml`))
+    ?.open_questions ?? [];
+  const glossary =
+    (await readYaml<{ terms?: World["glossary"] }>(`${root}/glossary.yaml`))?.terms ?? [];
+  const coa = await readYaml<{ accounts?: Record<string, unknown>[] }>(
+    `${root}/ledger/chart-of-accounts.yaml`,
+  );
   const pr = await readYaml<{
     rules?: Record<string, unknown>[];
     no_posting?: { event?: string }[];
     unwritten?: { event?: string }[];
   }>(`${root}/ledger/posting-rules.yaml`);
-  const dims = (await readYaml<{ dimensions?: World["dimensions"] }>(`${root}/ledger/dimensions.yaml`))?.dimensions ?? [];
+  const dims =
+    (await readYaml<{ dimensions?: World["dimensions"] }>(`${root}/ledger/dimensions.yaml`))
+      ?.dimensions ?? [];
 
   const coveredEvents = new Set<string>();
   for (const r of pr?.rules ?? []) {
@@ -158,7 +182,10 @@ async function loadWorld(root: string): Promise<World> {
       if (basename(e.path).startsWith("_")) continue;
       const v = await readYaml<{ posting_rule?: string; kind?: string }>(e.path);
       if (!v?.posting_rule) continue;
-      vectorsByRule.set(v.posting_rule, [...(vectorsByRule.get(v.posting_rule) ?? []), String(v.kind)]);
+      vectorsByRule.set(v.posting_rule, [
+        ...(vectorsByRule.get(v.posting_rule) ?? []),
+        String(v.kind),
+      ]);
     }
   } catch { /* absent */ }
 
@@ -173,7 +200,9 @@ async function loadWorld(root: string): Promise<World> {
     formalReadme = await Deno.readTextFile(`${root}/formal/README.md`);
   } catch { /* absent */ }
 
-  const milestones = (await readYaml<{ milestones?: RawMilestone[] }>(`${root}/roadmap/milestones.yaml`))?.milestones ?? [];
+  const milestones =
+    (await readYaml<{ milestones?: RawMilestone[] }>(`${root}/roadmap/milestones.yaml`))
+      ?.milestones ?? [];
 
   return {
     root,
@@ -197,7 +226,8 @@ async function loadWorld(root: string): Promise<World> {
   };
 }
 
-const unset = (v: unknown) => v === undefined || v === null || v === "" || String(v).trim() === "TBD";
+const unset = (v: unknown) =>
+  v === undefined || v === null || v === "" || String(v).trim() === "TBD";
 
 /**
  * The registry. A criterion names one of these, or declares itself `prose_only`.
@@ -208,8 +238,13 @@ const unset = (v: unknown) => v === undefined || v === null || v === "" || Strin
 export const CHECKS: Record<string, Check> = {
   // ── m1 ──
   events_have_producer_and_consumer: (w) => {
-    const bad = w.events.filter((e) => !e.producer || ((e.consumers ?? []).length === 0 && e.terminal !== true));
-    return { ok: bad.length === 0, detail: `${w.events.length} events, ${bad.length} without a producer or consumer` };
+    const bad = w.events.filter((e) =>
+      !e.producer || ((e.consumers ?? []).length === 0 && e.terminal !== true)
+    );
+    return {
+      ok: bad.length === 0,
+      detail: `${w.events.length} events, ${bad.length} without a producer or consumer`,
+    };
   },
 
   // ── m2 ──
@@ -217,12 +252,16 @@ export const CHECKS: Record<string, Check> = {
     const missing = w.contextDirs.filter((c) => !w.contextsWithDoc.includes(c));
     return {
       ok: missing.length === 0,
-      detail: `${w.contextsWithDoc.length} of ${w.contextDirs.length} contexts have a non-empty context.md`,
+      detail:
+        `${w.contextsWithDoc.length} of ${w.contextDirs.length} contexts have a non-empty context.md`,
     };
   },
   glossary_no_todo: (w) => {
     const todo = w.glossary.filter((t) => String(t.definition ?? "").trim() === "TODO");
-    return { ok: todo.length === 0, detail: `${todo.length} of ${w.glossary.length} terms still TODO` };
+    return {
+      ok: todo.length === 0,
+      detail: `${todo.length} of ${w.glossary.length} terms still TODO`,
+    };
   },
 
   // ── m3 ──
@@ -230,11 +269,14 @@ export const CHECKS: Record<string, Check> = {
     const todo = w.accounts.filter((a) => /^TODO$/i.test(String(a.name ?? "").trim()));
     const codes = new Set(w.accounts.map((a) => Number(a.code)));
     // ADR-0019 requires the absorbed/unabsorbed pair to exist; the chart mints them at 5800/5801.
-    const labour = w.accounts.filter((a) => /Wages \((Absorbed|Unabsorbed)\)/.test(String(a.name ?? "")));
+    const labour = w.accounts.filter((a) =>
+      /Wages \((Absorbed|Unabsorbed)\)/.test(String(a.name ?? ""))
+    );
     const ok = todo.length === 0 && labour.length === 2 && codes.size === w.accounts.length;
     return {
       ok,
-      detail: `${w.accounts.length} accounts, ${todo.length} named TODO, ${labour.length} of 2 labour accounts present`,
+      detail:
+        `${w.accounts.length} accounts, ${todo.length} named TODO, ${labour.length} of 2 labour accounts present`,
     };
   },
   dimensions_defined: (w) => {
@@ -245,7 +287,9 @@ export const CHECKS: Record<string, Check> = {
     };
   },
   posting_rules_cover_events: (w) => {
-    const ledgerEvents = w.events.filter((e) => e.producer === "ledger" || (e.consumers ?? []).includes("ledger"));
+    const ledgerEvents = w.events.filter((e) =>
+      e.producer === "ledger" || (e.consumers ?? []).includes("ledger")
+    );
     const uncovered = ledgerEvents.filter((e) => !w.coveredEvents.has(e.id));
     const specified = w.rules.filter((r) => String(r.status) === "specified").length;
     // ⚠️ Coverage is necessary and NOT sufficient. Every ledger event appearing in some bucket is
@@ -274,11 +318,16 @@ export const CHECKS: Record<string, Check> = {
 
   // ── m4 ──
   spikes_closed_with_adr: (w) => {
-    const open = w.spikes.filter((s) => !["closed", "abandoned"].includes(String(s.status ?? "open")));
-    const unnamed = w.spikes.filter((s) => String(s.status) === "closed" && (!s.closes_adr || s.closes_adr === "new"));
+    const open = w.spikes.filter((s) =>
+      !["closed", "abandoned"].includes(String(s.status ?? "open"))
+    );
+    const unnamed = w.spikes.filter((s) =>
+      String(s.status) === "closed" && (!s.closes_adr || s.closes_adr === "new")
+    );
     return {
       ok: open.length === 0 && unnamed.length === 0,
-      detail: `${w.spikes.length} spikes, ${open.length} open, ${unnamed.length} closed without naming an ADR`,
+      detail:
+        `${w.spikes.length} spikes, ${open.length} open, ${unnamed.length} closed without naming an ADR`,
     };
   },
   adr_review_by_current: (w, now) => {
@@ -287,11 +336,17 @@ export const CHECKS: Record<string, Check> = {
       String(a.status) === "proposed" && a.review_by && new Date(String(a.review_by)) < now
     );
     const proposed = w.adrs.filter((a) => String(a.status) === "proposed");
-    return { ok: stale.length === 0, detail: `${proposed.length} proposed, ${stale.length} past review_by` };
+    return {
+      ok: stale.length === 0,
+      detail: `${proposed.length} proposed, ${stale.length} past review_by`,
+    };
   },
   hotspots_resolved: (w) => {
     const open = w.hots.filter((h) => String(h.status ?? "open") !== "resolved");
-    return { ok: open.length === 0, detail: `${w.hots.length} hotspots, ${open.length} unresolved` };
+    return {
+      ok: open.length === 0,
+      detail: `${w.hots.length} hotspots, ${open.length} unresolved`,
+    };
   },
 
   // ── m5 ──
@@ -304,14 +359,18 @@ export const CHECKS: Record<string, Check> = {
     const hasOutcome = /NoError|no violation/.test(w.formalReadme);
     return {
       ok: w.formalSpecs.length > 0 && missing.length === 0 && hasOutcome,
-      detail: `${w.formalSpecs.length} .qnt specs, ${missing.length} unrecorded in formal/README.md`,
+      detail:
+        `${w.formalSpecs.length} .qnt specs, ${missing.length} unrecorded in formal/README.md`,
     };
   },
 
   // ── spec-v1 ──
   oq_all_owned: (w) => {
     const bad = w.oqs.filter((q) => unset(q.owner) || unset(q.decide_by));
-    return { ok: bad.length === 0, detail: `${w.oqs.length} open questions, ${bad.length} with no owner or decide_by` };
+    return {
+      ok: bad.length === 0,
+      detail: `${w.oqs.length} open questions, ${bad.length} with no owner or decide_by`,
+    };
   },
   requirements_all_have_scenarios: () => {
     // Deliberately delegated. Gate 3 already decides this, and a second implementation here could
@@ -330,7 +389,10 @@ export const DELEGATED = new Set(["requirements_all_have_scenarios"]);
  * Evaluate every milestone. Pass `now` ONLY from a tool that writes nothing — `validate.ts`.
  * With `now === null`, clock-dependent checks return `deferred` rather than a verdict.
  */
-export async function evaluateMilestones(root: string, now: Date | null = null): Promise<MilestoneResult[]> {
+export async function evaluateMilestones(
+  root: string,
+  now: Date | null = null,
+): Promise<MilestoneResult[]> {
   const w = await loadWorld(root);
   const out: MilestoneResult[] = [];
   for (const m of w.milestones) {
@@ -344,7 +406,12 @@ export async function evaluateMilestones(root: string, now: Date | null = null):
       }
       const fn = c.check ? CHECKS[c.check] : undefined;
       if (!c.check || !fn) {
-        criteria.push({ text, check: c.check, verdict: "prose", detail: `unknown check "${c.check}"` });
+        criteria.push({
+          text,
+          check: c.check,
+          verdict: "prose",
+          detail: `unknown check "${c.check}"`,
+        });
         continue;
       }
       if (DELEGATED.has(c.check)) {
@@ -352,7 +419,12 @@ export async function evaluateMilestones(root: string, now: Date | null = null):
         continue;
       }
       if (CLOCK_DEPENDENT.has(c.check) && !now) {
-        criteria.push({ text, check: c.check, verdict: "deferred", detail: "clock-dependent — decided by validate" });
+        criteria.push({
+          text,
+          check: c.check,
+          verdict: "deferred",
+          detail: "clock-dependent — decided by validate",
+        });
         continue;
       }
       const r = fn(w, now);

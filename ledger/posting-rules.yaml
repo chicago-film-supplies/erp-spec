@@ -87,26 +87,26 @@ rules:
     control_total: invoice.total_minor
     invariants:
       - >-
-        A transfer carries every dimension named by its accounts' own `dimensions:` lists in
-        `ledger/chart-of-accounts.yaml`, with a value from that dimension's declared set in
-        `ledger/dimensions.yaml`, or the posting is REFUSED rather than recorded (REQ-LED-001,
-        ADR-0025). For a revenue transfer that is `product_line`; `cost_type` is a labour dimension
-        and appears on 5800 alone.
-        **What is refused is ABSENCE, not null** (ADR-0025). An explicit `product_line: null`
-        records that no tracked product line applies and is recorded; a missing key means nobody
-        decided and is refused. An empty string is refused as well — it passes a naive NOT NULL
-        check while meaning nothing — and so is a value outside the declared set. There is no
-        `Other` to fall back on, and a receipt that is not a categorised sale at all belongs in
-        4800 Other Income, which requires no dimension.
+          A transfer carries every dimension named by its accounts' own `dimensions:` lists in
+          `ledger/chart-of-accounts.yaml`, with a value from that dimension's declared set in
+          `ledger/dimensions.yaml`, or the posting is REFUSED rather than recorded (REQ-LED-001,
+          ADR-0025). For a revenue transfer that is `product_line`; `cost_type` is a labour dimension
+          and appears on 5800 alone.
+          **What is refused is ABSENCE, not null** (ADR-0025). An explicit `product_line: null`
+          records that no tracked product line applies and is recorded; a missing key means nobody
+          decided and is refused. An empty string is refused as well — it passes a naive NOT NULL
+          check while meaning nothing — and so is a value outside the declared set. There is no
+          `Other` to fall back on, and a receipt that is not a categorised sale at all belongs in
+          4800 Other Income, which requires no dimension.
       - >-
-        No posting takes an accounting date inside a closed period (ADR-0010, ADR-0017). The check
-        is on accounting date, never on posting timestamp.
+          No posting takes an accounting date inside a closed period (ADR-0010, ADR-0017). The check
+          is on accounting date, never on posting timestamp.
       - >-
-        The credit account is determined by the item's TYPE, not by which product the operator
-        picked — a `surcharge` books to 4110 and a `service` to 4100, always (ADR-0021).
+          The credit account is determined by the item's TYPE, not by which product the operator
+          picked — a `surcharge` books to 4110 and a `service` to 4100, always (ADR-0021).
       - >-
-        This posting is what MAKES the invoice issued (ADR-0022). `lifecycle` is derived from the
-        existence of this AR posting, never assigned.
+          This posting is what MAKES the invoice issued (ADR-0022). `lifecycle` is derived from the
+          existence of this AR posting, never assigned.
     relates_to: [REQ-LED-001, ADR-0010, ADR-0017, ADR-0018, ADR-0021, ADR-0022]
     vectors_dir: ledger/vectors/invoice_issued/
 
@@ -131,21 +131,21 @@ rules:
     control_total: invoice.total_minor
     invariants:
       - >-
-        **A reversal, never a delete** (REQ-BIL-001, the no-hard-deletes fence). Every transfer of
-        the original entry reappears with its two accounts exchanged and its amount and dimensions
-        unchanged — so the reversal carries the same dimensions as what it reverses, and a
-        dimensional report nets to zero rather than losing both sides.
+          **A reversal, never a delete** (REQ-BIL-001, the no-hard-deletes fence). Every transfer of
+          the original entry reappears with its two accounts exchanged and its amount and dimensions
+          unchanged — so the reversal carries the same dimensions as what it reverses, and a
+          dimensional report nets to zero rather than losing both sides.
       - >-
-        **If the original's period is closed, the reversal takes an accounting date in an OPEN
-        period** (ADR-0017, EVT-BIL-002). A closed period's Parquet artifact is immutable and
-        hashed; restating it would break the hash, which is the guarantee. The reversal is a new
-        entry in an open period, not an edit of a sealed one.
+          **If the original's period is closed, the reversal takes an accounting date in an OPEN
+          period** (ADR-0017, EVT-BIL-002). A closed period's Parquet artifact is immutable and
+          hashed; restating it would break the hash, which is the guarantee. The reversal is a new
+          entry in an open period, not an edit of a sealed one.
       - >-
-        An invoice with no AR posting is a draft document and there is nothing to reverse
-        (ADR-0022). Voiding one is refused.
+          An invoice with no AR posting is a draft document and there is nothing to reverse
+          (ADR-0022). Voiding one is refused.
       - >-
-        Voiding is not a bad-debt write-off. A void says the sale did not happen; a write-off says
-        it happened and the money did not arrive, and that debits 6900 instead.
+          Voiding is not a bad-debt write-off. A void says the sale did not happen; a write-off says
+          it happened and the money did not arrive, and that debits 6900 instead.
     relates_to: [ADR-0010, ADR-0017, ADR-0022]
     vectors_dir: ledger/vectors/invoice_voided/
 
@@ -172,20 +172,20 @@ rules:
     control_total: null
     invariants:
       - >-
-        The close record carries the **sha256 of the period's Parquet artifact** (EVT-LED-002,
-        ADR-0017). Without it a closed period has no drift guarantee at all, so a close with no
-        hash is refused.
+          The close record carries the **sha256 of the period's Parquet artifact** (EVT-LED-002,
+          ADR-0017). Without it a closed period has no drift guarantee at all, so a close with no
+          hash is refused.
       - >-
-        After close, no posting may take an accounting date inside the period — regardless of its
-        posting timestamp (ADR-0010). This is the invariant `formal/period-close.qnt` model-checks
-        in m5; the vector and the model are two independent expressions of it, and if they disagree
-        one of them is wrong.
+          After close, no posting may take an accounting date inside the period — regardless of its
+          posting timestamp (ADR-0010). This is the invariant `formal/period-close.qnt` model-checks
+          in m5; the vector and the model are two independent expressions of it, and if they disagree
+          one of them is wrong.
       - >-
-        Parquet is exported from MongoDB, not from TigerBeetle — Mongo holds the accounting date
-        and is queryable, and TigerBeetle has no bulk export (ADR-0017).
+          Parquet is exported from MongoDB, not from TigerBeetle — Mongo holds the accounting date
+          and is queryable, and TigerBeetle has no bulk export (ADR-0017).
       - >-
-        A period with zero postings still closes and still produces a hashed artifact. A close that
-        only works when there is activity is a hole, not a simplification.
+          A period with zero postings still closes and still produces a hashed artifact. A close that
+          only works when there is activity is a hole, not a simplification.
     relates_to: [ADR-0010, ADR-0017]
     vectors_dir: ledger/vectors/period_closed/
 
@@ -212,41 +212,41 @@ rules:
     control_total: session.amount_minor
     invariants:
       - >-
-        **One journal entry per SESSION, not per invoice** — a session is one operator action, and
-        one payment may be applied across several invoices. That is what makes this entry span
-        several source documents and is half of erp-spec#3's evidence that `journal_entry_id`
-        cannot be derived from a single source-document reference. The current system already groups
-        this way: `settlements.uid_session`, documented as "one per operator action — groups a batch
-        payment or a multi-invoice allocation"
-        (`code:2026-08-09:core@33f5654:src/schemas/settlement.ts`).
+          **One journal entry per SESSION, not per invoice** — a session is one operator action, and
+          one payment may be applied across several invoices. That is what makes this entry span
+          several source documents and is half of erp-spec#3's evidence that `journal_entry_id`
+          cannot be derived from a single source-document reference. The current system already groups
+          this way: `settlements.uid_session`, documented as "one per operator action — groups a batch
+          payment or a multi-invoice allocation"
+          (`code:2026-08-09:core@33f5654:src/schemas/settlement.ts`).
       - >-
-        **The entry accounts for ALL the money that arrived** (control total), and the part that
-        relieves no receivable is a liability rather than a refusal. `session.unapplied_minor`
-        credits **2050 Customer Credit Balances** — the same account an unallocated credit note
-        sits in, because it is the same fact: customer value CFS holds that is attached to no
-        invoice. This is what all four surveyed suites do with an advance (OQ-028; NetSuite
-        `Customer Deposits`, SAP a special G/L reconciliation account, Intacct an AR Advance, Odoo a
-        down-payment liability).
-        The remainder is zero on an ordinary payment, so the leg is not written at all — see the
-        note on zero amounts in this file's header.
+          **The entry accounts for ALL the money that arrived** (control total), and the part that
+          relieves no receivable is a liability rather than a refusal. `session.unapplied_minor`
+          credits **2050 Customer Credit Balances** — the same account an unallocated credit note
+          sits in, because it is the same fact: customer value CFS holds that is attached to no
+          invoice. This is what all four surveyed suites do with an advance (OQ-028; NetSuite
+          `Customer Deposits`, SAP a special G/L reconciliation account, Intacct an AR Advance, Odoo a
+          down-payment liability).
+          The remainder is zero on an ordinary payment, so the leg is not written at all — see the
+          note on zero amounts in this file's header.
       - >-
-        **Recording an overpayment is not endorsing it.** An operator who keys $15,000 for $1,500
-        gets a visible liability rather than an error, and the deliberate cost is that the mis-key
-        lands silently. The money is in the bank either way, and refusing to record it puts the
-        ledger further from the bank rather than closer — so the check belongs in the client, which
-        **warns before recording a remainder** (owner, 2026-08-09). A warning an operator can
-        override is the right shape for a fact that is real but usually wrong.
+          **Recording an overpayment is not endorsing it.** An operator who keys $15,000 for $1,500
+          gets a visible liability rather than an error, and the deliberate cost is that the mis-key
+          lands silently. The money is in the bank either way, and refusing to record it puts the
+          ledger further from the bank rather than closer — so the check belongs in the client, which
+          **warns before recording a remainder** (owner, 2026-08-09). A warning an operator can
+          override is the right shape for a fact that is real but usually wrong.
       - >-
-        **A session names exactly ONE deposit account.** Money that arrives in two accounts is two
-        events, however it looked to the operator. Without this the debit side of the fan is
-        ambiguous and the bank reconciliation (EVT-BNK-002) has nothing stable to match against.
+          **A session names exactly ONE deposit account.** Money that arrives in two accounts is two
+          events, however it looked to the operator. Without this the debit side of the fan is
+          ambiguous and the bank reconciliation (EVT-BNK-002) has nothing stable to match against.
       - >-
-        A settlement against an invoice with **no AR posting** is refused — a draft invoice never
-        debited AR, so crediting it manufactures a negative receivable (ADR-0022). Money received
-        before an invoice exists is a customer prepayment, not a settlement.
+          A settlement against an invoice with **no AR posting** is refused — a draft invoice never
+          debited AR, so crediting it manufactures a negative receivable (ADR-0022). Money received
+          before an invoice exists is a customer prepayment, not a settlement.
       - >-
-        Neither account carries a dimension: 1200 and the cash accounts all name none. Settlement
-        moves money that has **already been dimensioned** at the sale.
+          Neither account carries a dimension: 1200 and the cash accounts all name none. Settlement
+          moves money that has **already been dimensioned** at the sale.
     relates_to: [ADR-0010, ADR-0014, ADR-0022]
     vectors_dir: ledger/vectors/settlement_recorded/
 
@@ -269,28 +269,28 @@ rules:
     control_total: reversal.amount_minor
     invariants:
       - >-
-        **A bounced payment asserts the money never arrived** — distinct from a credit note, which
-        asserts that money owed is being given back. The first reverses cash against AR; the second
-        reverses revenue. Conflating them books a sale as uncollected or an uncollected sale as a
-        return, and both misstate revenue.
+          **A bounced payment asserts the money never arrived** — distinct from a credit note, which
+          asserts that money owed is being given back. The first reverses cash against AR; the second
+          reverses revenue. Conflating them books a sale as uncollected or an uncollected sale as a
+          return, and both misstate revenue.
       - >-
-        **A reversal, never a delete, and never an edit** (REQ-BIL-001). The current system already
-        holds this shape: `settlements` is append-only, a correction is a NEW row carrying
-        `reverses`, and `reverses` is "provenance only, never arithmetic"
-        (`code:2026-08-09:core@33f5654:src/schemas/settlement.ts`). Live example — settlement
-        `4ab47fcb6d599e406636`, `type: payment_reversal`, `reason: source_retracted`, retracting
-        `441cb6e9177eaf7085a1` on invoice 1689 (`api:2026-08-09:get_settlements`).
+          **A reversal, never a delete, and never an edit** (REQ-BIL-001). The current system already
+          holds this shape: `settlements` is append-only, a correction is a NEW row carrying
+          `reverses`, and `reverses` is "provenance only, never arithmetic"
+          (`code:2026-08-09:core@33f5654:src/schemas/settlement.ts`). Live example — settlement
+          `4ab47fcb6d599e406636`, `type: payment_reversal`, `reason: source_retracted`, retracting
+          `441cb6e9177eaf7085a1` on invoice 1689 (`api:2026-08-09:get_settlements`).
       - >-
-        **Whole rows only — a retraction carries the amount of the row it retracts.** A partial
-        reversal is refused: it would leave the retracted settlement half-standing with no record of
-        which half, and "the payment partly arrived" is not a fact a bounce can assert.
+          **Whole rows only — a retraction carries the amount of the row it retracts.** A partial
+          reversal is refused: it would leave the retracted settlement half-standing with no record of
+          which half, and "the payment partly arrived" is not a fact a bounce can assert.
       - >-
-        **A settlement is retracted at most once.** A second retraction of the same row debits AR
-        twice for one bounce and leaves the invoice reporting more owed than was ever billed.
+          **A settlement is retracted at most once.** A second retraction of the same row debits AR
+          twice for one bounce and leaves the invoice reporting more owed than was ever billed.
       - >-
-        **The reversal takes its OWN accounting date, in an open period** (ADR-0017) — the same
-        manoeuvre `invoice_voided` performs, and for the same reason: a sealed period's Parquet
-        artifact is hashed, so restating it breaks the guarantee.
+          **The reversal takes its OWN accounting date, in an open period** (ADR-0017) — the same
+          manoeuvre `invoice_voided` performs, and for the same reason: a sealed period's Parquet
+          artifact is hashed, so restating it breaks the guarantee.
     relates_to: [ADR-0010, ADR-0017, ADR-0022]
     vectors_dir: ledger/vectors/settlement_reversed/
 
@@ -324,34 +324,34 @@ rules:
     control_total: credit_note.total_minor
     invariants:
       - >-
-        **The credit side is 2050 Customer Credit Balances, NOT 1200.** A credit note is
-        issued against an organization and allocated to invoices afterwards, so between the two it
-        is attached to no invoice. Crediting AR at issue puts the unallocated balance in the control
-        account while no invoice in the subledger carries it, and AR stops tying to the sum of open
-        invoices by exactly that amount. The current system already keeps this number —
-        `credit-notes.remaining_credit_cents` — and moves an invoice's `amount_credited` only when an
-        allocation row exists (`code:2026-08-09:core@33f5654:src/schemas/settlement.ts`).
+          **The credit side is 2050 Customer Credit Balances, NOT 1200.** A credit note is
+          issued against an organization and allocated to invoices afterwards, so between the two it
+          is attached to no invoice. Crediting AR at issue puts the unallocated balance in the control
+          account while no invoice in the subledger carries it, and AR stops tying to the sum of open
+          invoices by exactly that amount. The current system already keeps this number —
+          `credit-notes.remaining_credit_cents` — and moves an invoice's `amount_credited` only when an
+          allocation row exists (`code:2026-08-09:core@33f5654:src/schemas/settlement.ts`).
       - >-
-        **Bad debt is not a revenue reversal, and that is the whole of the debit side.** A write-off
-        says the sale happened and the money did not arrive, so it debits **6900 Bad Debt** and the
-        revenue stands. Everything else is a return or an allowance — the customer never owed it —
-        and debits **the line's own revenue account**. This is `deriveCreditPostingAccount` in the
-        current system (`code:2026-08-09:core@33f5654:src/schemas/credit-note.ts`), and history does
-        not obey it: 4 of 12 live notes are miscoded, CN-1007 booking a bad-debt write-off to 4210.
+          **Bad debt is not a revenue reversal, and that is the whole of the debit side.** A write-off
+          says the sale happened and the money did not arrive, so it debits **6900 Bad Debt** and the
+          revenue stands. Everything else is a return or an allowance — the customer never owed it —
+          and debits **the line's own revenue account**. This is `deriveCreditPostingAccount` in the
+          current system (`code:2026-08-09:core@33f5654:src/schemas/credit-note.ts`), and history does
+          not obey it: 4 of 12 live notes are miscoded, CN-1007 booking a bad-debt write-off to 4210.
       - >-
-        **A write-off reverses no tax.** The sale stands, so the tax charged on it stands; relief for
-        tax remitted on an uncollectible receivable is claimed on the return, which is the tax
-        context's business and not a reversal of this posting. A revenue-reversal note DOES reverse
-        its tax, because that sale is being undone.
+          **A write-off reverses no tax.** The sale stands, so the tax charged on it stands; relief for
+          tax remitted on an uncollectible receivable is claimed on the return, which is the tax
+          context's business and not a reversal of this posting. A revenue-reversal note DOES reverse
+          its tax, because that sale is being undone.
       - >-
-        **A line whose posting account cannot be determined is refused, not defaulted.**
-        `deriveCreditPostingAccount` returns null for `correction` and `unspecified` deliberately —
-        a correction may be adding a credit that was missed or removing one that never happened, so
-        the account depends on what is being corrected and the operator must state it.
+          **A line whose posting account cannot be determined is refused, not defaulted.**
+          `deriveCreditPostingAccount` returns null for `correction` and `unspecified` deliberately —
+          a correction may be adding a credit that was missed or removing one that never happened, so
+          the account depends on what is being corrected and the operator must state it.
       - >-
-        A revenue-reversal line carries the **product line of the sale it reverses** (REQ-LED-001,
-        ADR-0025) — otherwise the reversal nets the total to zero while leaving the original standing
-        in every dimensional report. A write-off carries none, because 6900 and 2050 both name none.
+          A revenue-reversal line carries the **product line of the sale it reverses** (REQ-LED-001,
+          ADR-0025) — otherwise the reversal nets the total to zero while leaving the original standing
+          in every dimensional report. A write-off carries none, because 6900 and 2050 both name none.
     relates_to: [REQ-LED-001, ADR-0022, ADR-0025]
     vectors_dir: ledger/vectors/credit_note_issued/
 
@@ -374,30 +374,30 @@ rules:
     control_total: session.amount_minor
     invariants:
       - >-
-        **This is the entry that spans source documents, and it is measured rather than argued.**
-        One operator action may draw on several credit notes: invoice 1767 takes $247.75 from
-        CN-1015 and $27.26 from CN-1017 under one `uid_session`
-        (`api:2026-08-09:get_settlements`). One note may also be split across several invoices —
-        CN-1015's $259.74 goes $247.75 to invoice 1767 and $11.99 to invoice 1751. Either way the
-        entry references more than one source document, which is why `journal_entry_id` cannot be
-        derived from one (erp-spec#3).
+          **This is the entry that spans source documents, and it is measured rather than argued.**
+          One operator action may draw on several credit notes: invoice 1767 takes $247.75 from
+          CN-1015 and $27.26 from CN-1017 under one `uid_session`
+          (`api:2026-08-09:get_settlements`). One note may also be split across several invoices —
+          CN-1015's $259.74 goes $247.75 to invoice 1767 and $11.99 to invoice 1751. Either way the
+          entry references more than one source document, which is why `journal_entry_id` cannot be
+          derived from one (erp-spec#3).
       - >-
-        **The accounting date is `max(credit_note.date, invoice.date)`** — the only date on which
-        both facts are true. Verified 6 of 6 on prod and already load-bearing in the current system,
-        where an allocation carries its own date rather than the note's
-        (`code:2026-08-09:core@33f5654:src/schemas/settlement.ts`).
+          **The accounting date is `max(credit_note.date, invoice.date)`** — the only date on which
+          both facts are true. Verified 6 of 6 on prod and already load-bearing in the current system,
+          where an allocation carries its own date rather than the note's
+          (`code:2026-08-09:core@33f5654:src/schemas/settlement.ts`).
       - >-
-        **An allocation may not exceed the note's remaining credit.** 2050 holds one balance per
-        note; over-allocating drives that balance negative, which is the ledger asserting the
-        business gave back more than it ever credited. `credit-notes.remaining_credit_cents` is the
-        live counterpart.
+          **An allocation may not exceed the note's remaining credit.** 2050 holds one balance per
+          note; over-allocating drives that balance negative, which is the ledger asserting the
+          business gave back more than it ever credited. `credit-notes.remaining_credit_cents` is the
+          live counterpart.
       - >-
-        Allocating to an invoice with **no AR posting** is refused, for the same reason a settlement
-        against a draft is (ADR-0022) — there is no receivable to relieve.
+          Allocating to an invoice with **no AR posting** is refused, for the same reason a settlement
+          against a draft is (ADR-0022) — there is no receivable to relieve.
       - >-
-        **Issue and allocation are separate events on purpose.** Collapsing them would make an
-        unallocated credit unrepresentable, and a credit note is unallocated for as long as the
-        customer has not been billed against it.
+          **Issue and allocation are separate events on purpose.** Collapsing them would make an
+          unallocated credit unrepresentable, and a credit note is unallocated for as long as the
+          customer has not been billed against it.
     relates_to: [ADR-0010, ADR-0014, ADR-0022]
     vectors_dir: ledger/vectors/credit_note_allocated/
 
@@ -423,31 +423,31 @@ rules:
     control_total: asset.cost_minor
     invariants:
       - >-
-        **The GAAP book, and only the GAAP book, posts** (ADR-0026). Tax NBV differs — most of this
-        fleet is §179'd to zero in year 1 while GAAP carries it 5, 10 or 20 years — so the tax gain
-        differs too, and it is §1245 recapture rather than a book gain. `EVT-FA-003` carries
-        `nbv_tax_minor` for exactly that reason: the register computes the tax result and the read
-        side reports it. No tax-basis value reaches TigerBeetle.
+          **The GAAP book, and only the GAAP book, posts** (ADR-0026). Tax NBV differs — most of this
+          fleet is §179'd to zero in year 1 while GAAP carries it 5, 10 or 20 years — so the tax gain
+          differs too, and it is §1245 recapture rather than a book gain. `EVT-FA-003` carries
+          `nbv_tax_minor` for exactly that reason: the register computes the tax result and the read
+          side reports it. No tax-basis value reaches TigerBeetle.
       - >-
-        **Accumulated depreciation plus net book value equals cost**, which is what the control
-        total checks. The two legs relieve the asset account to zero between them; if the register's
-        two numbers disagree with the asset's cost, the entry is refused rather than plugged.
+          **Accumulated depreciation plus net book value equals cost**, which is what the control
+          total checks. The two legs relieve the asset account to zero between them; if the register's
+          two numbers disagree with the asset's cost, the entry is refused rather than plugged.
       - >-
-        **PROCEEDS ARE NOT POSTED HERE.** Cash for a sold asset arrives through the sale document —
-        an invoice line coded to 1998 (EVT-BIL-001, ADR-0021) or a bank receipt (EVT-BNK-002).
-        Posting them here as well would debit the cash twice. 1998 therefore holds the NBV as a
-        debit and the proceeds as a credit, and its balance IS the gain or loss without anything
-        having to compute one — which is also why no leg of this rule needs a conditional.
+          **PROCEEDS ARE NOT POSTED HERE.** Cash for a sold asset arrives through the sale document —
+          an invoice line coded to 1998 (EVT-BIL-001, ADR-0021) or a bank receipt (EVT-BNK-002).
+          Posting them here as well would debit the cash twice. 1998 therefore holds the NBV as a
+          debit and the proceeds as a credit, and its balance IS the gain or loss without anything
+          having to compute one — which is also why no leg of this rule needs a conditional.
       - >-
-        **A loss is a debit to 1998 and that is by design.** The account's chart entry already says
-        so: it is the one place in this chart where a normal balance is routinely violated, and its
-        live classification as an Asset is corrected to revenue there.
+          **A loss is a debit to 1998 and that is by design.** The account's chart entry already says
+          so: it is the one place in this chart where a normal balance is routinely violated, and its
+          live classification as an Asset is corrected to revenue there.
       - >-
-        **An asset is disposed of once.** A second disposal credits an asset account already at
-        zero, manufacturing a negative asset and a second gain out of one sale.
+          **An asset is disposed of once.** A second disposal credits an asset account already at
+          zero, manufacturing a negative asset and a second gain out of one sale.
       - >-
-        A fully depreciated asset has a zero NBV, so the second leg is **not written at all** — one
-        transfer, not a zero-amount one. See the note on zero amounts in this file's header.
+          A fully depreciated asset has a zero NBV, so the second leg is **not written at all** — one
+          transfer, not a zero-amount one. See the note on zero amounts in this file's header.
     relates_to: [ADR-0007, ADR-0010, ADR-0021, ADR-0026]
     vectors_dir: ledger/vectors/asset_disposed/
 
@@ -470,27 +470,27 @@ rules:
     control_total: adjustment.capitalised_minor
     invariants:
       - >-
-        **Prospective, never retrospective.** The adjustment changes the remaining schedule from its
-        effective date forward. An effective date earlier than the asset's last posted depreciation
-        would require restating depreciation already posted — and in a closed period, already sealed
-        and hashed (ADR-0017) — so it is refused. `EVT-FA-004` says this outright: "Not a
-        restatement of prior periods."
+          **Prospective, never retrospective.** The adjustment changes the remaining schedule from its
+          effective date forward. An effective date earlier than the asset's last posted depreciation
+          would require restating depreciation already posted — and in a closed period, already sealed
+          and hashed (ADR-0017) — so it is refused. `EVT-FA-004` says this outright: "Not a
+          restatement of prior periods."
       - >-
-        **A tax-book adjustment posts NOTHING** (ADR-0026). A §179 election changes the tax basis
-        and the tax schedule; the GAAP carrying value is untouched, so there is nothing to
-        capitalise and `capitalisations` is empty. The entry's control total is zero and it writes no
-        transfer — which is the difference between "no effect on the ledger" and "no effect", and
-        `EVT-FA-004` carries `book` precisely so the two are distinguishable.
+          **A tax-book adjustment posts NOTHING** (ADR-0026). A §179 election changes the tax basis
+          and the tax schedule; the GAAP carrying value is untouched, so there is nothing to
+          capitalise and `capitalisations` is empty. The entry's control total is zero and it writes no
+          transfer — which is the difference between "no effect on the ledger" and "no effect", and
+          `EVT-FA-004` carries `book` precisely so the two are distinguishable.
       - >-
-        **A capital improvement is capitalised, not expensed** — Dr the asset account, Cr whatever
-        funded it (2000 Accounts Payable, a cash account, or 1999 Fixed Asset Clearing until the
-        improvement is in service). Expensing it to 6xxx would understate the asset and overstate
-        the period, and depreciate nothing.
+          **A capital improvement is capitalised, not expensed** — Dr the asset account, Cr whatever
+          funded it (2000 Accounts Payable, a cash account, or 1999 Fixed Asset Clearing until the
+          improvement is in service). Expensing it to 6xxx would understate the asset and overstate
+          the period, and depreciate nothing.
       - >-
-        **Cost basis is per book** (ADR-0007), so an adjustment names the book it applies to. An
-        improvement that raises both bases is two register facts and one GL posting.
+          **Cost basis is per book** (ADR-0007), so an adjustment names the book it applies to. An
+          improvement that raises both bases is two register facts and one GL posting.
       - >-
-        No dimension applies: asset, payable and clearing accounts all name none.
+          No dimension applies: asset, payable and clearing accounts all name none.
     relates_to: [ADR-0007, ADR-0010, ADR-0017, ADR-0026]
     vectors_dir: ledger/vectors/asset_basis_adjusted/
 
@@ -524,69 +524,69 @@ rules:
     control_total: shift.cost_minor
     invariants:
       - >-
-        **The credit leg is 2000 Accounts Payable, because CFS has no payroll liability and never
-        has** (OQ-024). Payroll processing is a charter non-goal: an external employer of record
-        stays, and CFS "does not calculate withholding, file payroll tax, or move payroll money".
-        **An EOR is not payroll — it is a vendor that invoices.** Measured on CFS's own balance
-        sheet at 2025-12-31 on both bases: current liabilities are 2000, the 2100 credit-card block,
-        2200, 2600 and the two PSA accounts, and **no payroll liability in any of four comparative
-        years** — consistent with 2160/2170/2180/2190 all being Archived. The ledger therefore never
-        carries gross-to-net; withholding and employer taxes are the EOR's ledger.
+          **The credit leg is 2000 Accounts Payable, because CFS has no payroll liability and never
+          has** (OQ-024). Payroll processing is a charter non-goal: an external employer of record
+          stays, and CFS "does not calculate withholding, file payroll tax, or move payroll money".
+          **An EOR is not payroll — it is a vendor that invoices.** Measured on CFS's own balance
+          sheet at 2025-12-31 on both bases: current liabilities are 2000, the 2100 credit-card block,
+          2200, 2600 and the two PSA accounts, and **no payroll liability in any of four comparative
+          years** — consistent with 2160/2170/2180/2190 all being Archived. The ledger therefore never
+          carries gross-to-net; withholding and employer taxes are the EOR's ledger.
       - >-
-        **5800 absorbed / 5801 unabsorbed measures UTILISATION, not rate deviation** (ADR-0019).
-        Costing is ACTUAL at that person's per-contact wage, so there is no standard rate and no
-        rate variance to compute — HOT-010. Hours worked on a causal job absorb into 5800; the
-        guaranteed-but-unworked balance of the day lands in 5801, and the gap between the two IS the
-        idle-capacity number.
+          **5800 absorbed / 5801 unabsorbed measures UTILISATION, not rate deviation** (ADR-0019).
+          Costing is ACTUAL at that person's per-contact wage, so there is no standard rate and no
+          rate variance to compute — HOT-010. Hours worked on a causal job absorb into 5800; the
+          guaranteed-but-unworked balance of the day lands in 5801, and the gap between the two IS the
+          idle-capacity number.
       - >-
-        **5801 is undimensioned BY DESIGN and that is load-bearing.** Its chart entry names no
-        dimension, so a posting to it may not declare one — idle time belongs to no product line and
-        no kind of work, and letting it carry either would make it a plug that absorbs whatever the
-        allocation could not place. 5800 names **both** `product_line` and `cost_type`; it is the
-        only account in the chart that names `cost_type` at all (ADR-0025).
+          **5801 is undimensioned BY DESIGN and that is load-bearing.** Its chart entry names no
+          dimension, so a posting to it may not declare one — idle time belongs to no product line and
+          no kind of work, and letting it carry either would make it a plug that absorbs whatever the
+          allocation could not place. 5800 names **both** `product_line` and `cost_type`; it is the
+          only account in the chart that names `cost_type` at all (ADR-0025).
       - >-
-        **The overtime hour splits in two** (OQ-018). The BASE rate for every hour, overtime
-        included, is direct labour charged to the causal job worked. The **PREMIUM** is allocated
-        **pro-rata by hours across that day's causal jobs** — the standard cost-accounting
-        convention, because the premium is caused by the day's volume in aggregate rather than by
-        whichever job was on the clock after hour eight. Chronological attribution would make the
-        same two jobs in the opposite order produce different COGS.
+          **The overtime hour splits in two** (OQ-018). The BASE rate for every hour, overtime
+          included, is direct labour charged to the causal job worked. The **PREMIUM** is allocated
+          **pro-rata by hours across that day's causal jobs** — the standard cost-accounting
+          convention, because the premium is caused by the day's volume in aggregate rather than by
+          whichever job was on the clock after hour eight. Chronological attribution would make the
+          same two jobs in the opposite order produce different COGS.
       - >-
-        **A labour posting takes the product line of the REVENUE it serves** — not of the goods that
-        happened to be on the order. That is what makes gross margin by product line computable at
-        all, which is the entire reason `product_line` sits on revenue and COGS alike. Delivery
-        labour serving a delivery charge is `Delivery`; crew prepping a table rental is
-        `Tables & Chairs`.
-        **It is NOT allocated across the order's goods** (ADR-0029). A delivery serving a mixed
-        order posts to `Delivery` whole, because allocation is destructive and the official
-        product-line P&L can spread it afterwards — where posting it spread cannot be undone.
-        Measured: `Delivery` is the largest tracked line in the business at $216,050 and 12.8% of
-        revenue, so this rule decides where a large number lands
-        (`inbox/2026-08-09-product-line-by-revenue-account-matrix.md`).
+          **A labour posting takes the product line of the REVENUE it serves** — not of the goods that
+          happened to be on the order. That is what makes gross margin by product line computable at
+          all, which is the entire reason `product_line` sits on revenue and COGS alike. Delivery
+          labour serving a delivery charge is `Delivery`; crew prepping a table rental is
+          `Tables & Chairs`.
+          **It is NOT allocated across the order's goods** (ADR-0029). A delivery serving a mixed
+          order posts to `Delivery` whole, because allocation is destructive and the official
+          product-line P&L can spread it afterwards — where posting it spread cannot be undone.
+          Measured: `Delivery` is the largest tracked line in the business at $216,050 and 12.8% of
+          revenue, so this rule decides where a large number lands
+          (`inbox/2026-08-09-product-line-by-revenue-account-matrix.md`).
       - >-
-        **The allocation is performed in the SHIFT RECORD, never here.** `amount:` is a dotted path
-        with no arithmetic, so the pro-rata rounding — and the residual cent when hours do not
-        divide the premium evenly — is decided upstream, in the document, where the money rules
-        already apply. This is the fence that keeps a posting rule from becoming the place a rate
-        gets quantized, and `overtime-premium-pro-rata-across-the-days-jobs` is a deliberately
-        non-dividing case.
+          **The allocation is performed in the SHIFT RECORD, never here.** `amount:` is a dotted path
+          with no arithmetic, so the pro-rata rounding — and the residual cent when hours do not
+          divide the premium evenly — is decided upstream, in the document, where the money rules
+          already apply. This is the fence that keeps a posting rule from becoming the place a rate
+          gets quantized, and `overtime-premium-pro-rata-across-the-days-jobs` is a deliberately
+          non-dividing case.
       - >-
-        **Overtime a customer specifically asked for is charged direct to the order that asked, and
-        the override is recorded AS an override** — the same shape OQ-004 gave a `handling_bucket`
-        override, so costing can always tell a stated exception from the default.
+          **Overtime a customer specifically asked for is charged direct to the order that asked, and
+          the override is recorded AS an override** — the same shape OQ-004 gave a `handling_bucket`
+          override, so costing can always tell a stated exception from the default.
       - >-
-        **A sixth consecutive day worked is 1.5x for the whole day, and premium applies once**
-        (OQ-019). The 6th-day multiplier does not compound with the after-eight-hours multiplier: a
-        tenth hour on a sixth day is 1.5x, not 2.25x. "Consecutive" is a rolling count of calendar
-        days worked, not a position within a payroll week — the industry convention, and CFS is
-        non-union so nothing forces the statutory workweek reading.
+          **A sixth consecutive day worked is 1.5x for the whole day, and premium applies once**
+          (OQ-019). The 6th-day multiplier does not compound with the after-eight-hours multiplier: a
+          tenth hour on a sixth day is 1.5x, not 2.25x. "Consecutive" is a rolling count of calendar
+          days worked, not a position within a payroll week — the industry convention, and CFS is
+          non-union so nothing forces the statutory workweek reading.
       - >-
-        ⚠️ **A seventh consecutive day POSTS. It is a compliance failure, not a rate** (OQ-019).
-        Illinois ODRISA requires 24 consecutive hours of rest in every consecutive seven-day period,
-        so the SCHEDULER refuses one with an audited override. The ledger records what happened —
-        work performed is cost incurred, and refusing to post it would understate COGS and hide the
-        breach in the one system that noticed it. The control belongs where the action is taken, not
-        where the fact is recorded, which is the same reasoning OQ-028 applied to an overpayment.
+          ⚠️ **A seventh consecutive day POSTS. It is a compliance failure, not a rate** (OQ-019).
+          Illinois ODRISA requires 24 consecutive hours of rest in every consecutive seven-day period,
+          so the SCHEDULER refuses one with an audited override. The ledger records what happened —
+          work performed is cost incurred, and refusing to post it would understate COGS and hide the
+          breach in the one system that noticed it. The control belongs where the action is taken, not
+          where the fact is recorded, which is the same reasoning OQ-028 applied to an overpayment.
     relates_to: [ADR-0019, ADR-0025, REQ-LED-001]
     vectors_dir: ledger/vectors/shift_recorded/
 
@@ -602,18 +602,18 @@ rules:
     known:
       - "Dr 7000 Depreciation Expense / Cr the matching `Less-Accumulated Depreciation` account."
       - >-
-        **Two sets of numbers per asset per period, ONE of them a posting** (ADR-0026). GAAP and tax
-        bases run separately and both must produce a full P&L and balance sheet, but only the GAAP
-        set reaches TigerBeetle; the tax set is derived at report time from the register's schedule.
-        ⚠️ This entry previously read "Two postings per asset per period, not one", which asserted a
-        parallel posting ledger nobody had decided on and which the fixed-asset suites mostly do not
-        build — see `inbox/2026-08-09-tax-and-gaap-statements-are-both-required.md`.
+          **Two sets of numbers per asset per period, ONE of them a posting** (ADR-0026). GAAP and tax
+          bases run separately and both must produce a full P&L and balance sheet, but only the GAAP
+          set reaches TigerBeetle; the tax set is derived at report time from the register's schedule.
+          ⚠️ This entry previously read "Two postings per asset per period, not one", which asserted a
+          parallel posting ledger nobody had decided on and which the fixed-asset suites mostly do not
+          build — see `inbox/2026-08-09-tax-and-gaap-statements-are-both-required.md`.
     unknown:
       - >-
-        **SPIKE-005** — hand-roll versus library. The conventions the engine applies (mid-month,
-        half-year), the class lives (GDS vs ADS), and §179 and bonus effects on basis all change
-        the AMOUNT, so no vector can be written until the engine is chosen and graded against its
-        corpus. Errors here have filing consequences, not just reporting ones.
+          **SPIKE-005** — hand-roll versus library. The conventions the engine applies (mid-month,
+          half-year), the class lives (GDS vs ADS), and §179 and bonus effects on basis all change
+          the AMOUNT, so no vector can be written until the engine is chosen and graded against its
+          corpus. Errors here have filing consequences, not just reporting ones.
     relates_to: [ADR-0007]
 
   - id: bank_transaction_matched
@@ -629,13 +629,13 @@ rules:
       - "Dr/Cr the cash account for the instrument, against the posting the transaction matched."
     unknown:
       - >-
-        **SPIKE-004** — what Plaid actually provides. Pending-versus-posted semantics decide which
-        date is the accounting date and whether a pending row may post at all; transaction-id
-        stability decides whether match state can be keyed on it without corrupting silently. Plaid
-        is a consumer-fintech product, not an accounting bank feed, and the gap is the deliverable.
+          **SPIKE-004** — what Plaid actually provides. Pending-versus-posted semantics decide which
+          date is the accounting date and whether a pending row may post at all; transaction-id
+          stability decides whether match state can be keyed on it without corrupting silently. Plaid
+          is a consumer-fintech product, not an accounting bank feed, and the gap is the deliverable.
       - >-
-        Whether an unmatched transaction rests in **2500 Suspense** is the same spike's question —
-        which is why 2500's disposition in the chart of accounts is `undecided` rather than a guess.
+          Whether an unmatched transaction rests in **2500 Suspense** is the same spike's question —
+          which is why 2500's disposition in the chart of accounts is `undecided` rather than a guess.
     relates_to: [ADR-0002, ADR-0009]
 
   - id: asset_acquired
@@ -655,39 +655,39 @@ rules:
     control_total: acquisition.cost_minor
     invariants:
       - >-
-        **Unblocked by OQ-020, which gave procurement an owner.** The rule was blocked because no
-        context owned purchase orders, so writing it would have placed procurement in the ledger by
-        default — the arbitrary placement `contexts/ledger/events.yaml` refuses to make. Procurement
-        is now the ninth context and owns the inbound document.
+          **Unblocked by OQ-020, which gave procurement an owner.** The rule was blocked because no
+          context owned purchase orders, so writing it would have placed procurement in the ledger by
+          default — the arbitrary placement `contexts/ledger/events.yaml` refuses to make. Procurement
+          is now the ninth context and owns the inbound document.
       - >-
-        **The GAAP book posts and only the GAAP book** (ADR-0026). Cost basis is carried per book —
-        §179 and bonus change the tax basis on day one for most of this fleet — but the tax basis is
-        a fixed-asset register fact that the read side reports, never a transfer. An acquisition that
-        posted both books would double the balance sheet.
+          **The GAAP book posts and only the GAAP book** (ADR-0026). Cost basis is carried per book —
+          §179 and bonus change the tax basis on day one for most of this fleet — but the tax basis is
+          a fixed-asset register fact that the read side reports, never a transfer. An acquisition that
+          posted both books would double the balance sheet.
       - >-
-        **The debit is the asset account if the asset is in service, and 1999 Fixed Asset Clearing if
-        it is not.** `in_service_on` is distinct from `acquired_on`
-        (`contexts/fixed-assets/entities/asset.yaml`) and drives the depreciation convention, not
-        this posting. 1999's balance at period end is therefore a real signal — assets bought and not
-        yet capitalised — rather than a rounding account.
+          **The debit is the asset account if the asset is in service, and 1999 Fixed Asset Clearing if
+          it is not.** `in_service_on` is distinct from `acquired_on`
+          (`contexts/fixed-assets/entities/asset.yaml`) and drives the depreciation convention, not
+          this posting. 1999's balance at period end is therefore a real signal — assets bought and not
+          yet capitalised — rather than a rounding account.
       - >-
-        **The accounting date is when the asset was ACQUIRED, not when it entered service.** The
-        obligation to the vendor arises on acquisition; depreciation starts on the in-service date.
-        Conflating them would either delay a liability that exists or start depreciating an asset
-        that is still in a crate.
+          **The accounting date is when the asset was ACQUIRED, not when it entered service.** The
+          obligation to the vendor arises on acquisition; depreciation starts on the in-service date.
+          Conflating them would either delay a liability that exists or start depreciating an asset
+          that is still in a crate.
       - >-
-        **Credit 2000 Accounts Payable.** Under procurement's three-stage lifecycle (OQ-020) a
-        receipt that precedes its invoice accrues first and reclassifies to AP when the bill arrives;
-        that stage is procurement's to specify and is not modelled here yet.
+          **Credit 2000 Accounts Payable.** Under procurement's three-stage lifecycle (OQ-020) a
+          receipt that precedes its invoice accrues first and reclassifies to AP when the bill arrives;
+          that stage is procurement's to specify and is not modelled here yet.
       - >-
-        **Below the capitalisation threshold there is no acquisition at all.** The live chart draws
-        the line at $1,000 in the account names themselves — 6300 Tools, Machinery & Equipment (Less
-        Than 1K), 6204 Building: Improvements (Less Than 1K), 6500 Rental Inventory (less than 1K).
-        A cheap purchase is an expense, never an asset with a schedule, and routing one here would
-        create a depreciating asset out of a box of clamps.
+          **Below the capitalisation threshold there is no acquisition at all.** The live chart draws
+          the line at $1,000 in the account names themselves — 6300 Tools, Machinery & Equipment (Less
+          Than 1K), 6204 Building: Improvements (Less Than 1K), 6500 Rental Inventory (less than 1K).
+          A cheap purchase is an expense, never an asset with a schedule, and routing one here would
+          create a depreciating asset out of a box of clamps.
       - >-
-        No dimension: asset accounts, 1999 and 2000 all name none. An acquisition is not a sale and
-        has no product line — the goods acquire one when they earn revenue (ADR-0029).
+          No dimension: asset accounts, 1999 and 2000 all name none. An acquisition is not a sale and
+          has no product line — the goods acquire one when they earn revenue (ADR-0029).
     relates_to: [ADR-0007, ADR-0026, ADR-0029]
     vectors_dir: ledger/vectors/asset_acquired/
 

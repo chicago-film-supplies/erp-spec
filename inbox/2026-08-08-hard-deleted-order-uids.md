@@ -13,5 +13,5 @@ triage_count: 0
 concentrated in 2023–24.
 
 This is the evidence behind the charter's **no hard deletes, ever** fence. Not reproduced on
-2026-08-08; confirming it needs a cross-reference of every invoice's `query_by_orders` against
-the orders collection. Tracked as OQ-013.
+2026-08-08; confirming it needs a cross-reference of every invoice's `query_by_orders` against the
+orders collection. Tracked as OQ-013.

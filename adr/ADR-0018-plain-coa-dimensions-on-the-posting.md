@@ -18,8 +18,8 @@ superseded_by:
 
 ## Context
 
-- ADR-0008 exploded dimensions into account identity — one account per GL code × product line ×
-  cost type — so that dimensional balances could be read directly rather than aggregated.
+- ADR-0008 exploded dimensions into account identity — one account per GL code × product line × cost
+  type — so that dimensional balances could be read directly rather than aggregated.
 - ADR-0017 removed the premise: reporting authority is the read side, so a dimensional balance is
   answered there anyway. Real-time dimensional balances were solving a problem nobody has.
 - Account **count** was never the real objection. TigerBeetle handles millions of accounts and CFS
@@ -36,8 +36,8 @@ posting**, in `user_data` and in the Mongo/Parquet projection, never in account 
   performance.
 - **Period-scoped accounts** — one account per GL code × dimensions × period, making a period trial
   balance a direct set of balance reads. Genuinely viable at this volume (~7,600 accounts over ten
-  years). Rejected because Parquet exists regardless under ADR-0017, so this adds a second
-  mechanism without removing the first, and leaves two things to keep in agreement.
+  years). Rejected because Parquet exists regardless under ADR-0017, so this adds a second mechanism
+  without removing the first, and leaves two things to keep in agreement.
 - **Plain COA, dimensions on the posting** (chosen).
 
 ## Consequences
@@ -45,8 +45,8 @@ posting**, in `user_data` and in the Mongo/Parquet projection, never in account 
 - **Cardinality grows by addition, not multiplication.** The exploded tree was 21 product lines × 3
   cost types = 63 per dimensioned GL code, and a third dimension would have multiplied again. That
   future dimension, not today's count, was the real risk.
-- **Adding a product line stops being a migration.** Under ADR-0008 it meant minting N accounts as
-  a deploy step, forever, that could be forgotten — and a missing account means a posting fails or
+- **Adding a product line stops being a migration.** Under ADR-0008 it meant minting N accounts as a
+  deploy step, forever, that could be forgotten — and a missing account means a posting fails or
   lands in the wrong place.
 - **The COA stays legible to an auditor.** The charter gives the CPA read access; ~60 accounts plus
   a dimension column hands over cleanly, several hundred synthetic keys like `4100-Crew-Direct` does

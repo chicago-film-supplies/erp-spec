@@ -24,7 +24,15 @@ given:
     cost_minor: 24000
     unabsorbed_minor: 9000
     absorbed_allocations:
-      - { causal_job: ORD-VEC-0001, hours: 5, base_minor: 15000, premium_share_minor: 0, amount_minor: 15000, product_line: "Delivery", cost_type: delivery }
+      - {
+          causal_job: ORD-VEC-0001,
+          hours: 5,
+          base_minor: 15000,
+          premium_share_minor: 0,
+          amount_minor: 15000,
+          product_line: "Delivery",
+          cost_type: delivery,
+        }
 
 derivation: >-
   A guaranteed eight-hour day with five hours of causal work in it. 5 x 3000 = **15000** absorbs
@@ -46,6 +54,18 @@ derivation: >-
 
 expect:
   transfers:
-    - { debit_account: 5800, credit_account: 2000, amount_minor: 15000, accounting_date: "2026-08-06", product_line: "Delivery", cost_type: delivery }
-    - { debit_account: 5801, credit_account: 2000, amount_minor: 9000, accounting_date: "2026-08-06" }
+    - {
+        debit_account: 5800,
+        credit_account: 2000,
+        amount_minor: 15000,
+        accounting_date: "2026-08-06",
+        product_line: "Delivery",
+        cost_type: delivery,
+      }
+    - {
+        debit_account: 5801,
+        credit_account: 2000,
+        amount_minor: 9000,
+        accounting_date: "2026-08-06",
+      }
   rejects: []

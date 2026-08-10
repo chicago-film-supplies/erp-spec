@@ -22,11 +22,11 @@ superseded_by:
 
 Three statements disagreed, and all three were load-bearing (HOT-011):
 
-- **REQ-LED-001** — both dimensions on *every* revenue and COGS posting.
+- **REQ-LED-001** — both dimensions on _every_ revenue and COGS posting.
 - **`ledger/dimensions.yaml`** — `product_line` on revenue and COGS, `cost_type` on COGS only.
 - **The chart itself** — accounts where even `product_line` has no defensible value.
 
-`cost_type`'s own description is *"what kind of work a **labour** posting represents"*, with values
+`cost_type`'s own description is _"what kind of work a **labour** posting represents"_, with values
 `delivery / counter / warehouse`. None of them is true of a camera rental, or of
 `5000 Cost of Goods Sold: Retail Inventory`. Separately, `4820 Interest Income` and five siblings
 are `type: Other Income` live and arise from no sale at all
@@ -52,32 +52,32 @@ cashback, a vendor refund, a one-off oddity. Neither substitutes for the other: 
 service to 4800 understates operating revenue, and nulling a genuine one-off on 4100 overstates it.
 
 REQ-LED-001 is amended to match and keeps its teeth, with the boundary drawn at **absence rather
-than null** (OQ-025): a posting to an account whose `dimensions` list names a dimension must
-DECLARE it — a value from the declared set, or an explicit `null` recording that no tracked value
-applies. A posting that does not declare it is **rejected**, and so is one declaring `""`.
+than null** (OQ-025): a posting to an account whose `dimensions` list names a dimension must DECLARE
+it — a value from the declared set, or an explicit `null` recording that no tracked value applies. A
+posting that does not declare it is **rejected**, and so is one declaring `""`.
 
 ## Considered options
 
 - **Widen the requirement** — require `cost_type` everywhere and mint a "not labour" value for it.
   Rejected: that value is a null with a name, and it would be the majority value.
 - **Permit an absent `product_line` on revenue.** Rejected: it re-permits the exact population
-  REQ-LED-001 was written to stop — 28.74% of line revenue, measured — and on ADR-0009's ground,
-  a value that is simply missing cannot be told apart from an oversight.
-  ⚠️ An **explicit null is not this option** and is permitted. The distinction is the one ADR-0009
-  actually draws: what it forbids is a null nobody wrote down. A declared null is a determination —
-  "no tracked product line applies" — and it is countable, reportable, and attributable, exactly
-  as `EVT-TAX-002` carries a reason because "no tax" and "no tax BECAUSE" audit differently.
+  REQ-LED-001 was written to stop — 28.74% of line revenue, measured — and on ADR-0009's ground, a
+  value that is simply missing cannot be told apart from an oversight. ⚠️ An **explicit null is not
+  this option** and is permitted. The distinction is the one ADR-0009 actually draws: what it
+  forbids is a null nobody wrote down. A declared null is a determination — "no tracked product line
+  applies" — and it is countable, reportable, and attributable, exactly as `EVT-TAX-002` carries a
+  reason because "no tax" and "no tax BECAUSE" audit differently.
 - **Keep `Other`.** Rejected: it reads as a category and means "nobody chose". A line in 4800
-  asserts *this was not a categorised sale*, which is a fact about the transaction. A line in 4100
-  tagged `Other` asserts *this was a categorised sale* and then names no category, which is not.
+  asserts _this was not a categorised sale_, which is a fact about the transaction. A line in 4100
+  tagged `Other` asserts _this was a categorised sale_ and then names no category, which is not.
 - **Per-account obligation with an account-shaped escape hatch** (chosen).
 
 ## Consequences
 
 - **Nothing infers a dimension requirement from a class.** The previous gate derived "needs
   `cost_type`" from `class == expense`, which was wrong for six COGS accounts the moment `cost_type`
-  became labour-only. A per-account list cannot be wrong by inference — only by being written
-  wrong, which is visible in review.
+  became labour-only. A per-account list cannot be wrong by inference — only by being written wrong,
+  which is visible in review.
 - **`dimensions.yaml` and the chart become two authorities that check each other.** The chart says
   which postings owe a dimension; `dimensions.yaml` says which values it may take. Gate 10 checks
   every golden vector against both — and therefore against neither the rule nor the vector it is

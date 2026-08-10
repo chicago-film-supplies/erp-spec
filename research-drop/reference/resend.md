@@ -8,7 +8,7 @@ service. Already in production in v1 — a retention.
 - API reference: <https://resend.com/docs/api-reference/introduction>
 - Send an email: <https://resend.com/docs/api-reference/emails/send-email>
 - **No `llms.txt`** as of 2026-08-09; this note is the curated substitute.
-- **Reachable as an MCP server** (`resend`) — note it exposes *write* tools (send, broadcast,
+- **Reachable as an MCP server** (`resend`) — note it exposes _write_ tools (send, broadcast,
   domains, contacts). Treat them as production actions, because they are.
 
 ## CFS-specific gotchas
@@ -22,8 +22,8 @@ service. Already in production in v1 — a retention.
   `services/dmarcReports.ts`) — deliverability is instrumented rather than assumed. Anything that
   changes sending domains has a downstream effect there.
 - **Email is NOT a domain event** ([[ADR-0027]]). Sending is a side effect of an event that already
-  happened. An `InvoiceEmailed` event in the ledger would be the assigned-state mistake
-  [[ADR-0014]] forbids, one layer out — the fact is that the invoice was issued.
+  happened. An `InvoiceEmailed` event in the ledger would be the assigned-state mistake [[ADR-0014]]
+  forbids, one layer out — the fact is that the invoice was issued.
 - **A Resend message id is a foreign identifier**, fenced out of domain models by [[ADR-0009]].
 
 Cross-refs: [[ADR-0027]] · [[ADR-0009]] · [[ADR-0014]]

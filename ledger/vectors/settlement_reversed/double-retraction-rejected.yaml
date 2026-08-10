@@ -22,7 +22,12 @@ given:
     reason: bounced
     amount_minor: 100031
     retracted_transfers:
-      - { settlement: SET-VEC-0002, debit_account: 1001, credit_account: 1200, amount_minor: 100031 }
+      - {
+          settlement: SET-VEC-0002,
+          debit_account: 1001,
+          credit_account: 1200,
+          amount_minor: 100031,
+        }
 
 derivation: >-
   Byte-identical to the accept vector except that `SET-VEC-0002` has already been retracted. The

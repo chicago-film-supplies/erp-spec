@@ -9,12 +9,12 @@ verified: true
 triage_count: 0
 ---
 
-Measured across the entire prod invoice corpus: $485,821.72 of $1,689,895.68 in line revenue
-(28.7%) has `tracking_category: null`. The seeded estimate was "roughly a fifth" — the real
-figure is materially worse.
+Measured across the entire prod invoice corpus: $485,821.72 of $1,689,895.68 in line revenue (28.7%)
+has `tracking_category: null`. The seeded estimate was "roughly a fifth" — the real figure is
+materially worse.
 
-Live in the current year, but improving sharply: 2023 42.0%, 2024 48.3%, 2025 16.2%, 2026 11.4%.
-Not a legacy-only problem, and not a fixed one.
+Live in the current year, but improving sharply: 2023 42.0%, 2024 48.3%, 2025 16.2%, 2026 11.4%. Not
+a legacy-only problem, and not a fixed one.
 
 Caveat: these totals include void invoices (477 lines / $69,769.66), which is itself
 [[2026-08-08-void-invoices-not-filtered]] biting inside this very measurement.

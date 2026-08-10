@@ -24,15 +24,15 @@ superseded_by:
 - Performance does not discriminate here. Measured 2026-08-09: 999 invoices and 9,197 line items in
   prod, so even at 15 transfers per invoice the entire history is on the order of 15k transfers.
   Every candidate design is faster than required by orders of magnitude.
-- ADR-0006 made "DuckDB over Parquet" the read side generally. Its real content — the sealed,
-  hashed period artifact — is narrower than that and is what carries the weight.
+- ADR-0006 made "DuckDB over Parquet" the read side generally. Its real content — the sealed, hashed
+  period artifact — is narrower than that and is what carries the weight.
 
 ## Decision
 
-| Period state | Reporting authority |
-|---|---|
-| **Open** | MongoDB, read live |
-| **Closed** | The period's Parquet file, sealed **monthly** and hashed into the close record |
+| Period state | Reporting authority                                                            |
+| ------------ | ------------------------------------------------------------------------------ |
+| **Open**     | MongoDB, read live                                                             |
+| **Closed**   | The period's Parquet file, sealed **monthly** and hashed into the close record |
 
 TigerBeetle remains the authority for **balance integrity** and for current balances. DuckDB reads
 sealed periods and ad-hoc analysis; the `.duckdb` file stays a rebuildable cache.
@@ -43,14 +43,15 @@ specified in `m3`.
 ## Consequences
 
 - **A closed period cannot drift**, because its artifact is immutable and hashed — a stronger
-  guarantee than recompute-and-compare. An open period is not expected to be stable, so drift is
-  not a meaningful notion there. The boundary is the close event, which is unambiguous.
+  guarantee than recompute-and-compare. An open period is not expected to be stable, so drift is not
+  a meaningful notion there. The boundary is the close event, which is unambiguous.
 - **Parquet is exported from MongoDB**, not from TigerBeetle: the two-store commit already writes
   the posting to Mongo, which holds the accounting date and is queryable. TigerBeetle has no bulk
   export.
 - **This makes MongoDB load-bearing for the accounting record.** Lose it and balances rebuild from
   TigerBeetle but periods do not — unless TigerBeetle carries the accounting date. So this decision
-  *strengthens* the case for accounting-date-in-`user_data` (erp-spec#3), rather than making it moot.
+  _strengthens_ the case for accounting-date-in-`user_data` (erp-spec#3), rather than making it
+  moot.
 - **Parquet is never written on the request path.** It is a batch artifact produced at close;
   per-posting appends would make the commit a three-store commit and Parquet is not a transactional
   format.

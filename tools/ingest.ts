@@ -15,7 +15,15 @@ const ROOT = new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const DROPS = `${ROOT}/research-drop`;
 const INBOX = `${ROOT}/inbox`;
 
-const KINDS = ["finding", "decision", "question", "correction", "research", "idea", "constraint"] as const;
+const KINDS = [
+  "finding",
+  "decision",
+  "question",
+  "correction",
+  "research",
+  "idea",
+  "constraint",
+] as const;
 type Kind = typeof KINDS[number];
 
 const KIND_OF_SECTION: Record<string, Kind> = {
@@ -97,10 +105,12 @@ const hotsPath = `${ROOT}/hotspots.yaml`;
 const oqsPath = `${ROOT}/open-questions.yaml`;
 const hotsText = await Deno.readTextFile(hotsPath);
 const oqsText = await Deno.readTextFile(oqsPath);
-const hotIds: string[] = ((parseYaml(hotsText) as { hotspots?: { id: string }[] })?.hotspots ?? []).map((h) => h.id);
-const oqIds: string[] = ((parseYaml(oqsText) as { open_questions?: { id: string }[] })?.open_questions ?? []).map((q) =>
-  q.id
-);
+const hotIds: string[] = ((parseYaml(hotsText) as { hotspots?: { id: string }[] })?.hotspots ?? [])
+  .map((h) => h.id);
+const oqIds: string[] =
+  ((parseYaml(oqsText) as { open_questions?: { id: string }[] })?.open_questions ?? []).map((q) =>
+    q.id
+  );
 const existingHotStatements = new Set(
   ((parseYaml(hotsText) as { hotspots?: { statement?: string }[] })?.hotspots ?? [])
     .map((h) => String(h.statement ?? "").replace(/\s+/g, " ").trim()),
@@ -139,7 +149,14 @@ for (const name of drops) {
   const topics = Array.isArray(parsed.fm.topics) ? parsed.fm.topics.map(String) : [];
   // topics -> context dirs, only where they actually resolve
   const CONTEXT_DIRS = new Set([
-    "ledger", "fulfillment", "billing", "fixed-assets", "ordering", "availability", "banking", "tax",
+    "ledger",
+    "fulfillment",
+    "billing",
+    "fixed-assets",
+    "ordering",
+    "availability",
+    "banking",
+    "tax",
   ]);
   const contexts = topics.filter((t) => CONTEXT_DIRS.has(t));
 
@@ -183,9 +200,13 @@ for (const name of drops) {
         skipped++;
         continue;
       }
-      const id = nextId([...oqIds, ...newOqYaml.matchAll(/id: (OQ-\d{3})/g)].map((x) =>
-        typeof x === "string" ? x : x[1]
-      ), "OQ", 3);
+      const id = nextId(
+        [...oqIds, ...newOqYaml.matchAll(/id: (OQ-\d{3})/g)].map((x) =>
+          typeof x === "string" ? x : x[1]
+        ),
+        "OQ",
+        3,
+      );
       oqIds.push(id);
       existingOqQuestions.add(normalized);
       newOqYaml += `\n  - id: ${id}\n    question: ${yamlStr(normalized)}\n    owner: TBD\n` +
@@ -265,4 +286,8 @@ console.log(
     `  hotspots added      : ${hotAdded}\n` +
     `  already present     : ${skipped}\n`,
 );
-if (oqAdded) console.log("  note: new open questions have owner/decide_by TBD — `deno task validate` will flag them.\n");
+if (oqAdded) {
+  console.log(
+    "  note: new open questions have owner/decide_by TBD — `deno task validate` will flag them.\n",
+  );
+}

@@ -9,9 +9,8 @@ verified: true
 triage_count: 0
 ---
 
-By item type, share of revenue with no product-line dimension:
-service **71.9%** ($447,267 of $621,879) · sale 26.9% · rental **0.8%** · replacement 0.1% ·
-surcharge 0.0%.
+By item type, share of revenue with no product-line dimension: service **71.9%** ($447,267 of
+$621,879) · sale 26.9% · rental **0.8%** · replacement 0.1% · surcharge 0.0%.
 
 Rentals are essentially clean. The defect is a service-line defect, which confirms "the CFS-side
 denormalization was never correct for service-group categories" as a precise claim rather than a

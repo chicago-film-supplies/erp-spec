@@ -61,4 +61,4 @@ rule has no opinion and the caller must supply the account.
 History does not obey the rule and the owner ruled that historic rather than sanctioned: **4 of 12
 notes are miscoded** — CN-1007 books a bad-debt write-off to 4210 (revenue), and CN-1010/1011/1012
 book customer credits to 6000 General Operating Expenses on a line whose Xero `TaxType` is `INPUT`,
-a *purchase* tax type on a receivable.
+a _purchase_ tax type on a receivable.

@@ -21,17 +21,17 @@ Gotenberg, or of Firestore:
 - scarce internal resource (3) — `draftQuote` 3 + `invoicePdf` 5 = 8 concurrent Gotenberg renders
   against 10 instances; `typesenseReindex` 2, memory-bound on a shared 512 MiB VM
 - serialization for correctness (4) — `xeroInvoice`/`xeroQuote` at concurrency 1 close a
-  double-create race; `userNameCascade` 1 prevents interleaved read-modify-writes;
-  `orderFinalize` 1 *is* the coalescing
+  double-create race; `userNameCascade` 1 prevents interleaved read-modify-writes; `orderFinalize` 1
+  _is_ the coalescing
 - Firestore contention (2) — `opportunityReconcile` `min_backoff = 120s`, derived from a measured
-  60–87s abandoned-transaction lock tail; `stockSummaryRebuild` exists only because the rebuild
-  used to run inside the order transaction
+  60–87s abandoned-transaction lock tail; `stockSummaryRebuild` exists only because the rebuild used
+  to run inside the order transaction
 - debounce / chain (2) — `holidayDraftRecompute`, `tokenRefresh`
 
 **Five of sixteen retire with the systems they serve, not with the platform:** `xeroQuote`,
 `xeroQuoteBackfill`, `xeroInvoice` (Xero, ADR-0001), `opportunityReconcile` (CRMS), `trelloUpdate`
-(Trello — confirmed going away 2026-08-09). Four of the thirteen scheduler handlers go the same
-way: `sweep-crms-order-status`, `sweep-xero-quote-expiry`, `reconcile-xero-item-links`,
+(Trello — confirmed going away 2026-08-09). Four of the thirteen scheduler handlers go the same way:
+`sweep-crms-order-status`, `sweep-xero-quote-expiry`, `reconcile-xero-item-links`,
 `audit-tracking-options`.
 
 **`tokenRefreshQueue` collapses to a single service.** `OAuthService` is
@@ -39,6 +39,6 @@ way: `sweep-crms-order-status`, `sweep-xero-quote-expiry`, `reconcile-xero-item-
 does **not** use this chain: `src/lib/calendar.ts` mints a service-account token with its own
 in-process cache. Whether a `gmail` OAuth refresh is still needed at all is an open question.
 
-So the port is ~11 queues, and two of those (`stockSummaryRebuild`, `opportunityReconcile`'s
-backoff derivation) lose their *rationale* with Firestore rather than their function — they must be
+So the port is ~11 queues, and two of those (`stockSummaryRebuild`, `opportunityReconcile`'s backoff
+derivation) lose their _rationale_ with Firestore rather than their function — they must be
 re-derived against the new store's concurrency model, not carried over.

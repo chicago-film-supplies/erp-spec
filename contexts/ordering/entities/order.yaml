@@ -1,9 +1,24 @@
 # EXAMPLE ENTITY — one per context, to fix the shape. Not a schema. Not exhaustive.
 entity: Order
 fields:
-  order_id:         { type: uuid, required: true }
+  order_id: { type: uuid, required: true }
   organization_ref: { type: organization_id, required: true }
-  destinations:     { type: array, of: destination_id, required: true, note: "multi-destination is newly possible" }
-  fulfillment_mode: { type: enum, values: [local_delivery, counter, shipped, trucked], required: true, note: "OQ-003 — order-level or destination-level" }
-  items:            { type: array, of: order_item, required: true, note: "path is the row identity, single author" }
-  status:           { type: enum, values: [draft, confirmed, amended, cancelled], required: true }
+  destinations: {
+    type: array,
+    of: destination_id,
+    required: true,
+    note: "multi-destination is newly possible",
+  }
+  fulfillment_mode: {
+    type: enum,
+    values: [local_delivery, counter, shipped, trucked],
+    required: true,
+    note: "OQ-003 — order-level or destination-level",
+  }
+  items: {
+    type: array,
+    of: order_item,
+    required: true,
+    note: "path is the row identity, single author",
+  }
+  status: { type: enum, values: [draft, confirmed, amended, cancelled], required: true }

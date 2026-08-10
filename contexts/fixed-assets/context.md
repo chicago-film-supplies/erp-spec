@@ -2,9 +2,9 @@
 
 ## Responsibility
 
-The asset register and depreciation. Owns asset identity, acquisition cost, in-service date,
-class life, disposal, and the carrying basis under **both** the GAAP and tax books — plus the
-deferred difference between them.
+The asset register and depreciation. Owns asset identity, acquisition cost, in-service date, class
+life, disposal, and the carrying basis under **both** the GAAP and tax books — plus the deferred
+difference between them.
 
 ## Boundary
 

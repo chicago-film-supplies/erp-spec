@@ -2,12 +2,16 @@
 entity: Leg
 description: One directed movement of equipment between CFS and a destination. Blocked on HOT-007.
 fields:
-  leg_id:          { type: uuid, required: true }
-  shift_id:        { type: uuid, required: true, note: "the highest-value single field. subsumes five inferences" }
-  actor_id:        { type: person_ref, required: true }
-  trip_id:         { type: uuid, required: false, note: "null until grouped. OQ-002" }
+  leg_id: { type: uuid, required: true }
+  shift_id: {
+    type: uuid,
+    required: true,
+    note: "the highest-value single field. subsumes five inferences",
+  }
+  actor_id: { type: person_ref, required: true }
+  trip_id: { type: uuid, required: false, note: "null until grouped. OQ-002" }
   destination_ref: { type: destination_id, required: true }
-  direction:       { type: enum, values: [outbound, inbound], required: true }
-  chargeable:      { type: bool, required: true, note: "counts toward Delivery/Setup/Removal quantity" }
-  clock_in:        { type: timestamp, required: true }
-  clock_out:       { type: timestamp, required: true }
+  direction: { type: enum, values: [outbound, inbound], required: true }
+  chargeable: { type: bool, required: true, note: "counts toward Delivery/Setup/Removal quantity" }
+  clock_in: { type: timestamp, required: true }
+  clock_out: { type: timestamp, required: true }

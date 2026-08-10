@@ -39,7 +39,7 @@ is a real cost attributable to no job, so both accounts stand:
 - `COGS-Labour Absorbed` — hours actually worked on a job, at that person's actual rate, dimensioned
 - `COGS-Unabsorbed Labour` — guaranteed-but-unworked hours and idle time, undimensioned
 
-The gap between them is **utilisation**, not rate deviation. `labour_variance` as a *rate* variance
+The gap between them is **utilisation**, not rate deviation. `labour_variance` as a _rate_ variance
 is dropped.
 
 ## Consequences

@@ -12,6 +12,6 @@ triage_count: 0
 The legacy system never supported multiple destinations on one order. The new one must, and real
 multi-destination orders will begin arriving.
 
-Consequences to chase: whether `fulfillment_mode` is per-order or per-destination (OQ-003),
-whether a trip may span orders (OQ-002), and how a chargeable field leg count is apportioned when
-one trip serves several destinations.
+Consequences to chase: whether `fulfillment_mode` is per-order or per-destination (OQ-003), whether
+a trip may span orders (OQ-002), and how a chargeable field leg count is apportioned when one trip
+serves several destinations.

@@ -20,5 +20,4 @@ status: open
 Expect lossiness around `$ref`, conditionals (`if`/`then`), `unevaluatedProperties`, and
 discriminated unions — which the order items tree depends on heavily.
 
-The failure to avoid: a constraint everyone assumes the database enforces that it silently does
-not.
+The failure to avoid: a constraint everyone assumes the database enforces that it silently does not.

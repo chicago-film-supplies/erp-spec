@@ -11,20 +11,20 @@ superseded_by:
 ---
 
 > **In the context of** owning the order-to-invoice path but renting the ledger, **facing** a
-> tracking-dimension defect that Xero silently absorbs and a costing model Xero cannot express,
-> **we decided** to build the general ledger in-house, **to achieve** dimensional postings that
-> cannot be null and a labour-absorption model we control, **accepting** that a large amount of
-> unglamorous accounting surface area becomes ours to build and keep correct.
+> tracking-dimension defect that Xero silently absorbs and a costing model Xero cannot express, **we
+> decided** to build the general ledger in-house, **to achieve** dimensional postings that cannot be
+> null and a labour-absorption model we control, **accepting** that a large amount of unglamorous
+> accounting surface area becomes ours to build and keep correct.
 
 ## Context
 
 - CFS already owns orders, invoices, products and fulfillment. Xero owns only the ledger.
 - The dimension on a Xero line is optional by construction: an unresolvable tracking option id is
   dropped and the push still succeeds. 28.7% of line revenue has no product line as a result.
-- The costing design — standard cost, causal-job absorption, unabsorbed-labour as a KPI account —
-  is not expressible in Xero.
-- Xero is single-tenant, live, and rate-limited to ~1,000 calls/day. Every integration is
-  competing with the money path.
+- The costing design — standard cost, causal-job absorption, unabsorbed-labour as a KPI account — is
+  not expressible in Xero.
+- Xero is single-tenant, live, and rate-limited to ~1,000 calls/day. Every integration is competing
+  with the money path.
 
 ## Decision
 

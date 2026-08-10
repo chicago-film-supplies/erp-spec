@@ -18,10 +18,10 @@ superseded_by:
 
 ## Context
 
-- Orders and invoices are deeply nested documents with an items tree. That shape drove the
-  Firestore design and it still fits a document store.
-- A ledger has the opposite requirements: append-only, balance-enforcing, no partial writes.
-  Storing it as documents means re-implementing debit/credit integrity in application code.
+- Orders and invoices are deeply nested documents with an items tree. That shape drove the Firestore
+  design and it still fits a document store.
+- A ledger has the opposite requirements: append-only, balance-enforcing, no partial writes. Storing
+  it as documents means re-implementing debit/credit integrity in application code.
 - TigerBeetle enforces double-entry in the database and is built for this exact workload.
 
 ## Considered options

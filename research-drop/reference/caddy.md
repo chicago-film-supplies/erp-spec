@@ -9,7 +9,8 @@ Google fronts TLS and Caddy would be redundant.
 - Docs: <https://caddyserver.com/docs/>
 - Caddyfile directives: <https://caddyserver.com/docs/caddyfile/directives>
 - `reverse_proxy`: <https://caddyserver.com/docs/caddyfile/directives/reverse_proxy>
-- **No `llms.txt`** as of 2026-08-09 (only a community request); this note is the curated substitute.
+- **No `llms.txt`** as of 2026-08-09 (only a community request); this note is the curated
+  substitute.
 
 ## Version (checked 2026-08-09)
 

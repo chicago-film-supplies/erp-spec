@@ -19,9 +19,9 @@ superseded_by:
 ## Context
 
 - Duplicate ACTIVE products book the same event to different accounts, and the inconsistency runs
-  both ways: "Distance Charge" exists as `service` @ 4100 *and* `surcharge` @ 4110; "Rush Charge"
-  exists twice, both `surcharge` @ 4100; "Off Hours Surcharge" (`service` @ 4100) coexists with
-  "Off Hours Charge" (`surcharge` @ 4110).
+  both ways: "Distance Charge" exists as `service` @ 4100 _and_ `surcharge` @ 4110; "Rush Charge"
+  exists twice, both `surcharge` @ 4100; "Off Hours Surcharge" (`service` @ 4100) coexists with "Off
+  Hours Charge" (`surcharge` @ 4110).
 - So the source data does not determine the posting — the account depends on which of two
   identically-named active products the operator happened to pick.
 - A per-pair judgement would resolve today's duplicates and leave nothing to stop the ambiguity
@@ -31,8 +31,8 @@ superseded_by:
 
 **Type determines the account, always:** a `surcharge` books to **4110**, a `service` to **4100**.
 
-For each duplicate pair, the correctly-typed member is **canonical**; the other is deactivated —
-not deleted, per the no-hard-deletes fence.
+For each duplicate pair, the correctly-typed member is **canonical**; the other is deactivated — not
+deleted, per the no-hard-deletes fence.
 
 ## Consequences
 

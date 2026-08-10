@@ -14,8 +14,7 @@ superseded_by:
 > **In the context of** a ledger whose store assigns its own timestamps, **facing** reporting that
 > is periodised by business date, **we decided** to carry accounting date and posting timestamp as
 > distinct fields with distinct rules, **to achieve** periodisation that survives late and
-> back-dated entries, **accepting** that the ledger's native ordering is not the reporting
-> ordering.
+> back-dated entries, **accepting** that the ledger's native ordering is not the reporting ordering.
 
 ## Context
 

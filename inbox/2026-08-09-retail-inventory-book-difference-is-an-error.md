@@ -27,14 +27,14 @@ It was never a costing-method choice, a §263A adjustment or a write-down treate
   inventory differently, and which basis does v2 carry" — the answer is that they should not differ
   and v2 carries one number.
 - **The migration must not carry the divergence across.** One retail-inventory cost at cutover, on
-  both bases. Whether the prior years are corrected in the existing books or the divergence is simply
-  not imported is the owner's and the CPA's call.
+  both bases. Whether the prior years are corrected in the existing books or the divergence is
+  simply not imported is the owner's and the CPA's call.
 
 ## What does NOT change
 
 The measurement stands and is worth keeping: **the two statements as filed differ in exactly two
 accounts**, and that fact was what confirmed a derived tax book is what CFS already produces. One of
-the two turning out to be a defect makes the confirmation stronger, not weaker — the only *intended*
+the two turning out to be a defect makes the confirmation stronger, not weaker — the only _intended_
 difference between the books is depreciation, and it reconciles to the cent.
 
 Also worth keeping: the divergence was **invisible until the two statements were diffed line by

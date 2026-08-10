@@ -17,8 +17,8 @@ status: open
 
 ## Notes
 
-**Plaid transactions are not an accounting bank feed.** They are a consumer-fintech product. The
-gap between what Plaid returns and what reconciliation needs is the actual deliverable here.
+**Plaid transactions are not an accounting bank feed.** They are a consumer-fintech product. The gap
+between what Plaid returns and what reconciliation needs is the actual deliverable here.
 
 Unstable transaction ids would be a serious finding — reconciliation state keyed on them would
 corrupt silently.

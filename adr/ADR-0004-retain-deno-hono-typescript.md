@@ -25,12 +25,12 @@ superseded_by:
 
 Keep Deno, Hono and TypeScript. **No Rust or Go rewrite.**
 
-**Revisit trigger:** if the TigerBeetle client cannot load under Deno (SPIKE-001), add a Go
-sidecar for the ledger service only. That is a component boundary, not a language migration, and
-it does not reopen this ADR for the rest of the system.
+**Revisit trigger:** if the TigerBeetle client cannot load under Deno (SPIKE-001), add a Go sidecar
+for the ledger service only. That is a component boundary, not a language migration, and it does not
+reopen this ADR for the rest of the system.
 
 ## Consequences
 
 - SPIKE-001 is on the critical path — it gates whether the sidecar exists.
-- A sidecar, if needed, adds a network hop inside the two-store commit, which SPIKE-002 and the
-  TLA+ spec must then account for.
+- A sidecar, if needed, adds a network hop inside the two-store commit, which SPIKE-002 and the TLA+
+  spec must then account for.

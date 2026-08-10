@@ -17,12 +17,12 @@ the shape that drove the Firestore design and still fits a document store.
 
 ## CFS-specific gotchas
 
-- **`$jsonSchema` is an OLD JSON Schema draft (≈ draft 4), lossy vs 2020-12** ([[SPIKE-006]]). Expect
-  `$ref`, `if`/`then`, `unevaluatedProperties`, and **discriminated unions** not to survive — and the
-  order items tree leans on discriminated unions heavily. Catalogue every construct that does not
-  translate, then state a split: what the DB enforces vs what the app (Zod) enforces, with **no
-  construct unenforced in both.** The failure to avoid: a rule everyone assumes Mongo enforces that
-  it silently does not.
+- **`$jsonSchema` is an OLD JSON Schema draft (≈ draft 4), lossy vs 2020-12** ([[SPIKE-006]]).
+  Expect `$ref`, `if`/`then`, `unevaluatedProperties`, and **discriminated unions** not to survive —
+  and the order items tree leans on discriminated unions heavily. Catalogue every construct that
+  does not translate, then state a split: what the DB enforces vs what the app (Zod) enforces, with
+  **no construct unenforced in both.** The failure to avoid: a rule everyone assumes Mongo enforces
+  that it silently does not.
 - **Money: BSON has no unsigned 128-bit.** Store minor units as BSON **`Long`** (64-bit int), never
   `Double`. Match TB's u128 semantics at the app boundary and mind the `2^63` ceiling (TB's is
   `2^128`). Floats for money are banned everywhere (CLAUDE.md §7).
@@ -34,4 +34,5 @@ the shape that drove the Firestore design and still fits a document store.
   **Mongo write** → TB post/void. Invariant: a Mongo document must never exist without a pending or
   posted transfer (`formal/two-store-commit.qnt`).
 
-Cross-refs: [[ADR-0003]] · [[SPIKE-006]] · [[SPIKE-009]] · [[SPIKE-002]] · `formal/two-store-commit.qnt`
+Cross-refs: [[ADR-0003]] · [[SPIKE-006]] · [[SPIKE-009]] · [[SPIKE-002]] ·
+`formal/two-store-commit.qnt`

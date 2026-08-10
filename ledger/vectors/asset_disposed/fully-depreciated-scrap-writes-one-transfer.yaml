@@ -45,5 +45,10 @@ derivation: >-
 
 expect:
   transfers:
-    - { debit_account: 1501, credit_account: 1500, amount_minor: 100000, accounting_date: "2026-08-07" }
+    - {
+        debit_account: 1501,
+        credit_account: 1500,
+        amount_minor: 100000,
+        accounting_date: "2026-08-07",
+      }
   rejects: []

@@ -8,7 +8,6 @@
 
 terms:
   # ── Fulfillment geometry ────────────────────────────────────────────────────
-
   - term: leg
     definition: >-
       One directed movement of equipment between CFS and a destination — outbound (CFS delivers)

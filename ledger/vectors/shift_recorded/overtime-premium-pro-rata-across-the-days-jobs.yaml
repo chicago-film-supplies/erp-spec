@@ -24,9 +24,33 @@ given:
     cost_minor: 37500
     unabsorbed_minor: 0
     absorbed_allocations:
-      - { causal_job: ORD-VEC-0001, hours: 5, base_minor: 15000, premium_share_minor: 2046, amount_minor: 17046, product_line: "Delivery", cost_type: delivery }
-      - { causal_job: ORD-VEC-0002, hours: 4, base_minor: 12000, premium_share_minor: 1636, amount_minor: 13636, product_line: "Crew", cost_type: counter }
-      - { causal_job: ORD-VEC-0003, hours: 2, base_minor: 6000, premium_share_minor: 818, amount_minor: 6818, product_line: "Tables & Chairs", cost_type: warehouse }
+      - {
+          causal_job: ORD-VEC-0001,
+          hours: 5,
+          base_minor: 15000,
+          premium_share_minor: 2046,
+          amount_minor: 17046,
+          product_line: "Delivery",
+          cost_type: delivery,
+        }
+      - {
+          causal_job: ORD-VEC-0002,
+          hours: 4,
+          base_minor: 12000,
+          premium_share_minor: 1636,
+          amount_minor: 13636,
+          product_line: "Crew",
+          cost_type: counter,
+        }
+      - {
+          causal_job: ORD-VEC-0003,
+          hours: 2,
+          base_minor: 6000,
+          premium_share_minor: 818,
+          amount_minor: 6818,
+          product_line: "Tables & Chairs",
+          cost_type: warehouse,
+        }
 
 derivation: >-
   **Hand-computed, and the residual is the point.** One person, eleven hours at $30.00, across three
@@ -53,7 +77,28 @@ derivation: >-
 
 expect:
   transfers:
-    - { debit_account: 5800, credit_account: 2000, amount_minor: 17046, accounting_date: "2026-08-06", product_line: "Delivery", cost_type: delivery }
-    - { debit_account: 5800, credit_account: 2000, amount_minor: 13636, accounting_date: "2026-08-06", product_line: "Crew", cost_type: counter }
-    - { debit_account: 5800, credit_account: 2000, amount_minor: 6818, accounting_date: "2026-08-06", product_line: "Tables & Chairs", cost_type: warehouse }
+    - {
+        debit_account: 5800,
+        credit_account: 2000,
+        amount_minor: 17046,
+        accounting_date: "2026-08-06",
+        product_line: "Delivery",
+        cost_type: delivery,
+      }
+    - {
+        debit_account: 5800,
+        credit_account: 2000,
+        amount_minor: 13636,
+        accounting_date: "2026-08-06",
+        product_line: "Crew",
+        cost_type: counter,
+      }
+    - {
+        debit_account: 5800,
+        credit_account: 2000,
+        amount_minor: 6818,
+        accounting_date: "2026-08-06",
+        product_line: "Tables & Chairs",
+        cost_type: warehouse,
+      }
   rejects: []

@@ -24,7 +24,7 @@ status: open
 
 The failure this spike exists to prevent is a boundary drawn too early. Pull it back far enough and
 a forward booking starts consuming balance, which silently reintroduces the per-day-rollup oversell
-the v1 engine deliberately avoids — and it would present as availability being *too low*, which
+the v1 engine deliberately avoids — and it would present as availability being _too low_, which
 reads as conservative rather than as a bug.
 
 The count of underivable statuses is the real output. ADR-0014 says to shrink the assigned set

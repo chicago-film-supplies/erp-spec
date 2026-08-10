@@ -28,13 +28,13 @@ cannot work without.
 
 - `src/lib/email.ts`: direct REST to `api.resend.com/emails`. Four sender identities in use —
   `verify@`, `reset@`, `invite@`, `alerts@` — replying to `team@`.
-- CFS runs **its own DMARC monitoring** (`src/services/dmarcReportParser.ts` +
-  `dmarcReports.ts`), so deliverability is instrumented rather than assumed.
+- CFS runs **its own DMARC monitoring** (`src/services/dmarcReportParser.ts` + `dmarcReports.ts`),
+  so deliverability is instrumented rather than assumed.
 
 ## What they have in common, and it is the reason to record them together
 
 - **Both are already fenced out of tests.** `tests/helpers/forbiddenHosts.ts` denies Xero, CRMS,
-  **Resend** and **Mapbox** by default. That fence exists because they *were* being reached: until
+  **Resend** and **Mapbox** by default. That fence exists because they _were_ being reached: until
   2026-07-13 the suite sent a real alert email on every run.
 - **Both mint foreign identifiers** — a Mapbox place id, a Resend message id — and ADR-0009 fences
   those out of domain models. Neither belongs in a domain entity.

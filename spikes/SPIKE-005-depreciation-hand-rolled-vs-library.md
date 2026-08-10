@@ -16,8 +16,8 @@ status: open
 
 ## Notes
 
-Highest-stakes correctness surface in the rebuild — errors here have filing consequences, not
-just reporting ones.
+Highest-stakes correctness surface in the rebuild — errors here have filing consequences, not just
+reporting ones.
 
-Build the corpus before evaluating anything. A library chosen first and tested second gets graded
-on the cases it happens to handle.
+Build the corpus before evaluating anything. A library chosen first and tested second gets graded on
+the cases it happens to handle.

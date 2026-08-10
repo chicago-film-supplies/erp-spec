@@ -16,7 +16,7 @@ is append-only and stands as written.
 
 > So the Delivery line's cost attaches to the 4100 service, and the 4110 surcharge improves the
 > line's margin without adding to its cost. Anything that allocated delivery COGS in proportion to
-> *total* Delivery revenue would misallocate by the surcharge share.
+> _total_ Delivery revenue would misallocate by the surcharge share.
 
 The second sentence is **wrong**, and the first is misleading in the same direction.
 
@@ -35,14 +35,14 @@ Two consequences the original note got backwards:
    delivery revenue — $43,290 of $216,050 — out of the line it belongs to. The margin question is a
    subtraction, not an allocation, and both accounts are on the revenue side of it.
 2. **Delivery revenue was never going to be an allocation base.** Under ADR-0029 the official P&L
-   spreads delivery revenue *and* delivery cost across the goods on the orders that caused them —
-   so delivery revenue is a thing being **allocated**, not a basis for allocating. The base is a
+   spreads delivery revenue _and_ delivery cost across the goods on the orders that caused them — so
+   delivery revenue is a thing being **allocated**, not a basis for allocating. The base is a
    property of the goods (their revenue, weight, count), and the surcharge question does not arise.
 
 ## What the split IS good for
 
 **Forecasting, not allocation.** Delivery cost scales with 4100 service volume and not with
-surcharge revenue, so a model predicting delivery cost from *total* delivery revenue over-predicts
+surcharge revenue, so a model predicting delivery cost from _total_ delivery revenue over-predicts
 in a surcharge-heavy period. That is the same fact OQ-006 settled — the premium the customer pays is
 margin, not cost — and it belongs to cost prediction rather than to the reporting basis.
 

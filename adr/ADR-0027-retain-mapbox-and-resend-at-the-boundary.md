@@ -13,8 +13,8 @@ superseded_by:
 
 > **In the context of** a rebuild that replaces the ledger, the datastore and the host, **facing**
 > two external services that already work and are not the reason for the rebuild, **we decided** to
-> retain Mapbox for geocoding and Resend for transactional email as boundary services with no
-> domain footprint, **to achieve** a smaller cutover surface, **accepting** two live third-party
+> retain Mapbox for geocoding and Resend for transactional email as boundary services with no domain
+> footprint, **to achieve** a smaller cutover surface, **accepting** two live third-party
 > dependencies that every test must be prevented from reaching.
 
 ## Context
@@ -35,8 +35,8 @@ superseded_by:
 
 ## Decision
 
-Retain both, as **boundary services**: they are called at the edge, their outputs are enrichments
-or side effects, and neither appears in a domain model or a domain event.
+Retain both, as **boundary services**: they are called at the edge, their outputs are enrichments or
+side effects, and neither appears in a domain model or a domain event.
 
 ## Consequences
 
@@ -44,13 +44,13 @@ or side effects, and neither appears in a domain model or a domain event.
   are correspondence for the boundary to hold, not fields on an entity. The same rule that keeps
   `xero_id` out of the chart of accounts applies here.
 - **Neither produces a domain event, and this is worth stating because the mistake is tempting.**
-  Sending an email is a side effect of an event that already happened; geocoding is an enrichment
-  of an address. An `InvoiceEmailed` event in the ledger would be the assigned-state error ADR-0014
-  forbids, one layer out — the fact is "the invoice was issued", and whether a message was
-  delivered is the mail provider's business.
+  Sending an email is a side effect of an event that already happened; geocoding is an enrichment of
+  an address. An `InvoiceEmailed` event in the ledger would be the assigned-state error ADR-0014
+  forbids, one layer out — the fact is "the invoice was issued", and whether a message was delivered
+  is the mail provider's business.
 - **Tests must never reach either, and the fence already exists** —
   `api-cloudrun/tests/helpers/forbiddenHosts.ts` denies Mapbox and Resend by default. It exists
-  because they *were* being reached: until 2026-07-13 the suite sent a real alert email on every
+  because they _were_ being reached: until 2026-07-13 the suite sent a real alert email on every
   run. Carry the fence, not just the services.
 - **Retaining Mapbox does not fix the address defect.** Addresses are geocoded but **not
   normalized**, and region representation is inconsistent

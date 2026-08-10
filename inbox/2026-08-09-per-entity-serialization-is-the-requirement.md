@@ -15,16 +15,16 @@ device, not throughput management:
 - two Xero queues — serial dispatch is what stops two attempts both missing an `xero_id == null`
   check and double-creating in the live ledger
 - `userNameCascade` — stops two renames interleaving read-modify-writes on container documents
-- `orderFinalize` — the serialization *is* the coalescing (a task name could not be used: the ~24h
+- `orderFinalize` — the serialization _is_ the coalescing (a task name could not be used: the ~24h
   tombstone would suppress the next legitimate finalize of that order)
 
 This is a **per-entity** requirement being met with a **global** knob, and it costs throughput on
 every unrelated entity. Any replacement has to provide it explicitly: a per-queue concurrency
 setting does not express "serialize per order uid".
 
-Where duplicate dispatch cannot be prevented it is currently *detected* — a 180s Firestore CAS
-lease (`taskLease.ts`) on the three lease-backed queues, which drops to two once Trello goes. That
-lease forces a three-way coupling asserted in CI: `retryBudget >= leaseMs > timeoutTier`. It exists
+Where duplicate dispatch cannot be prevented it is currently _detected_ — a 180s Firestore CAS lease
+(`taskLease.ts`) on the three lease-backed queues, which drops to two once Trello goes. That lease
+forces a three-way coupling asserted in CI: `retryBudget >= leaseMs > timeoutTier`. It exists
 because the platform can dispatch a duplicate at will.
 
 **The design opportunity: make duplicate processing structurally impossible rather than

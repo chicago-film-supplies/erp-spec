@@ -19,8 +19,8 @@ dimensions:
   - id: product_line
     description: What category of goods or service the line belongs to.
     required_on: [revenue, cogs]
-    declaration: required        # the KEY must be present on every posting to an account naming it
-    null_permitted: true         # as an explicit determination that no tracked value applies
+    declaration: required # the KEY must be present on every posting to an account naming it
+    null_permitted: true # as an explicit determination that no tracked value applies
     source: "api:2026-08-08:db_tracking_categories_query (21 values in the current system)"
     values:
       - Crafty
