@@ -135,6 +135,22 @@ milestones:
         reason: >-
           The first half is checkable (OQ-012 answered); the second is not, and splitting the
           criterion to check only the easy half would report the whole as met.
+      - text: >-
+          The two migrations that cross the closed periods are ORDERED, and each carries its own
+          before/after proof. ADR-0020's dimension restatement runs FIRST and proves no amount
+          moved; ADR-0032's identity re-keying runs SECOND and proves no AR balance moved.
+        prose_only: true
+        reason: >-
+          ADR-0032 creates this obligation and HOT-006 does not cover it — HOT-006 asked
+          "import defective lines or restate?" on the LINE DIMENSION axis, which ADR-0020 answered.
+          Re-keying document identity is a different axis over the same corpus, ~90% of it behind
+          the 2025-12-31 lock. The two promise the same thing ("nothing moved") about different
+          quantities, so **neither assertion is verifiable while the other is in flight** and a
+          single combined pass produces one red report that names no culprit. Owner fixed the order
+          2026-08-10.
+          Not checkable: whether two proofs were actually run in order, against a live database this
+          repo cannot reach, is a reading of migration evidence rather than a shape in a YAML file.
+          A checker would compare the milestone against itself.
 
   - id: m7
     title: Walking skeleton defined

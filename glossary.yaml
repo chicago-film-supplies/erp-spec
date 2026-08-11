@@ -308,31 +308,36 @@ terms:
       own COA 4150. Per OQ-006 the person-day it absorbs is the ACTUAL cost; the premium the
       customer pays for a long haul is margin, not cost.
 
-  # ── Customer structure (ADR-0032) ───────────────────────────────────────────
-  - term: customer
+  # ── Organization structure (ADR-0032, ADR-0033) ─────────────────────────────
+  - term: organization
     definition: >-
       The LEGAL ENTITY that owes CFS money — the party that could be sued for an unpaid invoice.
-      The root of the customer tree, and the only level of it that carries liability. Credit
-      exposure, credit limit, trading history and tax profile attach here and nowhere else.
+      The root of the organization tree, and the only level of it that carries liability. Credit
+      exposure, trading history and the destination address book attach here.
     aliases: [legal entity, liable party, account]
     contexts: [billing, ordering]
     source: adr/ADR-0032-the-customer-tree-is-a-liability-tree.md
-    open_questions: [OQ-037]
+    open_questions: [OQ-038, OQ-039]
     notes: >-
-      ⚠️ **Not a synonym for `organization`**, which is the CURRENT system's flat record and conflates
-      all three levels below into one row plus a name suffix — 31 of 286 such records are department
-      clones and `Netflix Productions, LLC` is 10 of them with no parent
-      (`api:2026-08-10:db_organizations_query`).
-      Because the tree is a LIABILITY tree, a separately-incorporated production is its own customer
-      rather than a child of the studio behind it. `Pops, Puffs, Pebbles Canada LTD` and
-      `Pops, Puffs, Pebbles, LLC` are two customers. The economic roll-up that would join them is a
-      different question — OQ-037.
+      ⚠️ **`customer` is NOT the term.** Owner, 2026-08-10: "customer is organization, customer is
+      too easily confused with contact for use." An earlier draft of ADR-0032 used `customer` for
+      this level and warned it was not a synonym for `organization`; that is reversed — the level is
+      unchanged and the word for it is `organization`.
+      ⚠️ **The v1 collection has the same NAME and a wider meaning**, so the migration diff shows no
+      rename while the semantics narrow. Today's flat record conflates all three levels into one row
+      plus a name suffix — 31 of 286 are department clones and `Netflix Productions, LLC` is 10 of
+      them with no parent (`api:2026-08-10:db_organizations_query`).
+      Because the tree is a LIABILITY tree, a separately-incorporated production is its own
+      organization rather than a child of the studio behind it. `Pops, Puffs, Pebbles Canada LTD` and
+      `Pops, Puffs, Pebbles, LLC` are two organizations.
+      **Credit LIMITS and HOLDS do not attach here or anywhere yet** — CFS operates none today, and
+      the control is OQ-038. What the root gives is that exposure becomes READABLE.
 
   - term: project
     definition: >-
-      A production. The middle level of the customer tree, and the cost object a job attaches to: it
-      has a start and an end, it staffs up and disperses, and it is where the production type is
-      carried. It carries NO liability — the customer above it does.
+      A production. The middle level of the organization tree, and the cost object a job attaches
+      to: it has a start and a wrap, it staffs up and disperses, and it is where the production type
+      is carried. It carries NO liability — the organization above it does.
     aliases: [production, show, job]
     contexts: [billing, ordering, ledger]
     source: adr/ADR-0032-the-customer-tree-is-a-liability-tree.md
@@ -342,26 +347,55 @@ terms:
       project or job and gives it the same role — SAP WBS elements, NetSuite Projects (literally
       subcustomers), Sage Intacct's project dimension, Odoo analytic accounts
       (`inbox/2026-08-10-survey-a-department-is-a-settlement-point-and-a-production-is-a-project.md`).
-      A customer with exactly one project is the general shape with N=1, not a special case — most of
-      the corpus, and it must not force an artificial record.
+      An organization with exactly one project is the general shape with N=1, not a special case —
+      most of the corpus. **It must not force an operator to invent a record: the API mints the
+      level, records that it derived it, and the UI suppresses it** (ADR-0032 §3).
+      **Production start and wrap are recorded FACTS; ACTIVE/DORMANT is DERIVED** from open orders
+      and open AR, per ADR-0014. There is no close operation, and open AR keeps a project alive
+      regardless of its wrap date.
 
   - term: settlement point
     definition: >-
-      A department on a project — the leaf of the customer tree and the thing an invoice is actually
-      addressed to and settled by. It holds its own AR balance, statement, aging and **its own
-      contacts**. It carries no liability; it partitions the receivable of the customer above it.
+      A department on a project — the leaf of the organization tree and the thing a document is
+      addressed to and settled by. It holds its own AR balance, statement, aging, unallocated credit
+      and contact edges. It carries no liability; it partitions the receivable of the organization
+      above it.
     aliases: [department, bill-to, payer]
     contexts: [billing]
     source: adr/ADR-0032-the-customer-tree-is-a-liability-tree.md
     notes: >-
-      It is `(project × department)` and NOT `(customer × department)`, because departments staff up
-      per project — the locations team on one production is different people from the locations team
-      on another for the same studio at the same time (owner, 2026-08-10). `Saturn Return: Locations`
-      and `Big Red: Locations` share a name and nothing else.
-      ⚠️ **Contacts belong here, not on the customer.** The current system gets this right by
-      accident, because each department clone is an `organization` and `contacts[]` is embedded on
-      it. A migration that pools contacts upward reproduces the failure Xero users report of contact
-      groups — reminders going to every address on the record rather than the one the invoice went
-      to.
+      It is `(project × department)` and NOT `(organization × department)`, because departments staff
+      up per project — the locations team on one production is different people from the locations
+      team on another for the same studio at the same time (owner, 2026-08-10).
+      `Saturn Return: Locations` and `Big Red: Locations` share a name and nothing else.
+      **Contact MEMBERSHIP EDGES belong here; the person does not.** A contact is one global record
+      with N memberships, each carrying a role — 26 of 165 contacts are attached to two or more
+      organizations today (`api:2026-08-10:db_contacts_query`), so a per-node contact record would
+      fragment them. A statement addresses the edge, never the person, which is what avoids the
+      failure Xero users report of contact groups: reminders going to every address on the record
+      rather than the one the invoice went to.
+      **Unallocated credit sits here too** (ADR-0033), and may be applied across settlement points
+      within one organization as a recorded event — never across organizations, which is the
+      ASC 210-20-45-1 same-party boundary.
       SAP's `payer` partner function is the closest existing analogue: "the entity responsible for
       making the payment", determined per document and held separately from who bought.
+
+  - term: contact
+    definition: >-
+      A person. ONE global record per human, carrying N membership edges into the organization tree —
+      each edge naming a node and a role. The person is never duplicated per department, project or
+      organization.
+    aliases: [coordinator, crew contact, membership]
+    contexts: [billing, ordering]
+    source: adr/ADR-0032-the-customer-tree-is-a-liability-tree.md
+    notes: >-
+      Consistent with OQ-008 — "the same human is one record whether they are crew or a customer
+      contact". Per-node contact records would have contradicted it.
+      ⚠️ **v1 already works this way and an earlier draft of ADR-0032 said otherwise.** `contacts` is
+      a top-level collection and each contact carries `organizations[]`, an explicit many-to-many
+      (`api:2026-08-10:db_schema:contacts`); `organizations.contacts[]` is the reverse denorm, not the
+      authority. Measured 2026-08-10 across all 165 contacts: **26 (15.8%) belong to 2+
+      organizations**, 5 belong to none, and at least 8 humans have duplicate records.
+      `Nick Rafferty` is on five nodes — two future Netflix settlement points, `Enemies Movie, LLC`,
+      and two unrelated entities. A freelance locations manager working across productions and across
+      customers is the industry norm, not an edge case.

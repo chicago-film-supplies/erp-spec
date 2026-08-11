@@ -1056,7 +1056,25 @@ open_questions:
     owner: alex
     decide_by: 2026-12-15
     blocks: []
-    status: open
+    status: answered
+    answer: >-
+      **No — the question is withdrawn rather than answered, because its premise fails.** Owner,
+      2026-08-10: A24 backs `Enemies Movie, LLC`, but **A24 carries no legal liability for it and
+      does not control it** — Enemies holds its own insurance and stands alone. ASC 280-10-50-42's
+      major-customer test is **common CONTROL**, so on GAAP's own test A24 is not an economic parent
+      either. The liability tree and the common-control grouping therefore do NOT diverge on the case
+      that motivated this question, and the ~45–50 single-purpose-LLC count that sized it was only
+      ever a name-pattern heuristic.
+      **What the owner actually wants from the grouping is a different axis entirely** — "from a
+      financial reporting angle it's a high budget feature". That is OQ-035's **production type**,
+      attached to the project. Revenue by production type answers "what kind of work do we depend on";
+      "which studios do we depend on" was a bad proxy for it.
+      ⇒ **No economic grouping is built.** No second tree, no backer tag, no report-time grouping —
+      and therefore nothing that could contaminate the liability tree, which was the whole hazard this
+      question was held open to manage. ADR-0032 amended 2026-08-10 to withdraw its
+      economic-concentration objection.
+      Recorded in
+      `inbox/2026-08-10-interview-the-org-tree-root-stays-organization-and-contacts-are-memberships.md`.
     notes: >-
       Left open deliberately by ADR-0032 rather than decided with it, because the mechanism differs
       by answer and because it must not be allowed to corrupt the tree collections depends on.
@@ -1105,3 +1123,118 @@ open_questions:
       Television` are one legal entity spelled two ways**, alongside the 5 exact-duplicate pairs and
       3 `(copy)` records already recorded. That is an ADR-0032 migration problem, not an OQ-037 one,
       and it is captured in `migration/field-map.yaml`.
+
+  - id: OQ-038
+    question: >-
+      Does CFS operate credit limits and credit holds in v2 — what triggers a hold, who overrides
+      one, what may a held organization still do, and does a hold reach every project beneath?
+    owner: alex
+    decide_by: 2026-12-15
+    blocks: []
+    status: open
+    notes: >-
+      Raised by ADR-0032's amendment, 2026-08-10, and it exists because the ADR's first draft
+      overreached. That draft asserted that "credit limits and credit holds attach to the customer,
+      never to a project or department" and that "a hold applies to every project beneath" — stated
+      as a consequence of choosing liability.
+      ⚠️ **There is no incumbent behaviour behind either sentence.** Owner, 2026-08-10: CFS operates
+      no credit limits today. So the ADR was designing a control that has never existed while
+      appearing to record a consequence of one that had, which is the failure mode
+      `ledger/dimensions.yaml` calls out elsewhere — a rule with no input that can never fire.
+      ADR-0032 now claims only that credit exposure is **READABLE** at the organization. That much IS
+      a genuine consequence: the flat clone table cannot answer "what is Netflix's total exposure"
+      without a string match across ten records, and a root fixes it. Everything beyond reading is
+      this question.
+      **Survey obligation.** A hold is a posting-and-presentation control, so CLAUDE.md → _Accounting
+      decisions_ applies in full — six references before a recommendation. Two shapes are already
+      known to differ and the split is informative: **NetSuite** does NOT include subcustomers in a
+      parent's limit by default, so a parent can sit at its limit while its subcustomers trade on
+      unrestricted — unless Consolidated Payments is enabled, at which point the top-level limit
+      governs the whole hierarchy and subcustomer limits stop being enforced. That is a direct
+      analogue of "does a hold reach every project beneath", answered configurably rather than
+      structurally
+      (`inbox/2026-08-11-survey-unallocated-credit-sits-with-the-legal-party-and-crossing-departments-is-a-management-control.md`).
+      **Xero cannot inform this one.** It has no hierarchy, so the incumbent has no delta to measure
+      — the migration cost is nil by construction and the whole question is greenfield design.
+      Not a blocker on ADR-0032 or ADR-0033; neither depends on an answer.
+
+  - id: OQ-039
+    question: >-
+      `organizations.tax_profile` carries two different concepts in one enum — who owes (applied /
+      exempt) and where the goods went (three Illinois municipalities). Under ADR-0032's tree, where
+      does each half attach, and does a project ever hold its own exemption?
+    owner: alex
+    decide_by: 2027-01-15
+    blocks: []
+    status: open
+    notes: >-
+      **Measured 2026-08-11** (`api:2026-08-11:db_organizations_count`, five queries, all 286
+      organizations): **273 `tax_applied`, 11 `tax_exempt`, 1 `tax_rantoul`, 1 `tax_frankfort`, 0
+      `tax_paxton`**.
+      Two enum members describe the **party** — exemption is a property of who owes, and travels with
+      the legal entity. Three name **Illinois municipalities**, which describe where the goods were
+      delivered and are properties of the destination, not of the payer. `migration/field-map.yaml`
+      currently maps the whole field UP to the root on the reasoning that "tax status is a property
+      of the party that owes"; that reasoning is sound for two of the five values and not for the
+      other three.
+      ⚠️ **Deliberately NOT decided as part of the customer-structure work.** Owner, 2026-08-11: "dont
+      close any tax adrs we have a lot to figure out with that." A 2026-08-10 interview had provisionally
+      split the field; that provisional answer is **withdrawn** and superseded by this question. The
+      interview note recording it is append-only and stands as written — this is the correction.
+      **Settling an attachment point as a side effect of an ADR about customer structure is the wrong
+      order** when the surrounding tax design is still open: ADR-0026's dual-basis non-posting tax
+      book, the `tax` bounded context, and two live v1 defects on the same seam —
+      **api-cloudrun#486** (nothing on the order path reads the org's `tax_profile`, so every
+      tax-exempt customer's order gets taxed at cutover) and **manager#248** (order-level
+      `tax_profile` selector with profile-aware recompute).
+      **The field maps forward unchanged and unsplit until this is answered**, and
+      `migration/field-map.yaml` records it as blocked rather than mapped — an honest "not yet
+      decided" beats a mapping that looks settled.
+      Three things to settle together, since answering one alone re-opens the others: where exemption
+      attaches; whether jurisdiction leaves the organization for the destination; and whether a
+      **project** can hold its own exemption certificate independently of the organization, which is
+      real in this industry — state film-incentive certificates are issued per production, not per
+      company. That third part is what makes this a tree question at all rather than a pure tax one.
+      **Survey obligation applies in full** (CLAUDE.md → _Accounting decisions_) — six references
+      before a recommendation, and Xero is the incumbent whose delta must be measured rather than
+      assumed.
+
+  - id: OQ-040
+    question: >-
+      Is `settlement_point` a declared LEDGER DIMENSION, or a document attribute the read side joins
+      to — given that ADR-0033 requires per-settlement-point aging to be computable without walking
+      the tree?
+    owner: alex
+    decide_by: 2026-12-15
+    blocks: [ADR-0033]
+    status: open
+    notes: >-
+      Surfaced 2026-08-11 while writing EVT-BIL-007's `no_posting` entry, which could not state where
+      each leg's node attribution lives.
+      **The gap is concrete.** `ledger/dimensions.yaml` declares exactly two dimensions —
+      `product_line` and `cost_type` — and neither can express "which department owes this". ADR-0033
+      requires that the sum of settlement-point balances be checkable **without traversing the tree**,
+      because the tree walk is the thing being checked and a guard that consults its own oracle is not
+      a guard. That independent property needs the node to be readable somewhere the ledger can group
+      by.
+      **Two shapes, and they are not equivalent:**
+      · **A third declared dimension.** ADR-0018 already took dimensions off account identity, so
+        cardinality grows by addition rather than by exploding the chart — the same argument that made
+        restoring `Transport` cheap (OQ-034). But ADR-0025 makes dimension obligation **per account**,
+        so this would need a `required_on` answer for every account, and the honest answer is
+        "receivable and customer-credit accounts only" — a much narrower obligation than either
+        existing dimension carries.
+      · **A document attribute** the read side joins to, with the ledger holding only the
+        journal-entry reference. Cheaper, and it keeps a customer-structure concept out of the
+        chart — but OQ-035's survey found that **not one of six references joins to a master at
+        report time**, and the reasoning transfers: a live join cannot be audited, and re-keying a
+        settlement point would silently restate history.
+      ⚠️ That second bullet is the trap to avoid re-deriving: this looks like a cheap join and it is
+      the same shape that failed on 2026-08-10 (api-cloudrun#473).
+      **Survey obligation applies** (CLAUDE.md → _Accounting decisions_) — this is "where something
+      posts", six references before a recommendation. SAP's head office/branch is the closest
+      analogue already read: items post to the branch account and clear from the head office, so the
+      node is on the POSTING rather than joined at report time
+      (`inbox/2026-08-11-survey-unallocated-credit-sits-with-the-legal-party-and-crossing-departments-is-a-management-control.md`).
+      **Blocks ADR-0033's acceptance**, not its drafting: the ADR's decisions stand either way, but
+      its independent-check consequence cannot be implemented until this is answered.

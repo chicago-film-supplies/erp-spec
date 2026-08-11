@@ -2,7 +2,11 @@
 entity: Order
 fields:
   order_id: { type: uuid, required: true }
-  organization_ref: { type: organization_id, required: true }
+  billed_to: {
+    type: node_ref,
+    required: true,
+    note: "ADR-0033 — { level, id }, level-tagged. Only `settlement_point` is written today; the tag makes project-level ordering and item-level override additive. The liable organization is DERIVED by walking up, never stored beside this.",
+  }
   destinations: {
     type: array,
     of: destination_id,

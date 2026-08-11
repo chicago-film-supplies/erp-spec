@@ -98,27 +98,39 @@ mappings:
       Rates stay 4dp decimals and do NOT get a _minor suffix. They sit adjacent to amounts in four
       schemas and a sweep that converts every money field is how the beta.117 regression happened.
 
-  # ── organizations → the customer tree (ADR-0032) ─────────────────────────────
+  # ── organizations → the organization tree (ADR-0032, ADR-0033) ───────────────
   # The largest delta found so far, and a different KIND from the rest of this file: a re-keying
   # rather than a re-dimensioning. ADR-0020 restates dimensions on lines; this changes identity.
+  #
+  # ⚠️ ORDER MATTERS. Owner, 2026-08-10: ADR-0020's restatement runs FIRST and proves no amount
+  # moved, against the familiar flat identity; this re-keying runs SECOND and proves no AR balance
+  # moved, against settled dimensions. Both cross the same closed periods and each promises
+  # "nothing moved" on a different axis, so run together neither proof names a culprit when it
+  # goes red. Carried by roadmap/milestones.yaml → m6.
 
   - from: organizations (the record)
-    to: customer | project | settlement_point
+    to: organization | project | settlement_point
     disposition: defective
     reason: >-
       One flat record carries all three levels of ADR-0032's tree. Measured 2026-08-10
       (`api:2026-08-10:db_organizations_query`, all 286): 31 are department clones across 11 parent
       companies, and `Netflix Productions, LLC` is **10 records with no un-suffixed parent** — the
-      customer as an entity does not exist, so total exposure to it needs a string match.
+      entity does not exist, so total exposure to it needs a string match.
       ⚠️ **The defect is FLATNESS, not duplication.** The clones are not copies; each is a genuinely
       distinct settling unit with its own receivable and coordinator, and they are close to the
       correct LEAVES already. The migration adds a root and a middle — record count barely falls, so
       "10 become 1" is the wrong target and a migration measured by record reduction is measuring the
       wrong thing.
-    blocked_by: [OQ-036, OQ-037]
+      ⚠️ **The target collection keeps the name `organizations` and NARROWS its meaning** — from the
+      flat conflated record to the legal-entity root alone (ADR-0032 §2). A field that keeps its name
+      and changes its semantics is invisible in a diff, so nothing about this mapping is caught
+      automatically. Treat every surviving reader of `organizations` as unverified until read.
+      **All three levels are mandatory in the target**, and the API mints what it is not given
+      (ADR-0032 §3) — so the mapping never has to emit a two-level path. Netflix's 5 bare department
+      records with no production are resolved by hand: the owner supplies the project names.
 
   - from: organizations.name
-    to: customer.name + project.name + settlement_point.name
+    to: organization.name + project.name + settlement_point.name
     disposition: defective
     reason: >-
       Three concepts in one string, with **four delimiter conventions** in use — space-hyphen-space,
@@ -132,20 +144,50 @@ mappings:
       name pairs exist (`Enlace Chicago`, `Free Spirit Media`, `Full Spectrum Features`, `Omnicom`,
       `Sound Off Films`) plus 3 records suffixed with a literal `(copy)`, so `Sound Off Films` occurs
       three times.
+      **Duplicates are resolved HERE rather than by merging in v1** (owner, 2026-08-10). Two source
+      rows pointing at one target node is what an authored mapping is for; it needs no v1 merge tool
+      and takes no exposure to the `api-cloudrun#423` org/contact cascade deadlock.
+      ⚠️ **Four further duplicate pairs found 2026-08-10 by reading contact→organization edges**
+      (`api:2026-08-10:db_contacts_query`), by uid rather than by name:
+      `Omnicom` (`ny7yRgfTh5tFBT7nouzu`, `YOgvPOYnUN4J18XgRilT`);
+      `Enlace Chicago` (`K85dVseZECgedhFa75ln`, `hCdYsTi9NDWxq4ufvHhV`);
+      `Free Spirit Media` (`CTFP195QqkTtEl4kyfc2`, `AxDwNH8IFZEKJJrMqjQc`);
+      `Sound Off Films` (`MCh8UuepH05BGR3FDCEf`, `04KRDdsiQO6yXI6GXX7N`).
+      The `Free Spirit Media` pair is not cosmetic — a credit note issued against one settled an
+      invoice belonging to the other (ADR-0033).
 
-  - from: organizations.contacts[]
-    to: settlement_point.contacts[]
+  - from: contacts (the collection) + contacts.organizations[]
+    to: contact (the person) + membership edges
     disposition: map
     reason: >-
-      ⚠️ **Maps DOWN to the leaf, never up to the customer — and the current system already has this
-      right.** Because each department clone IS an organization and `contacts[]` is embedded, today's
-      contacts already sit on the settling unit. Owner, 2026-08-10: "every project and/or dept will
-      have its own set of contacts."
-      A migration that pools them onto the customer **destroys a working property to fix a broken
-      one**, and reproduces exactly the failure Xero users report of the contact-group workaround —
-      reminders going to every address on the record rather than the one the invoice went to. A
-      statement for `Saturn Return: Locations` would dun the Big Red office coordinator.
-      `query_by_contacts` follows the same rule.
+      ⚠️ **CORRECTS an earlier entry that described a model v1 does not have.** This file previously
+      mapped `organizations.contacts[]` to `settlement_point.contacts[]` on the reasoning that
+      contacts are embedded per organization. **They are not.** `contacts` is a TOP-LEVEL collection
+      and each contact carries `organizations[]` — an explicit many-to-many
+      (`api:2026-08-10:db_schema:contacts`). The person is already global.
+      **The person maps 1:1; the EDGE is what lands on a settlement point** (ADR-0032 §4). One human
+      is one record with N memberships, each naming a node and a role.
+      **Measured 2026-08-10, all 165 contacts** (`api:2026-08-10:db_contacts_query`): **26 (15.8%)
+      belong to 2 or more organizations**; 5 belong to none; `Nick Rafferty` is on five — two future
+      Netflix settlement points, `Enemies Movie, LLC`, and two unrelated entities. A per-node contact
+      record would have fragmented all 26, so the correction is load-bearing rather than cosmetic.
+      ⚠️ **≥8 duplicated humans to resolve in the authored mapping**, several being a fully-populated
+      record beside an empty twin: Katie Kincaid ×3; Kristi Gescheidler, Erik Goserud, Kevin McGrail,
+      Iman Sharabash, Rob Roediger, Kyle Behling, Angie Gaffney ×2 each. Erik Goserud
+      `GSEaRYjBAfW5NZf8ICPd` holds 6 memberships and `wXBHopjodDc4qBxMXqlW` holds 0.
+
+  - from: organizations.contacts[] + query_by_contacts
+    to: null
+    disposition: drop
+    reason: >-
+      The reverse denorm of `contacts.organizations[]`, not the authority — see the entry above.
+      Dropped because the edge is migrated from the authoritative side; carrying the denorm forward
+      would mean migrating the same relation twice and inventing a reconciliation between them.
+      ⚠️ Do NOT read this as "contacts move up to the organization". The edge lands on the settlement
+      point. Pooling edges onto the root reproduces the failure Xero users report of the
+      contact-group workaround — reminders going to every address on the record rather than the one
+      the invoice went to, so a statement for `Saturn Return: Locations` would dun the Big Red office
+      coordinator.
 
   - from: organizations.{xero_id,crms_id}
     to: null
@@ -158,23 +200,71 @@ mappings:
       establish which of ADR-0032's three levels either record belongs to.
 
   - from: organizations.tax_profile
-    to: customer.tax_profile
+    to: undecided
+    disposition: quarantine
+    reason: >-
+      ⚠️ **Previously mapped UP to the legal entity** on the reasoning that "tax status is a property
+      of the party that owes". That reasoning holds for two of the five enum values and not for the
+      other three. Measured 2026-08-11 (`api:2026-08-11:db_organizations_count`, all 286): **273
+      `tax_applied`, 11 `tax_exempt`, 1 `tax_rantoul`, 1 `tax_frankfort`, 0 `tax_paxton`**.
+      `tax_applied` / `tax_exempt` describe the **party**. `tax_rantoul` / `tax_frankfort` /
+      `tax_paxton` are Illinois **municipalities** — they describe where the goods went, which is a
+      property of the destination.
+      **Deliberately left undecided — OQ-039.** Owner, 2026-08-11: "dont close any tax adrs we have a
+      lot to figure out with that." Settling an attachment point as a side effect of a
+      customer-structure migration is the wrong order while ADR-0026's dual-basis book, the `tax`
+      context and two live v1 defects (`api-cloudrun#486`, `manager#248`) are all still open. The
+      field carries forward whole and unsplit until OQ-039 answers.
+      ⚠️ Whatever the answer, collapsing clones still requires asserting the value is identical across
+      every clone of one organization first; a disagreement is a finding, not a merge conflict to
+      resolve arbitrarily.
+    blocked_by: [OQ-039]
+
+  - from: destinations.organizations[]
+    to: organization.destinations[]
     disposition: map
     reason: >-
-      Maps UP to the legal entity, opposite to `contacts[]`. Tax status is a property of the party
-      that owes, not of the department being invoiced. ⚠️ Requires asserting the value is identical
-      across every clone of one customer before collapsing; a disagreement is a finding, not a
-      merge conflict to resolve arbitrarily.
+      One address book per legal entity, usable by every project and settlement point beneath
+      (ADR-0032 §5). `destinations` is already a separate many-to-many collection keyed to
+      organizations, so this is a re-pointing rather than a restructure — the edge follows whichever
+      target node its organization collapses into.
+      ⚠️ `destinations.contacts[]` is the same shape as `organizations.contacts[]` and follows the
+      same correction: the person is global, the edge is what moves.
 
   - from: "invoices.organization / orders.organization_ref"
-    to: "*.settlement_point_ref"
+    to: "*.billed_to { level, id }"
     disposition: defective
     reason: >-
       A single flat reference to the pre-tree `organizations` record. Under ADR-0032 a document is
-      addressed to a **settlement point**, and its customer is derived by walking up — so this
+      addressed to a **settlement point**, and its organization is derived by walking up — so this
       reference changes meaning as well as target.
-      ⚠️ **AR balances must not move.** The consolidated customer balance must be proven equal to the
-      sum of its settlement points, per invoice and per settlement — ADR-0020's amount assertion on a
-      different axis. Xero's own warning about the duplicate-contact route is that it double-counts,
-      so this is a measured hazard rather than a theoretical one.
-    blocked_by: [OQ-036]
+      **The target is level-tagged** (ADR-0033 §1): `{ level, id }`, where the migration writes only
+      `level: settlement_point`. The tag exists so that project-level ordering and SAP-style
+      item-level override are later additive value changes rather than a second re-keying of every
+      order and invoice.
+      ⚠️ **AR balances must not move.** The consolidated organization balance must be proven equal to
+      the sum of its settlement points, per invoice and per settlement — ADR-0020's amount assertion
+      on a different axis. Xero's own warning about the duplicate-contact route is that it
+      double-counts, so this is a measured hazard rather than a theoretical one.
+      **The proof must not walk the tree**, or it agrees with itself: check the sum of open invoice
+      amounts grouped by `billed_to.id` against the roll-up, computed by different code.
+
+  - from: credit-notes.organization + credit-note allocations.uid_organization
+    to: "*.billed_to { level: settlement_point }"
+    disposition: defective
+    reason: >-
+      Unallocated credit sits at the settlement point under ADR-0033 §3, so both the note and its
+      allocation rows re-point with the documents they settle.
+      **Measured 2026-08-11** (`api:2026-08-11:search_credit_notes` + `get_credit_notes_uid_allocations`,
+      all 13 notes): 10 `applied`, 3 `void`, 9 allocation rows. **8 of 9 allocations name the same
+      organization as their credit note.** The one that crosses — CN-1024 — crosses the duplicate
+      `Free Spirit Media` pair, which this mapping collapses into one organization, so the crossing
+      disappears rather than needing ADR-0033's transfer event. **Historical population for cross-node
+      transfer: zero.**
+      ⚠️ **Two `applied` notes have no allocation row at all** and must not be imported as settled:
+      `MKeNqa5Xc9yfQj5jqqbT` (CN-1016, `Yellow Film LLC`) and `zFXSXP1jLdtfyO9nVpYl` (CN-1013,
+      `Juniper Productions`). This is the population in `api-cloudrun#469`, which the issue leaves
+      unnamed.
+      ⚠️ Read from the Typesense projection only — there is no `db_credit_notes_*` tool and
+      `credit-notes` is absent from `db_schema`'s enum. Inspect the authoritative documents when the
+      mapping is authored.

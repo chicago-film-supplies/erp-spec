@@ -325,8 +325,9 @@ rules:
     invariants:
       - >-
           **The credit side is 2050 Customer Credit Balances, NOT 1200.** A credit note is
-          issued against an organization and allocated to invoices afterwards, so between the two it
-          is attached to no invoice. Crediting AR at issue puts the unallocated balance in the control
+          issued against a **settlement point** (ADR-0033 §3 — a credit is negative receivable and
+          partitions the way the receivable does; pre-tree this said "an organization") and allocated
+          to invoices afterwards, so between the two it is attached to no invoice. Crediting AR at issue puts the unallocated balance in the control
           account while no invoice in the subledger carries it, and AR stops tying to the sum of open
           invoices by exactly that amount. The current system already keeps this number —
           `credit-notes.remaining_credit_cents` — and moves an invoice's `amount_credited` only when an
@@ -398,7 +399,21 @@ rules:
           **Issue and allocation are separate events on purpose.** Collapsing them would make an
           unallocated credit unrepresentable, and a credit note is unallocated for as long as the
           customer has not been billed against it.
-    relates_to: [ADR-0010, ADR-0014, ADR-0022]
+      - >-
+          ⚠️ **The two legs may sit at DIFFERENT settlement points, and the rule must read both rather
+          than assume one.** Under ADR-0033 the 2050 leg is attributed to the node holding the credit
+          (`from_billed_to`) and the 1200 leg to the node the invoice was addressed to
+          (`to_billed_to`). Where they differ, EVT-BIL-007 records the authorization — it posts
+          nothing, because this rule already moves the money exactly once.
+          **Both nodes must resolve to the SAME organization.** A crossing between two organizations
+          is refused outright: ASC 210-20-45-1 permits setoff only between amounts due to and from
+          the same party, and that is the one line all six references in the 2026-08-11 survey agree
+          on. Moving value between legal entities is a refund out and a payment in, not an
+          allocation.
+          Historical population for a crossing: **zero** — 8 of 9 prod allocations name their note's
+          own organization, and the ninth crosses a duplicate `Free Spirit Media` pair that the
+          ADR-0032 mapping collapses (`api:2026-08-11:get_credit_notes_uid_allocations`).
+    relates_to: [ADR-0010, ADR-0014, ADR-0022, ADR-0033]
     vectors_dir: ledger/vectors/credit_note_allocated/
 
   # ══════════════════════════════════════════════════════════════════════════════════════════════
@@ -772,6 +787,23 @@ no_posting:
     reason: >-
       Determines that no tax leg exists. Nothing to post — but the REASON is carried, because
       "no tax" and "no tax BECAUSE" audit differently.
+
+  - event: EVT-BIL-007
+    reason: >-
+      **The money movement is `credit_note_allocated`'s, and there is exactly one of it.** Applying
+      credit held at one settlement point to an invoice at another is Dr 2050 / Cr 1200 — the same
+      posting as any allocation. What differs is only which node each leg is attributed to, and a
+      second posting for the same movement would double it.
+      What this event records is the **authorization**: who permitted the crossing and why. It is a
+      control fact, not a transaction, and ADR-0033 §4 is explicit that the control is managerial
+      rather than accounting — ASC 210-20-45-1 asks about parties, and within one legal entity there
+      is one counterparty, so GAAP requires nothing here at all.
+      ⚠️ It reaches the ledger for one reason: the attribution of each leg to a settlement point is
+      what makes per-department aging computable, and the posting rule for `credit_note_allocated`
+      must read `from_billed_to` / `to_billed_to` rather than assume both legs sit at the same node.
+      **Whether settlement point is a declared ledger DIMENSION or a document attribute is not
+      settled** — `ledger/dimensions.yaml` declares only `product_line` and `cost_type`, and ADR-0025
+      makes dimension obligation per-account. That is a real gap and it is tracked, not hidden.
 
 # ══════════════════════════════════════════════════════════════════════════════════════════════════
 # UNWRITTEN — in scope, nothing blocking them, not written yet. Each names its issue.

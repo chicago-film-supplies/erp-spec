@@ -58,12 +58,14 @@ events:
   - id: EVT-BIL-005
     name: CreditNoteIssued
     description: >-
-      A credit was raised against a customer. Unallocated on issue — allocation is its own event,
-      because one credit note may be applied across several invoices.
+      A credit was raised against a settlement point. Unallocated on issue — allocation is its own
+      event, because one credit note may be applied across several invoices.
+      It sits at the settlement point rather than the organization (ADR-0033 §3): a credit is
+      negative receivable and partitions the way the receivable does.
     producer: billing
     consumers: [ledger]
     terminal: false
-    carries: [credit_note_id, organization_ref, amount_minor, accounting_date]
+    carries: [credit_note_id, billed_to, amount_minor, accounting_date]
 
   - id: EVT-BIL-006
     name: CreditNoteAllocated
@@ -75,3 +77,22 @@ events:
     consumers: [ledger]
     terminal: false
     carries: [credit_note_ref, invoice_ref, amount_minor, accounting_date]
+
+  - id: EVT-BIL-007
+    name: CreditTransferredAcrossSettlementPoints
+    description: >-
+      Unallocated credit held at one settlement point was applied to an invoice addressed to a
+      DIFFERENT settlement point under the same organization (ADR-0033 §4). Carries an actor and a
+      reason, and appears on the ORIGIN node's statement as well as the destination's.
+      ⚠️ **This event is a MANAGEMENT control, not an accounting one, and the distinction is
+      load-bearing.** ASC 210-20-45-1 asks about parties: within one legal entity there is one
+      counterparty, so no setoff question arises and GAAP requires nothing here. SAP, NetSuite and
+      Odoo all clear across internal nodes without ceremony. It exists because the owner's
+      requirement runs both ways — "locations doesn't want to see what office owes", and Locations
+      must equally be able to see where its own overpayment went.
+      Applying credit ACROSS organizations is forbidden with no override — that IS the GAAP boundary,
+      and it needs a refund out and a payment in rather than an allocation.
+    producer: billing
+    consumers: [ledger]
+    terminal: false
+    carries: [credit_note_ref, from_billed_to, to_billed_to, invoice_ref, amount_minor, actor, reason, accounting_date]

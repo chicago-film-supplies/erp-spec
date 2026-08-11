@@ -11,18 +11,18 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 8 open | 29 answered of 37 · **0 with no owner or no decide-by** |
+| Open questions | 10 open | 30 answered of 40 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 12 | 1 open |
-| Decisions (ADR) | 32 | 17 in force · 13 proposed |
+| Decisions (ADR) | 33 | 17 in force · 14 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 2 | 0 without a scenario |
-| Inbox | 57 | 46 unpromoted |
+| Inbox | 59 | 48 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
-| Glossary terms | 26 | 0 still `TODO` |
+| Glossary terms | 27 | 0 still `TODO` |
 
 ## The bottleneck: undecided questions
 
-**8 of 37 still open**, soonest decide-by first.
+**10 of 40 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
@@ -33,7 +33,9 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-034` | Is `Transport` restored as a product line, now that the measurement it was dropped on tur… | alex | 2026-10-15 | `ADR-0020` `ADR-0031` |
 | `OQ-035` | Does CFS introduce a production-type classification — `studio | indie | corporate/commerc… | alex | 2026-10-15 | — |
 | `OQ-033` | Once the shipping specs are populated, which physical basis becomes allocation basis v2 —… | alex | 2026-12-15 | `ADR-0031` |
-| `OQ-037` | Does CFS want an ECONOMIC grouping of customers alongside ADR-0032's liability tree — "wh… | alex | 2026-12-15 | — |
+| `OQ-038` | Does CFS operate credit limits and credit holds in v2 — what triggers a hold, who overrid… | alex | 2026-12-15 | — |
+| `OQ-040` | Is `settlement_point` a declared LEDGER DIMENSION, or a document attribute the read side… | alex | 2026-12-15 | `ADR-0033` |
+| `OQ-039` | `organizations.tax_profile` carries two different concepts in one enum — who owes (applie… | alex | 2027-01-15 | — |
 
 Whether any of these dates has PASSED is `deno task validate`'s judgement — gate 7 fails on an open question past its decide-by. This file reads no clock and so cannot say.
 
@@ -65,7 +67,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 - `ADR-0024` — DuckDB is reached natively and server-side; client-side reporting is rejected
 - `ADR-0026` — The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time
 
-### Proposed (13)
+### Proposed (14)
 
 | ADR | Title | Review by | Blocked on |
 |---|---|---|---|
@@ -81,7 +83,8 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | `ADR-0029` | The ledger records un-allocated facts; allocation is a specified reporting act | 2026-10-01 | `OQ-006` `OQ-018` |
 | `ADR-0030` | Vehicle cost moves from operating expense into COGS, absorbed and unabsorbed | 2026-11-01 | `SPIKE-005` |
 | `ADR-0031` | The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy | 2026-11-01 | `OQ-006` `OQ-018` `OQ-031` `OQ-032` `OQ-033` |
-| `ADR-0032` | The customer tree is a liability tree; projects and departments are addressing beneath it | 2026-11-15 | `OQ-035` `OQ-036` `HOT-006` |
+| `ADR-0032` | The organization tree is a liability tree; projects and settlement points are addressing beneath it | 2026-11-15 | `OQ-035` `OQ-036` `OQ-038` `OQ-039` `HOT-006` |
+| `ADR-0033` | A document is addressed to exactly one node by a level-tagged reference, and unallocated credit sits at the settlement point | 2026-11-15 | `OQ-030` `OQ-038` `OQ-040` |
 
 ## Spikes
 
@@ -113,7 +116,7 @@ it is counted separately on purpose, and a milestone is not done because its che
 | `m3` | Ledger core | `m2` | 2 | 2 | — | — |
 | `m4` | All spikes closed by ADR | `m3` | 0 | 2 | — | 1 |
 | `m5` | Formal specs checking clean | `m4` | 1 | — | 2 | — |
-| `m6` | Migration field map complete | `m2` | 0 | — | 3 | — |
+| `m6` | Migration field map complete | `m2` | 0 | — | 4 | — |
 | `m7` | Walking skeleton defined | `m3` `m5` `m6` | 0 | — | 3 | — |
 | `spec-v1` | Tag spec-v1 | `m0` `m1` `m2` `m3` `m4` `m5` `m6` `m7` | 1 | — | 3 | 1 |
 
@@ -121,7 +124,7 @@ it is counted separately on purpose, and a milestone is not done because its che
 
 | Milestone | Criterion | Check | Measured |
 |---|---|---|---|
-| `m3` | Posting rules defined for every source document type. | `posting_rules_cover_events` | 27 ledger events, 0 in no bucket, 11 specified, 2 unwritten |
+| `m3` | Posting rules defined for every source document type. | `posting_rules_cover_events` | 28 ledger events, 0 in no bucket, 11 specified, 2 unwritten |
 | `m3` | Golden input->expected-transfer vectors exist for every posting rule,… | `vectors_cover_rules` | 44 vectors over 11 specified rules; 0 lack an accept or a reject; 2 rules unwritten |
 | `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 12 spikes, 9 open, 0 closed without naming an ADR |
 | `m4` | Every HOT- is resolved or has an ADR that consciously defers it with… | `hotspots_resolved` | 12 hotspots, 1 unresolved |

@@ -12,12 +12,16 @@ events:
   - id: EVT-ORD-001
     name: OrderPlaced
     description: >-
-      A customer order came into existence with its organization, destinations and items. Draft —
-      it reserves nothing and commits nothing.
+      An order came into existence, addressed to one node of the organization tree, with its
+      destinations and items. Draft — it reserves nothing and commits nothing.
+      `billed_to` is level-tagged (ADR-0033): it names a settlement point today, and the level is
+      recorded so project-level ordering is a value change rather than a re-keying. The liable
+      organization is derived by walking up, never carried separately — two references to the same
+      party is how they drift apart.
     producer: ordering
     consumers: [availability, billing]
     terminal: false
-    carries: [order_id, organization_ref, destination_refs, item_refs, placed_at]
+    carries: [order_id, billed_to, destination_refs, item_refs, placed_at]
 
   - id: EVT-ORD-002
     name: OrderConfirmed
