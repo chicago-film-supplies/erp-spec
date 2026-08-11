@@ -878,3 +878,95 @@ open_questions:
       Blocked in practice on **core#51**: `shipping.weight` is a bare `z.number()`, so `0` means both
       "weighs nothing" and "not yet weighed", and the precondition cannot be evaluated correctly
       until "unmeasured" is representable.
+
+  - id: OQ-035
+    question: >-
+      Does CFS introduce a production-type classification — `studio | indie |
+      corporate/commercial/industrial | event | student`, possibly splitting `studio` by budget tier —
+      and does it attach to the production, defaulted from the organization?
+    owner: alex
+    decide_by: 2026-10-15
+    blocks: []
+    status: open
+    notes: >-
+      Raised by the owner 2026-08-10. It answers a question `product_line` cannot: **which KIND of
+      production earns**. A commercial is short, intense and high-touch; a feature is long and
+      low-touch. Different margins, different working capital, different risk — and nothing in the
+      spec can currently slice by it.
+      **Surveyed before proposing** (CLAUDE.md → Accounting decisions):
+      `inbox/2026-08-10-survey-a-classification-is-snapshotted-at-posting-and-changed-by-a-named-realignment.md`.
+      The survey **reframes the question the owner asked.** "Posting dimension or joinable attribute?"
+      is not the axis: **not one of the six references joins to the master at report time.** All six
+      snapshot the classification onto the transaction. What divides them is what happens when the
+      master changes afterwards — and each pairs the snapshot with a NAMED retroactive operation
+      (SAP realignment; GAAP recast-and-disclose under ASC 280, deliberately renamed from "restate" by
+      ASU 2023-07 to keep it distinct from error correction; Odoo bulk journal-item edit). Xero has
+      none, which is why CFS's history cannot be re-cut today.
+      ⚠️ **"Joinable attribute" is the one option no reference supports.** The instinct behind it is
+      sound — you will mistype a production and want to fix it without a migration — but every system
+      meets that need with a realignment operation rather than a live join, because a live join cannot
+      be audited. Joining to a mutable order field only moves the silent restatement one hop.
+      **The org default is safe under this criterion**, as three snapshots each recording its
+      provenance: `org.default_production_type` → `order.production_type` (at order creation) →
+      `posting.production_type` (at posting). Changing the org's default reaches forwards only.
+      ⚠️ **This is the same SHAPE that failed on 2026-08-10** — a denormalized copy of a master
+      attribute — so the narrow lesson must be carried, not the broad one. The defect was not that a
+      denorm existed; it was that **nothing derived it**: two writers, one of which took the value
+      from the client on trust (api-cloudrun#473). A snapshot needs exactly one server-side writer,
+      must record what it derived from so a realignment can find the population, and must be measured
+      against the AUTHORITY rather than the copy.
+      **The value set needs measuring, not inventing.** The owner's revision — `studio | indie |
+      corporate/commercial/industrial | event | student`, with `studio` possibly splitting into
+      high-budget (TPS, 20th, Disney) and low-budget (Hallmark, Lifetime) — is a better fit than the
+      first draft, which had `tv` and `show` overlapping. The 286 organization names and the order
+      names carry enough signal to derive the real set; a budget-tier split in particular should be
+      checked against actual order values before it is declared, since "high budget" is an assertion
+      about the customer that the corpus can confirm or refute.
+      **Migration delta: nil, and for an unusual reason.** Xero's cap of 2 active tracking categories
+      is already fully consumed, so no production-type history exists in the incumbent to carry
+      across. The delta is that **the cap disappears** — an argument for ADR-0001 not previously made
+      in this form: the incumbent's binding constraint on management reporting is a hard product
+      limit, not a configuration choice.
+      Depends on OQ-036 for its grain: production type attaches to a PRODUCTION, and the production
+      layer does not exist as a first-class thing today — it is a substring inside
+      `organizations.name`.
+
+  - id: OQ-036
+    question: >-
+      How are a customer's company, its productions and its departments modelled, given that
+      settlement is per department and the current workaround duplicates the organization with a
+      name suffix?
+    owner: alex
+    decide_by: 2026-11-15
+    blocks: [OQ-035]
+    status: open
+    notes: >-
+      Raised by the owner 2026-08-10: invoices settle by department, and "locations doesn't want to
+      see what office or wardrobe owes". Measured the same day —
+      `inbox/2026-08-10-three-concepts-are-crammed-into-the-organization-name.md`,
+      `api:2026-08-10:db_organizations_query`, all 286 organizations.
+      **31 of 286 orgs are department clones across 11 parent companies.** `Netflix Productions, LLC`
+      is **10 records with no un-suffixed parent** — the customer as an entity does not exist in the
+      system, so total exposure to Netflix is unobtainable without a string match. Four delimiter
+      conventions are in use (` - `, `: `, ` / `, ` // `), all four within Netflix alone, so the
+      structure is not machine-readable even as a stopgap. One department is spelled two ways
+      (`Transportation`, `Transpo`).
+      **The data says three levels, not two.** The owner asked for departments on organizations;
+      `20th Television - Deli Boys - S2: Locations` is company + production + department at once.
+      The production layer is also where OQ-035's production type actually attaches.
+      **The requirement behind the workaround is real** — per-department AR balance, statement and
+      aging. What it costs: no customer-level credit exposure, no customer-level history (a repeat
+      customer reads as eleven new ones), and no stable migration key.
+      ⚠️ **A separate defect surfaced by the same query**: exact-duplicate organization names
+      (`Enlace Chicago`, `Free Spirit Media`, `Full Spectrum Features`, `Omnicom`, `Sound Off Films`,
+      each ×2) plus three records suffixed with a literal `(copy)`. `Sound Off Films` exists three
+      times. Not the same problem, but it lands in the same place at migration and it means
+      match-on-name is not a viable key.
+      **Needs its own six-reference survey before an ADR** — this is a customer-master and
+      AR-settlement question, not the classification question OQ-035 surveyed. SAP's **payer**
+      partner function is the most direct precedent ("who settles this", held separately from "who
+      bought"); NetSuite has customer sub-entities with consolidated or separate AR; Odoo has
+      `res.partner` child contacts typed `invoice`; **Xero has no answer at all, which is why the
+      suffix exists** — the absence is the measurement. GAAP should be checked for whether splitting
+      one customer into ten understates a major-customer concentration disclosable at the 10%
+      threshold (ASC 280-10-50-42).

@@ -56,7 +56,7 @@
           <outline text="[object Object]"/>
         </outline>
       </outline>
-      <outline text="Open questions (6 of 34 still open)" _note="The bottleneck. Each blocks what is listed under it.">
+      <outline text="Open questions (8 of 36 still open)" _note="The bottleneck. Each blocks what is listed under it.">
         <outline text="OQ-001 — Are fulfillment legs first-class recorded events with their own identity, or derived from the order…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-007"/>
           <outline text="blocks ADR-0011"/>
@@ -167,6 +167,10 @@
         </outline>
         <outline text="OQ-033 — Once the shipping specs are populated, which physical basis becomes allocation basis v2 — weight, c…" _note="owner: alex · decide by: 2026-12-15">
           <outline text="blocks ADR-0031"/>
+        </outline>
+        <outline text="OQ-035 — Does CFS introduce a production-type classification — `studio | indie | corporate/commercial/indust…" _note="owner: alex · decide by: 2026-10-15"/>
+        <outline text="OQ-036 — How are a customer's company, its productions and its departments modelled, given that settlement i…" _note="owner: alex · decide by: 2026-11-15">
+          <outline text="blocks OQ-035"/>
         </outline>
       </outline>
       <outline text="Conflicts (1 open)">
@@ -414,7 +418,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (41 unpromoted of 52)" _note="no drops pending">
+      <outline text="Capture (43 unpromoted of 54)" _note="no drops pending">
         <outline text="Actor per leg, clock in/out per stop, crew size per trip" _note="inbox/2026-08-08-actor-and-clock-per-leg.md"/>
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
@@ -455,7 +459,9 @@
         <outline text="The 28.8% untracked figure is three populations, and only 4.0% is unambiguously undecided" _note="inbox/2026-08-09-untracked-revenue-decomposes-into-three-populations.md"/>
         <outline text="The untracked 28.8% is 51.8% denormalisation failure and 0.1% genuinely undecided — so &quot;nobody deci…" _note="inbox/2026-08-09-untracked-revenue-is-mostly-a-denorm-failure-not-an-undecided-dimension.md"/>
         <outline text="Correction — &quot;0.141%, not 28.7%&quot; compares a share of untracked revenue against a share of total rev…" _note="inbox/2026-08-10-correction-the-nobody-decided-share-is-quoted-against-two-different-bases.md"/>
+        <outline text="Survey — all six references snapshot a classification onto the posting; none joins to the master at…" _note="inbox/2026-08-10-survey-a-classification-is-snapshotted-at-posting-and-changed-by-a-named-realignment.md"/>
         <outline text="The untracked-revenue denorm is repaired — 28.7% is now 15.00%, and &quot;nobody decided&quot; was 0.141%" _note="inbox/2026-08-10-the-untracked-revenue-denorm-is-repaired-and-28-7-percent-is-now-15-percent.md"/>
+        <outline text="Company, production and department are all crammed into organizations.name — 31 of 286 orgs are dep…" _note="inbox/2026-08-10-three-concepts-are-crammed-into-the-organization-name.md"/>
       </outline>
     </outline>
   </body>
