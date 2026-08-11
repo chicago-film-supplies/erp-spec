@@ -18,7 +18,7 @@ is `deno task validate`'s judgement, not this file's.
 | Requirements | 2 | 0 without a scenario |
 | Inbox | 57 | 46 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
-| Glossary terms | 23 | 0 still `TODO` |
+| Glossary terms | 26 | 0 still `TODO` |
 
 ## The bottleneck: undecided questions
 

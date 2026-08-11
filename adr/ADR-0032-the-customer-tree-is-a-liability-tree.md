@@ -115,9 +115,32 @@ balance per customer. Neither is derived on demand from the other by string matc
     sum of its settlement points, per invoice and per settlement — the same assertion ADR-0020 makes
     about amounts, on a different axis. Xero's warning about the duplicate-contact route is
     precisely that it double-counts, so this is a measured hazard rather than a theoretical one.
+- ⚠️ **Two migrations now cross the same closed periods, and HOT-006 covers only one of them.**
+  HOT-006 asked "import defective lines or restate?" and ADR-0020 answered it — on the **line
+  dimension** axis. This ADR re-keys **document identity** on the same corpus, and ~90% of it sits
+  behind the 2025-12-31 lock. The two are orthogonal in what they touch and identical in what they
+  promise: ADR-0020 says the restatement must not alter any amount, this says AR balances must not
+  move. **Neither assertion can be verified while the other is in flight**, so they need a stated
+  order and each needs its own before/after proof. Not a contradiction, and not covered by HOT-006 —
+  a sequencing obligation this ADR creates and m6 has to carry.
 - **This unblocks OQ-035.** Production type attaches to the project, and the value-set measurement
   needs a stable key to group by — impossible today, when `20th Television` is spread across six
   records.
+- ⚠️ **`contexts/ordering/entities/order.yaml` contradicts this and must change with it.** It
+  carries `organization_ref: { type: organization_id, required: true }` — a single flat reference
+  written under the pre-tree model. Under this ADR a document is addressed to a **settlement point**
+  and its customer is derived by walking up, so the reference changes meaning as well as target. The
+  same applies to `invoices.organization`. Not edited yet: this ADR is `proposed`, and rewriting
+  entity files on the strength of an unaccepted decision is how a spec ends up describing a system
+  nobody agreed to. **It becomes required work the moment this is accepted**, and it is recorded in
+  `migration/field-map.yaml`.
+- **Both roll-ups must be independently computable, and neither may be the other's oracle.** The
+  consolidated customer balance and the per-settlement-point aging are the same money read two ways,
+  so the natural implementation derives one from the other — and then a bug in the tree walk is
+  invisible, because the check agrees with itself. This repo's standing rule applies: pair the
+  fixed-point check with a property that holds independently. The independent property here is that
+  the sum of settlement-point balances equals the sum of open invoice amounts addressed to them,
+  computed without traversing the tree at all.
 
 ## Open question this leaves
 

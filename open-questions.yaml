@@ -1083,6 +1083,25 @@ open_questions:
       be answered by walking the liability tree. Those are different questions with different
       correct answers, and the whole point of separating them is that neither silently answers the
       other.
-      Depends on nothing; ADR-0032 can be accepted without it. The corpus can inform it — the
-      single-purpose LLC population is measurable and its share of revenue would say how much the
-      question is worth.
+      Depends on nothing; ADR-0032 can be accepted without it.
+      ✅ **Sized 2026-08-10 by reading all 286 organization names, and it is SMALLER than ADR-0032
+      implies.** The liability tree already captures the two largest studio customers, because their
+      productions are **not** separately incorporated — every one of the 10 `Netflix Productions,
+      LLC` records names that same legal entity, and every one of the 6 `20th Television` records
+      names that one. Departments and productions there are internal divisions of a single LLC, so
+      the liability tree groups them exactly right and loses nothing.
+      **The divergence is confined to genuinely separate LLCs**, of which ~45–50 of 286 carry
+      single-purpose production names (`Enemies Movie, LLC`, `Whale Shark Movie LLC`, `GODSHOT MOVIE
+      LLC`, `Freaky Monday LLC`, `First Snow LLC`, `Big Time Movie LLC`, …). ⚠️ **That count is a
+      name-pattern heuristic and is not evidence of anything by itself** — it does not distinguish a
+      genuine indie, where there IS no parent and the liability tree is simply correct, from a studio
+      production wearing its own LLC, where the two trees diverge.
+      **So the question reduces to one the owner can answer in a sentence and no query can:** of the
+      single-purpose production LLCs, how many are studio productions in disguise rather than
+      genuine independents? If most are true indies, this OQ is worth little and should be **dropped**
+      rather than answered — the liability tree would already be giving the right answer for
+      substantially all revenue.
+      ⚠️ A related identity defect found in the same read: **`20th Television` and `Twentieth
+      Television` are one legal entity spelled two ways**, alongside the 5 exact-duplicate pairs and
+      3 `(copy)` records already recorded. That is an ADR-0032 migration problem, not an OQ-037 one,
+      and it is captured in `migration/field-map.yaml`.

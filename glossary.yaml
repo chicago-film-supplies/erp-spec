@@ -307,3 +307,61 @@ terms:
       same revenue account as Crew labour and Delivery services — while `Shipping` books to its
       own COA 4150. Per OQ-006 the person-day it absorbs is the ACTUAL cost; the premium the
       customer pays for a long haul is margin, not cost.
+
+  # ── Customer structure (ADR-0032) ───────────────────────────────────────────
+  - term: customer
+    definition: >-
+      The LEGAL ENTITY that owes CFS money — the party that could be sued for an unpaid invoice.
+      The root of the customer tree, and the only level of it that carries liability. Credit
+      exposure, credit limit, trading history and tax profile attach here and nowhere else.
+    aliases: [legal entity, liable party, account]
+    contexts: [billing, ordering]
+    source: adr/ADR-0032-the-customer-tree-is-a-liability-tree.md
+    open_questions: [OQ-037]
+    notes: >-
+      ⚠️ **Not a synonym for `organization`**, which is the CURRENT system's flat record and conflates
+      all three levels below into one row plus a name suffix — 31 of 286 such records are department
+      clones and `Netflix Productions, LLC` is 10 of them with no parent
+      (`api:2026-08-10:db_organizations_query`).
+      Because the tree is a LIABILITY tree, a separately-incorporated production is its own customer
+      rather than a child of the studio behind it. `Pops, Puffs, Pebbles Canada LTD` and
+      `Pops, Puffs, Pebbles, LLC` are two customers. The economic roll-up that would join them is a
+      different question — OQ-037.
+
+  - term: project
+    definition: >-
+      A production. The middle level of the customer tree, and the cost object a job attaches to: it
+      has a start and an end, it staffs up and disperses, and it is where the production type is
+      carried. It carries NO liability — the customer above it does.
+    aliases: [production, show, job]
+    contexts: [billing, ordering, ledger]
+    source: adr/ADR-0032-the-customer-tree-is-a-liability-tree.md
+    open_questions: [OQ-035]
+    notes: >-
+      Named `project` rather than `production` because every commercial reference calls this level a
+      project or job and gives it the same role — SAP WBS elements, NetSuite Projects (literally
+      subcustomers), Sage Intacct's project dimension, Odoo analytic accounts
+      (`inbox/2026-08-10-survey-a-department-is-a-settlement-point-and-a-production-is-a-project.md`).
+      A customer with exactly one project is the general shape with N=1, not a special case — most of
+      the corpus, and it must not force an artificial record.
+
+  - term: settlement point
+    definition: >-
+      A department on a project — the leaf of the customer tree and the thing an invoice is actually
+      addressed to and settled by. It holds its own AR balance, statement, aging and **its own
+      contacts**. It carries no liability; it partitions the receivable of the customer above it.
+    aliases: [department, bill-to, payer]
+    contexts: [billing]
+    source: adr/ADR-0032-the-customer-tree-is-a-liability-tree.md
+    notes: >-
+      It is `(project × department)` and NOT `(customer × department)`, because departments staff up
+      per project — the locations team on one production is different people from the locations team
+      on another for the same studio at the same time (owner, 2026-08-10). `Saturn Return: Locations`
+      and `Big Red: Locations` share a name and nothing else.
+      ⚠️ **Contacts belong here, not on the customer.** The current system gets this right by
+      accident, because each department clone is an `organization` and `contacts[]` is embedded on
+      it. A migration that pools contacts upward reproduces the failure Xero users report of contact
+      groups — reminders going to every address on the record rather than the one the invoice went
+      to.
+      SAP's `payer` partner function is the closest existing analogue: "the entity responsible for
+      making the payment", determined per document and held separately from who bought.

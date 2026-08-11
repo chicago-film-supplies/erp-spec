@@ -97,3 +97,84 @@ mappings:
     reason: >-
       Rates stay 4dp decimals and do NOT get a _minor suffix. They sit adjacent to amounts in four
       schemas and a sweep that converts every money field is how the beta.117 regression happened.
+
+  # ── organizations → the customer tree (ADR-0032) ─────────────────────────────
+  # The largest delta found so far, and a different KIND from the rest of this file: a re-keying
+  # rather than a re-dimensioning. ADR-0020 restates dimensions on lines; this changes identity.
+
+  - from: organizations (the record)
+    to: customer | project | settlement_point
+    disposition: defective
+    reason: >-
+      One flat record carries all three levels of ADR-0032's tree. Measured 2026-08-10
+      (`api:2026-08-10:db_organizations_query`, all 286): 31 are department clones across 11 parent
+      companies, and `Netflix Productions, LLC` is **10 records with no un-suffixed parent** — the
+      customer as an entity does not exist, so total exposure to it needs a string match.
+      ⚠️ **The defect is FLATNESS, not duplication.** The clones are not copies; each is a genuinely
+      distinct settling unit with its own receivable and coordinator, and they are close to the
+      correct LEAVES already. The migration adds a root and a middle — record count barely falls, so
+      "10 become 1" is the wrong target and a migration measured by record reduction is measuring the
+      wrong thing.
+    blocked_by: [OQ-036, OQ-037]
+
+  - from: organizations.name
+    to: customer.name + project.name + settlement_point.name
+    disposition: defective
+    reason: >-
+      Three concepts in one string, with **four delimiter conventions** in use — space-hyphen-space,
+      colon-space, space-slash-space, space-double-slash-space — all four inside `Netflix
+      Productions, LLC` alone. `20th Television - Deli Boys - S2: Locations` is company + production
+      + department at once.
+      **The split must be AUTHORED and committed, not parsed.** A parse is unreliable on four
+      delimiters, and it cannot fix `Transportation` / `Transpo` (one department spelled two ways) or
+      `20th Television` / `Twentieth Television` (one legal entity spelled two ways).
+      ⚠️ **Match-on-name is not a viable migration key** independently of the split: 5 exact-duplicate
+      name pairs exist (`Enlace Chicago`, `Free Spirit Media`, `Full Spectrum Features`, `Omnicom`,
+      `Sound Off Films`) plus 3 records suffixed with a literal `(copy)`, so `Sound Off Films` occurs
+      three times.
+
+  - from: organizations.contacts[]
+    to: settlement_point.contacts[]
+    disposition: map
+    reason: >-
+      ⚠️ **Maps DOWN to the leaf, never up to the customer — and the current system already has this
+      right.** Because each department clone IS an organization and `contacts[]` is embedded, today's
+      contacts already sit on the settling unit. Owner, 2026-08-10: "every project and/or dept will
+      have its own set of contacts."
+      A migration that pools them onto the customer **destroys a working property to fix a broken
+      one**, and reproduces exactly the failure Xero users report of the contact-group workaround —
+      reminders going to every address on the record rather than the one the invoice went to. A
+      statement for `Saturn Return: Locations` would dun the Big Red office coordinator.
+      `query_by_contacts` follows the same rule.
+
+  - from: organizations.{xero_id,crms_id}
+    to: null
+    disposition: drop
+    reason: >-
+      Foreign identifiers — ADR-0009 forbids them entering the domain model. Usable at migration time
+      to correlate records, then discarded. ⚠️ They are NOT a shortcut around the authored mapping
+      above: a shared `xero_id` proves two CFS records point at one Xero contact, which is the
+      duplicate-contact workaround Xero itself warns double-counts the receivable — it does not
+      establish which of ADR-0032's three levels either record belongs to.
+
+  - from: organizations.tax_profile
+    to: customer.tax_profile
+    disposition: map
+    reason: >-
+      Maps UP to the legal entity, opposite to `contacts[]`. Tax status is a property of the party
+      that owes, not of the department being invoiced. ⚠️ Requires asserting the value is identical
+      across every clone of one customer before collapsing; a disagreement is a finding, not a
+      merge conflict to resolve arbitrarily.
+
+  - from: "invoices.organization / orders.organization_ref"
+    to: "*.settlement_point_ref"
+    disposition: defective
+    reason: >-
+      A single flat reference to the pre-tree `organizations` record. Under ADR-0032 a document is
+      addressed to a **settlement point**, and its customer is derived by walking up — so this
+      reference changes meaning as well as target.
+      ⚠️ **AR balances must not move.** The consolidated customer balance must be proven equal to the
+      sum of its settlement points, per invoice and per settlement — ADR-0020's amount assertion on a
+      different axis. Xero's own warning about the duplicate-contact route is that it double-counts,
+      so this is a measured hazard rather than a theoretical one.
+    blocked_by: [OQ-036]
