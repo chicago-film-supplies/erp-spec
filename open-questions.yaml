@@ -997,14 +997,39 @@ open_questions:
       contact groups filter but produce no consolidated statement, and the duplicate-contact route is
       explicitly warned against because it double-counts the receivable and payments on one copy do
       not clear the other.
-      ⚠️ **The survey overturns this question's own "three levels" framing. It is TWO AXES, not a
-      tree.** `20th Television - Deli Boys - S2: Locations` is customer (`20th Television`) + PROJECT
-      (`Deli Boys S2`) + settlement point (`Locations`). Every serious reference has a separate
-      project/job concept beside the customer hierarchy — SAP WBS, NetSuite Projects, Intacct's
-      project dimension, Odoo analytic accounts. **A production is a project, not a level of the
-      customer tree**, and modelling it as one is what forces the explosion: 2 productions × 5
-      departments = the 10 Netflix records. Under two axes Netflix is 1 customer + 2 projects + 5
-      settlement points — 8 records that compose rather than 10 that do not.
+      **A production is a PROJECT** — a dimension-bearing cost object in all four commercial
+      references (SAP WBS, NetSuite Projects, Intacct's project dimension, Odoo analytic accounts) —
+      and that is where OQ-035's production type attaches.
+      ⚠️ **CORRECTED 2026-08-10, same day** —
+      `inbox/2026-08-10-correction-the-settlement-point-is-project-x-department-not-customer-x-department.md`.
+      The survey first concluded this was "two axes, not a tree", and computed Netflix as 1 customer
+      + 2 projects + 5 settlement points = "8 records that compose". **The axes do not factor and
+      that arithmetic is wrong.** Owner, 2026-08-10: "these projects staff up entirely separately —
+      the locations team on one project is different from the team on another even if they're both
+      20th at the same time", and "every project and/or dept will have its own set of contacts".
+      `Saturn Return: Locations` and `Big Red: Locations` share a department NAME and nothing else.
+      **A settlement point is (project × department), subordinate to the project, not to the
+      customer.** NetSuite supports this natively — "projects are tracked as subcustomers", and the
+      hierarchy is a parent plus its subcustomers plus THEIR subcustomers, so customer → job →
+      department is a native three-level chain with balances payable at any level. SAP determines
+      partners **per document**, header and item, overriding the customer-master default.
+      ⚠️ **The diagnosis changes with it: the defect is FLATNESS, not duplication.** The 31 records
+      are not clones — they are close to the correct LEAVES already, each with its own receivable and
+      coordinator. What is missing is the root and the middle. "10 records become 1" was the wrong
+      target; record count barely falls, and what appears is the ability to ask a question at the
+      top.
+      ⚠️ **Migration trap: contacts must NOT be consolidated.** `organizations.contacts[]` is
+      embedded per organization, so because each department clone IS an organization, the current
+      model accidentally gets contacts right. Merging to one customer pools them — exactly the
+      failure Xero users report of contact groups, where reminders go to every address on the record
+      rather than the one the invoice went to. The settlement point must remain the contact-bearing
+      entity.
+      **Open sub-question this raises**: much of the corpus is single-purpose production LLCs
+      (`Enemies Movie, LLC`, `Whale Shark Movie LLC`, `GODSHOT MOVIE LLC`), where customer and
+      project are the same entity and the credit risk sits on the LLC rather than any studio behind
+      it. So "roll up to the parent for credit exposure" may be wrong for the indie half. **Does the
+      hierarchy express LEGAL LIABILITY or COMMERCIAL RELATIONSHIP?** They are not the same tree, and
+      SAP models them as different partner functions precisely for that reason.
       **Migration delta is real and is the largest found so far** — a re-keying, not a
       re-dimensioning. The 10→1+N+M mapping must be authored and committed (ADR-0009 fences foreign
       ids out, four delimiter conventions make a parse unreliable, and `Transportation`/`Transpo` is

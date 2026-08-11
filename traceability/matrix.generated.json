@@ -5,7 +5,7 @@
     "adrs": 31,
     "adrs_accepted": 17,
     "events": 36,
-    "inbox": 56,
+    "inbox": 57,
     "inbox_promoted": 11
   },
   "requirements": [
@@ -115,6 +115,7 @@
       "inbox/2026-08-09-untracked-revenue-decomposes-into-three-populations.md",
       "inbox/2026-08-09-untracked-revenue-is-mostly-a-denorm-failure-not-an-undecided-dimension.md",
       "inbox/2026-08-10-correction-the-nobody-decided-share-is-quoted-against-two-different-bases.md",
+      "inbox/2026-08-10-correction-the-settlement-point-is-project-x-department-not-customer-x-department.md",
       "inbox/2026-08-10-survey-a-classification-is-snapshotted-at-posting-and-changed-by-a-named-realignment.md",
       "inbox/2026-08-10-survey-a-department-is-a-settlement-point-and-a-production-is-a-project.md",
       "inbox/2026-08-10-the-untracked-revenue-denorm-is-repaired-and-28-7-percent-is-now-15-percent.md",
