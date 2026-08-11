@@ -122,3 +122,4 @@ Accepted and not superseded, as of the last `deno task gen`.
 | [ADR-0029](ADR-0029-the-ledger-records-unallocated-facts.md) | The ledger records un-allocated facts; allocation is a specified reporting act | 2026-10-01 | OQ-006, OQ-018 |
 | [ADR-0030](ADR-0030-vehicle-cost-moves-into-cogs.md) | Vehicle cost moves from operating expense into COGS, absorbed and unabsorbed | 2026-11-01 | SPIKE-005 |
 | [ADR-0031](ADR-0031-allocation-basis-is-goods-revenue-on-the-causal-order.md) | The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy | 2026-11-01 | OQ-006, OQ-018, OQ-031, OQ-032, OQ-033 |
+| [ADR-0032](ADR-0032-the-customer-tree-is-a-liability-tree.md) | The customer tree is a liability tree; projects and departments are addressing beneath it | 2026-11-15 | OQ-035, OQ-036, HOT-006 |

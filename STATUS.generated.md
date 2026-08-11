@@ -11,9 +11,9 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 8 open | 28 answered of 36 · **0 with no owner or no decide-by** |
+| Open questions | 8 open | 29 answered of 37 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 12 | 1 open |
-| Decisions (ADR) | 31 | 17 in force · 12 proposed |
+| Decisions (ADR) | 32 | 17 in force · 13 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 2 | 0 without a scenario |
 | Inbox | 57 | 46 unpromoted |
@@ -22,7 +22,7 @@ is `deno task validate`'s judgement, not this file's.
 
 ## The bottleneck: undecided questions
 
-**8 of 36 still open**, soonest decide-by first.
+**8 of 37 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
@@ -32,8 +32,8 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-032` | Does `Distance Charge` belong on 4110, given that 4110 is defined as a premium nobody per… | alex | 2026-10-15 | `ADR-0031` |
 | `OQ-034` | Is `Transport` restored as a product line, now that the measurement it was dropped on tur… | alex | 2026-10-15 | `ADR-0020` `ADR-0031` |
 | `OQ-035` | Does CFS introduce a production-type classification — `studio | indie | corporate/commerc… | alex | 2026-10-15 | — |
-| `OQ-036` | How are a customer's company, its productions and its departments modelled, given that se… | alex | 2026-11-15 | `OQ-035` |
 | `OQ-033` | Once the shipping specs are populated, which physical basis becomes allocation basis v2 —… | alex | 2026-12-15 | `ADR-0031` |
+| `OQ-037` | Does CFS want an ECONOMIC grouping of customers alongside ADR-0032's liability tree — "wh… | alex | 2026-12-15 | — |
 
 Whether any of these dates has PASSED is `deno task validate`'s judgement — gate 7 fails on an open question past its decide-by. This file reads no clock and so cannot say.
 
@@ -65,7 +65,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 - `ADR-0024` — DuckDB is reached natively and server-side; client-side reporting is rejected
 - `ADR-0026` — The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time
 
-### Proposed (12)
+### Proposed (13)
 
 | ADR | Title | Review by | Blocked on |
 |---|---|---|---|
@@ -81,6 +81,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | `ADR-0029` | The ledger records un-allocated facts; allocation is a specified reporting act | 2026-10-01 | `OQ-006` `OQ-018` |
 | `ADR-0030` | Vehicle cost moves from operating expense into COGS, absorbed and unabsorbed | 2026-11-01 | `SPIKE-005` |
 | `ADR-0031` | The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy | 2026-11-01 | `OQ-006` `OQ-018` `OQ-031` `OQ-032` `OQ-033` |
+| `ADR-0032` | The customer tree is a liability tree; projects and departments are addressing beneath it | 2026-11-15 | `OQ-035` `OQ-036` `HOT-006` |
 
 ## Spikes
 

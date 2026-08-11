@@ -957,7 +957,17 @@ open_questions:
     owner: alex
     decide_by: 2026-11-15
     blocks: [OQ-035]
-    status: open
+    status: answered
+    answer: >-
+      Three levels — customer (the LEGAL ENTITY) → project (production) → settlement point
+      (department) — where **the tree is determined by legal liability**: a node sits under a parent
+      only where that parent is legally liable for the child's debts. Projects and settlement points
+      are addressing beneath the liable entity and do not change who owes. Owner, 2026-08-10: "the
+      tree does mean liability." Drafted as ADR-0032 (proposed).
+      ⚠️ Direct consequence: **a separately-incorporated production is its own customer, not a
+      child.** `Pops, Puffs, Pebbles Canada LTD` and `Pops, Puffs, Pebbles, LLC` are two customers;
+      the ~15 single-purpose production LLCs are roots with no parent however obvious the studio
+      behind them. The tree therefore cannot answer economic concentration — OQ-037.
     notes: >-
       Raised by the owner 2026-08-10: invoices settle by department, and "locations doesn't want to
       see what office or wardrobe owes". Measured the same day —
@@ -1037,3 +1047,42 @@ open_questions:
       pairs plus 3 literal `(copy)` records. ⚠️ **AR balances must not move** — the consolidated
       balance must be proven equal to the sum of the parts, per invoice and per settlement, which is
       ADR-0020's amount assertion applied to a different axis.
+
+  - id: OQ-037
+    question: >-
+      Does CFS want an ECONOMIC grouping of customers alongside ADR-0032's liability tree — "which
+      studios do we actually depend on" — and if so, what is it keyed on and how is it kept from
+      contaminating the liability tree?
+    owner: alex
+    decide_by: 2026-12-15
+    blocks: []
+    status: open
+    notes: >-
+      Left open deliberately by ADR-0032 rather than decided with it, because the mechanism differs
+      by answer and because it must not be allowed to corrupt the tree collections depends on.
+      **ADR-0032 chose liability, and liability splits things economics would join.**
+      `Pops, Puffs, Pebbles Canada LTD` and `Pops, Puffs, Pebbles, LLC` are one production and two
+      legal entities, so two customers. The ~15 single-purpose production LLCs — `Enemies Movie,
+      LLC`, `Whale Shark Movie LLC`, `GODSHOT MOVIE LLC`, `Freaky Monday LLC`, `First Snow LLC` — are
+      roots with no parent, however obvious the studio behind them. That is CORRECT for credit and
+      collection and WRONG for "which studios do we actually depend on".
+      **GAAP asks the economic question, not the liability one.** ASC 280-10-50-42 defines one
+      customer by **common control** for the 10%-of-revenue major-customer disclosure. It binds
+      public entities, so it does not oblige CFS — but it is evidence that the economic roll-up is
+      the one a reader of financial statements is assumed to want, and it is a real management
+      question regardless of who is required to publish it.
+      Three shapes to choose between, and they are not equivalent:
+      · **a many-to-one tag** on the customer — cheapest, no second hierarchy to maintain, but
+        nothing enforces that a customer has exactly one economic owner;
+      · **a second tree** — expressive, and two hierarchies over one entity set is a known
+        maintenance hazard;
+      · **a report-time grouping** — no stored structure at all, defined in the reporting layer,
+        which keeps the liability tree provably uncontaminated but leaves the grouping unversioned.
+      ⚠️ **Whatever is chosen must not be reachable from the liability tree**, in either direction. A
+      credit hold must never propagate along an economic edge, and a concentration report must never
+      be answered by walking the liability tree. Those are different questions with different
+      correct answers, and the whole point of separating them is that neither silently answers the
+      other.
+      Depends on nothing; ADR-0032 can be accepted without it. The corpus can inform it — the
+      single-purpose LLC population is measurable and its share of revenue would say how much the
+      question is worth.
