@@ -930,6 +930,24 @@ open_questions:
       Depends on OQ-036 for its grain: production type attaches to a PRODUCTION, and the production
       layer does not exist as a first-class thing today — it is a substring inside
       `organizations.name`.
+      ✅ **OQ-036's survey named that grain, 2026-08-10: a production is a PROJECT** — a
+      dimension-bearing cost object in all four commercial references (SAP WBS, NetSuite Projects,
+      Intacct's project dimension, Odoo analytic accounts) — not a level of the customer tree.
+      Production type therefore attaches to the project, and the `org.default → order → posting`
+      chain above becomes `org.default → project → posting`.
+      ⚠️ **Do not attach it to a customer clone**, which is the only shape available today. That is
+      the wrong axis and would inherit the 2026-08-10 denormalization trap in a new costume.
+      **The value set is still unmeasured, and the owner's own background suggests the proposed cut
+      may be wrong** —
+      `inbox/2026-08-10-what-actually-separates-a-low-budget-studio-from-an-indie.md`. The tier split
+      is motivated by duration (3–6 weeks), spend, and delivery-vs-pickup; low-budget studio is said
+      to resemble indie on all three. If that holds, the real boundary is `high-budget studio` vs
+      everything else and `studio` is doing no work as a category. One discriminator is already
+      half-answered against it: 55.92% of revenue is customer-collecting both ways corpus-wide
+      (HOT-002), so "prefers in-store pickup" is near the corpus norm rather than a tier marker.
+      **Measure before declaring the set** — a category nothing distinguishes in the data reports as
+      a bucket while saying nothing, which is what retired `Other`. The measurement is itself blocked
+      on OQ-036, because grouping by customer today measures the naming convention.
 
   - id: OQ-036
     question: >-
@@ -962,11 +980,35 @@ open_questions:
       each ×2) plus three records suffixed with a literal `(copy)`. `Sound Off Films` exists three
       times. Not the same problem, but it lands in the same place at migration and it means
       match-on-name is not a viable key.
-      **Needs its own six-reference survey before an ADR** — this is a customer-master and
-      AR-settlement question, not the classification question OQ-035 surveyed. SAP's **payer**
-      partner function is the most direct precedent ("who settles this", held separately from "who
-      bought"); NetSuite has customer sub-entities with consolidated or separate AR; Odoo has
-      `res.partner` child contacts typed `invoice`; **Xero has no answer at all, which is why the
-      suffix exists** — the absence is the measurement. GAAP should be checked for whether splitting
-      one customer into ten understates a major-customer concentration disclosable at the 10%
-      threshold (ASC 280-10-50-42).
+      ✅ **Survey run 2026-08-10** —
+      `inbox/2026-08-10-survey-a-department-is-a-settlement-point-and-a-production-is-a-project.md`.
+      **CRITERION: separate settlement is an ADDRESSING concern, not an IDENTITY concern.** Every
+      reference but Xero keeps ONE customer identity and hangs N settlement points off it; not one
+      creates a second customer. SAP uses partner functions (sold-to / bill-to / **payer**), NetSuite
+      subcustomers with Consolidated Payments — its A/R aging shows the un-consolidated balance per
+      subcustomer AND the hierarchy total, which is exactly the both-views requirement — Intacct
+      parent-child "National Accounts", Odoo `res.partner` children typed `invoice`. GAAP defines one
+      customer by **common control** (ASC 280-10-50-42; binds public entities only, so cited for the
+      criterion and not as an obligation on CFS).
+      Identity carries credit exposure, trading history, pricing inheritance and concentration.
+      Settlement carries the invoice, statement, aging bucket and dunning email. Conflate them and
+      you get one or the other — CFS has settlement and has given up identity.
+      **CFS's workaround is the documented XERO workaround, and its costs are known upstream**:
+      contact groups filter but produce no consolidated statement, and the duplicate-contact route is
+      explicitly warned against because it double-counts the receivable and payments on one copy do
+      not clear the other.
+      ⚠️ **The survey overturns this question's own "three levels" framing. It is TWO AXES, not a
+      tree.** `20th Television - Deli Boys - S2: Locations` is customer (`20th Television`) + PROJECT
+      (`Deli Boys S2`) + settlement point (`Locations`). Every serious reference has a separate
+      project/job concept beside the customer hierarchy — SAP WBS, NetSuite Projects, Intacct's
+      project dimension, Odoo analytic accounts. **A production is a project, not a level of the
+      customer tree**, and modelling it as one is what forces the explosion: 2 productions × 5
+      departments = the 10 Netflix records. Under two axes Netflix is 1 customer + 2 projects + 5
+      settlement points — 8 records that compose rather than 10 that do not.
+      **Migration delta is real and is the largest found so far** — a re-keying, not a
+      re-dimensioning. The 10→1+N+M mapping must be authored and committed (ADR-0009 fences foreign
+      ids out, four delimiter conventions make a parse unreliable, and `Transportation`/`Transpo` is
+      one department spelled two ways). Match-on-name is independently unusable: 5 exact-duplicate
+      pairs plus 3 literal `(copy)` records. ⚠️ **AR balances must not move** — the consolidated
+      balance must be proven equal to the sum of the parts, per invoice and per settlement, which is
+      ADR-0020's amount assertion applied to a different axis.

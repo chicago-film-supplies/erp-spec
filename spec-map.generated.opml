@@ -418,7 +418,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (43 unpromoted of 54)" _note="no drops pending">
+      <outline text="Capture (45 unpromoted of 56)" _note="no drops pending">
         <outline text="Actor per leg, clock in/out per stop, crew size per trip" _note="inbox/2026-08-08-actor-and-clock-per-leg.md"/>
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
@@ -460,8 +460,10 @@
         <outline text="The untracked 28.8% is 51.8% denormalisation failure and 0.1% genuinely undecided — so &quot;nobody deci…" _note="inbox/2026-08-09-untracked-revenue-is-mostly-a-denorm-failure-not-an-undecided-dimension.md"/>
         <outline text="Correction — &quot;0.141%, not 28.7%&quot; compares a share of untracked revenue against a share of total rev…" _note="inbox/2026-08-10-correction-the-nobody-decided-share-is-quoted-against-two-different-bases.md"/>
         <outline text="Survey — all six references snapshot a classification onto the posting; none joins to the master at…" _note="inbox/2026-08-10-survey-a-classification-is-snapshotted-at-posting-and-changed-by-a-named-realignment.md"/>
+        <outline text="Survey — every reference but Xero keeps ONE customer identity with N settlement points, and puts th…" _note="inbox/2026-08-10-survey-a-department-is-a-settlement-point-and-a-production-is-a-project.md"/>
         <outline text="The untracked-revenue denorm is repaired — 28.7% is now 15.00%, and &quot;nobody decided&quot; was 0.141%" _note="inbox/2026-08-10-the-untracked-revenue-denorm-is-repaired-and-28-7-percent-is-now-15-percent.md"/>
         <outline text="Company, production and department are all crammed into organizations.name — 31 of 286 orgs are dep…" _note="inbox/2026-08-10-three-concepts-are-crammed-into-the-organization-name.md"/>
+        <outline text="The studio budget-tier split is motivated by duration, spend and delivery-vs-pickup — and low-budge…" _note="inbox/2026-08-10-what-actually-separates-a-low-budget-studio-from-an-indie.md"/>
       </outline>
     </outline>
   </body>
