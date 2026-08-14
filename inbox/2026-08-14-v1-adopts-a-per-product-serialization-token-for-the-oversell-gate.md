@@ -36,12 +36,12 @@ projection itself would be invalidated by every rebuild.
 
 Measured on `cfs-dev-3100`, and each number is why an obvious-looking alternative was rejected:
 
-| shape | result |
-|---|---|
-| read-modify-write of one hot document inside a transaction | **60–87 s per contender**, ~1 sustained write/sec ceiling |
-| the same claim as CAS on a separate token | **1.3–1.5 s**; a loser is refused in **~266 ms** |
-| transactional range read over the source rows | 15,003 ms, 1 of 2 committed |
-| range→point conversion of that read | **15,121 ms** — narrowing lock *granularity* leaves the *overlap* intact |
+| shape                                                      | result                                                                   |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------ |
+| read-modify-write of one hot document inside a transaction | **60–87 s per contender**, ~1 sustained write/sec ceiling                |
+| the same claim as CAS on a separate token                  | **1.3–1.5 s**; a loser is refused in **~266 ms**                         |
+| transactional range read over the source rows              | 15,003 ms, 1 of 2 committed                                              |
+| range→point conversion of that read                        | **15,121 ms** — narrowing lock _granularity_ leaves the _overlap_ intact |
 
 The deadlock is **mutual**: it requires each transaction's write to land inside the other's held
 read-lock set. Only a shape that holds no read lock on what it writes escapes, which is what makes
@@ -50,16 +50,17 @@ optimization.
 
 ## The policy is per-path, and a blanket gate is wrong
 
-A uniform `available >= qty` refusal is a regression, not a tightening — v1 records `quantity_available`
-going negative as *the intended oversell signal* for operators, and the CRMS ingest path pushes
-orders CFS did not author, where a refusal is a 400 to a webhook that retries forever.
+A uniform `available >= qty` refusal is a regression, not a tightening — v1 records
+`quantity_available` going negative as _the intended oversell signal_ for operators, and the CRMS
+ingest path pushes orders CFS did not author, where a refusal is a 400 to a webhook that retries
+forever.
 
-| path | policy |
-|---|---|
-| public booking | **hard refuse**, 409 carrying the real availability |
-| operator (orders, bookings, fulfillment picker) | advisory — record the shortage, never block |
-| external ingest | advisory, always — a refusal is unrecoverable |
-| out-of-service create | hard cap; a physical invariant, not demand |
+| path                                            | policy                                              |
+| ----------------------------------------------- | --------------------------------------------------- |
+| public booking                                  | **hard refuse**, 409 carrying the real availability |
+| operator (orders, bookings, fulfillment picker) | advisory — record the shortage, never block         |
+| external ingest                                 | advisory, always — a refusal is unrecoverable       |
+| out-of-service create                           | hard cap; a physical invariant, not demand          |
 
 So "advisory vs hard" is not a single decision about the shortage signal — it is a property of the
 **actor**, and the same product in the same window answers differently depending on who asked.
@@ -72,11 +73,11 @@ So "advisory vs hard" is not a single decision about the shortage signal — it 
   from the other side. Two contexts now want "serialize per entity uid" and neither gets it from a
   global concurrency knob.
 - It does **not** settle SPIKE-012's boundary question. The token serializes whatever the claim
-  decides; it does not decide *when* a booking begins consuming. If v2 draws the boundary early
+  decides; it does not decide _when_ a booking begins consuming. If v2 draws the boundary early
   enough that a forward booking consumes balance, this mechanism will serialize an answer that is
   already wrong.
 - One question is open in v1 and transfers verbatim: **does a supply change serialize against a
   claim?** Receipts and reversals move `quantity_held` without bumping the token today, so a supply
   change landing between a claimer's read and its write is invisible to the precondition. The gate
-  decides from held quantity *and* claims, so the token's meaning has to be settled before the gate
+  decides from held quantity _and_ claims, so the token's meaning has to be settled before the gate
   ships — not discovered afterwards.

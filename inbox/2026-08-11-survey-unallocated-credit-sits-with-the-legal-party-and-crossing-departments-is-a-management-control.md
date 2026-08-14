@@ -24,8 +24,8 @@ at line level?
 
 **ASC 210-20-45-1** states four conditions for a right of setoff: each of two parties owes the other
 determinable amounts; the reporting party has the right to set off; it intends to set off; and the
-right is enforceable at law. The controlling gloss: *an asset and liability should be offset under a
-legal right of setoff **only when they represent amounts due to and from the same party***, and an
+right is enforceable at law. The controlling gloss: _an asset and liability should be offset under a
+legal right of setoff **only when they represent amounts due to and from the same party**_, and an
 entity **cannot** offset receivables and payables with different counterparties.
 
 **This is the criterion the whole question turns on, and it is a test about PARTIES, not about
@@ -52,9 +52,9 @@ let alone answer it.
 
 Two distinct mechanisms, and conflating them is the trap:
 
-- **Alternative payer/payee does not move the receivable.** "The system maintains all the transaction
-  details in the account of the original customer" — using an alternative payer "does not waive the
-  liability from original customer", and accounts are settled in their name. It is a
+- **Alternative payer/payee does not move the receivable.** "The system maintains all the
+  transaction details in the account of the original customer" — using an alternative payer "does
+  not waive the liability from original customer", and accounts are settled in their name. It is a
   payment-processing and correspondence convenience.
 - **Head office / branch is the real hierarchy.** Items post to the branch account, and a payment
   made to the head office **clears the line item in the branch account**.
@@ -77,15 +77,16 @@ own receivable either way.
 
 ### Sage Intacct — the sharpest line in the survey, and it splits CREDIT from PAYMENT
 
-Intacct is explicit and restrictive on credit: *"You cannot apply credits from one customer to the
-invoices of another customer, **even if they are in a parent-child relationship**."*
+Intacct is explicit and restrictive on credit: _"You cannot apply credits from one customer to the
+invoices of another customer, **even if they are in a parent-child relationship**."_
 
-And permissive on payment. A single payment offers three modes: one customer's invoices; **parent and
-child customer invoices**; or **multiple, unrelated customers' invoices** (entering a payer name).
+And permissive on payment. A single payment offers three modes: one customer's invoices; **parent
+and child customer invoices**; or **multiple, unrelated customers' invoices** (entering a payer
+name).
 
 **That split is the most useful finding in the survey.** Intacct is not saying "hierarchies don't
-matter" — it is saying that a *credit* is a value pinned to the party that earned it, while a
-*payment* is money arriving that may settle anything. Two different questions with two different
+matter" — it is saying that a _credit_ is a value pinned to the party that earned it, while a
+_payment_ is money arriving that may settle anything. Two different questions with two different
 answers, in the same module.
 
 ### Odoo — the opposite placement from SAP, via `commercial_partner_id`
@@ -103,19 +104,19 @@ shared commercial entity** — i.e. a declared single party. GAAP's test again, 
 
 ## What the survey settles
 
-| Reference   | Where the balance sits | Credit may cross a node? | Payment may cross?      |
-| ----------- | ---------------------- | ------------------------ | ----------------------- |
-| GAAP        | n/a — asks about parties | **yes within one party; never across parties** | same test |
-| Xero        | the contact            | **no** (edit or reverse) | no                      |
-| SAP         | **the leaf** (branch)  | via head-office clearing | yes, head office        |
-| NetSuite    | the subcustomer        | via Consolidated Payments | yes                    |
-| Intacct     | the customer           | **no, even parent-child** | **yes**, incl. unrelated |
-| Odoo        | **the root** (commercial entity) | yes, within the entity | yes, within the entity |
+| Reference | Where the balance sits           | Credit may cross a node?                       | Payment may cross?       |
+| --------- | -------------------------------- | ---------------------------------------------- | ------------------------ |
+| GAAP      | n/a — asks about parties         | **yes within one party; never across parties** | same test                |
+| Xero      | the contact                      | **no** (edit or reverse)                       | no                       |
+| SAP       | **the leaf** (branch)            | via head-office clearing                       | yes, head office         |
+| NetSuite  | the subcustomer                  | via Consolidated Payments                      | yes                      |
+| Intacct   | the customer                     | **no, even parent-child**                      | **yes**, incl. unrelated |
+| Odoo      | **the root** (commercial entity) | yes, within the entity                         | yes, within the entity   |
 
 **THE CRITERION: every reference draws its line at the legal party, and they differ only on whether
-a sub-node bears its own balance.** Where nodes are modelled as *separate customers* (Xero contacts,
+a sub-node bears its own balance.** Where nodes are modelled as _separate customers_ (Xero contacts,
 Intacct parent/child), credit cannot cross — the system cannot prove they are one party. Where nodes
-are modelled as *internal divisions of one party* (SAP branch, Odoo commercial entity), crossing is
+are modelled as _internal divisions of one party_ (SAP branch, Odoo commercial entity), crossing is
 native and needs no ceremony.
 
 **CFS's settlement points are internal divisions of one legal entity by construction** — that is
@@ -124,17 +125,17 @@ the leaf, Odoo at the root) is a genuine choice rather than a default to follow.
 at the leaf is what makes the per-department aging the owner asked for computable without a tree
 walk.
 
-⚠️ **The one thing the survey corrects in the owner's framing.** Nothing in GAAP, and nothing in four
-of the five systems, *requires* a recorded event when credit crosses settlement points inside one
-organization — GAAP is silent because there is one counterparty, and SAP/NetSuite/Odoo do it
+⚠️ **The one thing the survey corrects in the owner's framing.** Nothing in GAAP, and nothing in
+four of the five systems, _requires_ a recorded event when credit crosses settlement points inside
+one organization — GAAP is silent because there is one counterparty, and SAP/NetSuite/Odoo do it
 natively without ceremony. **So the recorded cross-node transfer is a MANAGEMENT control, not an
 accounting constraint, and the ADR must say so.** Its justification is the owner's own requirement —
-*locations doesn't want to see what office owes* — and its inverse, that Locations must be able to
+_locations doesn't want to see what office owes_ — and its inverse, that Locations must be able to
 see where its overpayment went. Framed as an accounting requirement it would be wrong; framed as a
 deliberate control it is defensible and cheap.
 
 **On header vs item bill-to: five of six are header-only.** Only SAP determines partners per
-document at header *and* item level. That supports ADR-0032's header-only decision and makes the
+document at header _and_ item level. That supports ADR-0032's header-only decision and makes the
 level-tagged reference (rather than an item-level split now) the conservative read.
 
 ## The migration delta — measured, and it is nil
@@ -142,19 +143,19 @@ level-tagged reference (rather than an item-level split now) the conservative re
 `api:2026-08-11:search_credit_notes` (all 13) + `get_credit_notes_uid_allocations` on each of the 10
 `applied` notes:
 
-| Fact                                                      | Measured                       |
-| --------------------------------------------------------- | ------------------------------ |
-| Credit notes total                                        | **13** (10 `applied`, 3 `void`) |
-| Allocation rows across the applied notes                  | **9**                          |
-| Allocations naming the SAME organization as their note    | **8 of 9**                     |
-| Allocations CROSSING an organization                      | **1 of 9**                     |
-| Applied notes with **no allocation row at all**            | **2**                          |
+| Fact                                                   | Measured                        |
+| ------------------------------------------------------ | ------------------------------- |
+| Credit notes total                                     | **13** (10 `applied`, 3 `void`) |
+| Allocation rows across the applied notes               | **9**                           |
+| Allocations naming the SAME organization as their note | **8 of 9**                      |
+| Allocations CROSSING an organization                   | **1 of 9**                      |
+| Applied notes with **no allocation row at all**        | **2**                           |
 
 **The one crossing is a duplicate pair, not a department.** CN-1024's single allocation names
-organization `AxDwNH8IFZEKJJrMqjQc`, while the note's indexed organization is
-`CTFP195QqkTtEl4kyfc2` — the **two duplicate `Free Spirit Media` records** recorded in the
-2026-08-10 interview note. The invoice it settles, #1981 (`7XHkIvda0ABfpYdfM4mT`, $150.00,
-`amount_credited_cents: 15000`), belongs to `AxDw…`.
+organization `AxDwNH8IFZEKJJrMqjQc`, while the note's indexed organization is `CTFP195QqkTtEl4kyfc2`
+— the **two duplicate `Free Spirit Media` records** recorded in the 2026-08-10 interview note. The
+invoice it settles, #1981 (`7XHkIvda0ABfpYdfM4mT`, $150.00, `amount_credited_cents: 15000`), belongs
+to `AxDw…`.
 
 ⇒ **The authored mapping collapses that pair into one organization, so the crossing becomes
 intra-organization and needs no transfer event. The cross-node transfer machinery has ZERO
@@ -162,12 +163,12 @@ historical population** — it is for the future shape, not for the migration. S
 2026-08-09 credit-note survey, arrived at independently: the delta that looked like a cost is nil.
 
 ⚠️ **Caveat on that read, stated rather than hidden.** There is no `db_credit_notes_*` tool —
-`credit-notes` is absent from `db_schema`'s collection enum — so the authoritative Firestore document
-could not be read, only its Typesense projection. Two of three sources (the allocation row and the
-settled invoice) say `AxDw…`; the index says `CTFP…`. Either it is a genuine cross-org allocation or
-the note's indexed organization is stale. **Both readings resolve the same way** — the pair collapses
-in the mapping — so the conclusion holds, but the underlying record should be inspected when the
-mapping is authored.
+`credit-notes` is absent from `db_schema`'s collection enum — so the authoritative Firestore
+document could not be read, only its Typesense projection. Two of three sources (the allocation row
+and the settled invoice) say `AxDw…`; the index says `CTFP…`. Either it is a genuine cross-org
+allocation or the note's indexed organization is stale. **Both readings resolve the same way** — the
+pair collapses in the mapping — so the conclusion holds, but the underlying record should be
+inspected when the mapping is authored.
 
 ## A defect this measurement identifies by uid
 
@@ -177,8 +178,8 @@ no allocation row" without naming them. They are:
 - `MKeNqa5Xc9yfQj5jqqbT` — CN-1016, `Yellow Film LLC` (`DKyHS1VLElkZgnsyG8ou`)
 - `zFXSXP1jLdtfyO9nVpYl` — CN-1013, `Juniper Productions` (`fK0Iqo4f6mJEWnuyJAvw`)
 
-Both `status: applied`, both `remaining_credit_cents: 0`, both with an empty allocations array. Worth
-adding to the issue so it can be picked up cold.
+Both `status: applied`, both `remaining_credit_cents: 0`, both with an empty allocations array.
+Worth adding to the issue so it can be picked up cold.
 
 ## Sources
 

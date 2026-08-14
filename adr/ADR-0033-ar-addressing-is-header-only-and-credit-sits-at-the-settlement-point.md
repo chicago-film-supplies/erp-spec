@@ -28,9 +28,9 @@ superseded_by:
 - **Surveyed 2026-08-11 against all six references**
   (`inbox/2026-08-11-survey-unallocated-credit-sits-with-the-legal-party-and-crossing-departments-is-a-management-control.md`).
 - **The criterion the survey found: every reference draws its line at the LEGAL PARTY**, and they
-  differ only on whether a sub-node bears its own balance. Where nodes are modelled as *separate
-  customers* (Xero contacts, Sage Intacct parent/child) credit cannot cross, because the system
-  cannot prove they are one party. Where nodes are *internal divisions of one party* (SAP head
+  differ only on whether a sub-node bears its own balance. Where nodes are modelled as _separate
+  customers_ (Xero contacts, Sage Intacct parent/child) credit cannot cross, because the system
+  cannot prove they are one party. Where nodes are _internal divisions of one party_ (SAP head
   office/branch, Odoo's commercial entity) crossing is native and needs no ceremony.
 - **ASC 210-20-45-1** makes that a rule rather than a convention: setoff is permitted "only when
   [the amounts] represent amounts due to and from the same party", and an entity cannot offset
@@ -40,13 +40,13 @@ superseded_by:
 - **The references split on placement, so this is a real choice.** SAP holds the balance at the leaf
   (items post to the branch; a payment at the head office clears the branch's line items). Odoo
   pushes it to the root (`commercial_partner_id` bears the AR; child contacts are addressing only).
-- **Sage Intacct draws the sharpest line, and it is between two different questions.** Credit:
-  "you cannot apply credits from one customer to the invoices of another customer, **even if they
-  are in a parent-child relationship**." Payment: a single payment may cover one customer, parent
-  and child, **or unrelated multiple customers**. A credit is value pinned to the party that earned
-  it; a payment is money arriving that may settle anything.
+- **Sage Intacct draws the sharpest line, and it is between two different questions.** Credit: "you
+  cannot apply credits from one customer to the invoices of another customer, **even if they are in
+  a parent-child relationship**." Payment: a single payment may cover one customer, parent and
+  child, **or unrelated multiple customers**. A credit is value pinned to the party that earned it;
+  a payment is money arriving that may settle anything.
 - **On header vs item addressing, five of six are header-only.** Only SAP determines partners per
-  document at header *and* item level.
+  document at header _and_ item level.
 
 ## Decision
 
@@ -66,7 +66,7 @@ yields project-level ordering, and an optional `items[].billed_to` yields SAP's 
 
 ADR-0032 requires that the per-settlement-point aging be checkable by a property that **holds
 independently of the tree**: the sum of settlement-point balances equals the sum of open invoice
-amounts addressed to them, *computed without traversing the tree at all*.
+amounts addressed to them, _computed without traversing the tree at all_.
 
 **That property holds only while a document has exactly one addressee.** Item-level splitting turns
 a one-hop sum into a line-level walk, and the walk shares its logic with the roll-up it is supposed
@@ -87,16 +87,16 @@ from the pre-tree flat `organization` to the settlement point.
 
 ### 4. Credit may be applied across settlement points within one organization, and that crossing is a recorded event
 
-Applying `Saturn Return: Locations`' overpayment to `Saturn Return: Office`'s invoice is legal. It is
-recorded as an explicit event carrying an actor and a reason, and it appears on the **origin** node's
-statement.
+Applying `Saturn Return: Locations`' overpayment to `Saturn Return: Office`'s invoice is legal. It
+is recorded as an explicit event carrying an actor and a reason, and it appears on the **origin**
+node's statement.
 
-⚠️ **This is a MANAGEMENT control, not an accounting constraint, and the distinction is load-bearing.**
-Nothing in GAAP requires it — there is one counterparty, so no setoff question arises — and
-SAP, NetSuite and Odoo all cross internal nodes without ceremony. Its justification is the owner's
-own requirement, *locations doesn't want to see what office owes*, and the inverse of it: Locations
-must be able to see where its overpayment went. Recorded as an accounting requirement this clause
-would be false; recorded as a deliberate control it is defensible and cheap.
+⚠️ **This is a MANAGEMENT control, not an accounting constraint, and the distinction is
+load-bearing.** Nothing in GAAP requires it — there is one counterparty, so no setoff question
+arises — and SAP, NetSuite and Odoo all cross internal nodes without ceremony. Its justification is
+the owner's own requirement, _locations doesn't want to see what office owes_, and the inverse of
+it: Locations must be able to see where its overpayment went. Recorded as an accounting requirement
+this clause would be false; recorded as a deliberate control it is defensible and cheap.
 
 ### 5. Credit may never be applied across organizations
 
@@ -130,19 +130,20 @@ references agree on. Moving value between two legal entities requires a refund o
   reason, and must appear on the origin node's statement as well as the destination's. It is the
   first event in the spec whose justification is explicitly managerial rather than accounting, and
   the ADR says so on purpose.
-- ⚠️ **The cross-node event has ZERO historical population, measured.** All 13 credit notes and all 9
-  allocation rows in prod were read on 2026-08-11
-  (`api:2026-08-11:search_credit_notes`, `get_credit_notes_uid_allocations`). 8 of 9 allocations
-  name the same organization as their credit note. The one that crosses — CN-1024, whose allocation
-  names `AxDwNH8IFZEKJJrMqjQc` while its indexed organization is `CTFP195QqkTtEl4kyfc2` — crosses the
-  **two duplicate `Free Spirit Media` records**, which ADR-0032's authored mapping collapses into one
-  organization. **So the migration delta is nil: this machinery is for the future shape, not for
-  history.** Same outcome as the 2026-08-09 credit-note survey, reached independently.
+- ⚠️ **The cross-node event has ZERO historical population, measured.** All 13 credit notes and all
+  9 allocation rows in prod were read on 2026-08-11 (`api:2026-08-11:search_credit_notes`,
+  `get_credit_notes_uid_allocations`). 8 of 9 allocations name the same organization as their credit
+  note. The one that crosses — CN-1024, whose allocation names `AxDwNH8IFZEKJJrMqjQc` while its
+  indexed organization is `CTFP195QqkTtEl4kyfc2` — crosses the **two duplicate `Free Spirit Media`
+  records**, which ADR-0032's authored mapping collapses into one organization. **So the migration
+  delta is nil: this machinery is for the future shape, not for history.** Same outcome as the
+  2026-08-09 credit-note survey, reached independently.
   - Caveat stated rather than hidden: there is no `db_credit_notes_*` tool and `credit-notes` is
     absent from `db_schema`'s enum, so only the Typesense projection could be read. The allocation
     row and the settled invoice (#1981) both say `AxDw…`; the index says `CTFP…`. Either it is a
     genuine cross-organization allocation or the note's indexed organization is stale — **both
-    readings resolve the same way**, but the record should be inspected when the mapping is authored.
+    readings resolve the same way**, but the record should be inspected when the mapping is
+    authored.
 - **Two `applied` credit notes have no allocation row at all** — `MKeNqa5Xc9yfQj5jqqbT` (CN-1016,
   `Yellow Film LLC`) and `zFXSXP1jLdtfyO9nVpYl` (CN-1013, `Juniper Productions`). This names the
   population in `api-cloudrun#469`, which the issue left unidentified. A v1 defect, not a v2 design
@@ -155,6 +156,7 @@ references agree on. Moving value between two legal entities requires a refund o
   expressible. **Payment-side addressing is not decided here**; it is named so that a future reader
   does not infer it from §5.
 - **`ledger/posting-rules.yaml` and the `2050` account definition both need editing** — the
-  credit-note and settlement rules currently say "organization" where they now mean settlement point.
+  credit-note and settlement rules currently say "organization" where they now mean settlement
+  point.
 - **Credit limits and holds remain undecided** and are OQ-038. ADR-0032 claims only that exposure is
   readable at the organization; nothing here adds a control.

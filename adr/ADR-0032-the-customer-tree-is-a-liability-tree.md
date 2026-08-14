@@ -25,8 +25,9 @@ tree
 The amendment renames the root, fixes a factual error about how contacts are stored today, makes all
 three levels mandatory, adds destinations and project dates, **retracts an unfounded claim about
 credit limits**, and **withdraws the economic-concentration objection** that OQ-037 was opened for.
-It deliberately decides **nothing** about tax (OQ-039). Permitted because this ADR is `proposed`; the
-file name is left at its original slug so that append-only `inbox/` notes citing it do not go dead.
+It deliberately decides **nothing** about tax (OQ-039). Permitted because this ADR is `proposed`;
+the file name is left at its original slug so that append-only `inbox/` notes citing it do not go
+dead.
 
 ## Context
 
@@ -61,11 +62,11 @@ file name is left at its original slug so that append-only `inbox/` notes citing
 
 ### 1. Three levels, and only the root carries liability
 
-| Level                | Is                                                                            | Carries                                                            |
-| -------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Level                | Is                                                                            | Carries                                                              |
+| -------------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------- |
 | **Organization**     | the **legal entity** — the party that owes the money and could be sued for it | credit exposure, trading history, destinations; tax **TBD** (OQ-039) |
-| **Project**          | a production                                                                  | the cost object; **production type** (OQ-035); a start and a wrap   |
-| **Settlement point** | a department on a project                                                     | its own AR balance, statement, aging, and its own contact edges     |
+| **Project**          | a production                                                                  | the cost object; **production type** (OQ-035); a start and a wrap    |
+| **Settlement point** | a department on a project                                                     | its own AR balance, statement, aging, and its own contact edges      |
 
 **The tree is determined by legal liability.** A node sits under a parent only where that parent is
 legally liable for the child's debts. Projects and settlement points are internal divisions of the
@@ -77,24 +78,25 @@ balance per organization. Neither is derived on demand from the other by string 
 
 ### 2. The root is called `organization`, not `customer`
 
-Owner, 2026-08-10: *"customer is organization, customer is too easily confused with contact for
-use."* `customer` is retired as a term. This is an operator-vocabulary decision, not a modelling one
+Owner, 2026-08-10: _"customer is organization, customer is too easily confused with contact for
+use."_ `customer` is retired as a term. This is an operator-vocabulary decision, not a modelling one
 — the level is unchanged.
 
 ⚠️ **It creates a silent-diff hazard and the migration must treat it as one.** The v1 collection is
 already called `organizations`, so the name survives while its **meaning narrows** — from a flat
 record conflating company + production + department into the legal-entity root alone. A field that
-keeps its name and changes its semantics is invisible in a diff. This is the workspace's
-*rename, never retype in place* rule arriving inverted: here the rename is what is **missing**, so
-no named reader becomes a compile error and nothing catches a stale assumption automatically.
+keeps its name and changes its semantics is invisible in a diff. This is the workspace's _rename,
+never retype in place_ rule arriving inverted: here the rename is what is **missing**, so no named
+reader becomes a compile error and nothing catches a stale assumption automatically.
 
 ### 3. All three levels are mandatory; the API mints what it is not given
 
-**Strict in the schema, minted at the API, suppressed in the UI.** An optional level puts a branch in
-every reader — the AR roll-up, the statement walk, the migration mapping, the reporting layer and the
-UI. A mandatory level puts the degenerate case in exactly one place: the minting rule. This is the
-repo's standing preference for making a defect class unrepresentable over policing it, and it is what
-makes "degenerate shapes must be legal, not special-cased" true in code rather than only in prose.
+**Strict in the schema, minted at the API, suppressed in the UI.** An optional level puts a branch
+in every reader — the AR roll-up, the statement walk, the migration mapping, the reporting layer and
+the UI. A mandatory level puts the degenerate case in exactly one place: the minting rule. This is
+the repo's standing preference for making a defect class unrepresentable over policing it, and it is
+what makes "degenerate shapes must be legal, not special-cased" true in code rather than only in
+prose.
 
 Three conditions:
 
@@ -147,8 +149,8 @@ the consequence below: the field is doing two jobs and untangling it is OQ-039.
 
 ## Consequences
 
-- ⚠️ **A separately-incorporated production is its OWN organization, not a child.** This is the direct
-  consequence of choosing liability, and it is the one that will surprise.
+- ⚠️ **A separately-incorporated production is its OWN organization, not a child.** This is the
+  direct consequence of choosing liability, and it is the one that will surprise.
   `Pops, Puffs, Pebbles Canada LTD` and `Pops, Puffs, Pebbles, LLC` are one production and two legal
   entities, so they are **two organizations** — and the single-purpose production LLCs
   (`Enemies Movie, LLC`, `Whale Shark Movie LLC`, `GODSHOT MOVIE LLC`, `Freaky Monday LLC`,
@@ -156,15 +158,15 @@ the consequence below: the field is doing two jobs and untangling it is OQ-039.
 - **The economic-concentration objection is withdrawn, and OQ-037 is closed.** The original text of
   this ADR raised the worry that the liability tree cannot answer "which studios do we actually
   depend on", because ASC 280-10-50-42 defines one customer by **common control**. The worked case
-  defeats the premise: A24 backs `Enemies Movie, LLC`, but A24 carries no liability for it *and does
-  not control it* — Enemies holds its own insurance and stands alone (owner, 2026-08-10). So the
+  defeats the premise: A24 backs `Enemies Movie, LLC`, but A24 carries no liability for it _and does
+  not control it_ — Enemies holds its own insurance and stands alone (owner, 2026-08-10). So the
   studio behind a single-purpose LLC is not an economic parent under ASC 280's own test either, and
   the two roll-ups do not diverge. **What the owner wants from that question — "from a financial
   reporting angle it's a high budget feature" — is OQ-035's production type on the project.** No
   second tree, no tag, and nothing that can contaminate the liability tree.
 - ⚠️ **Contact membership edges belong to the settlement point, and the reason given in the first
-  draft was factually wrong.** That draft said contacts are right "by accident, because each clone is
-  an organization and `organizations.contacts[]` is embedded." **Contacts are not embedded.**
+  draft was factually wrong.** That draft said contacts are right "by accident, because each clone
+  is an organization and `organizations.contacts[]` is embedded." **Contacts are not embedded.**
   `contacts` is a top-level collection and each contact carries `organizations[]` — an explicit
   many-to-many (`api:2026-08-10:db_schema:contacts`). `organizations.contacts[]` is the reverse
   denorm, not the authority. The placement claim survives; the mechanism claim does not, and it
@@ -186,12 +188,12 @@ the consequence below: the field is doing two jobs and untangling it is OQ-039.
   it — OQ-039.** Measured 2026-08-11 (`api:2026-08-11:db_organizations_count`, five queries): of 286
   organizations, **273 `tax_applied`, 11 `tax_exempt`, 1 `tax_rantoul`, 1 `tax_frankfort`, 0
   `tax_paxton`**. Two enum members describe **who owes** (applied / exempt) and three name Illinois
-  municipalities, which describe **where the goods went**. Under a three-level tree those two answers
-  would attach at different places — but tax has substantial unresolved design ahead of it (ADR-0026's
-  dual-basis book, the `tax` context, `api-cloudrun#486`, `manager#248`), and settling an attachment
-  point as a side effect of a customer-structure ADR is the wrong order. **The field maps forward
-  unchanged and unsplit until OQ-039 is answered**; `migration/field-map.yaml` records it as blocked
-  rather than mapped.
+  municipalities, which describe **where the goods went**. Under a three-level tree those two
+  answers would attach at different places — but tax has substantial unresolved design ahead of it
+  (ADR-0026's dual-basis book, the `tax` context, `api-cloudrun#486`, `manager#248`), and settling
+  an attachment point as a side effect of a customer-structure ADR is the wrong order. **The field
+  maps forward unchanged and unsplit until OQ-039 is answered**; `migration/field-map.yaml` records
+  it as blocked rather than mapped.
 - **AR addressing and unallocated credit are ADR-0033's, not this ADR's.** Where a document's
   `billed_to` points, at what level, and where an unallocated credit sits are decided there — they
   touch `ledger/posting-rules.yaml` and the 2050 account, so they required their own survey
@@ -209,19 +211,19 @@ the consequence below: the field is doing two jobs and untangling it is OQ-039.
     2026-08-10). Two source rows pointing at one target node is exactly what an authored mapping
     expresses; it needs no v1 merge tool and takes no exposure to the `api-cloudrun#423` org/contact
     cascade deadlock. Populations to carry: 5 exact-duplicate name pairs, 3 `(copy)` records,
-    `20th Television` / `Twentieth Television`, and — found 2026-08-10 by reading contact→organization
-    edges — `Omnicom` ×2, `Enlace Chicago` ×2, `Free Spirit Media` ×2, `Sound Off Films` ×2 by uid,
-    plus **≥8 duplicated humans in `contacts`** (Katie Kincaid ×3; Kristi Gescheidler, Erik Goserud,
-    Kevin McGrail, Iman Sharabash, Rob Roediger, Kyle Behling, Angie Gaffney ×2 each), several of
-    which are a fully-populated record beside an empty twin.
+    `20th Television` / `Twentieth Television`, and — found 2026-08-10 by reading
+    contact→organization edges — `Omnicom` ×2, `Enlace Chicago` ×2, `Free Spirit Media` ×2,
+    `Sound Off Films` ×2 by uid, plus **≥8 duplicated humans in `contacts`** (Katie Kincaid ×3;
+    Kristi Gescheidler, Erik Goserud, Kevin McGrail, Iman Sharabash, Rob Roediger, Kyle Behling,
+    Angie Gaffney ×2 each), several of which are a fully-populated record beside an empty twin.
   - ⚠️ **AR balances must not move.** The consolidated organization balance must be proven equal to
     the sum of its settlement points, per invoice and per settlement — the same assertion ADR-0020
     makes about amounts, on a different axis. Xero's warning about the duplicate-contact route is
     precisely that it double-counts, so this is a measured hazard rather than a theoretical one.
-- **The sequence against ADR-0020 is now fixed: RESTATE FIRST, then re-key.** The first draft flagged
-  that both migrations cross the same closed periods, that "neither assertion can be verified while
-  the other is in flight", and that HOT-006 covers only one of them — but left the order open.
-  Owner, 2026-08-10:
+- **The sequence against ADR-0020 is now fixed: RESTATE FIRST, then re-key.** The first draft
+  flagged that both migrations cross the same closed periods, that "neither assertion can be
+  verified while the other is in flight", and that HOT-006 covers only one of them — but left the
+  order open. Owner, 2026-08-10:
   1. **Restate dimensions** (ADR-0020) → prove no amount moved, against the familiar flat identity.
   2. **Re-key identity** (this ADR) → prove no AR balance moved, against settled dimensions.
 
@@ -235,14 +237,14 @@ the consequence below: the field is doing two jobs and untangling it is OQ-039.
 - ⚠️ **`contexts/ordering/entities/order.yaml`, `contexts/ordering/events.yaml` and
   `contexts/billing/events.yaml` all carry `organization_ref` under the pre-tree meaning and must
   change with this.** Under this ADR a document is addressed to a **settlement point** and its
-  organization is derived by walking up, so the reference changes meaning as well as target. The same
-  applies to `invoices.organization`. Recorded in `migration/field-map.yaml`; the shape of the
+  organization is derived by walking up, so the reference changes meaning as well as target. The
+  same applies to `invoices.organization`. Recorded in `migration/field-map.yaml`; the shape of the
   replacement reference is ADR-0033's.
 - **Both roll-ups must be independently computable, and neither may be the other's oracle.** The
   consolidated organization balance and the per-settlement-point aging are the same money read two
-  ways, so the natural implementation derives one from the other — and then a bug in the tree walk is
-  invisible, because the check agrees with itself. This repo's standing rule applies: pair the
-  fixed-point check with a property that holds independently. **The independent property here is that
-  the sum of settlement-point balances equals the sum of open invoice amounts addressed to them,
-  computed without traversing the tree at all** — and it is the reason ADR-0033 keeps document
+  ways, so the natural implementation derives one from the other — and then a bug in the tree walk
+  is invisible, because the check agrees with itself. This repo's standing rule applies: pair the
+  fixed-point check with a property that holds independently. **The independent property here is
+  that the sum of settlement-point balances equals the sum of open invoice amounts addressed to
+  them, computed without traversing the tree at all** — and it is the reason ADR-0033 keeps document
   addressing at the header.

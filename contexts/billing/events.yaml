@@ -95,4 +95,13 @@ events:
     producer: billing
     consumers: [ledger]
     terminal: false
-    carries: [credit_note_ref, from_billed_to, to_billed_to, invoice_ref, amount_minor, actor, reason, accounting_date]
+    carries: [
+      credit_note_ref,
+      from_billed_to,
+      to_billed_to,
+      invoice_ref,
+      amount_minor,
+      actor,
+      reason,
+      accounting_date,
+    ]

@@ -17,17 +17,17 @@ yet.
 
 > **Owner:** "customer is organization, customer is too easily confused with contact for use."
 
-`customer` is retired as the term for the root. The three levels are
-**organization → project → settlement point**.
+`customer` is retired as the term for the root. The three levels are **organization → project →
+settlement point**.
 
-- Reverses the `glossary.yaml` entry for `customer`, whose note currently reads
-  "⚠️ **Not a synonym for `organization`**". It now *is* the term.
+- Reverses the `glossary.yaml` entry for `customer`, whose note currently reads "⚠️ **Not a synonym
+  for `organization`**". It now _is_ the term.
 - ⚠️ **The hazard this creates.** The v1 collection is already called `organizations`, so the name
   survives the migration unchanged while its **meaning narrows** — from a flat record conflating
   company + production + department into the legal-entity root alone. A field that keeps its name
   and changes its semantics is invisible in a migration diff. This is the same class of defect as
   the workspace rule **"rename, never retype in place"**, arriving from the opposite direction: here
-  the rename is what is *missing*, so no named reader becomes a compile error.
+  the rename is what is _missing_, so no named reader becomes a compile error.
 
 ## 1. A contact is one person with N memberships
 
@@ -51,17 +51,17 @@ each clone is an organization and `organizations.contacts[]` is embedded"; field
 and each contact carries `organizations[]` (`api:2026-08-10:db_schema:contacts`).
 `organizations.contacts[]` is the **reverse denorm**, not the authority.
 
-The *placement* claim survives — the edge does land on the settling unit today. The *mechanism*
+The _placement_ claim survives — the edge does land on the settling unit today. The _mechanism_
 claim does not, and it matters: an embedded model would have made 26 people fragment on migration.
 
 **Measured 2026-08-10** (`api:2026-08-10:db_contacts_query`, all 165 contacts):
 
-| Fact                                 | Count                                                  |
-| ------------------------------------ | ------------------------------------------------------ |
-| Contacts total                       | **165**                                                |
-| On **2 or more** organizations       | **26 (15.8%)**                                         |
-| On **5 or more**                     | 5 — Kristi Gescheidler 7, Erik Goserud 6, Yajaira Marie Quinto 6, Nick Rafferty 5, Patrick Richter 5 |
-| On **zero** organizations            | 5                                                      |
+| Fact                           | Count                                                                                                |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| Contacts total                 | **165**                                                                                              |
+| On **2 or more** organizations | **26 (15.8%)**                                                                                       |
+| On **5 or more**               | 5 — Kristi Gescheidler 7, Erik Goserud 6, Yajaira Marie Quinto 6, Nick Rafferty 5, Patrick Richter 5 |
+| On **zero** organizations      | 5                                                                                                    |
 
 The load-bearing example: **Nick Rafferty** is attached to `Netflix Productions, LLC - Locations`,
 `Netflix Productions, LLC / Saturn Return: Locations`, `Enemies Movie, LLC - Locations`,
@@ -124,17 +124,16 @@ is one enum on a reference.
 
 > **Owner:** selected "Held at settlement point, cross-node allocation is a recorded fact".
 
-`2050 Customer Credit Balances` is `organization`-scoped today
-(`ledger/chart-of-accounts.yaml:449`, `ledger/posting-rules.yaml:328`, OQ-030). Under the tree it
-sits at the **leaf**, symmetric with AR: a credit is negative receivable and partitions the same way
-the receivable does.
+`2050 Customer Credit Balances` is `organization`-scoped today (`ledger/chart-of-accounts.yaml:449`,
+`ledger/posting-rules.yaml:328`, OQ-030). Under the tree it sits at the **leaf**, symmetric with AR:
+a credit is negative receivable and partitions the same way the receivable does.
 
 Applying `Saturn Return: Locations`' overpayment to `Saturn Return: Office`'s invoice is legal, but
 it is an **explicit recorded event** with an actor and a reason, and it appears on the origin node's
 statement. Consistent with ADR-0029 — the ledger records unallocated facts rather than inferring
 them. The rejected alternative (one customer-level pool, auto-applied to the oldest open invoice
 beneath) lets one department's debt silently absorb another's money, which is the same complaint
-that produced the whole requirement: *locations doesn't want to see what office owes.*
+that produced the whole requirement: _locations doesn't want to see what office owes._
 
 ## 5. `tax_profile` splits — exemption is the party's, jurisdiction is the destination's
 
@@ -154,8 +153,8 @@ false of three.
 | `tax_frankfort` | **1**   |
 | `tax_paxton`    | **0**   |
 
-`tax_rantoul` / `tax_frankfort` / `tax_paxton` are Illinois municipalities — they describe **where it
-was delivered**, not who owes. They cease to be attributes of the root and become jurisdiction
+`tax_rantoul` / `tax_frankfort` / `tax_paxton` are Illinois municipalities — they describe **where
+it was delivered**, not who owes. They cease to be attributes of the root and become jurisdiction
 derived from the destination address. Exemption (with its certificate) stays on the organization.
 
 Two live v1 issues are on the same seam and should be read with this: **api-cloudrun#486** (nothing
@@ -198,13 +197,14 @@ hold, who overrides one, and what a held organization can still do.
 ## 9. OQ-037 collapses into OQ-035 and should be closed
 
 > **Owner:** "Enemies is backed by A24, A24 has no legal libaility, enemies hodls its own insurance
-> etc.. but from a financial reporting angle its a high budget feature." Then selected "Collapse it".
+> etc.. but from a financial reporting angle its a high budget feature." Then selected "Collapse
+> it".
 
 OQ-037 asked whether CFS wants an **economic** grouping alongside the liability tree — "which
 studios do we actually depend on" — motivated by ASC 280-10-50-42, which defines one customer by
 **common control**.
 
-The A24 case defeats the premise. A24 carries no liability for Enemies *and does not control it* —
+The A24 case defeats the premise. A24 carries no liability for Enemies _and does not control it_ —
 Enemies holds its own insurance and stands alone. So the studio behind a single-purpose LLC is not
 an economic parent under ASC 280's own test either. The liability tree and the common-control
 grouping do not diverge here, because there is nothing to group to.
@@ -265,5 +265,5 @@ recorded** (surfaced by reading contact→organization edges, 2026-08-10):
 - **A new ADR — AR and credit addressing**: unallocated credit at the settlement point, the
   cross-node transfer event, and the level-tagged `billed_to`. It touches
   `ledger/posting-rules.yaml` and the `2050` account definition, so it **requires the six-reference
-  survey** before a recommendation (CLAUDE.md → _Accounting decisions_) and cannot simply be
-  written up from this session.
+  survey** before a recommendation (CLAUDE.md → _Accounting decisions_) and cannot simply be written
+  up from this session.
