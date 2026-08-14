@@ -438,7 +438,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (48 unpromoted of 59)" _note="no drops pending">
+      <outline text="Capture (49 unpromoted of 60)" _note="no drops pending">
         <outline text="Actor per leg, clock in/out per stop, crew size per trip" _note="inbox/2026-08-08-actor-and-clock-per-leg.md"/>
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
@@ -487,6 +487,7 @@
         <outline text="Company, production and department are all crammed into organizations.name — 31 of 286 orgs are dep…" _note="inbox/2026-08-10-three-concepts-are-crammed-into-the-organization-name.md"/>
         <outline text="The studio budget-tier split is motivated by duration, spend and delivery-vs-pickup — and low-budge…" _note="inbox/2026-08-10-what-actually-separates-a-low-budget-studio-from-an-indie.md"/>
         <outline text="Survey — every reference draws the credit-allocation line at the LEGAL PARTY, so crossing settlemen…" _note="inbox/2026-08-11-survey-unallocated-credit-sits-with-the-legal-party-and-crossing-departments-is-a-management-control.md"/>
+        <outline text="v1 is adopting a per-product serialization token for the oversell gate" _note="inbox/2026-08-14-v1-adopts-a-per-product-serialization-token-for-the-oversell-gate.md"/>
       </outline>
     </outline>
   </body>
