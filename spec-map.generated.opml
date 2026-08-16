@@ -57,7 +57,7 @@
           <outline text="[object Object]"/>
         </outline>
       </outline>
-      <outline text="Open questions (6 of 41 still open)" _note="The bottleneck. Each blocks what is listed under it.">
+      <outline text="Open questions (8 of 43 still open)" _note="The bottleneck. Each blocks what is listed under it.">
         <outline text="OQ-001 — Are fulfillment legs first-class recorded events with their own identity, or derived from the order…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-007"/>
           <outline text="blocks ADR-0011"/>
@@ -180,6 +180,10 @@
           <outline text="blocks ADR-0033"/>
         </outline>
         <outline text="OQ-041 — Does a pass-through purchase carry a product line — and if so, which one: the line of the thing bou…" _note="owner: alex · decide by: 2026-11-15"/>
+        <outline text="OQ-042 — Does `labour_line` (formerly `cost_type`) stay a POSTING field, or is it derived from the shift's a…" _note="owner: alex · decide by: 2026-11-15">
+          <outline text="blocks ADR-0036"/>
+        </outline>
+        <outline text="OQ-043 — Should the product and organization masters carry an EVENT HISTORY, so that a classification as it…" _note="owner: alex · decide by: 2026-12-15"/>
       </outline>
       <outline text="Conflicts (2 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labour) or an own long-haul run (labour-bearing)?…" _note="Decides whether a trucked fulfillment absorbs labour cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
@@ -476,7 +480,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (47 unpromoted of 66)" _note="no drops pending">
+      <outline text="Capture (48 unpromoted of 67)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -519,6 +523,7 @@
         <outline text="Survey — every reference draws the credit-allocation line at the LEGAL PARTY, so crossing settlemen…" _note="inbox/2026-08-11-survey-unallocated-credit-sits-with-the-legal-party-and-crossing-departments-is-a-management-control.md"/>
         <outline text="v1 is adopting a per-product serialization token for the oversell gate" _note="inbox/2026-08-14-v1-adopts-a-per-product-serialization-token-for-the-oversell-gate.md"/>
         <outline text="Correction — two of the three &quot;not reachable&quot; references in the vendor-side survey were a malformed…" _note="inbox/2026-08-16-correction-two-of-three-unreachable-references-were-a-bad-query-and-sap-models-this-case-exactly.md"/>
+        <outline text="Seven owner rulings on the keys-not-classifications design — line identity is `item.path`, an align…" _note="inbox/2026-08-16-owner-rulings-line-identity-is-item-path-ephemeral-reports-are-never-sealed-and-cost-type-becomes-labour-line.md"/>
         <outline text="Combined survey — when does a vendor-side amount become revenue rather than an adjustment to cost?…" _note="inbox/2026-08-16-survey-a-vendor-side-amount-becomes-revenue-only-where-control-or-a-markup-does.md"/>
         <outline text="Survey — every one of six references keeps the analytical dimension in the same durable store as th…" _note="inbox/2026-08-16-survey-all-six-references-keep-the-dimension-in-the-same-store-as-the-balance-and-only-odoo-splits-the-record.md"/>
         <outline text="Survey — five of six references put the customer on the SUBLEDGER and dimensions on the GL, and Odo…" _note="inbox/2026-08-16-survey-the-party-is-a-subledger-key-and-the-dimension-is-a-gl-slice-and-they-ride-different-legs.md"/>

@@ -1535,3 +1535,67 @@ open_questions:
       ✅ **And that line already carries `tracking_category: null`** — the dimension recommendation
       above, observed in the corpus rather than only proposed. One line is not a population, but the
       operator who typed it reached the same answer.
+
+  - id: OQ-042
+    question: >-
+      Does `labour_line` (formerly `cost_type`) stay a POSTING field, or is it derived from the
+      shift's allocation row the same way `product_line` is derived from the product master?
+    owner: alex
+    decide_by: 2026-11-15
+    blocks: [ADR-0036]
+    status: open
+    notes: >-
+      Surfaced 2026-08-16 by ADR-0036's own criterion, applied to the one dimension ADR-0036
+      deliberately did not sweep along. The owner's ruling addressed **product lines**; `cost_type`
+      was renamed `labour_line` and its enum grown to seven in the same breath, but its *location*
+      was not decided.
+      **THE CRITERION, and it is ADR-0036's own rather than a new one: could this value be revised
+      later without anyone having observed something new?** Yes ⇒ it is a classification and must be
+      derived. No ⇒ it is a fact and may be stored.
+      **The case for STORING it.** `labour_line` records an observation made at the time — this
+      person did delivery work on this job. Nobody re-decides it later from a master record, which is
+      exactly what separates it from `product_line`, whose value is
+      `products.uid_tracking_category` and has moved twice in one month.
+      **The case for DERIVING it.** `shift_recorded` fans `per: shift.absorbed_allocations`, and each
+      row already carries `product_line`, `cost_type` and `causal_job`. If the posting carries the
+      ROW's identity — which HOT-014 showed it must anyway, since one shift becomes several transfers
+      and `source_document` resolves only to the shift — then `labour_line` is reachable without
+      storing it, and the ledger holds keys uniformly rather than keys plus one exception.
+      ⚠️ **The two are not symmetric, and that is what makes this a real question rather than a
+      preference.** Deriving `product_line` crosses into a **mutable master**; deriving `labour_line`
+      crosses only into the **shift record**, which is itself a recorded historical fact. So the
+      derivation is safe in a way the product-master one is not — which weakens the strongest argument
+      for storing it.
+      **Blocks ADR-0036's acceptance only in the sense that the ADR should say which**; its decision
+      on `product_line` stands either way.
+      (`inbox/2026-08-16-owner-rulings-line-identity-is-item-path-ephemeral-reports-are-never-sealed-and-cost-type-becomes-labour-line.md`)
+
+  - id: OQ-043
+    question: >-
+      Should the product and organization masters carry an EVENT HISTORY, so that a classification as
+      it stood at any past date is recoverable?
+    owner: alex
+    decide_by: 2026-12-15
+    blocks: []
+    status: open
+    notes: >-
+      Owner, 2026-08-16: "i like the idea of maintaining an event history on products and
+      organizations." Recorded as a question rather than folded into ADR-0036, because it is a
+      capability nobody has costed.
+      **What it buys, specifically, in the ADR-0036 design.** ADR-0036 derives the product line at
+      report time from the current master, so every historical product-line P&L re-runs **as
+      classified NOW**. With a categorisation history it also re-runs **as classified THEN** — the
+      strongest form of the re-runnability the owner gave as the reason for allocation-as-reporting,
+      and it needs no ledger field at all.
+      ⚠️ **It is not needed for correctness and must not be presented as if it were.** ADR-0036 is
+      safe without it: the sealed compliance artifacts (balance sheet, account-level P&L) carry no
+      product line, so a re-categorisation cannot restate a closed period. This is a BI capability on
+      a BI report.
+      **Two questions inside it**: whether the history is a general audit log or specifically a
+      classification history (much cheaper, and the only part this design uses), and whether
+      organizations need it for the same reason — a customer-type P&L is the other ephemeral report
+      the owner named, and customer type is the same shape of mutable classification.
+      ⚠️ **v1 already holds part of the answer and it should be measured before designing.** Products
+      and organizations both carry a `version` field and a `updated_by`, and `uid_thread` links a
+      comment thread — so some change signal exists today. Whether it is enough to reconstruct a past
+      categorisation is unverified.

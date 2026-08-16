@@ -46,7 +46,25 @@ The keys a posting carries:
 - **Causal order(s)** — the order or orders that caused it. Plural by construction: a shared run
   serving several jobs, and a settlement across several invoices, both exist.
 - **Invoice link**, where the posting arises from billing.
-- **Line identity** — which line of which document the posting is for.
+- **Line identity — `item.path`**, never `item.uid`. `uid` identifies the *product* and repeats
+  within one document (18% of prod orders); `path` is the row identity, authored by exactly one
+  function and self-inclusive (`path.at(-1) === item.uid`).
+
+**One key may serve all three.** `INVOICE_ITEM_LEVELS` is `[order, destination, group]` against
+`ORDER_ITEM_LEVELS`'s `[destination, group]`, so an invoice item's path is the order item's path
+prefixed by an order divider — `path[0]` **is** the causal order. Where the two agree, one stored
+path carries line identity, invoice link and causal order together, and TigerBeetle reference space
+is freed rather than spent.
+
+⚠️ **That economy is not yet available and its precondition is measurable.** `api-cloudrun#485`:
+10 invoice lines sit at a different path than their order line, a component flattened out of its
+parent subtree. Small, and it must close first — a posting keyed on a wrong path is wrong forever.
+⚠️ **And it does not cover labour.** `shift_recorded` keys to a causal job with no invoice line, and
+its `absorbed_allocations` rows need their own identity (HOT-014's three-transfers-from-one-shift).
+
+**Keys are `products.uid`, never `sku`.** A human-readable id is by construction one someone will
+want to change; `sku` is a display and integration concern (it replaces `crms_id` within ~6 months
+and does not govern).
 
 `product_line` and `cost_type` are **not** posting fields. The product-line view is derived at report
 time by joining the posting's line identity to the product master. `ledger/dimensions.yaml` describes
@@ -80,27 +98,40 @@ the other two did, by being the first to take the untravelled path.
   against a classification: a posting with no causal order is unallocatable and should be refused,
   and unlike a category there is no defensible null. The golden rejection vectors move from
   "missing dimension" to "missing key".
-- ⚠️ **`cost_type` is NOT settled by this ADR.** It is `[delivery, counter, warehouse]` — "what kind
-  of work a labour posting represents" — which is a fact about the **shift**, not a classification of
-  a product, and the owner's statement addressed product lines. It may well be a genuine posting
-  field. Left open deliberately rather than swept along.
-- ⚠️ **`item.uid` is NOT a line identity and must not be used as one.** It identifies the *product*
-  and repeats within a single document — 18% of prod orders per the workspace `CLAUDE.md`, which is
-  why `path` exists and why `uid_parent: string` was unrepresentable. A posting keyed on `item.uid`
-  cannot distinguish two lines of the same product in different groups. **What "line identity" means
-  concretely is the first thing this ADR's implementation must pin**, and the candidates are the
-  item `path` or a minted stable line id.
+- **`cost_type` is renamed `labour_line` and its enum grows to seven** — `delivery`, `counter`,
+  `warehouse`, `trash_&_cleanup`, `shipping_&_handling`, `trucking`, `crew` (owner, 2026-08-16).
+  `cost_type` was too broad, and `labour_line` pairs with `product_line` by design. Five of the seven
+  mirror an activity product line; `counter` and `warehouse` bill nobody.
+  ⚠️ **Whether it stays a POSTING field is open, and the criterion is this ADR's own.** The case for
+  keeping it: it is an **observation recorded at the time**, not a value looked up from a mutable
+  master. The case against: the shift record already holds it per allocation row, so the posting could
+  carry the row identity and derive it. **Test — could this value be revised later without anyone
+  having observed something new?** Yes ⇒ classification. No ⇒ fact. Answer before the sweep.
 - **The dimensional balance stops being readable from the ledger alone.** Every product-line figure
   now requires a join to the product master. That is the cost, and it is the same cost ADR-0029
   already accepted for allocation.
-- ⚠️ **A join to a mutable master means a report is only reproducible if the master's state is
-  pinned.** ADR-0017 seals a period's Parquet and hashes it; that artifact must therefore carry the
-  product-line *as resolved at seal time*, or a re-categorisation silently restates a closed period —
-  the exact failure this ADR exists to prevent, reintroduced one layer up. **A sealed period pins the
-  classification; an open period resolves it live.** Re-running history under a *new* categorisation
-  then becomes a deliberate, versioned act, exactly like ADR-0031's `basis_version`.
+- **Nothing needs pinning at seal time, because these reports are never sealed.** Owner, 2026-08-16:
+  "there's no reason an ephemeral report would ever need to be sealed or locked. The balance sheet
+  and P&L can be derived without these mutable fields. **A P&L by product line or customer type is
+  driven by a need for business intelligence, not compliance.**" ADR-0017's sealed artifact is the
+  compliance statement — balance sheet and account-level P&L — and neither carries a product line.
+  So deriving from a mutable master creates no closed-period exposure at all.
+- ⚠️ **ADR-0031 §4 and `reporting/allocation-bases.yaml` therefore overstate their case** and need
+  amending: both justify `basis_version` as protecting ADR-0017's no-drift guarantee for "a report
+  over a sealed period", and the product-line P&L is not one. **`basis_version` survives on its own
+  merits** — knowing which basis produced a number, and ADR-0031's own "run both and compare". Only
+  the ADR-0017 justification goes.
 - **Re-runnability, which is the owner's reason for the whole split, now covers categorisation too.**
-  Before this ADR, a basis could be re-run but a category could not. Both can now.
+  Before this ADR, a basis could be re-run but a category could not. Both can now — and with a
+  categorisation history on the product master, a historical P&L becomes re-derivable **as classified
+  then** as well as **as classified now**, with no ledger field at all.
+- **Per-product TigerBeetle accounts married to a product-line account were raised and set aside**
+  (owner, 2026-08-16: "probably overkill and/or trying to force something into TigerBeetle that
+  doesn't naturally fit"). Recorded so it is not re-argued a third time: it is ADR-0008's exploded
+  model again, **the marriage is the mutable half** and TigerBeetle accounts cannot be re-parented,
+  and the one place the shape *is* natural already exists — per-item balances that must not go
+  negative are the inventory-custody ledger (ADR-0015). Per-product **money** balances are a
+  reporting roll-up, which is the test for what does not belong in TigerBeetle.
 - **The chart of accounts' `dimensions:` lists and gate 10's dimension checks are obsoleted** in their
   current form, and `ledger/vectors/` will need reworking. That is a large mechanical follow-up and
   it is not performed here.
