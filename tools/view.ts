@@ -32,6 +32,7 @@
 import { parse as parseYaml } from "@std/yaml";
 import { walk } from "@std/fs";
 import { basename, relative } from "@std/path";
+import { CONTEXTS } from "./contexts.ts";
 
 const ROOT = new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const isTemplate = (p: string) =>
@@ -41,17 +42,12 @@ const rel = (p: string) => relative(ROOT, p);
 // Same skip set validate.ts uses: the harness installs a node_modules tree of unparseable READMEs.
 const SKIP = [/[\\/]node_modules[\\/]/, /[\\/]spikes[\\/]harness[\\/]\.(bin|data)[\\/]/];
 
-const CONTEXT_CODES: Record<string, string> = {
-  LED: "ledger",
-  FUL: "fulfillment",
-  BIL: "billing",
-  FA: "fixed-assets",
-  ORD: "ordering",
-  AVL: "availability",
-  BNK: "banking",
-  TAX: "tax",
-};
-const CONTEXT_DIRS = Object.values(CONTEXT_CODES);
+// The registry is `tools/contexts.ts` and nothing else may hold a copy — see the note there.
+// ⚠️ This file held a NINTH copy until 2026-08-16: a hardcoded eight-entry map, written before
+// procurement existed and never updated (erp-spec#10 consolidated the four copies it knew about
+// and missed this one, because `view.ts` runs no gate and so never went red). The viewer silently
+// omitted every procurement requirement and event — the exact rot the registry exists to prevent,
+// and a reminder that a hand-maintained list in a tool NOTHING VALIDATES rots invisibly.
 
 // ── types (a superset of what validate.ts loads; only display fields added) ───
 interface Req {
@@ -184,7 +180,7 @@ async function mdFiles(dir: string): Promise<string[]> {
 async function loadSpec(): Promise<Spec> {
   const reqs: Req[] = [];
   const evts: Evt[] = [];
-  for (const dir of CONTEXT_DIRS) {
+  for (const dir of CONTEXTS) {
     const ry = await readYaml<{ requirements?: Req[] }>(
       `${ROOT}/contexts/${dir}/requirements.yaml`,
     );
