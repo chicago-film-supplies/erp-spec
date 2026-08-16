@@ -56,7 +56,6 @@ dimensions:
       - Power, Lights & Tools
       - Trash & Cleanup
       - Janitorial
-      - Transaction Fees
       - Walkies & Hotspots
       - Carts & Ramps
       - Expendables
@@ -64,6 +63,7 @@ dimensions:
       - Crew
       - Tents
       - Transport
+      - Shipping
     note: >-
       **20 values.** `Other` was deleted by OQ-022 — it read as a category and meant "nobody chose",
       which is the one thing a non-nullable dimension must not let back in. ✅ **The source system

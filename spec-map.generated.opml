@@ -57,7 +57,7 @@
           <outline text="[object Object]"/>
         </outline>
       </outline>
-      <outline text="Open questions (7 of 40 still open)" _note="The bottleneck. Each blocks what is listed under it.">
+      <outline text="Open questions (8 of 41 still open)" _note="The bottleneck. Each blocks what is listed under it.">
         <outline text="OQ-001 — Are fulfillment legs first-class recorded events with their own identity, or derived from the order…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-007"/>
           <outline text="blocks ADR-0011"/>
@@ -179,6 +179,7 @@
         <outline text="OQ-040 — Is `settlement_point` a declared LEDGER DIMENSION, or a document attribute the read side joins to —…" _note="owner: alex · decide by: 2026-12-15">
           <outline text="blocks ADR-0033"/>
         </outline>
+        <outline text="OQ-041 — Does a pass-through purchase carry a product line — and if so, which one: the line of the thing bou…" _note="owner: alex · decide by: 2026-11-15"/>
       </outline>
       <outline text="Conflicts (1 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labour) or an own long-haul run (labour-bearing)?…" _note="Decides whether a trucked fulfillment absorbs labour cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">

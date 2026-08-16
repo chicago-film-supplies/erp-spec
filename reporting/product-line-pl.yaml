@@ -48,8 +48,11 @@ report:
   # ── which product lines are goods, and which are activity ────────────────────────────────────
   # The taxonomy mixes categories of GOODS with categories of ACTIVITY, and the mix is not stable:
   # of the FIVE activity lines TWO are material — `Delivery` 13.91% and `Trash & Cleanup` 8.58%,
-  # together 22.5% of revenue — `Transport` is mid-sized at 2.35%, and two are small (`Crew` 0.21%,
-  # `Transaction Fees` 0.29%). `Transport` was restored by OQ-034 on 2026-08-16.
+  # together 22.5% of revenue — `Transport` (trucking) is 2.01%, and two are small (`Shipping` 0.34%,
+  # `Crew` 0.21%). `Transport` was restored and split from `Shipping` by OQ-034 on 2026-08-16, and
+  # `Transaction Fees` LEFT the dimension on the same day: a card fee is caused by how the customer
+  # paid, not by what was supplied, so no product line is true of it. 4700 and 5500 carry no
+  # dimension, which ADR-0025 permits per account and 4800 Other Income already does.
   #
   # ⚠️ **`activity` no longer implies `spreads`, and that is the most misreadable thing in this
   # file.** Of the five, exactly ONE spreads: `Delivery`, because it is not severable — "we wouldn't
@@ -86,8 +89,8 @@ report:
     Crew: activity
     Delivery: activity
     Trash & Cleanup: activity
-    Transaction Fees: activity
     Transport: activity
+    Shipping: activity
 
   # ── the pools ────────────────────────────────────────────────────────────────────────────────
   # One entry per ACTIVITY line, and every one of them lands in exactly one bucket — the same
@@ -144,61 +147,48 @@ report:
         Cost joins this pool as it arrives: labour COGS carrying `cost_type: delivery` (ADR-0019,
         5800/5801) is in the ledger now; vehicle COGS is ADR-0030 and its accounts are unchosen.
 
-    - id: transaction_fees
-      product_line: Transaction Fees
+    - id: shipping
+      product_line: Shipping
       status: not_allocated
-      accounts: [4700, 5500]
+      accounts: [4150, 5300]
       reason: >-
-        A card fee is caused by the PAYMENT METHOD, not by the goods. It varies with how the
-        customer chose to settle and not with what was supplied or moved, so spreading it over goods
-        would make a product look expensive because someone paid by card. It stays on its own line,
-        below the allocated margin. Measured 2026-08-09: 72 lines, $2,581.98, 0.2% of revenue.
-        Consistent with api-cloudrun#401, which moves Card Fee off a `sale` line and onto a real
-        `transaction_fee` — a fee is not a sale, and it is not a product line's cost either.
-        ✅ **This pool has a COST side, named by the owner 2026-08-16: `5500 Cost of Goods Sold:
-        Merchant Fees`** (Active). So it is the one activity line whose margin is already fully
-        expressible — 4700 revenue against 5500 cost, both on the same product line, neither
-        allocated. Every other pool is waiting on a cost that is not in the ledger yet.
-        It also absorbs OQ-032's `Card Fee` restatement: the $1,968 currently inside 4110 moves to
-        **4700**, pairing with 5500 on the cost side rather than sitting inside delivery revenue
-        with its cost somewhere else entirely.
+        **Severable, and its cost is BOUGHT IN rather than performed.** Split out of `Transport` by
+        OQ-034 on 2026-08-16 — owner: "shipping is a pass through, trucking is our own longer or
+        bigger haul." Third-party freight, bought and re-billed: no CFS crew-day, no vehicle.
+        Spreading it over goods would move a markup onto lines that did not cause it.
+        **This is the only pool whose margin is fully expressible today** — `4150 Shipping & Handling
+        Income` against `5300 Cost of Goods Sold: Shipping (Rentals & Sales Only)`, both on this
+        line, so the margin IS the markup and nothing is pending. Every other pool waits on a cost
+        that is not in the ledger yet.
+        It is classified `activity` rather than given a `pass_through` kind of its own. Two reasons:
+        the account is `Shipping & HANDLING` and CFS does handle it, so a performed component is
+        real; and a third kind with one member that changes no behaviour is the shape `Other` was
+        deleted for. What is distinctive about it — a bought-in cost — is already visible in the
+        accounts (5300, not 5800).
+        Measured 2026-08-09: 16 lines, $5,665.00, 0.34% of revenue.
 
     - id: transport
       product_line: Transport
       status: not_allocated
-      accounts: [4100, 4150, 5300]
+      accounts: [4100]
       reason: >-
-        **Severable — carries its own margin.** OQ-034 answered by the owner 2026-08-16: "trucking
-        is our own longer or bigger haul that doesn't fit into the standard delivery charge
-        paradigm, it should carry its own margin." That is the severability test passing, on the
-        same criterion as `crew` and `trash_cleanup`: `Delivery` spreads because it is a joint cost
-        of the product revenue, and a haul sold on its own terms is not.
-        ⚠️ **This pool holds TWO economically different things, and the allocation answer happens to
-        be the same for both.** Owner, same ruling: "shipping is a pass through, trucking is our own
-        longer or bigger haul." `Shipping` (16 lines, $5,665.00, account **4150 Shipping & Handling
-        Income**) is third-party freight bought and re-billed — no CFS crew-day and no vehicle.
-        `Trucking` (7 lines, $34,000.00, account 4100) is CFS-performed and labour-bearing, which is
-        ADR-0011's ruling on OQ-010 — a trucked leg generates a shift and absorbs a person-day.
-        Neither spreads, so one pool is correct today. **What differs is the COST side** — a freight
-        invoice versus crew plus vehicle — so a reader must not take the single line as a claim that
-        the two are the same kind of work. Whether they eventually become two product lines is not
-        decided and blocks nothing.
-        ⚠️ **The asymmetry is visible in the accounts, and it means this pool's margin is HALF
-        expressible today.** Owner, 2026-08-16: `5300 Cost of Goods Sold: Shipping (Rentals & Sales
-        Only)` pairs with `4150`. So the **Shipping** half is complete — a passthrough with its
-        revenue and its bought-in cost on the same product line, which is what a passthrough should
-        look like, and its margin is the markup. The **Trucking** half has revenue on 4100 and its
-        cost in two places that are not here: labour COGS carrying `cost_type: delivery`
-        (ADR-0019, 5800/5801) and vehicle COGS, whose accounts ADR-0030 has not chosen. **Reading
-        this pool's margin before vehicle COGS lands overstates trucking**, in exactly the way the
-        file header warns about for `Delivery`.
-        Restored to `ledger/dimensions.yaml` by the same ruling: 23 lines, $39,665.00, 2.35% of
-        revenue, the 14th largest of 20 lines — above `Expendables`, `Carts & Ramps` and
-        `Janitorial`, all of which were already declared. It had been dropped on a measurement that
-        read the invoice-line denorm rather than the product master (api-cloudrun#473).
-        ⚠️ `spikes/harness/allocation-basis-probe.ts` classifies `Transport` as goods by omission and
-        is now wrong — erp-spec#15 already blocks re-running it.
-
+        **Severable — carries its own margin.** OQ-034, owner 2026-08-16: "trucking is our own
+        longer or bigger haul that doesn't fit into the standard delivery charge paradigm, it should
+        carry its own margin." That is the severability test passing, on the same criterion as `crew`
+        and `trash_cleanup`: `Delivery` spreads because it is a joint cost of the product revenue,
+        and a haul sold on its own terms is not.
+        **This line is TRUCKING ONLY since the 2026-08-16 split.** `Shipping` moved to its own pool —
+        the two were one value only in the dimension, never in the chart, which has carried them on
+        different revenue accounts (4100 vs 4150) throughout. Splitting removed the single place they
+        were conflated rather than inventing a distinction, and it settles HOT-001's question — "does
+        `Trucking` mean third-party freight or an own long-haul run?" — structurally instead of in
+        prose. Trucking is CFS-performed and labour-bearing, per ADR-0011's ruling on OQ-010: a
+        trucked leg generates a shift and absorbs a person-day.
+        ⚠️ **This pool's margin is NOT yet readable, and that is the trap the file header warns about
+        for `Delivery`.** Revenue is on 4100; the cost is labour COGS carrying `cost_type: delivery`
+        (ADR-0019, 5800/5801) plus vehicle, and **ADR-0030 has not chosen the vehicle COGS
+        accounts**. Until it does, a Transport margin read off this pool overstates trucking.
+        Measured 2026-08-09: 7 lines, $34,000.00, 2.01% of revenue.
     - id: crew
       product_line: Crew
       status: not_allocated

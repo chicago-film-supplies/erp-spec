@@ -1369,3 +1369,44 @@ open_questions:
       dimensions. **This question cannot be fully closed until HOT-013 is**, but the recommendation
       above is unaffected by it: it holds whichever way the storage question falls, and it removes
       one claimant rather than adding one.
+
+  - id: OQ-041
+    question: >-
+      Does a pass-through purchase carry a product line — and if so, which one: the line of the
+      thing bought, or none at all?
+    owner: alex
+    decide_by: 2026-11-15
+    blocks: []
+    status: open
+    notes: >-
+      Raised 2026-08-16 while pairing a cost account to `4140 Pass Through Income`. Owner: CFS buys
+      something for a customer, marks it up and bills them for it, "usually from a vendor that isnt
+      willing or able to onboard direct with our customer" — CFS acting as a purchasing agent.
+      **The chart previously asserted an answer.** 4140's note read "a rebilled cost takes the
+      product line of the thing passed through, so the dimension is available even though the margin
+      is nil". Both halves were wrong: the margin is the **markup**, not nil, and the product-line
+      claim is an assumption rather than a rule. A widget bought for a customer from a one-off vendor
+      may belong to **no CFS product line at all** — the taxonomy describes what CFS supplies and
+      performs, and this is neither.
+      **Measured 2026-08-16, and the shape of the usage is the evidence.**
+      `api:2026-08-16:db_products_count`: **0 of 549 products** carry `price.coa_revenue: 4140`, so
+      nothing is configured to post here. `api:2026-08-16:db_invoices_query` over the first **63**
+      invoices found **1** line on 4140 — a `custom-` line, typed by hand. That is exactly what an
+      account reached only by ad-hoc entry looks like, and it is why no product master can supply the
+      dimension the way it does for every other revenue account.
+      ⚠️ **Not a corpus-wide count.** 63 of 999 invoices; the sweep stopped there because a full
+      count needs a script rather than MCP paging. The population is small but its exact size is
+      unmeasured, and "how often does CFS actually pass through" is worth knowing before deciding —
+      a handful of lines and a regular practice deserve different answers.
+      **Three candidate answers**, and the third is the one the Transaction Fees ruling makes
+      available: the line of the thing bought (what the chart assumed); `product_line: null` on a
+      dimensioned account, meaning "this IS a categorised kind of sale and no tracked line applies";
+      or **no dimension obligation at all**, as 4700/5500 now have — ADR-0025 makes it per-account,
+      and a purchasing-agent recharge is arguably no more a product line than a card fee is.
+      Both `4140` and the newly minted **`5150 Cost of Goods Sold: Pass Through`** carry
+      `dimensions: undecided` and name this question, so neither can be posted to until it is
+      answered.
+      ⚠️ **Accounting-shaped, so CLAUDE.md's six-reference survey applies** before a recommendation.
+      Gross-versus-net presentation of an agency arrangement is a real GAAP question (ASC 606's
+      principal-versus-agent test), and if CFS is an agent rather than a principal the answer may not
+      be a dimension at all — it may be that only the markup is revenue.

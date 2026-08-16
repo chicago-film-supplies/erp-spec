@@ -891,13 +891,32 @@ accounts:
     name: "Pass Through Income"
     class: revenue
     normal_balance: credit
-    dimensions: [product_line]
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
+    dimensions: undecided
+    blocked_by: [OQ-041]
+    reason: >-
+      A rebilled purchase may belong to no CFS product line at all — CFS is buying a thing it does
+      not stock from a vendor it does not normally use. This entry previously ASSERTED that "a
+      rebilled cost takes the product line of the thing passed through"; that is the assumption
+      OQ-041 tests rather than a settled rule.
     note: >-
-      One of the five `name: "TODO"` accounts. A rebilled cost takes the product line of the thing
-      passed through, so the dimension is available even though the margin is nil.
+      One of the five `name: "TODO"` accounts. **CFS buys something for a customer, marks it up and
+      bills them for it — usually from a vendor that is unwilling or unable to onboard the customer
+      direct** (owner, 2026-08-16). CFS is acting as a purchasing agent.
+      ⚠️ **This note previously said "the margin is nil". It is not — the whole point is the
+      markup.** It also asserted that "a rebilled cost takes the product line of the thing passed
+      through", which is now OQ-041: a widget bought for a customer may belong to no CFS product
+      line at all, so the dimension is `undecided` rather than assumed.
+      ⚠️ **It has no cost account.** Owner, 2026-08-16: "it should get a matching cogs." Minted below
+      as 5150 — the pairing 4150/5300 and 4700/5500 already have, and 4140 lacked.
+      **Measured 2026-08-16**: `api:2026-08-16:db_products_count` — **0 of 549 products** carry
+      `price.coa_revenue: 4140`, so nothing is configured to post here. `api:2026-08-16:db_invoices_query`
+      over the first **63** invoices found **1** line on 4140, and it is a `custom-` line typed by
+      hand. That fits the description: a vendor that will not onboard is ad-hoc by nature, so the
+      account is reached by custom line rather than by product. ⚠️ Not a corpus-wide count — 63 of
+      999 invoices, stopped there because a full sweep needs a script rather than MCP paging.
 
   - code: 4150
     name: "Shipping & Handling Income"
@@ -981,13 +1000,26 @@ accounts:
     name: "Transaction Fee Income"
     class: revenue
     normal_balance: credit
-    dimensions: [product_line]
+    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
     note: >-
-      One of the five `name: "TODO"` accounts. `Transaction Fees` is an existing `product_line`
-      value, so this account dimensions cleanly and pairs with 5500 on the cost side.
+      One of the five `name: "TODO"` accounts. Pairs with **5500 Cost of Goods Sold: Merchant Fees**:
+      what the customer is charged, against what the processor takes. The margin is the recharge
+      spread and it is readable with no dimension at all.
+      ⚠️ **Carries NO product line, decided 2026-08-16.** This note previously read "`Transaction
+      Fees` is an existing `product_line` value, so this account dimensions cleanly" — and that value
+      was retired the same day. A card fee is caused by HOW the customer paid, not by what was
+      supplied or performed, so no product line is true of it; keeping one would have been a bucket
+      meaning "not the other ones", which is exactly what got `Other` deleted.
+      ADR-0025 makes the dimension obligation **per account**, so `[]` is a legal shape here rather
+      than an exception — `4800 Other Income` is the precedent. ⚠️ It does **not** make this account
+      non-operating: 4800 is non-operating because of what it holds, while this is an operating
+      recharge that simply has no product line. Two different reasons for the same empty list.
+      Restatement under ADR-0020: 72 lines / $2,581.98 carry `product_line: Transaction Fees` today
+      and will carry none. It alters no amount, which is the only thing ADR-0020 forbids. OQ-032's
+      `Card Fee` move off 4110 lands here as well.
 
   - code: 4800
     name: "Other Income"
@@ -1087,6 +1119,28 @@ accounts:
       cost with actual, so the note went with it. Equipment rented in to fill an order takes the
       product line of what it substitutes for.
 
+  - code: 5150
+    name: "Cost of Goods Sold: Pass Through"
+    class: expense
+    normal_balance: debit
+    dimensions: undecided
+    blocked_by: [OQ-041]
+    disposition: new
+    status_live: absent
+    reason: >-
+      **4140 Pass Through Income had no cost side.** Owner, 2026-08-16: "it should get a matching
+      cogs." Every other recharge pair in this chart has one — 4150/5300 for freight, 4700/5500 for
+      merchant fees — and without it a passthrough reports its full re-billed amount as margin.
+      **Not 5400 Job Costs, and not 5100 Subrentals.** 5400 is `disposition: drop` precisely because
+      "a catchall beside those accounts is where cost goes to avoid being classified"; reviving it
+      for this would reintroduce exactly that. 5100 Subrentals is gear CFS does not own but still
+      SUPPLIES — CFS is the supplier. A passthrough is CFS acting as a **purchasing agent** for the
+      customer, which is a different economic role and a different margin story.
+      Placed at 5150 to sit adjacent to 5100, the other "obtained from a third party for this job"
+      account, following the chart's sub-numbering convention (1501 under 1500, 5001 under 5000).
+      ⚠️ The code is a PROPOSAL; the pairing is the decision.
+    source: ADR-0029
+
   - code: 5200
     name: "Cost of Goods Sold: Subcontractors, Sales Commissions"
     class: expense
@@ -1130,13 +1184,15 @@ accounts:
     name: "Cost of Goods Sold: Merchant Fees"
     class: expense
     normal_balance: debit
-    dimensions: [product_line]
+    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
     note: >-
-      Card, Venmo, PayPal, wire and ACH fees on sales. Dimensions to the `Transaction Fees` product
-      line, pairing with 4700 on the revenue side.
+      Card, Venmo, PayPal, wire and ACH fees on sales. Pairs with 4700 on the revenue side.
+      ⚠️ **Carries NO product line, decided 2026-08-16** — see 4700 for the reasoning. This note
+      previously read "Dimensions to the `Transaction Fees` product line", and that value was retired
+      the same day.
 
   - code: 5600
     name: "Cost of Goods Sold: Packaging"
