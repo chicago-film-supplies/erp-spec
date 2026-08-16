@@ -150,12 +150,14 @@ const goodsDisagreements = new Map<string, number>();
 let rows = 0, revenueLines = 0, totalCents = 0;
 let voidLines = 0, voidCents = 0;
 const statuses = new Map<string, number>();
+const itemTypes = new Map<string, number>();
 const disagreeSamples: string[] = [];
 
 for (const inv of invoices) {
   statuses.set(inv.status, (statuses.get(inv.status) ?? 0) + 1);
   for (const it of inv.items ?? []) {
     rows++;
+    itemTypes.set(it.type, (itemTypes.get(it.type) ?? 0) + 1);
     if (STRUCTURAL.has(it.type)) continue;
     revenueLines++;
     const cents = it.price?.subtotal_discounted_cents ?? 0;
@@ -234,6 +236,30 @@ console.log(
     usd(BASELINE_TOTALS.cents)
   }`,
 );
+console.log(
+  `items by type: ${
+    [...itemTypes].sort((a, b) => b[1] - a[1]).map(([t, n]) => `${t} ${n}`).join(", ")
+  }`,
+);
+{
+  // ⚠️ The TOTAL row count is not comparable to the 2026-08-09 note's, and nothing derived may use
+  // it. That note recorded 11,131 rows; a direct Firestore read of the same corpus plus 11 invoices
+  // gives 14,410, and the difference is almost exactly the `group` dividers — its `items[].x` MCP
+  // projection did not return them. `order` + `destination` alone reproduce its 1,937 structural rows
+  // to within one. The REVENUE-BEARING count is unaffected and is what every figure here rests on, so
+  // the incomparability is contained — but it has to be said, or someone diffs the two totals and
+  // concludes the corpus grew three thousand dividers in a week.
+  const orderDest = [...itemTypes]
+    .filter(([t]) => STRUCTURAL.has(t) && t !== "group")
+    .reduce((n, [, c]) => n + c, 0);
+  console.log(
+    `⚠️ total rows are NOT comparable to the baseline's ${BASELINE_TOTALS.rows}: ` +
+      `\`order\`+\`destination\` alone are ${orderDest} against its ` +
+      `${BASELINE_TOTALS.rows - BASELINE_TOTALS.lines} structural rows, so its \`items[].x\` ` +
+      `projection omitted the ${itemTypes.get("group") ?? 0} \`group\` dividers. ` +
+      `Revenue-bearing lines are unaffected.`,
+  );
+}
 console.log(`by status: ${[...statuses].map(([s, n]) => `${s} ${n}`).join(", ")}`);
 console.log(
   `void lines: ${voidLines}, ${usd(voidCents)} = ${pct(voidCents, totalCents)} of revenue`,
@@ -292,6 +318,24 @@ for (const [k, r] of multi) {
 }
 const singles = [...byDenorm.entries()].filter(([, r]) => r.byAccount.size <= 1).length;
 console.log(`\n(${singles} product lines sit on a single account.)`);
+
+// The population that IS in the allocation base but reports under the null row — a goods-ACCOUNT line
+// with no product line. `reporting/vectors/product_line_pl/null-product-line-goods-absorb-their-share.yaml`
+// cites it as its source (143 lines / $67,156 / 4.0% on 2026-08-09), so it needs re-measuring here
+// rather than inferring from the «none» total, most of which is on service accounts.
+{
+  const none = byDenorm.get(NONE);
+  const inBase = [...(none?.byAccount ?? [])].filter(([coa]) => GOODS_ACCOUNTS.has(coa));
+  const lines = inBase.reduce((n, [, a]) => n + a.lines, 0);
+  const cents = inBase.reduce((n, [, a]) => n + a.cents, 0);
+  console.log(
+    `\nnull product line ON A GOODS ACCOUNT — in the base, reports under the null row: ` +
+      `**${lines} lines, ${usd(cents)}, ${pct(cents, totalCents)} of line revenue** (` +
+      inBase.sort((a, b) => b[1].cents - a[1].cents)
+        .map(([coa, a]) => `${coa} ${usd(a.cents)}/${a.lines}`).join(" · ") +
+      ")",
+  );
+}
 
 // Accounts that carry more than one product line — the other direction of the same finding.
 const linesPerAccount = new Map<number, Map<string, number>>();
