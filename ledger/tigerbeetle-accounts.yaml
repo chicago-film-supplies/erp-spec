@@ -159,6 +159,61 @@ transfer_field_budget:
     **Undecided. This is the owner's call**, and it is the live half of what erp-spec#3 was opened
     for — the dead half being the eviction arithmetic, corrected above.
 
+  # ── why the first two fields are not redundant, proved in BOTH directions ─────────────────────
+  the_pair_answers_grouping_and_provenance: >-
+    Owner, 2026-08-16: **why do `journal_entry_id` and `source_document_ref` need to be different?**
+    The entry below proves only that the grouping is not a function of the document. The converse —
+    is the document derivable from the entry id? — had never been asked, and it is what makes the
+    pair non-redundant rather than merely conventional.
+    **Measured across the 13 `specified` posting rules: 3 span several source documents** —
+    `settlement_recorded`, `credit_note_allocated` and `vendor_bill_received`. The other 10 do not.
+    · **For those 3, no derivation exists even in principle**: one entry, many documents, one per
+    transfer, so the entry id cannot say which invoice a given transfer relieved.
+    · **For the other 10 it exists only through the projection**, which defeats the point — a
+    `journal_entry_id` is an opaque uid, so from TigerBeetle alone it identifies a group and says
+    nothing about what the group was for. Deriving the document from it means asking Mongo, the
+    exact dependency the field is carried to avoid.
+    ⇒ **Grouping and provenance are two facts.** TigerBeetle's `linked` flag gives a set atomicity
+    but not identity — atomic and anonymous — so the group needs an id; and a transfer must name its
+    own document or the ledger is not self-describing. Neither derives the other.
+    (`inbox/2026-08-16-the-two-reference-fields-answer-different-questions-and-a-path-fits-neither.md`)
+
+  # ⚠️ The claimant ADR-0036 introduces, and the one place it can actually go.
+  line_identity_replaces_the_document_ref_rather_than_joining_it: >-
+    Owner, 2026-08-16: **is line identity (`item.path`) already using one of these fields?** No — it
+    appears nowhere in this table today. It enters only through ADR-0036 (`proposed`), and measuring
+    it changes the arithmetic in both directions.
+    ✅ **A path SUBSUMES a document ref**, because it names the document and the row within it. So
+    stored line identity should **displace** `source_document_ref` in `user_data_64` rather than sit
+    beside it. That is a real saving and it is the answer to the question.
+    ⚠️ **But it does not fit, and it is not close.** Measured over all 1,010 prod invoices (14,410
+    items) and all 987 orders (13,573 items): invoice paths run to **depth 7** and **178 bytes**,
+    median 115B, and **14,410 of 14,410 exceed a u128's 16 bytes — 100%**. A single 36-char uuid
+    overflows a u128 on its own, and the corpus mixes three uid flavours (20-char Firestore, 36-char
+    uuid, 43-char `custom-` uuid), so no packing rescues it. **Storing line identity means storing a
+    HASH or a minted surrogate.** Collision is not the risk — 19,176 revenue-bearing lines gives a
+    ~1e-11 birthday bound on 64 bits. **Opacity is**: TigerBeetle would hold a fingerprint that
+    VERIFIES against the projection rather than a reference that RESOLVES without it, which is a
+    weaker self-description than the one the two fields above were justified by.
+    ⚠️ **And it does not reliably carry the causal order.** ADR-0036 says `path[0]` **is** the causal
+    order; **30 of 1,010 invoices (2.97%) carry no `order` divider at all**, holding **87
+    revenue-bearing lines worth $87,839.76** whose `path[0]` is a line. A posting keyed on `path[0]`
+    for one of those would record a line uid in a field the spec says holds an order — wrong forever,
+    in an immutable store. (Orders structurally have no order divider — `ORDER_ITEM_LEVELS` is
+    `[destination, group]` — and that is the schema, not a gap.)
+    ✅ **The 30 are a MIGRATION population, and the discriminator is decisive: 0 of them reference an
+    order and 30 of 30 carry a `crms_id`.** Legacy CRMS imports, not a live pattern.
+    ✅ **Owner, 2026-08-16: v1 can re-base order paths to match invoice paths.** That makes
+    `ORDER_ITEM_LEVELS` `[order, destination, group]` and the two structurally identical, so
+    `path[0]` is the causal order on everything the live system produces — ADR-0036's "where the two
+    agree" becomes an invariant rather than a conditional. It cannot reach the 30, which reference no
+    order for a divider to name. **A v1 re-path is a real change**: `path` is the row identity and
+    13,573 order items would be recomputed by `computeItemPaths`, so it needs its own api-cloudrun
+    issue rather than riding along here.
+    ⇒ **The economy saves ONE field, not two**, and the spare u16 now has **three** contenders: the
+    dimensions HOT-013 argues about, the actor ref, and the causal order on the 2.97% of invoices
+    where `path[0]` cannot supply it.
+
   # The finding that closed the other escape hatch.
   # ⚠️ Read the two entries together: erp-spec#3 offered `journal_entry_id` and `posting_rule` as
   # candidate evictions that "may make the shortfall disappear rather than force a choice", and

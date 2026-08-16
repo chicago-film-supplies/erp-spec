@@ -31,7 +31,8 @@
     "valkey": "deno run --allow-read --allow-env --allow-net --allow-sys valkey-queue-probe.ts",
     "//adc": "Read-only prod Firestore under ADC (erp-spec#15). `--allow-net` is narrowed to Google's auth and Firestore hosts so the probes CANNOT reach api.xero.com or api.current-rms.com — both single-tenant and live. No --allow-write.",
     "allocation": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal allocation-basis-probe.ts",
-    "matrix-lines": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal product-line-matrix-probe.ts"
+    "matrix-lines": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal product-line-matrix-probe.ts",
+    "posting-keys": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal posting-key-width-probe.ts"
   },
 
   "fmt": { "lineWidth": 100 },

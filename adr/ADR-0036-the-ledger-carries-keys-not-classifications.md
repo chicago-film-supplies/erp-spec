@@ -73,6 +73,46 @@ subtree. Small, and it must close first — a posting keyed on a wrong path is w
 it does not cover labour.** `shift_recorded` keys to a causal job with no invoice line, and its
 `absorbed_allocations` rows need their own identity (HOT-014's three-transfers-from-one-shift).
 
+⚠️ **THE PRECONDITION IS A FALSE GREEN, and this ADR must not inherit it.** `api-cloudrun#485`
+closed on 2026-08-16 as **`NOT_PLANNED`** — shut, with the divergence standing. "It must close
+first" is satisfied in letter and in nothing else. **So the property was measured rather than the
+issue** (2026-08-16, whole corpus): of **9,307** comparable invoice lines, **8,981 align**, **267
+are invoice-only** lines that never had an order path to agree with, and **59 (0.634%) are
+misaligned — the same line uid at a different path.** Six times #485's count, and one defect class:
+components flattened out of their parent rental, and custom lines lifted out of their group, on
+invoices that omit the unbilled zero-priced parent entirely. ⇒ **The alignment has to become a
+property something can fail on** — `scripts/audit-item-paths.ts` already walks both collections, and
+#485's own last comment proposed that guard — or this ADR's shared key is wrong for 59 lines,
+permanently, in an immutable store. ⚠️ **Separating the 267 is what makes the 59 credible**:
+counting all 326 as misalignment would manufacture a defect out of ordinary invoicing.
+
+✅ **The economy is now MEASURED, and it saves one field rather than two**
+(`inbox/2026-08-16-the-two-reference-fields-answer-different-questions-and-a-path-fits-neither.md`;
+whole corpus, `spikes/harness/posting-key-width-probe.ts`). Three corrections follow, and the ADR
+would have been accepted on all three unstated:
+
+- **A path SUBSUMES `source_document_ref` and should displace it**, because it names the document
+  and the row within it. That is the saving, and it is real: `user_data_64` holds line identity
+  rather than a document ref. It cannot also absorb `journal_entry_id` — 3 of 13 `specified` rules
+  span several source documents, so grouping and provenance are two facts and neither derives the
+  other.
+- ⚠️ **A path does not FIT, and it is not close.** Invoice paths run to depth 7 and **178 bytes**,
+  median 115B; **14,410 of 14,410 exceed a u128's 16 bytes — 100%**, and a single 36-char uuid
+  overflows one on its own. **Line identity is therefore stored as a HASH or a minted surrogate**,
+  not as a path. Collision is not the risk (19,176 revenue-bearing lines gives a ~1e-11 birthday
+  bound on 64 bits); **opacity is** — TigerBeetle holds a fingerprint that VERIFIES against the
+  projection rather than a reference that RESOLVES without it, which is weaker self-description than
+  the two fields it joins were justified by. This ADR takes that trade deliberately.
+- ⚠️ **`path[0]` is not reliably the causal order.** **30 of 1,010 invoices (2.97%) carry no `order`
+  divider at all**, holding **87 revenue-bearing lines worth $87,839.76**. ✅ The discriminator is
+  decisive: **0 of the 30 reference an order and 30 of the 30 carry a `crms_id`** — they are legacy
+  CRMS imports, a migration population rather than a live pattern. ✅ **Owner, 2026-08-16: "we can
+  change order path to match invoice path in v1."** Re-basing `ORDER_ITEM_LEVELS` to
+  `[order, destination, group]` makes the two structurally identical, which turns "where the two
+  agree" from a conditional into an invariant **for everything the live system produces**. It cannot
+  reach the 30 — they reference no order, so there is nothing for a divider to name. The rule is
+  fixed going forward; the 30 need a migration answer, not a path answer.
+
 **Keys are `products.uid`, never `sku`.** A human-readable id is by construction one someone will
 want to change; `sku` is a display and integration concern (it replaces `crms_id` within ~6 months
 and does not govern).
@@ -132,7 +172,17 @@ other two did, by being the first to take the untravelled path.
   what is refused is an undeclared value, not a null. That rule is _better_ against a key than
   against a classification: a posting with no causal order is unallocatable and should be refused,
   and unlike a category there is no defensible null. The golden rejection vectors move from "missing
-  dimension" to "missing key".
+  dimension" to "missing key". ⚠️ **"No defensible null" is FALSIFIED by the corpus, and the
+  correction is the owner's to choose.** **$87,839.76 across 87 revenue-bearing lines on 30 issued
+  invoices have no causal order** — all 30 legacy CRMS imports referencing no order at all. Refusing
+  them outright makes 30 historical invoices unpostable, which ADR-0020's "the restatement must not
+  alter any amount" forbids. Three amendments are available: **(1)** the rule binds NEW postings
+  only and migrated history carries an explicit null; **(2)** the migration mints a synthetic order
+  per legacy invoice — fabricating a document that never existed; **(3)** the key is nullable
+  outright, which weakens it into exactly the classification-shaped thing this ADR refuses. **(1) is
+  the only one that neither fabricates a record nor dissolves the rule**, and it is what this ADR
+  should say before acceptance. Recorded here rather than silently chosen, because it changes what
+  the rejection vectors assert.
 - **`cost_type` is renamed `labor_line` and its enum grows to seven** — `delivery`, `counter`,
   `warehouse`, `trash_&_cleanup`, `shipping_&_handling`, `trucking`, `crew` (owner, 2026-08-16).
   `cost_type` was too broad, and `labor_line` pairs with `product_line` by design. Five of the seven
