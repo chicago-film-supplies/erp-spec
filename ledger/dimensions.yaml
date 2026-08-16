@@ -32,7 +32,12 @@
 # ⚠️ Zero DISAGREEMENTS is not purely good news. An invoice is a point-in-time document and a line that
 # disagrees with a since-renamed master is expected and must never be repaired — so that branch of the
 # rule has never once been exercised, which by this repo's own standard makes it a claim rather than a
-# capability.
+# capability. **And the writer contradicts it**: `productLineDenorms` is the sole author of the field
+# and product wins unconditionally, so any PUT to an issued invoice restamps its lines with the
+# product's CURRENT category. Three artifacts assert point-in-time fidelity and the writer does not
+# implement it; the empty disagreeing population is why nothing can go red on that. Filed as
+# **api-cloudrun#537** — and it matters here because ADR-0020's restatement rule forbids any amount
+# moving, while a rename would silently restate closed-period product-line reports.
 # ⚠️ That $19,638.96 is NOT comparable to the $688.00 above — `Other` was retired at the product
 # master in the same sitting, moving 12 products and ~135 lines out of a named category. **$688.00
 # is the number to cite for "how often did an operator decline to classify".**
