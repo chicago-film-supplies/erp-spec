@@ -81,16 +81,15 @@ revenue on the causal order**.
    an upgrade against a recorded intention rather than a reversal.
 4. **The basis is versioned.** Every produced report records the `basis_version` that made it, so a
    number can always be traced to the basis that produced it and two bases can be run over the same
-   period and compared.
-   ⚠️ **This clause read "…a report over a sealed period must be reproducible byte-for-byte, and a
-   basis that changed silently between runs would break ADR-0017's guarantee that a closed period
-   cannot drift." That premise is FALSE and is retracted 2026-08-16.** Owner: "there's no reason an
-   ephemeral report would ever need to be sealed or locked… **a p&l by product line or customer type
-   is driven by a need for business intelligence, not compliance**." ADR-0017's sealed artifact is
-   the balance sheet and account-level P&L, and neither carries a product line — so this report is
-   not a sealed-period report and cannot break that guarantee. Versioning survives on the merits
-   stated above; only the ADR-0017 justification goes. Re-running a closed period under a new basis
-   is a **feature**, not drift.
+   period and compared. ⚠️ **This clause read "…a report over a sealed period must be reproducible
+   byte-for-byte, and a basis that changed silently between runs would break ADR-0017's guarantee
+   that a closed period cannot drift." That premise is FALSE and is retracted 2026-08-16.** Owner:
+   "there's no reason an ephemeral report would ever need to be sealed or locked… **a p&l by product
+   line or customer type is driven by a need for business intelligence, not compliance**."
+   ADR-0017's sealed artifact is the balance sheet and account-level P&L, and neither carries a
+   product line — so this report is not a sealed-period report and cannot break that guarantee.
+   Versioning survives on the merits stated above; only the ADR-0017 justification goes. Re-running
+   a closed period under a new basis is a **feature**, not drift.
 5. **When the base is zero, the pool stays un-allocated and is shown.** An order with activity
    revenue and no goods line has no denominator. Its pool is reported in a named `unallocated`
    bucket on the face of the product-line P&L. It is never forced onto an arbitrary line, never

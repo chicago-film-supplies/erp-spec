@@ -30,7 +30,7 @@ some tigerbeetle space."
 
 The hierarchies already differ by exactly the right level: `ORDER_ITEM_LEVELS` is
 `[destination, group]`, `INVOICE_ITEM_LEVELS` is `[order, destination, group]`. **An invoice item's
-path is the order item's path prefixed by an order divider.** So `path[0]` on an invoice line *is*
+path is the order item's path prefixed by an order divider.** So `path[0]` on an invoice line _is_
 the causal order, and one stored key does the work of three — line identity, invoice link and causal
 order.
 
@@ -52,8 +52,8 @@ useful; "actual uid still governs".
 
 **So the ledger keys on `products.uid`, never on `sku`.** A human-readable identifier is by
 construction one someone will want to change, and ADR-0036's whole argument is that a mutable value
-must not be frozen onto an immutable posting. `sku` is a display and integration concern.
-Verified 2026-08-16: the live product schema has no `sku` field today; identity is `uid`.
+must not be frozen onto an immutable posting. `sku` is a display and integration concern. Verified
+2026-08-16: the live product schema has no `sku` field today; identity is `uid`.
 
 ## 4. Ephemeral reports are never sealed — and this removes a problem rather than creating one
 
@@ -87,13 +87,13 @@ naturally fit there."
 model in a new costume, and it fails for the same reasons plus one new one:
 
 - **The marriage is the mutable part.** A per-product account is stable — product identity does not
-  move. The **product → product-line link** is what changes, and a TigerBeetle account tree cannot be
-  re-parented, so the marriage freezes exactly the value ADR-0036 exists to keep unfrozen.
+  move. The **product → product-line link** is what changes, and a TigerBeetle account tree cannot
+  be re-parented, so the marriage freezes exactly the value ADR-0036 exists to keep unfrozen.
 - **The chart stops being legible.** The charter gives the CPA read access; ~60 accounts plus a
   derived column hands over cleanly, 549 product accounts do not (ADR-0018, re-affirmed).
-- **The one place this shape IS natural already exists.** Per-item balances that must not go negative
-  are the **inventory-custody ledger** (ADR-0015), a separate TigerBeetle ledger where
-  `credits_must_not_exceed_debits` makes overselling unrepresentable. Per-product *money* balances
+- **The one place this shape IS natural already exists.** Per-item balances that must not go
+  negative are the **inventory-custody ledger** (ADR-0015), a separate TigerBeetle ledger where
+  `credits_must_not_exceed_debits` makes overselling unrepresentable. Per-product _money_ balances
   are a reporting roll-up, not a balance-integrity concern — which is the test for what belongs in
   TigerBeetle at all.
 

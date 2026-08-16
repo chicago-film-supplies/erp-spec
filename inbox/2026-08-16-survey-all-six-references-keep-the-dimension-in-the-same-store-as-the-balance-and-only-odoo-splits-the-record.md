@@ -17,8 +17,8 @@ narrow ADR has to answer:
 > separate structure?**
 
 Required by CLAUDE.md → _Accounting decisions_: "where something posts" and "how two books relate"
-both apply. Distinct from the 2026-08-16 party-versus-dimension survey, which asked *which axis a
-value is*; this asks *which record physically holds it*.
+both apply. Distinct from the 2026-08-16 party-versus-dimension survey, which asked _which axis a
+value is_; this asks _which record physically holds it_.
 
 ## The six
 
@@ -31,7 +31,7 @@ the consolidated totals — and **the presentation and format of the reconciliat
 prescribed**.
 
 So GAAP imposes **no requirement that the general ledger be dimensioned at all**. What it requires
-is that the dimensional statement *tie to* the audited totals. That is a constraint on the
+is that the dimensional statement _tie to_ the audited totals. That is a constraint on the
 relationship between the two, not on where the dimension is stored — and it is the reason a
 projection-only design is not a GAAP violation.
 
@@ -70,15 +70,15 @@ Class, Department and Location are standard; Custom Segments create more. **A cu
 not affect the GL unless the GL Impact box is enabled**, and once enabled it "becomes a first-class
 financial dimension just like Class or Department".
 
-NetSuite is the reference that makes "is this dimension *in* the ledger" an explicit configuration
-decision rather than an emergent one — and the affirmative case puts the value on the GL
-transaction line.
+NetSuite is the reference that makes "is this dimension _in_ the ledger" an explicit configuration
+decision rather than an emergent one — and the affirmative case puts the value on the GL transaction
+line.
 
 ### Sage Intacct — dimensions are on the transaction line and travel into the GL
 
 Dimension values are selected on transaction entry, **propagate to the general ledger**, and are
 committed with the entry as permanent accounting detail readable through the GL Detail API. The
-dimension framework *is* Intacct's general reporting substrate, and it is populated from the posting
+dimension framework _is_ Intacct's general reporting substrate, and it is populated from the posting
 rather than joined at report time.
 
 ### Odoo — the dissent, and it is the informative one
@@ -94,7 +94,7 @@ of doing so:
   tie-out; agreement is a convention.
 - Receivable/payable lines "rarely carry analytic data directly", so the Partner Ledger report needs
   a third-party module that reaches across to the counterpart income/expense lines.
-- The distribution is a *model* applied at posting time; re-running it restates the analytic view
+- The distribution is a _model_ applied at posting time; re-running it restates the analytic view
   without touching the GL.
 
 Odoo's absence-of-integration is exactly the informative case CLAUDE.md says to look for: the
@@ -102,22 +102,22 @@ workarounds published around it measure what the split costs.
 
 ## What the survey settles
 
-| Reference    | Dimension lives                                     | Same record as the amount? | Same durable store? |
-| ------------ | --------------------------------------------------- | -------------------------- | ------------------- |
-| **GAAP**     | unspecified — only the tie-out is mandated          | n/a                        | n/a                 |
-| **Xero**     | `TrackingCategories` on the journal line            | **yes**                    | **yes**             |
-| **SAP**      | columns on `ACDOCA`, after merging FI + CO          | **yes** (deliberately)     | **yes**             |
-| **NetSuite** | GL transaction line, behind a GL-Impact flag        | **yes** (opt-in)           | **yes**             |
-| **Intacct**  | transaction line, propagated into the GL            | **yes**                    | **yes**             |
-| **Odoo**     | `account.analytic.line`, a parallel non-DE ledger   | **no**                     | **yes** (one DB)    |
+| Reference    | Dimension lives                                   | Same record as the amount? | Same durable store? |
+| ------------ | ------------------------------------------------- | -------------------------- | ------------------- |
+| **GAAP**     | unspecified — only the tie-out is mandated        | n/a                        | n/a                 |
+| **Xero**     | `TrackingCategories` on the journal line          | **yes**                    | **yes**             |
+| **SAP**      | columns on `ACDOCA`, after merging FI + CO        | **yes** (deliberately)     | **yes**             |
+| **NetSuite** | GL transaction line, behind a GL-Impact flag      | **yes** (opt-in)           | **yes**             |
+| **Intacct**  | transaction line, propagated into the GL          | **yes**                    | **yes**             |
+| **Odoo**     | `account.analytic.line`, a parallel non-DE ledger | **no**                     | **yes** (one DB)    |
 
 **Five of six put the dimension on the posting line. Six of six keep it in the same durable store as
 the balance.** Not one answers a dimensional question by joining to a structure that can be lost
-independently of the ledger — Odoo splits the *record* and still holds both halves in one Postgres
+independently of the ledger — Odoo splits the _record_ and still holds both halves in one Postgres
 database.
 
-**THE CRITERION — and it is not "on the line":** *can the dimensional statement be reproduced from
-the accounting record alone?* Every reference passes, by different means: Xero/SAP/NetSuite/Intacct
+**THE CRITERION — and it is not "on the line":** _can the dimensional statement be reproduced from
+the accounting record alone?_ Every reference passes, by different means: Xero/SAP/NetSuite/Intacct
 because the value is on the line; Odoo because both structures share one database and one backup.
 "On the same line" is how five of them happen to achieve it, and SAP's ECC→S/4 move shows the split
 version is workable but costly. **The store boundary is the thing the survey actually agrees on.**
@@ -131,9 +131,8 @@ is a hotspot.
 
 ## Recommendation
 
-**Carry both dimensions on the TigerBeetle transfer, in `Transfer.code` as a packed
-(`product_line`, `cost_type`) pair.** Draft the narrow ADR that way, `relates_to: [ADR-0018]`,
-superseding nothing.
+**Carry both dimensions on the TigerBeetle transfer, in `Transfer.code` as a packed (`product_line`,
+`cost_type`) pair.** Draft the narrow ADR that way, `relates_to: [ADR-0018]`, superseding nothing.
 
 - **It satisfies the one property all six references share** without departing from ADR-0018's
   decision, which it merely completes: the sentence "in `user_data` and in the Mongo/Parquet
@@ -147,7 +146,7 @@ superseding nothing.
   lose their dimensional history to a non-ledger failure.
 - **ADR-0017 already argued for this and stopped one step short**: "Lose it and balances rebuild
   from TigerBeetle but periods do not — unless TigerBeetle carries the accounting date. So this
-  decision *strengthens* the case for accounting-date-in-`user_data`." The identical argument
+  decision _strengthens_ the case for accounting-date-in-`user_data`." The identical argument
   applies to dimensions and was not made, because the field budget looked full.
 - **GAAP's tie-out obligation is better served.** With the dimension in both stores, "recompute the
   dimensional P&L from TigerBeetle and compare to the projection" is a real check that can fail —

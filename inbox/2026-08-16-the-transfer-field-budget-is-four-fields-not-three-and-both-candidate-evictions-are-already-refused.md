@@ -18,10 +18,10 @@ HOT-013's `resolution_shape` says the ADR it needs "still needs" the two candida
 erp-spec#3, "which may make the shortfall disappear rather than force a choice". **The repo already
 answered both, and the answer is no on both.** `ledger/tigerbeetle-accounts.yaml` records it:
 
-| Candidate          | Status in the repo today                                                                                                                                                                                            |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Candidate          | Status in the repo today                                                                                                                                                                                                                                               |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `journal_entry_id` | **Refused.** `journal_entry_id_is_not_derivable:` — `EVT-BIL-006 CreditNoteAllocated` and `EVT-BIL-003 SettlementRecorded` both allocate one instrument across several invoices, so the grouping is not a function of `source_document_ref`. The field stays reserved. |
-| `posting_rule`     | **Already evicted**, to the Mongo projection — and the slot it freed was *already spent*: it "is what lets `accounting_date` take `user_data_32` at no cost".                                                        |
+| `posting_rule`     | **Already evicted**, to the Mongo projection — and the slot it freed was _already spent_: it "is what lets `accounting_date` take `user_data_32` at no cost".                                                                                                          |
 
 So there is no dissolution path through the evictions. All three `user_data` fields are spoken for
 by claimants the repo has separately justified, and `product_line` / `cost_type` have nowhere to go
@@ -47,19 +47,19 @@ different record. The **Transfer's** `code` appears nowhere in the ledger spec.
 
 Measured across all 13 `specified` posting rules: **no posting dimensions both legs.** Every
 dimensioned posting pairs exactly one dimensioned account with an undimensioned counterparty —
-`invoice_issued` is Dr 1200 (none) / Cr revenue (`product_line`); `credit_note_issued` is
-Dr revenue (`product_line`) / Cr 2050 (none); `shift_recorded` is Dr 5800
-(`product_line` + `cost_type`) / Cr 2000 (none).
+`invoice_issued` is Dr 1200 (none) / Cr revenue (`product_line`); `credit_note_issued` is Dr revenue
+(`product_line`) / Cr 2050 (none); `shift_recorded` is Dr 5800 (`product_line` + `cost_type`) / Cr
+2000 (none).
 
 19 of 138 accounts are dimensioned — 18 `[product_line]`, and **5800 alone** carries
 `[product_line, cost_type]`.
 
-So the maximum dimensional payload on one transfer is one pair: 21 `product_line` values
-(20 + explicit null) × 4 `cost_type` values (3 + explicit null) = **84 combinations, 7 bits**. In a
-u16 that leaves 9 bits spare. Even the hypothetical both-legs-dimensioned transfer the current rules
+So the maximum dimensional payload on one transfer is one pair: 21 `product_line` values (20 +
+explicit null) × 4 `cost_type` values (3 + explicit null) = **84 combinations, 7 bits**. In a u16
+that leaves 9 bits spare. Even the hypothetical both-legs-dimensioned transfer the current rules
 never produce is 84 × 84 = 7,056 — still inside u16.
 
-⚠️ **Sizing is not the same as deciding.** That the payload fits says the *representation* question
+⚠️ **Sizing is not the same as deciding.** That the payload fits says the _representation_ question
 has an answer; it does not say the ledger should carry dimensions at all. That is the choice HOT-013
 poses, and the survey note dated today is the evidence for it.
 
@@ -84,15 +84,15 @@ still comes from the projection (ADR-0017). The reference note's "no queries" is
 corrected there.
 
 ⚠️ **And the query surface is not what the decision turns on.** The case for carrying dimensions in
-TigerBeetle is *reconstruction after a Mongo loss*, which needs the value to be **present**, not
+TigerBeetle is _reconstruction after a Mongo loss_, which needs the value to be **present**, not
 filterable — a full walk of ~15k transfers rebuilds a dimensional P&L regardless of what
 `QueryFilter` can express. Settling the query surface removes a stated blocker from HOT-013 without
 changing either side of the argument.
 
 ## What this leaves for SPIKE-003
 
-Its first exit criterion — "documented rule for which field carries accounting date" — is
-answerable now and is unaffected by all of the above: `user_data_32`, packed `YYYYMMDD`. The other
-two exit criteria are untouched and still need the spike: the `imported` flag's timestamp and
-monotonicity semantics, and that live posting resumes after an import batch. **HOT-013 does not
-depend on either.**
+Its first exit criterion — "documented rule for which field carries accounting date" — is answerable
+now and is unaffected by all of the above: `user_data_32`, packed `YYYYMMDD`. The other two exit
+criteria are untouched and still need the spike: the `imported` flag's timestamp and monotonicity
+semantics, and that live posting resumes after an import batch. **HOT-013 does not depend on
+either.**

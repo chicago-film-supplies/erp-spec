@@ -13,17 +13,17 @@ superseded_by:
 
 > ## ❌ REJECTED 2026-08-16, the day it was drafted, by the owner — and the premise is what failed
 >
-> This ADR asked *where on a transfer a product line fits*. **The owner's answer is that it does not
+> This ADR asked _where on a transfer a product line fits_. **The owner's answer is that it does not
 > belong on a transfer at all**: "product lines themselves are a reporting concern, not a ledger
 > concern. causal order(s) matter. invoice linking matters. item uids or skus matter."
 >
-> A product line is a **classification of the product master** — `products.uid_tracking_category`,
-> a mutable field on a mutable record — not a fact about a posting. Freezing it onto an immutable
+> A product line is a **classification of the product master** — `products.uid_tracking_category`, a
+> mutable field on a mutable record — not a fact about a posting. Freezing it onto an immutable
 > transfer makes every re-categorisation a ledger restatement. This ADR found that symptom and
 > prescribed a workaround ("append only, never reorder or delete"), which was the wrong move on the
-> right observation: the two live re-categorisations of 2026-08 — `Other` retired across 12 products,
-> `Transport` dropped and restored — are ordinary reporting maintenance and must not touch the
-> ledger.
+> right observation: the two live re-categorisations of 2026-08 — `Other` retired across 12
+> products, `Transport` dropped and restored — are ordinary reporting maintenance and must not touch
+> the ledger.
 >
 > Superseded in substance by **ADR-0036**. Left in place as the record of a proposal that was made
 > and refused; nothing here was ever accepted.
@@ -54,8 +54,8 @@ superseded_by:
   propagated into erp-spec#3's title, HOT-013's claimant count, and ADR-0026's Context.
 - **The unhoused payload is 7 bits.** Measured 2026-08-16 across all 13 `specified` posting rules:
   **no posting dimensions both legs** — every dimensioned posting pairs one dimensioned account with
-  an undimensioned counterparty. 19 of 138 accounts are dimensioned; **5800 alone** owes both. So the
-  maximum on one transfer is a single pair: 21 `product_line` values × 4 `cost_type` values = 84
+  an undimensioned counterparty. 19 of 138 accounts are dimensioned; **5800 alone** owes both. So
+  the maximum on one transfer is a single pair: 21 `product_line` values × 4 `cost_type` values = 84
   combinations.
 - **The query surface is settled and was never load-bearing.** TigerBeetle 0.17.9 does expose
   `query_transfers` — equality on `user_data_128/64/32`, `ledger`, `code`; range only on its own
@@ -83,8 +83,8 @@ required — TigerBeetle refuses `code == 0`.
 
 - **Pack `(posting_rule, product_line, cost_type)` into `code`** — 13 rules × 84 pairs = 1,092
   values, 11 bits, still inside u16. Rejected: the equality filter would then answer only the
-  composite, so "all Crew revenue" becomes 52 enumerated queries rather than one, and it buys back
-  a debuggability property that is already absent today.
+  composite, so "all Crew revenue" becomes 52 enumerated queries rather than one, and it buys back a
+  debuggability property that is already absent today.
 - **Steal the 5 spare high bits of `user_data_32`** — `YYYYMMDD` tops out at `99991231`, using ~27
   of 32 bits. Rejected: it destroys the equality filter on accounting date, which is the only reason
   that value sits in a filterable field, and it compounds the "a u32 carrying a date is type-checked
@@ -98,30 +98,30 @@ required — TigerBeetle refuses `code == 0`.
 
 - **The ledger becomes dimensionally self-describing, which is what ADR-0017 asked for and stopped
   one step short of.** ADR-0017 argued that losing MongoDB leaves balances rebuildable but periods
-  not, "unless TigerBeetle carries the accounting date", and therefore *strengthened* the case for
+  not, "unless TigerBeetle carries the accounting date", and therefore _strengthened_ the case for
   accounting-date-in-`user_data`. The identical argument applies to dimensions and was not made,
   because the budget looked full. After a total MongoDB loss, **the UN-ALLOCATED dimensional P&L**
   rebuilds from TigerBeetle alone.
 - ⚠️ **The ALLOCATED P&L does not, and this ADR does not fix that.** ADR-0029 places one
-  load-bearing requirement on every posting rule — "**every posting must carry its causal order**, or
-  allocation is impossible and this decision quietly becomes *never allocate*" — and **the transfer
-  does not carry it.** `user_data_64` holds `source_document_ref`, which for `shift_recorded` is the
-  **shift**, not the order; the rule fans over `shift.absorbed_allocations`, so one shift becomes
-  several transfers with several different `causal_job`s, and the golden vectors' expected transfer
-  shape has no field for it. The causal order lives one hop away, in MongoDB, per transfer.
-  So what survives a MongoDB loss is precisely the view ADR-0029 says "**must never be read as a
-  managed P&L**", and what does not survive is the one it calls "the managed number". `code`'s 9
-  spare bits cannot close the gap — orders already number ~1,000 and grow. **Tracked as HOT-014**;
-  this ADR narrows its own claim rather than pretending to.
+  load-bearing requirement on every posting rule — "**every posting must carry its causal order**,
+  or allocation is impossible and this decision quietly becomes _never allocate_" — and **the
+  transfer does not carry it.** `user_data_64` holds `source_document_ref`, which for
+  `shift_recorded` is the **shift**, not the order; the rule fans over `shift.absorbed_allocations`,
+  so one shift becomes several transfers with several different `causal_job`s, and the golden
+  vectors' expected transfer shape has no field for it. The causal order lives one hop away, in
+  MongoDB, per transfer. So what survives a MongoDB loss is precisely the view ADR-0029 says "**must
+  never be read as a managed P&L**", and what does not survive is the one it calls "the managed
+  number". `code`'s 9 spare bits cannot close the gap — orders already number ~1,000 and grow.
+  **Tracked as HOT-014**; this ADR narrows its own claim rather than pretending to.
 - ⚠️ **It makes the misreading easier to reach.** ADR-0029 names reading the un-allocated view as a
   managed report "the single most likely misreading of the whole design" — `Delivery` shows a large
   structural loss by construction. After this ADR, that view is a single `query_transfers` call
   against a filterable field. The ledger's `product_line` is **the line a cost was booked to**, not
   the line ADR-0031's official P&L attributes it to after spreading, and those are different numbers
   wearing the same name.
-- **REQ-LED-001 is enforced where it is stated.** `ledger/dimensions.yaml` says the rejection vectors
-  are "the entire enforcement" of dimensionality. Those vectors now check a property of the artifact
-  the ledger actually stores, rather than of a projection beside it.
+- **REQ-LED-001 is enforced where it is stated.** `ledger/dimensions.yaml` says the rejection
+  vectors are "the entire enforcement" of dimensionality. Those vectors now check a property of the
+  artifact the ledger actually stores, rather than of a projection beside it.
 - **"Recompute the dimensional P&L from TigerBeetle and compare to the projection" becomes a check
   that can fail.** TigerBeetle is not the projection's normalizer, so this is not a fixed-point
   check — the repo's standing rule that a guard which can only consult its own oracle is not a
@@ -134,8 +134,8 @@ required — TigerBeetle refuses `code == 0`.
   but a reader of the raw ledger has one less handle, and the 9 spare bits are not a comfortable
   place to put it back later.
 - ⚠️ **A packed integer is type-checked by nothing.** One writer storing
-  `product_line × 4 + cost_type` and another storing `cost_type × 21 + product_line` both compile and
-  both are silently wrong — the same defect shape as the Typesense `money` boolean that shipped
+  `product_line × 4 + cost_type` and another storing `cost_type × 21 + product_line` both compile
+  and both are silently wrong — the same defect shape as the Typesense `money` boolean that shipped
   100×-wrong money in both environments, and as the `YYYYMMDD` hazard erp-spec#3 already flags for
   `user_data_32`. **A declaration that the encoding exists is not enough**; the golden vector must
   assert the value. Landing that vector red first is the repo's own rule.
@@ -144,7 +144,7 @@ required — TigerBeetle refuses `code == 0`.
   reorder or delete** — reordering `ledger/dimensions.yaml` silently restates history. `Transport`
   being dropped and restored between 2026-08-09 and 2026-08-16 (OQ-034) is exactly the event that
   would have done it.
-- **A both-legs-dimensioned posting is not representable at 84 values** and none exists today. If one
-  ever does, the pair-of-pairs form is 7,056 values and still fits in u16 — a re-encoding, not a
+- **A both-legs-dimensioned posting is not representable at 84 values** and none exists today. If
+  one ever does, the pair-of-pairs form is 7,056 values and still fits in u16 — a re-encoding, not a
   redesign. Note separately that TigerBeetle forbids `debit_account_id == credit_account_id`, so a
   same-account reclassification between product lines needs a clearing account regardless.

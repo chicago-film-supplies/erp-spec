@@ -77,14 +77,14 @@ read `[4294967295, 4294967295]` as a hard error.
   the entire point — `EVT-FUL-005` says so in terms. See `ledger/tigerbeetle-accounts.yaml`.
 - **`user_data_128/64/32` are the per-transfer reference fields.** The working assignment is
   `128 → journal_entry_id`, `64 → source_document`, `32 → accounting_date` (packed `YYYYMMDD`), with
-  `posting_rule` evicted to the Mongo projection — tracked as erp-spec#3 and still `proposed` pending
-  [[SPIKE-003]]. High-cardinality refs go _here_, never into account identity.
-- **⚠️ `Transfer.code` is a FOURTH discretionary field, and this entry said "only" until 2026-08-16.**
-  A u16 "user-defined enum denoting the reason for (or category of) the transfer", and a first-class
-  `QueryFilter` filter alongside the three `user_data` fields. Must not be zero; on a
-  `post_pending`/`void_pending` it must be zero (inherits the pending transfer's) or match it.
-  **Do not confuse it with `Account.code`**, which `ledger/tigerbeetle-accounts.yaml` already assigns
-  to the GL code — different field, different record. The transfer's `code` is **unclaimed**, and the
+  `posting_rule` evicted to the Mongo projection — tracked as erp-spec#3 and still `proposed`
+  pending [[SPIKE-003]]. High-cardinality refs go _here_, never into account identity.
+- **⚠️ `Transfer.code` is a FOURTH discretionary field, and this entry said "only" until
+  2026-08-16.** A u16 "user-defined enum denoting the reason for (or category of) the transfer", and
+  a first-class `QueryFilter` filter alongside the three `user_data` fields. Must not be zero; on a
+  `post_pending`/`void_pending` it must be zero (inherits the pending transfer's) or match it. **Do
+  not confuse it with `Account.code`**, which `ledger/tigerbeetle-accounts.yaml` already assigns to
+  the GL code — different field, different record. The transfer's `code` is **unclaimed**, and the
   miscount propagated into erp-spec#3 ("three fields, four claimants"), [[HOT-013]] ("three slots,
   six live claimants") and [[ADR-0026]]'s Context. `code:2026-08-16:.claude/docs/tigerbeetle.txt`
   (`Transfer.code` L12725, `QueryFilter.code` L13094).

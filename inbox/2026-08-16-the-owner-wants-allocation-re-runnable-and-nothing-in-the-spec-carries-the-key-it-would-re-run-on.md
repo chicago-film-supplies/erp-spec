@@ -29,10 +29,10 @@ period close.
 
 **Two capabilities, and the spec's support for them differs:**
 
-| Capability                                                | Supported today?                                                                                                                                                                    |
-| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Capability                                                 | Supported today?                                                                                                                                                                       |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Several bases available, pinned per report**             | **Yes, by design.** `reporting/allocation-bases.yaml` is a versioned registry; a report pins `(id, version)`; superseded bases stay so historical reports still resolve what made them |
-| **Re-allocate a period already closed, under a new basis** | **Not established — and the key it would run on is not recorded anywhere.** See below                                                                                                |
+| **Re-allocate a period already closed, under a new basis** | **Not established — and the key it would run on is not recorded anywhere.** See below                                                                                                  |
 
 ## The gap, measured
 
@@ -41,9 +41,12 @@ period close.
 `posting_timestamp`, `product_line`, `cost_type`, `source_document`, `posting_rule`. That is the
 only place in the spec where the posting shape is written.
 
-**`reporting/queries/product-line-pl.sql` joins on `causal_order_id` throughout** — `SELECT
-causal_order_id`, `JOIN base_total t USING (causal_order_id)`, `PARTITION BY causal_order_id,
-pool_id`. The official report's own query reads a column the posting does not declare.
+**`reporting/queries/product-line-pl.sql` joins on `causal_order_id` throughout** —
+`SELECT
+causal_order_id`, `JOIN base_total t USING (causal_order_id)`,
+`PARTITION BY causal_order_id,
+pool_id`. The official report's own query reads a column the posting
+does not declare.
 
 **ADR-0029 requires it in terms**: "every posting must carry its causal order, or allocation is
 impossible and this decision quietly becomes 'never allocate'."
@@ -57,8 +60,8 @@ cannot recover (HOT-014).
 
 HOT-014 listed "**seal the allocation instead of the key**" as the option fitting the existing
 architecture best, and recommended surveying it first. **Against this requirement it is the worst of
-the three**, because sealing the allocated *output* is precisely what makes a period un-re-allocable:
-you get one frozen answer per period and no way to ask a second question of it.
+the three**, because sealing the allocated _output_ is precisely what makes a period
+un-re-allocable: you get one frozen answer per period and no way to ask a second question of it.
 
 The correct form of that option is the opposite one: **seal the allocation INPUTS.** ADR-0017
 already exports the sealed Parquet **from MongoDB**, "which holds the accounting date and is
@@ -74,12 +77,12 @@ is not recoverable".
 
 ## What is genuinely foreclosed, and should not be mistaken for this gap
 
-Re-running the **weight/cube basis (v2, OQ-033)** over history stays impossible, and for an unrelated
-and honest reason: the driver was never captured. `products.shipping.weight` is zero on all 549
-products and no past order records what was moved. `allocation-bases.yaml` says so — "historical
-periods have no physical data and must keep resolving the basis that produced them."
+Re-running the **weight/cube basis (v2, OQ-033)** over history stays impossible, and for an
+unrelated and honest reason: the driver was never captured. `products.shipping.weight` is zero on
+all 549 products and no past order records what was moved. `allocation-bases.yaml` says so —
+"historical periods have no physical data and must keep resolving the basis that produced them."
 
-**That is a data-capture limit, not an architectural one.** Bases whose inputs *are* recorded —
+**That is a data-capture limit, not an architectural one.** Bases whose inputs _are_ recorded —
 goods revenue, line count, quantity — could all be re-run over history if the causal order survives.
 Conflating the two would make an avoidable architectural limit look like an unavoidable data one.
 
