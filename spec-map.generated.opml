@@ -422,7 +422,12 @@
           <outline text="EVT-BIL-006 — CreditNoteAllocated" _note="billing → ledger"/>
           <outline text="EVT-BIL-007 — CreditTransferredAcrossSettlementPoints" _note="billing → ledger"/>
         </outline>
-        <outline text="fixed-assets (FA)" _note="0 requirement(s) · 4 event(s)">
+        <outline text="fixed-assets (FA)" _note="5 requirement(s) · 4 event(s)">
+          <outline text="REQ-FA-001 — Every asset shall carry a basis in every book the register maintains, and an asset carrying a basis…"/>
+          <outline text="REQ-FA-002 — An asset's in-service date shall be recorded separately from its acquisition date, and both shall b…"/>
+          <outline text="REQ-FA-003 — A depreciation run shall post as one batch and shall retain a per-asset audit trail, and the batch…"/>
+          <outline text="REQ-FA-004 — The register shall be the authority for each book's schedule, and shall be able to reproduce the sc…"/>
+          <outline text="REQ-FA-005 — A disposal shall record its result on every book independently, and shall not derive one book's res…"/>
           <outline text="EVT-FA-001 — AssetAcquired" _note="fixed-assets → ledger, availability"/>
           <outline text="EVT-FA-002 — DepreciationRun" _note="fixed-assets → ledger"/>
           <outline text="EVT-FA-003 — AssetDisposed" _note="fixed-assets → ledger, availability, tax"/>
@@ -461,14 +466,13 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (43 unpromoted of 61)" _note="no drops pending">
+      <outline text="Capture (42 unpromoted of 61)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
         <outline text="CI is red by design at seed time, so the spec check is not a required merge check yet" _note="inbox/2026-08-08-ci-red-by-design.md"/>
         <outline text="Revenue COA codes observed in the live invoice corpus" _note="inbox/2026-08-08-coa-codes-in-use.md"/>
         <outline text="Crew sizes by activity" _note="inbox/2026-08-08-crew-sizes.md"/>
-        <outline text="Fixed assets — hundreds of low-value assets, straight-line, dual GAAP and tax basis" _note="inbox/2026-08-08-fixed-assets-dual-basis.md"/>
         <outline text="handling_bucket per product" _note="inbox/2026-08-08-handling-bucket-per-product.md"/>
         <outline text="55 order uids referenced by invoices do not exist" _note="inbox/2026-08-08-hard-deleted-order-uids.md"/>
         <outline text="Labour cost is a step function — do not weight allocation by expected hours" _note="inbox/2026-08-08-labour-cost-step-function.md"/>

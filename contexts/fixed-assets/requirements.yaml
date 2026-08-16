@@ -5,7 +5,120 @@
 # priority: must | should | could
 # status: draft | agreed | superseded
 #
-# Statements are implementation-free. "The system shall record the acting crew member on every
-# leg" — not "add an actor_id column".
+# ── Mined from ADR-0007 and ADR-0026, both accepted. See contexts/fulfillment/requirements.yaml for
+# the note on how an ADR's obligations are mined.
+#
+# ⚠️ **SCOPE BOUNDARY — SPIKE-005 IS STILL OPEN**, and every requirement below is written to stay on
+# the safe side of it. ADR-0007 requires that the spike "cover the whole rules surface before any
+# schema": mid-month and half-year conventions, GDS versus ADS class lives, §179 and bonus effects
+# on basis, partial disposals, prospective useful-life revisions, and the deferred difference.
+#
+# So these five say what the register must HOLD, what a run must PRODUCE, and what must be
+# REPRODUCIBLE. **Not one of them says how a depreciation amount is computed.** That is the spike's,
+# and `depreciation_run` remains one of the two `blocked` posting rules until it closes. A
+# requirement written now about conventions or class lives would be a guess wearing a "shall".
 
-requirements: []
+requirements:
+  - id: REQ-FA-001
+    statement: >-
+      Every asset shall carry a basis in every book the register maintains, and an asset carrying a
+      basis in only one of them shall be refused rather than recorded.
+    rationale: >-
+      ADR-0007 brings the register in-house "carrying dual GAAP and tax basis per asset", and
+      `contexts/fixed-assets/entities/asset.yaml` states the invariant in one line: **"a single-basis
+      asset is a bug."**
+      The divergence is not marginal, which is why absence cannot be tolerated as zero: most of the
+      fleet is §179'd to a tax carrying amount of zero in year one while GAAP carries most of cost
+      for years, so the two balance sheets differ materially and permanently (ADR-0026).
+      **Refusal rather than a default is the requirement.** A missing basis that silently reads as
+      zero is indistinguishable from a genuine full write-off, and one of those is a filing position.
+      Same absence-versus-null rule REQ-LED-001 enforces on dimensions.
+      ⚠️ This says nothing about what the basis VALUES are or how they evolve — SPIKE-005.
+    source: adr/ADR-0007-replace-asset-accountant.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [SPIKE-005, ADR-0026]
+
+  - id: REQ-FA-002
+    statement: >-
+      An asset's in-service date shall be recorded separately from its acquisition date, and both
+      shall be retained.
+    rationale: >-
+      `contexts/fixed-assets/entities/asset.yaml` carries both and notes that in-service is
+      "distinct from acquired_on" and **drives convention**. An asset bought in March and racked in
+      September depreciates from September, and collapsing the two loses the fact that decides which
+      convention applies.
+      ⚠️ Which convention it drives — mid-month, half-year, mid-quarter — is SPIKE-005's. This
+      requirement only obliges the input to exist and to be distinguishable, which is the part that
+      cannot be recovered later: a date nobody recorded cannot be reconstructed from the ledger.
+    source: adr/ADR-0007-replace-asset-accountant.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [SPIKE-005]
+
+  - id: REQ-FA-003
+    statement: >-
+      A depreciation run shall post as one batch and shall retain a per-asset audit trail, and the
+      batch total shall equal the sum of the per-asset amounts it records.
+    rationale: >-
+      ADR-0007: "Volume forces batch: a depreciation run posts for hundreds of assets at once and
+      still needs a per-asset audit trail." Hundreds of individually low-value assets, soon
+      thousands, so a per-asset manual close does not scale.
+      **The two halves pull against each other and that is why both are stated.** Batching is what
+      makes the run feasible; the per-asset trail is what makes any single number in it answerable.
+      A batch that posts a total nobody can decompose is exactly the re-keyed journal ADR-0007
+      exists to eliminate — it just arrives from inside the system instead of from a hosted tool.
+      The control total is the independent property: it is a comparison of two recorded numbers and
+      does not consult whatever computed either.
+      ⚠️ Says nothing about the amounts themselves — SPIKE-005.
+    source: adr/ADR-0007-replace-asset-accountant.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [SPIKE-005]
+
+  - id: REQ-FA-004
+    statement: >-
+      The register shall be the authority for each book's schedule, and shall be able to reproduce
+      the schedule it held for any past period.
+    rationale: >-
+      ADR-0026 makes the register the single source the tax basis is derived from, and REQ-TAX-002
+      obliges that derivation to read exactly one source. That obligation is only as good as the
+      register's ability to answer for a period that has already closed.
+      ADR-0007: "getting tax depreciation wrong has filing consequences, not just reporting ones.
+      This is the highest-stakes correctness surface in the rebuild." A filing position taken three
+      years ago has to remain explainable, and the ledger cannot answer it — the ledger holds the
+      GAAP postings, not the schedule that produced them.
+      ⚠️ This obliges reproducibility, not immutability of method. A prospective useful-life revision
+      legitimately changes future schedules; what must not change is what the register reported for a
+      period already filed. Which revisions are prospective versus retrospective is SPIKE-005's.
+    source: adr/ADR-0007-replace-asset-accountant.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [SPIKE-005, ADR-0026, REQ-TAX-002]
+
+  - id: REQ-FA-005
+    statement: >-
+      A disposal shall record its result on every book independently, and shall not derive one
+      book's result from another's.
+    rationale: >-
+      ADR-0026 states the mechanics and the reason a shared posting is impossible: "a disposal
+      relieves cost against a DIFFERENT accumulated depreciation and a DIFFERENT gain per book, so
+      the credit to the asset account cannot be shared."
+      This is also the structural argument that made the tax basis non-posting in the first place —
+      duplicating the asset account to carry both drags in the funding account, which drags in
+      payables. It is all postings or none, and ADR-0026 chose none.
+      The concrete case: an asset §179'd to a tax carrying amount of zero and disposed for $500 has
+      a $500 tax gain and a much smaller GAAP gain. Deriving either from the other loses the §1245
+      result.
+      ⚠️ How the gain is characterised for tax — ordinary recapture versus capital — is SPIKE-005's
+      rules surface. This requirement obliges the two results to be recorded independently, which is
+      what makes either answer expressible.
+    source: adr/ADR-0026-tax-basis-is-a-non-posting-derived-book.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [SPIKE-005, REQ-TAX-001]

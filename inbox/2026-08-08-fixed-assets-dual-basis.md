@@ -4,7 +4,7 @@ title: Fixed assets — hundreds of low-value assets, straight-line, dual GAAP a
 contexts: [fixed-assets, tax, ledger]
 source: prior-session analysis, 2026-08
 confidence: high
-promotes_to: []
+promotes_to: [REQ-FA-001, REQ-FA-003]
 verified: false
 triage_count: 0
 ---
