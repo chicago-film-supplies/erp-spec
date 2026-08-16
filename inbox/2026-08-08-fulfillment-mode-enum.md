@@ -4,7 +4,7 @@ title: fulfillment_mode enum on the order
 contexts: [ordering, fulfillment]
 source: prior-session design work, 2026-08
 confidence: high
-promotes_to: []
+promotes_to: [REQ-FUL-003]
 verified: false
 triage_count: 0
 ---

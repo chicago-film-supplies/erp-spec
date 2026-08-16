@@ -4,7 +4,7 @@ title: The whole book-to-tax difference is two accounts — depreciation and ret
 contexts: [fixed-assets, tax, ledger]
 source: "owner-supplied 2025 statements, both bases (Xero GAAP + tax package), measured 2026-08-09"
 confidence: high
-promotes_to: []
+promotes_to: [REQ-TAX-002]
 verified: true
 triage_count: 0
 ---

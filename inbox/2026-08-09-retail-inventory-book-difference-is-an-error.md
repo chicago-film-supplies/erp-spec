@@ -4,7 +4,7 @@ title: Retail inventory costing is the same on both bases — the measured diver
 contexts: [tax, ledger]
 source: repo owner, 2026-08-09 session
 confidence: high
-promotes_to: []
+promotes_to: [REQ-TAX-002]
 verified: false
 triage_count: 0
 ---

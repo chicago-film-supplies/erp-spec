@@ -6,7 +6,7 @@
     "adrs_accepted": 17,
     "events": 37,
     "inbox": 61,
-    "inbox_promoted": 11
+    "inbox_promoted": 18
   },
   "requirements": [
     {
@@ -444,7 +444,6 @@
       "procurement"
     ],
     "inbox_unpromoted": [
-      "inbox/2026-08-08-actor-and-clock-per-leg.md",
       "inbox/2026-08-08-addresses-unvalidated.md",
       "inbox/2026-08-08-byproduct-causal-job-rule.md",
       "inbox/2026-08-08-chicago-lease-transaction-tax.md",
@@ -452,15 +451,12 @@
       "inbox/2026-08-08-coa-codes-in-use.md",
       "inbox/2026-08-08-crew-sizes.md",
       "inbox/2026-08-08-fixed-assets-dual-basis.md",
-      "inbox/2026-08-08-fulfillment-mode-enum.md",
       "inbox/2026-08-08-handling-bucket-per-product.md",
       "inbox/2026-08-08-hard-deleted-order-uids.md",
       "inbox/2026-08-08-labour-cost-step-function.md",
-      "inbox/2026-08-08-multi-destination-orders.md",
       "inbox/2026-08-08-out-of-state-engagement-exclusion.md",
       "inbox/2026-08-08-product-weight-dimensions-empty.md",
       "inbox/2026-08-08-service-lines-are-the-epicentre.md",
-      "inbox/2026-08-08-shift-id-on-every-leg.md",
       "inbox/2026-08-08-shipping-trucking-tracking-refuted.md",
       "inbox/2026-08-08-standard-cost-with-variance.md",
       "inbox/2026-08-08-two-reporting-dimensions.md",
@@ -469,17 +465,14 @@
       "inbox/2026-08-09-4110-is-a-third-distance-charges-and-distance-is-performed.md",
       "inbox/2026-08-09-allocation-bases-measured-only-goods-revenue-survives.md",
       "inbox/2026-08-09-allocation-basis-survey-six-references.md",
-      "inbox/2026-08-09-book-to-tax-difference-is-exactly-two-accounts.md",
       "inbox/2026-08-09-correction-the-surcharge-split-is-not-an-allocation-rule.md",
       "inbox/2026-08-09-correction-the-unallocable-population-is-smaller-and-is-one-customer.md",
       "inbox/2026-08-09-customer-credit-balances-across-four-suites.md",
       "inbox/2026-08-09-external-boundary-services-mapbox-and-resend.md",
       "inbox/2026-08-09-labour-premium-rules-survey.md",
       "inbox/2026-08-09-product-line-by-revenue-account-matrix.md",
-      "inbox/2026-08-09-retail-inventory-book-difference-is-an-error.md",
       "inbox/2026-08-09-self-hosted-tier-gotenberg-and-the-victoria-stack.md",
       "inbox/2026-08-09-shipping-specs-are-scheduled-so-the-proxy-has-an-expiry.md",
-      "inbox/2026-08-09-tax-and-gaap-statements-are-both-required.md",
       "inbox/2026-08-09-unallocated-credit-has-no-home-in-ar.md",
       "inbox/2026-08-09-untracked-revenue-decomposes-into-three-populations.md",
       "inbox/2026-08-09-untracked-revenue-is-mostly-a-denorm-failure-not-an-undecided-dimension.md",

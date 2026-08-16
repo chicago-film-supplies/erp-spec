@@ -4,7 +4,7 @@ title: shift_id on every leg — the highest-value single field
 contexts: [fulfillment, ledger]
 source: prior-session design work, 2026-08
 confidence: high
-promotes_to: []
+promotes_to: [REQ-FUL-001]
 verified: false
 triage_count: 0
 ---

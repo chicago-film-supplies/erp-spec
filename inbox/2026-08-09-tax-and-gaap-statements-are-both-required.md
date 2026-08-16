@@ -4,7 +4,7 @@ title: Both a tax-basis and a GAAP-basis P&L and balance sheet are required, acr
 contexts: [fixed-assets, tax, ledger]
 source: repo owner, 2026-08-09 session
 confidence: high
-promotes_to: []
+promotes_to: [REQ-TAX-001, REQ-TAX-002]
 verified: false
 triage_count: 0
 ---

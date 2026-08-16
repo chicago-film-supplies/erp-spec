@@ -319,6 +319,14 @@ hotspots:
       it is why this is a hotspot rather than a repair.
       ⚠️ **ADR-0018 is `accepted` and therefore immutable**, so the correction has the same nowhere
       to live that HOT-012 describes. This is the second instance of that meta-problem.
+      ⚠️ **A SECOND accepted ADR carries the undercount, found 2026-08-16 while checking what the
+      requirements-mining pass rested on.** `ADR-0026`'s Context argues against a parallel ledger
+      partly on the grounds that "a `book` tag carried on the transfer instead would be a **fifth**
+      claimant on the three `user_data` fields erp-spec#3 already has four claimants for". By this
+      hotspot's count a `book` tag would be the **seventh**, not the fifth — which strengthens
+      ADR-0026's conclusion rather than weakening it, since the budget is tighter than it argued.
+      Recorded here rather than in ADR-0026, per ADR-0034: the decision stands, a cited fact was
+      wrong, so the correction lives in the hotspot and the ADR is left alone.
     blocks: [OQ-040, ADR-0033, SPIKE-003]
     status: open
     resolution_shape: >-

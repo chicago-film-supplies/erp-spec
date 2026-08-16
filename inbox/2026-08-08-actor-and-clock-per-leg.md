@@ -4,7 +4,7 @@ title: Actor per leg, clock in/out per stop, crew size per trip
 contexts: [fulfillment, ledger]
 source: prior-session design work, 2026-08
 confidence: high
-promotes_to: []
+promotes_to: [REQ-FUL-001, REQ-FUL-005]
 verified: false
 triage_count: 0
 ---
