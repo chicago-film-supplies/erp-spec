@@ -819,6 +819,13 @@ open_questions:
       versus crew plus vehicle. **Whether they should eventually be two product lines is not decided
       here** and does not block anything; it is recorded so a later reader does not mistake the
       single line for a claim that the two are the same kind of work.
+      ⚠️ **The cost accounts make the asymmetry concrete, and only ONE half is expressible today.**
+      Owner, 2026-08-16: **`5300 Cost of Goods Sold: Shipping (Rentals & Sales Only)` pairs with
+      `4150`**. So `Shipping` is complete — bought-in cost and re-billed revenue on the same line,
+      and its margin is the markup, which is what a passthrough should look like. `Trucking` is not:
+      its revenue is on 4100 and its cost is labour (ADR-0019, 5800/5801) plus vehicle, and
+      **ADR-0030 has not chosen the vehicle COGS accounts**. Until it does, this pool's margin
+      overstates trucking — the same trap the product-line P&L header warns about for `Delivery`.
       Consequences: `ledger/dimensions.yaml` restores the value; `reporting/product-line-pl.yaml`
       gains `Transport: activity` and a `not_allocated` pool; and **OQ-025's "Trucking to
       `Transport`" mapping has a target again**, which is what ADR-0020's restatement was waiting on.

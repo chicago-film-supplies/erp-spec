@@ -166,7 +166,7 @@ report:
     - id: transport
       product_line: Transport
       status: not_allocated
-      accounts: [4100, 4150]
+      accounts: [4100, 4150, 5300]
       reason: >-
         **Severable — carries its own margin.** OQ-034 answered by the owner 2026-08-16: "trucking
         is our own longer or bigger haul that doesn't fit into the standard delivery charge
@@ -183,6 +183,15 @@ report:
         invoice versus crew plus vehicle — so a reader must not take the single line as a claim that
         the two are the same kind of work. Whether they eventually become two product lines is not
         decided and blocks nothing.
+        ⚠️ **The asymmetry is visible in the accounts, and it means this pool's margin is HALF
+        expressible today.** Owner, 2026-08-16: `5300 Cost of Goods Sold: Shipping (Rentals & Sales
+        Only)` pairs with `4150`. So the **Shipping** half is complete — a passthrough with its
+        revenue and its bought-in cost on the same product line, which is what a passthrough should
+        look like, and its margin is the markup. The **Trucking** half has revenue on 4100 and its
+        cost in two places that are not here: labour COGS carrying `cost_type: delivery`
+        (ADR-0019, 5800/5801) and vehicle COGS, whose accounts ADR-0030 has not chosen. **Reading
+        this pool's margin before vehicle COGS lands overstates trucking**, in exactly the way the
+        file header warns about for `Delivery`.
         Restored to `ledger/dimensions.yaml` by the same ruling: 23 lines, $39,665.00, 2.35% of
         revenue, the 14th largest of 20 lines — above `Expendables`, `Carts & Ramps` and
         `Janitorial`, all of which were already declared. It had been dropped on a measurement that
