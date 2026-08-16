@@ -2,7 +2,7 @@
 
 - **Date:** 2026-08-16
 - **Repo:** erp-spec
-- **Status:** ⏳ 2 of 4 units landed
+- **Status:** ⏳ 2 of 4 units landed · branch pushed, **not merged**
 - **Origin:** a review of all six open issues (#13–#18), requested because #18 was on the owner's
   mind
 - **Related:** #13, #14, #15, #17, #20 · closed by this work: #16, #18 · HOT-015 (resolved) ·
@@ -10,16 +10,25 @@
 
 ## START HERE
 
-Six issues were open. **#16 and #18 are closed and their work is on
-`fix/supersede-machinery-and-feature-dimension-gate` (5 commits, not yet merged or pushed).** What
-remains is **#15 → #13** (one unit; #15 exists only to unblock #13) and **#14** (its own session).
-**#17 is deferred and not startable** — see Decisions.
+Six issues were open. **#16 and #18 are fixed on
+`fix/supersede-machinery-and-feature-dimension-gate` (5 commits, pushed, NOT merged).** What remains
+is **#15 → #13** (one unit; #15 exists only to unblock #13) and **#14** (its own session). **#17 is
+deferred and not startable** — see Decisions.
 
 Do **#14 next if you want roadmap movement**, **#15/#13 next if you want the stale numbers fixed**.
 #14 is the larger payoff and the larger session; see Remaining for why its own issue text
 understates it.
 
 `deno task validate` is green and `deno fmt --check` is clean as of `8ae3f37`.
+
+⚠️ **Before opening a PR: `origin/main` is 8 commits BEHIND local `main`** (measured 2026-08-16,
+`git rev-list --count origin/main..main` = 8, oldest `1e34f73`, newest `5b1f8ae`). Those are the
+ADR-0035/0036 and HOT-013/014 sessions, committed locally and never pushed. A PR opened against
+`origin/main` today bundles all 13 commits and reviews as one change. **Push `main` first**, then
+the PR is the 5 commits it should be.
+
+⚠️ **`main` is CI-red until this branch lands.** `deno fmt --check` fails on `5b1f8ae` (7 files);
+`12540fc` is the fix and it is on this branch.
 
 ## Done
 
