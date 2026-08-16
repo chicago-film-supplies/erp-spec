@@ -543,3 +543,43 @@ hotspots:
       line) must close first, and it does not cover labour, whose postings key to a causal job with
       no invoice line.
       **Stays `open` until ADR-0036 is accepted.**
+
+  - id: HOT-015
+    statement: >-
+      `contexts/ledger/features/dimensional-postings.feature` still states the reading ADR-0025
+      REFUTED. Its Feature title is "Revenue and COGS postings carry both mandatory dimensions";
+      scenario 1 has a *revenue* posting carry a `cost_type` and be recorded; scenario 3 asserts "A
+      COGS posting missing the cost type is rejected" against a generic dimensioned COGS account.
+      `ledger/dimensions.yaml` scopes `cost_type` to `required_on: [labour_cogs]`, and exactly one
+      account in `ledger/chart-of-accounts.yaml` names it.
+    contexts: [ledger]
+    why_it_matters: >-
+      This is **HOT-011 surviving in the one artifact its resolution did not sweep**. ADR-0025
+      amended REQ-LED-001, re-scoped `cost_type` in `ledger/dimensions.yaml` and set the per-account
+      `dimensions:` lists in `ledger/chart-of-accounts.yaml` — three artifacts. The `.feature` file
+      was left stating the refuted reading, and it is not a fourth copy of the rule: gate 3 ties
+      every requirement to a Gherkin scenario, so **these scenarios are REQ-LED-001's only
+      executable statement**. A scenario that overstates the obligation is what an implementer
+      builds to, and building it re-introduces exactly what OQ-021 removed — a "kind of work"
+      demanded on `5000 Cost of Goods Sold: Retail Inventory`, where none of `delivery` / `counter`
+      / `warehouse` is true.
+      It survived because **nothing reads a `.feature` file's dimension claims**. Gate 10 checks
+      every golden vector in `ledger/vectors/` against `ledger/dimensions.yaml` and stops there
+      (erp-spec#16). The value-set gate added for that issue does not catch this one either: every
+      value used here — `Transport`, `delivery`, `Crew` — is legally DECLARED. What is wrong is
+      APPLICABILITY, not vocabulary.
+    evidence: >-
+      Measured 2026-08-16 against `main@5b1f8ae`.
+      · `contexts/ledger/features/dimensional-postings.feature:1` (Feature title), `:22-28`
+        (scenario 1), `:40-47` (scenario 3).
+      · `ledger/dimensions.yaml` `cost_type`: `required_on: [labour_cogs]`, values
+        `[delivery, counter, warehouse]`, note "**Labour only** (OQ-021, resolving HOT-011)".
+      · `ledger/chart-of-accounts.yaml:1231` — **1 of 134 accounts** names `cost_type`:
+        `5800 Cost of Goods Sold: Wages (Absorbed)`, `dimensions: [product_line, cost_type]`.
+        No revenue account names it; `5000` does not name it.
+      · `contexts/ledger/requirements.yaml` REQ-LED-001 rationale retracts the old wording by name:
+        "the previous wording — 'every revenue and COGS posting shall carry both a product line and
+        a cost type' — named the two dimensions directly and was **wrong in both directions**".
+      · `deno task validate` is green with the contradiction in place — 0 failures, 0 warnings.
+    blocks: [REQ-LED-001]
+    status: open

@@ -1138,6 +1138,69 @@ for (const e of evts) {
     }
   }
 
+  /**
+   * 10n — a dimension value named in a `.feature` scenario must be one `dimensions.yaml` declares.
+   *
+   * Gate 10 checked every golden vector in `ledger/vectors/` against the declared value sets and
+   * stopped there, so the Gherkin — which gate 3 makes every requirement's ONLY executable
+   * statement — was a hole in a guarantee that reads as complete (erp-spec#16). The hole was real:
+   * `dimensional-postings.feature:25` asserted a posting carrying `"Transport"` is RECORDED for
+   * eleven days while `dimensions.yaml` did not declare the value, which the same requirement says
+   * must be refused. `deno task validate` was green throughout.
+   *
+   * ⚠️ **This lands GREEN**, and that is a fact about the data, not about the gate. `Transport` was
+   * restored on 2026-08-16 (OQ-034), so all three values in use — `Transport`, `delivery`, `Crew` —
+   * now resolve. It was fired deliberately against a mutated scenario before landing.
+   *
+   * Scope is VOCABULARY, not applicability. Whether a `cost_type` belongs on the account a
+   * scenario posts to is HOT-015, and this check cannot see it: the scenarios do not name an
+   * account. Do not read a green 10n as "the scenarios agree with the chart".
+   *
+   * A declared null stays legal — "carries no product line" is REQ-LED-001's whole point, and only
+   * a quoted value is matched here.
+   *
+   * ⚠️ **STEP LINES ONLY**, and that restriction is load-bearing rather than tidiness. A first cut
+   * matched anywhere in the file and fired on the Feature's own description paragraph, which named
+   * `"Transport"` while explaining that the value had been dropped. That is the repo's correction
+   * convention working — retraction annotations quote the retracted value on purpose, all over
+   * `ledger/` and `adr/` — so a gate that read prose would turn CI red on exactly the notes the
+   * repo asks people to write. A scenario STEP is the executable claim; the paragraph above it is
+   * documentation.
+   */
+  {
+    const DIM_OF: Record<string, string> = {
+      "product line": "product_line",
+      "cost type": "cost_type",
+    };
+    const STEP = /^\s*(Given|When|Then|And|But|\*)\s/;
+    for (const f of await filesIn("contexts", ".feature")) {
+      const text = await Deno.readTextFile(f);
+      const lines = text.split("\n");
+      lines.forEach((line, i) => {
+        if (!STEP.test(line)) return;
+        for (const m of line.matchAll(/\bthe (product line|cost type) "([^"]*)"/g)) {
+          const dim = DIM_OF[m[1]];
+          const values = dimValues.get(dim);
+          if (!values) {
+            fail(
+              G,
+              `${rel(f)}:${i + 1}: dimension "${dim}" is not defined in ledger/dimensions.yaml`,
+            );
+            continue;
+          }
+          if (!values.has(m[2])) {
+            fail(
+              G,
+              `${rel(f)}:${i + 1}: ${dim} "${
+                m[2]
+              }" is not a declared value in ledger/dimensions.yaml`,
+            );
+          }
+        }
+      });
+    }
+  }
+
   /** Resolve `a.b[0].c` inside a plain object. Returns `undefined` for any missing step. */
   const at = (obj: unknown, path: string): unknown => {
     let cur: unknown = obj;

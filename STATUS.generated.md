@@ -12,7 +12,7 @@ is `deno task validate`'s judgement, not this file's.
 | | Count | |
 |---|---:|---|
 | Open questions | 8 open | 36 answered of 44 · **0 with no owner or no decide-by** |
-| Conflicts (HOT) | 14 | 2 open |
+| Conflicts (HOT) | 15 | 3 open |
 | Decisions (ADR) | 36 | 17 in force · 16 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 21 | 0 without a scenario |
@@ -43,6 +43,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 |---|---|---|
 | `HOT-013` | `ADR-0018` says dimensions are "carried on the posting, in `user_data` and in the Mongo/Parquet projection".… | `OQ-040` `ADR-0033` `SPIKE-003` |
 | `HOT-014` | ADR-0029 requires that "every posting must carry its causal order, or allocation is impossible and this decis… | `ADR-0029` `ADR-0031` `ADR-0036` |
+| `HOT-015` | `contexts/ledger/features/dimensional-postings.feature` still states the reading ADR-0025 REFUTED. Its Featur… | `REQ-LED-001` |
 
 ## Decisions
 
@@ -128,7 +129,7 @@ it is counted separately on purpose, and a milestone is not done because its che
 | `m3` | Posting rules defined for every source document type. | `posting_rules_cover_events` | 28 ledger events, 0 in no bucket, 11 specified, 2 unwritten |
 | `m3` | Golden input->expected-transfer vectors exist for every posting rule,… | `vectors_cover_rules` | 44 vectors over 11 specified rules; 0 lack an accept or a reject; 2 rules unwritten |
 | `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 12 spikes, 9 open, 0 closed without naming an ADR |
-| `m4` | Every HOT- is resolved or has an ADR that consciously defers it with… | `hotspots_resolved` | 14 hotspots, 2 unresolved |
+| `m4` | Every HOT- is resolved or has an ADR that consciously defers it with… | `hotspots_resolved` | 15 hotspots, 3 unresolved |
 
 ## Coverage gaps
 
