@@ -476,7 +476,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (46 unpromoted of 65)" _note="no drops pending">
+      <outline text="Capture (47 unpromoted of 66)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -522,6 +522,7 @@
         <outline text="Combined survey — when does a vendor-side amount become revenue rather than an adjustment to cost?…" _note="inbox/2026-08-16-survey-a-vendor-side-amount-becomes-revenue-only-where-control-or-a-markup-does.md"/>
         <outline text="Survey — every one of six references keeps the analytical dimension in the same durable store as th…" _note="inbox/2026-08-16-survey-all-six-references-keep-the-dimension-in-the-same-store-as-the-balance-and-only-odoo-splits-the-record.md"/>
         <outline text="Survey — five of six references put the customer on the SUBLEDGER and dimensions on the GL, and Odo…" _note="inbox/2026-08-16-survey-the-party-is-a-subledger-key-and-the-dimension-is-a-gl-slice-and-they-ride-different-legs.md"/>
+        <outline text="The owner's reason for allocation-as-reporting is RE-RUNNABILITY — multiple bases, and re-allocatin…" _note="inbox/2026-08-16-the-owner-wants-allocation-re-runnable-and-nothing-in-the-spec-carries-the-key-it-would-re-run-on.md"/>
         <outline text="HOT-013's budget arithmetic is wrong twice over — `Transfer.code` is an uncounted fourth discretion…" _note="inbox/2026-08-16-the-transfer-field-budget-is-four-fields-not-three-and-both-candidate-evictions-are-already-refused.md"/>
       </outline>
     </outline>

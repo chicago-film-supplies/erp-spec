@@ -5,7 +5,7 @@
     "adrs": 35,
     "adrs_accepted": 17,
     "events": 37,
-    "inbox": 65,
+    "inbox": 66,
     "inbox_promoted": 19
   },
   "requirements": [
@@ -606,6 +606,7 @@
       "inbox/2026-08-16-survey-a-vendor-side-amount-becomes-revenue-only-where-control-or-a-markup-does.md",
       "inbox/2026-08-16-survey-all-six-references-keep-the-dimension-in-the-same-store-as-the-balance-and-only-odoo-splits-the-record.md",
       "inbox/2026-08-16-survey-the-party-is-a-subledger-key-and-the-dimension-is-a-gl-slice-and-they-ride-different-legs.md",
+      "inbox/2026-08-16-the-owner-wants-allocation-re-runnable-and-nothing-in-the-spec-carries-the-key-it-would-re-run-on.md",
       "inbox/2026-08-16-the-transfer-field-budget-is-four-fields-not-three-and-both-candidate-evictions-are-already-refused.md"
     ]
   }

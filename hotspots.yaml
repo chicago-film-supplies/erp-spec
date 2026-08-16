@@ -451,6 +451,19 @@ hotspots:
       ⚠️ **`Transfer.code` cannot absorb it.** ADR-0035 leaves 9 spare bits — 512 values against
       ~1,000 orders today and growing. This needs a field, not a corner of one, and there is no
       unclaimed field left.
+      ⚠️ **WIDER THAN FIRST WRITTEN, 2026-08-16: it is not only TigerBeetle. NOTHING in the spec
+      records a causal order on a posting.** `contexts/ledger/entities/posting.yaml` — the one place
+      the posting shape is written — declares `posting_id`, `journal_entry_id`, `account_ref`,
+      `amount_minor`, `direction`, `accounting_date`, `posting_timestamp`, `product_line`,
+      `cost_type`, `source_document`, `posting_rule`. **No causal order.** So it is absent from the
+      MongoDB record too, and therefore from the Parquet ADR-0017 exports from MongoDB and seals at
+      close.
+      ⚠️ **And the official report already reads it.** `reporting/queries/product-line-pl.sql` joins
+      on `causal_order_id` throughout — `SELECT causal_order_id`, `JOIN base_total t USING
+      (causal_order_id)`, `PARTITION BY causal_order_id, pool_id`. Three artifacts: ADR-0029 requires
+      the field, the official query consumes it, and the entity that defines the record omits it.
+      The only causal order anywhere in the spec is `shift.absorbed_allocations[].causal_job`, inside
+      the source document.
     blocks: [ADR-0029, ADR-0031, ADR-0035]
     status: open
     resolution_shape: >-
@@ -465,11 +478,34 @@ hotspots:
         only candidate and `journal_entry_id_is_not_derivable` closed that door for a different
         reason. Splitting `user_data_128` into two u64 halves is representable and costs the
         equality filter on journal entry.
-      · **Seal the allocation instead of the key.** ADR-0017 already seals a closed period's Parquet
-        and hashes it into the close record. If the allocated P&L is sealed at close alongside it,
-        history is recoverable without the ledger carrying the key — and only the OPEN period is
-        exposed. This is the option that fits the existing architecture best and is the one to
-        survey first.
+      · ~~**Seal the allocation instead of the key.**~~ ADR-0017 already seals a closed period's
+        Parquet and hashes it into the close record. If the allocated P&L is sealed at close
+        alongside it, history is recoverable without the ledger carrying the key.
+        ❌ **INVERTED 2026-08-16 by the owner's stated requirement, and it is now the WORST of the
+        three.** Owner: "i liked allocation being a reporting function, **that way i can reallocate,
+        i can have multiple allocation methods**." Sealing the allocated OUTPUT is exactly what makes
+        a closed period un-re-allocable — one frozen answer per period, and no way to ask a second
+        question of it.
+      ✅ **The correct form is the opposite one: SEAL THE INPUTS.** ADR-0017 already exports the
+      sealed Parquet **from MongoDB**, "which holds the accounting date and is queryable" — postings,
+      not report rows. Put the causal order on the POSTING and the sealed artifact carries it, so any
+      basis whose inputs are in the artifact re-runs over a closed period reproducibly. That is one
+      field on a record already being sealed, and it makes the TigerBeetle exposure bounded and
+      nameable: a MongoDB loss **before close** costs that open period's allocability; after close
+      the Parquet holds it.
+      ⚠️ **Do not confuse this with what is honestly foreclosed.** The weight/cube basis (v2, OQ-033)
+      can never be re-run over history because the driver was never captured — 0 of 549 products
+      carry a non-zero shipping dimension, and `allocation-bases.yaml` says historical periods "must
+      keep resolving the basis that produced them". That is a DATA-CAPTURE limit. Bases whose inputs
+      are recorded — goods revenue, line count, quantity — are limited only by this hotspot, which is
+      ARCHITECTURAL and fixable. Treating the two as one makes an avoidable limit look inevitable.
+      ⚠️ **One tension to state rather than resolve.** ADR-0017 guarantees "a closed period cannot
+      drift". Re-allocating a closed period under a new basis yields a different number for that
+      period. The `(basis_id, version)` pin already makes each such report reproducible and
+      self-identifying, so this is not drift — but the guarantee's wording is about the PERIOD and
+      this makes it about the **(period, basis)** pair, and that should be written down wherever
+      re-allocation is.
       ⚠️ **Survey obligation applies** (CLAUDE.md → _Accounting decisions_): "how two books relate"
       is exactly this. Six references before a recommendation.
       **Does not block ADR-0035**, which narrowed its own claim rather than resting on the gap.
+      (`inbox/2026-08-16-the-owner-wants-allocation-re-runnable-and-nothing-in-the-spec-carries-the-key-it-would-re-run-on.md`)
