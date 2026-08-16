@@ -94,18 +94,29 @@ report:
       note: >-
         **Both accounts, and the delivery line's margin includes both.** 4100 Service Income is the
         delivery / setup / removal charge, a service a person performs and therefore labour-bearing;
-        4110 Delivery Surcharges is off-hours, rush or weekend, which nobody performs. Measured
-        79.8% / 20.0%. They are two accounts because the two revenues have different COST CAUSATION,
-        not because they are different product lines — so both are pooled and both spread.
-        ⚠️ **The "nobody performs it" premise holds for 62.3% of 4110 and NOT for a third of it.**
-        Measured 2026-08-09 by line name across the whole account ($45,776.06): Off Hours 37.2%,
-        **Distance Charge 33.3%**, Weekend 22.9%, Card Fee 4.3%, Rush 1.1%. Distance IS performed —
-        somebody drives the extra miles — and it is the clearest cost driver in the pool. The
-        forecasting consequence therefore **inverts** for that third: distance causes both the charge
-        and the cost, so predicting delivery cost from 4100 volume alone UNDER-predicts in a
-        long-haul period, rather than over-predicting as a uniform reading of the split suggests.
-        The coding is inconsistent besides — `Rush Charge` sits on 4100 for 86% of its value against
-        a rule that puts it on 4110 — so the 79.8/20.0 ratio is that split plus an unmeasured error.
+        4110 Delivery Surcharges carries a premium priced for a CONDITION of that same delivery.
+        They are two accounts because the two revenues have different COST CAUSATION, not because
+        they are different product lines — so both are pooled and both spread.
+        ⚠️ **OQ-032 answered 2026-08-16, and it retracts the framing this note used to carry.** It
+        read "4110 is off-hours, rush or weekend, which nobody performs", then corrected itself to
+        say the premise "holds for 62.3% and NOT for a third of it". Both readings asked the wrong
+        question. Owner: **"the performance IS the delivery** — the distance surcharge is because it
+        takes longer, the rush surcharge is because it was unplanned." Nothing on 4110 is a
+        separately performed thing; every member is a premium on the one performance, priced for a
+        condition of it.
+        Composition measured 2026-08-09 across the account ($45,776.06): Off Hours 37.2%, Distance
+        Charge 33.3%, Weekend 22.9%, Card Fee 4.3%, Rush 1.1%.
+        ⚠️ **Two OQ-032 restatements change this pool and have not run yet.** `Card Fee` leaves 4110
+        for **4700 Transaction Fee Income** — a payment fee is not a premium on a delivery, and it is
+        the one member that fails the criterion. And the miscoded lines move onto 4110: `Rush Charge`
+        sits on 4100 for 86% of its value against the stated rule, `Distance Charge` leaks onto 4100
+        on 3 lines. **Until both run, the 79.8 / 20.0 split is that split plus an unmeasured coding
+        error**, and anything reasoning from the ratio inherits it.
+        ⚠️ **The forecasting consequence is OPEN, not merely nuanced** — see OQ-032 and ADR-0029. A
+        distance premium is priced *because the job costs more*, so for that third the prediction
+        error runs opposite to the direction ADR-0029 states. Whether the same holds for out-of-hours
+        and weekend turns on reconciling OQ-006's "the premium is margin, not cost" with ADR-0019's
+        1.5x rules, which has not been done.
         → **OQ-032**. None of this touches the basis: both accounts pool and spread as one, which is
         the whole point of
         `inbox/2026-08-09-correction-the-surcharge-split-is-not-an-allocation-rule.md`. It touches
@@ -129,34 +140,51 @@ report:
 
     - id: crew
       product_line: Crew
-      status: blocked
-      blocked_by: [OQ-031]
+      status: not_allocated
       accounts: [4100]
+      reason: >-
+        **Severable.** ADR-0029's argument for spreading `Delivery` is that delivery is NOT
+        severable — "we wouldn't do a delivery with no products, we would rent far fewer products if
+        we weren't delivering them" — so delivery cost is a joint cost of the product revenue. Crew
+        hired out to a customer fails that test: it is work sold on its own terms. Spreading it would
+        move a real profit or loss onto goods that did not cause it, which is ADR-0029's own error in
+        the opposite direction. Owner, OQ-031, 2026-08-16.
       note: >-
-        Measured 2026-08-09: 7 lines, $2,625.00, 0.2% of revenue. Blocked rather than guessed
-        because ADR-0029's argument for spreading Delivery does not obviously transfer.
-        The delivery argument is severability — "we wouldn't do a delivery with no products, we
-        would rent far fewer products if we weren't delivering them", so delivery cost is a JOINT
-        cost of product revenue. Crew hired out to a customer may be a severable service that stands
-        on its own margin, in which case spreading it would move a real profit or loss onto goods
-        that did not cause it. Small enough to be unimportant and exactly the shape that gets
-        decided by default if nobody names it.
+        **SEVERABLE — keeps its own margin and does not spread.** OQ-031 answered by the owner
+        2026-08-16. ADR-0029's severability argument for `Delivery` does not transfer: "we wouldn't
+        do a delivery with no products", but crew hired out to a customer stands on its own.
+        Spreading it would move a real profit or loss onto goods that did not cause it — the same
+        error as leaving delivery alone, in the opposite direction.
+        ⚠️ **Not allocated is NOT the same as not costed.** Owner, same ruling: "they still need
+        labor cost allocated to them", via the **causal-job rule** — the shift lands on the line it
+        performed. So this pool carries its own labour cost as well as its own revenue, and its
+        margin is a real one. A severable line with revenue and no cost against it would report a
+        margin near 100%, which is the failure this clause exists to prevent.
+        Measured 2026-08-10: 9 lines, $3,550.00, 0.21% of revenue.
 
     - id: trash_cleanup
       product_line: Trash & Cleanup
-      status: blocked
-      blocked_by: [OQ-031]
+      status: not_allocated
       accounts: [4100]
+      reason: >-
+        **Severable**, on the same criterion as `crew`: a wrap cleanup is a service contracted on its
+        own terms, not a joint cost of the rental. Spreading $144,975 onto goods that did not cause
+        it would misstate both sides — goods margin down, and a real service margin erased. Owner,
+        OQ-031, 2026-08-16.
       note: >-
+        **SEVERABLE — keeps its own margin and does not spread.** OQ-031 answered by the owner
+        2026-08-16, on the same criterion as `crew`: a wrap cleanup stands on its own, so spreading
+        it would move a real profit or loss onto goods that did not cause it.
         ⚠️ **Re-measured 2026-08-10: 70 lines, $144,975.00, 8.58% of revenue — the THIRD LARGEST
         product line in the business.** This note read "2 lines, $1,750.00, 0.1% of revenue" until
         then, off a line denorm that was null on 227 categorised lines (api-cloudrun#473). An 83×
-        error, and it is the reason OQ-031 was framed as a tidy-up.
-        Same question as `crew` and still deliberately blocked on the same OQ — both are "a service
-        a person performs, sold to the customer", and answering one without the other would leave
-        the pair inconsistent. **But the two are no longer comparable in size** (`crew` is 9 lines /
-        $3,550.00 / 0.21%), so "answer them together for consistency" now costs materially more if
-        it delays this one. OQ-031 carries the re-framing.
+        error, and it is the reason OQ-031 was framed as a tidy-up when it was the largest open
+        decision in this file.
+        ⚠️ **The labour qualifier matters most here, because of that size.** Owner: "they still need
+        labor cost allocated to them", via the causal-job rule — a crew-day spent on a trash sweep
+        attributes to this line because that is the job that caused it. $144,975 of revenue on its
+        own P&L line with no cost against it would report a margin near 100% and would be the most
+        misleading number this report could produce.
 
   # ── pools that are the same shape and are NOT yet expressible ────────────────────────────────
   # `pools` above is keyed by an ACTIVITY PRODUCT LINE, because that is what today's data has: an
