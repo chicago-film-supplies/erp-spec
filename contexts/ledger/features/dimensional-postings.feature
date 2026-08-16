@@ -1,8 +1,14 @@
-Feature: Revenue and COGS postings carry both mandatory dimensions
+Feature: A posting declares every dimension its own account names
 
   ADR-0018 took dimensions off account identity and put them on the posting, which makes this
   rule the ONLY thing enforcing dimensionality. Nothing structural catches a missing dimension
   any more — there is no account whose absence would fail the write.
+
+  The obligation is READ OFF THE ACCOUNT, not inferred from its class (ADR-0025, resolving
+  HOT-011). `cost_type` describes labour, so exactly one account in the chart names it —
+  5800 Cost of Goods Sold: Wages (Absorbed) — and no revenue account does. A rule stated per class
+  was wrong in both directions: it demanded a "kind of work" on retail-inventory COGS, and it
+  demanded a product line on revenue accounts that arise from no sale.
 
   Measured on the current system 2026-08-10, joined to the product master: 15.00% of line revenue
   ($253,306.59 of $1,688,980.87) carries no product line, and all of it is custom lines with no
@@ -13,20 +19,26 @@ Feature: Revenue and COGS postings carry both mandatory dimensions
   categorised (api-cloudrun#473, repaired). Of the untracked population only $688.00 — 0.041% of all
   line revenue — was ever an operator declining to classify.
 
-  ⚠️ The scenario below uses the product line "Transport", which `ledger/dimensions.yaml` currently
-  does NOT declare — it was dropped 2026-08-09 on a measurement that read the wrong field, and
-  whether it is restored is OQ-034. Nothing in `deno task validate` checks a .feature file's
-  dimension values against the declared set (erp-spec#16), which is why this contradiction was
-  invisible.
+  Every dimension value named in a step below is checked against `ledger/dimensions.yaml` by
+  validate gate 10n (erp-spec#16). Before that gate existed, the scenario below asserted a posting
+  carrying `"Transport"` was RECORDED for eleven days while the value was not declared — which this
+  same requirement says must be refused — and validate was green throughout.
 
   @REQ-LED-001
-  Scenario: A revenue posting carrying both dimensions is recorded
-    Given a revenue posting to a dimensioned account
+  Scenario: A revenue posting carrying the product line its account names is recorded
+    Given a revenue posting to an account that names the product line
     And the posting carries the product line "Transport"
-    And the posting carries the cost type "delivery"
     When the posting is submitted to the ledger
     Then the posting is recorded
     And its balance is reportable sliced by product line
+
+  @REQ-LED-001
+  Scenario: A labour posting to the one account naming both dimensions declares both
+    Given a COGS posting to 5800 Cost of Goods Sold: Wages (Absorbed)
+    And the posting carries the product line "Delivery"
+    And the posting carries the cost type "delivery"
+    When the posting is submitted to the ledger
+    Then the posting is recorded
 
   @REQ-LED-001
   Scenario: A revenue posting missing the product line is rejected
@@ -38,13 +50,17 @@ Feature: Revenue and COGS postings carry both mandatory dimensions
     And the rejection names the missing dimension
 
   @REQ-LED-001
-  Scenario: A COGS posting missing the cost type is rejected
-    Given a COGS posting to a dimensioned account
-    And the posting carries the product line "Crew"
+  Scenario: A COGS posting owes no cost type when its account does not name one
+    This scenario read "A COGS posting missing the cost type is rejected" against a generic
+    dimensioned COGS account until 2026-08-16 (HOT-015). That was the pre-ADR-0025 reading, and it
+    is the one ADR-0025 refuted: 5000 takes the product line of the item sold, and none of
+    delivery / counter / warehouse is true of it.
+
+    Given a COGS posting to 5000 Cost of Goods Sold: Retail Inventory
+    And the posting carries the product line "Replacements"
     And the posting carries no cost type
     When the posting is submitted to the ledger
-    Then the posting is rejected
-    And nothing is recorded
+    Then the posting is recorded
 
   @REQ-LED-001
   Scenario: Rejection is refusal, not substitution

@@ -186,7 +186,7 @@
         <outline text="OQ-043 — Should the product and organization masters carry an EVENT HISTORY, so that a classification as it…" _note="owner: alex · decide by: 2026-12-15"/>
         <outline text="OQ-044 — Once wages move into COGS, what stays in `6600 Wages` — and can salaried sales/admin staff who neve…" _note="owner: alex · decide by: 2026-12-15"/>
       </outline>
-      <outline text="Conflicts (3 open)">
+      <outline text="Conflicts (2 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labour) or an own long-haul run (labour-bearing)?…" _note="Decides whether a trucked fulfillment absorbs labour cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
           <outline text="blocks OQ-010"/>
           <outline text="blocks ADR-0011"/>

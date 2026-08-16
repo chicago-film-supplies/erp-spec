@@ -581,5 +581,31 @@ hotspots:
         "the previous wording — 'every revenue and COGS posting shall carry both a product line and
         a cost type' — named the two dimensions directly and was **wrong in both directions**".
       · `deno task validate` is green with the contradiction in place — 0 failures, 0 warnings.
+      ⚠️ **The file contradicted ITSELF.** Its last scenario — `Scenario Outline: Unabsorbed labour
+      is the one posting exempt from the cost-type rule` — already stated the post-ADR-0025 reading
+      correctly, in its own prose: "the obligation is read off each account's own `dimensions` list
+      in ledger/chart-of-accounts.yaml, and 5801's is empty. **5800 is the only account in the chart
+      that names `cost_type` at all.**" So the correct rule and the refuted one sat 40 lines apart in
+      one file, and the amendment that added the first did not revisit the second.
     blocks: [REQ-LED-001]
-    status: open
+    status: resolved
+    resolved_by: ADR-0025
+    measured: >-
+      Resolved 2026-08-16 by amending the artifact, not by a new decision — ADR-0025 had already
+      decided this and three of the four artifacts already agreed. No open question was re-opened.
+      What changed in `contexts/ledger/features/dimensional-postings.feature`:
+      · **Feature title** — "Revenue and COGS postings carry both mandatory dimensions" →
+        "A posting declares every dimension its own account names".
+      · **Scenario 1** no longer puts a `cost_type` on a revenue posting.
+      · **Scenario 3 flips from `rejected` to `recorded`** and names its account: a posting to
+        5000 Cost of Goods Sold: Retail Inventory carrying a product line and NO cost type is
+        RECORDED, because 5000's `dimensions:` is `[product_line]`. That is the correction made
+        executable rather than merely written down.
+      · A scenario was ADDED for 5800, the one account naming both — so a declared `cost_type`
+        value stays exercised by gate 10n after the revenue scenario stopped carrying one.
+      · The stale ⚠️ paragraph claiming `dimensions.yaml` "currently does NOT declare" `Transport`
+        was removed; it had been false since 2026-08-16 (OQ-034).
+      ⚠️ **Nothing gates the applicability rule itself.** Gate 10n checks that a value is DECLARED,
+      not that the dimension applies to the account a scenario posts to — and the scenarios did not
+      name an account until this amendment. Three of the six now do, which is the precondition such
+      a gate would need. Filed as erp-spec#20.
