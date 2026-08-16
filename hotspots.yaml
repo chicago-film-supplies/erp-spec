@@ -256,7 +256,23 @@ hotspots:
       ADR-0020, ADR-0025, `charter.md`, `glossary.yaml`, `contexts/ledger/requirements.yaml`. All
       six are either `proposed` or in a freely-refactored directory. ADR-0001 is neither.
     blocks: []
-    status: open
+    status: resolved
+    resolved_by: ADR-0034
+    resolution: >-
+      **An accepted ADR is a historical record of the decision as taken, not a statement of current
+      fact.** Owner, 2026-08-16, choosing the general answer this hotspot said would resolve it by
+      convention. `ADR-0001` is left exactly as written.
+      The correction lives where this hotspot said it would: in `inbox/` (append-only, dated) and in
+      this entry, which stays in `hotspots.yaml` permanently because nothing here is ever deleted.
+      ADR-0034 also names the pattern the repo had been using unwritten — a question an accepted ADR
+      left open is answered by a NEW NARROW ADR that `relates_to` it and supersedes nothing
+      (ADR-0025 is the precedent) — and reserves superseding for an actual change of decision.
+      ⚠️ **The accepted cost**: a reader of ADR-0001 cannot tell from ADR-0001 that its 28.7% is
+      retracted. ADR-0034 records the cheap reversal if that bites — render each ADR's `relates_to`
+      hotspots beneath it in `in-force.generated.md`, a generator change touching no frozen body.
+      ⚠️ **Not machine-enforced.** Nothing in `deno task validate` can fail when a frozen body is
+      edited. ADR-0034 names the enforceable version (a body hash in frontmatter, recomputed at
+      validate time) and does not build it.
 
   - id: HOT-013
     statement: >-
@@ -305,3 +321,24 @@ hotspots:
       to live that HOT-012 describes. This is the second instance of that meta-problem.
     blocks: [OQ-040, ADR-0033, SPIKE-003]
     status: open
+    resolution_shape: >-
+      **Settled 2026-08-16 by ADR-0034, which decides the FORM this resolution takes and not its
+      content.** `ADR-0018` stays exactly as written — its decision (plain COA, dimensions off
+      account identity) is not in doubt, and it did not decide wrongly so much as under-specify.
+      So the answer is a **new narrow ADR** deciding where a dimension physically lives on a
+      transfer, carrying `relates_to: [ADR-0018]` and superseding nothing — the ADR-0025 pattern,
+      now named. **Superseding ADR-0018 is explicitly the wrong instrument**: it would re-open
+      plain-COA-versus-exploded-accounts to fix a prepositional clause.
+      **What that ADR still needs before it can be written:**
+      · **SPIKE-003** — `research-drop/reference/tigerbeetle.md` says flatly "no queries" while
+        recent releases are believed to expose a limited `query_transfers`. Neither gives a range
+        filter on `user_data`, so the conclusion is unchanged, but the spike decides whether
+        TigerBeetle can serve any period question at all.
+      · **The two candidate evictions in erp-spec#3**, which may make the shortfall disappear
+        rather than force a choice: `journal_entry_id` may be derivable as
+        `(source_document, posting event)` under ADR-0014's derived-state doctrine, and
+        `posting_rule` may be a projection concern rather than a ledger fact. If both go, only
+        `source_document` stays reserved and two slots open up.
+      · The OQ-040 survey's recommendation **removes** a claimant rather than adding one — a
+        settlement point is a subledger key on the receivable leg, not a third dimension
+        (`inbox/2026-08-16-survey-the-party-is-a-subledger-key-and-the-dimension-is-a-gl-slice-and-they-ride-different-legs.md`).

@@ -12,8 +12,8 @@ is `deno task validate`'s judgement, not this file's.
 | | Count | |
 |---|---:|---|
 | Open questions | 10 open | 30 answered of 40 · **0 with no owner or no decide-by** |
-| Conflicts (HOT) | 13 | 2 open |
-| Decisions (ADR) | 33 | 17 in force · 14 proposed |
+| Conflicts (HOT) | 13 | 1 open |
+| Decisions (ADR) | 34 | 17 in force · 15 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 2 | 0 without a scenario |
 | Inbox | 61 | 50 unpromoted |
@@ -43,7 +43,6 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 
 | HOT | Statement | Blocks |
 |---|---|---|
-| `HOT-012` | `ADR-0001` is `accepted` and therefore immutable, and its Context states a number that has been retracted and… | — |
 | `HOT-013` | `ADR-0018` says dimensions are "carried on the posting, in `user_data` and in the Mongo/Parquet projection".… | `OQ-040` `ADR-0033` `SPIKE-003` |
 
 ## Decisions
@@ -68,7 +67,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 - `ADR-0024` — DuckDB is reached natively and server-side; client-side reporting is rejected
 - `ADR-0026` — The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time
 
-### Proposed (14)
+### Proposed (15)
 
 | ADR | Title | Review by | Blocked on |
 |---|---|---|---|
@@ -86,6 +85,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | `ADR-0031` | The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy | 2026-11-01 | `OQ-006` `OQ-018` `OQ-031` `OQ-032` `OQ-033` |
 | `ADR-0032` | The organization tree is a liability tree; projects and settlement points are addressing beneath it | 2026-11-15 | `OQ-035` `OQ-036` `OQ-038` `OQ-039` `HOT-006` |
 | `ADR-0033` | A document is addressed to exactly one node by a level-tagged reference, and unallocated credit sits at the settlement point | 2026-11-15 | `OQ-030` `OQ-038` `OQ-040` |
+| `ADR-0034` | An accepted ADR is a historical record of the decision as taken; corrections live outside it and superseding is reserved for re-deciding | 2026-11-15 | `HOT-012` `HOT-013` |
 
 ## Spikes
 
@@ -128,7 +128,7 @@ it is counted separately on purpose, and a milestone is not done because its che
 | `m3` | Posting rules defined for every source document type. | `posting_rules_cover_events` | 28 ledger events, 0 in no bucket, 11 specified, 2 unwritten |
 | `m3` | Golden input->expected-transfer vectors exist for every posting rule,… | `vectors_cover_rules` | 44 vectors over 11 specified rules; 0 lack an accept or a reject; 2 rules unwritten |
 | `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 12 spikes, 9 open, 0 closed without naming an ADR |
-| `m4` | Every HOT- is resolved or has an ADR that consciously defers it with… | `hotspots_resolved` | 13 hotspots, 2 unresolved |
+| `m4` | Every HOT- is resolved or has an ADR that consciously defers it with… | `hotspots_resolved` | 13 hotspots, 1 unresolved |
 
 ## Coverage gaps
 

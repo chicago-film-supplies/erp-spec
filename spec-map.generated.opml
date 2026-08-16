@@ -180,7 +180,7 @@
           <outline text="blocks ADR-0033"/>
         </outline>
       </outline>
-      <outline text="Conflicts (2 open)">
+      <outline text="Conflicts (1 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labour) or an own long-haul run (labour-bearing)?…" _note="Decides whether a trucked fulfillment absorbs labour cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
           <outline text="blocks OQ-010"/>
           <outline text="blocks ADR-0011"/>
@@ -227,7 +227,7 @@
           <outline text="blocks SPIKE-003"/>
         </outline>
       </outline>
-      <outline text="Decisions (17 in force, 14 proposed)">
+      <outline text="Decisions (17 in force, 15 proposed)">
         <outline text="In force (17)">
           <outline text="ADR-0001 — Replace Xero with an in-house ledger" _note="**In the context of** owning the order-to-invoice path but renting the ledger, **facing** a tracking-dimension defect that Xero silently absorbs and a costing model Xero cannot express, **we decided** to build the general ledger in-house, **to achieve** dimensional postings that cannot be null and a labour-absorption model we control, **accepting** that a large amount of unglamorous accounting surface area becomes ours to build and keep correct."/>
           <outline text="ADR-0002 — Bank feed sourced from Plaid, single Chase account" _note="**In the context of** needing bank transactions now that Xero's feed goes away, **facing** one bank and one account, **we decided** to source the feed from Plaid, **to achieve** a working feed without a bank-specific integration, **accepting** that Plaid's transaction model is a consumer-fintech model, not an accounting bank feed."/>
@@ -247,7 +247,7 @@
           <outline text="ADR-0024 — DuckDB is reached natively and server-side; client-side reporting is rejected" _note="**In the context of** sealed-period Parquet as the closed-period reporting authority (ADR-0017), **facing** a choice between the native DuckDB addon, WASM in the API process, and WASM in the browser, **we decided** to reach DuckDB natively and server-side and to reject client-side reporting, **to achieve** exact integer reporting over an artifact the server controls, **accepting** that reporting stays an API surface we have to build."/>
           <outline text="ADR-0026 — The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time" _note="**In the context of** a fixed-asset register that must produce a full P&amp;L _and balance sheet_ on both a GAAP and a tax basis across years, **facing** a fleet where a §179 election expenses an asset in year 1 that GAAP carries for 5, 10 or 20, **we decided** that only the GAAP book posts to the general ledger and the tax book is derived at report time from the register's per-book schedules, **to achieve** two complete sets of statements without a second write path, **accepting** that the tax book has no double-entry enforcement of its own and is only as good as its derivation."/>
         </outline>
-        <outline text="Proposed (14)">
+        <outline text="Proposed (15)">
           <outline text="ADR-0009 — Anticorruption layer — foreign identifiers never enter domain models" _note="review by: 2026-09-15 · **In the context of** integrating Plaid and any surviving external system, **facing** silent translation failures at a foreign boundary, **we decided** that foreign identifiers never enter domain models and an unresolvable id is a hard error, **to achieve** failures that are loud at the boundary instead of silent in the data, **accepting** that ingestion will refuse work that the current system would have accepted.">
             <outline text="blocked on HOT-006"/>
           </outline>
@@ -312,6 +312,10 @@
             <outline text="blocked on OQ-030"/>
             <outline text="blocked on OQ-038"/>
             <outline text="blocked on OQ-040"/>
+          </outline>
+          <outline text="ADR-0034 — An accepted ADR is a historical record of the decision as taken; corrections live outside it and superseding is reserved for re-deciding" _note="review by: 2026-11-15 · **In the context of** two accepted ADRs whose evidence was later corrected, **facing** a lifecycle rule that forbids editing them and a supersede mechanism that would mean re-deciding things nobody disputes, **we decided** that an accepted ADR is a historical record of the decision as taken, **to achieve** an `adr/` directory that can be trusted to say what was actually believed and when, **accepting** that a reader of an ADR cannot tell from the ADR alone that one of its claims has since been retracted.">
+            <outline text="blocked on HOT-012"/>
+            <outline text="blocked on HOT-013"/>
           </outline>
         </outline>
       </outline>

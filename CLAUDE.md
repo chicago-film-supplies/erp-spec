@@ -20,6 +20,24 @@ Nothing goes straight into a `requirements.yaml`. Everything enters `inbox/` and
 triage. Promotion writes `promotes_to:` into the inbox file and `source:` into the target. Nothing
 is ever deleted.
 
+**An accepted ADR is a HISTORICAL RECORD of the decision as taken, not a statement of current fact**
+(ADR-0034, resolving HOT-012). Three consequences, and the third is the one that gets forgotten:
+
+| The ADR's decision | What you do |
+| ------------------ | ----------- |
+| **changed** | supersede — symmetric `supersedes` / `superseded_by`, which gate 6 checks |
+| **stands, but left a question open** | a **new narrow ADR** that `relates_to` it and supersedes **nothing** (ADR-0025 is the precedent) |
+| **stands, but a fact it cited was wrong** | **no new ADR.** A dated note in `inbox/`, plus a `hotspots.yaml` entry when it contradicts something |
+
+- The body is frozen at acceptance — no errata block, no inline correction, no appended "see also".
+  `relates_to` may still gain ids: it is an index, not a claim, and it is the correction index.
+- **Superseding is for re-deciding, never for correcting.** Superseding ADR-0001 to fix a Context
+  bullet would mean re-opening "replace Xero", which nobody is asking to reopen.
+- ⚠️ **Immutability bites only at `accepted`.** ADR-0032 was amended substantially while `proposed`.
+  Draft freely; acceptance is the irreversible act, and it is never Claude's to make (rule 3 below).
+- ⚠️ **Nothing enforces this.** `validate` cannot see that a frozen body was edited. ADR-0034 names
+  the enforceable version (a body hash in front matter) and deliberately does not build it.
+
 **The one exception to "no implementation code".** Measurement code that produces spike evidence and
 implements nothing in the target system lives in `spikes/harness/`. It is the same category as
 `tools/`: it exists so a claim in a spike's `## Notes` can be re-run rather than believed. The rule
