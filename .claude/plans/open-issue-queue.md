@@ -2,33 +2,36 @@
 
 - **Date:** 2026-08-16
 - **Repo:** erp-spec
-- **Status:** ⏳ 2 of 4 units landed · branch pushed, **not merged**
-- **Origin:** a review of all six open issues (#13–#18), requested because #18 was on the owner's
-  mind
-- **Related:** #13, #14, #15, #17, #20 · closed by this work: #16, #18 · HOT-015 (resolved) ·
-  `tools/validate.ts`, `spikes/harness/allocation-basis-probe.ts`, `ledger/posting-rules.yaml`
+- **Status:** ⏳ #16 and #18 closed (PR #21, merged) · 9 issues open
+- **Origin:** a review of the open issue queue, requested because #18 was on the owner's mind
+- **Related:** open — #3, #4, #6, #8, #12, #13, #14, #15, #17, #19, #20 · closed by this work: #16,
+  #18 · HOT-015 (resolved) · `tools/validate.ts`, `spikes/harness/allocation-basis-probe.ts`,
+  `ledger/posting-rules.yaml`
 
 ## START HERE
 
-Six issues were open. **#16 and #18 are fixed on
-`fix/supersede-machinery-and-feature-dimension-gate` (5 commits, pushed, NOT merged).** What remains
-is **#15 → #13** (one unit; #15 exists only to unblock #13) and **#14** (its own session). **#17 is
-deferred and not startable** — see Decisions.
+**#16 and #18 are closed** — PR #21, merged fast-forward to `main` 2026-08-16. `main` is CI-green at
+`0a97083`; the run before it (`5b1f8ae`) is a recorded **failure**, which is the `deno fmt --check`
+red this work also fixed.
 
-Do **#14 next if you want roadmap movement**, **#15/#13 next if you want the stale numbers fixed**.
-#14 is the larger payoff and the larger session; see Remaining for why its own issue text
-understates it.
+**Nine issues remain open.** In priority order:
 
-`deno task validate` is green and `deno fmt --check` is clean as of `8ae3f37`.
+|        | Issue                             | State                                                           |
+| ------ | --------------------------------- | --------------------------------------------------------------- |
+| Unit 3 | **#15 → #13**                     | startable — #15 exists only to unblock #13                      |
+| Unit 4 | **#14**                           | startable, **biggest roadmap payoff** — completes m3 outright   |
+| Unit 5 | **#8**                            | startable, cheapest real win (one 5-minute fix + bulk coverage) |
+| Unit 6 | **#6**                            | startable, but **its numbers are stale** — re-measure first     |
+| —      | **#19**, **#3**                   | gated on **ADR-0036 acceptance**, an owner action               |
+| —      | **#17**, **#12**, **#20**, **#4** | not startable — see the sections below                          |
 
-⚠️ **Before opening a PR: `origin/main` is 8 commits BEHIND local `main`** (measured 2026-08-16,
-`git rev-list --count origin/main..main` = 8, oldest `1e34f73`, newest `5b1f8ae`). Those are the
-ADR-0035/0036 and HOT-013/014 sessions, committed locally and never pushed. A PR opened against
-`origin/main` today bundles all 13 commits and reviews as one change. **Push `main` first**, then
-the PR is the 5 commits it should be.
+If you want one thing to move the most: **accept ADR-0036**. It resolves both open hotspots and
+unblocks #19 and #3 — and Unit 1 of this plan is what makes taking that action safe.
 
-⚠️ **`main` is CI-red until this branch lands.** `deno fmt --check` fails on `5b1f8ae` (7 files);
-`12540fc` is the fix and it is on this branch.
+⚠️ **This triage is the corrected one.** The first pass covered 6 of 11 open issues: the initial
+`gh issue list` was piped through `head -60` and #13's comment bodies consumed the output, silently
+truncating #12, #8, #6, #4 and #3. #19 was filed by a parallel session while planning. Anything
+citing "six open issues" predates the correction.
 
 ## Done
 
@@ -140,6 +143,81 @@ Order matters:
 Exit check: `m3` reads **4 met / 0 unmet / 0 prose** in `STATUS.generated.md` and `unwritten:` is
 empty.
 
+### Unit 5 — #8, the m6 field map (cheapest real win)
+
+`migration/field-map.yaml` holds ~10 mappings against ~30 Firestore collections, against an m6 exit
+criterion of "every current Firestore path maps to a new field, an explicit drop, or a quarantine".
+Unblocked and parallelisable with everything else.
+
+Two parts, very different sizes:
+
+- **Five minutes:** `invoices.query_by_orders` carries `disposition: defective` on the strength of
+  "55 referenced order uids reportedly do not exist" — **OQ-013 answered that with a measured 0**
+  (`inbox/2026-08-09-hard-deleted-order-uids-do-not-reproduce.md`). Do what `charter.md` already
+  does for the no-hard-deletes fence: keep the disposition if it stands on other grounds, and say
+  plainly that the original evidence does not reproduce.
+- **The bulk:** the remaining ~20 collections. Also the live→target GL account correspondence, which
+  belongs here and exists nowhere — `ledger/chart-of-accounts.yaml` deliberately carries no
+  `xero_id` (ADR-0009 fences foreign identifiers out of domain models).
+
+⚠️ Same milestone as **#17**, which is deferred. #8 does not depend on it and should not wait for
+it.
+
+### Unit 6 — #6, the requirements promotion backlog
+
+⚠️ **The issue's numbers are badly stale and nobody updated them.** It says "2 requirements total"
+and "6 of 8 contexts have `requirements: []`". `STATUS.generated.md` today reports **21
+requirements**, 0 without a scenario, and 4 contexts uncovered (`ordering`, `availability`,
+`banking`, `procurement`). 19 were promoted on 2026-08-16. **Re-measure before planning it** — this
+is the largest remaining structural gap and it blocks m7, but it is roughly half the size the issue
+claims.
+
+The trap the issue names is still live: **adding a requirement trips gate 3**, which demands a
+tagged Gherkin scenario. Promotion is requirement + scenario, never requirement alone. And as of
+this session those scenarios are also checked by gate 10n.
+
+## Gated on ADR-0036 acceptance — the single biggest unblocker left
+
+Accepting ADR-0036 is now **one owner action that moves four things**, and Unit 1 is what makes it
+safe to take: the promise is machine-enforced rather than remembered, and ADR-0018 stays in force
+until the moment of acceptance.
+
+- **HOT-013 and HOT-014** — the repo's only two open conflicts. ADR-0036 is the sole proposed
+  resolution of both, and they are 1 of m4's 3 unmet criteria.
+- **#19 — `cost_type` → `labour_line` (3 → 7 values) plus the keys-not-classifications rework.** The
+  issue says explicitly **do not start before ADR-0036 is accepted**: it reworks the same files, and
+  renaming first means touching every vector twice.
+- **#3 — the TigerBeetle `user_data` budget (three fields, four claimants).** Its premise moves
+  under ADR-0036, which changes what a posting carries at all. Do not re-litigate the eviction
+  before the decision lands. It is HOT-013's subject.
+
+⚠️ **#19 lands directly on top of what this session built.** It renames `cost_type`, and its own
+editable list names `tools/validate.ts` (gate 10) and
+`contexts/ledger/features/dimensional-postings.feature` — gate 10n's `DIM_OF` map hardcodes
+`"cost type" → cost_type`, and the amended scenarios use the value `delivery`. Both move in the
+sweep. Two things #19 flags that must be settled first: the British/American spelling
+(`labour_line`, per ADR-0019 and `labour_cogs`), and whether `labour_line` stays a posting field at
+all under ADR-0036's own criterion.
+
+## Not startable — leave open
+
+- **#17** — see Decisions.
+- **#12**, the three deferred allocation pools (`vehicle_cogs`, `trip_travel`,
+  `warehouse_overhead`). Three separate blockers, none decided: ADR-0030 chooses no accounts, so
+  there is nothing to pool; `trip_travel` needs an inner allocation with no basis and no data;
+  `warehouse_overhead` needs an ADR moving it into COGS that nobody has written. Worth knowing for
+  Unit 3: **one capture decision answers two questions** — recording what a leg moved and how far
+  gives `trip_travel` its basis _and_ upgrades ADR-0031's official allocation from Horngren tier 4
+  (`ability_to_bear`, an explicit proxy) to tier 1. Measured 2026-08-09: `products.shipping.weight`
+  is present on 531 of 549 products and **zero on all 549**.
+- **#20** — needs the presence-vs-absence decision first; see Decisions.
+- **#4** — ADR-0003 cites `formal/two-store-commit.tla`, which no longer exists (Quint, ADR-0016).
+  ADR-0003 is `accepted` and immutable, so the fix is not an edit. The issue's own preferred option
+  is right: **fold it into the m5 formal-methods ADR**, which has to supersede that clause anyway.
+  Its detection note is worth acting on independently — a gate asserting that file paths cited by
+  ADRs and spikes actually resolve would have caught all six stale `.tla` references at once, and is
+  the same shape as gate 10n.
+
 ## Decisions
 
 - **#18 fixed with a new field, not a status-aware gate 6.** The alternative still required
@@ -163,6 +241,6 @@ empty.
 
 ## Context recommendation
 
-**CLEAR CONTEXT.** Units 3 and 4 are executable from this doc plus `CLAUDE.md`, they touch entirely
-different material from Units 1 and 2 (ADC auth and allocation measurement; a six-reference
-accounting survey), and #14 in particular wants a fresh full window.
+**CLEAR CONTEXT.** Units 3-6 are executable from this doc plus `CLAUDE.md`, and they touch entirely
+different material from Units 1 and 2 — ADC auth and allocation measurement, a six-reference
+accounting survey, a Firestore-collection sweep. #14 in particular wants a fresh full window.
