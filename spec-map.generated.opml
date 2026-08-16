@@ -408,8 +408,12 @@
           <outline text="EVT-FUL-006 — UnitsReturned" _note="fulfillment → availability, billing, ledger"/>
           <outline text="EVT-FUL-007 — CommitmentVoided" _note="fulfillment → availability, ledger"/>
         </outline>
-        <outline text="billing (BIL)" _note="1 requirement(s) · 7 event(s)">
+        <outline text="billing (BIL)" _note="5 requirement(s) · 7 event(s)">
           <outline text="REQ-BIL-001 — A voided source document shall be excluded from every default aggregate, and its inclusion shall re…"/>
+          <outline text="REQ-BIL-002 — An invoice's lifecycle and its settlement state shall each be derived from an independent fact — th…"/>
+          <outline text="REQ-BIL-003 — Both derived invoice states shall be rebuildable from the ledger at any time, and a rebuild shall r…"/>
+          <outline text="REQ-BIL-004 — A voided invoice shall not be able to hold a non-zero receivable balance, and this shall hold by co…"/>
+          <outline text="REQ-BIL-005 — The two derived invoice states shall be permitted to disagree, and an invoice paid before it was vo…"/>
           <outline text="EVT-BIL-001 — InvoiceIssued" _note="billing → ledger, tax"/>
           <outline text="EVT-BIL-002 — InvoiceVoided" _note="billing → ledger, tax"/>
           <outline text="EVT-BIL-003 — SettlementRecorded" _note="billing → ledger, banking"/>
@@ -441,7 +445,12 @@
           <outline text="EVT-BNK-002 — BankTransactionMatched" _note="banking → ledger"/>
           <outline text="EVT-BNK-003 — BankTransactionUnmatched" _note="banking → ledger"/>
         </outline>
-        <outline text="tax (TAX)" _note="0 requirement(s) · 3 event(s)">
+        <outline text="tax (TAX)" _note="5 requirement(s) · 3 event(s)">
+          <outline text="REQ-TAX-001 — No tax-basis value shall ever be posted to the general ledger, and an account that exists only for…"/>
+          <outline text="REQ-TAX-002 — The tax basis shall be derived at report time from exactly one source — the fixed-asset register's…"/>
+          <outline text="REQ-TAX-003 — The tax-basis derivation shall be deterministic, shall live in exactly one place, and shall be cove…"/>
+          <outline text="REQ-TAX-004 — A closed period shall seal both bases in one artifact, hashed as a unit, so that a tax-basis statem…"/>
+          <outline text="REQ-TAX-005 — Permanent differences between accounting income and taxable income shall belong to neither basis, a…"/>
           <outline text="EVT-TAX-001 — TaxDetermined" _note="tax → billing, ledger"/>
           <outline text="EVT-TAX-002 — TaxExemptionApplied" _note="tax → billing, ledger"/>
           <outline text="EVT-TAX-003 — TaxRateSuperseded" _note="tax → billing"/>

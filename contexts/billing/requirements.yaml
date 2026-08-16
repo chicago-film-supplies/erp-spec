@@ -19,3 +19,81 @@ requirements:
     verification_method: test
     status: draft
     relates_to: []
+
+  # ── Mined from ADR-0022 (accepted). See contexts/fulfillment/requirements.yaml for the note on
+  # how an ADR's obligations are mined; the same method applies here. Two came from the Decision
+  # (002, 003) and two from the Consequences (004, 005).
+
+  - id: REQ-BIL-002
+    statement: >-
+      An invoice's lifecycle and its settlement state shall each be derived from an independent
+      fact — the lifecycle from the invoice's posting history, the settlement from its receivable
+      balance — and no writer shall assign either.
+    rationale: >-
+      ADR-0022 retires `invoice.status`, which conflated an assigned lifecycle fact with a derived
+      balance fact. One field carrying two semantics means no invariant can be stated about either
+      half, which is why HOT-009 blocked ADR-0014 from applying to invoices at all.
+      **`issued` is a fact about the ledger, not an operator's assertion about it.** The obvious
+      reading of HOT-009 was to keep lifecycle assigned and derive only settlement; ADR-0022
+      rejected it, because in double-entry the lifecycle facts already ARE postings — an invoice
+      that has not posted to the receivable is a draft document, whatever anyone typed.
+      Measured against the v1 corpus: 86 orders hold a stale denormalized invoice status
+      (api-cloudrun#453), which is the derived half drifting from the facts that determine it.
+    source: adr/ADR-0022-invoice-status-decomposed.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [HOT-009, ADR-0014]
+
+  - id: REQ-BIL-003
+    statement: >-
+      Both derived invoice states shall be rebuildable from the ledger at any time, and a rebuild
+      shall reproduce the stored projection exactly; the comparison shall be made against the ledger
+      rather than against whatever wrote the projection.
+    rationale: >-
+      ADR-0014 makes derived state a rebuildable projection. ADR-0022 materializes both fields into
+      the document store because the ledger answers no queries and a list view needs them — which
+      reintroduces the possibility of drift that materialization always does.
+      ⚠️ **The second clause is the whole requirement.** "The projection equals what the projector
+      produces" is a fixed-point check and can only ever agree with itself. ADR-0022 names the
+      escape: recompute-versus-ledger is independent **because the ledger is not the normalizer**.
+      A rebuild checked against its own writer would have certified all 86 stale rows as correct.
+    source: adr/ADR-0022-invoice-status-decomposed.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [ADR-0014, ADR-0017]
+
+  - id: REQ-BIL-004
+    statement: >-
+      A voided invoice shall not be able to hold a non-zero receivable balance, and this shall hold
+      by construction rather than by detection and repair.
+    rationale: >-
+      ADR-0022: `voided` MEANS "a reversal exists", and a reversal zeroes the receivable — so a
+      voided invoice carrying a live balance is not a state the model can express.
+      ⚠️ **"By construction" is the requirement, not decoration.** The v1 population
+      (api-cloudrun#436) is recorded as GROWING rather than historical, so a detect-and-repair
+      approach has already been demonstrated to lose ground. This is the repo's standing preference
+      for making a defect class unrepresentable over policing it.
+    source: adr/ADR-0022-invoice-status-decomposed.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [ADR-0014]
+
+  - id: REQ-BIL-005
+    statement: >-
+      The two derived invoice states shall be permitted to disagree, and an invoice paid before it
+      was voided shall report both facts truthfully rather than resolving them to one value.
+    rationale: >-
+      ADR-0022 names this as correct rather than a flaw: an invoice voided after payment is
+      `lifecycle: voided` and `settlement: paid`, which is the true history. The retired single enum
+      could not express it and had to pick one, which is how a real fact became unreportable.
+      This is the direct consequence of deriving the two from independent facts, and it is worth
+      asserting because the instinct on seeing the pair is to add a precedence rule — the option
+      ADR-0022 rejected on the grounds that precedence rules are how the conflation survives.
+    source: adr/ADR-0022-invoice-status-decomposed.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [HOT-009]

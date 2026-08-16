@@ -5,7 +5,115 @@
 # priority: must | should | could
 # status: draft | agreed | superseded
 #
-# Statements are implementation-free. "The system shall record the acting crew member on every
-# leg" — not "add an actor_id column".
+# ── Mined from ADR-0026 (accepted). See contexts/fulfillment/requirements.yaml for the note on how
+# an ADR's obligations are mined. Two came from the Decision (001, 002) and three from the
+# Consequences (003, 004, 005).
 
-requirements: []
+requirements:
+  - id: REQ-TAX-001
+    statement: >-
+      No tax-basis value shall ever be posted to the general ledger, and an account that exists only
+      for the tax basis shall never carry a ledger transfer.
+    rationale: >-
+      ADR-0026: the ledger holds one book and it is GAAP. Every posting rule therefore states one
+      set of postings, and they are the GAAP set.
+      **All four mature fixed-asset systems default the tax book to non-posting** — SAP's posting
+      indicator 0 ("area does not post any values to FI") is a first-class setting, NetSuite states
+      alternate methods "are not linked to NetSuite journal postings", and Sage Fixed Assets updates
+      the GL from one default posting book and warns that changing it double-posts.
+      7001 Section 179 Depreciation Expense is the worked case: it stays in the chart and will never
+      carry a transfer, because a §179 election is exactly a tax-basis-only expense.
+      ⚠️ A partial second book inside one ledger is not available and the reason is structural: a
+      disposal relieves cost against a different accumulated depreciation and a different gain per
+      basis, so the credit to the asset account cannot be shared. It is all postings or none.
+    source: adr/ADR-0026-tax-basis-is-a-non-posting-derived-book.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [ADR-0007, ADR-0018]
+
+  - id: REQ-TAX-002
+    statement: >-
+      The tax basis shall be derived at report time from exactly one source — the fixed-asset
+      register's per-asset tax schedule — and depreciation shall be the only account in which the two
+      bases are permitted to differ; a difference anywhere else shall be reported as a defect rather
+      than absorbed as a difference in basis.
+    rationale: >-
+      ADR-0026 states the derivation as a scope: the tax basis reads GL postings, less their GAAP
+      fixed-asset entries, plus the register's tax-basis entries.
+      **Measured 2026-08-09 against CFS's real 2025 statements, and it holds exactly**: the two
+      bases differ in **two accounts and nothing else** — 7000 Depreciation Expense (63,553.48) and
+      5000 COGS Retail Inventory (105.60) — summing to the net-income difference of 63,659.08 with
+      **zero residual**, and 52 of 60 P&L lines byte-identical. Total liabilities agree to the cent.
+      ⚠️ **The second account was a DEFECT, and that is the argument for this requirement.** The
+      retail-inventory divergence was invisible until the two statements were diffed line by line —
+      0.6% of the balance, growing across three years, flagged by nothing. Two independently
+      maintained sets of statements can drift in any account without either looking wrong. A basis
+      derived by a stated rule cannot: a difference in an account the derivation does not name is a
+      difference nobody authored, and it has nowhere to hide (OQ-029). The owner ruled that one an
+      error to correct, not a difference in basis.
+    source: adr/ADR-0026-tax-basis-is-a-non-posting-derived-book.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [ADR-0017, OQ-029]
+
+  - id: REQ-TAX-003
+    statement: >-
+      The tax-basis derivation shall be deterministic, shall live in exactly one place, and shall be
+      covered by input-to-expected-output vectors including rejection cases.
+    rationale: >-
+      ADR-0026 names this as the real cost of the decision: **the tax basis has no double-entry
+      enforcement.** TigerBeetle guarantees the GAAP book and nothing else, so the tax basis rests
+      entirely on its derivation being deterministic and on the per-asset audit trail ADR-0007
+      already requires.
+      That is why the derivation belongs in one place with vectors over it rather than in a report
+      template — a rule expressed in a template is re-expressed in every template, and the copies
+      drift. The GAAP side already works this way, and the golden vectors in `ledger/vectors/` are
+      the precedent: they are the entire enforcement of REQ-LED-001, not decoration.
+      ⚠️ One place is necessary and not sufficient. A location ratchet needs a value assertion beside
+      it — the money `_str` mirror was rendered in exactly one file, and that one file was wrong in
+      both environments until 2026-08-08.
+    source: adr/ADR-0026-tax-basis-is-a-non-posting-derived-book.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [ADR-0007, REQ-LED-001]
+
+  - id: REQ-TAX-004
+    statement: >-
+      A closed period shall seal both bases in one artifact, hashed as a unit, so that a tax-basis
+      statement for a closed period cannot drift.
+    rationale: >-
+      ADR-0026: the sealed artifact for a closed period carries the tax-basis entries alongside the
+      GAAP postings and is hashed as one artifact (ADR-0017).
+      **Sealing them separately would defeat the point.** The tax basis has no double-entry
+      enforcement of its own (REQ-TAX-003), so a separately-sealed tax statement could be
+      regenerated against a changed derivation and nothing would notice. One artifact and one hash
+      means a tax-basis figure for a closed period is exactly as immutable as the GAAP figure beside
+      it.
+    source: adr/ADR-0026-tax-basis-is-a-non-posting-derived-book.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [ADR-0017]
+
+  - id: REQ-TAX-005
+    statement: >-
+      Permanent differences between accounting income and taxable income shall belong to neither
+      basis, and no return-reconciliation logic shall be built into the ledger or into the derivation.
+    rationale: >-
+      ADR-0026, and it is the consequence most likely to be "helpfully" violated. Meals (17,777.88),
+      political expenditures (1,250.00) and vehicle tickets (3,635.88) are **identical on both 2025
+      statements** despite being nondeductible or half-deductible. They are Schedule M-1 adjustments
+      **on the return**, downstream of both sets of statements.
+      Form 1065 models it the same way: one balance sheet (Schedule L) plus M-1/M-2 reconciling book
+      to tax. The reconciliation is the deliverable, not a third book.
+      ⚠️ A system that tried to build these in would be doing the CPA's job with worse information —
+      deductibility depends on facts the ledger does not hold, and encoding half of the rule produces
+      a number that is neither basis and cannot be reconciled to either.
+    source: adr/ADR-0026-tax-basis-is-a-non-posting-derived-book.md
+    priority: must
+    verification_method: analysis
+    status: draft
+    relates_to: []

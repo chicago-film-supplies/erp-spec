@@ -15,7 +15,7 @@ is `deno task validate`'s judgement, not this file's.
 | Conflicts (HOT) | 13 | 1 open |
 | Decisions (ADR) | 34 | 17 in force · 15 proposed |
 | Spikes | 12 | 9 open |
-| Requirements | 7 | 0 without a scenario |
+| Requirements | 16 | 0 without a scenario |
 | Inbox | 61 | 50 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 27 | 0 still `TODO` |
@@ -132,6 +132,6 @@ it is counted separately on purpose, and a milestone is not done because its che
 
 ## Coverage gaps
 
-- Contexts with no requirements yet: `fixed-assets`, `ordering`, `availability`, `banking`, `tax`, `procurement`
+- Contexts with no requirements yet: `fixed-assets`, `ordering`, `availability`, `banking`, `procurement`
 - Requirements with no Gherkin scenario: none
 - Glossary terms still `TODO`: none

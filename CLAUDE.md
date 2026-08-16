@@ -133,9 +133,9 @@ Not every tool has an upstream dump, and the difference is worth knowing before 
 - **Quint** also ships official agent skills, enabled as a plugin in `.claude/settings.json` — those
   beat both halves for authoring `.qnt`.
 
-## Two rules that exist because the current system broke on them
+## Three rules that exist because something here broke on them
 
-Both are already enforced in the `~/cfs` workspace and both are load-bearing here:
+The first two are already enforced in the `~/cfs` workspace. All three are load-bearing here:
 
 - **A guard that can only consult its own oracle is not a guard.** A fixed-point check — "the stored
   value equals what the recompute produces" — is defined in terms of the normalizer and can only
@@ -143,6 +143,24 @@ Both are already enforced in the `~/cfs` workspace and both are load-bearing her
 - **A stated guarantee that nothing executes is not a guarantee.** If this repo asserts an
   invariant, something in `deno task validate` has to be able to fail on it. Land new gates **red**,
   watch them bite, then fix the data.
+- **An unexercised branch of a rule is a claim, not a capability.** Where a rule permits several
+  options and only one has ever been used, assume the machinery behind the others does not work. It
+  will look correct in review — the code reads fine, the gates are green, and nothing is stale.
+  **Neither instance below was found by reading. Both were found by being the first to take the
+  other branch**, and both had been wrong for as long as the option existed:
+  - Rule 2 permits a requirement's `source:` to be an inbox file, **an ADR**, or a verification
+    query. Every requirement cited an inbox note until 2026-08-16, so `generate.ts` wrote `source`
+    into a field named `inbox_source` and built `adrs` from `relates_to` alone. The first
+    ADR-sourced requirements therefore recorded **no ADR at all** — REQ-FUL-003/004/005 each cite
+    ADR-0011 and all three were reported under `gaps.requirements_without_adr`. The traceability
+    matrix was dropping the strongest link it had.
+  - `tools/contexts.ts` says "THE registry — nothing else may hold a copy", and erp-spec#10
+    consolidated four hand-maintained lists into it. `view.ts` held a **fifth**, hardcoded at eight
+    contexts, so the live viewer silently omitted every procurement requirement and event. It
+    survived the consolidation because **`view.ts` runs no gate and so could never go red.**
+
+  So: when you are about to be the first to use a documented-but-untravelled path, go and check the
+  artifacts that claim to cover it, rather than assuming they do.
 
 ## Accounting decisions: survey before deciding
 
