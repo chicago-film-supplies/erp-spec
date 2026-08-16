@@ -8,6 +8,7 @@ contexts: [ledger, ordering]
 relates_to: [SPIKE-002, ADR-0010]
 supersedes:
 superseded_by:
+frozen_sha256: 850a426cef107d884849105d434e545c0a123981049c73f01d2d358498af5263
 ---
 
 > **In the context of** two formal specs that exist as never-executed stubs, **facing** a choice

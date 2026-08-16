@@ -8,6 +8,7 @@ contexts: [fulfillment, ledger]
 relates_to: [HOT-007, HOT-001, HOT-002, OQ-001, OQ-002, OQ-003, OQ-005, OQ-007, OQ-010, ADR-0019]
 supersedes:
 superseded_by:
+frozen_sha256: dea7a2c780dc889fc9434183fcfcf5082fa6fdff89bc806fe4209d4b4aa2f159
 ---
 
 > **In the context of** wanting COGS labour allocation, **facing** a current system that derives

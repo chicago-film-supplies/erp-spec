@@ -8,6 +8,7 @@ contexts: [banking, ledger]
 relates_to: [SPIKE-004]
 supersedes:
 superseded_by:
+frozen_sha256: aeaac105708d1a74417802b908d1fa15c72da219744e1afe59e1407e6c381208
 ---
 
 > **In the context of** needing bank transactions now that Xero's feed goes away, **facing** one

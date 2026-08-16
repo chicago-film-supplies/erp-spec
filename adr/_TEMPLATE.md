@@ -9,6 +9,9 @@ contexts: []
 relates_to: [] # HOT-/OQ-/SPIKE-/REQ- ids
 supersedes:
 superseded_by:
+# frozen_sha256: <body SHA-256>  — added AT ACCEPTANCE, not before. Gate 14 recomputes it every run
+# and fails if the body has changed since (ADR-0034). `validate` prints the value to paste in.
+# Front matter is not hashed: `relates_to` must stay writable so a later correction can be linked.
 ---
 
 > **In the context of** <situation>, **facing** <concern>, **we decided** <option>, **to achieve**

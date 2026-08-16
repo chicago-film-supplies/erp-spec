@@ -50,14 +50,14 @@ statement of present fact.** Three rules follow.
 
 ### 1. The body is frozen at acceptance — never edited, never annotated
 
-No errata block, no inline correction, no "see also" appended later. The frontmatter's
-`relates_to` may gain ids, because it is an index rather than a claim.
+No errata block, no inline correction, no "see also" appended later. The frontmatter's `relates_to`
+may gain ids, because it is an index rather than a claim.
 
 ### 2. A correction to an accepted ADR's evidence lives in `inbox/`, and in `hotspots.yaml` when it is a contradiction
 
 `inbox/` is append-only and dated, which is exactly the shape a retraction needs. A hotspot is
-opened when the correction puts two spec statements in conflict — which is the normal case, since
-an ADR's claim usually contradicts whatever measured it wrong.
+opened when the correction puts two spec statements in conflict — which is the normal case, since an
+ADR's claim usually contradicts whatever measured it wrong.
 
 **Nothing is ever deleted**, so a `resolved` hotspot keeps its evidence in `hotspots.yaml`
 permanently. That is the durable home for the correction.
@@ -66,8 +66,8 @@ permanently. That is the durable home for the correction.
 
 - The **decision changed** → supersede, with the symmetric `supersedes` / `superseded_by` pair gate
   6 checks.
-- The **decision stands and a question it left open needs answering** → a new ADR that
-  `relates_to` it and supersedes nothing. `ADR-0025` is the precedent.
+- The **decision stands and a question it left open needs answering** → a new ADR that `relates_to`
+  it and supersedes nothing. `ADR-0025` is the precedent.
 - The **decision stands and a fact it cited was wrong** → rule 2. No new ADR at all.
 
 ## Considered options
@@ -96,17 +96,23 @@ permanently. That is the durable home for the correction.
   cannot tell from the ADR that one of its claims has been retracted.** They must find the hotspot
   or the inbox note. Today `ADR-0001` reads as current and its headline number is wrong by ~700×.
   **The cheap fix if this bites is the rejected middle option** — render each ADR's `relates_to`
-  hotspots under it in `in-force.generated.md`, a generator change with no schema change and no
-  edit to any frozen body. Recorded here so that reversing this trade-off later is a small
-  deliberate act rather than a rediscovery.
-- ⚠️ **This convention is not machine-enforced, and by this repo's own standing rule it should be.**
-  "A stated guarantee that nothing executes is not a guarantee" — yet nothing in `deno task validate`
-  can currently fail when an accepted ADR's body is edited, because validate reads front matter and
-  prose, not history. The enforceable version is a content hash of the body recorded in frontmatter
-  at acceptance and recomputed by validate, which turns any edit to a frozen body into a CI failure
-  that has to be dismissed on purpose. **Not built here** — it touches all 17 accepted ADRs and is
-  its own piece of work. Until it exists, rule 1 is a convention people follow rather than an
-  invariant the repo holds, and this bullet is the honest statement of that gap.
+  hotspots under it in `in-force.generated.md`, a generator change with no schema change and no edit
+  to any frozen body. Recorded here so that reversing this trade-off later is a small deliberate act
+  rather than a rediscovery.
+- ✅ **Rule 1 is machine-enforced — `deno task validate` gate 14, built 2026-08-16.** The body's
+  SHA-256 is recorded as `frozen_sha256:` in front matter and recomputed on every run, so editing a
+  frozen body turns CI red and the only way to dismiss it is to update the hash in the same commit —
+  a deliberate, reviewable line in the diff rather than a silent rewrite of the record. Required by
+  this repo's standing rule that a stated guarantee nothing executes is not a guarantee.
+  - **Landed red and watched to bite**: 19 failures on the first run (17 `accepted` + 2
+    `superseded`), then green once stamped; inserting one sentence into ADR-0018's Context turns it
+    red again with the two hashes named.
+  - **Front matter is deliberately NOT hashed**, and that is what makes rule 1 and rule 2
+    compatible: `relates_to` must be able to gain the id of a later correction, and `status` /
+    `superseded_by` must be writable or superseding an ADR would trip the gate protecting it.
+    Demonstrated in the same sitting — ADR-0018 gained `HOT-013` in `relates_to` with its body hash
+    unchanged.
+  - `superseded` counts as frozen: it was accepted once, and its body is the record of that.
 - **Immutability bites only at `accepted`, and that is load-bearing.** `ADR-0032` was amended
   substantially on 2026-08-10 — a rename, a factual correction about contacts, a retracted claim
   about credit limits — precisely because it is `proposed`. Draft freely; accept deliberately.

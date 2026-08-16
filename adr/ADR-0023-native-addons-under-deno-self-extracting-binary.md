@@ -8,6 +8,7 @@ contexts: [ledger, billing, ordering]
 relates_to: [SPIKE-001, SPIKE-007, SPIKE-010, ADR-0003, ADR-0004, ADR-0012, ADR-0013]
 supersedes:
 superseded_by:
+frozen_sha256: 1fce221a5e315ce646001ea9894cb942b2a1572a052837747f17d74252b36fdf
 ---
 
 > **In the context of** a Deno API that must load three npm packages with native or native-adjacent

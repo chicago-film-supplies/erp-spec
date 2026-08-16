@@ -8,6 +8,7 @@ contexts: [ledger, billing, banking, tax]
 relates_to: [HOT-005, HOT-006, OQ-012]
 supersedes:
 superseded_by:
+frozen_sha256: 2302488fd2b12af6df3d437cfb805d7d42f85feb6e385f42589eb65aa1079738
 ---
 
 > **In the context of** owning the order-to-invoice path but renting the ledger, **facing** a

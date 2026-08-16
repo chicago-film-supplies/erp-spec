@@ -8,6 +8,7 @@ contexts: [ledger, billing]
 relates_to: [HOT-008, OQ-014]
 supersedes:
 superseded_by:
+frozen_sha256: 1b3db617ee73a2d7f636b59b533dcc9b8261f2b48042dc832418a9105a2c8057
 ---
 
 > **In the context of** duplicate active charge products booking the same economic event to

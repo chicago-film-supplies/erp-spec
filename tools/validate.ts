@@ -59,15 +59,48 @@ async function readYaml<T = unknown>(path: string): Promise<T | null> {
 }
 
 /** Split `---\n...\n---\nbody` into front matter + body. */
-function frontMatter(text: string): { fm: Record<string, unknown>; body: string } | null {
+function frontMatter(text: string): { fm: unknown; body: string } | null {
   const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!m) return null;
   try {
-    return { fm: (parseYaml(m[1]) ?? {}) as Record<string, unknown>, body: m[2] ?? "" };
+    return { fm: parseYaml(m[1]) ?? {}, body: m[2] ?? "" };
   } catch {
     return null;
   }
 }
+
+// ── front-matter decoding ───────────────────────────────────────────────────
+/**
+ * `parseYaml` returns `unknown` and that is the truth: a `.md` on disk can hold anything. The
+ * loaders below therefore DECODE rather than assert. The previous form was
+ * `{ ...parsed.fm as unknown as Adr }` — a double cast TypeScript demands precisely because the
+ * two types do not overlap, which is the compiler saying the claim is unchecked.
+ *
+ * ⚠️ The cast was hiding a live lie. `Adr.date` and `Adr.review_by` were typed `string`, and YAML
+ * parses an unquoted `date: 2026-08-08` into a **`Date`** — so every ADR's `date` was a `Date` while
+ * the type said otherwise, and the call sites had grown `String(...)` and `ymdUTC(...)` wrappers to
+ * cope. They are decoded to `Date` here, which is what they always were.
+ */
+const isRecord = (v: unknown): v is Record<string, unknown> =>
+  typeof v === "object" && v !== null && !Array.isArray(v);
+
+const str = (v: unknown): string | undefined => (typeof v === "string" ? v : undefined);
+
+/**
+ * Elements are stringified rather than filtered, deliberately: a malformed entry must survive to
+ * the gate that reports it. Dropping it would turn a bad value into a silently absent one — the
+ * exact substitution `ledger/dimensions.yaml` warns about for dimensions.
+ */
+const strList = (v: unknown): string[] =>
+  Array.isArray(v) ? v.map((x) => (typeof x === "string" ? x : String(x))) : [];
+
+/** YAML gives a `Date` for an unquoted date and a `string` for a quoted one. Accept both. */
+const dateVal = (v: unknown): Date | undefined => {
+  if (v instanceof Date) return isNaN(v.getTime()) ? undefined : v;
+  if (typeof v !== "string") return undefined;
+  const d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(v.trim()) ? `${v.trim()}T00:00:00Z` : v);
+  return isNaN(d.getTime()) ? undefined : d;
+};
 
 /**
  * `.gitignore` is invisible to `walk()`. `spikes/harness/` installs a real node_modules tree
@@ -121,13 +154,75 @@ interface Adr {
   id: string;
   title?: string;
   status?: string;
-  date?: string;
-  review_by?: string;
-  contexts?: string[];
-  supersedes?: string | null;
-  superseded_by?: string | null;
-  relates_to?: string[];
+  date?: Date;
+  review_by?: Date;
+  contexts: string[];
+  supersedes: string | null;
+  superseded_by: string | null;
+  relates_to: string[];
+  frozen_sha256?: string;
   _file: string;
+  /** Everything after the front matter. Gate 14 hashes this and nothing else. */
+  _body: string;
+}
+
+function toAdr(fm: unknown, file: string, body: string): Adr | null {
+  if (!isRecord(fm)) return null;
+  const id = str(fm.id);
+  if (id === undefined) return null;
+  return {
+    id,
+    title: str(fm.title),
+    status: str(fm.status),
+    date: dateVal(fm.date),
+    review_by: dateVal(fm.review_by),
+    contexts: strList(fm.contexts),
+    supersedes: str(fm.supersedes) ?? null,
+    superseded_by: str(fm.superseded_by) ?? null,
+    relates_to: strList(fm.relates_to),
+    frozen_sha256: str(fm.frozen_sha256),
+    _file: file,
+    _body: body,
+  };
+}
+
+interface Spike {
+  id: string;
+  closes_adr?: string;
+  status?: string;
+  exit_criteria: unknown[];
+  _file: string;
+}
+
+function toSpike(fm: unknown, file: string): Spike | null {
+  if (!isRecord(fm)) return null;
+  const id = str(fm.id);
+  if (id === undefined) return null;
+  return {
+    id,
+    closes_adr: str(fm.closes_adr),
+    status: str(fm.status),
+    exit_criteria: Array.isArray(fm.exit_criteria) ? fm.exit_criteria : [],
+    _file: file,
+  };
+}
+
+/** The three keys any gate actually reads off an inbox note. */
+interface InboxNote {
+  file: string;
+  title?: string;
+  promotes_to: string[];
+  contexts: string[];
+}
+
+function toInboxNote(fm: unknown, file: string): InboxNote {
+  const r = isRecord(fm) ? fm : {};
+  return {
+    file,
+    title: str(r.title),
+    promotes_to: strList(r.promotes_to),
+    contexts: strList(r.contexts),
+  };
 }
 
 const reqs: Req[] = [];
@@ -135,14 +230,8 @@ const evts: Evt[] = [];
 const adrs: Adr[] = [];
 const hots: { id: string; status?: string; contexts?: string[]; blocks?: string[] }[] = [];
 const oqs: { id: string; owner?: unknown; decide_by?: unknown; status?: string }[] = [];
-const spikes: {
-  id: string;
-  closes_adr?: string;
-  status?: string;
-  exit_criteria?: unknown[];
-  _file: string;
-}[] = [];
-const inbox: { file: string; fm: Record<string, unknown> }[] = [];
+const spikes: Spike[] = [];
+const inbox: InboxNote[] = [];
 
 // contexts/*/requirements.yaml + events.yaml
 for (const dir of CONTEXT_DIRS) {
@@ -161,7 +250,12 @@ for (const f of await filesIn("adr", ".md")) {
     fail("6", `${rel(f)}: missing or unparseable front matter`);
     continue;
   }
-  adrs.push({ ...(parsed.fm as unknown as Adr), _file: f });
+  const adr = toAdr(parsed.fm, f, parsed.body);
+  if (!adr) {
+    fail("6", `${rel(f)}: front matter has no string \`id\``);
+    continue;
+  }
+  adrs.push(adr);
 }
 
 for (const f of await filesIn("spikes", ".md")) {
@@ -170,7 +264,12 @@ for (const f of await filesIn("spikes", ".md")) {
     fail("1", `${rel(f)}: missing or unparseable front matter`);
     continue;
   }
-  spikes.push({ ...parsed.fm, _file: f } as unknown as (typeof spikes)[number]);
+  const spike = toSpike(parsed.fm, f);
+  if (!spike) {
+    fail("1", `${rel(f)}: front matter has no string \`id\``);
+    continue;
+  }
+  spikes.push(spike);
 }
 
 for (const f of await filesIn("inbox", ".md")) {
@@ -179,7 +278,7 @@ for (const f of await filesIn("inbox", ".md")) {
     fail("9", `${rel(f)}: missing or unparseable front matter`);
     continue;
   }
-  inbox.push({ file: f, fm: parsed.fm });
+  inbox.push(toInboxNote(parsed.fm, f));
 }
 
 // Parse-coverage sweep. Every structured YAML in the repo must at least PARSE, whether or not a
@@ -208,10 +307,7 @@ const terms = glossY?.terms ?? [];
 
 // ── --triage-only short circuit ─────────────────────────────────────────────
 if (TRIAGE_ONLY) {
-  const unpromoted = inbox.filter((i) => {
-    const p = i.fm.promotes_to;
-    return !Array.isArray(p) || p.length === 0;
-  });
+  const unpromoted = inbox.filter((i) => i.promotes_to.length === 0);
   console.log(`\nUnpromoted inbox items: ${unpromoted.length} of ${inbox.length}\n`);
   // Age, not `triage_count` — the counter was written as 0 and incremented by nothing, so it
   // printed the same "(triaged 0x)" for a note dropped today and one ignored for a month
@@ -222,7 +318,7 @@ if (TRIAGE_ONLY) {
       ? Math.floor((Date.now() - new Date(`${m[1]}T00:00:00Z`).getTime()) / 86_400_000)
       : null;
     console.log(`  ${rel(i.file)}${days === null ? "" : `  (${days}d)`}`);
-    console.log(`      ${i.fm.title ?? "(no title)"}`);
+    console.log(`      ${i.title ?? "(no title)"}`);
   }
   console.log("");
   Deno.exit(0);
@@ -253,14 +349,14 @@ if (TRIAGE_ONLY) {
   // map link to spikes by path, and a renamed file silently breaks every link to it. ADRs have
   // had this check since the start; spikes never did.
   for (const s of spikes) {
-    if (typeof s.id === "string" && !basename(s._file).startsWith(s.id)) {
+    if (!basename(s._file).startsWith(s.id)) {
       fail("1", `${rel(s._file)}: filename does not start with its id "${s.id}"`);
     }
   }
 
   // an ADR's id must match its filename, or in-force.generated.md links break
   for (const a of adrs) {
-    if (typeof a.id === "string" && !basename(a._file).startsWith(a.id)) {
+    if (!basename(a._file).startsWith(a.id)) {
       fail("1", `${rel(a._file)}: filename does not start with its id "${a.id}"`);
     }
   }
@@ -374,7 +470,7 @@ for (const e of evts) {
     if (a.status === "proposed") {
       if (!a.review_by) {
         fail("6", `${a.id}: proposed ADRs must carry a \`review_by\` date`);
-      } else if (new Date(String(a.review_by)) < now) {
+      } else if (a.review_by < now) {
         fail("6", `${a.id}: proposed past its review_by (${ymdUTC(a.review_by)})`);
       }
     }
@@ -404,6 +500,52 @@ for (const e of evts) {
       if (!CONTEXT_DIRS.has(c)) {
         fail("6", `${a.id}: context "${c}" does not resolve to a context directory`);
       }
+    }
+  }
+}
+
+// ── gate 14: an accepted ADR's body is frozen ───────────────────────────────
+/**
+ * ADR-0034 decides that an accepted ADR is a historical record of the decision as taken, and that
+ * its body is never edited — corrections live in `inbox/` and `hotspots.yaml`, and superseding is
+ * reserved for actually re-deciding. That was a convention, and this repo's standing rule is that
+ * **a stated guarantee nothing executes is not a guarantee**.
+ *
+ * So: the body's SHA-256 is recorded in front matter when the ADR is accepted, and recomputed here.
+ * Editing a frozen body turns CI red, and the only way to dismiss it is to update the hash in the
+ * same commit — which makes the edit a deliberate, reviewable line in the diff rather than a silent
+ * rewrite of the record.
+ *
+ * **Front matter is deliberately NOT hashed.** ADR-0034 permits `relates_to` to gain ids — it is
+ * an index, not a claim, and it is where a later correction is linked from. `status` and
+ * `superseded_by` must also be writable, or superseding an ADR would trip the gate that protects
+ * it. Only the prose below the `---` is frozen.
+ *
+ * `superseded` counts as frozen: it was accepted once, and its body is the record of that.
+ */
+{
+  const FROZEN = new Set(["accepted", "superseded"]);
+  const enc = new TextEncoder();
+  for (const a of adrs) {
+    if (!FROZEN.has(a.status ?? "")) continue;
+    const digest = await crypto.subtle.digest("SHA-256", enc.encode(a._body));
+    const hash = Array.from(new Uint8Array(digest))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    if (!a.frozen_sha256) {
+      fail(
+        "14",
+        `${a.id}: status "${a.status}" but no \`frozen_sha256\`. If the body is correct, add:  frozen_sha256: ${hash}`,
+      );
+    } else if (a.frozen_sha256 !== hash) {
+      fail(
+        "14",
+        `${a.id}: body edited since acceptance — front matter says ${
+          a.frozen_sha256.slice(0, 12)
+        }…, body hashes to ${
+          hash.slice(0, 12)
+        }…. ADR-0034: an accepted body is never edited. Revert it, or supersede the ADR.`,
+      );
     }
   }
 }
@@ -470,10 +612,8 @@ for (const e of evts) {
     }
   }
   for (const i of inbox) {
-    const cs = i.fm.contexts;
-    if (!Array.isArray(cs)) continue;
-    for (const c of cs) {
-      if (!CONTEXT_DIRS.has(String(c))) {
+    for (const c of i.contexts) {
+      if (!CONTEXT_DIRS.has(c)) {
         fail("8", `${rel(i.file)}: context "${c}" does not resolve`);
       }
     }
@@ -530,8 +670,7 @@ for (const e of evts) {
   const envToday = Deno.env.get("SPEC_TODAY");
   const now = envToday ? new Date(envToday) : new Date();
   for (const i of inbox) {
-    const p = i.fm.promotes_to;
-    if (Array.isArray(p) && p.length > 0) continue;
+    if (i.promotes_to.length > 0) continue;
     const m = basename(i.file).match(/^(\d{4}-\d{2}-\d{2})-/);
     if (!m) {
       warn("9", `${rel(i.file)}: filename does not start with a date, so its age cannot be judged`);
@@ -1818,6 +1957,7 @@ const GATE_NAMES: Record<string, string> = {
   "11": "repo paths cited in prose resolve",
   "12": "milestone exit criteria are wired to a check or declared prose",
   "13": "reporting content — allocation bases, pools, line classification, golden vectors",
+  "14": "accepted ADR bodies are frozen",
   xref: "cross-references resolve",
   parse: "files parse",
 };

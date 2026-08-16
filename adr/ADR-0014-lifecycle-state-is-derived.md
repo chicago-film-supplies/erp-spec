@@ -8,6 +8,7 @@ contexts: [ordering, billing, ledger, fulfillment]
 relates_to: [ADR-0003, ADR-0015, HOT-005, HOT-009]
 supersedes:
 superseded_by:
+frozen_sha256: b2e8bc51c2a6a6e42c7e318f55ef197286cf4aa115984e8b055a5d6dea021186
 ---
 
 > **In the context of** deciding where order and invoice status live, **facing** a v1 corpus where

@@ -23,10 +23,10 @@ is ever deleted.
 **An accepted ADR is a HISTORICAL RECORD of the decision as taken, not a statement of current fact**
 (ADR-0034, resolving HOT-012). Three consequences, and the third is the one that gets forgotten:
 
-| The ADR's decision | What you do |
-| ------------------ | ----------- |
-| **changed** | supersede — symmetric `supersedes` / `superseded_by`, which gate 6 checks |
-| **stands, but left a question open** | a **new narrow ADR** that `relates_to` it and supersedes **nothing** (ADR-0025 is the precedent) |
+| The ADR's decision                        | What you do                                                                                          |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **changed**                               | supersede — symmetric `supersedes` / `superseded_by`, which gate 6 checks                            |
+| **stands, but left a question open**      | a **new narrow ADR** that `relates_to` it and supersedes **nothing** (ADR-0025 is the precedent)     |
 | **stands, but a fact it cited was wrong** | **no new ADR.** A dated note in `inbox/`, plus a `hotspots.yaml` entry when it contradicts something |
 
 - The body is frozen at acceptance — no errata block, no inline correction, no appended "see also".
@@ -35,8 +35,10 @@ is ever deleted.
   bullet would mean re-opening "replace Xero", which nobody is asking to reopen.
 - ⚠️ **Immutability bites only at `accepted`.** ADR-0032 was amended substantially while `proposed`.
   Draft freely; acceptance is the irreversible act, and it is never Claude's to make (rule 3 below).
-- ⚠️ **Nothing enforces this.** `validate` cannot see that a frozen body was edited. ADR-0034 names
-  the enforceable version (a body hash in front matter) and deliberately does not build it.
+- ✅ **Enforced by `validate` gate 14.** An accepted or superseded ADR carries `frozen_sha256:` in
+  its front matter, recomputed over the body on every run — edit the body and CI goes red. **Front
+  matter is not hashed**, which is what lets `relates_to` gain the id of a later correction and lets
+  `status` / `superseded_by` be written when superseding.
 
 **The one exception to "no implementation code".** Measurement code that produces spike evidence and
 implements nothing in the target system lives in `spikes/harness/`. It is the same category as

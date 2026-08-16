@@ -21,8 +21,8 @@ recorded separately as **HOT-013**.
 ### GAAP — customer detail is explicitly NOT in the general ledger
 
 The control-account / subsidiary-ledger doctrine is unambiguous and is the oldest answer here:
-*subsidiary ledger accounts are **not part of the general ledger** — they are supplemental accounts
-providing the detail behind a control account*. The AR subsidiary ledger holds one account per
+_subsidiary ledger accounts are **not part of the general ledger** — they are supplemental accounts
+providing the detail behind a control account_. The AR subsidiary ledger holds one account per
 customer; the GL holds one Accounts Receivable control account. **Individual customer detail does
 not appear in the trial balance**; only the control total does. The reconciliation obligation is
 that the sum of the subsidiary accounts equals the control account.
@@ -42,7 +42,7 @@ a tracking category.
 
 ### SAP — the GL never sees the customer list
 
-*"In GL you will not have the list of vendors but a few reconciliation accounts."* Postings go to a
+_"In GL you will not have the list of vendors but a few reconciliation accounts."_ Postings go to a
 subledger customer account and update a linked **reconciliation account** in the GL. Reconciliation
 accounts appear on the financial statements; the individual subledger accounts do not.
 
@@ -52,9 +52,9 @@ it** — it is master data on the line, resolved through the reconciliation acco
 ### NetSuite — the dimension mechanism is segments, and GL impact is an explicit opt-in
 
 Class, Department and Location are the standard classifications; Custom Segments create more of the
-same kind. Critically, *"by default a custom segment does not affect GL unless the GL Impact box is
-enabled"*, and when it is, the segment *"becomes a first-class financial dimension just like Class
-or Department."*
+same kind. Critically, _"by default a custom segment does not affect GL unless the GL Impact box is
+enabled"_, and when it is, the segment _"becomes a first-class financial dimension just like Class
+or Department."_
 
 **Customer is not a segment.** It is the transaction's entity field. NetSuite makes the
 dimension/non-dimension boundary an explicit configuration flag, and the customer sits outside it.
@@ -64,8 +64,8 @@ dimension/non-dimension boundary an explicit configuration flag, and the custome
 Intacct's standard dimensions are Location, Department, Project, **Customer**, Vendor, Employee,
 Item and Class. So one reference of six **does** make the customer a first-class dimension.
 
-Worth reading carefully rather than discounting: Intacct's dimension framework is its *general
-reporting substrate for everything*, so making Customer a dimension is how Intacct produces
+Worth reading carefully rather than discounting: Intacct's dimension framework is its _general
+reporting substrate for everything_, so making Customer a dimension is how Intacct produces
 customer-sliced **P&L** — not how it produces aging. Aging still comes from AR. The dissent is about
 what else you get, not about where the receivable detail lives.
 
@@ -74,9 +74,9 @@ what else you get, not about where the receivable detail lives.
 `partner_id` on `account.move.line` "links to the customer for aging and reconciliation… essential
 for receivable/payable account lines". `analytic_distribution` is the separate dimension mechanism.
 
-And the mechanism that makes the distinction visible: for the Partner Ledger report, *"where
+And the mechanism that makes the distinction visible: for the Partner Ledger report, _"where
 **receivable/payable lines rarely carry analytic data directly**, the module automatically looks up
-the analytic distribution from the counterpart income/expense lines of the same journal entry."*
+the analytic distribution from the counterpart income/expense lines of the same journal entry."_
 
 **The party is on the receivable leg. The dimension is on the revenue/expense leg. Same journal
 entry, different lines.** A report wanting both has to join across the entry — which is precisely
@@ -95,7 +95,7 @@ what a third-party module had to be written to do.
 
 **THE CRITERION: is the question answered from a TRIAL BALANCE or from a SUBLEDGER?** A dimension
 slices the P&L and shows up in a dimensional trial balance. A party drives aging, statements and
-dunning, which are subsidiary-ledger reports that GAAP says are *not* in the trial balance. The two
+dunning, which are subsidiary-ledger reports that GAAP says are _not_ in the trial balance. The two
 mechanisms answer different questions, and five of six references keep them structurally apart.
 
 ## Recommendation for OQ-040
@@ -114,7 +114,7 @@ dimension.** `ledger/dimensions.yaml` stays at two.
 - **The reconciliation obligation comes free and is the right one**: sum of settlement-point
   balances equals the 1200 control account. That is GAAP's own subsidiary-ledger rule, and it is the
   same assertion ADR-0032 already demands.
-- **Intacct's dissent is not ignored, it is scoped.** If CFS later wants a customer-sliced *P&L* —
+- **Intacct's dissent is not ignored, it is scoped.** If CFS later wants a customer-sliced _P&L_ —
   margin by settlement point — that is a dimension question and Intacct is the precedent for
   answering it that way. It is not this question, and it is not needed for aging.
 
@@ -134,21 +134,21 @@ two lines; TigerBeetle's model does not offer that split.
 
 A transfer has exactly three discretionary reference fields. Claimants:
 
-| # | Claimant           | Asserted by                                        |
-| - | ------------------ | -------------------------------------------------- |
-| 1 | `journal_entry_id` | erp-spec#3, `research-drop/reference/tigerbeetle.md` |
-| 2 | `source_document`  | same                                               |
-| 3 | `accounting_date`  | same — packed `YYYYMMDD` in `user_data_32`         |
-| 4 | `posting_rule`     | **already evicted** to the Mongo projection        |
+| # | Claimant           | Asserted by                                             |
+| - | ------------------ | ------------------------------------------------------- |
+| 1 | `journal_entry_id` | erp-spec#3, `research-drop/reference/tigerbeetle.md`    |
+| 2 | `source_document`  | same                                                    |
+| 3 | `accounting_date`  | same — packed `YYYYMMDD` in `user_data_32`              |
+| 4 | `posting_rule`     | **already evicted** to the Mongo projection             |
 | 5 | `product_line`     | **ADR-0018** — "carried on the posting, in `user_data`" |
-| 6 | `cost_type`        | **ADR-0018** — same sentence                       |
-| 7 | `settlement_point` | this survey, if it were a dimension                |
+| 6 | `cost_type`        | **ADR-0018** — same sentence                            |
+| 7 | `settlement_point` | this survey, if it were a dimension                     |
 
 **Three slots. Six live claimants before settlement point is considered at all.**
 
-erp-spec#3 is titled *"three fields, four claimants"* and enumerates 1–4. **It never counted 5 and
-6.** ADR-0008 reserved all three `user_data` fields in a world where dimensions lived in *account
-identity* and `user_data` was therefore free for high-cardinality references. ADR-0018 superseded
+erp-spec#3 is titled _"three fields, four claimants"_ and enumerates 1–4. **It never counted 5 and
+6.** ADR-0008 reserved all three `user_data` fields in a world where dimensions lived in _account
+identity_ and `user_data` was therefore free for high-cardinality references. ADR-0018 superseded
 ADR-0008 and moved dimensions onto the posting — **without re-doing the budget that assumption had
 made safe.**
 

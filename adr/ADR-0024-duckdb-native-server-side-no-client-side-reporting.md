@@ -8,6 +8,7 @@ contexts: [ledger, billing, banking]
 relates_to: [SPIKE-007, ADR-0017, ADR-0008, ADR-0010, ADR-0023]
 supersedes:
 superseded_by:
+frozen_sha256: 99435526f651c28c5ef9815d9a0dfe7aebfbe41f8c7d1a733a38a192f80acc05
 ---
 
 > **In the context of** sealed-period Parquet as the closed-period reporting authority (ADR-0017),

@@ -8,6 +8,7 @@ contexts: [ordering, fulfillment]
 relates_to: [SPIKE-009]
 supersedes:
 superseded_by:
+frozen_sha256: 808a2ebb5036953014654ce5d97deba8a67d8386d9365c85c57a0b27d7d06d88
 ---
 
 > **In the context of** rebuilding the API underneath the operator UI, **facing** a working SolidJS

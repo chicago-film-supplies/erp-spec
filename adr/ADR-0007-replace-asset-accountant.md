@@ -8,6 +8,7 @@ contexts: [fixed-assets, tax, ledger]
 relates_to: [SPIKE-005]
 supersedes:
 superseded_by:
+frozen_sha256: 4830f6f6c9fa468edd5e6da0d026f8dd378d367e722262c885136725e35d434c
 ---
 
 > **In the context of** building our own ledger, **facing** a separate hosted tool holding the asset

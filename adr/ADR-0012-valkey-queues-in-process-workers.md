@@ -8,6 +8,7 @@ contexts: [ordering, billing, fulfillment]
 relates_to: [SPIKE-010, ADR-0004]
 supersedes:
 superseded_by:
+frozen_sha256: 3ac3b3b987f20abfa00eca508179d09f09747bbfed512dae14457989a4a4a034
 ---
 
 > **In the context of** leaving Cloud Tasks along with the rest of the GCP platform, **facing** 16

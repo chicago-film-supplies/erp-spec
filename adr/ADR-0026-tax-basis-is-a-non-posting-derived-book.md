@@ -8,6 +8,7 @@ contexts: [fixed-assets, ledger, tax]
 relates_to: [ADR-0007, ADR-0017, ADR-0018, SPIKE-005, OQ-027, OQ-029]
 supersedes:
 superseded_by:
+frozen_sha256: 01d5ebf968d1a8b62253ef93c8b9a71f198b888a0fe4639dae907767bd789df5
 ---
 
 > **In the context of** a fixed-asset register that must produce a full P&L _and balance sheet_ on

@@ -8,6 +8,7 @@ contexts: [ledger, banking, billing]
 relates_to: [HOT-005, OQ-009, ADR-0003, ADR-0010, ADR-0014, ADR-0018]
 supersedes: ADR-0006
 superseded_by:
+frozen_sha256: 74529acd9e7afd521f690b2450eabbeb3ccc98923a504e2a2091c3e4570d38ee
 ---
 
 > **In the context of** a ledger whose timestamps are posting time and reporting that is periodised

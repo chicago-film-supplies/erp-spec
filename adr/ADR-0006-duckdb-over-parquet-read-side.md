@@ -8,6 +8,7 @@ contexts: [ledger, banking]
 relates_to: [HOT-005, SPIKE-007, OQ-009]
 supersedes:
 superseded_by: ADR-0017
+frozen_sha256: 65732cd6369ed5089bd6b33e15dc5490dbbf7ac4616f1ab29bf237401a224f46
 ---
 
 > **In the context of** needing analytical reporting over the ledger, **facing** a transactional
