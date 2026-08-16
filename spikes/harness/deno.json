@@ -24,6 +24,8 @@
     "matrix": "deno run --allow-read --allow-write --allow-env --allow-ffi --allow-run --allow-net --allow-sys matrix.ts",
     "napi": "deno run --allow-read --allow-env --allow-ffi napi-probe.ts",
     "napi-test": "deno test --allow-read --allow-env --allow-ffi napi-probe_test.ts",
+    "//tb-budget": "The spec's transfer field budget against tigerbeetle-node's OWN bindings.d.ts. NOT in CI — the ground truth is an unvendored npm package, so no repo-only gate can reach it.",
+    "tb-budget": "deno test --allow-read tb-field-budget_test.ts",
     "tb": "deno run --allow-read --allow-env --allow-ffi --allow-net tb-probe.ts",
     "tb-test": "deno test --allow-read --allow-env --allow-ffi --allow-net tb-probe_test.ts",
     "duckdb": "deno run --allow-read --allow-write --allow-env --allow-ffi duckdb-probe.ts",

@@ -179,10 +179,21 @@ other two did, by being the first to take the untravelled path.
   alter any amount" forbids. Three amendments are available: **(1)** the rule binds NEW postings
   only and migrated history carries an explicit null; **(2)** the migration mints a synthetic order
   per legacy invoice — fabricating a document that never existed; **(3)** the key is nullable
-  outright, which weakens it into exactly the classification-shaped thing this ADR refuses. **(1) is
-  the only one that neither fabricates a record nor dissolves the rule**, and it is what this ADR
-  should say before acceptance. Recorded here rather than silently chosen, because it changes what
-  the rejection vectors assert.
+  outright, which weakens it into exactly the classification-shaped thing this ADR refuses. ✅
+  **DECIDED by the owner, 2026-08-16: "we can allow source order null."** So the sentence is amended
+  rather than defended — **an explicit null causal order is legal and recorded, and what is refused
+  is its ABSENCE.** That is not a weakening into a classification; it is the rule this repo already
+  runs on everywhere else, and every reason carries over: · **a null is a determination** —
+  countable, reportable, something someone can be asked about — where an absent key is
+  indistinguishable from an oversight (`ledger/dimensions.yaml`); · **the population is
+  measurable**: $87,839.76 across 87 lines on 30 invoices today, every one a legacy CRMS import.
+  "Share of postings with no causal order" becomes a number the read side publishes, and if it grows
+  on NEW postings that is a finding rather than a silent default; · **nothing is fabricated** — no
+  synthetic order per legacy invoice — so ADR-0020's "the restatement must not alter any amount"
+  holds without special-casing history. ⇒ The golden rejection vectors move from "missing dimension"
+  to "missing key", **and the accept side gains a declared-null vector** — the same pair
+  `invoice_issued` already carries for `product_line`: `declared-null-product-line-recorded` beside
+  `missing-product-line-rejected`.
 - **`cost_type` is renamed `labor_line` and its enum grows to seven** — `delivery`, `counter`,
   `warehouse`, `trash_&_cleanup`, `shipping_&_handling`, `trucking`, `crew` (owner, 2026-08-16).
   `cost_type` was too broad, and `labor_line` pairs with `product_line` by design. Five of the seven

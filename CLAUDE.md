@@ -142,9 +142,9 @@ Not every tool has an upstream dump, and the difference is worth knowing before 
 - **Quint** also ships official agent skills, enabled as a plugin in `.claude/settings.json` — those
   beat both halves for authoring `.qnt`.
 
-## Three rules that exist because something here broke on them
+## Four rules that exist because something here broke on them
 
-The first two are already enforced in the `~/cfs` workspace. All three are load-bearing here:
+The first two are already enforced in the `~/cfs` workspace. All four are load-bearing here:
 
 - **A guard that can only consult its own oracle is not a guard.** A fixed-point check — "the stored
   value equals what the recompute produces" — is defined in terms of the normalizer and can only
@@ -170,6 +170,32 @@ The first two are already enforced in the `~/cfs` workspace. All three are load-
 
   So: when you are about to be the first to use a documented-but-untravelled path, go and check the
   artifacts that claim to cover it, rather than assuming they do.
+
+- **A fact about a third-party API has ONE owner in the structured spec, and something executes
+  against the API.** `research-drop/reference/tigerbeetle.md` said `user_data_128/64/32` were "the
+  **only** per-transfer reference fields". That is an **exhaustiveness claim about someone else's
+  software**, and nothing here could falsify it — so it was believed, and it propagated into
+  erp-spec#3's title ("three fields, four claimants"), HOT-013's "three slots, six live claimants"
+  and ADR-0026's "fifth claimant" aside. **Four artifacts, one error, all wrong together.**
+  `Transfer.code` is a fourth field, and it had to be re-discovered **twice** — ADR-0035 found it
+  and was rejected, then a correction note found it again. A fact that gets re-discovered is not
+  recorded anywhere that counts.
+
+  Two halves, and the second is the one that was missing:
+
+  - **One owner.** `ledger/tigerbeetle-accounts.yaml` owns the transfer field budget.
+    `research-drop/reference/` may explain the mechanics and must not restate the numbers — it is
+    "not spec, not ingested, not validated" by its own README, and that is exactly why it must not
+    be where an authority lives. ⚠️ **An `adr/` or `inbox/` file repeating the old number is NOT
+    scatter to fix**: an accepted ADR is a historical record (ADR-0034) and an inbox note is dated
+    evidence. Only _live, mutable, authority-claiming_ copies are the problem, and there were three.
+  - **Something executes.** `spikes/harness/tb-field-budget_test.ts` reads `tigerbeetle-node`'s own
+    `bindings.d.ts` and fails if any discretionary `Transfer` field is unnamed by the budget — **it
+    fails CLOSED**, so a field the library grows is unaccounted-for by default rather than
+    invisible. Fired red three ways, one of them reproducing the original miscount exactly. ⚠️ **It
+    is not in CI, and that is a stated limit**: CI runs `deno task validate`, which has no npm
+    dependencies by design, and the ground truth is an unvendored package. The harness is where
+    claims about third-party APIs get executed; `deno task tb-budget`.
 
 ## Accounting decisions: survey before deciding
 

@@ -75,10 +75,13 @@ read `[4294967295, 4294967295]` as a hard error.
   `ledger/chart-of-accounts.yaml` is a **reporting** property, not a constraint. These flags belong
   on the **inventory-custody** ledger ([[ADR-0015]]), where making overselling unrepresentable is
   the entire point — `EVT-FUL-005` says so in terms. See `ledger/tigerbeetle-accounts.yaml`.
-- **`user_data_128/64/32` are the per-transfer reference fields.** The working assignment is
-  `128 → journal_entry_id`, `64 → source_document`, `32 → accounting_date` (packed `YYYYMMDD`), with
-  `posting_rule` evicted to the Mongo projection — tracked as erp-spec#3 and still `proposed`
-  pending [[SPIKE-003]]. High-cardinality refs go _here_, never into account identity.
+- ⚠️ **THE FIELD BUDGET IS NOT HERE, AND MUST NOT BE COPIED BACK.** Its one owner is
+  `ledger/tigerbeetle-accounts.yaml` → `transfer_field_budget`, checked against the library's own
+  `bindings.d.ts` by `spikes/harness/tb-field-budget_test.ts` (`deno task tb-budget`, fails closed).
+  **This entry used to state the assignment, and that is how the miscount below happened** — a note
+  that is "not spec, not ingested, not validated" was serving as an authority, so nothing could go
+  red when it was wrong. What belongs here is the mechanics; what belongs there is the decision.
+  High-cardinality refs go into these fields, never into account identity.
 - **⚠️ `Transfer.code` is a FOURTH discretionary field, and this entry said "only" until
   2026-08-16.** A u16 "user-defined enum denoting the reason for (or category of) the transfer", and
   a first-class `QueryFilter` filter alongside the three `user_data` fields. Must not be zero; on a
