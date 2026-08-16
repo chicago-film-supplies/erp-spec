@@ -485,7 +485,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (53 unpromoted of 72)" _note="no drops pending">
+      <outline text="Capture (54 unpromoted of 73)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -539,6 +539,7 @@
         <outline text="The owner's reason for allocation-as-reporting is RE-RUNNABILITY — multiple bases, and re-allocatin…" _note="inbox/2026-08-16-the-owner-wants-allocation-re-runnable-and-nothing-in-the-spec-carries-the-key-it-would-re-run-on.md"/>
         <outline text="The product-line × revenue-account matrix rebuilt as a re-runnable artifact with the product-master…" _note="inbox/2026-08-16-the-product-line-matrix-rebuilt-with-the-master-join-denorm-and-master-now-agree-on-every-line.md"/>
         <outline text="HOT-013's budget arithmetic is wrong twice over — `Transfer.code` is an uncounted fourth discretion…" _note="inbox/2026-08-16-the-transfer-field-budget-is-four-fields-not-three-and-both-candidate-evictions-are-already-refused.md"/>
+        <outline text="`journal_entry_id` and `source_document_ref` are not redundant — they answer grouping and provenanc…" _note="inbox/2026-08-16-the-two-reference-fields-answer-different-questions-and-a-path-fits-neither.md"/>
       </outline>
     </outline>
   </body>

@@ -24,6 +24,8 @@
     "matrix": "deno run --allow-read --allow-write --allow-env --allow-ffi --allow-run --allow-net --allow-sys matrix.ts",
     "napi": "deno run --allow-read --allow-env --allow-ffi napi-probe.ts",
     "napi-test": "deno test --allow-read --allow-env --allow-ffi napi-probe_test.ts",
+    "//tb-budget": "The spec's transfer field budget against tigerbeetle-node's OWN bindings.d.ts. NOT in CI — the ground truth is an unvendored npm package, so no repo-only gate can reach it.",
+    "tb-budget": "deno test --allow-read tb-field-budget_test.ts",
     "tb": "deno run --allow-read --allow-env --allow-ffi --allow-net tb-probe.ts",
     "tb-test": "deno test --allow-read --allow-env --allow-ffi --allow-net tb-probe_test.ts",
     "duckdb": "deno run --allow-read --allow-write --allow-env --allow-ffi duckdb-probe.ts",
@@ -31,7 +33,8 @@
     "valkey": "deno run --allow-read --allow-env --allow-net --allow-sys valkey-queue-probe.ts",
     "//adc": "Read-only prod Firestore under ADC (erp-spec#15). `--allow-net` is narrowed to Google's auth and Firestore hosts so the probes CANNOT reach api.xero.com or api.current-rms.com — both single-tenant and live. No --allow-write.",
     "allocation": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal allocation-basis-probe.ts",
-    "matrix-lines": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal product-line-matrix-probe.ts"
+    "matrix-lines": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal product-line-matrix-probe.ts",
+    "posting-keys": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal posting-key-width-probe.ts"
   },
 
   "fmt": { "lineWidth": 100 },
