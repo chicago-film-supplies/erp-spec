@@ -402,7 +402,21 @@ hotspots:
       store as the balance, and **no reference faces CFS's two-store split** — so the property they
       unanimously hold is the one ADR-0003's architecture can fail, which is why the survey
       corroborates ADR-0018 rather than reopening it.
-      **This hotspot stays `open` until ADR-0035 is accepted, which is not Claude's to do.**
+      ❌ **ADR-0035 WAS REJECTED THE SAME DAY, and everything above it is superseded reasoning.**
+      Owner, 2026-08-16: "product lines themselves are a reporting concern, not a ledger concern.
+      causal order(s) matter. invoice linking matters. item uids or skus matter."
+      **The whole hotspot rested on a premise nobody held.** It asked WHERE ON A TRANSFER a product
+      line fits; the answer is that it does not go on a transfer at all. A product line is
+      `products.uid_tracking_category` — a mutable field on a mutable master — and freezing it onto
+      an immutable transfer makes every re-categorisation a ledger restatement. It has moved twice in
+      one month (`Other` retired across 12 products; `Transport` dropped and restored), both times
+      correctly.
+      ✅ **Superseded in substance by ADR-0036** (`proposed`, 2026-08-16), which supersedes ADR-0018:
+      the posting carries the GL account and its keys — causal order(s), invoice link, `item.path` —
+      and every classification is a Mongo concern. **This hotspot DISSOLVES rather than resolves:
+      there was never a dimension to fit into a `user_data` field.**
+      **Stays `open` until ADR-0036 is accepted, which is not Claude's to do.**
+      (`inbox/2026-08-16-owner-rulings-line-identity-is-item-path-ephemeral-reports-are-never-sealed-and-cost-type-becomes-labour-line.md`)
       · The OQ-040 survey's recommendation **removes** a claimant rather than adding one — a
         settlement point is a subledger key on the receivable leg, not a third dimension
         (`inbox/2026-08-16-survey-the-party-is-a-subledger-key-and-the-dimension-is-a-gl-slice-and-they-ride-different-legs.md`).
@@ -464,7 +478,7 @@ hotspots:
       the field, the official query consumes it, and the entity that defines the record omits it.
       The only causal order anywhere in the spec is `shift.absorbed_allocations[].causal_job`, inside
       the source document.
-    blocks: [ADR-0029, ADR-0031, ADR-0035]
+    blocks: [ADR-0029, ADR-0031, ADR-0036]
     status: open
     resolution_shape: >-
       **Not a re-decision of ADR-0029 — the same shape HOT-013 turned out to have.** ADR-0029's
@@ -507,5 +521,25 @@ hotspots:
       re-allocation is.
       ⚠️ **Survey obligation applies** (CLAUDE.md → _Accounting decisions_): "how two books relate"
       is exactly this. Six references before a recommendation.
-      **Does not block ADR-0035**, which narrowed its own claim rather than resting on the gap.
       (`inbox/2026-08-16-the-owner-wants-allocation-re-runnable-and-nothing-in-the-spec-carries-the-key-it-would-re-run-on.md`)
+      ✅ **ABSORBED BY ADR-0036 (`proposed`, 2026-08-16), and the survey obligation lapses with it.**
+      ADR-0035 was rejected the same day it was drafted, so every reference to it above is stale
+      reasoning kept for the record. ADR-0036 makes the causal order a **decision** rather than an
+      unmet obligation: a posting carries causal order(s), invoice link and `item.path`.
+      ⚠️ **Two of this entry's own conclusions are RETRACTED by the owner's rulings**, and both were
+      me over-reaching rather than the hotspot being wrong:
+      · **"the recoverable view is the one that must never be read as a managed P&L"** — the asymmetry
+        does not matter, because the sealed artifact is the balance sheet and account-level P&L and
+        **neither carries a product line**. Owner, 2026-08-16: "there's no reason an ephemeral report
+        would ever need to be sealed or locked… a p&l by product line or customer type is driven by a
+        need for business intelligence, not compliance."
+      · **The "(period, basis) rather than period" tension** — dissolves for the same reason. Nothing
+        drifts, because the BI report was never sealed.
+      ✅ **And the fix is cheaper than any of the three candidates.** `INVOICE_ITEM_LEVELS` is
+      `[order, destination, group]` against `ORDER_ITEM_LEVELS`'s `[destination, group]`, so an
+      invoice item's path is the order item's path prefixed by an order divider — **`path[0]` IS the
+      causal order.** One stored key carries line identity, invoice link and causal order together.
+      ⚠️ Precondition: **api-cloudrun#485** (10 invoice lines at a different path than their order
+      line) must close first, and it does not cover labour, whose postings key to a causal job with
+      no invoice line.
+      **Stays `open` until ADR-0036 is accepted.**

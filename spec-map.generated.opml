@@ -235,7 +235,7 @@
         <outline text="HOT-014 — ADR-0029 requires that &quot;every posting must carry its causal order, or allocation is impossible and…" _note="ADR-0029 splits the ledger from the report on the promise that the un-allocated posting keeps enough to allocate downstream — &quot;an un-allocated posting that carries its causal order can be allocated downstream by any basis a question needs&quot;. The causal order is the half of that promise the ledger does not keep. ADR-0031's official product-line P&amp;L allocates `goods_revenue_on_causal_order` with `scope: causal_order`, so the ONE official allocation is keyed on a value the accounting record does not hold. **The consequence is asymmetric and it is the wrong way round.** After a MongoDB loss, TigerBeetle rebuilds balances (ADR-0003), periods (`user_data_32`) and — under ADR-0035 — dimensions. What it cannot rebuild is the allocation, because the causal order is gone. So the recoverable view is exactly the one ADR-0029 says &quot;must never be read as a managed P&amp;L&quot;, and the unrecoverable one is what it calls &quot;the managed number&quot;. This is not the same gap as HOT-013. HOT-013 asked where a DIMENSION lives and is answered by ADR-0035. This asks where the ALLOCATION KEY lives, and ADR-0035 explicitly does not answer it.">
           <outline text="blocks ADR-0029"/>
           <outline text="blocks ADR-0031"/>
-          <outline text="blocks ADR-0035"/>
+          <outline text="blocks ADR-0036"/>
         </outline>
       </outline>
       <outline text="Decisions (17 in force, 16 proposed)">

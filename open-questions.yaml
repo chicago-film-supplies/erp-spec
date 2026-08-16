@@ -1630,6 +1630,11 @@ open_questions:
       gen opex wages for future salaried staff that dont do deliveries (sales, admin etc... **though
       i guess they could all be cogs, not sure**)." The first half is decided; the parenthesis is
       this question.
+      ✅ **The STRUCTURAL half is settled 2026-08-16: "we'll keep both labor accounts."** `6600 Wages`
+      is retained alongside the new `5800`/`5801`, so "could they all be COGS" is answered **no** at
+      the level of the chart — an operating-expense wages account continues to exist and to hold
+      somebody. What remains open is only WHO, and the sales/admin asymmetry below is the live part
+      of it.
       ✅ **The move itself is ALREADY SPECIFIED and needs no new decision.** `ledger/chart-of-accounts.yaml`
       carries `5800 Cost of Goods Sold: Wages (Absorbed)` and `5801 Cost of Goods Sold: Wages
       (Unabsorbed)`, both `disposition: new`, `status_live: absent`, against `6600 Wages`

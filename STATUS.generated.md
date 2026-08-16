@@ -42,7 +42,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | HOT | Statement | Blocks |
 |---|---|---|
 | `HOT-013` | `ADR-0018` says dimensions are "carried on the posting, in `user_data` and in the Mongo/Parquet projection".… | `OQ-040` `ADR-0033` `SPIKE-003` |
-| `HOT-014` | ADR-0029 requires that "every posting must carry its causal order, or allocation is impossible and this decis… | `ADR-0029` `ADR-0031` `ADR-0035` |
+| `HOT-014` | ADR-0029 requires that "every posting must carry its causal order, or allocation is impossible and this decis… | `ADR-0029` `ADR-0031` `ADR-0036` |
 
 ## Decisions
 

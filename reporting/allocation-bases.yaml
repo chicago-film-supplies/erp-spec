@@ -1,9 +1,18 @@
 # Allocation bases — the registry of ways a pooled amount may be spread over a base.
 #
-# A basis is VERSIONED, and a report pins `(id, version)`. That is not ceremony: ADR-0017 makes a
-# closed period's Parquet artifact immutable and hashed, so a report over a sealed period must be
-# reproducible. A basis that changed between runs would break that guarantee while every individual
-# run still looked internally consistent — the worst shape of wrong.
+# A basis is VERSIONED, and a report pins `(id, version)`. That is not ceremony: a number must be
+# traceable to the basis that produced it, and two bases must be runnable over the same period and
+# compared. A basis that changed between runs would leave every individual run looking internally
+# consistent while the series silently meant different things — the worst shape of wrong.
+#
+# ⚠️ **This paragraph justified versioning by ADR-0017's sealed-period guarantee — "a report over a
+# sealed period must be reproducible". That premise is FALSE and is retracted 2026-08-16.** Owner:
+# "there's no reason an ephemeral report would ever need to be sealed or locked… a p&l by product
+# line or customer type is driven by a need for business intelligence, not compliance." ADR-0017
+# seals the balance sheet and the account-level P&L; **neither carries a product line**, so nothing
+# in this file is a sealed-period artifact and nothing here can make a closed period drift.
+# **Re-running a closed period under a new basis is the POINT** — it is why allocation is a reporting
+# act at all (ADR-0029, ADR-0036). Versioning is what makes the re-run legible, not what forbids it.
 #
 # ⚠️ **`criterion` is the field that keeps this honest.** Horngren's ranking is cause_and_effect >
 # benefits_received > fairness > ability_to_bear, and a revenue basis is the LAST of those. Naming
