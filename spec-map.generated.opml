@@ -308,7 +308,7 @@
           <outline text="ADR-0030 — Vehicle cost moves from operating expense into COGS, absorbed and unabsorbed" _note="review by: 2026-11-01 · **In the context of** delivery being the largest tracked product line and carrying almost no cost, **facing** vehicle running costs sitting in operating expenses where no product line can see them, **we decided** to move vehicle cost into COGS on the same absorbed/unabsorbed shape ADR-0019 gave labour, **to achieve** a delivery cost that is complete enough to allocate, **accepting** a second utilisation measure to maintain and a mileage-or-hours basis that has to be captured.">
             <outline text="blocked on SPIKE-005"/>
           </outline>
-          <outline text="ADR-0031 — The official product-line P&amp;L allocates by goods revenue on the causal order, declared as a proxy" _note="review by: 2026-11-01 · **In the context of** ADR-0029 promising exactly one official allocation and not saying what it is, **facing** three candidate bases that reassign up to a third of the largest product line's revenue between them, **we decided** to allocate by goods revenue on the causal order and to record in the report that this is a proxy rather than a cost driver, **to achieve** one reproducible margin per product line, **accepting** that the basis is the weakest tier in the standard criterion and stays that way until the shipping specs are populated this year.">
+          <outline text="ADR-0031 — The official product-line P&amp;L allocates by goods revenue on the causal order, declared as a proxy" _note="review by: 2026-11-01 · **In the context of** ADR-0029 promising exactly one official allocation and not saying what it is, **facing** three candidate bases that reassign up to a third of the largest product line's revenue between them, **we decided** to allocate by goods revenue on the causal order and to record in the report that this is a proxy rather than a cost driver, **to achieve** one reproducible margin per product line, **accepting** that the basis is the weakest tier in the standard criterion and stays that way until the shipping specs are populated.">
             <outline text="blocked on OQ-006"/>
             <outline text="blocked on OQ-018"/>
             <outline text="blocked on OQ-031"/>
@@ -484,7 +484,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (48 unpromoted of 67)" _note="no drops pending">
+      <outline text="Capture (52 unpromoted of 71)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -526,12 +526,16 @@
         <outline text="The studio budget-tier split is motivated by duration, spend and delivery-vs-pickup — and low-budge…" _note="inbox/2026-08-10-what-actually-separates-a-low-budget-studio-from-an-indie.md"/>
         <outline text="Survey — every reference draws the credit-allocation line at the LEGAL PARTY, so crossing settlemen…" _note="inbox/2026-08-11-survey-unallocated-credit-sits-with-the-legal-party-and-crossing-departments-is-a-management-control.md"/>
         <outline text="v1 is adopting a per-product serialization token for the oversell gate" _note="inbox/2026-08-14-v1-adopts-a-per-product-serialization-token-for-the-oversell-gate.md"/>
+        <outline text="ADR-0031's allocation figures re-measured on the repaired corpus — pool-exceeds-base ROSE against a…" _note="inbox/2026-08-16-adr-0031s-figures-re-measured-two-of-three-predicted-directions-failed.md"/>
+        <outline text="Correction — the 2026-08-10 retraction of the service-only-jobs finding reasoned from a product NAM…" _note="inbox/2026-08-16-correction-the-duradeck-retraction-reasoned-from-a-product-name.md"/>
         <outline text="Correction — two of the three &quot;not reachable&quot; references in the vendor-side survey were a malformed…" _note="inbox/2026-08-16-correction-two-of-three-unreachable-references-were-a-bad-query-and-sap-models-this-case-exactly.md"/>
         <outline text="Seven owner rulings on the keys-not-classifications design — line identity is `item.path`, an align…" _note="inbox/2026-08-16-owner-rulings-line-identity-is-item-path-ephemeral-reports-are-never-sealed-and-cost-type-becomes-labour-line.md"/>
+        <outline text="Owner — shipping.weight will exist for MANY products by the time basis v2 is in dev, which makes pa…" _note="inbox/2026-08-16-owner-shipping-weight-will-exist-for-many-products-by-the-time-v2-is-in-dev.md"/>
         <outline text="Combined survey — when does a vendor-side amount become revenue rather than an adjustment to cost?…" _note="inbox/2026-08-16-survey-a-vendor-side-amount-becomes-revenue-only-where-control-or-a-markup-does.md"/>
         <outline text="Survey — every one of six references keeps the analytical dimension in the same durable store as th…" _note="inbox/2026-08-16-survey-all-six-references-keep-the-dimension-in-the-same-store-as-the-balance-and-only-odoo-splits-the-record.md"/>
         <outline text="Survey — five of six references put the customer on the SUBLEDGER and dimensions on the GL, and Odo…" _note="inbox/2026-08-16-survey-the-party-is-a-subledger-key-and-the-dimension-is-a-gl-slice-and-they-ride-different-legs.md"/>
         <outline text="The owner's reason for allocation-as-reporting is RE-RUNNABILITY — multiple bases, and re-allocatin…" _note="inbox/2026-08-16-the-owner-wants-allocation-re-runnable-and-nothing-in-the-spec-carries-the-key-it-would-re-run-on.md"/>
+        <outline text="The product-line × revenue-account matrix rebuilt as a re-runnable artifact with the product-master…" _note="inbox/2026-08-16-the-product-line-matrix-rebuilt-with-the-master-join-denorm-and-master-now-agree-on-every-line.md"/>
         <outline text="HOT-013's budget arithmetic is wrong twice over — `Transfer.code` is an uncounted fourth discretion…" _note="inbox/2026-08-16-the-transfer-field-budget-is-four-fields-not-three-and-both-candidate-evictions-are-already-refused.md"/>
       </outline>
     </outline>

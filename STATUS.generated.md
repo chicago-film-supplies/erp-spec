@@ -16,7 +16,7 @@ is `deno task validate`'s judgement, not this file's.
 | Decisions (ADR) | 36 | 17 in force · 16 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 21 | 0 without a scenario |
-| Inbox | 67 | 48 unpromoted |
+| Inbox | 71 | 52 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 27 | 0 still `TODO` |
 
