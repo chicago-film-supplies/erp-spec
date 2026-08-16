@@ -406,3 +406,70 @@ hotspots:
       · The OQ-040 survey's recommendation **removes** a claimant rather than adding one — a
         settlement point is a subledger key on the receivable leg, not a third dimension
         (`inbox/2026-08-16-survey-the-party-is-a-subledger-key-and-the-dimension-is-a-gl-slice-and-they-ride-different-legs.md`).
+
+  - id: HOT-014
+    statement: >-
+      ADR-0029 requires that "every posting must carry its causal order, or allocation is impossible
+      and this decision quietly becomes never allocate" — and no posting carries one. The
+      TigerBeetle transfer has no field for it, and the golden vectors' expected transfer shape has
+      none either.
+    contexts: [ledger, fulfillment, billing]
+    why_it_matters: >-
+      ADR-0029 splits the ledger from the report on the promise that the un-allocated posting keeps
+      enough to allocate downstream — "an un-allocated posting that carries its causal order can be
+      allocated downstream by any basis a question needs". The causal order is the half of that
+      promise the ledger does not keep. ADR-0031's official product-line P&L allocates
+      `goods_revenue_on_causal_order` with `scope: causal_order`, so the ONE official allocation is
+      keyed on a value the accounting record does not hold.
+      **The consequence is asymmetric and it is the wrong way round.** After a MongoDB loss,
+      TigerBeetle rebuilds balances (ADR-0003), periods (`user_data_32`) and — under ADR-0035 —
+      dimensions. What it cannot rebuild is the allocation, because the causal order is gone. So the
+      recoverable view is exactly the one ADR-0029 says "must never be read as a managed P&L", and
+      the unrecoverable one is what it calls "the managed number".
+      This is not the same gap as HOT-013. HOT-013 asked where a DIMENSION lives and is answered by
+      ADR-0035. This asks where the ALLOCATION KEY lives, and ADR-0035 explicitly does not answer it.
+    evidence: >-
+      `adr/ADR-0029-the-ledger-records-unallocated-facts.md`, Consequences: "**Every posting must
+      carry its causal order**, or allocation is impossible and this decision quietly becomes 'never
+      allocate'. That is the load-bearing requirement this ADR places on every future posting rule."
+      Against `ledger/posting-rules.yaml` and `ledger/vectors/`, measured 2026-08-16:
+      · `shift_recorded` fans `per: shift.absorbed_allocations`, and each allocation carries
+        `causal_job` in the SOURCE DOCUMENT — `ledger/vectors/shift_recorded/overtime-premium-pro-rata-across-the-days-jobs.yaml`
+        shows ORD-VEC-0001 / -0002 / -0003 on one shift. The `expect.transfers[]` entries are
+        `{debit_account, credit_account, amount_minor, accounting_date, product_line, cost_type}` —
+        **no causal job**. Three transfers, three different causal orders, indistinguishable on the
+        transfer.
+      · `trigger.source_document` for `shift_recorded` is `shift`, so `user_data_64` resolves to the
+        shift and NOT to any order. The causal order is per-transfer data below the source document,
+        which is the one shape a document reference cannot recover.
+      · `reporting/allocation-bases.yaml` → `goods_revenue_on_causal_order`, `scope: causal_order`.
+      ⚠️ **Invoice-borne postings are luckier and it is luck, not design.** `invoice_issued`'s
+      source document is the invoice, and 0 of 999 prod invoices bill more than one order
+      (ADR-0031), so the causal order is currently one deterministic hop away. ADR-0031 chose order
+      scope precisely because that coincidence will not hold, and when a multi-order invoice appears
+      the revenue side acquires the same defect the labour side already has.
+      ⚠️ **`Transfer.code` cannot absorb it.** ADR-0035 leaves 9 spare bits — 512 values against
+      ~1,000 orders today and growing. This needs a field, not a corner of one, and there is no
+      unclaimed field left.
+    blocks: [ADR-0029, ADR-0031, ADR-0035]
+    status: open
+    resolution_shape: >-
+      **Not a re-decision of ADR-0029 — the same shape HOT-013 turned out to have.** ADR-0029's
+      decision (the ledger does not allocate) is not in doubt; it stated a requirement and nothing
+      was built to meet it. Candidate answers, none surveyed yet:
+      · **Accept it and say so.** Allocation is a MongoDB/Parquet concern by construction, and the
+        ledger's disaster-recovery guarantee stops at the un-allocated dimensional trial balance.
+        Cheapest, and it makes ADR-0029's requirement an obligation on the PROJECTION rather than on
+        the posting — which is a real narrowing of ADR-0029, so it should be written down as one.
+      · **Give the causal order a field**, which means taking one back. `journal_entry_id` is the
+        only candidate and `journal_entry_id_is_not_derivable` closed that door for a different
+        reason. Splitting `user_data_128` into two u64 halves is representable and costs the
+        equality filter on journal entry.
+      · **Seal the allocation instead of the key.** ADR-0017 already seals a closed period's Parquet
+        and hashes it into the close record. If the allocated P&L is sealed at close alongside it,
+        history is recoverable without the ledger carrying the key — and only the OPEN period is
+        exposed. This is the option that fits the existing architecture best and is the one to
+        survey first.
+      ⚠️ **Survey obligation applies** (CLAUDE.md → _Accounting decisions_): "how two books relate"
+      is exactly this. Six references before a recommendation.
+      **Does not block ADR-0035**, which narrowed its own claim rather than resting on the gap.

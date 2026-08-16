@@ -83,8 +83,25 @@ required — TigerBeetle refuses `code == 0`.
   one step short of.** ADR-0017 argued that losing MongoDB leaves balances rebuildable but periods
   not, "unless TigerBeetle carries the accounting date", and therefore *strengthened* the case for
   accounting-date-in-`user_data`. The identical argument applies to dimensions and was not made,
-  because the budget looked full. After a total MongoDB loss, a dimensional P&L now rebuilds from
-  TigerBeetle alone.
+  because the budget looked full. After a total MongoDB loss, **the UN-ALLOCATED dimensional P&L**
+  rebuilds from TigerBeetle alone.
+- ⚠️ **The ALLOCATED P&L does not, and this ADR does not fix that.** ADR-0029 places one
+  load-bearing requirement on every posting rule — "**every posting must carry its causal order**, or
+  allocation is impossible and this decision quietly becomes *never allocate*" — and **the transfer
+  does not carry it.** `user_data_64` holds `source_document_ref`, which for `shift_recorded` is the
+  **shift**, not the order; the rule fans over `shift.absorbed_allocations`, so one shift becomes
+  several transfers with several different `causal_job`s, and the golden vectors' expected transfer
+  shape has no field for it. The causal order lives one hop away, in MongoDB, per transfer.
+  So what survives a MongoDB loss is precisely the view ADR-0029 says "**must never be read as a
+  managed P&L**", and what does not survive is the one it calls "the managed number". `code`'s 9
+  spare bits cannot close the gap — orders already number ~1,000 and grow. **Tracked as HOT-014**;
+  this ADR narrows its own claim rather than pretending to.
+- ⚠️ **It makes the misreading easier to reach.** ADR-0029 names reading the un-allocated view as a
+  managed report "the single most likely misreading of the whole design" — `Delivery` shows a large
+  structural loss by construction. After this ADR, that view is a single `query_transfers` call
+  against a filterable field. The ledger's `product_line` is **the line a cost was booked to**, not
+  the line ADR-0031's official P&L attributes it to after spreading, and those are different numbers
+  wearing the same name.
 - **REQ-LED-001 is enforced where it is stated.** `ledger/dimensions.yaml` says the rejection vectors
   are "the entire enforcement" of dimensionality. Those vectors now check a property of the artifact
   the ledger actually stores, rather than of a projection beside it.
