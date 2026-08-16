@@ -1543,7 +1543,24 @@ open_questions:
     owner: alex
     decide_by: 2026-11-15
     blocks: [ADR-0036]
-    status: open
+    status: answered
+    answer: >-
+      **DERIVED, not stored — `labor_line` follows exactly the same protocol as `product_line`.**
+      Owner, 2026-08-16: "labor_line should follow same protocol as products, what's recorded in the
+      immutable ledger is wages… **so ledger account rides TigerBeetle, the classification is a
+      Mongo** [detail]."
+      So the rule generalises rather than acquiring an exception: **the posting carries the GL
+      ACCOUNT and its keys; every classification is a Mongo concern.** What TigerBeetle records about
+      a shift is that wages were incurred — the account — and *what kind of work it was* is read off
+      the shift's allocation row at report time, the same way a product line is read off the product
+      master.
+      The survey's own reasoning supports it: the case for storing rested on `labor_line` being an
+      observation rather than a lookup, and the case against was that the shift record already holds
+      it per allocation row and the posting must carry that row's identity anyway (HOT-014). The
+      second wins, and the criterion is not violated — deriving from the **shift record** crosses
+      into a recorded historical fact, not into a mutable master.
+      ⚠️ **Consequence for the sweep (erp-spec#19): 5800's `dimensions: [product_line, cost_type]`
+      becomes `dimensions: []`**, and 5800/5801 stop being the exception in the chart.
     notes: >-
       Surfaced 2026-08-16 by ADR-0036's own criterion, applied to the one dimension ADR-0036
       deliberately did not sweep along. The owner's ruling addressed **product lines**; `cost_type`
@@ -1599,3 +1616,38 @@ open_questions:
       and organizations both carry a `version` field and a `updated_by`, and `uid_thread` links a
       comment thread — so some change signal exists today. Whether it is enough to reconstruct a past
       categorisation is unverified.
+
+  - id: OQ-044
+    question: >-
+      Once wages move into COGS, what stays in `6600 Wages` — and can salaried sales/admin staff who
+      never touch a delivery be COGS too, or must they remain operating expense?
+    owner: alex
+    decide_by: 2026-12-15
+    blocks: []
+    status: open
+    notes: >-
+      Owner, 2026-08-16: wages "are currently in gen opex and should be moved to cogs. we'll keep the
+      gen opex wages for future salaried staff that dont do deliveries (sales, admin etc... **though
+      i guess they could all be cogs, not sure**)." The first half is decided; the parenthesis is
+      this question.
+      ✅ **The move itself is ALREADY SPECIFIED and needs no new decision.** `ledger/chart-of-accounts.yaml`
+      carries `5800 Cost of Goods Sold: Wages (Absorbed)` and `5801 Cost of Goods Sold: Wages
+      (Unabsorbed)`, both `disposition: new`, `status_live: absent`, against `6600 Wages`
+      (`status_live: Active`, `type: Expense`). ADR-0019 is the decision behind them.
+      **What is open is only the RESIDUE — what 6600 keeps.**
+      ⚠️ **Do not survey this as an open question. GAAP is narrow here and the answer is probably
+      no.** COGS is direct cost of revenue; general and administrative salaries are period costs and
+      belong in SG&A. Classifying admin salary as COGS overstates gross margin's denominator and
+      misstates a subtotal investors and lenders read. **The interesting half is sales**, not admin —
+      and the live books have already taken a position on it: `5200 Cost of Goods Sold:
+      Subcontractors, **Sales Commissions**` is Active, so commission-based selling cost is in COGS
+      today while salaried selling cost would not be. Whether that asymmetry is deliberate or
+      inherited is worth asking before extending it.
+      **Survey obligation applies** (CLAUDE.md → _Accounting decisions_) — "what an account means" —
+      but scope it to the residue: what do the six references put in COGS-labour versus SG&A-labour,
+      and what is their criterion for splitting one person's time across the two.
+      ⚠️ **Utilisation is the trap to avoid.** ADR-0019's 5800/5801 split measures utilisation, so a
+      salaried person who does deliveries **some** of the time is not an all-or-nothing case — they
+      absorb into 5800 for hours on a causal job and land in 5801 otherwise. A person who NEVER
+      touches a delivery has no absorption mechanism at all, which is what makes them different in
+      kind rather than in degree. That distinction, not the job title, is the likely criterion.

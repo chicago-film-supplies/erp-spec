@@ -98,15 +98,30 @@ the other two did, by being the first to take the untravelled path.
   against a classification: a posting with no causal order is unallocatable and should be refused,
   and unlike a category there is no defensible null. The golden rejection vectors move from
   "missing dimension" to "missing key".
-- **`cost_type` is renamed `labour_line` and its enum grows to seven** — `delivery`, `counter`,
+- **`cost_type` is renamed `labor_line` and its enum grows to seven** — `delivery`, `counter`,
   `warehouse`, `trash_&_cleanup`, `shipping_&_handling`, `trucking`, `crew` (owner, 2026-08-16).
-  `cost_type` was too broad, and `labour_line` pairs with `product_line` by design. Five of the seven
+  `cost_type` was too broad, and `labor_line` pairs with `product_line` by design. Five of the seven
   mirror an activity product line; `counter` and `warehouse` bill nobody.
-  ⚠️ **Whether it stays a POSTING field is open, and the criterion is this ADR's own.** The case for
-  keeping it: it is an **observation recorded at the time**, not a value looked up from a mutable
-  master. The case against: the shift record already holds it per allocation row, so the posting could
-  carry the row identity and derive it. **Test — could this value be revised later without anyone
-  having observed something new?** Yes ⇒ classification. No ⇒ fact. Answer before the sweep.
+  **American spelling, and the live books decide it rather than taste**: of 134 live accounts, `4120
+  Contract **Labor** Income` is the only one naming the concept and **no account contains "Labour"**
+  (`api:2026-08-16:db_chart_of_accounts_query`, 134 accounts). The repo's British prose is spec-side
+  drift from the incumbent chart. The field has never been called `labour_line` in any artifact, so
+  the rename goes `cost_type` → `labor_line` directly.
+- **`labor_line` is DERIVED, not a posting field** (OQ-042, owner 2026-08-16): "labor_line should
+  follow same protocol as products… **so ledger account rides TigerBeetle, the classification is a
+  Mongo** [detail]." So this ADR's rule has no exceptions: **the posting carries the GL account and
+  its keys; every classification is a Mongo concern.** TigerBeetle records that wages were incurred —
+  the account — and *what kind of work* is read off the shift's allocation row, whose identity the
+  posting must carry anyway (HOT-014). Deriving from the **shift record** crosses into a recorded
+  historical fact, not into a mutable master, so the criterion above is satisfied rather than waived.
+  ⇒ `5800`'s `dimensions: [product_line, cost_type]` becomes `dimensions: []`.
+- **Wages move from operating expense into COGS, and this is already specified** —
+  `5800 Cost of Goods Sold: Wages (Absorbed)` / `5801 … (Unabsorbed)`, both `disposition: new`,
+  `status_live: absent`, against the live `6600 Wages`. ADR-0019 is the decision behind them; this
+  ADR only removes their dimension columns. **What 6600 retains — salaried staff who never touch a
+  delivery — is OQ-044**, and the utilisation split is why that is a difference in kind: a salaried
+  person who sometimes delivers absorbs into 5800 for those hours and 5801 otherwise, while one who
+  never does has no absorption mechanism at all.
 - **The dimensional balance stops being readable from the ledger alone.** Every product-line figure
   now requires a join to the product master. That is the cost, and it is the same cost ADR-0029
   already accepted for allocation.

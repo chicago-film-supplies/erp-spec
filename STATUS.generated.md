@@ -11,7 +11,7 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 8 open | 35 answered of 43 · **0 with no owner or no decide-by** |
+| Open questions | 8 open | 36 answered of 44 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 14 | 2 open |
 | Decisions (ADR) | 36 | 17 in force · 16 proposed |
 | Spikes | 12 | 9 open |
@@ -22,17 +22,17 @@ is `deno task validate`'s judgement, not this file's.
 
 ## The bottleneck: undecided questions
 
-**8 of 43 still open**, soonest decide-by first.
+**8 of 44 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
 | `OQ-030` | Does CFS introduce a forced-call (short-turnaround) premium, and if so what is the turnar… | alex | 2026-10-15 | `REQ-LED` |
 | `OQ-035` | Does CFS introduce a production-type classification — `studio | indie | corporate/commerc… | alex | 2026-10-15 | — |
-| `OQ-042` | Does `labour_line` (formerly `cost_type`) stay a POSTING field, or is it derived from the… | alex | 2026-11-15 | `ADR-0036` |
 | `OQ-033` | Once the shipping specs are populated, which physical basis becomes allocation basis v2 —… | alex | 2026-12-15 | `ADR-0031` |
 | `OQ-038` | Does CFS operate credit limits and credit holds in v2 — what triggers a hold, who overrid… | alex | 2026-12-15 | — |
 | `OQ-040` | Is `settlement_point` a declared LEDGER DIMENSION, or a document attribute the read side… | alex | 2026-12-15 | `ADR-0033` |
 | `OQ-043` | Should the product and organization masters carry an EVENT HISTORY, so that a classificat… | alex | 2026-12-15 | — |
+| `OQ-044` | Once wages move into COGS, what stays in `6600 Wages` — and can salaried sales/admin staf… | alex | 2026-12-15 | — |
 | `OQ-039` | `organizations.tax_profile` carries two different concepts in one enum — who owes (applie… | alex | 2027-01-15 | — |
 
 Whether any of these dates has PASSED is `deno task validate`'s judgement — gate 7 fails on an open question past its decide-by. This file reads no clock and so cannot say.

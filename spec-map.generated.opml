@@ -57,7 +57,7 @@
           <outline text="[object Object]"/>
         </outline>
       </outline>
-      <outline text="Open questions (8 of 43 still open)" _note="The bottleneck. Each blocks what is listed under it.">
+      <outline text="Open questions (8 of 44 still open)" _note="The bottleneck. Each blocks what is listed under it.">
         <outline text="OQ-001 — Are fulfillment legs first-class recorded events with their own identity, or derived from the order…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-007"/>
           <outline text="blocks ADR-0011"/>
@@ -184,6 +184,7 @@
           <outline text="blocks ADR-0036"/>
         </outline>
         <outline text="OQ-043 — Should the product and organization masters carry an EVENT HISTORY, so that a classification as it…" _note="owner: alex · decide by: 2026-12-15"/>
+        <outline text="OQ-044 — Once wages move into COGS, what stays in `6600 Wages` — and can salaried sales/admin staff who neve…" _note="owner: alex · decide by: 2026-12-15"/>
       </outline>
       <outline text="Conflicts (2 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labour) or an own long-haul run (labour-bearing)?…" _note="Decides whether a trucked fulfillment absorbs labour cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
