@@ -386,14 +386,23 @@ hotspots:
         `source_document` stays reserved and two slots open up.
         ❌ **Both refused, per the evidence above — and refused before this hotspot was opened.**
         No slots open up. What opens instead is `Transfer.code`, which was never counted.
-      **So the ADR is unblocked and the remaining question is a choice between two defensible
-      systems**, surveyed 2026-08-16 against all six references
+      ⚠️ **This was briefly written up as a choice between carrying dimensions and a
+      projection-only design. That framing is WRONG and is retracted 2026-08-16.** ADR-0018 is
+      accepted and says dimensions ride ON THE POSTING; ADR-0034 says in terms that it "did not
+      decide wrongly — it under-specified". So projection-only is not a live option here — choosing
+      it would be RE-DECIDING ADR-0018, which is the instrument ADR-0034 reserves for an actual
+      change of decision. **The only open question was ever WHICH FIELD**, and it stopped being a
+      judgement the moment `Transfer.code` was counted.
+      ✅ **Drafted as ADR-0035** (`proposed`, 2026-08-16) — the dimension pair packed into
+      `Transfer.code` as `1 + product_line_idx*4 + cost_type_idx`, `relates_to: [ADR-0018, …]`,
+      superseding nothing, per the ADR-0025 pattern ADR-0034 named.
+      Surveyed against all six references first
       (`inbox/2026-08-16-survey-all-six-references-keep-the-dimension-in-the-same-store-as-the-balance-and-only-odoo-splits-the-record.md`):
       five of six carry the dimension on the posting line, six of six keep it in the same durable
       store as the balance, and **no reference faces CFS's two-store split** — so the property they
-      unanimously hold is the one ADR-0003's architecture can fail. The survey recommends carrying
-      both dimensions in `Transfer.code` as a packed pair. **Awaiting the owner's ruling; nothing
-      here is decided.**
+      unanimously hold is the one ADR-0003's architecture can fail, which is why the survey
+      corroborates ADR-0018 rather than reopening it.
+      **This hotspot stays `open` until ADR-0035 is accepted, which is not Claude's to do.**
       · The OQ-040 survey's recommendation **removes** a claimant rather than adding one — a
         settlement point is a subledger key on the receivable leg, not a third dimension
         (`inbox/2026-08-16-survey-the-party-is-a-subledger-key-and-the-dimension-is-a-gl-slice-and-they-ride-different-legs.md`).

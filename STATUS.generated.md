@@ -13,7 +13,7 @@ is `deno task validate`'s judgement, not this file's.
 |---|---:|---|
 | Open questions | 6 open | 35 answered of 41 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 13 | 1 open |
-| Decisions (ADR) | 34 | 17 in force · 15 proposed |
+| Decisions (ADR) | 35 | 17 in force · 16 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 21 | 0 without a scenario |
 | Inbox | 65 | 46 unpromoted |
@@ -63,7 +63,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 - `ADR-0024` — DuckDB is reached natively and server-side; client-side reporting is rejected
 - `ADR-0026` — The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time
 
-### Proposed (15)
+### Proposed (16)
 
 | ADR | Title | Review by | Blocked on |
 |---|---|---|---|
@@ -82,6 +82,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | `ADR-0032` | The organization tree is a liability tree; projects and settlement points are addressing beneath it | 2026-11-15 | `OQ-035` `OQ-036` `OQ-038` `OQ-039` `HOT-006` |
 | `ADR-0033` | A document is addressed to exactly one node by a level-tagged reference, and unallocated credit sits at the settlement point | 2026-11-15 | `OQ-030` `OQ-038` `OQ-040` |
 | `ADR-0034` | An accepted ADR is a historical record of the decision as taken; corrections live outside it and superseding is reserved for re-deciding | 2026-11-15 | `HOT-012` `HOT-013` |
+| `ADR-0035` | Dimensions ride on the transfer in `Transfer.code`, not in `user_data` | 2026-11-15 | `HOT-013` `SPIKE-003` |
 
 ## Spikes
 

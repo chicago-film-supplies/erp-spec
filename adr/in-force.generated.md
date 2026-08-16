@@ -125,3 +125,4 @@ Accepted and not superseded, as of the last `deno task gen`.
 | [ADR-0032](ADR-0032-the-customer-tree-is-a-liability-tree.md) | The organization tree is a liability tree; projects and settlement points are addressing beneath it | 2026-11-15 | OQ-035, OQ-036, OQ-038, OQ-039, HOT-006 |
 | [ADR-0033](ADR-0033-ar-addressing-is-header-only-and-credit-sits-at-the-settlement-point.md) | A document is addressed to exactly one node by a level-tagged reference, and unallocated credit sits at the settlement point | 2026-11-15 | OQ-030, OQ-038, OQ-040 |
 | [ADR-0034](ADR-0034-an-accepted-adr-is-a-historical-record.md) | An accepted ADR is a historical record of the decision as taken; corrections live outside it and superseding is reserved for re-deciding | 2026-11-15 | HOT-012, HOT-013 |
+| [ADR-0035](ADR-0035-dimensions-ride-in-the-transfer-code-field.md) | Dimensions ride on the transfer in `Transfer.code`, not in `user_data` | 2026-11-15 | HOT-013, SPIKE-003 |
