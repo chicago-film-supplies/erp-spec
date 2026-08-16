@@ -317,6 +317,30 @@ hotspots:
       be derivable as `(source_document, posting event)` under ADR-0014, and `posting_rule` may be a
       projection concern. If both go, the shortfall narrows. That is analysis, not a decision, and
       it is why this is a hotspot rather than a repair.
+      ⚠️ **BOTH escape hatches are closed, and were already closed when this hotspot was written —
+      2026-08-16, `ledger/tigerbeetle-accounts.yaml`.** `journal_entry_id_is_not_derivable:`
+      records that EVT-BIL-006 and EVT-BIL-003 both allocate one instrument across several invoices,
+      so the grouping is not a function of `source_document_ref`; the field stays reserved. And
+      `posting_rule` is not merely evictable — it is already **evicted**, and the slot it freed was
+      already spent letting `accounting_date` take `user_data_32`. **The shortfall within `user_data`
+      is real and has no dissolution path.**
+      ✅ **But the field count itself is wrong, in this hotspot's favour.** `Transfer.code` is a
+      **fourth** discretionary reference field — u16, "the reason for (or category of) the transfer",
+      and a first-class `QueryFilter` filter — and **nothing in `ledger/` claims it**.
+      `ledger/tigerbeetle-accounts.yaml`'s `account_code_rule` assigns the **Account's** `code` to
+      the GL code; the **Transfer's** `code` is a different field on a different record. The miscount
+      originates in `research-drop/reference/tigerbeetle.md` ("the only per-transfer reference
+      fields", corrected 2026-08-16) and propagated into erp-spec#3, into this entry, and into
+      ADR-0026's Context.
+      ✅ **And the unhoused payload fits it with room to spare.** Measured 2026-08-16 across all 13
+      `specified` posting rules: **no posting dimensions both legs** — every dimensioned posting pairs
+      one dimensioned account with an undimensioned counterparty, and 5800 alone owes both dimensions.
+      So the maximum is one pair: 21 `product_line` values × 4 `cost_type` values = **84 combinations,
+      7 bits of 16**. Even a hypothetical both-legs case is 7,056, still inside u16.
+      ⚠️ **Fitting is not deciding.** That the representation exists removes the "unrepresentable"
+      framing from this hotspot; it does not answer whether the ledger should carry dimensions at
+      all, which is the actual conflict.
+      (`inbox/2026-08-16-the-transfer-field-budget-is-four-fields-not-three-and-both-candidate-evictions-are-already-refused.md`)
       ⚠️ **ADR-0018 is `accepted` and therefore immutable**, so the correction has the same nowhere
       to live that HOT-012 describes. This is the second instance of that meta-problem.
       ⚠️ **A SECOND accepted ADR carries the undercount, found 2026-08-16 while checking what the
@@ -338,15 +362,38 @@ hotspots:
       now named. **Superseding ADR-0018 is explicitly the wrong instrument**: it would re-open
       plain-COA-versus-exploded-accounts to fix a prepositional clause.
       **What that ADR still needs before it can be written:**
-      · **SPIKE-003** — `research-drop/reference/tigerbeetle.md` says flatly "no queries" while
+      ✅ **Both technical blockers below are DISCHARGED as of 2026-08-16. What remains is a
+      judgement, not a measurement.**
+      · ~~**SPIKE-003**~~ — `research-drop/reference/tigerbeetle.md` says flatly "no queries" while
         recent releases are believed to expose a limited `query_transfers`. Neither gives a range
         filter on `user_data`, so the conclusion is unchanged, but the spike decides whether
         TigerBeetle can serve any period question at all.
-      · **The two candidate evictions in erp-spec#3**, which may make the shortfall disappear
+        ✅ **Settled from the cached 0.17.9 reference, without the spike.** `query_transfers` and
+        `query_accounts` exist, taking a `QueryFilter`: equality only on `user_data_128/64/32`,
+        `ledger` and `code`; range only on TigerBeetle's own `timestamp`, which is posting time.
+        **No range filter on `user_data`**, so periodisation still comes from the projection
+        (ADR-0017) exactly as `ledger/tigerbeetle-accounts.yaml` already assumed.
+        ⚠️ **And this was never load-bearing for the hotspot.** The case for dimensions in
+        TigerBeetle is reconstruction after a Mongo loss, which needs the value **present**, not
+        filterable — a walk of ~15k transfers rebuilds a dimensional P&L whatever `QueryFilter`
+        can express. SPIKE-003's other two exit criteria (the `imported` flag's timestamp and
+        monotonicity semantics, and live posting resuming after an import batch) are untouched and
+        **this hotspot does not depend on either**.
+      · ~~**The two candidate evictions in erp-spec#3**~~, which may make the shortfall disappear
         rather than force a choice: `journal_entry_id` may be derivable as
         `(source_document, posting event)` under ADR-0014's derived-state doctrine, and
         `posting_rule` may be a projection concern rather than a ledger fact. If both go, only
         `source_document` stays reserved and two slots open up.
+        ❌ **Both refused, per the evidence above — and refused before this hotspot was opened.**
+        No slots open up. What opens instead is `Transfer.code`, which was never counted.
+      **So the ADR is unblocked and the remaining question is a choice between two defensible
+      systems**, surveyed 2026-08-16 against all six references
+      (`inbox/2026-08-16-survey-all-six-references-keep-the-dimension-in-the-same-store-as-the-balance-and-only-odoo-splits-the-record.md`):
+      five of six carry the dimension on the posting line, six of six keep it in the same durable
+      store as the balance, and **no reference faces CFS's two-store split** — so the property they
+      unanimously hold is the one ADR-0003's architecture can fail. The survey recommends carrying
+      both dimensions in `Transfer.code` as a packed pair. **Awaiting the owner's ruling; nothing
+      here is decided.**
       · The OQ-040 survey's recommendation **removes** a claimant rather than adding one — a
         settlement point is a subledger key on the receivable leg, not a third dimension
         (`inbox/2026-08-16-survey-the-party-is-a-subledger-key-and-the-dimension-is-a-gl-slice-and-they-ride-different-legs.md`).

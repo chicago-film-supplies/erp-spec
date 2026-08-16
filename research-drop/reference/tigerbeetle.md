@@ -52,12 +52,21 @@ read `[4294967295, 4294967295]` as a hard error.
 - **Accounts and transfers are immutable; `id` is the idempotency key.** Use TB's recommended
   time-based, lexicographically-sortable 128-bit ids (48-bit ms timestamp + 80-bit random). Do
   **not** use random ids — they hurt LSM write throughput.
-- **No queries, no joins, no ad-hoc aggregation.** Balances are per-account only. Do not plan to
-  "just group transfers by dimension" — that is not a thing TB does. ⚠️ This used to say it was
-  _why_ [[ADR-0008]] exploded dimensions into account identity; **[[ADR-0008]] is superseded by
+- **No joins, no ad-hoc aggregation.** Balances are per-account only. Do not plan to "just group
+  transfers by dimension" — that is not a thing TB does. ⚠️ This used to say it was _why_
+  [[ADR-0008]] exploded dimensions into account identity; **[[ADR-0008]] is superseded by
   [[ADR-0018]]**, which keeps the chart plain and carries dimensions on the posting, because
   [[ADR-0017]] made the read side answer dimensional balances anyway. Same TB limitation, opposite
   conclusion.
+- **⚠️ "No queries" was WRONG and this entry said it flatly until 2026-08-16.** 0.17.9 ships
+  `query_transfers` / `query_accounts` taking a `QueryFilter`: **equality only** on `user_data_128`,
+  `user_data_64`, `user_data_32`, `ledger` and `code`, plus a **range** on `timestamp_min` /
+  `timestamp_max` — TB's own timestamp, which is posting time and therefore the wrong date. Also
+  `get_account_transfers` / `get_account_balances` by account. `limit` is capped at the batch max
+  (`too_much_data` above it). **The conclusion is unchanged — no range filter on `user_data`, so no
+  period query** — which is why [[SPIKE-003]] flagging this contradiction never threatened
+  [[ADR-0017]]. `code:2026-08-16:.claude/docs/tigerbeetle.txt` (`QueryFilter` L13178, Requests
+  L9442).
 - **Account `flags` set balance direction/constraints:** `debits_must_not_exceed_credits` /
   `credits_must_not_exceed_debits`. ⚠️ **Do NOT choose these per the COA normal balance.** That
   advice stood here and is wrong for a general ledger: a revenue account legitimately goes
@@ -66,11 +75,19 @@ read `[4294967295, 4294967295]` as a hard error.
   `ledger/chart-of-accounts.yaml` is a **reporting** property, not a constraint. These flags belong
   on the **inventory-custody** ledger ([[ADR-0015]]), where making overselling unrepresentable is
   the entire point — `EVT-FUL-005` says so in terms. See `ledger/tigerbeetle-accounts.yaml`.
-- **`user_data_128/64/32` are the only per-transfer reference fields.** The working assignment is
+- **`user_data_128/64/32` are the per-transfer reference fields.** The working assignment is
   `128 → journal_entry_id`, `64 → source_document`, `32 → accounting_date` (packed `YYYYMMDD`), with
-  `posting_rule` evicted to the Mongo projection — three fields, four claimants, tracked as
-  erp-spec#3 and still `proposed` pending [[SPIKE-003]]. High-cardinality refs go _here_, never into
-  account identity.
+  `posting_rule` evicted to the Mongo projection — tracked as erp-spec#3 and still `proposed` pending
+  [[SPIKE-003]]. High-cardinality refs go _here_, never into account identity.
+- **⚠️ `Transfer.code` is a FOURTH discretionary field, and this entry said "only" until 2026-08-16.**
+  A u16 "user-defined enum denoting the reason for (or category of) the transfer", and a first-class
+  `QueryFilter` filter alongside the three `user_data` fields. Must not be zero; on a
+  `post_pending`/`void_pending` it must be zero (inherits the pending transfer's) or match it.
+  **Do not confuse it with `Account.code`**, which `ledger/tigerbeetle-accounts.yaml` already assigns
+  to the GL code — different field, different record. The transfer's `code` is **unclaimed**, and the
+  miscount propagated into erp-spec#3 ("three fields, four claimants"), [[HOT-013]] ("three slots,
+  six live claimants") and [[ADR-0026]]'s Context. `code:2026-08-16:.claude/docs/tigerbeetle.txt`
+  (`Transfer.code` L12725, `QueryFilter.code` L13094).
 - **TB timestamp = posting time, NOT accounting date** ([[HOT-005]] / [[ADR-0010]]). Never periodise
   a trial balance / P&L / close on the TB timestamp. Accounting date is a distinct field held
   outside TB. This is load-bearing, not a detail.
