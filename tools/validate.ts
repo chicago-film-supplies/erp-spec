@@ -1441,6 +1441,20 @@ for (const e of evts) {
  * ADR-0003 kept pointing at `formal/two-store-commit.tla` through the Quint migration that deleted
  * it. Only repo-rooted paths are checked — a bare `matrix.ts` in prose is not a claim about a
  * location.
+ *
+ * ⚠️ **Widened 2026-08-16 (erp-spec#14) from `adr/` + `spikes/` to the whole refactorable half.**
+ * The gate was scoped to where the original defect happened, and by then the structured spec cited
+ * far more paths than the ADRs did: `ledger/posting-rules.yaml` and the golden vectors point at
+ * each other and at `inbox/` surveys constantly, and none of it was checked. It lands GREEN — 0 of
+ * 189 files held an unresolved citation when the scope was widened — which is a fact about the data
+ * and not about the gate; it was fired red against a deliberately dead path first.
+ *
+ * ⚠️ **`inbox/` and `research-drop/` are deliberately OUT, and the reason is the lifecycle.** Both
+ * are append-only: a note is raw capture and is never rewritten. A note that cited a path since
+ * deleted would turn CI red with no legal edit available, so the only fix would be an exemption per
+ * note — an allowlist that grows forever, which is what this gate's own exemption rule exists to
+ * prevent. `adr/` is immutable too, but its exemptions are three, self-expiring, and about one
+ * migration; inbox notes number 72 and climb every session.
  */
 {
   const G = "11";
@@ -1473,7 +1487,12 @@ for (const e of evts) {
   ];
   const used = new Set<string>();
 
-  for (const f of [...(await filesIn("adr", ".md")), ...(await filesIn("spikes", ".md"))]) {
+  const SCANNED_DIRS = ["adr", "spikes", "contexts", "ledger", "reporting", "migration", "roadmap"];
+  const scanned: string[] = [];
+  for (const d of SCANNED_DIRS) {
+    for (const ext of [".md", ".yaml", ".feature"]) scanned.push(...await filesIn(d, ext));
+  }
+  for (const f of scanned) {
     const text = await Deno.readTextFile(f);
     const relFile = rel(f);
     for (const m of text.matchAll(/`([A-Za-z0-9_./-]+\.[A-Za-z0-9]+)`/g)) {

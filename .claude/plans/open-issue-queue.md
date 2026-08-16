@@ -2,30 +2,37 @@
 
 - **Date:** 2026-08-16
 - **Repo:** erp-spec
-- **Status:** ⏳ #16, #18 closed (PR #21) · #15, #13 closed (PR #23) · 7 issues open
+- **Status:** ⏳ #16, #18 closed (PR #21) · #15, #13 closed (PR #23) · **#14 closed (PR #25) — `m3`
+  is COMPLETE** · 8 issues open
 - **Origin:** a review of the open issue queue, requested because #18 was on the owner's mind
-- **Related:** open — #3, #4, #6, #8, #12, #14, #17, #19, #20 · closed by this work: #13, #15, #16,
-  #18 · HOT-015 (resolved) · `tools/validate.ts`,
+- **Related:** open — #3, #4, #6, #8, #12, #17, #19, #20 · closed by this work: #13, #14, #15, #16,
+  #18 · HOT-015 (resolved) · OQ-045 (opened) · `tools/validate.ts`,
   `spikes/harness/{corpus,allocation-basis-probe,product-line-matrix-probe}.ts`,
   `ledger/posting-rules.yaml`
 
 ## START HERE
 
-**Units 1, 2 and 3 are done.** #16 and #18 closed via PR #21; **#15 and #13 closed via PR #23**
-(2026-08-16). `main` was CI-green at `c88041a` before PR #23.
+**Units 1–4 are done.** #16 and #18 closed via PR #21; #15 and #13 via PR #23; **#14 via PR #25**
+(2026-08-16), which took **`m3` to 4 met / 0 unmet / 0 prose — the first finished milestone in the
+repo.** `main` is CI-green at `ef84a6c`.
 
-**Seven issues remain open.** In priority order:
+**Eight issues remain open.** In priority order:
 
 |        | Issue                             | State                                                           |
 | ------ | --------------------------------- | --------------------------------------------------------------- |
-| Unit 4 | **#14**                           | startable, **biggest roadmap payoff** — completes m3 outright   |
 | Unit 5 | **#8**                            | startable, cheapest real win (one 5-minute fix + bulk coverage) |
 | Unit 6 | **#6**                            | startable, but **its numbers are stale** — re-measure first     |
 | —      | **#19**, **#3**                   | gated on **ADR-0036 acceptance**, an owner action               |
 | —      | **#17**, **#12**, **#20**, **#4** | not startable — see the sections below                          |
 
-If you want one thing to move the most: **accept ADR-0036**. It resolves both open hotspots and
-unblocks #19 and #3 — and Unit 1 of this plan is what makes taking that action safe.
+⚠️ **The roadmap picture changed with Unit 4, and it changes what is worth doing next.** m3 gated m4
+and m7. m4's two remaining criteria are `spikes_closed_with_adr` (12 spikes, 9 open) and
+`hotspots_resolved` (2 unresolved) — **and accepting ADR-0036 resolves both open hotspots.** So
+after Unit 4, the single owner action below is no longer just an unblocker for two issues; it is one
+of the two things standing between the repo and m4.
+
+If you want one thing to move the most: **accept ADR-0036**. It resolves both open hotspots, moves
+m4, and unblocks #19 and #3 — and Unit 1 of this plan is what makes taking that action safe.
 
 ⚠️ **New capability every remaining unit should use.** `spikes/harness/corpus.ts` reads prod
 Firestore read-only under ADC — no token, project hardcoded to `cfs-3100`, `--allow-net` narrowed so
@@ -141,38 +148,45 @@ precondition is v2's primary requirement. Two new consequences recorded on OQ-03
 bucket as a **coverage meter**, and activation at a coverage **threshold** rather than first
 non-zero weight.
 
+### Unit 4 — #14, procurement's posting rules (PR #25) — CLOSED, and m3 with it
+
+`m3` reads **4 met / 0 unmet / 0 prose**. `unwritten:` is empty; 13 rules specified, 2 blocked, 53
+vectors. The issue's "not urgent and nothing is blocked" was wrong at the roadmap level, as
+predicted — one bucket entry held two exit criteria red.
+
+**The survey found the criterion is `matched` versus `estimated`, not goods versus services**, and
+that one fact decided both rules. A matched accrual goes to a **clearing** account relieved by the
+bill (SAP GR/IR, NetSuite `Accrued Purchases`, Odoo `Stock Interim (Received)`, Intacct's
+advanced-workflow accrual); an estimated one goes to an accrued-expenses account relieved by a dated
+**auto-reversal** — Xero's model, and the textbook one. Every accrual v2 produces carries an amount
+from a source document, so **one** account was minted
+(`2010 Accrued Expenses: Received Not
+Invoiced`) and **none** for the estimated flavour, because no
+v2 event produces one.
+
+- ⚠️ **It was not a pure addition, and the correction is bigger than the addition.**
+  `shift_recorded` and `asset_acquired` both credited 2000 AP — wrong on the shift and acquisition
+  dates, because the vendor has not invoiced. Until 2010 existed **every shift in the ledger
+  overstated trade payables by its own cost.** Five existing golden vectors moved with them.
+- **Two schema defects surfaced only by writing the rules**, neither visible from the issue text:
+  `EVT-PRO-002` carried no `debit_account` and no `product_line`, so it **could not have produced a
+  legal transfer**; and `EVT-PRO-003`'s singular `obligation_id` could not express an EOR invoice
+  covering a fortnight of shifts. It is now `reclassifications[]` + `direct_lines[]`, making this
+  the **third** rule whose entry spans source documents — more evidence for #3.
+- **The goods number will mislead whoever measures it first.** Prod holds 74 `type: purchase`
+  movements, 15 costed, **$18,117.52** total, 60% of it one pallet buy. The population that makes
+  2010 material is **labour**, which measures as zero everywhere because the current system has
+  never had the stage.
+- **The migration delta is unmeasurable from this repo's permitted sources**, and that is recorded
+  as the finding rather than skipped: vendor bills are Xero ACCPAY documents, none are mirrored into
+  Firestore, and this repo does not call the Xero API. What would measure it is named in the survey.
+- Opened **OQ-045** — a bill for LESS than was accrued leaves a residual nothing retires. A bill for
+  MORE is decided (the excess is an ordinary direct line, and **no variance account was minted** —
+  2600 Rounding was dropped on the same reasoning), and a partial bill is normal, not an error.
+
 ## Remaining
 
-### Unit 4 — #14, procurement's three posting rules (its own session)
-
-⚠️ **The issue says "not urgent and nothing is blocked". That is wrong at the roadmap level.** Both
-unmet `m3` criteria — `posting_rules_cover_events` and `vectors_cover_rules` — require
-`w.unwrittenRules === 0` (`tools/milestone-checks.ts:291,304`), and `EVT-PRO-002`/`EVT-PRO-003` are
-the **only** two entries in `ledger/posting-rules.yaml`'s `unwritten:` bucket. m3 has four criteria,
-two met, **zero `prose_only`** — so #14 completes m3 outright. It is the only milestone in the repo
-finishable by machine today, and m3 gates m4 and m7 → `spec-v1`.
-
-Order matters:
-
-1. **Survey first (rule 8a, non-optional)** — the accrued-expense account against all six
-   references. Record in `inbox/`, dated, before any rule cites it.
-2. `ledger/chart-of-accounts.yaml` — add the accrued-expense account. ⚠️ **Not 2160**: CFS has no
-   payroll liability across four years, payroll is a charter non-goal, the EOR is a vendor that
-   invoices (OQ-024).
-3. `EVT-PRO-002 ObligationAccrued` — Dr expense/asset, Cr accrued liability.
-4. `EVT-PRO-003 VendorBillReceived` — one event, two postings, discriminated on whether
-   `obligation_id` resolves. **Getting this wrong double-books the expense in a way that still
-   balances**, so no balance check catches it. The reject vector is the load-bearing artifact.
-5. Vectors — gate 10k requires an accept **and** a reject per specified rule.
-6. **Amend `shift_recorded` and `asset_acquired`** — both credit 2000 AP today, wrong on the
-   shift/acquisition date because the vendor has not invoiced. **Not a pure addition**: both are
-   `specified` with existing golden vectors under `ledger/vectors/`, and the vectors move with them.
-7. `EVT-PRO-001 PurchaseOrderIssued` stays `no_posting` — decided, not deferred.
-
-Exit check: `m3` reads **4 met / 0 unmet / 0 prose** in `STATUS.generated.md` and `unwritten:` is
-empty.
-
-### Unit 5 — #8, the m6 field map (cheapest real win)
+### Unit 5 — #8, the m6 field map (cheapest real win, and now the top of the queue)
 
 `migration/field-map.yaml` holds ~10 mappings against ~30 Firestore collections, against an m6 exit
 criterion of "every current Firestore path maps to a new field, an explicit drop, or a quarantine".
@@ -247,9 +261,15 @@ all under ADR-0036's own criterion.
 - **#4** — ADR-0003 cites `formal/two-store-commit.tla`, which no longer exists (Quint, ADR-0016).
   ADR-0003 is `accepted` and immutable, so the fix is not an edit. The issue's own preferred option
   is right: **fold it into the m5 formal-methods ADR**, which has to supersede that clause anyway.
-  Its detection note is worth acting on independently — a gate asserting that file paths cited by
-  ADRs and spikes actually resolve would have caught all six stale `.tla` references at once, and is
-  the same shape as gate 10n.
+  ✅ **Its detection note is DONE and the plan was stale on this** — gate 11
+  (`repo paths cited in
+  prose resolve`) already existed, built for #4, with the ADR-0003 citation
+  carried as a self-expiring exemption that fails if the path ever comes back. **Widened
+  2026-08-16** from `adr/` + `spikes/` to `contexts/`, `ledger/`, `reporting/`, `migration/` and
+  `roadmap/` as well; it landed green (0 unresolved citations in 189 files) and was fired red twice
+  first. `inbox/` and `research-drop/` stay out on purpose: they are append-only, so a citation gone
+  stale there has no legal fix but an exemption, and that allowlist would grow forever. **What
+  remains on #4 is only the ADR**, not the detection.
 
 ## Decisions
 
@@ -274,12 +294,20 @@ all under ADR-0036's own criterion.
 
 ## Context recommendation
 
-**CLEAR CONTEXT.** Units 4-6 are executable from this doc plus `CLAUDE.md`, and they touch entirely
-different material from Units 1-3 — a six-reference accounting survey, a Firestore-collection sweep,
-a requirements-promotion backlog. **#14 in particular wants a fresh full window**, and it is the one
-to take next: it completes m3 outright and m3 gates m4 and m7 → `spec-v1`.
+**CLEAR CONTEXT.** Units 5 and 6 are executable from this doc plus `CLAUDE.md`, and they touch
+entirely different material from Units 1-4 — a Firestore-collection sweep and a
+requirements-promotion backlog, against an accounting survey and a ledger rule. **Take #8 next**: it
+is the cheapest remaining win, it is unblocked, and it is the m6 exit criterion.
 
-One thing to carry across the clear, because it is not obvious from the issue text: **the "needs a
-script rather than MCP paging" excuse is gone.** `spikes/harness/corpus.ts` pages any prod
-collection read-only under ADC in a few lines, and Units 5 and 6 were both scoped assuming that was
-expensive.
+Three things to carry across the clear, none obvious from the issue text:
+
+- **The "needs a script rather than MCP paging" excuse is gone.** `spikes/harness/corpus.ts` pages
+  any prod collection read-only under ADC in a few lines, and Units 5 and 6 were both scoped
+  assuming that was expensive.
+- **`ledger/chart-of-accounts.yaml` deliberately carries no `xero_id`** (ADR-0009 fences foreign
+  identifiers out of domain models), so the live→target GL correspondence #8 needs exists nowhere
+  and has to be authored. It now has **138** entries, four of them minted (5800, 5801, 2050, 2010) —
+  the minted ones have no live counterpart at all, which is a distinct case the field map must state
+  rather than leave blank.
+- **The next big lever is not an issue.** Accepting ADR-0036 resolves both open hotspots, which is
+  one of m4's two remaining criteria, and unblocks #19 and #3. It is an owner action, not work.
