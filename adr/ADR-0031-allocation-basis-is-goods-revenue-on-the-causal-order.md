@@ -28,7 +28,7 @@ superseded_by:
 > revenue between them, **we decided** to allocate by goods revenue on the causal order and to
 > record in the report that this is a proxy rather than a cost driver, **to achieve** one
 > reproducible margin per product line, **accepting** that the basis is the weakest tier in the
-> standard criterion and stays that way until the shipping specs are populated this year.
+> standard criterion and stays that way until the shipping specs are populated.
 
 ## Context
 
@@ -44,20 +44,25 @@ superseded_by:
   Intacct both ship a **statistical account** mechanism whose entire purpose is to allocate by a
   non-financial quantity — nobody builds that to allocate by revenue. So the survey does not split
   on the answer; it splits on whether you have gone and captured a driver.
-- **CFS has not, and the way it has not is a trap.** Measured 2026-08-09 across all 549 products
-  (`inbox/2026-08-09-allocation-bases-measured-only-goods-revenue-survives.md`):
-  `products.shipping.weight` is a real schema field, present on 531 products, and **0 of 549 hold a
-  non-zero value**. Height, width and length likewise. No `weight`, `volume`, `mileage`, `distance`
-  or `vehicle` field exists on `order`, `destination` or `fulfillment`, and `Address` stores a
-  `mapbox_id` but no coordinates — the only coordinates live in an **expiring cache**. Distance is
-  therefore derivable forward and **not recoverable historically**.
+- **CFS has not, and the way it has not is a trap.** `products.shipping.weight` is a real schema
+  field and **0 products hold a non-zero value** — re-measured 2026-08-16 across all **567**: 0
+  non-zero, 3 zero, 537 `null`, 27 with the block absent, identically for height, width and length.
+  (Pre-repair reading, 2026-08-09 across 549: 0 non-zero, with 531 recorded as holding a number
+  rather than null — see the correction under OQ-033. The conclusion is unchanged and the mechanism
+  differs, which is what makes the precondition writable.) No `weight`, `volume`, `mileage`,
+  `distance` or `vehicle` field exists on `order`, `destination` or `fulfillment`, and `Address`
+  stores a `mapbox_id` but no coordinates — the only coordinates live in an **expiring cache**.
+  Distance is therefore derivable forward and **not recoverable historically**.
 - **Quantity is available and wrong.** Units per $100 of revenue ranges from 1.14 (Office Supplies)
-  to 59.88 (Expendables) — a **52× spread**. A box of tape and a cart are both "1 unit".
+  to 59.88 (Expendables) — a **52× spread** corpus-wide. Re-measured 2026-08-16 across the
+  allocation base itself: 1.27 (Replacements) to 47.80 (Traffic, Safety & Signage), a **38×
+  spread**. A box of tape and a cart are both "1 unit".
 - **The choice is load-bearing.** Allocating each order's delivery revenue over its goods, the three
-  bases disagree by **27.4% (revenue vs lines), 31.5% (revenue vs quantity) and 33.5% (lines vs
-  quantity)** of all delivery revenue. ⚠️ **Measured on the pre-repair corpus — pending
-  re-measurement, see the note under Consequences.** The direction of change is not predictable
-  here; that the bases disagree materially is not in doubt.
+  bases disagree by **27.77% (revenue vs lines), 32.53% (revenue vs quantity) and 34.19% (lines vs
+  quantity)** of ex-void delivery revenue — re-measured 2026-08-16 against 27.4 / 31.5 / 33.5% on
+  the pre-repair corpus. ✅ **The one figure this ADR left unpredicted is the one that barely
+  moved**, and it now stands on a base that is no longer a lower bound of unknown tightness. That
+  the bases disagree materially was never in doubt and is confirmed.
 - **Xero performs no allocation at all** — tracking categories tag, nothing spreads — so the
   migration delta is a report that has never existed rather than a report whose numbers change.
   Nothing has to be carried across history.
@@ -72,9 +77,11 @@ revenue on the causal order**.
    to `subtotal_discounted`, in integer minor units, by largest remainder so the shares sum exactly
    to the pool.
 2. **The scope is the ORDER, not the invoice** — ADR-0029's "the orders that caused them". Measured:
-   **0 of 999 invoices bill more than one order** and 969 carry exactly one, so order-scope and
-   invoice-scope coincide on today's corpus. Choosing the order costs nothing now and is the only
-   one that stays correct when a multi-order invoice appears.
+   **0 of 1,010 invoices bill more than one order** and 980 carry exactly one — re-measured
+   2026-08-16, against 0 of 999 / 969 pre-repair — so order-scope and invoice-scope coincide on
+   today's corpus. Choosing the order costs nothing now and is the only one that stays correct when
+   a multi-order invoice appears. The 30 invoices carrying no order divider at all are unchanged in
+   count.
 3. **The basis is declared a proxy, on the face of the report.** It is an ability-to-bear allocation
    standing in for an uncaptured cause-and-effect driver, and the report says so. This is not a
    caveat in a footnote — it is a named property of the stated basis, so that replacing it later is
@@ -102,60 +109,92 @@ revenue on the causal order**.
    sit in `deferred_pools`, each holding erp-spec#12, rather than being given an invented shape.
    **`trip_travel` is not merely another pool — it is an allocation that runs BEFORE this one** (one
    shared run → the several orders it served), so it chains rather than composes, and its own basis
-   is undecided and uncaptured. **Whether `Crew` and `Trash & Cleanup` follow `Delivery` at all is
-   OQ-031**, deliberately left blocked: ADR-0029's argument for spreading delivery is severability,
-   and it does not obviously transfer to a service that may stand on its own margin.
+   is undecided and uncaptured. ✅ **Whether `Crew` and `Trash & Cleanup` follow `Delivery` at all
+   was OQ-031, and it is ANSWERED — they do not** (owner, 2026-08-16). ADR-0029's argument for
+   spreading delivery is severability, and it does not transfer: crew hired out and a wrap cleanup
+   are each sold on their own terms, so spreading them would move a real profit or loss onto goods
+   that did not cause it. `Transport` and `Shipping` are severable on the same criterion (OQ-034).
+   **So five product lines are `activity` and exactly one spreads**, and `activity` therefore does
+   not imply `spreads` — the two were the same question only while `Delivery` was the only one
+   decided. ⚠️ Not allocated is not the same as not costed: each keeps its own labour cost via the
+   causal-job rule, or a severable line with revenue and no cost against it reports a margin near
+   100%.
 
 ## Considered options
 
-| basis                     |                                                                                                                                                                                                                                                                                                  why not |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| **weight / cubic volume** | The cause-and-effect answer, and **structurally unavailable TODAY**: 0 of 549 products carry a non-zero shipping dimension. **Scheduled for population this year**, at which point it becomes basis v2 — OQ-033. Historical periods stay on v1 regardless, because no past order records what was moved. |
-| **distance travelled**    |                                                                                                                            Also cause-and-effect, and unavailable historically — no stored coordinates, geocodes live in an expiring cache. Available _going forward_ if captured; see the consequences. |
-| **item count (quantity)** |                                                                                                               Available, and **not commensurable** — a 52× spread in units per revenue dollar between Expendables and Office Supplies. It would allocate delivery cost by how finely a line is packaged. |
-| **line count**            |                                                                                                                              Available, and a line is a **data-entry artifact**: `splitItem` divides one line into two, which would move money between product lines without anything physical changing. |
-| **goods revenue**         |                                                                                                                                                                                                                        **Chosen.** The weakest defensible criterion, and the only one the data supports. |
+| basis                     |                                                                                                                                                                                                                                                                                                                                                                                                                                       why not |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| **weight / cubic volume** | The cause-and-effect answer, and **structurally unavailable TODAY**: 0 of 567 products carry a non-zero shipping dimension (re-measured 2026-08-16; 537 hold `null`). **Scheduled for population, and the owner expects MANY products covered by the time v2 is in dev** — at which point it becomes basis v2, gated on a coverage threshold, OQ-033. Historical periods stay on v1 regardless, because no past order records what was moved. |
+| **distance travelled**    |                                                                                                                                                                                                                                                                 Also cause-and-effect, and unavailable historically — no stored coordinates, geocodes live in an expiring cache. Available _going forward_ if captured; see the consequences. |
+| **item count (quantity)** |                                                                                                                                                                                                                                                    Available, and **not commensurable** — a 52× spread in units per revenue dollar between Expendables and Office Supplies. It would allocate delivery cost by how finely a line is packaged. |
+| **line count**            |                                                                                                                                                                                                                                                                   Available, and a line is a **data-entry artifact**: `splitItem` divides one line into two, which would move money between product lines without anything physical changing. |
+| **goods revenue**         |                                                                                                                                                                                                                                                                                                                                                             **Chosen.** The weakest defensible criterion, and the only one the data supports. |
 
 ## Consequences
 
-> ⚠️ **Every measured figure in this section was taken on the pre-repair corpus and is pending
-> re-measurement.** `spikes/harness/allocation-basis-probe.ts` read `items[].tracking_category`,
-> which was null on 227 lines whose product master **was** categorised (api-cloudrun#473, repaired
-> 2026-08-10). Those lines were therefore counted as neither goods nor activity — they fell out of
-> the base entirely. Re-running the probe is blocked on erp-spec#15: its documented `CFS_API_TOKEN`
-> auth path no longer authenticates against `/mcp/cfs`.
+> ✅ **RE-MEASURED 2026-08-16 on the repaired corpus, and this block's predictions were wrong.** The
+> figures below were taken on the pre-repair corpus; erp-spec#15 is fixed, the probe reads prod
+> Firestore under ADC, and it had in fact **never been executed even once** before this run
+> (`inbox/2026-08-16-adr-0031s-figures-re-measured-two-of-three-predicted-directions-failed.md`).
+> Judged like-for-like — the 2026-08-09 base rule AND its classification on both sides, because the
+> corpus grew and OQ-034/OQ-032 moved two values at the same time:
 >
-> **Two directions are predictable and one is not:**
+> - ⚠️ **Pool-exceeds-base ROSE: 41.4% → 45.20%**, 115/305 → 129/314 groups, median pool/base ratio
+>   0.775 → 0.862. The prediction assumed the defect suppressed only the base. **It suppressed both
+>   sides and suppressed the pool harder** — `Delivery` gained $20,437.50 and almost all of it on
+>   4100 Service Income, where a service-heavy order has little goods revenue to categorise against
+>   it. The design consequence is unaffected and **strengthened**: the population where spreading
+>   replaces a margin rather than adjusting it is larger than recorded, not smaller.
+> - ⚠️ **Structurally unallocable: the share fell only because its denominator grew.** 5.16% →
+>   4.94%, but the amount rose $11,150.00 → $11,400.00 and the group count 11 → 12. **Nothing became
+>   allocable.** Quoting the share alone reports this as the predicted improvement.
+> - ⚠️ **The five Netflix Duradeck orders did NOT stop qualifying, and the reasoning that they would
+>   is refuted.** `products/kqzVClx5uJrJ07bEjokX.tracking_category_name` is **`"Delivery"`** — the
+>   install / tear-out / relocate labour, not the deck — and all 15 lines across the five invoices
+>   are `Delivery` at both the line and the master, with no goods line anywhere. The retraction
+>   inferred a category from a product NAME and never read either product record
+>   (`inbox/2026-08-16-correction-the-duradeck-retraction-reasoned-from-a-product-name.md`). **The
+>   2026-08-09 reading — service-only jobs, not a defect — is reinstated.**
+> - ✅ **Inter-basis divergence is flat**: 27.4 → 27.77%, 31.5 → 32.53%, 33.5 → 34.19%. The premise
+>   this ADR rests on survives on a base that is no longer a lower bound of unknown tightness.
 >
-> - **Pool-exceeds-base (41.4%) must FALL.** Lines that were invisible to the base now count toward
->   it, so the base grows on exactly the groups where it was thinnest.
-> - **Structurally unallocable (5.16%) must FALL.** A group qualified only if it carried no goods
->   line at all; several qualified solely because their goods lines were null. The five Netflix
->   Duradeck orders stop qualifying once Duradeck reads `Surface Protection`.
-> - **Inter-basis divergence — unknown.** More lines in the base cuts both ways.
+> Control totals hold under all three bases: allocated $219,337.75 + unallocated $11,400.00 =
+> $230,737.75, exactly the ex-void pool.
 >
-> A third change is not a re-measurement but a re-scoping: **`Trash & Cleanup` is an activity pool
-> this ADR spreads, and it grew from $1,750 to $144,975** — 83×, the third largest line in the
-> business. The pool-exceeds-base and unallocable analyses were performed for `Delivery` alone, on
-> the reasoning that the other activity lines were rounding errors. **That reasoning no longer
-> holds**, and OQ-031 — which asks whether `Trash & Cleanup` spreads at all — is now a materially
-> larger question than when it was written.
+> ✅ **The `Trash & Cleanup` re-scoping this block flagged is resolved, by decision rather than by
+> measurement.** It grew from $1,750 to $144,975 — 83× — and the pool-exceeds-base and unallocable
+> analyses had been performed for `Delivery` alone on the reasoning that the other activity lines
+> were rounding errors. **OQ-031 answered on 2026-08-16 that `Trash & Cleanup` does NOT spread**
+> (severable, carries its own margin via the causal-job rule), so `Delivery` remains the only
+> spreading pool and the analyses are correctly scoped to it. `reporting/product-line-pl.yaml` holds
+> the five pools and their statuses, and the probe now reads that file rather than carrying its own
+> copy.
 
-- ⚠️ **On 38% of delivery-bearing orders the pool is LARGER than the base it spreads over.**
-  Measured: 115 of 305 allocable order-groups, holding **$89,425 — 41.4% of all delivery revenue**;
-  ratio median 0.775, p90 3.13, **max 25.0**. `Crafty` is the clean case — $11,735 of own revenue on
-  delivery-bearing orders receives **$21,958**, 187% of itself, from five near-identical invoices
-  where a $1,500–$2,500 delivery sits against $480–$800 of Crafty as the only goods on the order.
-  **Where a pool exceeds its base, pro-rata spreading does not adjust a product line's margin — it
-  replaces it.** The report must therefore show own and allocated amounts as separate figures, never
-  only their sum, or a reader cannot tell a product's economics from an activity's.
-- **$11,150.00 — 5.16% of delivery revenue, 11 order-groups ex-void — is structurally unallocable**
+- ⚠️ **On 41% of delivery-bearing orders the pool is LARGER than the base it spreads over.**
+  Re-measured 2026-08-16: **125 of 307 allocable order-groups ex-void, holding $104,875.00 — 45.45%
+  of ex-void delivery revenue**; ratio median 0.840, p90 3.33, **max 25.00**. (Pre-repair: 115 of
+  305,
+  $89,425, 41.4%, median 0.775 — it **rose**, against this ADR's own prediction that it must fall.)
+  `Crafty` is still the clean case — **$16,990.00** of own revenue on delivery-bearing orders
+  receives **$21,549.26, 126.8% of itself** (pre-repair $11,735 receiving $21,958, 187%), from five
+  near-identical invoices where a $1,500–$2,500 delivery sits against $480–$800 of Crafty as the
+  only goods on the order. **Where a pool exceeds its base, pro-rata spreading does not adjust a
+  product line's margin — it replaces it.** The report must therefore show own and allocated amounts
+  as separate figures, never only their sum, or a reader cannot tell a product's economics from an
+  activity's. **The re-measurement makes this rule bigger, not smaller.**
+- **$11,400.00 — 4.94% of ex-void delivery revenue, 12 order-groups — is structurally unallocable**
   under every basis, because those orders carry no goods line at all. It becomes a visible number
   rather than a rounding difference. If it grows, that is a signal about how work is being booked,
-  and a bucket is how it stays visible.
-- **The proxy has an expiry, and it is this year.** Owner, 2026-08-09: the product shipping specs
-  will be populated. That makes this basis explicitly interim-with-a-date rather than interim in
-  principle, and it is why `basis_version` exists.
+  and a bucket is how it stays visible. ⚠️ **It did grow.** Pre-repair it was $11,150.00 across 11
+  groups and 5.16%; the share fell only because the pool denominator grew. By year, ex-void: 2023 1
+  group / $100.00 · 2024 1 / $250.00 · 2025 9 / $10,800.00 · 2026 1 / $250.00 — still concentrated
+  in one quarter of 2025 and still not a standing practice.
+- **The proxy has an expiry, and it is now tied to a milestone.** Owner, 2026-08-09: the product
+  shipping specs will be populated this year. Owner, 2026-08-16: **weights will exist for MANY
+  products by the time basis v2 is in dev.** So the basis is interim-with-a-trigger rather than
+  interim in principle, and it is why `basis_version` exists. Re-measured on every
+  `deno task allocation` run, so the premise cannot flip unnoticed — v1 outliving its own
+  justification is the failure mode that matters here, and it is silent.
 - **A populated shipping spec is SUFFICIENT here, not merely better** — and this corrects the
   assumption that one capture serves both this allocation and vehicle absorption. The official
   allocation spreads **one order's** pool across **that order's** lines, so only what varies
@@ -172,8 +211,15 @@ revenue on the causal order**.
   silently**: an unmeasured line absorbs zero cost, the shares still sum exactly to the pool, the
   control total passes, and the least-maintained catalogue entries report the best margins. v2 must
   require every line in an order's base to carry a non-zero driver or degrade that whole order to
-  the bucket. Blocked in practice on **core#51** — `shipping.weight` is a bare `z.number()`, so `0`
-  means both "weighs nothing" and "not yet weighed".
+  the bucket. ⚠️ **Owner, 2026-08-16: weights will exist for MANY products by the time v2 is in dev
+  — so partial population is the ANTICIPATED state and the precondition is v2's primary requirement
+  rather than its hardening.** Two things follow that OQ-033 now carries: the unallocated bucket
+  becomes a **coverage meter**, so coverage is reported beside it; and v2 activates at a coverage
+  **threshold**, not at the first non-zero weight, or margins move across the series because someone
+  weighed inventory rather than because anything economic changed. ✅ **core#51 is CLOSED
+  (2026-08-10) and no longer blocks it**: the four dimensions are `z.number().nullable()` and prod
+  holds **0 non-zero, 3 zero, 537 null and 27 with the block absent, of 567 products** (measured
+  2026-08-16), so "unmeasured" is representable in the schema and distinguished in the data.
 - ⚠️ **The 4110 rationale quoted above is true of 62.3% of that account and not of a third of it.**
   Measured after this ADR was drafted: `Distance Charge` is **33.3% of 4110**, and distance is
   performed and is the pool's clearest cost driver. The forecasting consequence inverts for that

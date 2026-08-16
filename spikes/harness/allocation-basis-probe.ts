@@ -51,6 +51,20 @@ import {
   usd,
 } from "./corpus.ts";
 
+/**
+ * The physical-driver premise, re-measured.
+ *
+ * ADR-0031 chose an ability-to-bear basis *because* the cause-and-effect driver is uncaptured, and
+ * `reporting/allocation-bases.yaml` records that as `proxy_for` with a measurement behind it: 0 of 549
+ * products carry a non-zero shipping dimension. **The owner said on 2026-08-09 that the specs would be
+ * populated this year, so this is a signal that is expected to flip** — and a basis premise that flips
+ * without anyone noticing is how v1 outlives its own justification. It is re-measured on every run.
+ */
+interface ShippingProduct {
+  uid: string;
+  shipping?: { weight?: number; height?: number; width?: number; length?: number };
+}
+
 /** The 2026-08-09 figures, so "a reading that moves the other way is a finding" is checkable here. */
 const BASELINE = {
   poolCents: 21605025, // $216,050.25 Delivery revenue, voids INCLUDED
@@ -105,6 +119,7 @@ function spread(pool: number, weights: number[], keys: string[]): number[] | nul
 
 const cls: Classification = await loadClassification();
 const invoices = await pageAll<Invoice>("invoices", INVOICE_FIELDS);
+const shipProducts = await pageAll<ShippingProduct>("products", ["uid", "shipping"]);
 
 console.log(`# Allocation basis, re-measured\n`);
 console.log(`corpus: ${invoices.length} invoices (999 on 2026-08-09, +${invoices.length - 999})`);
@@ -575,6 +590,60 @@ for (const [k, kind] of [...cls.kind].filter(([, v]) => v === "activity")) {
   void kind;
 }
 console.log(`\nline revenue (all invoices, tax-exclusive): ${usd(lineRevenue)}`);
+
+// ── the driver-availability premise, which the basis exists because of ───────────────────────────
+
+// ⚠️ `null` and `0` are counted SEPARATELY, and that distinction is the whole point of core#51:
+// `0` means "weighs nothing", `null` means "nobody has weighed it", and a coverage precondition that
+// cannot tell them apart either forbids a genuinely weightless line or silently admits an unmeasured
+// one. core#51 asked for the fields to become nullable before the population effort started.
+console.log(`\n## Physical drivers — the premise behind choosing a proxy at all\n`);
+console.log("| field | non-zero number | zero | null (unmeasured) | absent |");
+console.log("| --- | ---: | ---: | ---: | ---: |");
+const FIELDS = ["weight", "height", "width", "length"] as const;
+let anyNonZero = false, anyNull = false;
+for (const f of FIELDS) {
+  let nonZero = 0, zero = 0, nul = 0, absent = 0;
+  for (const p of shipProducts) {
+    const v = p.shipping?.[f];
+    if (v === undefined) absent++;
+    else if (v === null) nul++;
+    else if (v > 0) nonZero++;
+    else zero++;
+  }
+  if (nonZero > 0) anyNonZero = true;
+  if (nul > 0) anyNull = true;
+  console.log(`| \`shipping.${f}\` | **${nonZero}** | ${zero} | ${nul} | ${absent} |`);
+}
+console.log(`\nproducts: ${shipProducts.length} (549 on 2026-08-09, 0 non-zero on all four)`);
+if (anyNonZero) {
+  console.log(
+    `\n⚠️⚠️ **A SHIPPING DIMENSION IS NOW POPULATED.** ADR-0031's basis is declared interim expressly ` +
+      `against this signal — the owner said the specs would be populated this year. This is the ` +
+      `trigger for OQ-033 (which physical measure becomes basis v2) and for the coverage precondition ` +
+      `that must gate it: **partial population fails SILENTLY** — an unmeasured line absorbs zero ` +
+      `cost, the shares still sum exactly to the pool, the control total passes, and the ` +
+      `least-maintained catalogue entries report the best margins.`,
+  );
+} else {
+  console.log(
+    `\n✅ no physical driver is captured on any product, so the cause-and-effect basis remains ` +
+      `unavailable and the ability-to-bear proxy remains what the data supports rather than what is ` +
+      `best. **The premise holds. The blocker attached to it does not.**`,
+  );
+}
+console.log(
+  anyNull
+    ? `\n⚠️ **ADR-0031 records this as "blocked in practice on core#51 — \`shipping.weight\` is a bare ` +
+      `\`z.number()\`, so \`0\` means both weighs-nothing and not-yet-weighed". That is STALE.** ` +
+      `core#51 closed 2026-08-10; the fields are \`z.number().nullable()\` ` +
+      `(\`code:2026-08-16:core@3847366:src/schemas/product.ts\`) and prod holds \`null\`, not \`0\`, on ` +
+      `the counts above. So "unmeasured" IS representable, and OQ-033's activation precondition — the ` +
+      `half core#51 called un-evaluable — can now be written correctly.`
+    : `\n⚠️ every dimension reads as a number or is absent; \`null\` appears nowhere, so the ` +
+      `weighs-nothing / not-yet-weighed ambiguity core#51 describes is live in the DATA regardless of ` +
+      `what the schema permits.`,
+);
 if ((ownRevenue.get("Shipping") ?? 0) === 0 && cls.declared.has("Shipping")) {
   console.log(
     `\n⚠️ **\`Shipping\` reads $0.00 and is NOT a repeat of the \`Transport\` failure.** OQ-034 split ` +

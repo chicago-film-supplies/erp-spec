@@ -6,9 +6,13 @@
 # delivered.
 #
 # The failure mode: excluding null from the base concentrates the entire pool onto the tracked lines
-# and overstates their absorbed cost. Measured 2026-08-09, 4.0% of line revenue — 143 lines,
-# $67,156 — sits on rental, retail and replacement accounts with no product line set, so this is not
-# a hypothetical population.
+# and overstates their absorbed cost. Re-measured 2026-08-16, **264 lines / $38,678.20 / 2.25% of line
+# revenue** sit on rental, retail and replacement accounts with no product line set — 4200 $21,716.14,
+# 4000 $10,671.16, 4210 $6,290.90 — so this is not a hypothetical population.
+# ⚠️ It was 143 lines / $67,156 / 4.0% on 2026-08-09. The LINES nearly doubled while the MONEY nearly
+# halved, and both moves are explained: api-cloudrun#473's repair took the large categorised lines out
+# of this population, and the `Other` retirement put ~135 small ones in. The vector's argument is
+# unaffected by either — it turns on null being a determination, not on the size.
 #
 # Note the share reports UNDER null. It is a row on the report, not a line to be redistributed:
 # guessing which tracked line it "really" belongs to would be inventing the dimension the ledger
@@ -18,7 +22,7 @@ report: product_line_pl
 basis: goods_revenue_on_causal_order
 basis_version: 1
 kind: accept
-source: "api:2026-08-09:db_invoices_query — 143 goods-account lines, $67,156, carrying no product line"
+source: "api:2026-08-16:firestore invoices via spikes/harness/product-line-matrix-probe.ts — 264 goods-account lines, $38,678.20, carrying no product line"
 
 given:
   pool_minor: 40000 # $400.00 delivery

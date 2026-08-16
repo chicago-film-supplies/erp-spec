@@ -796,7 +796,8 @@ open_questions:
       meaningful rather than flattering: **$144,975 of revenue on its own P&L line with no cost
       against it would report a margin near 100%.** Severable means it carries its own cost as well
       as its own revenue.
-      Sizes at the time of the ruling: `Trash & Cleanup` **70 lines / $144,975.00 / 8.58%** — the
+      Sizes at the time of the ruling: `Trash & Cleanup` **70 lines / $144,975.00 / 8.58%** (8.45% of
+      the re-measured $1,715,472.79 denominator, 2026-08-16; the amount is unchanged to the cent) — the
       third-largest product line — and `Crew` **9 lines / $3,550.00 / 0.21%**.
       Consequence for `reporting/product-line-pl.yaml`: both move off `blocked` and are classified
       **activity lines that do NOT participate in the goods spread**, which is a third category the
@@ -826,7 +827,8 @@ open_questions:
       `Delivery`, which was the right call for a better reason than the one originally given.
       ✅ **api-cloudrun#473 is FIXED (2026-08-10) and this is no longer blocked on it.** The denorm
       is repaired (`tracking_missing` 227 → 0), so the pool can now be assembled and the confirmed
-      size is **70 lines / $144,975.00 / 8.58%**. Nothing external blocks this question any more —
+      size is **70 lines / $144,975.00 / 8.45%** (re-measured 2026-08-16; 8.58% of the smaller
+      2026-08-10 denominator). Nothing external blocks this question any more —
       it is waiting on a decision, and it is the largest one outstanding in the reporting spec.
       ⚠️ **`Delivery` and `Trash & Cleanup` together are 22.5% of revenue.** "Answer them together
       for consistency" is still right on the criterion, but the cost of waiting is no longer
@@ -1017,9 +1019,28 @@ open_questions:
       pool, the control total passes, and the least-maintained catalogue entries report the best
       margins. So v2 must require every goods line in an order's base to carry a non-zero driver, or
       degrade that whole order to the unallocated bucket — never spread over the measured subset.
-      Blocked in practice on **core#51**: `shipping.weight` is a bare `z.number()`, so `0` means both
-      "weighs nothing" and "not yet weighed", and the precondition cannot be evaluated correctly
-      until "unmeasured" is representable.
+      ⚠️ **Owner, 2026-08-16: "shipping.weight will exist for MANY products by the time v2 is in
+      dev."** So partial population is the ANTICIPATED state, not a hazard to guard against — which
+      promotes the precondition above from hardening to **the primary requirement of v2**. v2 is not
+      "allocate by weight"; it is "allocate by weight where the whole order's base is measured, and
+      degrade the order otherwise".
+      Two consequences follow that were not recorded before
+      (`inbox/2026-08-16-owner-shipping-weight-will-exist-for-many-products-by-the-time-v2-is-in-dev.md`):
+      **the unallocated bucket becomes a COVERAGE METER**, so coverage must be reported on the face of
+      the report beside it — the bucket's size is uninterpretable without it; and **v2 activates at a
+      coverage THRESHOLD, not at the first non-zero weight**, or its early periods are mostly-bucket
+      and its later ones mostly-allocated, and product-line margins move across the series because
+      someone weighed inventory rather than because anything economic changed. Every individual run
+      would still look internally consistent, which is the failure `reporting/allocation-bases.yaml`
+      calls the worst shape of wrong.
+      ✅ **core#51 is CLOSED (2026-08-10) and no longer blocks this.** It asked for the four dimensions
+      to become nullable before the population effort, because `0` meant both "weighs nothing" and
+      "nobody has weighed it" and the precondition could not otherwise be evaluated. They are
+      `z.number().nullable()` (`code:2026-08-16:core@3847366:src/schemas/product.ts`) and prod agrees:
+      measured 2026-08-16 across all **567** products, identically on all four fields — **0 non-zero,
+      3 zero, 537 null, 27 with the block absent.** "Unmeasured" is representable in the schema and
+      distinguished in the data, so the precondition can be written correctly today. Re-measured on
+      every `deno task allocation` run, which prints a ⚠️⚠️ the first time a non-zero value appears.
 
   - id: OQ-035
     question: >-

@@ -22,7 +22,7 @@ superseded_by:
 - Vehicle costs are **operating expenses today**: 6400 Repairs & Maintenance, 6401 Registrations &
   Fees, 6402 Fuel, 6403 Parking & Tolls, 6404 Tickets. 2025 actuals total **$21,844.77**, plus
   vehicle depreciation against 1700/1701.
-- Nothing connects them to a job, so `Delivery` — **13.91% of revenue, $234,987.75**
+- Nothing connects them to a job, so `Delivery` — **13.79% of revenue, $236,487.75**
   (`inbox/2026-08-10-the-untracked-revenue-denorm-is-repaired-and-28-7-percent-is-now-15-percent.md`)
   — carries essentially no cost, and the product-line P&L ADR-0029 specifies cannot be assembled. ⚠️
   Written here as 12.8% / $216,050 from the 2026-08-09 matrix, which read a denorm that was null on

@@ -37,19 +37,23 @@ report:
   excludes:
     - what: void documents
       reason: >-
-        A voided invoice is not revenue and its delivery line is not a pool. Measured 2026-08-09:
-        41 of 999 invoices are void and carry $5,750.00 of delivery revenue, 2.7% of the total —
-        the then-headline $216,050.25 figure includes them.
-        (`inbox/2026-08-08-void-invoices-not-filtered.md`)
-        ⚠️ The `Delivery` headline is now **$234,987.75** (re-measured 2026-08-10, api-cloudrun#473).
-        The void carve-out is unchanged in kind; its share of the larger figure has not been
-        re-measured and is blocked on erp-spec#15.
+        A voided invoice is not revenue and its delivery line is not a pool. Re-measured 2026-08-16:
+        **43 of 1,010 invoices are void and carry $5,750.00 of delivery revenue — 2.43% of the
+        $236,487.75 headline**, so the pool net of voids is **$230,737.75**. Corpus-wide the voids are
+        481 lines / $70,127.26 / 4.09% of line revenue.
+        (41 of 999 / $5,750.00 / 2.7% on 2026-08-09 — `inbox/2026-08-08-void-invoices-not-filtered.md`.
+        The delivery void amount is **unchanged to the cent**; only its share moved, because the
+        headline grew.)
 
   # ── which product lines are goods, and which are activity ────────────────────────────────────
   # The taxonomy mixes categories of GOODS with categories of ACTIVITY, and the mix is not stable:
-  # of the FIVE activity lines TWO are material — `Delivery` 13.91% and `Trash & Cleanup` 8.58%,
-  # together 22.5% of revenue — `Transport` (trucking) is 2.01%, and two are small (`Shipping` 0.34%,
-  # `Crew` 0.21%). `Transport` was restored and split from `Shipping` by OQ-034 on 2026-08-16, and
+  # of the FIVE activity lines TWO are material — `Delivery` 13.79% and `Trash & Cleanup` 8.45%,
+  # together 22.2% of revenue — `Transport` (trucking) is 1.98%, and two are small (`Shipping` 0.33%,
+  # `Crew` 0.21%). ⚠️ Re-measured 2026-08-16: every DOLLAR figure OQ-031 and OQ-034 recorded reproduces
+  # exactly — $144,975.00, $39,665.00, $34,000.00, $5,665.00, $3,550.00 — and only the SHARES moved,
+  # because the denominator grew from $1,688,980.87 to $1,715,472.79. `Delivery` alone moved in dollars,
+  # gaining 3 lines and $1,500.00 since 2026-08-10 to 537 / $236,487.75.
+  # `Transport` was restored and split from `Shipping` by OQ-034 on 2026-08-16, and
   # `Transaction Fees` LEFT the dimension on the same day: a card fee is caused by how the customer
   # paid, not by what was supplied, so no product line is true of it. 4700 and 5500 carry no
   # dimension, which ADR-0025 permits per account and 4800 Other Income already does.
@@ -117,13 +121,20 @@ report:
         separately performed thing; every member is a premium on the one performance, priced for a
         condition of it.
         Composition measured 2026-08-09 across the account ($45,776.06): Off Hours 37.2%, Distance
-        Charge 33.3%, Weekend 22.9%, Card Fee 4.3%, Rush 1.1%.
+        Charge 33.3%, Weekend 22.9%, Card Fee 4.3%, Rush 1.1%. ⚠️ 4110 is **$46,276.06** as of
+        2026-08-16 and `Transaction Fees` on it is **$1,986.06 / 42 lines / 4.29%** — so the `Card Fee`
+        member reproduces its 4.3% and IS the pending restatement below, now measured rather than
+        asserted. The rest of the composition has not been re-split by member.
         ⚠️ **Two OQ-032 restatements change this pool and have not run yet.** `Card Fee` leaves 4110
         for **4700 Transaction Fee Income** — a payment fee is not a premium on a delivery, and it is
-        the one member that fails the criterion. And the miscoded lines move onto 4110: `Rush Charge`
-        sits on 4100 for 86% of its value against the stated rule, `Distance Charge` leaks onto 4100
-        on 3 lines. **Until both run, the 79.8 / 20.0 split is that split plus an unmeasured coding
-        error**, and anything reasoning from the ratio inherits it.
+        the one member that fails the criterion; measured 2026-08-16 it is **$1,986.06 across 42
+        lines**, and 4110 net of it would be **$44,290.00**. And the miscoded lines move onto 4110:
+        `Rush Charge` sits on 4100 for 86% of its value against the stated rule, `Distance Charge`
+        leaks onto 4100 on 3 lines. **Until both run, the split is that split plus an unmeasured coding
+        error**, and anything reasoning from the ratio inherits it. The ratio itself is now
+        **4100 81.38% ($192,447.75 / 407 lines) / 4110 18.52% ($43,790.00 / 129) / 4200 0.11%**,
+        re-measured 2026-08-16 against 79.8 / 20.0 — a delivery line is still four times more likely to
+        be Service Income than Delivery Surcharges.
         ✅ **The forecasting consequence is RESOLVED for distance, and it inverts ADR-0029's stated
         direction.** Owner, 2026-08-16: the extra cost of a distant delivery is "the opportunity cost
         of the team being gone longer (and thus unavailable for a second delivery), and additional
@@ -165,7 +176,9 @@ report:
         real; and a third kind with one member that changes no behaviour is the shape `Other` was
         deleted for. What is distinctive about it — a bought-in cost — is already visible in the
         accounts (5300, not 5800).
-        Measured 2026-08-09: 16 lines, $5,665.00, 0.34% of revenue.
+        Measured 2026-08-16: 16 lines, **$5,665.00**, 0.33% of revenue — the amount reproduces OQ-034's
+        figure exactly and only the share moved, because the denominator grew. Derived by account: the
+        corpus still carries one `Transport` value and 4150 under it is entirely this pool.
 
     - id: transport
       product_line: Transport
@@ -188,7 +201,10 @@ report:
         for `Delivery`.** Revenue is on 4100; the cost is labour COGS carrying `cost_type: delivery`
         (ADR-0019, 5800/5801) plus vehicle, and **ADR-0030 has not chosen the vehicle COGS
         accounts**. Until it does, a Transport margin read off this pool overstates trucking.
-        Measured 2026-08-09: 7 lines, $34,000.00, 2.01% of revenue.
+        Measured 2026-08-16: 7 lines, **$34,000.00**, 1.98% of revenue — the amount reproduces OQ-034's
+        figure exactly and only the share moved. Derived by account: 4100 under the corpus's single
+        `Transport` value. ⚠️ The corpus has NOT been restated into two values; that is an ADR-0020
+        obligation, and `Shipping` therefore reads 0 lines when the dimension is read directly.
     - id: crew
       product_line: Crew
       status: not_allocated
@@ -211,7 +227,7 @@ report:
         performed. So this pool carries its own labour cost as well as its own revenue, and its
         margin is a real one. A severable line with revenue and no cost against it would report a
         margin near 100%, which is the failure this clause exists to prevent.
-        Measured 2026-08-10: 9 lines, $3,550.00, 0.21% of revenue.
+        Measured 2026-08-16: 9 lines, **$3,550.00**, 0.21% of revenue — unchanged on both figures.
 
     - id: trash_cleanup
       product_line: Trash & Cleanup
@@ -226,11 +242,12 @@ report:
         **SEVERABLE — keeps its own margin and does not spread.** OQ-031 answered by the owner
         2026-08-16, on the same criterion as `crew`: a wrap cleanup stands on its own, so spreading
         it would move a real profit or loss onto goods that did not cause it.
-        ⚠️ **Re-measured 2026-08-10: 70 lines, $144,975.00, 8.58% of revenue — the THIRD LARGEST
+        ⚠️ **Re-measured 2026-08-16: 70 lines, $144,975.00, 8.45% of revenue — the THIRD LARGEST
         product line in the business.** This note read "2 lines, $1,750.00, 0.1% of revenue" until
-        then, off a line denorm that was null on 227 categorised lines (api-cloudrun#473). An 83×
+        2026-08-10, off a line denorm that was null on 227 categorised lines (api-cloudrun#473). An 83×
         error, and it is the reason OQ-031 was framed as a tidy-up when it was the largest open
-        decision in this file.
+        decision in this file. The amount reproduces the 2026-08-10 re-measurement to the cent; the
+        share moved only because the denominator grew.
         ⚠️ **The labour qualifier matters most here, because of that size.** Owner: "they still need
         labor cost allocated to them", via the causal-job rule — a crew-day spent on a trash sweep
         attributes to this line because that is the job that caused it. $144,975 of revenue on its
@@ -277,28 +294,36 @@ report:
     own_and_allocated_shown_separately: true
     own_and_allocated_reason: >-
       ⚠️ **The single most important rule on this report, and it is a measurement, not a
-      preference.** On 115 of 305 delivery-bearing order-groups — holding $89,425, **41.4% of all
-      delivery revenue** — the pool is LARGER than the goods revenue it spreads over. Ratio median
-      0.775, p90 3.13, max 25.0.
-      ⚠️ **Measured on the pre-repair corpus; pending re-measurement, blocked on erp-spec#15.** The
-      probe read a line denorm that was null on 227 categorised lines, so those lines counted toward
-      no base at all (api-cloudrun#473). **This share must FALL** — the base grows on exactly the
-      groups where it was thinnest. The rule does not depend on the magnitude: one group where the
-      pool exceeds its base is enough to require the two figures be shown separately, and the
-      `Crafty` case is a real invoice pattern, not a rounding artifact.
+      preference.** Re-measured 2026-08-16 (erp-spec#15 fixed; the probe reads prod Firestore under
+      ADC): on **125 of 307** delivery-bearing order-groups ex-void — holding **$104,875.00, 45.45% of
+      ex-void delivery revenue** — the pool is LARGER than the goods revenue it spreads over. Ratio
+      median 0.840, p90 3.33, max 25.00.
+      ⚠️⚠️ **This share was predicted to FALL and it ROSE.** Pre-repair it was 115 of 305 / $89,425 /
+      41.4%, median 0.775; like-for-like on the 2026-08-09 base rule and classification it is now
+      **45.20%, 129 of 314, median 0.862**. The prediction assumed api-cloudrun#473 suppressed only the
+      base. It suppressed BOTH sides and suppressed the pool harder — `Delivery` gained $20,437.50 and
+      almost all of it on 4100 Service Income, where a service-heavy order has little goods revenue to
+      categorise against it.
+      **So the re-measurement makes this rule bigger, not smaller.** The rule never depended on the
+      magnitude — one group where the pool exceeds its base is enough to require the two figures be
+      shown separately — but the population it protects against is larger than recorded.
       Where a pool exceeds its base, pro-rata spreading does not adjust a product line's margin, it
-      REPLACES it. `Crafty` receives $21,958 of allocated delivery revenue against $11,735 of its
-      own — 187% — from five near-identical invoices where a $1,500–$2,500 delivery sits against
-      $480–$800 of Crafty as the only goods on the order.
+      REPLACES it. `Crafty` receives **$21,549.26** of allocated delivery revenue against **$16,990.00**
+      of its own — **126.8%** (pre-repair $21,958 against $11,735, 187%) — from five near-identical
+      invoices where a $1,500–$2,500 delivery sits against $480–$800 of Crafty as the only goods on the
+      order. ⚠️ `Crafty` itself nearly tripled corpus-wide to $45,530.48 and its account mix inverted to
+      90.26% on 4200 Retail Sales, so anything reasoning from the old figure is reasoning about a much
+      smaller line than exists.
       So every figure appears twice, own and allocated, and never only as their sum. A reader who
       cannot separate them cannot tell a product's economics from an activity's.
+      (`inbox/2026-08-16-adr-0031s-figures-re-measured-two-of-three-predicted-directions-failed.md`)
 
     unallocated_row_shown: true
     unallocated_row_reason: >-
       An order carrying activity revenue and NO goods line has no denominator, under every basis.
-      Measured 2026-08-09 **under this file's own base definition** — null-product-line goods
-      included, voids excluded: **11 order-groups, $11,150.00, 5.16% of delivery revenue**
-      (12 / $11,400.00 / 5.28% including the one void). It is reported on its own row, never forced
+      Re-measured 2026-08-16 **under this file's own base definition** — null-product-line goods
+      included, voids excluded: **12 order-groups, $11,400.00, 4.94% of ex-void delivery revenue**
+      (13 / $11,650.00 / 4.93% including the void). It is reported on its own row, never forced
       onto an arbitrary line, never spread across all lines, and never dropped.
       ⚠️ **These are service-only JOBS, not orphaned deliveries**, and the row should be read that
       way: CFS sold labour — install, tear-out, relocate, trash removal — with no rental or retail
@@ -309,17 +334,24 @@ report:
       $250 line, so it is not a standing practice.
       Watch the row for service-only work becoming a larger share of the business — not for booking
       errors. (`inbox/2026-08-09-correction-the-unallocable-population-is-smaller-and-is-one-customer.md`)
-      ⚠️⚠️ **THE DOMINANT CASE HERE PROBABLY IS NOT UNALLOCABLE, re-read 2026-08-10.** Those five
-      Netflix orders qualified because their lines carried no product line — but Duradeck **is**
-      categorised at the product master, as `Surface Protection`, so after the repair
-      (api-cloudrun#473) they carry a goods line and have a denominator. If that holds, **85.5% of
-      this row's measured population disappears** and "service-only jobs, not a defect" was a
-      conclusion drawn from the defect. Pending re-measurement, blocked on erp-spec#15; the share
-      must FALL and may approach zero.
-      **The row is retained on its own merits.** An order carrying activity revenue and no goods
-      line genuinely has no denominator, and forcing such a pool onto an arbitrary line would be
-      worse than reporting it — that argument never rested on the population size. What is retracted
-      is the claim that the population is real and characterised.
+      ⚠️⚠️ **A retraction stood here from 2026-08-10 to 2026-08-16 and it was WRONG. It is withdrawn.**
+      It read: "THE DOMINANT CASE HERE PROBABLY IS NOT UNALLOCABLE… Duradeck **is** categorised at the
+      product master, as `Surface Protection`, so after the repair they carry a goods line and have a
+      denominator… 85.5% of this row's measured population disappears and 'service-only jobs, not a
+      defect' was a conclusion drawn from the defect."
+      Measured 2026-08-16: **`products/kqzVClx5uJrJ07bEjokX.tracking_category_name` is `"Delivery"`.**
+      It is the install / tear-out / relocate **labour**, not the deck. All 15 lines across the five
+      invoices are `Delivery` at both the line and the master, every one of the five still has a base of
+      $0.00, and none carries a goods line at all. The retraction inferred a category from a product
+      NAME and never read either product record — the same error class as api-cloudrun#473 itself, one
+      level up. **The 2026-08-09 reading above is reinstated in full.**
+      ⚠️ And the row did not shrink: it grew. 11 groups / $11,150.00 → **12 / $11,400.00**; the SHARE
+      fell 5.16% → 4.94% only because the pool denominator grew. Nothing became allocable. By year,
+      ex-void: 2023 1 / $100.00 · 2024 1 / $250.00 · 2025 9 / $10,800.00 · 2026 1 / $250.00.
+      **The row is retained on its own merits regardless.** An order carrying activity revenue and no
+      goods line genuinely has no denominator, and forcing such a pool onto an arbitrary line would be
+      worse than reporting it — that argument never rested on the population size.
+      (`inbox/2026-08-16-correction-the-duradeck-retraction-reasoned-from-a-product-name.md`)
 
     null_product_line_row_shown: true
     null_product_line_row_reason: >-
@@ -327,11 +359,15 @@ report:
       is a countable population and gets a row. Goods-account revenue carrying null is part of the
       allocation BASE and absorbs its share; service and other revenue carrying null is neither pool
       nor base and reports below the allocated margin.
-      Measured 2026-08-10 the untracked share is **15.00% of line revenue** ($253,306.59 of
-      $1,688,980.87), and after the repair it is exactly the two populations that are not defects:
-      **128 custom lines with no product master** ($233,667.63) and **170 lines on genuinely
-      uncategorised products** ($19,638.96). The first is the one to watch — a custom line is where
-      a new product line announces itself.
+      Re-measured 2026-08-16 the untracked share is **14.76% of line revenue** ($253,269.75 of
+      $1,715,472.79), and it is exactly the two populations that are not defects: **130 custom lines
+      with no product master** ($233,610.63) and **183 lines on genuinely uncategorised products**
+      ($19,659.12). The first is the one to watch — a custom line is where a new product line announces
+      itself. (15.00% of $1,688,980.87 on 2026-08-10, across 128 / $233,667.63 and 170 / $19,638.96 —
+      the money is flat and the denominator grew.)
+      ⚠️ The sub-population that is in the allocation BASE rather than merely reported under this row is
+      the null lines on a GOODS account: **264 lines, $38,678.20, 2.25% of line revenue** — 4200
+      $21,716.14 / 36, 4000 $10,671.16 / 220, 4210 $6,290.90 / 8.
       (`inbox/2026-08-10-the-untracked-revenue-denorm-is-repaired-and-28-7-percent-is-now-15-percent.md`)
       ⚠️ This read "28.8% ... 2.8% correctly dimensionless, 22.1% service revenue where null is the
       decided answer, 4.0% — 143 lines, $67,156 — where a product line obviously applies and nobody

@@ -11,7 +11,9 @@ mappings:
     to: null
     disposition: drop
     reason: >-
-      0 of 549 products have a non-zero value — verified 2026-08-08. Superseded by
+      0 of 567 products have a non-zero value — re-verified 2026-08-16 (537 hold `null`, 3 hold 0, 27
+      lack the block; core#51 made them nullable on 2026-08-10, so "unmeasured" is now representable
+      and distinguished in the data). Superseded by
       handling_bucket. Dropping a field that was never populated costs nothing; carrying it
       forward implies data that does not exist.
 

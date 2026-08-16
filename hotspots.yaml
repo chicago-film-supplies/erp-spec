@@ -458,7 +458,7 @@ hotspots:
         which is the one shape a document reference cannot recover.
       · `reporting/allocation-bases.yaml` → `goods_revenue_on_causal_order`, `scope: causal_order`.
       ⚠️ **Invoice-borne postings are luckier and it is luck, not design.** `invoice_issued`'s
-      source document is the invoice, and 0 of 999 prod invoices bill more than one order
+      source document is the invoice, and 0 of 1,010 prod invoices bill more than one order
       (ADR-0031), so the causal order is currently one deterministic hop away. ADR-0031 chose order
       scope precisely because that coincidence will not hold, and when a multi-order invoice appears
       the revenue side acquires the same defect the labour side already has.
@@ -508,7 +508,7 @@ hotspots:
       nameable: a MongoDB loss **before close** costs that open period's allocability; after close
       the Parquet holds it.
       ⚠️ **Do not confuse this with what is honestly foreclosed.** The weight/cube basis (v2, OQ-033)
-      can never be re-run over history because the driver was never captured — 0 of 549 products
+      can never be re-run over history because the driver was never captured — 0 of 567 products
       carry a non-zero shipping dimension, and `allocation-bases.yaml` says historical periods "must
       keep resolving the basis that produced them". That is a DATA-CAPTURE limit. Bases whose inputs
       are recorded — goods revenue, line count, quantity — are limited only by this hotspot, which is

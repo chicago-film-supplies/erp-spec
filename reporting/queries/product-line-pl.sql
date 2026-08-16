@@ -47,8 +47,12 @@ pool AS (
 
 -- ── the spread, largest remainder ─────────────────────────────────────────────────────────────
 -- Floor each share, then hand the residual cents to the largest fractional parts. `ORDER BY` breaks
--- ties on product_line so the result is DETERMINISTIC: a tie broken by hash or scan order would
--- make the report irreproducible over a sealed period, which ADR-0017 forbids.
+-- ties on product_line so the result is DETERMINISTIC: a tie broken by hash or scan order would make
+-- two runs over the same period disagree for no stated reason.
+-- ⚠️ This read "…irreproducible over a sealed period, which ADR-0017 forbids" — a residue of the
+-- sealed-period premise retracted 2026-08-16. This report is never sealed; re-running it is the point
+-- (ADR-0029, ADR-0036). Determinism stands on its own: `(sealed inputs, basis version)` must determine
+-- the output, and a hash-ordered tiebreak breaks that regardless of whether anything is sealed.
 --
 -- Integer arithmetic throughout. `pool * base / total` is staged as multiply-then-divide in integer
 -- minor units so nothing rounds in between — quantizing the ratio first is the defect class the
@@ -85,10 +89,12 @@ allocated AS (
 ),
 
 -- ── the pool that has no base at all ──────────────────────────────────────────────────────────
--- Measured 2026-08-09: 11 order-groups ex-void, $11,150.00, 5.16% of delivery revenue. A ROW, not a
--- silent division by zero and not a helpful spread across every line.
--- ⚠️ Pre-repair figure, pending re-run (erp-spec#15) and expected to fall sharply — several groups
--- qualified on NULL goods lines rather than absent ones (api-cloudrun#473). The query is unchanged.
+-- Re-measured 2026-08-16: 12 order-groups ex-void, $11,400.00, 4.94% of ex-void delivery revenue. A
+-- ROW, not a silent division by zero and not a helpful spread across every line.
+-- ⚠️ This was expected "to fall sharply" once api-cloudrun#473 was repaired. It did not: the amount
+-- ROSE from $11,150.00 and the group count from 11, and only the SHARE fell, because the pool
+-- denominator grew. The five orders predicted to leave the bucket did not — their product is the
+-- install LABOUR, categorised `Delivery` at the master. The query is unchanged.
 unallocated AS (
     SELECT p.pool_id, SUM(p.pool_revenue_minor) AS unallocated_minor
     FROM pool p
@@ -98,11 +104,12 @@ unallocated AS (
 )
 
 -- ── presentation ──────────────────────────────────────────────────────────────────────────────
--- OWN and ALLOCATED are separate columns and are never summed away. On 41.4% of measured delivery
+-- OWN and ALLOCATED are separate columns and are never summed away. On 45.45% of ex-void delivery
 -- revenue the pool exceeds its base, where spreading REPLACES a line's margin rather than adjusting
 -- it — a reader who cannot separate the two cannot tell a product's economics from an activity's.
--- ⚠️ 41.4% is a pre-repair figure pending re-run (erp-spec#15) and must fall. The rule does not
--- depend on it: one such group is enough to require the columns stay separate.
+-- ⚠️ Re-measured 2026-08-16: this was 41.4% pre-repair and was predicted to FALL. It ROSE. The rule
+-- never depended on the magnitude — one such group is enough to require the columns stay separate —
+-- but the population it protects against is larger than recorded, not smaller.
 SELECT
     b.product_line,
     SUM(b.base_minor)                                  AS own_revenue_minor,
