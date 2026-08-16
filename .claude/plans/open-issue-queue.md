@@ -238,7 +238,11 @@ all under ADR-0036's own criterion.
   Unit 3: **one capture decision answers two questions** — recording what a leg moved and how far
   gives `trip_travel` its basis _and_ upgrades ADR-0031's official allocation from Horngren tier 4
   (`ability_to_bear`, an explicit proxy) to tier 1. Measured 2026-08-09: `products.shipping.weight`
-  is present on 531 of 549 products and **zero on all 549**.
+  is present on 540 of 567 products and **non-zero on 0 of them** — re-measured 2026-08-16: 537 hold
+  `null`, 3 hold 0, 27 lack the block. core#51 closed 2026-08-10 and made the four dimensions
+  nullable, so "unmeasured" is now distinguishable from "weighs nothing" — which is what OQ-033's
+  coverage precondition needs, and the owner expects **many** products populated by the time basis
+  v2 is in dev.
 - **#20** — needs the presence-vs-absence decision first; see Decisions.
 - **#4** — ADR-0003 cites `formal/two-store-commit.tla`, which no longer exists (Quint, ADR-0016).
   ADR-0003 is `accepted` and immutable, so the fix is not an edit. The issue's own preferred option
