@@ -1461,7 +1461,24 @@ open_questions:
       `coa_revenue: 4140`. It is self-enforcing by the owner's own logic, since any durable wholesale
       price "would generally warrant creating a product in the catalog", and it is requirement-shaped:
       a PRODUCT configured to 4140 should be refused.
-      ⚠️ **Still open besides the dimension**: the Xero migration delta is UNMEASURED — whether CFS's
-      Xero history presents pass-throughs gross or net could not be established from documentation.
-      One document settles it: the single 4140 line found (`1Qr50IQXdPjKC2cB7WyV`) carries a
-      `xero_id`. Sage Intacct and SAP were not reached.
+      ⚠️ **CORRECTED 2026-08-16, same day** —
+      `inbox/2026-08-16-correction-two-of-three-unreachable-references-were-a-bad-query-and-sap-models-this-case-exactly.md`.
+      **SAP was not unreachable, it was skipped by a malformed query — and it is the strongest
+      reference in the survey.** SAP's third-party order processing is CFS's case exactly: goods go
+      supplier-direct to the customer, a **statistical goods receipt** records the flow WITHOUT
+      creating inventory, the vendor invoice posts separately, and the sales order line becomes
+      billing-relevant. That is a **gross** presentation, and the statistical receipt is precisely the
+      mechanism for holding no inventory while still being the principal. ⇒ It EXPLAINS the one
+      indicator that pointed "agent" rather than merely outweighing it. Sage Intacct likewise
+      supports automatic percentage markups on billable transactions.
+      **The migration delta is narrower than stated and is partly unanswerable by design.** Reading
+      the document (`api:2026-08-16:db_invoices_get` on `1Qr50IQXdPjKC2cB7WyV`): invoice 1308,
+      "Internet @ Firehouse", **$800.00**, `GWave Productions, LLC / Office`, 2023-09-15 — CFS bought
+      internet at a shoot location and re-billed it. **The revenue side is visible and IS gross**: the
+      full $800 posts to 4140, not a markup-only figure. **The cost side cannot be seen** — a
+      pass-through's cost is an ACCPAY bill, and CFS deliberately mirrors none of them, and this repo
+      must not call the Xero API. So the open question is "where did the vendor cost land", not
+      "gross or net".
+      ✅ **And that line already carries `tracking_category: null`** — the dimension recommendation
+      above, observed in the corpus rather than only proposed. One line is not a population, but the
+      operator who typed it reached the same answer.
