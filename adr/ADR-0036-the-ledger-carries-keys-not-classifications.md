@@ -110,6 +110,21 @@ other two did, by being the first to take the untravelled path.
   field. The claimant list loses `product_line` and `cost_type` and gains the keys above — which is
   a different budget problem, not the same one, and it is a problem about **references**, which is
   what `user_data` is for.
+- ⚠️ **And this is a CHOICE, not a forced move — the slot exists and is declined.** HOT-013 and
+  erp-spec#3 were both written against a field count that is wrong: `Transfer.code` is a **fourth**
+  discretionary reference field (u16, "the reason for/category of the transfer", a first-class
+  `QueryFilter` filter), and nothing in `ledger/` claims it. The unhoused dimensional payload
+  measures **84 combinations — 7 bits of 16** across all 13 `specified` rules, because no posting
+  dimensions both legs and 5800 alone owes two dimensions. So "there is nowhere to put them" was
+  never the argument and must not become the remembered one
+  (`inbox/2026-08-16-the-transfer-field-budget-is-four-fields-not-three-and-both-candidate-evictions-are-already-refused.md`,
+  `code:2026-08-16:.claude/docs/tigerbeetle.txt` — `Transfer.code` L12725). **The rejected
+  alternative is therefore live and stated:** keep dimensions on the transfer, packed into `code`.
+  It is refused on this ADR's own criterion rather than on capacity — a product line is
+  `products.uid_tracking_category`, a mutable field on a mutable master, and freezing it into an
+  immutable transfer is the defect regardless of which field holds it. It has moved twice in one
+  month. **A cheap wrong answer is still the wrong answer**, and it would cost `code` its
+  conventional occupant (the transfer's reason) on top.
 - **HOT-014 is absorbed.** It said ADR-0029 requires every posting to carry its causal order and
   none does. That requirement is now this ADR's decision rather than an unmet obligation, and the
   posting entity has to gain the field either way.
