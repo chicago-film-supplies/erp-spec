@@ -2,23 +2,22 @@
 
 - **Date:** 2026-08-16
 - **Repo:** erp-spec
-- **Status:** ⏳ #16 and #18 closed (PR #21, merged) · 9 issues open
+- **Status:** ⏳ #16, #18 closed (PR #21) · #15, #13 closed (PR #23) · 7 issues open
 - **Origin:** a review of the open issue queue, requested because #18 was on the owner's mind
-- **Related:** open — #3, #4, #6, #8, #12, #13, #14, #15, #17, #19, #20 · closed by this work: #16,
-  #18 · HOT-015 (resolved) · `tools/validate.ts`, `spikes/harness/allocation-basis-probe.ts`,
+- **Related:** open — #3, #4, #6, #8, #12, #14, #17, #19, #20 · closed by this work: #13, #15, #16,
+  #18 · HOT-015 (resolved) · `tools/validate.ts`,
+  `spikes/harness/{corpus,allocation-basis-probe,product-line-matrix-probe}.ts`,
   `ledger/posting-rules.yaml`
 
 ## START HERE
 
-**#16 and #18 are closed** — PR #21, merged fast-forward to `main` 2026-08-16. `main` is CI-green at
-`0a97083`; the run before it (`5b1f8ae`) is a recorded **failure**, which is the `deno fmt --check`
-red this work also fixed.
+**Units 1, 2 and 3 are done.** #16 and #18 closed via PR #21; **#15 and #13 closed via PR #23**
+(2026-08-16). `main` was CI-green at `c88041a` before PR #23.
 
-**Nine issues remain open.** In priority order:
+**Seven issues remain open.** In priority order:
 
 |        | Issue                             | State                                                           |
 | ------ | --------------------------------- | --------------------------------------------------------------- |
-| Unit 3 | **#15 → #13**                     | startable — #15 exists only to unblock #13                      |
 | Unit 4 | **#14**                           | startable, **biggest roadmap payoff** — completes m3 outright   |
 | Unit 5 | **#8**                            | startable, cheapest real win (one 5-minute fix + bulk coverage) |
 | Unit 6 | **#6**                            | startable, but **its numbers are stale** — re-measure first     |
@@ -27,6 +26,13 @@ red this work also fixed.
 
 If you want one thing to move the most: **accept ADR-0036**. It resolves both open hotspots and
 unblocks #19 and #3 — and Unit 1 of this plan is what makes taking that action safe.
+
+⚠️ **New capability every remaining unit should use.** `spikes/harness/corpus.ts` reads prod
+Firestore read-only under ADC — no token, project hardcoded to `cfs-3100`, `--allow-net` narrowed so
+it cannot reach Xero or CRMS, write verbs unreachable by construction. **This retires "a full sweep
+needs a script rather than MCP paging"**, which the spec was carrying as an accepted limit in at
+least one place (`chart-of-accounts` 4140, now measured corpus-wide). Unit 5 (#8) in particular is a
+~30-collection sweep that was priced as manual work and is not any more.
 
 ⚠️ **This triage is the corrected one.** The first pass covered 6 of 11 open issues: the initial
 `gh issue list` was piped through `head -60` and #13's comment bodies consumed the output, silently
@@ -88,31 +94,54 @@ names account 5000 (`dimensions: [product_line]`); a scenario was added for 5800
 `deno fmt --check` is a CI step and was **failing on `main` at `5b1f8ae`** — 7 files, none touched
 by this work. Landed separately so it did not swamp the real diffs.
 
+### Unit 3 — #15 then #13 (PR #23) — CLOSED
+
+**#15** took option 2, direct Firestore via ADC. `spikes/harness/corpus.ts` holds it: no token, the
+`Firestore` handle confined to a closure so write verbs are unreachable, `--allow-net` narrowed to
+Google hosts so the harness cannot reach Xero or CRMS, project hardcoded to `cfs-3100`. The probe
+had **never been executed once** — its own provenance note said so.
+
+⚠️ **The bigger half of #15 was not the auth.** The probe held a hand-maintained sixth copy of the
+goods/activity taxonomy, so OQ-034's restoration of `Transport` left it classified **goods by
+omission** — $39,665 in the allocation base. `validate.ts` does not read `spikes/`, so no gate could
+ever have caught it. `loadClassification` now reads `line_kinds` and the pools' `status` from
+`reporting/product-line-pl.yaml`. Same lesson as `view.ts`'s fifth copy of the context registry.
+
+**#13 — both remaining items done, and two of three predicted directions FAILED.**
+
+| figure                   |      2026-08-09 |             2026-08-16 | predicted      | outcome                              |
+| ------------------------ | --------------: | ---------------------: | -------------- | ------------------------------------ |
+| pool exceeds base        |           41.4% |             **45.20%** | must FALL      | ⚠️ **ROSE 3.8 pp**                   |
+| structurally unallocable |           5.16% |              **4.94%** | FALL, maybe ~0 | ⚠️ share fell, **amount+count rose** |
+| inter-basis divergence   | 27.4/31.5/33.5% | **27.77/32.53/34.19%** | unknown        | flat — the unpredicted one was right |
+
+- **Pool-exceeds-base rose** because the defect suppressed BOTH sides and suppressed the pool
+  harder. `Delivery` gained $20,437.50, almost all on 4100 Service Income, where a service-heavy
+  order has little goods revenue to categorise against it. The design rule gets **bigger**, not
+  smaller.
+- **Unallocable's share fell only because its denominator grew** — amount $11,150 → $11,400, groups
+  11 → 12. Nothing became allocable. Fourth base-comparability trap in this corpus in eight days.
+- **The five Netflix Duradeck orders did not move**, and the 2026-08-10 retraction saying they would
+  is **withdrawn**: `products/kqzVClx5uJrJ07bEjokX` is `"Delivery"` at the master — the install
+  labour, not the deck. That retraction inferred a category from a product NAME and read neither
+  product record. The 2026-08-09 "service-only jobs, not a defect" reading is reinstated.
+- Both golden vectors asked to be re-checked and **both were vindicated**, including invoice 1616's
+  worked example (exactly two revenue lines; all five near-identical invoices at exactly 312.5%).
+
+⚠️ **Two traps worth carrying forward.** The 2026-08-09 note's **row** count (11,131) is not
+comparable to a direct Firestore read (14,410) — its `items[].x` MCP projection omitted all 3,056
+`group` dividers; revenue-bearing lines are unaffected. And `Crafty` nearly tripled to $45,530.48
+with its account mix inverting to 90.26% retail, which nobody had flagged.
+
+✅ Also closed on the way: **core#51 is closed and ADR-0031 still cited it as live**. The `shipping`
+dimensions are nullable and prod holds 537 `null` / 3 zero / 0 non-zero of 567, so OQ-033's
+activation precondition is writable — and the owner's ruling that weights will exist for **many**
+products by the time v2 is in dev makes partial population the anticipated state, so that
+precondition is v2's primary requirement. Two new consequences recorded on OQ-033: the unallocated
+bucket as a **coverage meter**, and activation at a coverage **threshold** rather than first
+non-zero weight.
+
 ## Remaining
-
-### Unit 3 — #15 then #13 (one session)
-
-**#15 — take option 2, direct Firestore via ADC.** `spikes/harness/allocation-basis-probe.ts`
-authenticates with a shared `CFS_API_TOKEN`; `/mcp/cfs` moved to OAuth
-(`requireMcpOAuth("mcp:cfs")`) and `MCP_LEGACY_BEARER_UNTIL` has passed. Option 2 over 1 or 3: the
-probe needs read-only `invoices` paging and nothing else, `gcloud auth application-default login` is
-already a workspace prerequisite, it kills the shared-token dependency, and it does not re-open a
-path that was deliberately closed. **Update the probe's header comment** — it documents an auth path
-that no longer works, which is what made this a 15-minute discovery instead of a 15-second one.
-
-**#13 — two items left** (items 3 and 4 were completed 2026-08-16):
-
-1. Rebuild the **product-line × revenue-account matrix** with the product-master join; diff line by
-   line against `inbox/2026-08-09-product-line-by-revenue-account-matrix.md`. Individual lines have
-   been re-measured piecemeal; the matrix has never been rebuilt as a re-runnable artifact.
-2. Re-run **ADR-0031's allocation measurements**. ⚠️ Before running: the probe classifies
-   `Transport` as goods **by omission**, and OQ-034 made it a fifth activity line that does not
-   spread. Add the classification or the run is wrong.
-
-Predicted directions are already recorded on #13 — 41.4% pool-exceeds-base must **fall**, 5.16%
-unallocable must **fall** (85.5% of it is five Netflix Duradeck orders). **A reading that moves the
-other way is a finding, not a result.** Record measured values as numbers, and state the denominator
-on every figure — there have been three base mismatches in this corpus.
 
 ### Unit 4 — #14, procurement's three posting rules (its own session)
 
@@ -241,6 +270,12 @@ all under ADR-0036's own criterion.
 
 ## Context recommendation
 
-**CLEAR CONTEXT.** Units 3-6 are executable from this doc plus `CLAUDE.md`, and they touch entirely
-different material from Units 1 and 2 — ADC auth and allocation measurement, a six-reference
-accounting survey, a Firestore-collection sweep. #14 in particular wants a fresh full window.
+**CLEAR CONTEXT.** Units 4-6 are executable from this doc plus `CLAUDE.md`, and they touch entirely
+different material from Units 1-3 — a six-reference accounting survey, a Firestore-collection sweep,
+a requirements-promotion backlog. **#14 in particular wants a fresh full window**, and it is the one
+to take next: it completes m3 outright and m3 gates m4 and m7 → `spec-v1`.
+
+One thing to carry across the clear, because it is not obvious from the issue text: **the "needs a
+script rather than MCP paging" excuse is gone.** `spikes/harness/corpus.ts` pages any prod
+collection read-only under ADC in a few lines, and Units 5 and 6 were both scoped assuming that was
+expensive.
