@@ -5,7 +5,7 @@
     "adrs": 36,
     "adrs_accepted": 17,
     "events": 37,
-    "inbox": 72,
+    "inbox": 73,
     "inbox_promoted": 19
   },
   "requirements": [
@@ -615,7 +615,8 @@
       "inbox/2026-08-16-survey-the-party-is-a-subledger-key-and-the-dimension-is-a-gl-slice-and-they-ride-different-legs.md",
       "inbox/2026-08-16-the-owner-wants-allocation-re-runnable-and-nothing-in-the-spec-carries-the-key-it-would-re-run-on.md",
       "inbox/2026-08-16-the-product-line-matrix-rebuilt-with-the-master-join-denorm-and-master-now-agree-on-every-line.md",
-      "inbox/2026-08-16-the-transfer-field-budget-is-four-fields-not-three-and-both-candidate-evictions-are-already-refused.md"
+      "inbox/2026-08-16-the-transfer-field-budget-is-four-fields-not-three-and-both-candidate-evictions-are-already-refused.md",
+      "inbox/2026-08-16-the-two-reference-fields-answer-different-questions-and-a-path-fits-neither.md"
     ]
   }
 }
