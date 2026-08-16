@@ -66,7 +66,7 @@ expect:
   transfers:
     - {
         debit_account: 5800,
-        credit_account: 2000,
+        credit_account: 2010,
         amount_minor: 36000,
         accounting_date: "2026-08-09",
         product_line: "Delivery",

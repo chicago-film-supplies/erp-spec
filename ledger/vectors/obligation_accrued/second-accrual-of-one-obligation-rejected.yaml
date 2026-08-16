@@ -1,0 +1,47 @@
+name: second-accrual-of-one-obligation-rejected
+posting_rule: obligation_accrued
+kind: reject
+source: >-
+  The same once-only shape `asset_disposed/second-disposal-of-one-asset-rejected` and
+  `settlement_reversed`'s "a settlement is retracted at most once" already carry. Structurally
+  identical to the accept vector; refused on ledger state alone.
+
+differs_from: subrental-received-before-the-vendor-invoices
+differs_in: ["ledger_state.outstanding_obligations"]
+
+given:
+  ledger_state:
+    closed_periods: ["2026-07"]
+    outstanding_obligations:
+      - { obligation_id: OBL-VEC-0001, accrued_minor: 185000 }
+  obligation:
+    obligation_id: OBL-VEC-0001
+    purchase_order_id: PO-VEC-0007
+    accrual_date: "2026-08-12"
+    amount_minor: 185000
+    debit_account: 5100
+    product_line: "Power, Lights & Tools"
+    source_document_ref: "subrental receipt SR-VEC-4471"
+
+derivation: >-
+  The identical accrual, submitted a second time — a redelivered event, a double-click, or an
+  operator who could not see the first. **Refused on ledger state**: `OBL-VEC-0001` already carries
+  an outstanding accrued balance of 185000, and every other field matches the accept vector exactly.
+  **The damage is asymmetric, which is why this is a refusal rather than a warning.** A second
+  accrual debits 5100 twice — overstating COGS and understating margin on that job — and leaves
+  2010 holding $1,850.00 the vendor's bill can never relieve, because there is only one invoice
+  coming. The residual then sits in the account whose whole purpose is to be a measurement, quietly
+  making it read wrong.
+  ⚠️ **No balance check can catch it.** Dr 5100 / Cr 2010 is a perfectly balanced entry; the control
+  total matches; the trial balance ties. The only thing that distinguishes the second one from the
+  first is that the obligation is already accrued, which is a fact about state rather than about the
+  document. Compare `vendor_bill_received`'s re-book: same class of failure at the other end of the
+  same obligation.
+  **This is a refusal, not a de-duplication.** A rule that silently ignored the second event would
+  make a genuine second receipt against the same purchase order unrepresentable — that is a new
+  obligation with its own id, which this vector does not touch.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "OBL-VEC-0001 already carries an outstanding accrued balance of 185000 — an obligation is accrued once; a second accrual doubles the cost and strands a liability no bill can relieve"

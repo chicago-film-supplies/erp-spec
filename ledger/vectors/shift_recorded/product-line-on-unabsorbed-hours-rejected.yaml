@@ -44,7 +44,7 @@ derivation: >-
   rather than obviously wrong. Amounts balance and the control total is satisfied. It is refused on
   the dimension alone.
   **5801 names no dimension, so a posting to it may declare none.** The obligation is read off the
-  accounts, and neither 5801 nor 2000 requires one — declaring an unrequired dimension is the same
+  accounts, and neither 5801 nor 2010 requires one — declaring an unrequired dimension is the same
   class of error as omitting a required one, and the gate treats it the same way.
   **The reason is not tidiness.** Idle time is caused by no job; that is the definition of
   unabsorbed. Attaching a product line to it asserts that three unworked hours belong to the
@@ -62,4 +62,4 @@ derivation: >-
 expect:
   transfers: []
   rejects:
-    - reason: "the unabsorbed leg declares product_line, and neither 5801 nor 2000 requires a dimension — 5801 is the idle-capacity KPI and must not become a plug (ADR-0019, ADR-0025)"
+    - reason: "the unabsorbed leg declares product_line, and neither 5801 nor 2010 requires a dimension — 5801 is the idle-capacity KPI and must not become a plug (ADR-0019, ADR-0025)"

@@ -1,0 +1,54 @@
+name: subrental-received-before-the-vendor-invoices
+posting_rule: obligation_accrued
+kind: accept
+source: >-
+  Accounts live — 5100 Cost of Goods Sold: Subrentals, Active, `dimensions: [product_line]`; credit
+  leg 2010 Accrued Expenses: Received Not Invoiced, minted 2026-08-16 by erp-spec#14
+  (`api:2026-08-16:db_chart_of_accounts_query`, 134 live accounts, 0 accrued-expense). The shape is
+  the matched-clearing accrual all six references in
+  `inbox/2026-08-16-survey-the-accrued-liability-is-a-matched-clearing-account-and-the-bill-reclassifies-rather-than-reverses.md`
+  agree on. Amounts synthetic.
+
+given:
+  ledger_state:
+    closed_periods: ["2026-07"]
+    outstanding_obligations: []
+  obligation:
+    obligation_id: OBL-VEC-0001
+    purchase_order_id: PO-VEC-0007
+    accrual_date: "2026-08-12"
+    amount_minor: 185000
+    debit_account: 5100
+    product_line: "Power, Lights & Tools"
+    source_document_ref: "subrental receipt SR-VEC-4471"
+
+derivation: >-
+  A $1,850.00 subrental collected from another house on the 12th to cover a shortfall. The gear is
+  in the building and on a job; the vendor has not invoiced. One transfer: Dr 5100 / Cr 2010, and
+  `control_total` = `obligation.amount_minor` = **185000**.
+  **The credit leg is not 2000.** There is no invoice and no agreed terms, so this is not trade debt
+  — it is a known amount owed for something received, which is a matched accrual. Reg S-X 5-02.19
+  reserves the trade-creditor category for actual payables; folding this in would present an
+  un-invoiced accrual as trade debt. `vendor_bill_received` moves it to 2000 when the bill arrives.
+  **The debit is the cost account the goods belong to, not a holding account**, and it is dated the
+  12th. That is the entire value of the stage: the cost lands in the period the job ran, rather than
+  whenever the other house gets round to billing.
+  **`product_line` IS declared here, because 5100 names it** (REQ-LED-001, ADR-0025) — read off the
+  account, never inferred from "is this COGS". A subrental serves the revenue it was rented for, so
+  it carries that revenue's line. Contrast `overhead-accrual-carries-no-product-line`, which is the
+  same rule against a 6xxx account that names none: **both arms are exercised, because an
+  undimensioned arm alone would leave the dimensioned one a claim.**
+  **July is closed and this is dated August**, so the closed-period fence (ADR-0017) is satisfied
+  rather than untested — a closed period in `ledger_state` that the accrual does not touch is the
+  quiet half of that guarantee.
+
+expect:
+  transfers:
+    - {
+        debit_account: 5100,
+        credit_account: 2010,
+        amount_minor: 185000,
+        accounting_date: "2026-08-12",
+        product_line: "Power, Lights & Tools",
+      }
+  rejects: []

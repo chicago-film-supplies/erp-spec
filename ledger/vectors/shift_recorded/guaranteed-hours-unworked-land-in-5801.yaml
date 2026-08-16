@@ -51,12 +51,19 @@ derivation: >-
   Contrast `overtime-premium-pro-rata-across-the-days-jobs`, where the day overflowed instead of
   underflowing: same account pair, opposite direction, and only one of the two legs is written in
   each.
+  ⚠️ **AMENDED 2026-08-16 (erp-spec#14): both legs credit 2010 Accrued Expenses: Received Not
+  Invoiced, where they credited 2000 Accounts Payable.** The EOR has not invoiced on 2026-08-06 —
+  the work has been performed and the amount is known, which is a matched accrual and not trade
+  debt. `vendor_bill_received` reclassifies it into 2000 when the EOR's invoice arrives, and one
+  invoice will relieve many shifts. Only the account code moved: amounts, dates, the
+  absorbed/unabsorbed split and both dimension declarations are unchanged, and 2010 names no
+  dimension exactly as 2000 did, so the obligation on each leg is identical.
 
 expect:
   transfers:
     - {
         debit_account: 5800,
-        credit_account: 2000,
+        credit_account: 2010,
         amount_minor: 15000,
         accounting_date: "2026-08-06",
         product_line: "Delivery",
@@ -64,7 +71,7 @@ expect:
       }
     - {
         debit_account: 5801,
-        credit_account: 2000,
+        credit_account: 2010,
         amount_minor: 9000,
         accounting_date: "2026-08-06",
       }

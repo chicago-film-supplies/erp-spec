@@ -1,0 +1,50 @@
+name: bill-with-no-accrual-books-the-cost
+posting_rule: vendor_bill_received
+kind: accept
+source: >-
+  Accounts live — 6004 Insurance, Active, Overhead, `dimensions: []`; 2000 Accounts Payable, Active
+  (`api:2026-08-16:db_chart_of_accounts_query`). The arm that exists because most CFS bills will
+  never have an accrual behind them. Amount synthetic.
+
+given:
+  ledger_state:
+    closed_periods: ["2026-07"]
+    outstanding_obligations: []
+  bill:
+    bill_id: BILL-VEC-0002
+    vendor_ref: VEN-VEC-0044
+    bill_date: "2026-08-05"
+    due_date: "2026-09-04"
+    terms: net_30
+    amount_minor: 120000
+    reclassifications: []
+    direct_lines:
+      - { debit_account: 6004, amount_minor: 120000 }
+
+derivation: >-
+  A $1,200.00 general-liability premium. Nothing was received in advance of it and nothing was
+  accrued, so there is no liability to move. One transfer: Dr 6004 / Cr 2000, `control_total` =
+  **120000**.
+  **This is the second of the rule's two postings, with the first arm empty.** `bill.reclassifications`
+  is `[]`, and a `per:` over an empty collection writes nothing at all — so the discrimination costs
+  no conditional and no second rule. The mirror of
+  `eor-invoice-reclassifies-a-fortnight-of-shifts`, where the other arm is the empty one.
+  ⚠️ **Structurally identical to the re-book this rule refuses, and legal only because nothing is
+  outstanding.** Compare `reclassification-rebooks-the-expense-rejected`: same posting shape, same
+  direction, and refused there purely because the bill resolved obligations that were already
+  carrying the cost. **The discriminator is ledger state, never the shape of the line** — which is
+  what makes these two vectors a pair worth reading together.
+  **No dimension**: 6004 names none and 2000 names none, so the key is absent rather than null.
+  Insurance is not a categorised kind of sale and belongs to no product line — the same third
+  category `overhead-accrual-carries-no-product-line` pins on the accrual side.
+  **The accounting date is the bill's own**, and August is open (ADR-0017).
+
+expect:
+  transfers:
+    - {
+        debit_account: 6004,
+        credit_account: 2000,
+        amount_minor: 120000,
+        accounting_date: "2026-08-05",
+      }
+  rejects: []

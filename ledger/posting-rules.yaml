@@ -13,16 +13,19 @@
 # Every one of the 24 now appears below in exactly one of four buckets, and gate 10e fails if any
 # event is missing from all of them or present in more than one:
 #
-#   rules[] status: specified  11   fully written, with golden vectors
+#   rules[] status: specified  13   fully written, with golden vectors
 #   rules[] status: blocked     2   named blocker that is genuinely still open; NO postings written
 #   no_posting[]               11   produces no GL posting at all, with the reason
 #   unwritten[]                 0   in scope, no blocker, not yet specified — each names an issue
 #
-# **`unwritten` is empty as of 2026-08-09 (erp-spec#5).** It was the honest bucket for seven rules
-# this file's first pass did not write; six are now specified below and `EVT-FUL-001` moved to
-# `no_posting`, because a leg turned out to move no money rather than to be an unwritten rule. The
-# bucket stays in the schema — it is where the next uncovered event goes, and gate 10e requires each
-# entry to name a GitHub issue so it cannot become a dumping ground.
+# **`unwritten` is empty as of 2026-08-16, and this time nothing is parked anywhere.** It held seven
+# rules after this file's first pass; six were specified on 2026-08-09 and `EVT-FUL-001` moved to
+# `no_posting` (erp-spec#5). The last two — `EVT-PRO-002` and `EVT-PRO-003` — are specified below as
+# `obligation_accrued` and `vendor_bill_received` (erp-spec#14), which is what makes m3's
+# `posting_rules_cover_events` and `vectors_cover_rules` reachable at all: both require
+# `unwrittenRules === 0`, so a single entry here holds two exit criteria red.
+# The bucket stays in the schema — it is where the next uncovered event goes, and gate 10f requires
+# each entry to name a GitHub issue so it cannot become a dumping ground.
 #
 # ── rule shape ──────────────────────────────────────────────────────────────────────────────────
 #   id                       snake_case, unique
@@ -50,7 +53,7 @@
 # it was added after a deliberately zero leg passed every other check, because a zero adds nothing
 # to a control total and 10i therefore cannot see it.
 #
-# **`amount:` is a path, never arithmetic.** Gate 10l forbids `+ - * / %` in it. This is a fence,
+# **`amount:` is a path, never arithmetic.** Gate 10e forbids `+ - * / %` in it. This is a fence,
 # not formatting: every rounding decision stays upstream in the source document where the money
 # rules already apply, so a posting rule can never become the place a rate gets quantized. It is
 # also what stops OQ-018's overtime-premium allocation from quietly landing inside a posting rule
@@ -498,9 +501,11 @@ rules:
           `EVT-FA-004` carries `book` precisely so the two are distinguishable.
       - >-
           **A capital improvement is capitalised, not expensed** — Dr the asset account, Cr whatever
-          funded it (2000 Accounts Payable, a cash account, or 1999 Fixed Asset Clearing until the
-          improvement is in service). Expensing it to 6xxx would understate the asset and overstate
-          the period, and depreciate nothing.
+          funded it: **2010 Accrued Expenses: Received Not Invoiced** where the work is done and the
+          vendor has not billed (the ordinary case, and the one erp-spec#14 corrected across this
+          file), 2000 Accounts Payable where an invoice already exists, a cash account where it was
+          paid outright, or 1999 Fixed Asset Clearing until the improvement is in service. Expensing
+          it to 6xxx would understate the asset and overstate the period, and depreciate nothing.
       - >-
           **Cost basis is per book** (ADR-0007), so an adjustment names the book it applies to. An
           improvement that raises both bases is two register facts and one GL posting.
@@ -526,20 +531,20 @@ rules:
       spans_multiple_source_documents: false
     postings:
       - debit_account: 5800
-        credit_account: 2000
+        credit_account: 2010
         per: shift.absorbed_allocations
         amount: allocation.amount_minor
         dimensions:
           product_line: allocation.product_line
           cost_type: allocation.cost_type
       - debit_account: 5801
-        credit_account: 2000
+        credit_account: 2010
         amount: shift.unabsorbed_minor
         dimensions: none
     control_total: shift.cost_minor
     invariants:
       - >-
-          **The credit leg is 2000 Accounts Payable, because CFS has no payroll liability and never
+          **The credit leg is NOT a payroll liability, because CFS has no payroll liability and never
           has** (OQ-024). Payroll processing is a charter non-goal: an external employer of record
           stays, and CFS "does not calculate withholding, file payroll tax, or move payroll money".
           **An EOR is not payroll — it is a vendor that invoices.** Measured on CFS's own balance
@@ -547,6 +552,19 @@ rules:
           2200, 2600 and the two PSA accounts, and **no payroll liability in any of four comparative
           years** — consistent with 2160/2170/2180/2190 all being Archived. The ledger therefore never
           carries gross-to-net; withholding and employer taxes are the EOR's ledger.
+      - >-
+          ⚠️ **AMENDED 2026-08-16 (erp-spec#14): the credit leg is 2010 Accrued Expenses: Received
+          Not Invoiced, not 2000 Accounts Payable.** It read 2000 because procurement's accrual stage
+          did not exist and there was nowhere else for it to go — and that was wrong on the shift
+          date, which is the whole point of the rule. **The EOR has not invoiced when the shift is
+          worked**, so there is no invoice, no terms and no trade payable; there is a known amount
+          owed for work already performed, which is a matched accrual. `vendor_bill_received`
+          reclassifies it into 2000 when the EOR's invoice arrives.
+          Nothing else about this rule moved: the amount, the dates, the absorbed/unabsorbed split
+          and both dimensions are unchanged, and the golden vectors changed one account code each.
+          **This is the correction erp-spec#14 called "not a pure addition"**, and it is the reason
+          the issue's own "nothing is blocked" framing understated it — until 2010 existed, every
+          shift in the ledger overstated trade payables by its own cost.
       - >-
           **5800 absorbed / 5801 unabsorbed measures UTILISATION, not rate deviation** (ADR-0019).
           Costing is ACTUAL at that person's per-contact wage, so there is no standard rate and no
@@ -667,7 +685,7 @@ rules:
       spans_multiple_source_documents: false
     postings:
       - debit_account: acquisition.debit_account
-        credit_account: 2000
+        credit_account: 2010
         amount: acquisition.cost_minor
         dimensions: none
     control_total: acquisition.cost_minor
@@ -694,9 +712,16 @@ rules:
           Conflating them would either delay a liability that exists or start depreciating an asset
           that is still in a crate.
       - >-
-          **Credit 2000 Accounts Payable.** Under procurement's three-stage lifecycle (OQ-020) a
-          receipt that precedes its invoice accrues first and reclassifies to AP when the bill arrives;
-          that stage is procurement's to specify and is not modelled here yet.
+          ⚠️ **AMENDED 2026-08-16 (erp-spec#14): credit 2010 Accrued Expenses: Received Not Invoiced,
+          not 2000 Accounts Payable.** This invariant previously read "Credit 2000 … that stage is
+          procurement's to specify and is not modelled here yet" — it named its own defect and
+          deferred it. The stage now exists: under procurement's three-stage lifecycle (OQ-020) a
+          receipt that precedes its invoice accrues first, and `vendor_bill_received` reclassifies it
+          into 2000 when the vendor bills.
+          **An asset is acquired on the day it is received, and the vendor invoices later** — so on
+          the acquisition date there is no invoice and no terms, and 2000 would be asserting trade
+          debt that does not exist yet. Neither account carries a dimension, so nothing else about
+          this posting changes.
       - >-
           **Below the capitalisation threshold there is no acquisition at all.** The live chart draws
           the line at $1,000 in the account names themselves — 6300 Tools, Machinery & Equipment (Less
@@ -708,6 +733,163 @@ rules:
           has no product line — the goods acquire one when they earn revenue (ADR-0029).
     relates_to: [ADR-0007, ADR-0026, ADR-0029]
     vectors_dir: ledger/vectors/asset_acquired/
+
+  # ══════════════════════════════════════════════════════════════════════════════════════════════
+  - id: obligation_accrued
+    status: specified
+    trigger:
+      event: EVT-PRO-002
+      source_document: obligation
+    accounting_date: obligation.accrual_date
+    posting_timestamp: assigned_by_ledger
+    journal_entry:
+      spans_multiple_source_documents: false
+    postings:
+      - debit_account: obligation.debit_account
+        credit_account: 2010
+        amount: obligation.amount_minor
+        dimensions:
+          product_line: obligation.product_line
+    control_total: obligation.amount_minor
+    invariants:
+      - >-
+          **The credit leg is 2010 Accrued Expenses: Received Not Invoiced, and it is a MATCHED
+          clearing account rather than a period-end estimate.** The survey found all six references
+          split accrued liabilities on **matched versus estimated**, not on goods versus services
+          (`inbox/2026-08-16-survey-the-accrued-liability-is-a-matched-clearing-account-and-the-bill-reclassifies-rather-than-reverses.md`):
+          a matched amount goes to a clearing account relieved by the bill (SAP GR/IR, NetSuite
+          `Accrued Purchases`, Odoo `Stock Interim (Received)`), an estimated one to an
+          accrued-expenses account relieved by a dated auto-reversal (Xero's model, and the textbook
+          one). This event carries an amount from a **source document**, never an estimate, so it is
+          the first kind — and that single fact decides `vendor_bill_received` too.
+          **It is not 2000 Accounts Payable.** There is no invoice and no agreed terms, so it fails
+          2000's own definition, and Reg S-X 5-02.19/20 requires trade creditors to be presented
+          separately from other accrued liabilities. **It is not 2160 either**: CFS has no payroll
+          liability across four years, payroll is a charter non-goal and the EOR is a vendor that
+          invoices (OQ-024).
+      - >-
+          **This is not the only rule that accrues, and that is the point.** Three rules credit 2010:
+          this one, `shift_recorded` (labour, through the shift record) and `asset_acquired` (fixed
+          assets, through the acquisition). Procurement owns the accrual STAGE, not every document
+          that reaches it — `contexts/procurement/context.md` already fences the asset register and
+          stock levels out. What lands here is what procurement itself receives and no other context
+          already posts: goods, subrentals, and services received under a purchase order.
+      - >-
+          ⚠️ **Labour never accrues through this rule.** A shift is one person's paid span for one
+          day (OQ-005) costed at their actual wage (ADR-0019), and `shift_recorded` already performs
+          the absorbed/unabsorbed split and the overtime pro-rata that no generic accrual could. So
+          an obligation never debits 5800, and `cost_type` — which 5800 alone names (ADR-0025) —
+          can never be owed by a transfer of this rule. That is why the dimension map above declares
+          `product_line` and nothing else.
+      - >-
+          **`product_line` is declared where the debit account names it and omitted where it does
+          not** (REQ-LED-001, ADR-0025), read off the account rather than inferred. A subrental
+          accrual debits 5100, which names `product_line`; an insurance or fuel accrual debits a
+          6xxx overhead account, which names none, and writing the key there would be refused just
+          as firmly as omitting it on 5100. **Both arms are exercised by vectors** — an
+          undimensioned arm alone would leave the dimensioned one a claim.
+      - >-
+          **The accounting date is when the obligation was INCURRED, not when anyone recorded it**
+          (ADR-0010, charter fence). That is the entire value of the stage: the ledger becomes
+          accurate on the date work happened rather than on the date a vendor got round to invoicing.
+          No posting takes an accounting date inside a closed period (ADR-0017).
+      - >-
+          **An obligation is accrued once.** A second accrual of the same receipt books the cost
+          twice and leaves 2010 holding a liability the bill can never relieve — the same class of
+          silent, balanced double-count `vendor_bill_received` guards the other end of.
+    relates_to: [REQ-LED-001, ADR-0010, ADR-0017, ADR-0025]
+    vectors_dir: ledger/vectors/obligation_accrued/
+
+  # ══════════════════════════════════════════════════════════════════════════════════════════════
+  - id: vendor_bill_received
+    status: specified
+    trigger:
+      event: EVT-PRO-003
+      source_document: vendor_bill
+    accounting_date: bill.bill_date
+    posting_timestamp: assigned_by_ledger
+    journal_entry:
+      spans_multiple_source_documents: true
+    postings:
+      - debit_account: 2010
+        credit_account: 2000
+        per: bill.reclassifications
+        amount: reclassification.amount_minor
+        dimensions: none
+      - debit_account: line.debit_account
+        credit_account: 2000
+        per: bill.direct_lines
+        amount: line.amount_minor
+        dimensions:
+          product_line: line.product_line
+    control_total: bill.amount_minor
+    invariants:
+      - >-
+          ⚠️ **THE BILL RECLASSIFIES. IT NEVER RE-BOOKS.** Where the bill resolves an obligation the
+          cost is already sitting in its expense or asset account, so the entry moves the LIABILITY —
+          Dr 2010 / Cr 2000 — and touches no expense account at all. Re-booking instead (Dr expense /
+          Cr 2000) is a **perfectly balanced entry** that doubles the expense and strands the accrual
+          in 2010 forever, so no balance check, no control total and no trial balance can catch it.
+          It is the single most dangerous mistake in this file, and
+          `reclassification-rebooks-the-expense-rejected` is the vector that exists to refuse it.
+          Four of five surveyed systems reclassify and name the account for it; the fifth is Xero,
+          which has no accrual stage to reclassify from.
+      - >-
+          **The two postings are discriminated by whether the obligation resolves, and a bill may
+          carry both.** `bill.reclassifications` names obligations and the amount of each the bill
+          covers; `bill.direct_lines` are costs with no accrual behind them. A `per:` over an empty
+          collection writes nothing (see this file's header on zero amounts), so an
+          all-reclassification bill and an all-direct bill are the same rule with one arm empty —
+          not two rules, and not a conditional inside one.
+      - >-
+          **A reclassification may not exceed its obligation's outstanding accrued balance.** 2010
+          holds one balance per obligation in the projection; over-relieving drives it negative,
+          which is the ledger asserting more was relieved than was ever accrued. This is exactly the
+          shape `credit_note_allocated` already uses against a note's remaining credit, and the
+          check consults the projection rather than a ledger balance for the same reason ADR-0018
+          gives there: the chart stays plain, with no account per obligation.
+      - >-
+          **A partial bill is NORMAL and leaves a residual.** Both SAP and NetSuite treat the
+          received-not-invoiced residual as the ordinary state with a reconciliation practice
+          attached, not as an error — SAP's GR/IR analysis reads the SIGN of the balance as the
+          finding (credit = received not invoiced, debit = invoiced not received). A rule that
+          demanded a bill exactly equal its accrual would refuse the common case.
+      - >-
+          **A bill for MORE than was accrued gets an ordinary direct line for the excess — there is
+          no variance account and none should be minted.** 2600 Rounding was dropped from this chart
+          on precisely that reasoning: an account whose job is to absorb a difference gives a defect
+          somewhere to hide. The excess is real cost, incurred in the bill's period, and it books to
+          its own expense account like any other line.
+          ⚠️ A bill for **LESS** than was accrued leaves a residual that nothing in this spec yet
+          retires — correcting or writing back an over-accrual is a fourth procurement event that
+          does not exist. Not invented here; **OQ-045** holds it, and it is not blocking because the
+          residual is visible and reportable either way.
+      - >-
+          **The accounting date is the BILL's date, not the accrual's** (ADR-0010, ADR-0017). The
+          cost already belongs to the period it was incurred in and must stay there; only the
+          liability moves, and it moves on the day the invoice arrived. Back-dating the
+          reclassification to the accrual date would restate a period that may already be sealed and
+          hashed, and would move nothing that needed moving.
+      - >-
+          ⚠️ **The reclassification leg carries NO dimension, and that is load-bearing rather than
+          incidental.** 2010 and 2000 both name none, so a transfer declaring one is refused — which
+          means a reclassification **cannot** move a cost between product lines. The dimensions were
+          decided at the accrual and stay on the accrual's transfer. Without this fence an AP move
+          would be a silent restatement of a dimensional report, which is the thing ADR-0020 forbids
+          outright. A direct line, by contrast, is the first posting of that cost and declares
+          whatever its own debit account names.
+      - >-
+          **One entry per BILL, spanning as many obligations as the bill covers.** An EOR invoice for
+          a fortnight matches every shift accrued in it, so a bill routinely references several
+          source documents — the third rule in this file to do so, after `settlement_recorded` and
+          `credit_note_allocated`, and more evidence that `journal_entry_id` cannot be derived from a
+          single source-document reference (erp-spec#3).
+      - >-
+          **A vendor bill is received once.** A duplicate credits 2000 twice for one invoice and
+          would relieve the same accrual twice. Payment of the bill is Banking's event, not this one
+          (`contexts/procurement/context.md`).
+    relates_to: [REQ-LED-001, ADR-0010, ADR-0017, ADR-0018, ADR-0020, ADR-0025]
+    vectors_dir: ledger/vectors/vendor_bill_received/
 
 # ══════════════════════════════════════════════════════════════════════════════════════════════════
 # NO POSTING — these reach the ledger context but produce no GL entry. Each says why.
@@ -808,36 +990,24 @@ no_posting:
 # ══════════════════════════════════════════════════════════════════════════════════════════════════
 # UNWRITTEN — in scope, nothing blocking them, not written yet. Each names its issue.
 #
-# **Empty as of 2026-08-09, and that is what makes m3's criterion 3 met** (erp-spec#5). The seven
-# that sat here are `settlement_recorded`, `settlement_reversed`, `credit_note_issued`,
-# `credit_note_allocated`, `asset_disposed` and `asset_basis_adjusted` — all now specified above —
-# plus `leg_completed`, which is not a rule at all and moved to `no_posting`.
+# **Empty as of 2026-08-16, and now genuinely empty rather than down to two** (erp-spec#5, #14).
+# Nine rules have passed through here. Seven left on 2026-08-09: `settlement_recorded`,
+# `settlement_reversed`, `credit_note_issued`, `credit_note_allocated`, `asset_disposed` and
+# `asset_basis_adjusted` were specified, and `leg_completed` moved to `no_posting` because it is not
+# a rule at all. The last two left on 2026-08-16 as `obligation_accrued` and `vendor_bill_received`.
 #
-# Two of them were not free, and what unblocked each is worth keeping:
+# Three of the nine were not free, and what unblocked each is worth keeping — the pattern is that
+# **the blocker was never the prose; it was a missing account or an undecided question**:
 #   · `credit_note_issued` had no credit-side account. **2050 Customer Credit Balances** is
 #     minted for it, because crediting 1200 at issue breaks the tie between the AR control account
 #     and the invoice subledger by exactly the unallocated balance.
 #   · `asset_disposed` needed the dual-book question answered first — ADR-0026 (proposed), which
 #     keeps the tax book out of the ledger and derives it at report time.
+#   · `obligation_accrued` had no credit-side account either. **2010 Accrued Expenses: Received Not
+#     Invoiced** is minted for it, and the survey that chose it settled `vendor_bill_received` in the
+#     same stroke: a matched accrual is relieved by RECLASSIFICATION, never by a reversal.
 #
 # The list stays here rather than being deleted: it is where the next uncovered event goes, and an
-# empty bucket is a claim gate 10e can check. Nothing may be parked here without a GitHub issue.
+# empty bucket is a claim gate 10f can check. Nothing may be parked here without a GitHub issue.
 # ══════════════════════════════════════════════════════════════════════════════════════════════════
-unwritten:
-  - event: EVT-PRO-002
-    issue: erp-spec#14
-    proposed_rule: >-
-      Dr the expense or asset, Cr an **accrued liability**. The account does not exist — the live
-      chart has no accrued-expense account, and the archived payroll liabilities are NOT it (CFS has
-      no payroll liability across four years and payroll is a charter non-goal; the EOR is a vendor
-      that invoices — OQ-024). So this rule pulls a chart entry with it.
-
-  - event: EVT-PRO-003
-    issue: erp-spec#14
-    proposed_rule: >-
-      Where an obligation was accrued, **reclassify**: Dr the accrued liability, Cr 2000 Accounts
-      Payable — the cost is already booked and must not be booked again. Where none was, book the
-      cost directly. One event, two postings, discriminated by whether `obligation_id` resolves.
-      ⚠️ Getting this wrong double-counts the expense **in a way that still balances**, so no balance
-      check catches it. It is the strongest reject-vector candidate in the whole ledger: an
-      accrued-then-billed obligation whose bill re-books instead of reclassifying, asserted refused.
+unwritten: []

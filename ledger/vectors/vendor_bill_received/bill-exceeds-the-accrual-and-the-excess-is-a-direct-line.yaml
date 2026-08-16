@@ -1,0 +1,72 @@
+name: bill-exceeds-the-accrual-and-the-excess-is-a-direct-line
+posting_rule: vendor_bill_received
+kind: accept
+source: >-
+  The variance case, decided by the survey rather than by a variance account:
+  `inbox/2026-08-16-survey-the-accrued-liability-is-a-matched-clearing-account-and-the-bill-reclassifies-rather-than-reverses.md`.
+  Accounts live — 5100 Cost of Goods Sold: Subrentals, `dimensions: [product_line]`; 2010 and 2000
+  (`api:2026-08-16:db_chart_of_accounts_query`). Continues `obligation_accrued`'s
+  `subrental-received-before-the-vendor-invoices`; amounts synthetic.
+
+given:
+  ledger_state:
+    closed_periods: ["2026-07"]
+    outstanding_obligations:
+      - { obligation_id: OBL-VEC-0001, accrued_minor: 185000 }
+  bill:
+    bill_id: BILL-VEC-0003
+    vendor_ref: VEN-VEC-0009
+    bill_date: "2026-08-20"
+    due_date: "2026-09-19"
+    terms: net_30
+    amount_minor: 199500
+    reclassifications:
+      - { obligation_id: OBL-VEC-0001, amount_minor: 185000 }
+    direct_lines:
+      - {
+          debit_account: 5100,
+          amount_minor: 14500,
+          product_line: "Power, Lights & Tools",
+        }
+
+derivation: >-
+  The subrental house bills **$1,995.00** against an accrual of $1,850.00 — a $145.00 delivery
+  charge nobody knew about on the 12th. **Both arms of the rule fire on one bill.** Two transfers:
+  Dr 2010 / Cr 2000 for 185000, and Dr 5100 / Cr 2000 for 14500. `control_total` = 185000 + 14500 =
+  **199500**.
+  ⚠️ **THERE IS NO VARIANCE ACCOUNT, AND MINTING ONE WOULD BE THE MISTAKE.** The excess is not a
+  variance to be parked; it is real cost, incurred, that nobody had recorded — so it books to the
+  account it belongs to, 5100, like any other first-time cost. **2600 Rounding was dropped from this
+  chart on exactly this reasoning**: an account whose job is to absorb a difference gives a defect
+  somewhere to hide, and the difference here is not a defect at all.
+  **The excess lands in the BILL's period, and that is correct rather than a compromise.** Nobody
+  knew about the delivery charge on the 12th; the information arrived on the 20th, and that is when
+  the ledger learned it. Back-dating it to the accrual date would restate a period on the strength
+  of a fact that did not exist in it.
+  **The direct line declares `product_line` and the reclassification cannot.** 5100 names it, so the
+  new cost carries the line it serves. 2010 and 2000 name none, so the reclassification is
+  structurally incapable of carrying one — which is what stops an AP move from silently restating a
+  dimensional report. **The same bill therefore has one leg that must declare and one that must
+  not**, read off the accounts rather than off the document (ADR-0025).
+  **The accrual is relieved in FULL, and that is what makes the excess a separate line.** A partial
+  relief is legal too and leaves a residual in 2010 — the received-not-invoiced population, which
+  both SAP and NetSuite treat as the ordinary state with a reconciliation practice attached. What is
+  refused is relieving MORE than was accrued; see
+  `reclassification-exceeds-the-accrued-balance-rejected`.
+
+expect:
+  transfers:
+    - {
+        debit_account: 2010,
+        credit_account: 2000,
+        amount_minor: 185000,
+        accounting_date: "2026-08-20",
+      }
+    - {
+        debit_account: 5100,
+        credit_account: 2000,
+        amount_minor: 14500,
+        accounting_date: "2026-08-20",
+        product_line: "Power, Lights & Tools",
+      }
+  rejects: []

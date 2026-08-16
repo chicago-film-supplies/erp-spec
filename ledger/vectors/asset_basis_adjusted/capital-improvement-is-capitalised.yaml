@@ -25,8 +25,16 @@ given:
       - { asset_account: 1700, funding_account: 2000, amount_minor: 250000 }
 
 derivation: >-
-  A new lift gate on a box truck, $2,500.00, on account. Dr 1700 / Cr 2000 — one transfer,
-  `control_total` = `adjustment.capitalised_minor` = **250000**.
+  A new lift gate on a box truck, $2,500.00, **against a vendor invoice already in hand**. Dr 1700 /
+  Cr 2000 — one transfer, `control_total` = `adjustment.capitalised_minor` = **250000**.
+  ⚠️ **The funding account is 2000 here BECAUSE the bill has arrived, and that is now a choice rather
+  than the only option** (erp-spec#14). `funding_account` is a path, and the rule's invariant lists
+  four legal values: **2010 Accrued Expenses: Received Not Invoiced** where the work is done and the
+  vendor has not billed — which is the ordinary case and the one every other acquisition rule was
+  corrected to on 2026-08-16 — 2000 where an invoice exists, a cash account where it was paid
+  outright, and 1999 Fixed Asset Clearing until the improvement is in service. This vector keeps the
+  2000 arm on purpose: it is the only one of the four exercised anywhere, and pinning it here stops
+  the amendment from reading as "2000 is never right".
   **Capitalised, not expensed.** The improvement extends the asset's service life, so it belongs in
   the carrying value and depreciates over the remaining life. Booking it to a 6xxx expense would
   understate the asset, overstate the period by the full $2,500.00, and depreciate nothing — the

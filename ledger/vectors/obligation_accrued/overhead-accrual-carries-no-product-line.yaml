@@ -1,0 +1,46 @@
+name: overhead-accrual-carries-no-product-line
+posting_rule: obligation_accrued
+kind: accept
+source: >-
+  Accounts live — 6303 Rented Space, Active, Overhead, `dimensions: []`; credit leg 2010
+  (`api:2026-08-16:db_chart_of_accounts_query`). A month of occupancy accrued before the landlord's
+  invoice is the ordinary CFS case for this arm. Amount synthetic.
+
+given:
+  ledger_state:
+    closed_periods: ["2026-07"]
+    outstanding_obligations: []
+  obligation:
+    obligation_id: OBL-VEC-0002
+    purchase_order_id: PO-VEC-0011
+    accrual_date: "2026-08-31"
+    amount_minor: 950000
+    debit_account: 6303
+    source_document_ref: "lease LSE-VEC-0002, August occupancy"
+
+derivation: >-
+  $9,500.00 of warehouse rent for August, accrued on the last day of the month because the landlord
+  invoices in arrears. One transfer: Dr 6303 / Cr 2010, `control_total` = **950000**.
+  ⚠️ **`product_line` is ABSENT here, and its absence is the assertion.** 6303 names no dimension and
+  2010 names none, so declaring one would be refused exactly as firmly as omitting it on 5100 would
+  be — the obligation is read off the accounts (ADR-0025), and this vector is the undimensioned arm
+  of the pair whose other half is `subrental-received-before-the-vendor-invoices`.
+  This is a **third** thing again, and the distinction is the one `ledger/dimensions.yaml` spells
+  out: not a tracked value, and not an explicit `null` meaning "no tracked value applies", but **no
+  obligation at all**. Rent belongs to the business rather than to a kind of sale.
+  ⚠️ **Still a MATCHED accrual, not an estimate, and the distinction survives the fact that rent
+  looks like a textbook month-end accrual.** The amount comes from the lease, not from a guess, so
+  the landlord's invoice will relieve it by reclassification and there is no reversal to forget.
+  That is exactly the criterion the survey found all six references drawing — an estimated accrual
+  would need a different account and a dated auto-reversal, and **v2 has no event that produces
+  one**, which is why no such account was minted.
+
+expect:
+  transfers:
+    - {
+        debit_account: 6303,
+        credit_account: 2010,
+        amount_minor: 950000,
+        accounting_date: "2026-08-31",
+      }
+  rejects: []

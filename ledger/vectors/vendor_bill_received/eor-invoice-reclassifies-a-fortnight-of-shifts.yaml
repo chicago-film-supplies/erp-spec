@@ -1,0 +1,78 @@
+name: eor-invoice-reclassifies-a-fortnight-of-shifts
+posting_rule: vendor_bill_received
+kind: accept
+source: >-
+  OQ-024 (an EOR is not payroll — it is a vendor that invoices) and the accrual amendment made to
+  `shift_recorded` by erp-spec#14. Accounts live/minted — 2010 Accrued Expenses: Received Not
+  Invoiced (new), 2000 Accounts Payable, Active
+  (`api:2026-08-16:db_chart_of_accounts_query`). Three shifts and the amounts are synthetic; the
+  many-to-one shape is not.
+
+given:
+  ledger_state:
+    closed_periods: ["2026-07"]
+    outstanding_obligations:
+      - { obligation_id: OBL-VEC-0101, accrued_minor: 120000 }
+      - { obligation_id: OBL-VEC-0102, accrued_minor: 96000 }
+      - { obligation_id: OBL-VEC-0103, accrued_minor: 84000 }
+  bill:
+    bill_id: BILL-VEC-0001
+    vendor_ref: VEN-VEC-EOR
+    bill_date: "2026-08-14"
+    due_date: "2026-08-29"
+    terms: net_15
+    amount_minor: 300000
+    reclassifications:
+      - { obligation_id: OBL-VEC-0101, amount_minor: 120000 }
+      - { obligation_id: OBL-VEC-0102, amount_minor: 96000 }
+      - { obligation_id: OBL-VEC-0103, amount_minor: 84000 }
+    direct_lines: []
+
+derivation: >-
+  The employer of record's invoice for the first half of August, $3,000.00, covering three crew days
+  already accrued by `shift_recorded` on the days they were worked. Three transfers, all
+  Dr 2010 / Cr 2000: 120000 + 96000 + 84000 = **300000** = `bill.amount_minor`.
+  ⚠️ **NOT A SINGLE EXPENSE ACCOUNT IS TOUCHED, and that is the whole rule.** The cost went to 5800
+  on the 4th, the 6th and the 11th and it stays there. What moves is the LIABILITY — out of the
+  accrual and into trade debt, because there is now an invoice, a number and terms. Re-booking the
+  cost here instead would be a perfectly balanced entry that doubled it; see
+  `reclassification-rebooks-the-expense-rejected`, which is the arm that refuses exactly that.
+  **The accounting date is the BILL's, not the shifts'** (ADR-0010, ADR-0017). The cost already
+  belongs to the days it was incurred on and must not move; only the liability belongs to the 14th.
+  Back-dating the reclassification would restate periods that are no longer the ledger's to restate,
+  and would move nothing that needed moving.
+  **No dimension on any leg, and that is load-bearing rather than incidental.** 2010 and 2000 both
+  name none, so a reclassification **cannot** carry a `product_line` — which means it cannot move a
+  cost between product lines. The dimensions were decided at the accrual (`Delivery`, `Crew`, and a
+  `cost_type` on each) and stay on the accrual's transfers, where a dimensional report can still see
+  them. Without the fence, an AP move would be a silent restatement, which is what ADR-0020 forbids.
+  **One entry, three source documents.** An EOR invoice matches every shift accrued in its period,
+  so this is the third rule in the file whose journal entry spans source documents — after
+  `settlement_recorded` (one session, several invoices) and `credit_note_allocated` (one session,
+  several notes). Three independent instances is no longer a special case, and it is why
+  `journal_entry_id` cannot be derived from a single source-document reference (erp-spec#3).
+  **Every obligation is relieved in full here**, so 2010 nets to zero for these three. That is the
+  clean case; a partial relief leaves a residual, which is the ordinary state rather than an error —
+  see `bill-exceeds-the-accrual-and-the-excess-is-a-direct-line` for the other direction.
+
+expect:
+  transfers:
+    - {
+        debit_account: 2010,
+        credit_account: 2000,
+        amount_minor: 120000,
+        accounting_date: "2026-08-14",
+      }
+    - {
+        debit_account: 2010,
+        credit_account: 2000,
+        amount_minor: 96000,
+        accounting_date: "2026-08-14",
+      }
+    - {
+        debit_account: 2010,
+        credit_account: 2000,
+        amount_minor: 84000,
+        accounting_date: "2026-08-14",
+      }
+  rejects: []
