@@ -798,7 +798,31 @@ open_questions:
     owner: alex
     decide_by: 2026-10-15
     blocks: [ADR-0020, ADR-0031]
-    status: open
+    status: answered
+    answer: >-
+      **RESTORED, as an ACTIVITY line that does NOT spread — it carries its own margin.** Owner,
+      2026-08-16. Same classification as `Crew` and `Trash & Cleanup` under OQ-031's severability
+      criterion, and for a stated reason: "trucking is our own longer or bigger haul that doesn't fit
+      into the standard delivery charge paradigm, it should carry its own margin."
+      That is the severability test passing. `Delivery` spreads because it is a joint cost of the
+      product revenue — "we wouldn't do a delivery with no products". A long haul that does not fit
+      the standard delivery paradigm is priced and sold as its own thing, so spreading it would move
+      a real margin onto goods that did not cause it.
+      ⚠️ **The line holds TWO economically different things, and the owner named the split**:
+      "shipping is a pass through, trucking is our own longer or bigger haul." So `Shipping`
+      (16 lines, $5,665.00, on its own account **4150 Shipping & Handling Income**) is third-party
+      freight bought and re-billed — no CFS crew-day, no vehicle. `Trucking` (7 lines, $34,000.00, on
+      4100) is CFS-performed and labour-bearing, which is consistent with ADR-0011's ruling on OQ-010
+      that a trucked leg generates a shift and absorbs a person-day.
+      **Both keep their own margin, so one pool can hold both** — the allocation answer is the same
+      for a passthrough and for a severable own-haul. What differs is the COST side: freight invoice
+      versus crew plus vehicle. **Whether they should eventually be two product lines is not decided
+      here** and does not block anything; it is recorded so a later reader does not mistake the
+      single line for a claim that the two are the same kind of work.
+      Consequences: `ledger/dimensions.yaml` restores the value; `reporting/product-line-pl.yaml`
+      gains `Transport: activity` and a `not_allocated` pool; and **OQ-025's "Trucking to
+      `Transport`" mapping has a target again**, which is what ADR-0020's restatement was waiting on.
+      `spikes/harness/allocation-basis-probe.ts` classifies it as goods by omission and is now wrong.
     notes: >-
       `ledger/dimensions.yaml` dropped `Transport` on 2026-08-09 because
       `inbox/2026-08-09-product-line-by-revenue-account-matrix.md` measured **zero lines and zero
@@ -860,14 +884,33 @@ open_questions:
         ($1,968) it is the one member that fails the criterion — a payment-processing fee is not a
         premium on a delivery. 4700 exists and is Active. `api-cloudrun#401` is the v1 half of the
         same move.
-      · ⚠️ **ADR-0029's FORECASTING consequence rests on the retracted phrasing and is NOT re-ruled
-        here.** It argues that "the surcharge adds revenue and no cost", so a model predicting cost
-        from total delivery revenue over-predicts in a surcharge-heavy period. Under this criterion
-        at least the distance premium is priced *because the job costs more* — more drive hours,
-        more fuel — so the error would run the other way for that share. Whether the same is true of
-        the out-of-hours and weekend premiums depends on OQ-006's "the premium is margin, not cost"
-        against ADR-0019's 1.5x rules, and those two have not been reconciled. **Flagged, not
-        decided** — it is a costing question, not a chart-of-accounts one.
+      · ✅ **The FORECASTING consequence is now resolved, and it decomposes into three things rather
+        than one.** Owner, 2026-08-16: "the additional cost on a distant delivery is the opportunity
+        cost of the team being gone longer (and thus unavailable for a second delivery), and
+        additional gas."
+        **Wage — unchanged, so OQ-006 stands.** The same crew-day is consumed whether the delivery
+        is near or far, so no extra wage is caused and "the premium the customer pays is margin, not
+        cost" is correct about the labour component.
+        **Fuel — a REAL incremental cost, and it already has a home.** It is vehicle cost, ADR-0030,
+        which moves vehicle expense into COGS. So distance-surcharge revenue does correlate with a
+        bookable cost, and ADR-0029's flat "the surcharge adds revenue and no cost" is wrong to that
+        extent.
+        **Opportunity cost — real, and deliberately NOT booked.** A crew gone all day on one long
+        haul cannot take a second delivery. That is not an entry — GAAP books no opportunity cost —
+        and it **needs no new mechanism, because ADR-0019's absorption model already expresses it**:
+        the long haul absorbs its person-day into 5800, the rest of the day has no second job to
+        absorb it, and the shortfall surfaces as **5801 Unabsorbed Labour**. HOT-010 settled that
+        absorption measures UTILISATION rather than rate deviation, which is exactly the signal
+        being described. This also answers HOT-004's question — a long haul does not need a
+        byproduct-loss premium loaded onto the job, because the cost of the foregone second job
+        appears on its own as reduced absorption.
+        ⇒ **A model predicting delivery cost from 4100 volume alone under-predicts in a long-haul
+        period**, which is the opposite of ADR-0029's stated direction. Distance surcharge revenue is
+        the best available proxy for a driver nothing else records.
+        ⚠️ **Out-of-hours and weekend are still unreconciled** and are a smaller question: they cost
+        more in WAGE (ADR-0019's 1.5x rules) where distance costs more in FUEL. Whether the premium
+        exceeds the wage uplift is not measured. Left open, and it is narrower than the question this
+        bullet used to carry.
     notes: >-
       **4110 is not homogeneous.** Measured 2026-08-09 across the whole corpus
       (`inbox/2026-08-09-4110-is-a-third-distance-charges-and-distance-is-performed.md`): of

@@ -104,13 +104,20 @@ Both views are legitimate and they answer different questions:
   and both are allocated across the order's goods by whatever basis the official P&L states. What
   the split is good for is **forecasting**: delivery cost scales with the 4100 service volume, and a
   model predicting cost from total delivery revenue will over-predict in a surcharge-heavy period.
-  ⚠️ **That forecasting claim inherits the retracted gloss and is NOT yet re-ruled (OQ-032).** It
-  rests on "the surcharge adds revenue and no cost". Under the corrected criterion the distance
-  premium is priced _because the job costs more_ — more drive hours, more fuel — so for that third
-  of the account the error runs the other way, and distance-surcharge revenue is the best available
-  proxy for a cost driver nothing else records. Whether the same holds for the out-of-hours and
-  weekend premiums turns on reconciling OQ-006's "the premium is margin, not cost" with ADR-0019's
-  1.5x rules, which has not been done. Treat this bullet as open pending that.
+  ⚠️ **That forecasting claim is WRONG FOR DISTANCE, and the direction INVERTS** (OQ-032, owner
+  2026-08-16). It rests on "the surcharge adds revenue and no cost". The extra cost of a distant
+  delivery is "the opportunity cost of the team being gone longer (and thus unavailable for a second
+  delivery), and additional gas" — three components, and only one of them is an entry: **wage** is
+  unchanged, so OQ-006's "the premium is margin, not cost" holds for labour; **fuel** is a real
+  incremental cost and lands in vehicle COGS (ADR-0030); **opportunity cost** is real and
+  deliberately NOT booked — ADR-0019's absorption model already expresses it, because the long haul
+  absorbs its person-day into 5800 while no second job absorbs the rest of the day, and the
+  shortfall surfaces as 5801 Unabsorbed Labour. That is HOT-010's "absorption measures UTILISATION",
+  and it answers HOT-004 without loading a premium onto the job. ⇒ a model predicting delivery cost
+  from 4100 volume alone **under-predicts** in a long-haul period, and distance-surcharge revenue is
+  the best available proxy for a driver nothing else records. Out-of-hours and weekend stay
+  unreconciled — they cost more in WAGE where distance costs more in FUEL — and that is the narrower
+  question this bullet now leaves open.
 - **Activity product lines are kept, not dropped.** `Delivery` is where the un-allocated activity
   revenue and its cost meet; deleting it would force the allocation into the posting, which is the
   destructive direction. The mixed-basis taxonomy is tolerable _because_ the ledger does not

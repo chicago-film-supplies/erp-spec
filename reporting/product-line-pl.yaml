@@ -47,8 +47,16 @@ report:
 
   # ── which product lines are goods, and which are activity ────────────────────────────────────
   # The taxonomy mixes categories of GOODS with categories of ACTIVITY, and the mix is not stable:
-  # of the four activity lines TWO are material — `Delivery` 13.91% and `Trash & Cleanup` 8.58%,
-  # together 22.5% of revenue — and two are small (`Crew` 0.21%, `Transaction Fees` 0.29%).
+  # of the FIVE activity lines TWO are material — `Delivery` 13.91% and `Trash & Cleanup` 8.58%,
+  # together 22.5% of revenue — `Transport` is mid-sized at 2.35%, and two are small (`Crew` 0.21%,
+  # `Transaction Fees` 0.29%). `Transport` was restored by OQ-034 on 2026-08-16.
+  #
+  # ⚠️ **`activity` no longer implies `spreads`, and that is the most misreadable thing in this
+  # file.** Of the five, exactly ONE spreads: `Delivery`, because it is not severable — "we wouldn't
+  # do a delivery with no products". The other four are severable and keep their own margin
+  # (OQ-031, OQ-034). So `line_kinds` answers "is this a thing supplied or a thing performed", and
+  # the pool's `status` answers "does its cost land on the goods" — two different questions that
+  # were the same question when only `Delivery` had been decided.
   # ⚠️ This read "one carries 12.8% and two are rounding errors" until 2026-08-10, off a line denorm
   # that was null on 227 categorised lines (api-cloudrun#473). That is
   # tolerable only because the ledger does not allocate — this file is where the distinction is
@@ -79,6 +87,7 @@ report:
     Delivery: activity
     Trash & Cleanup: activity
     Transaction Fees: activity
+    Transport: activity
 
   # ── the pools ────────────────────────────────────────────────────────────────────────────────
   # One entry per ACTIVITY line, and every one of them lands in exactly one bucket — the same
@@ -112,11 +121,20 @@ report:
         sits on 4100 for 86% of its value against the stated rule, `Distance Charge` leaks onto 4100
         on 3 lines. **Until both run, the 79.8 / 20.0 split is that split plus an unmeasured coding
         error**, and anything reasoning from the ratio inherits it.
-        ⚠️ **The forecasting consequence is OPEN, not merely nuanced** — see OQ-032 and ADR-0029. A
-        distance premium is priced *because the job costs more*, so for that third the prediction
-        error runs opposite to the direction ADR-0029 states. Whether the same holds for out-of-hours
-        and weekend turns on reconciling OQ-006's "the premium is margin, not cost" with ADR-0019's
-        1.5x rules, which has not been done.
+        ✅ **The forecasting consequence is RESOLVED for distance, and it inverts ADR-0029's stated
+        direction.** Owner, 2026-08-16: the extra cost of a distant delivery is "the opportunity cost
+        of the team being gone longer (and thus unavailable for a second delivery), and additional
+        gas." Three components, and only one of them is an entry: **wage** is unchanged (same
+        crew-day near or far, so OQ-006 stands for labour), **fuel** is a real cost and lands in
+        vehicle COGS (ADR-0030), and **opportunity cost** is deliberately not booked — it surfaces
+        through ADR-0019's absorption model, as the long haul absorbing its person-day into 5800
+        while no second job absorbs the rest of the day, leaving 5801 Unabsorbed Labour. That is
+        HOT-010's "absorption measures UTILISATION", and it answers HOT-004 without loading a
+        premium onto the job.
+        ⇒ predicting delivery cost from 4100 volume alone **under-predicts** in a long-haul period.
+        ⚠️ Out-of-hours and weekend remain unreconciled and are the narrower question: they cost more
+        in WAGE (ADR-0019's 1.5x) where distance costs more in FUEL, and whether the premium exceeds
+        the wage uplift is unmeasured.
         → **OQ-032**. None of this touches the basis: both accounts pool and spread as one, which is
         the whole point of
         `inbox/2026-08-09-correction-the-surcharge-split-is-not-an-allocation-rule.md`. It touches
@@ -129,7 +147,7 @@ report:
     - id: transaction_fees
       product_line: Transaction Fees
       status: not_allocated
-      accounts: [4700]
+      accounts: [4700, 5500]
       reason: >-
         A card fee is caused by the PAYMENT METHOD, not by the goods. It varies with how the
         customer chose to settle and not with what was supplied or moved, so spreading it over goods
@@ -137,6 +155,40 @@ report:
         below the allocated margin. Measured 2026-08-09: 72 lines, $2,581.98, 0.2% of revenue.
         Consistent with api-cloudrun#401, which moves Card Fee off a `sale` line and onto a real
         `transaction_fee` — a fee is not a sale, and it is not a product line's cost either.
+        ✅ **This pool has a COST side, named by the owner 2026-08-16: `5500 Cost of Goods Sold:
+        Merchant Fees`** (Active). So it is the one activity line whose margin is already fully
+        expressible — 4700 revenue against 5500 cost, both on the same product line, neither
+        allocated. Every other pool is waiting on a cost that is not in the ledger yet.
+        It also absorbs OQ-032's `Card Fee` restatement: the $1,968 currently inside 4110 moves to
+        **4700**, pairing with 5500 on the cost side rather than sitting inside delivery revenue
+        with its cost somewhere else entirely.
+
+    - id: transport
+      product_line: Transport
+      status: not_allocated
+      accounts: [4100, 4150]
+      reason: >-
+        **Severable — carries its own margin.** OQ-034 answered by the owner 2026-08-16: "trucking
+        is our own longer or bigger haul that doesn't fit into the standard delivery charge
+        paradigm, it should carry its own margin." That is the severability test passing, on the
+        same criterion as `crew` and `trash_cleanup`: `Delivery` spreads because it is a joint cost
+        of the product revenue, and a haul sold on its own terms is not.
+        ⚠️ **This pool holds TWO economically different things, and the allocation answer happens to
+        be the same for both.** Owner, same ruling: "shipping is a pass through, trucking is our own
+        longer or bigger haul." `Shipping` (16 lines, $5,665.00, account **4150 Shipping & Handling
+        Income**) is third-party freight bought and re-billed — no CFS crew-day and no vehicle.
+        `Trucking` (7 lines, $34,000.00, account 4100) is CFS-performed and labour-bearing, which is
+        ADR-0011's ruling on OQ-010 — a trucked leg generates a shift and absorbs a person-day.
+        Neither spreads, so one pool is correct today. **What differs is the COST side** — a freight
+        invoice versus crew plus vehicle — so a reader must not take the single line as a claim that
+        the two are the same kind of work. Whether they eventually become two product lines is not
+        decided and blocks nothing.
+        Restored to `ledger/dimensions.yaml` by the same ruling: 23 lines, $39,665.00, 2.35% of
+        revenue, the 14th largest of 20 lines — above `Expendables`, `Carts & Ramps` and
+        `Janitorial`, all of which were already declared. It had been dropped on a measurement that
+        read the invoice-line denorm rather than the product master (api-cloudrun#473).
+        ⚠️ `spikes/harness/allocation-basis-probe.ts` classifies `Transport` as goods by omission and
+        is now wrong — erp-spec#15 already blocks re-running it.
 
     - id: crew
       product_line: Crew

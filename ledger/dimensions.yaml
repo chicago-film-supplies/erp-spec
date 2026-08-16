@@ -63,44 +63,44 @@ dimensions:
       - Tables & Chairs
       - Crew
       - Tents
+      - Transport
     note: >-
-      **19 values.** `Other` was deleted by OQ-022 — it read as a category and meant "nobody chose",
+      **20 values.** `Other` was deleted by OQ-022 — it read as a category and meant "nobody chose",
       which is the one thing a non-nullable dimension must not let back in. ✅ **The source system
       reached the same conclusion independently on 2026-08-10**: `Other` was retired at the product
       master (12 products) and stripped from the historical CFS lines and the Xero ledger. Its
       revenue is now *unallocated*, which is honest, rather than *allocated to a bucket naming
-      nothing*. **`Transport` was
-      dropped 2026-08-09** (owner) on the measurement in
-      `inbox/2026-08-09-product-line-by-revenue-account-matrix.md`: **zero lines and zero revenue
-      across all 9,194 revenue-bearing lines in the corpus.**
-      ⚠️ **THAT MEASUREMENT READ THE WRONG FIELD AND THE DROP RESTS ON AN ARTIFACT — OQ-034.**
-      Re-measured 2026-08-09 at the PRODUCT master rather than the line denorm
-      (`inbox/2026-08-09-untracked-revenue-is-mostly-a-denorm-failure-not-an-undecided-dimension.md`):
-      the products `Trucking` (7 lines, $34,000.00) and `Shipping` (16 lines, $5,665.00) both carry
-      `Transport` — **23 lines and $39,665.00**, used continuously, none of which ever reached a
-      line because the line-level `tracking_category` is not derived from the product. The value is
-      left dropped pending OQ-034 rather than silently restored, but the stated reason for dropping
-      it is retracted, and so is the explanation built on top of it below.
-      ⚠️ **Since 2026-08-10 those 23 lines DO carry `Transport` in CFS** — the derivation was
-      repaired (api-cloudrun#473), so this file now omits a value the source system actively writes.
-      **Two independent systems of record already agreed and neither was the one being read**: the
-      product master carried `Transport` throughout, and so did Xero — prod invoice #1987's
-      `Trucking` line was tagged `Transport` in the Xero ledger while the CFS line was null. At
-      $39,665.00 / **2.35%** it is the 14th largest line of 20. OQ-034 is the owner's to decide; the
-      evidence for it is now complete.
+      nothing*. ✅ **`Transport` is RESTORED, 2026-08-16 (OQ-034).**
+      It had been dropped 2026-08-09 on a measurement of **zero lines and zero revenue** across all
+      9,194 revenue-bearing lines — and **that measurement read the invoice-line denorm, not the
+      product master.** At the master, `Trucking` (7 lines, $34,000.00) and `Shipping` (16 lines,
+      $5,665.00) both carried `Transport` throughout: **23 lines, $39,665.00, 2.35%** — the 14th
+      largest of 20, above `Expendables`, `Carts & Ramps` and `Janitorial`, all of which stayed
+      declared. None ever reached a line because the line-level `tracking_category` was not derived
+      from the product (api-cloudrun#473, repaired 2026-08-10).
+      **Three independent systems of record agreed and none of them was the one being read**: the
+      product master, Xero (prod invoice #1987's `Trucking` line was tagged `Transport` in the Xero
+      ledger while the CFS line was null), and — since the repair — the CFS lines themselves.
+      ⚠️ **The line holds two economically different things**, and OQ-034 records the owner's split:
+      `Shipping` is a **passthrough** (third-party freight, its own account 4150, no CFS crew-day),
+      `Trucking` is **CFS's own longer or bigger haul** and is labour-bearing per ADR-0011/OQ-010.
+      Both are severable and neither spreads, so one product line is correct today; whether they
+      eventually separate is not decided and blocks nothing.
+      **This is the value that most nearly proves the whole absence-versus-null rule below**: it was
+      not undecided, it was never written, and for six days the spec omitted a value three source
+      systems were actively recording.
       Why it was never used is the part worth keeping. **Activity lines and goods lines compete for
       the same line item, and goods lines win**: shipping a walkie is categorised `Walkies &
       Hotspots` (699 lines, $175,015), by what was shipped rather than by the shipping. `Delivery`
       survives — **534 lines and $234,987.75, 13.91%**, the largest tracked line in the business
       (re-measured 2026-08-10) — only because a delivery line has no product to be categorised as
       instead.
-      If one-off long-haul trucking ever needs its own line, **adding one back is cheap by design**:
-      ADR-0018 took dimensions off account identity precisely so cardinality grows by addition and a
-      new product line stops being a migration. Dropping an unused value costs nothing and stating a
-      value nothing uses costs clarity.
-      ⚠️ **ADR-0020's restatement plan referenced this value** — OQ-025's notes list "Trucking to
-      `Transport`" among the mechanical mappings. That mapping now has no target and needs one
-      before the restatement runs.
+      **Adding a value back is cheap by design**: ADR-0018 took dimensions off account identity
+      precisely so cardinality grows by addition and a new product line stops being a migration.
+      That is what made restoring `Transport` a one-line change rather than a schema event.
+      ✅ **ADR-0020's restatement plan referenced this value and now has its target back** — OQ-025's
+      notes list "Trucking to `Transport`" among the mechanical mappings, which was left dangling
+      while the value was dropped. The restatement is no longer blocked on re-homing those 23 lines.
       Two mechanisms replace **`Other`**, and they state DIFFERENT facts — that is why there are two:
         · `product_line: null` on a dimensioned account — "this IS a categorised kind of sale, and
           no tracked product line applies to it". The line stays where it belongs on the P&L.
