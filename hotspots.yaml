@@ -257,3 +257,51 @@ hotspots:
       six are either `proposed` or in a freely-refactored directory. ADR-0001 is neither.
     blocks: []
     status: open
+
+  - id: HOT-013
+    statement: >-
+      `ADR-0018` says dimensions are "carried on the posting, in `user_data` and in the
+      Mongo/Parquet projection". A TigerBeetle transfer has exactly three `user_data` fields, and
+      erp-spec#3 plus `research-drop/reference/tigerbeetle.md` assign all three to
+      `journal_entry_id`, `source_document` and `accounting_date` — with a fourth claimant
+      (`posting_rule`) already evicted. Both cannot be true: there is no slot for `product_line` or
+      `cost_type`.
+    contexts: [ledger]
+    why_it_matters: >-
+      It decides whether the ledger is self-describing. If TigerBeetle carries the dimensions, a
+      dimensional P&L can be rebuilt from the ledger alone after a Mongo loss; if it does not,
+      TigerBeetle holds balance integrity and the dimensional view exists only in the projection —
+      which is defensible under ADR-0017, but is a different system from the one ADR-0018's sentence
+      describes.
+      The ambiguity is load-bearing rather than cosmetic, because REQ-LED-001's whole enforcement
+      story rests on it. `ledger/dimensions.yaml` states that with dimensions off account identity
+      "nothing structural catches a missing one — the rejection vectors are the entire enforcement".
+      That reasoning assumed the dimension is on the posting the vectors check. If dimensions live
+      only in the projection, the vectors are checking a different artifact from the one the ledger
+      stores, and REQ-LED-001 is being enforced somewhere other than where it is stated.
+    evidence: >-
+      `adr/ADR-0018-plain-coa-dimensions-on-the-posting.md` (status `accepted`, 2026-08-09):
+      "**Dimensions are carried on the posting**, in `user_data` and in the Mongo/Parquet
+      projection, never in account identity."
+      Against `research-drop/reference/tigerbeetle.md`: "`user_data_128/64/32` are the only
+      per-transfer reference fields. The working assignment is `128 → journal_entry_id`,
+      `64 → source_document`, `32 → accounting_date` (packed `YYYYMMDD`), with `posting_rule`
+      evicted to the Mongo projection — three fields, four claimants, tracked as erp-spec#3".
+      **Surfaced 2026-08-16 by counting claimants for OQ-040**
+      (`inbox/2026-08-16-survey-the-party-is-a-subledger-key-and-the-dimension-is-a-gl-slice-and-they-ride-different-legs.md`).
+      In TigerBeetle one transfer is one debit account plus one credit account, so a single
+      `invoice_issued` transfer (Dr 1200 / Cr 4100) carries both an AR-side and a revenue-side
+      obligation. **Three slots, six live claimants** before `settlement_point` is considered.
+      **erp-spec#3 undercounts.** Its title is "three fields, four claimants" and it enumerates
+      `journal_entry_id`, `source_document`, `posting_rule`, `accounting_date` — it never counts the
+      two dimensions ADR-0018 placed there. ADR-0008 reserved all three fields when dimensions lived
+      in ACCOUNT IDENTITY and `user_data` was therefore free; ADR-0018 superseded ADR-0008 and moved
+      dimensions onto the posting without re-doing the budget that assumption had made safe.
+      ⚠️ Two of the three reservations may be eliminable — erp-spec#3 argues `journal_entry_id` may
+      be derivable as `(source_document, posting event)` under ADR-0014, and `posting_rule` may be a
+      projection concern. If both go, the shortfall narrows. That is analysis, not a decision, and
+      it is why this is a hotspot rather than a repair.
+      ⚠️ **ADR-0018 is `accepted` and therefore immutable**, so the correction has the same nowhere
+      to live that HOT-012 describes. This is the second instance of that meta-problem.
+    blocks: [OQ-040, ADR-0033, SPIKE-003]
+    status: open

@@ -180,7 +180,7 @@
           <outline text="blocks ADR-0033"/>
         </outline>
       </outline>
-      <outline text="Conflicts (1 open)">
+      <outline text="Conflicts (2 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labour) or an own long-haul run (labour-bearing)?…" _note="Decides whether a trucked fulfillment absorbs labour cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
           <outline text="blocks OQ-010"/>
           <outline text="blocks ADR-0011"/>
@@ -221,6 +221,11 @@
           <outline text="blocks OQ-021"/>
         </outline>
         <outline text="HOT-012 — `ADR-0001` is `accepted` and therefore immutable, and its Context states a number that has been ret…" _note="Not because the decision is in doubt — replacing Xero stands on the costing model Xero cannot express, on ADR-0026's dual-basis requirement, and on three other Context bullets that are unaffected. It matters because **the repo has no mechanism for an accepted ADR whose evidence was later corrected**, and this is the first instance. Every other artifact citing the 28.7% was amended in place on 2026-08-10; `adr/` is the one lifecycle where that is forbidden (&quot;immutable once accepted — superseded by a new ADR, never edited&quot;). So the correction has nowhere to live, and a reader of `ADR-0001` today gets a number that is wrong by a factor of ~700 and a causal claim that points at the wrong system. The general question is the one to settle: **is an ADR a historical record of a decision as taken, or a statement of current fact?** If the former, this hotspot resolves by convention — the correction lives in `inbox/` and the traceability matrix, and ADR-0001 is left alone as the honest record of what was believed on 2026-08-08. If the latter, an accepted ADR needs a lightweight errata mechanism, because superseding ADR-0001 to fix a Context bullet would mean re-deciding &quot;replace Xero&quot;, which nobody is asking to reopen."/>
+        <outline text="HOT-013 — `ADR-0018` says dimensions are &quot;carried on the posting, in `user_data` and in the Mongo/Parquet pro…" _note="It decides whether the ledger is self-describing. If TigerBeetle carries the dimensions, a dimensional P&amp;L can be rebuilt from the ledger alone after a Mongo loss; if it does not, TigerBeetle holds balance integrity and the dimensional view exists only in the projection — which is defensible under ADR-0017, but is a different system from the one ADR-0018's sentence describes. The ambiguity is load-bearing rather than cosmetic, because REQ-LED-001's whole enforcement story rests on it. `ledger/dimensions.yaml` states that with dimensions off account identity &quot;nothing structural catches a missing one — the rejection vectors are the entire enforcement&quot;. That reasoning assumed the dimension is on the posting the vectors check. If dimensions live only in the projection, the vectors are checking a different artifact from the one the ledger stores, and REQ-LED-001 is being enforced somewhere other than where it is stated.">
+          <outline text="blocks OQ-040"/>
+          <outline text="blocks ADR-0033"/>
+          <outline text="blocks SPIKE-003"/>
+        </outline>
       </outline>
       <outline text="Decisions (17 in force, 14 proposed)">
         <outline text="In force (17)">
@@ -438,7 +443,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (49 unpromoted of 60)" _note="no drops pending">
+      <outline text="Capture (50 unpromoted of 61)" _note="no drops pending">
         <outline text="Actor per leg, clock in/out per stop, crew size per trip" _note="inbox/2026-08-08-actor-and-clock-per-leg.md"/>
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
@@ -488,6 +493,7 @@
         <outline text="The studio budget-tier split is motivated by duration, spend and delivery-vs-pickup — and low-budge…" _note="inbox/2026-08-10-what-actually-separates-a-low-budget-studio-from-an-indie.md"/>
         <outline text="Survey — every reference draws the credit-allocation line at the LEGAL PARTY, so crossing settlemen…" _note="inbox/2026-08-11-survey-unallocated-credit-sits-with-the-legal-party-and-crossing-departments-is-a-management-control.md"/>
         <outline text="v1 is adopting a per-product serialization token for the oversell gate" _note="inbox/2026-08-14-v1-adopts-a-per-product-serialization-token-for-the-oversell-gate.md"/>
+        <outline text="Survey — five of six references put the customer on the SUBLEDGER and dimensions on the GL, and Odo…" _note="inbox/2026-08-16-survey-the-party-is-a-subledger-key-and-the-dimension-is-a-gl-slice-and-they-ride-different-legs.md"/>
       </outline>
     </outline>
   </body>

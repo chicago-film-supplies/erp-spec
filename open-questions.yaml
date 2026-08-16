@@ -1238,3 +1238,37 @@ open_questions:
       (`inbox/2026-08-11-survey-unallocated-credit-sits-with-the-legal-party-and-crossing-departments-is-a-management-control.md`).
       **Blocks ADR-0033's acceptance**, not its drafting: the ADR's decisions stand either way, but
       its independent-check consequence cannot be implemented until this is answered.
+      ✅ **SURVEYED 2026-08-16 against all six references —**
+      `inbox/2026-08-16-survey-the-party-is-a-subledger-key-and-the-dimension-is-a-gl-slice-and-they-ride-different-legs.md`.
+      **THE CRITERION: is the question answered from a TRIAL BALANCE or from a SUBLEDGER?** A
+      dimension slices the P&L and appears in a dimensional trial balance. A party drives aging,
+      statements and dunning — subsidiary-ledger reports that GAAP says are **not** in the trial
+      balance at all. Five of six references keep the two structurally apart: GAAP (control account +
+      AR subsidiary ledger), Xero (contact is a report grouping, explicitly not a tracking category),
+      SAP ("in GL you will not have the list of vendors but a few reconciliation accounts"), NetSuite
+      (customer is the entity field; segments are the dimension mechanism and GL impact is an opt-in
+      flag), Odoo (`partner_id` on the receivable leg, `analytic_distribution` on the P&L legs).
+      **Odoo is the sharpest: they ride DIFFERENT LEGS of the same journal entry** — its Partner
+      Ledger has to fetch analytics from the counterpart income/expense lines because
+      "receivable/payable lines rarely carry analytic data directly".
+      **Sage Intacct dissents** — Customer is one of its standard dimensions. Scoped rather than
+      discounted: that is how Intacct produces customer-sliced *P&L*, not how it produces aging.
+      **RECOMMENDATION (owner's call): a settlement point is a SUBLEDGER KEY on the
+      receivable-bearing leg, NOT a third declared dimension.** `ledger/dimensions.yaml` stays at
+      two. Three supports: (1) the repo already has this shape — `product_line` is
+      `required_on: [revenue, cogs]` and `cost_type` on `[labour_cogs]`, so **neither is required on
+      1200 or 2050**, and the survey names why; (2) it is what makes ADR-0033's independent check
+      genuinely independent — "group open invoices by `billed_to.id`" is a subledger query, whereas a
+      dimensional GL read would be the same machinery as the roll-up it must not agree with by
+      construction; (3) the reconciliation obligation comes free and is GAAP's own — the sum of
+      settlement-point balances equals the 1200 control account.
+      ⚠️ **The survey did NOT resolve where the party key physically lives on a TigerBeetle transfer,
+      and found that nothing else does either — HOT-013.** Counting claimants exposed a contradiction
+      that exists WITHOUT settlement point: ADR-0018 says dimensions ride in `user_data`, and all
+      three `user_data` fields are already assigned to `journal_entry_id`, `source_document` and
+      `accounting_date`. One transfer is one debit plus one credit account, so a single
+      `invoice_issued` transfer (Dr 1200 / Cr 4100) owes both an AR-side and a revenue-side value —
+      **three slots, six live claimants**. erp-spec#3's "four claimants" never counted the two
+      dimensions. **This question cannot be fully closed until HOT-013 is**, but the recommendation
+      above is unaffected by it: it holds whichever way the storage question falls, and it removes
+      one claimant rather than adding one.

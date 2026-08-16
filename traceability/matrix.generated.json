@@ -5,7 +5,7 @@
     "adrs": 33,
     "adrs_accepted": 17,
     "events": 37,
-    "inbox": 60,
+    "inbox": 61,
     "inbox_promoted": 11
   },
   "requirements": [
@@ -124,7 +124,8 @@
       "inbox/2026-08-10-three-concepts-are-crammed-into-the-organization-name.md",
       "inbox/2026-08-10-what-actually-separates-a-low-budget-studio-from-an-indie.md",
       "inbox/2026-08-11-survey-unallocated-credit-sits-with-the-legal-party-and-crossing-departments-is-a-management-control.md",
-      "inbox/2026-08-14-v1-adopts-a-per-product-serialization-token-for-the-oversell-gate.md"
+      "inbox/2026-08-14-v1-adopts-a-per-product-serialization-token-for-the-oversell-gate.md",
+      "inbox/2026-08-16-survey-the-party-is-a-subledger-key-and-the-dimension-is-a-gl-slice-and-they-ride-different-legs.md"
     ]
   }
 }
