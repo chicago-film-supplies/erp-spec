@@ -736,7 +736,26 @@ open_questions:
     owner: alex
     decide_by: 2026-10-15
     blocks: [ADR-0031]
-    status: open
+    status: answered
+    answer: >-
+      **Both are SEVERABLE and keep their own margin.** Owner, 2026-08-16. Neither spreads across
+      the order's goods the way `Delivery` does, because neither fails the severability test the way
+      delivery does: a wrap cleanup and a hired-out crew each stand on their own, and spreading them
+      would move a real profit or loss onto goods that did not cause it — the same error as leaving
+      delivery alone, in the opposite direction.
+      **⚠️ With a qualifier that is the load-bearing half: "they still need labor cost allocated to
+      them"** (owner, 2026-08-16), **via the causal-job rule** — the shift lands on the line it
+      performed. A crew-day spent on a trash sweep attributes to `Trash & Cleanup` because that is
+      the job that caused it.
+      That uses ADR-0019's existing machinery with no new mechanism, and it is what makes the answer
+      meaningful rather than flattering: **$144,975 of revenue on its own P&L line with no cost
+      against it would report a margin near 100%.** Severable means it carries its own cost as well
+      as its own revenue.
+      Sizes at the time of the ruling: `Trash & Cleanup` **70 lines / $144,975.00 / 8.58%** — the
+      third-largest product line — and `Crew` **9 lines / $3,550.00 / 0.21%**.
+      Consequence for `reporting/product-line-pl.yaml`: both move off `blocked` and are classified
+      **activity lines that do NOT participate in the goods spread**, which is a third category the
+      file does not yet express — `Delivery` spreads, these do not, and both are activities.
     notes: >-
       ADR-0029's argument for spreading `Delivery` is **severability**, in the owner's words: "we
       wouldn't do a delivery with no products, we would rent far fewer products if we weren't
@@ -820,7 +839,35 @@ open_questions:
     owner: alex
     decide_by: 2026-10-15
     blocks: [ADR-0031]
-    status: open
+    status: answered
+    answer: >-
+      **Both stay on 4110, because the account was never about who performs the surcharge — it is a
+      premium ON the delivery, and the delivery is the performance.** Owner, 2026-08-16: "the
+      performance is the delivery, the distance surcharge is because it takes longer, the rush
+      surcharge is because it was unplanned, i think both fit 4110 fine."
+      The criterion that follows: **4110 carries a premium priced for a CONDITION of the job** —
+      longer, unplanned, out-of-hours, weekend — rather than for a separately performed thing. The
+      account's own name already said so (`4110 Delivery Surcharges`); what was wrong was ADR-0029's
+      gloss on it, not the account.
+      Neither option this question offered was taken, and both were framed on the retracted premise.
+      Three consequences follow:
+      · **The miscoded lines restate to 4110** (owner, 2026-08-16). `Rush Charge` sits on 4100 for
+        12 of 13 lines and **$3,000 of $3,500 — 86% by value** — against the stated rule; `Distance
+        Charge` leaks onto 4100 on 3 lines / $950.00. In scope for ADR-0020: moving a line between
+        two revenue accounts alters no amount, which is the only thing that restatement forbids.
+        This also removes the unmeasured coding error the 79.8% / 20.0% split currently carries.
+      · **`Card Fee` leaves 4110 for `4700 Transaction Fee Income`** (owner, 2026-08-16). At 4.3%
+        ($1,968) it is the one member that fails the criterion — a payment-processing fee is not a
+        premium on a delivery. 4700 exists and is Active. `api-cloudrun#401` is the v1 half of the
+        same move.
+      · ⚠️ **ADR-0029's FORECASTING consequence rests on the retracted phrasing and is NOT re-ruled
+        here.** It argues that "the surcharge adds revenue and no cost", so a model predicting cost
+        from total delivery revenue over-predicts in a surcharge-heavy period. Under this criterion
+        at least the distance premium is priced *because the job costs more* — more drive hours,
+        more fuel — so the error would run the other way for that share. Whether the same is true of
+        the out-of-hours and weekend premiums depends on OQ-006's "the premium is margin, not cost"
+        against ADR-0019's 1.5x rules, and those two have not been reconciled. **Flagged, not
+        decided** — it is a costing question, not a chart-of-accounts one.
     notes: >-
       **4110 is not homogeneous.** Measured 2026-08-09 across the whole corpus
       (`inbox/2026-08-09-4110-is-a-third-distance-charges-and-distance-is-performed.md`): of

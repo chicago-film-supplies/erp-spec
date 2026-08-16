@@ -89,14 +89,28 @@ Both views are legitimate and they answer different questions:
   _permitted_.
 - **Delivery revenue spans two accounts and BOTH are the Delivery product line.** Owner, 2026-08-09:
   4100 Service Income is the delivery/setup/removal charge — a service performed by a person, and
-  labour-bearing; 4110 Delivery Surcharges is off-hours, rush or weekend, which nobody performs.
-  Measured 79.8% / 20.0%. The two accounts exist because the two revenues have different **cost
-  causation**, not because they are different product lines: the same crew does the same delivery on
-  a Saturday, so the surcharge adds revenue and no cost — OQ-006's ruling that "the premium the
-  customer pays is margin, not cost". So the delivery line's margin includes **both**, and both are
-  allocated across the order's goods by whatever basis the official P&L states. What the split is
-  good for is **forecasting**: delivery cost scales with the 4100 service volume, and a model
-  predicting cost from total delivery revenue will over-predict in a surcharge-heavy period.
+  labour-bearing; 4110 Delivery Surcharges is off-hours, rush, weekend or distance. ⚠️ **This bullet
+  said 4110 "is off-hours, rush or weekend, WHICH NOBODY PERFORMS", and that gloss is retracted
+  (OQ-032, owner 2026-08-16).** It was wrong about a third of the account — distance is 33.3% of it
+  and somebody drives those miles — and wrong about the question. Owner: "the performance is the
+  delivery, the distance surcharge is because it takes longer, the rush surcharge is because it was
+  unplanned." **4110 carries a premium priced for a CONDITION of the job**, not for a separately
+  performed thing; the account's own name already said so. Measured 79.8% / 20.0%, and ⚠️ that split
+  carries an unmeasured coding error until the OQ-032 restatement runs — `Rush Charge` is on 4100
+  for 86% of its value against the stated rule. The two accounts exist because the two revenues have
+  different **cost causation**, not because they are different product lines: the same crew does the
+  same delivery on a Saturday, so the surcharge adds revenue and no cost — OQ-006's ruling that "the
+  premium the customer pays is margin, not cost". So the delivery line's margin includes **both**,
+  and both are allocated across the order's goods by whatever basis the official P&L states. What
+  the split is good for is **forecasting**: delivery cost scales with the 4100 service volume, and a
+  model predicting cost from total delivery revenue will over-predict in a surcharge-heavy period.
+  ⚠️ **That forecasting claim inherits the retracted gloss and is NOT yet re-ruled (OQ-032).** It
+  rests on "the surcharge adds revenue and no cost". Under the corrected criterion the distance
+  premium is priced _because the job costs more_ — more drive hours, more fuel — so for that third
+  of the account the error runs the other way, and distance-surcharge revenue is the best available
+  proxy for a cost driver nothing else records. Whether the same holds for the out-of-hours and
+  weekend premiums turns on reconciling OQ-006's "the premium is margin, not cost" with ADR-0019's
+  1.5x rules, which has not been done. Treat this bullet as open pending that.
 - **Activity product lines are kept, not dropped.** `Delivery` is where the un-allocated activity
   revenue and its cost meet; deleting it would force the allocation into the posting, which is the
   destructive direction. The mixed-basis taxonomy is tolerable _because_ the ledger does not
