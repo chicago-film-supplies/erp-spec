@@ -34,28 +34,46 @@ bases:
     criterion: ability_to_bear
     proxy_for: >-
       The physical movement the activity performed — weight, cubic volume or distance. Measured
-      2026-08-09: `products.shipping.weight` is present on 531 of 549 products and **zero on all
-      549**; height, width and length likewise; no order, destination or fulfillment record carries
-      mileage or distance, and the only coordinates in the system live in an expiring geocode cache.
-      The driver is not merely unchosen, it is uncaptured — so this basis is what remains, not what
-      is best. See `inbox/2026-08-09-allocation-bases-measured-only-goods-revenue-survives.md`.
-      ⚠️ **This basis has an expiry.** Owner 2026-08-09: the shipping specs will be populated this
-      year. Because the allocation spreads ONE order's pool across THAT order's lines, only
-      line-level facts can matter — distance, crew and drive time are order-level and cancel out
-      entirely — so a populated weight-and-dimensions spec closes the cause-and-effect gap
-      COMPLETELY rather than merely narrowing it. Which physical measure becomes v2, and the
-      coverage precondition that must gate it, is OQ-033. Do not retire v1: historical periods have
-      no physical data and must keep resolving the basis that produced them.
+      2026-08-16 across all **567** products, identically on all four fields:
+      **0 non-zero, 3 zero, 537 `null`, 27 with the block absent.** No order, destination or
+      fulfillment record carries mileage or distance, and the only coordinates in the system live in an
+      expiring geocode cache. The driver is not merely unchosen, it is uncaptured — so this basis is
+      what remains, not what is best.
+      ⚠️ **`null` versus `0` is load-bearing here and was not, before.** The 2026-08-09 reading
+      (`inbox/2026-08-09-allocation-bases-measured-only-goods-revenue-survives.md`) recorded "present
+      on 531 of 549 and zero on all 549 — the field is not missing, it is populated with zero". Today
+      it is `null`: core#51 closed 2026-08-10 and the four dimensions are `z.number().nullable()`
+      (`code:2026-08-16:core@3847366:src/schemas/product.ts`). So `0` now means "weighs nothing" and
+      `null` means "nobody has weighed it", which is exactly what v2's coverage precondition has to be
+      able to tell apart. The conclusion — no product carries a driver — is unchanged either way.
+      ⚠️ **This basis has an expiry, and it is a trigger rather than a date.** Owner 2026-08-09: the
+      shipping specs will be populated this year. Owner 2026-08-16: **weights will exist for MANY
+      products by the time v2 is in dev** — so **partial population is the anticipated state**, which
+      makes OQ-033's activation precondition v2's primary requirement rather than its hardening, and
+      adds two things v2 must carry: the unallocated bucket read as a **coverage meter** with coverage
+      reported beside it, and activation at a coverage **threshold** rather than at the first non-zero
+      weight (`inbox/2026-08-16-owner-shipping-weight-will-exist-for-many-products-by-the-time-v2-is-in-dev.md`).
+      Because the allocation spreads ONE order's pool across THAT order's lines, only line-level facts
+      can matter — distance, crew and drive time are order-level and cancel out entirely — so a
+      populated weight-and-dimensions spec closes the cause-and-effect gap COMPLETELY rather than
+      merely narrowing it. Which physical measure becomes v2 is OQ-033. Do not retire v1: historical
+      periods have no physical data and must keep resolving the basis that produced them.
+      ✅ Re-measured on every `deno task allocation` run, which prints a ⚠️⚠️ the first time a non-zero
+      value appears. A basis premise that flips unnoticed is how v1 outlives its own justification.
     scope: causal_order
     base: goods_line.subtotal_discounted_minor
     rounding: largest_remainder
     zero_base: unallocated_bucket
     note: >-
       **Scope is the ORDER, not the invoice** — ADR-0029's "the orders that caused them". Measured
-      2026-08-09: 0 of 999 invoices bill more than one order and 969 carry exactly one, so the two
-      scopes coincide on today's corpus and choosing the order costs nothing. It is the only scope
-      that stays correct when a multi-order invoice first appears, and by then the reports it would
-      change are already sealed.
+      2026-08-16: **0 of 1,010 invoices bill more than one order** and 980 carry exactly one (0 of 999 /
+      969 on 2026-08-09), so the two scopes coincide on today's corpus and choosing the order costs
+      nothing. It is the only scope
+      that stays correct when a multi-order invoice first appears.
+      ⚠️ This clause continued "…and by then the reports it would change are already sealed", which is
+      a residue of the sealed-period premise **this file's own header retracts as of 2026-08-16**. This
+      report is never sealed; re-running it is the point. The scope argument does not need that crutch
+      and stands on the sentence above.
       **`largest_remainder` is a decision, not a detail.** The shares must sum to the pool exactly;
       independent rounding of each share does not, and the residual cent has to land somewhere
       stated. Same discipline as OQ-018's pro-rata premium split, which put the rounding in the
@@ -63,4 +81,8 @@ bases:
       **A goods line with `product_line: null` is still part of the base.** It is goods that nobody
       categorised (ADR-0025 makes null a legal determination), and excluding it would concentrate
       the whole pool onto the tracked lines and overstate their absorbed cost. It reports in the
-      null row.
+      null row. Re-measured 2026-08-16: **264 lines, $38,678.20, 2.25% of line revenue** sit on a goods
+      account with no product line — 4200 $21,716.14 / 36 lines, 4000 $10,671.16 / 220, 4210 $6,290.90
+      / 8. (2026-08-09: 143 lines / $67,156 / 4.0%. The lines nearly doubled while the money nearly
+      halved — api-cloudrun#473's repair took the large categorised lines out and the `Other`
+      retirement put ~135 small ones in.) Emphatically not a hypothetical population.

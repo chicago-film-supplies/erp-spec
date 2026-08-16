@@ -913,12 +913,16 @@ accounts:
       line at all, so the dimension is `undecided` rather than assumed.
       ⚠️ **It has no cost account.** Owner, 2026-08-16: "it should get a matching cogs." Minted below
       as 5150 — the pairing 4150/5300 and 4700/5500 already have, and 4140 lacked.
-      **Measured 2026-08-16**: `api:2026-08-16:db_products_count` — **0 of 549 products** carry
-      `price.coa_revenue: 4140`, so nothing is configured to post here. `api:2026-08-16:db_invoices_query`
-      over the first **63** invoices found **1** line on 4140, and it is a `custom-` line typed by
-      hand. That fits the description: a vendor that will not onboard is ad-hoc by nature, so the
-      account is reached by custom line rather than by product. ⚠️ Not a corpus-wide count — 63 of
-      999 invoices, stopped there because a full sweep needs a script rather than MCP paging.
+      **Measured 2026-08-16, and the sweep is now COMPLETE**: **0 of 567 products** carry
+      `price.coa_revenue: 4140`, so nothing is configured to post here, and corpus-wide across all
+      **1,010** invoices there are **6 lines on 4140 across 5 invoices (1194, 1308, 1366, 1507, 1897)
+      totalling $8,788.00 — and all 6 of 6 are `custom-` lines typed by hand.** That confirms the
+      description outright: a vendor that will not onboard is ad-hoc by nature, so the account is
+      reached by custom line rather than by product.
+      ✅ This note previously read "0 of 549 products… over the first 63 invoices found 1 line… ⚠️ Not a
+      corpus-wide count, stopped there because a full sweep needs a script rather than MCP paging." The
+      script exists as of erp-spec#15 (`spikes/harness/corpus.ts`, read-only prod Firestore under ADC),
+      so the partial sweep is retired rather than carried.
 
   - code: 4150
     name: "Shipping & Handling Income"

@@ -1,19 +1,25 @@
 # The pool is LARGER than the base it spreads over — and this is not an edge case.
 #
-# Measured 2026-08-09: 115 of 305 allocable delivery-bearing order-groups, holding $89,425 — 41.4%
-# of all delivery revenue. Ratio median 0.775, p90 3.13, max 25.0.
+# Re-measured 2026-08-16: **125 of 307 allocable delivery-bearing order-groups ex-void, holding
+# $104,875.00 — 45.45% of ex-void delivery revenue.** Ratio median 0.840, p90 3.33, max 25.00.
 #
-# ⚠️ **Pre-repair measurement, pending re-run (erp-spec#15).** The probe read a line denorm null on
-# 227 categorised lines (api-cloudrun#473), so those lines counted toward no base. The share must
-# FALL. **Re-check the worked example below specifically**: "$800.00 of Crafty as the ONLY goods on
-# the order" may be an artifact — if the order's other lines were untracked rather than absent, they
-# are goods now and the ratio changes. The VECTOR is unaffected either way; it pins that a pool
-# exceeding its base still spreads whole, which is a rule about arithmetic, not about frequency.
+# ⚠️⚠️ **This block said "the share must FALL". It ROSE**, 41.4% → 45.20% judged like-for-like on the
+# 2026-08-09 base rule and classification, 115/305 → 129/314 groups, median ratio 0.775 → 0.862.
+# api-cloudrun#473 suppressed BOTH sides of the ratio and suppressed the pool harder.
+# (`inbox/2026-08-16-adr-0031s-figures-re-measured-two-of-three-predicted-directions-failed.md`)
+#
+# ✅ **The worked example was flagged for re-checking, and it is NOT an artifact.** Invoice 1616,
+# measured 2026-08-16, carries exactly two revenue lines: `sale/4200 Crafty $800.00` and
+# `service/4100 Delivery $2,500.00`. Nothing was untracked-rather-than-absent. All five of the
+# near-identical invoices reproduce at exactly 312.5%: 1616 / 1617 / 1678 are $2,500 against $800,
+# 1679 is $2,000 against $640, 1680 is $1,500 against $480.
 #
 # This vector is invoice 1616's shape verbatim: a $2,500.00 delivery against $800.00 of Crafty as
 # the ONLY goods on the order. The whole pool lands on one product line, at 312% of that line's own
-# revenue. Five near-identical invoices (1616, 1617, 1678, 1679, 1680) are why `Crafty` receives
-# $21,958 of allocated delivery against $11,735 of its own revenue corpus-wide.
+# revenue. Those five invoices are why `Crafty` receives **$21,549.26** of allocated delivery against
+# **$16,990.00** of its own revenue on pool-bearing groups — **126.8%** (pre-repair $21,958 against
+# $11,735, 187%). ⚠️ `Crafty` itself nearly tripled corpus-wide to $45,530.48 and its account mix
+# inverted to 90.26% on 4200, so the RATIO fell while the underlying pattern is unchanged.
 #
 # ⚠️ Nothing here is clamped, capped or spilled into the unallocated bucket. The arithmetic is
 # correct and the RESULT is misleading, which is a presentation problem and not a basis problem —

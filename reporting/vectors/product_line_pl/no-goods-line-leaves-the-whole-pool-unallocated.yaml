@@ -1,16 +1,19 @@
 # The degenerate case, and the one this whole bucket exists for.
 #
-# An order carrying delivery revenue and NO goods line has no denominator under any basis. Measured
-# 2026-08-09, under the base this spec states (null-product-line goods included, voids excluded):
-# 11 order-groups, $11,150.00 — 5.16% of all delivery revenue. Invoice 1856 is the
-# largest at $3,250.00.
+# An order carrying delivery revenue and NO goods line has no denominator under any basis.
+# Re-measured 2026-08-16, under the base this spec states (null-product-line goods included, voids
+# excluded): **12 order-groups, $11,400.00 — 4.94% of ex-void delivery revenue.** Invoice 1856 is still
+# the largest at $3,250.00.
 #
-# ⚠️ **Pre-repair measurement, pending re-run (erp-spec#15), and this one may collapse.** A group
-# qualified only by carrying no goods line at all — but several qualified because their goods lines
-# were NULL, not absent. The five Netflix Duradeck orders (85.5% of the population) carry
-# `Surface Protection` at the product master, so after api-cloudrun#473 they have a denominator.
-# The VECTOR is retained regardless: a zero base must produce a row rather than a NaN, a spread or a
-# silent drop, and that is a rule about arithmetic. What is pending is only how often it fires.
+# ✅ **This block predicted the population "may collapse". It did not — it GREW, and the specific case
+# it named did not move.** The five Netflix Duradeck orders were said to carry `Surface Protection` at
+# the product master and therefore to gain a denominator after api-cloudrun#473. Measured:
+# `products/kqzVClx5uJrJ07bEjokX.tracking_category_name` is **`"Delivery"`** — it is the install /
+# tear-out / relocate LABOUR, not the deck — and all 15 lines across the five invoices are `Delivery`
+# at both the line and the master, with no goods line anywhere. They are still 85.5% of the bucket.
+# (`inbox/2026-08-16-correction-the-duradeck-retraction-reasoned-from-a-product-name.md`)
+# The VECTOR was retained regardless, and correctly: a zero base must produce a row rather than a NaN,
+# a spread or a silent drop, and that is a rule about arithmetic rather than about frequency.
 #
 # The failure mode this pins is silent absorption: an implementation that divides by a zero base and
 # gets NaN, or that "helpfully" spreads the pool evenly across all product lines, or that drops the
@@ -20,7 +23,7 @@ report: product_line_pl
 basis: goods_revenue_on_causal_order
 basis_version: 1
 kind: unallocated
-source: "api:2026-08-09:db_invoices_query — 11 groups ex-void, $11,150.00; largest is invoice 1856 at $3,250.00, a Netflix Duradeck install/tear-out job with no goods on the order"
+source: "api:2026-08-16:firestore invoices via spikes/harness/allocation-basis-probe.ts — 12 groups ex-void, $11,400.00; largest is invoice 1856 at $3,250.00, a Netflix Duradeck install/tear-out job whose every line is Delivery at both the line and the product master"
 
 given:
   pool_minor: 325000 # invoice 1856

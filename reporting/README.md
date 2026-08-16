@@ -23,7 +23,7 @@ Gate 13 in `tools/validate.ts` enforces the lot.
 
 **The allocation is a proxy and the data says so.** `criterion: ability_to_bear` on the only active
 basis is not self-deprecation — it is Horngren's lowest tier, recorded in the field the gate reads,
-because the cause-and-effect driver (weight, volume, distance) is **uncaptured**: 0 of 549 products
+because the cause-and-effect driver (weight, volume, distance) is **uncaptured**: 0 of 567 products
 carry a non-zero shipping dimension. Gate 13 refuses any basis below `cause_and_effect` that does
 not name the driver it stands in for, so the day someone adds a better basis the old one cannot
 quietly claim to be one.
@@ -47,10 +47,10 @@ Pair every fixed-point check with a property that holds independently of it.
 | **un-allocated** (the ledger's own grouping) | postings as posted          | what did delivery cost us; what did we charge for it |
 | **allocated** (this report)                  | postings + the stated basis | what does a product line really earn, delivered      |
 
-⚠️ The un-allocated view shows `Delivery` — the largest tracked product line, **$234,987.75 and
-13.91% of revenue** (re-measured 2026-08-10; read $216,050 / 12.8% until then, off a line denorm
-that was null on 227 categorised lines — api-cloudrun#473) — at a large loss **by construction**,
-because delivery revenue is a surcharge and delivery cost is crew plus vehicle and the two were
-never meant to cover each other. Anyone reading it as a managed P&L concludes delivery should be
-cut, which would cut product revenue. ADR-0029 calls this the single most likely misreading of the
-whole design.
+⚠️ The un-allocated view shows `Delivery` — the largest tracked product line, **$236,487.75 and
+13.79% of revenue** (re-measured 2026-08-16; read $216,050 / 12.8% until 2026-08-10, off a line
+denorm that was null on 227 categorised lines — api-cloudrun#473) — at a large loss **by
+construction**, because delivery revenue is a surcharge and delivery cost is crew plus vehicle and
+the two were never meant to cover each other. Anyone reading it as a managed P&L concludes delivery
+should be cut, which would cut product revenue. ADR-0029 calls this the single most likely
+misreading of the whole design.

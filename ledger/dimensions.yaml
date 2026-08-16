@@ -22,9 +22,17 @@
 # ✅ **The propagation defect is FIXED, measured 2026-08-10** (api-cloudrun#473,
 # `inbox/2026-08-10-the-untracked-revenue-denorm-is-repaired-and-28-7-percent-is-now-15-percent.md`).
 # `tracking_missing` 227 → **0**; a dry re-run of the repair touches 0 invoices. Untracked line
-# revenue is now **15.00%** ($253,306.59 of $1,688,980.87), and what remains is the two populations
-# that were never defects: 128 custom lines with no product master ($233,667.63) and 170 lines on
-# genuinely uncategorised products ($19,638.96).
+# revenue is now **14.76%** ($253,269.75 of $1,715,472.79), and what remains is the two populations
+# that were never defects: 130 custom lines with no product master ($233,610.63) and 183 lines on
+# genuinely uncategorised products ($19,659.12) — re-measured 2026-08-16 (15.00% of $1,688,980.87
+# across 128 / $233,667.63 and 170 / $19,638.96 on 2026-08-10: the money is flat and the denominator
+# grew). ✅ **`tracking_missing` is still 0 and the denorm now agrees with the master on every one of
+# 9,394 revenue lines** — 0 nulls-against-a-categorised-master, 0 disagreements, 0 lines set against an
+# uncategorised master. The repair is holding.
+# ⚠️ Zero DISAGREEMENTS is not purely good news. An invoice is a point-in-time document and a line that
+# disagrees with a since-renamed master is expected and must never be repaired — so that branch of the
+# rule has never once been exercised, which by this repo's own standard makes it a claim rather than a
+# capability.
 # ⚠️ That $19,638.96 is NOT comparable to the $688.00 above — `Other` was retired at the product
 # master in the same sitting, moving 12 products and ~135 lines out of a named category. **$688.00
 # is the number to cite for "how often did an operator decline to classify".**
@@ -74,9 +82,11 @@ dimensions:
       It had been dropped 2026-08-09 on a measurement of **zero lines and zero revenue** across all
       9,194 revenue-bearing lines — and **that measurement read the invoice-line denorm, not the
       product master.** At the master, `Trucking` (7 lines, $34,000.00) and `Shipping` (16 lines,
-      $5,665.00) both carried `Transport` throughout: **23 lines, $39,665.00, 2.35%** — the 14th
+      $5,665.00) both carried `Transport` throughout: **23 lines, $39,665.00, 2.31%** — the 14th
       largest of 20, above `Expendables`, `Carts & Ramps` and `Janitorial`, all of which stayed
-      declared. None ever reached a line because the line-level `tracking_category` was not derived
+      declared. ✅ Every one of those amounts reproduces to the cent on a 2026-08-16 re-run
+      (`spikes/harness/product-line-matrix-probe.ts`); only the share moved, because line revenue grew
+      to $1,715,472.79. None ever reached a line because the line-level `tracking_category` was not derived
       from the product (api-cloudrun#473, repaired 2026-08-10).
       **Three independent systems of record agreed and none of them was the one being read**: the
       product master, Xero (prod invoice #1987's `Trucking` line was tagged `Transport` in the Xero
@@ -84,17 +94,23 @@ dimensions:
       ⚠️ **The line holds two economically different things**, and OQ-034 records the owner's split:
       `Shipping` is a **passthrough** (third-party freight, its own account 4150, no CFS crew-day),
       `Trucking` is **CFS's own longer or bigger haul** and is labour-bearing per ADR-0011/OQ-010.
-      Both are severable and neither spreads, so one product line is correct today; whether they
-      eventually separate is not decided and blocks nothing.
+      Both are severable and neither spreads.
+      ⚠️ **The two values ARE now declared separately here, and the corpus has not been restated.**
+      Measured 2026-08-16: `Shipping` reads **0 lines** when the dimension is read directly, because
+      every one of the 23 lines still carries the single value `Transport`. The split is derivable by
+      account — 4100 $34,000.00 / 7 lines is trucking, 4150 $5,665.00 / 16 lines is shipping, matching
+      OQ-034's figures exactly — so nothing is unknown. What is outstanding is the historical
+      restatement, an ADR-0020 obligation. **A zero row here is not another `Transport` failure; check
+      which of the two it is before acting on it.**
       **This is the value that most nearly proves the whole absence-versus-null rule below**: it was
       not undecided, it was never written, and for six days the spec omitted a value three source
       systems were actively recording.
       Why it was never used is the part worth keeping. **Activity lines and goods lines compete for
       the same line item, and goods lines win**: shipping a walkie is categorised `Walkies &
-      Hotspots` (699 lines, $175,015), by what was shipped rather than by the shipping. `Delivery`
-      survives — **534 lines and $234,987.75, 13.91%**, the largest tracked line in the business
-      (re-measured 2026-08-10) — only because a delivery line has no product to be categorised as
-      instead.
+      Hotspots` (706 lines, $178,980.10), by what was shipped rather than by the shipping. `Delivery`
+      survives — **537 lines and $236,487.75, 13.79%**, the largest tracked line in the business
+      (re-measured 2026-08-16; 534 / $234,987.75 / 13.91% on 2026-08-10) — only because a delivery line
+      has no product to be categorised as instead.
       **Adding a value back is cheap by design**: ADR-0018 took dimensions off account identity
       precisely so cardinality grows by addition and a new product line stops being a migration.
       That is what made restoring `Transport` a one-line change rather than a schema event.
