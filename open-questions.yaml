@@ -578,6 +578,29 @@ open_questions:
       a discount recorded against COGS plausibly inherits the product line of the goods it
       discounts, where one recorded as other income has no customer product line at all.
       Split out of OQ-021, which settled the dimension rule but not this.
+      ✅ **SURVEYED 2026-08-16, combined with OQ-041** —
+      `inbox/2026-08-16-survey-a-vendor-side-amount-becomes-revenue-only-where-control-or-a-markup-does.md`.
+      ⚠️ **THE QUESTION IS REFRAMED, and a prior stated in that session was wrong.** It was predicted
+      that "GAAP likely has a firm answer here, which would make this narrower than it looks."
+      **It does not.** ASC 330 and the retail inventory method treat a cash discount as *"credited
+      directly to the purchases account at cost, reducing the cost of inventory"* — but the guidance
+      is explicit that **either** treatment is permissible: "GAAP allows recognition either as a
+      reduction of purchases or as other income, **but consistency must be maintained**."
+      ⇒ **The defect is not which account. It is that BOTH are Active.** This question's own notes
+      say "the treatment is currently whichever account the operator picked" — and under a standard
+      that permits either treatment while requiring consistency, an operator-by-operator choice is
+      the one thing that is NOT permitted. So the answer needed is **"pick one and retire the
+      other"**, and the default and conceptually preferred treatment is **5001** (reduction of cost).
+      **Owner facts scope the population, 2026-08-16**: supplier discounts are "often none"; where
+      they exist it is net-30 style terms with account vendors; "any real wholesale price
+      relationship would generally warrant creating a product in the catalog". So this is
+      **early-payment terms, and small** — not volume rebates, not marketing or co-op allowances,
+      each of which GAAP treats differently again and none of which applies here.
+      **Still needed before it closes**: whether the live corpus already contains postings on BOTH
+      accounts. If it does, retiring one is a restatement under ADR-0020 (it alters no amount, so it
+      is in scope); if 4300 has never been used, retiring it costs nothing. Not measured — AP is
+      thin in the current system (OQ-020), so this may not be answerable from CFS data at all and may
+      have to come from Xero.
 
   - id: OQ-027
     question: >-
@@ -1410,3 +1433,35 @@ open_questions:
       Gross-versus-net presentation of an agency arrangement is a real GAAP question (ASC 606's
       principal-versus-agent test), and if CFS is an agent rather than a principal the answer may not
       be a dimension at all — it may be that only the markup is revenue.
+      ✅ **SURVEYED 2026-08-16** —
+      `inbox/2026-08-16-survey-a-vendor-side-amount-becomes-revenue-only-where-control-or-a-markup-does.md`.
+      **The principal-versus-agent half is SETTLED: CFS is a PRINCIPAL, so the presentation is
+      GROSS** — 4140 carries the full re-billed amount and 5150 the full vendor cost. Owner facts,
+      2026-08-16: CFS is primarily responsible if the item is wrong ("we own the problem") and CFS
+      sets the price with discretion over the markup; CFS carries no inventory risk because the
+      customer commits first.
+      ⚠️ **Not decided by counting indicators, and an earlier framing in that session was wrong to
+      imply it was.** ASC 606-10-55-36ff is explicit that the three indicators are *evidence, not a
+      three-part test* — "meeting two of three doesn't automatically make the entity a principal".
+      The determination rests on CONTROL, and responsibility-for-acceptability plus price discretion
+      is what establishes that CFS directs the good's use before transfer. Absence of inventory risk
+      is ordinary in a buy-to-order arrangement.
+      **NetSuite's default is the opposite and that is worth knowing**: without its "Track Billable
+      Expense in" setting it credits the EXPENSE account — a net presentation — so gross is a
+      deliberate configuration rather than a shape to assume. Odoo makes the same line a per-expense
+      policy field, "At cost" versus "Sales price".
+      **RECOMMENDATION on the dimension this question actually asks: `product_line: null`, keeping
+      the obligation to declare.** `ledger/dimensions.yaml` already defines that fact exactly — "this
+      IS a categorised kind of sale, and no tracked product line applies to it" — and a pass-through
+      is precisely that: a real sale of a thing that by rule is not in the catalogue. ⚠️ **Different
+      from what 4700/5500 took the same day** (no dimension obligation at all), because a card fee is
+      not a sale. Two empty-looking answers, two different reasons.
+      ✅ **A rule the owner stated and the data already obeys**: "pass through items should
+      exclusively be custom items (not product/service catalog)." Measured — 0 of 549 products carry
+      `coa_revenue: 4140`. It is self-enforcing by the owner's own logic, since any durable wholesale
+      price "would generally warrant creating a product in the catalog", and it is requirement-shaped:
+      a PRODUCT configured to 4140 should be refused.
+      ⚠️ **Still open besides the dimension**: the Xero migration delta is UNMEASURED — whether CFS's
+      Xero history presents pass-throughs gross or net could not be established from documentation.
+      One document settles it: the single 4140 line found (`1Qr50IQXdPjKC2cB7WyV`) carries a
+      `xero_id`. Sage Intacct and SAP were not reached.
