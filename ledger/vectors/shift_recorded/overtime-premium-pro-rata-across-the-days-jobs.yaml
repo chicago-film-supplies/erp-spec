@@ -72,14 +72,14 @@ derivation: >-
   would change all three jobs' COGS without changing a single hour worked.
   **This is the only vector in the spec that exercises `cost_type`**, and it uses all three declared
   values. Both dimensions are required here because 5800 is the one account in the chart naming
-  `cost_type`; 2000 names none, so the union is exactly what each transfer declares.
+  `cost_type`; 2010 names none, so the union is exactly what each transfer declares.
   No unabsorbed leg: `unabsorbed_minor` is 0 and a zero-amount posting is not written.
 
 expect:
   transfers:
     - {
         debit_account: 5800,
-        credit_account: 2000,
+        credit_account: 2010,
         amount_minor: 17046,
         accounting_date: "2026-08-06",
         product_line: "Delivery",
@@ -87,7 +87,7 @@ expect:
       }
     - {
         debit_account: 5800,
-        credit_account: 2000,
+        credit_account: 2010,
         amount_minor: 13636,
         accounting_date: "2026-08-06",
         product_line: "Crew",
@@ -95,7 +95,7 @@ expect:
       }
     - {
         debit_account: 5800,
-        credit_account: 2000,
+        credit_account: 2010,
         amount_minor: 6818,
         accounting_date: "2026-08-06",
         product_line: "Tables & Chairs",

@@ -1,0 +1,69 @@
+name: reclassification-rebooks-the-expense-rejected
+posting_rule: vendor_bill_received
+kind: reject
+source: >-
+  The failure erp-spec#14 named as the reason this rule was worth writing carefully, and the one the
+  six-reference survey found is the single most common cause of double-counted expense
+  (`inbox/2026-08-16-survey-the-accrued-liability-is-a-matched-clearing-account-and-the-bill-reclassifies-rather-than-reverses.md`).
+  Four of five surveyed systems reclassify — SAP GR/IR, NetSuite `Accrued Purchases`, Odoo
+  `Stock Interim (Received)`, Intacct's advanced-workflow accrual. The fifth is Xero, which has no
+  accrual stage to reclassify from and therefore cannot make this mistake.
+
+differs_from: eor-invoice-reclassifies-a-fortnight-of-shifts
+differs_in: ["bill.reclassifications", "bill.direct_lines"]
+
+given:
+  ledger_state:
+    closed_periods: ["2026-07"]
+    outstanding_obligations:
+      - { obligation_id: OBL-VEC-0101, accrued_minor: 120000 }
+      - { obligation_id: OBL-VEC-0102, accrued_minor: 96000 }
+      - { obligation_id: OBL-VEC-0103, accrued_minor: 84000 }
+  bill:
+    bill_id: BILL-VEC-0001
+    vendor_ref: VEN-VEC-EOR
+    bill_date: "2026-08-14"
+    due_date: "2026-08-29"
+    terms: net_15
+    amount_minor: 300000
+    reclassifications: []
+    direct_lines:
+      - {
+          debit_account: 5800,
+          amount_minor: 300000,
+          product_line: "Delivery",
+          cost_type: delivery,
+        }
+
+derivation: >-
+  ⚠️ **THE LOAD-BEARING VECTOR OF THIS RULE.** The same EOR invoice, the same three outstanding
+  accruals, the same $3,000.00 — presented as a direct cost line instead of a reclassification. It
+  is what an operator does when a bill arrives and the obvious action is "code it to wages".
+  **It balances. That is the danger.** Dr 5800 $3,000.00 / Cr 2000 $3,000.00 is a valid entry: the
+  control total matches `bill.amount_minor`, Σ debits equals Σ credits by construction, and the
+  trial balance ties. **No arithmetic check anywhere in this spec can see the defect**, which is
+  precisely why it has to be refused by a named rule with a named vector.
+  **What it actually does:**
+  - **5800 carries the crew days twice** — once on the shift dates, once on the 14th. COGS is
+    overstated by $3,000.00 and gross margin understated by the same, in the largest cost account in
+    the business.
+  - **2010 keeps its $3,000.00 forever.** Nothing will ever relieve it: there is one EOR invoice per
+    period and it has now been consumed. The residual is indistinguishable from a bill that never
+    arrived, so the one report that would have caught this — the received-not-invoiced balance,
+    whose sign SAP's GR/IR analysis reads as the finding — is the thing the error corrupts.
+  - **The dimensional damage is separate and permanent.** The re-booked line re-declares `Delivery`
+    and `delivery` on the 14th, so a product-line P&L shows delivery labour twice and in the wrong
+    period. A legitimate reclassification cannot do this: 2010 and 2000 name no dimension, so the
+    leg is structurally incapable of carrying one.
+  ⚠️ **The refusal is on STATE, not on shape.** A direct line to 5800 is not illegal in itself —
+  `bill-with-no-accrual-books-the-cost` is an accept vector doing exactly that. What refuses it here
+  is that `OBL-VEC-0101/0102/0103` are outstanding and this bill resolves them: a cost with an
+  accrual behind it may not be booked a second time. **A rule that discriminated on the shape of the
+  line rather than on the obligation would pass this vector**, which is why the two accept vectors
+  sit either side of it.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "the bill resolves OBL-VEC-0101/0102/0103, which are outstanding and already carry the cost in 5800 — a bill with an accrual behind it reclassifies (Dr 2010 / Cr 2000) and must not re-book the expense; the re-booked entry balances, so nothing downstream would catch it"
+    - reason: "re-booking strands 300000 in 2010 with no bill left to relieve it, corrupting the received-not-invoiced balance that is the account's whole purpose"

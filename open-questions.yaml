@@ -1677,3 +1677,40 @@ open_questions:
       absorb into 5800 for hours on a causal job and land in 5801 otherwise. A person who NEVER
       touches a delivery has no absorption mechanism at all, which is what makes them different in
       kind rather than in degree. That distinction, not the job title, is the likely criterion.
+
+  - id: OQ-045
+    question: >-
+      When a vendor bills LESS than was accrued, what retires the residual left in
+      `2010 Accrued Expenses: Received Not Invoiced` — and who is allowed to do it?
+    owner: alex
+    decide_by: 2027-02-15
+    blocks: []
+    status: open
+    notes: >-
+      Opened 2026-08-16 by erp-spec#14, which specified `obligation_accrued` and
+      `vendor_bill_received` and deliberately did **not** invent the answer to this.
+      **What IS decided.** A bill for MORE than was accrued needs nothing: the excess is an ordinary
+      direct line to its own cost account, in the bill's period
+      (`ledger/vectors/vendor_bill_received/bill-exceeds-the-accrual-and-the-excess-is-a-direct-line.yaml`).
+      A **partial** bill is normal and leaves a residual on purpose — both SAP and NetSuite treat the
+      received-not-invoiced residual as the ordinary state with a reconciliation practice attached,
+      and its sign is the finding (credit = received not invoiced, debit = invoiced not received).
+      **What is NOT decided** is the case where the vendor's final bill comes in under the accrual
+      and no further bill is coming. The cost was overstated in the period it was accrued, and the
+      difference sits in 2010 with nothing left to relieve it. That needs a fourth procurement event
+      — an obligation correction or write-back — and inventing it alongside the other three would
+      have been machinery for a branch nothing takes.
+      ⚠️ **The reason it must be a DECISION and not a default is the period.** The accrual may sit in
+      a period that is closed and hashed (ADR-0017), so the correction cannot restate it; it has to
+      post in an open period, which means the two periods disagree about that job's cost and
+      somebody has to say that is acceptable. The alternative — a materiality threshold below which
+      the residual is written off automatically — is a policy, and a threshold that lives only in an
+      operator's habit is not a threshold (the same reasoning
+      `asset_acquired/below-capitalisation-threshold-rejected` pins for the $1,000 line).
+      **Survey obligation applies** (CLAUDE.md → _Accounting decisions_) — "where something posts".
+      Scope it narrowly: what do the six references do with an unclearable GR/IR residual, and what
+      is their criterion for writing one off rather than chasing it. SAP's F.19 reclassification is
+      the obvious starting point, and note that it **reclassifies rather than clears** — which is
+      evidence the write-off is a separate, deliberate act everywhere.
+      Not blocking: 2010's residual is visible and reportable either way, and nothing in m3 depends
+      on it.

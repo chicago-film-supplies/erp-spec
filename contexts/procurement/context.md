@@ -44,26 +44,40 @@ billed. The first two stages are the whole reason this context was worth a ninth
 - **Produces:** purchase order issued, obligation accrued, vendor bill received — all consumed by
   Ledger.
 
-## The rule this context owes, and why it does not exist yet
+## The rule this context owed, and what it corrected — settled 2026-08-16 (erp-spec#14)
 
-`shift_recorded` credits **2000 Accounts Payable** today. But the EOR has not invoiced on the shift
-date, so the accurate credit leg is an **accrued labour liability** that the EOR's invoice later
-**reclassifies** into AP. That reclassification is a procurement posting rule and it is unwritten.
-`asset_acquired` has the same shape — it credits AP directly and notes the accrual stage as
-procurement's to specify.
+`shift_recorded` and `asset_acquired` both credited **2000 Accounts Payable**. Both were wrong on
+the date they posted: the EOR has not invoiced when the shift is worked, and the vendor has not
+invoiced when the asset is received, so neither was trade debt. Both now credit **2010 Accrued
+Expenses: Received Not Invoiced**, and `vendor_bill_received` reclassifies it into AP when the
+invoice arrives.
 
-⚠️ **This is why a wages liability has a real purpose in v2 even though CFS has never had one.**
+⚠️ **This is why an accrued liability has a real purpose in v2 even though CFS has never had one.**
 Measured across four years of balance sheets there is no payroll liability of any kind, and all four
 payroll accounts (2160, 2170, 2180, 2190) are Archived in the live chart — consistent with the EOR
-arrangement. The account v2 needs is not a payroll liability; it is an **accrued expense** account,
-which is a different thing and does not exist yet either.
+arrangement. The account v2 needed is **not** a payroll liability; it is an accrued expense, which
+is a different thing. Re-measured 2026-08-16: the live chart holds **134 accounts and no
+accrued-expense account of any kind** (`api:2026-08-16:db_chart_of_accounts_query`).
+
+**The survey is what decided the shape**
+(`inbox/2026-08-16-survey-the-accrued-liability-is-a-matched-clearing-account-and-the-bill-reclassifies-rather-than-reverses.md`).
+All six references split accrued liabilities on **matched versus estimated**, not on goods versus
+services. A matched amount goes to a clearing account relieved by the bill — SAP GR/IR, NetSuite
+`Accrued Purchases`, Odoo `Stock Interim (Received)`, Intacct's advanced-workflow accrual — and an
+estimated one goes to an accrued-expenses account relieved by a dated auto-reversal, which is Xero's
+model and the textbook one. **Every accrual v2 produces carries an amount from a source document**,
+so all of them are the first kind: one account, and the bill **reclassifies** rather than reverses.
+
+⚠️ **Three rules credit 2010, not one, and procurement does not own all three.** `shift_recorded`
+accrues labour, `asset_acquired` accrues fixed assets, and `obligation_accrued` accrues what
+procurement itself receives. Procurement owns the accrual STAGE; the boundaries above still hold.
 
 ## Open
 
-- **erp-spec#14** — the three posting rules: what a PO posts (nothing), what an accrual posts, and
-  what the reclassification posts. `EVT-PRO-002` and `EVT-PRO-003` sit in `unwritten` until then.
-- The accrued-liability **account** is unchosen. The chart has no accrued-expense account; adding
-  one is part of the same work.
+- **The over-accrual — `OQ-045`.** A bill for LESS than was accrued leaves a residual in 2010 that
+  nothing retires; correcting or writing back an over-accrual is a fourth procurement event that
+  does not exist. Deliberately not invented. A bill for MORE is already decided — the excess is an
+  ordinary direct line — and a partial bill is the normal case, not an error.
 - Whether a **recurring bill** is a distinct document type or a vendor invoice with a schedule.
-- Nothing is blocked on any of this — eleven posting rules are specified without it. It becomes
-  urgent when the accrual stage is specified, because that is procurement's first real posting rule.
+- **Three-way matching** (PO → receipt → bill) stays out of scope, per `events.yaml`'s own header.
+- Payment execution and bank matching remain Banking's, not this context's.

@@ -1,0 +1,58 @@
+name: reclassification-exceeds-the-accrued-balance-rejected
+posting_rule: vendor_bill_received
+kind: reject
+source: >-
+  The same shape `credit_note_allocated/over-allocation-beyond-remaining-credit-rejected` already
+  carries against a note's remaining credit, applied to an obligation's outstanding accrual. Both
+  consult a projection rather than a ledger balance, for the reason ADR-0018 gives: the chart stays
+  plain, with no account per note and no account per obligation.
+
+differs_from: eor-invoice-reclassifies-a-fortnight-of-shifts
+differs_in: ["bill.reclassifications[2].amount_minor", "bill.amount_minor"]
+
+given:
+  ledger_state:
+    closed_periods: ["2026-07"]
+    outstanding_obligations:
+      - { obligation_id: OBL-VEC-0101, accrued_minor: 120000 }
+      - { obligation_id: OBL-VEC-0102, accrued_minor: 96000 }
+      - { obligation_id: OBL-VEC-0103, accrued_minor: 84000 }
+  bill:
+    bill_id: BILL-VEC-0001
+    vendor_ref: VEN-VEC-EOR
+    bill_date: "2026-08-14"
+    due_date: "2026-08-29"
+    terms: net_15
+    amount_minor: 312000
+    reclassifications:
+      - { obligation_id: OBL-VEC-0101, amount_minor: 120000 }
+      - { obligation_id: OBL-VEC-0102, amount_minor: 96000 }
+      - { obligation_id: OBL-VEC-0103, amount_minor: 96000 }
+    direct_lines: []
+
+derivation: >-
+  The same EOR invoice, with the third shift billed at **$960.00** against an accrual of $840.00 —
+  the EOR charged for nine hours where eight were recorded. **Refused on the third line alone**; the
+  first two are legal and unchanged, which is what makes this a minimal pair rather than a
+  demonstration that something was refused.
+  **Relieving more than was accrued drives 2010 negative for that obligation** — the ledger
+  asserting that more liability was cleared than was ever raised. The balance is a measurement, and
+  a negative one is not a small overshoot: it is the account reporting a fact that cannot be true.
+  ⚠️ **The refusal is NOT "the bill may not exceed the accrual".** It may, and
+  `bill-exceeds-the-accrual-and-the-excess-is-a-direct-line` is the accept vector proving it. What
+  is refused is expressing the excess **as reclassification of an obligation that never held it**.
+  The same $120.00 is perfectly legal as a direct line: it books to the cost account where it
+  belongs, in the bill's period, visibly as new cost. **The money is identical and the ledger
+  entries are not** — one relieves a liability that does not exist, the other records a cost that
+  does.
+  **That distinction is the reason this is a refusal rather than a cap.** Silently clamping the
+  reclassification to 84000 would balance the entry, satisfy the control total, and leave $120.00 of
+  real cost unrecorded — a quieter failure than the one being prevented.
+  **The check consults the projection, not a ledger balance.** 2010 holds one total in TigerBeetle;
+  the per-obligation outstanding is a document-store fact, exactly as
+  `credit-notes.remaining_credit_cents` is in the current system.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "the reclassification of OBL-VEC-0103 is 96000 against an outstanding accrued balance of 84000 — relieving more than was accrued drives 2010 negative for that obligation; the 12000 excess is legal as a DIRECT LINE, which records new cost rather than clearing a liability that was never raised"

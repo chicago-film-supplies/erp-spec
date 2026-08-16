@@ -1,0 +1,52 @@
+name: labour-accrued-through-this-rule-rejected
+posting_rule: obligation_accrued
+kind: reject
+source: >-
+  ADR-0019 (costing is ACTUAL at the person's own wage), OQ-005 (a shift is one person's paid span
+  for one day), OQ-018 (the overtime premium is allocated pro-rata across the day's causal jobs) and
+  ADR-0025 (5800 is the only account in the chart naming `cost_type`). The boundary this vector pins
+  is `contexts/procurement/context.md`'s own: procurement owns the accrual STAGE, not every document
+  that reaches it.
+
+differs_from: subrental-received-before-the-vendor-invoices
+differs_in:
+  ["obligation.debit_account", "obligation.product_line", "obligation.source_document_ref"]
+
+given:
+  ledger_state:
+    closed_periods: ["2026-07"]
+    outstanding_obligations: []
+  obligation:
+    obligation_id: OBL-VEC-0003
+    purchase_order_id: PO-VEC-0007
+    accrual_date: "2026-08-12"
+    amount_minor: 185000
+    debit_account: 5800
+    product_line: "Delivery"
+    source_document_ref: "crew day, 4 people"
+
+derivation: >-
+  An attempt to accrue a crew day straight to 5800 through the generic procurement rule, because the
+  EOR has not invoiced and the cost is real. **Refused.** Labour accrues through `shift_recorded`,
+  which credits the same 2010 and reaches it by a different road.
+  **Two independent reasons, and the second is the one a reviewer would miss.**
+  1. **It would double-count with `shift_recorded`.** Both rules debit 5800 and credit 2010 for the
+     same hours, and each entry balances on its own — so the ledger would carry the crew day twice
+     with a clean trial balance. The same silent, balanced failure `vendor_bill_received` guards the
+     other end of.
+  2. **This rule structurally cannot produce a legal 5800 transfer.** 5800 names **both**
+     `product_line` and `cost_type`, and `cost_type` applies to 5800 alone in the whole chart
+     (ADR-0025). `EVT-PRO-002` carries no `cost_type` and could not: the value is a property of the
+     work performed, decided in the shift record. So the transfer would be refused by REQ-LED-001
+     for an absent dimension even if the double-count did not exist. **A rule boundary that is also
+     a dimension boundary is worth having** — the weaker of the two enforcements still fires.
+  ⚠️ **What is refused is the ROUTE, not the accrual.** The cost is real, it belongs on 2026-08-12,
+  and `shift_recorded` posts it — with the absorbed/unabsorbed split (5800/5801) and the overtime
+  pro-rata that no generic accrual could perform, because `amount:` is a path with no arithmetic and
+  the allocation must therefore happen upstream in the shift record.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "obligation.debit_account 5800 is a labour account — labour accrues through shift_recorded, which already debits 5800 and credits 2010; accruing it here books the crew day twice in a way that still balances (ADR-0019, OQ-005)"
+    - reason: "5800 names cost_type and EVT-PRO-002 carries none — an absent dimension on a dimensioned account is refused, never defaulted (REQ-LED-001, ADR-0025)"

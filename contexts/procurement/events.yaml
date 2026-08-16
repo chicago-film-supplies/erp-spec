@@ -42,13 +42,34 @@ events:
     producer: procurement
     consumers: [ledger]
     terminal: false
-    carries: [obligation_id, purchase_order_id, accrual_date, amount_minor, source_document_ref]
+    carries:
+      [
+        obligation_id,
+        purchase_order_id,
+        accrual_date,
+        amount_minor,
+        debit_account,
+        product_line,
+        source_document_ref,
+      ]
     note: >-
       **The stage CFS has never had, and the one that makes the ledger accurate on the shift date.**
-      `shift_recorded` credits 2000 Accounts Payable today, but the EOR has not invoiced yet — so
-      the accurate credit is an accrued liability, not a payable. Same shape for `asset_acquired`.
-      Its posting rule is `unwritten` (erp-spec#14) and the accrued-expense account it needs does
-      not exist in the chart.
+      ✅ **Specified 2026-08-16 as `obligation_accrued` (erp-spec#14)**, and the account it needed is
+      minted: **2010 Accrued Expenses: Received Not Invoiced**. `shift_recorded` and `asset_acquired`
+      credited 2000 Accounts Payable until the same day — wrong on the shift and acquisition dates,
+      because the vendor had not invoiced — and both were amended to credit 2010 with their golden
+      vectors.
+      ⚠️ **This event is not the only producer of an accrual, and it must not become one.** Labour
+      accrues through `shift_recorded` and fixed assets through `asset_acquired`; what lands here is
+      what procurement itself receives and no other context already posts — goods, subrentals, and
+      services under a purchase order. Accruing a crew day here would double-count it against
+      `shift_recorded` in a way that still balances
+      (`ledger/vectors/obligation_accrued/labour-accrued-through-this-rule-rejected.yaml`).
+      ⚠️ **`debit_account` and `product_line` were added to `carries` when the rule was written.** The
+      posting rule's `amount:` is a dotted path with no arithmetic and its dimensions are read off the
+      debit account (ADR-0025), so both facts have to arrive ON the event; an event that carried only
+      an amount could not produce a legal transfer. `cost_type` is deliberately NOT here — 5800 is
+      the only account naming it and labour never accrues through this rule.
 
   - id: EVT-PRO-003
     name: VendorBillReceived
@@ -59,11 +80,38 @@ events:
     producer: procurement
     consumers: [ledger, banking]
     terminal: false
-    carries: [bill_id, vendor_ref, obligation_id, bill_date, due_date, amount_minor, terms]
+    carries:
+      [
+        bill_id,
+        vendor_ref,
+        bill_date,
+        due_date,
+        amount_minor,
+        terms,
+        reclassifications,
+        direct_lines,
+      ]
     note: >-
       **The reclassification is the whole difficulty.** A bill that matches an accrual must move the
       liability, and a bill with no accrual behind it must book the cost — one event, two postings,
-      discriminated by whether `obligation_id` resolves. Getting that wrong double-counts the
+      discriminated by whether the obligation resolves. Getting that wrong double-counts the
       expense, and it double-counts it in a way that still balances.
+      ✅ **Specified 2026-08-16 as `vendor_bill_received` (erp-spec#14).** The bill **RECLASSIFIES**:
+      Dr 2010 / Cr 2000 for what it covers, touching no expense account at all. Four of the five
+      systems surveyed do exactly this and the fifth is Xero, which has no accrual stage to
+      reclassify from
+      (`inbox/2026-08-16-survey-the-accrued-liability-is-a-matched-clearing-account-and-the-bill-reclassifies-rather-than-reverses.md`).
+      The refusal has its own vector,
+      `ledger/vectors/vendor_bill_received/reclassification-rebooks-the-expense-rejected.yaml`.
+      ⚠️ **`obligation_id` became `reclassifications[]` when the rule was written, and the singular
+      was a real error rather than a shorthand.** An EOR invoice covers every shift accrued in its
+      period, so one bill routinely resolves MANY obligations, each at a partial amount — a partial
+      bill is the ordinary state in every system surveyed, not an exception. The singular field
+      could not express it. `direct_lines[]` is its counterpart: the costs on the same bill with no
+      accrual behind them, including the excess where a bill exceeds what was accrued.
+      ⚠️ **That also makes this journal entry span source documents** — the third rule in
+      `ledger/posting-rules.yaml` to do so, after `settlement_recorded` and `credit_note_allocated`,
+      and further evidence for erp-spec#3 that `journal_entry_id` cannot be derived from a single
+      source-document reference.
       This is also the stage that answers *what leaves the bank and when*, which is the only one of
       the three the current system holds.

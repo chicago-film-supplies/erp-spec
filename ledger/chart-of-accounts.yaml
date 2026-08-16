@@ -8,10 +8,15 @@
 # 22 Archived**. Every one of the 134 appears below. `code` is a NUMBER in the live collection —
 # a string filter silently returns 0 rows.
 #
-# **137 entries**, because three are minted rather than carried across — each `disposition: new`,
+# **138 entries**, because four are minted rather than carried across — each `disposition: new`,
 # `status_live: absent`, with the rule that needs it named in its `reason`: 5800/5801 for
-# absorbed/unabsorbed labour (ADR-0019), and **2050 Customer Credit Balances** for
-# `credit_note_issued`, which had no credit-side account at all (erp-spec#5).
+# absorbed/unabsorbed labour (ADR-0019), **2050 Customer Credit Balances** for `credit_note_issued`,
+# which had no credit-side account at all (erp-spec#5), and **2010 Accrued Expenses: Received Not
+# Invoiced** for `obligation_accrued`, which had none either (erp-spec#14).
+#
+# ⚠️ **All four were minted for a rule that could not otherwise be written, and none of them for
+# tidiness.** That is the bar: an account enters this file because a posting rule has no legal
+# account for one of its legs, not because a chart "should have" one.
 #
 # A `disposition` is a PROPOSAL for the cutover, with a reason, for the owner to review. It is not
 # a decision already taken. Where no defensible proposal exists the value is `undecided` and the
@@ -409,6 +414,57 @@ accounts:
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
+
+  - code: 2010
+    name: "Accrued Expenses: Received Not Invoiced"
+    class: liability
+    normal_balance: credit
+    dimensions: []
+    disposition: new
+    status_live: absent
+    reason: >-
+      **The credit-side account `EVT-PRO-002 ObligationAccrued` had none of** (erp-spec#14), and the
+      account `shift_recorded` and `asset_acquired` should have been crediting all along. Work
+      performed or goods received before the vendor invoices is a liability that is real, known and
+      **not a trade payable** — there is no invoice and no agreed terms, so it fails 2000's own
+      definition.
+      **Named for the CRITERION, not the mechanism** — the same principle that named 2050 for the
+      presentation rule rather than for the document that most often fills it. The survey
+      (`inbox/2026-08-16-survey-the-accrued-liability-is-a-matched-clearing-account-and-the-bill-reclassifies-rather-than-reverses.md`)
+      found that all six references split accrued liabilities on **matched versus estimated**, not on
+      goods versus services: a matched amount goes to a clearing account relieved by the bill
+      (SAP GR/IR, NetSuite `Accrued Purchases`, Intacct's advanced-workflow accrual, Odoo
+      `Stock Interim (Received)`), and an estimated one goes to an accrued-expenses account relieved
+      by a dated auto-reversal (Xero's model, and the textbook one). **This account is the first
+      kind.** `EVT-PRO-002` carries an amount from a source document, never an estimate.
+      **The estimated flavour deliberately gets NO account**, because no v2 event produces one.
+      Minting it now would be machinery for a branch nothing takes — the failure this repo has
+      already paid for twice.
+      **Not 2160.** CFS has no payroll liability across four years of balance sheets, all four
+      payroll accounts are Archived, payroll processing is a charter non-goal and the EOR is a vendor
+      that invoices (OQ-024). An accrued expense is a different thing.
+      **Presentation requires the split**: Reg S-X 5-02.19 names trade creditors as their own payable
+      category and 5-02.20 requires separate statement of any other current liability over 5% of the
+      total. Folding this into 2000 would present an un-invoiced accrual as trade debt.
+      ⚠️ **Class stated explicitly rather than copied.** Odoo's equivalent is typed a current ASSET
+      in its default chart while carrying a credit balance for exactly the window that matters — a
+      liability presented inside assets, which is what 5-02 exists to prevent. This is a liability
+      with a credit normal balance and no exception; `1998` remains the only account in this chart
+      where the normal balance is routinely violated.
+    source: "api:2026-08-16:db_chart_of_accounts_query"
+    note: >-
+      **Its balance is a MEASUREMENT, and both signs mean something** — the reading SAP's GR/IR
+      analysis makes explicit. A credit balance is received-not-invoiced, which is the ordinary state
+      between a shift and the EOR's invoice. A residual that never clears is a bill that never
+      arrived or an accrual nobody corrected, and it is visible rather than absorbed.
+      ⚠️ **The population that makes this account material is LABOUR, not goods, and the goods number
+      will mislead anyone who measures it first.** Prod holds **74** `type: purchase` stock
+      movements, only **15** with a non-zero cost, totalling **$18,117.52** — 60% of it one pallet
+      buy (`api:2026-08-16:db_transactions_query`). The EOR invoice against shifts already worked is
+      the real volume, and it measures as zero everywhere today because the current system has never
+      had the stage.
+      `1350 Vendor Deposits` (Archived) is the mirror image — paid, not received. It exists; do not
+      mint a second one.
 
   - code: 2060
     name: "Gift Card Liability"
