@@ -1,15 +1,32 @@
 ---
 id: ADR-0035
 title: Dimensions ride on the transfer in `Transfer.code`, not in `user_data`
-status: proposed
+status: rejected
 date: 2026-08-16
 review_by: 2026-11-15
 deciders: [repo owner]
 contexts: [ledger]
-relates_to: [ADR-0018, ADR-0025, ADR-0017, ADR-0034, HOT-013, SPIKE-003]
+relates_to: [ADR-0018, ADR-0025, ADR-0017, ADR-0034, ADR-0036, HOT-013, SPIKE-003]
 supersedes:
 superseded_by:
 ---
+
+> ## ❌ REJECTED 2026-08-16, the day it was drafted, by the owner — and the premise is what failed
+>
+> This ADR asked *where on a transfer a product line fits*. **The owner's answer is that it does not
+> belong on a transfer at all**: "product lines themselves are a reporting concern, not a ledger
+> concern. causal order(s) matter. invoice linking matters. item uids or skus matter."
+>
+> A product line is a **classification of the product master** — `products.uid_tracking_category`,
+> a mutable field on a mutable record — not a fact about a posting. Freezing it onto an immutable
+> transfer makes every re-categorisation a ledger restatement. This ADR found that symptom and
+> prescribed a workaround ("append only, never reorder or delete"), which was the wrong move on the
+> right observation: the two live re-categorisations of 2026-08 — `Other` retired across 12 products,
+> `Transport` dropped and restored — are ordinary reporting maintenance and must not touch the
+> ledger.
+>
+> Superseded in substance by **ADR-0036**. Left in place as the record of a proposal that was made
+> and refused; nothing here was ever accepted.
 
 > **In the context of** ADR-0018 having decided that dimensions ride on the posting, **facing** a
 > `user_data` budget in which all three fields were already claimed, **we decided** to carry the

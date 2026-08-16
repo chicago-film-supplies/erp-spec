@@ -13,7 +13,7 @@ is `deno task validate`'s judgement, not this file's.
 |---|---:|---|
 | Open questions | 6 open | 35 answered of 41 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 14 | 2 open |
-| Decisions (ADR) | 35 | 17 in force · 16 proposed |
+| Decisions (ADR) | 36 | 17 in force · 16 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 21 | 0 without a scenario |
 | Inbox | 66 | 47 unpromoted |
@@ -83,7 +83,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | `ADR-0032` | The organization tree is a liability tree; projects and settlement points are addressing beneath it | 2026-11-15 | `OQ-035` `OQ-036` `OQ-038` `OQ-039` `HOT-006` |
 | `ADR-0033` | A document is addressed to exactly one node by a level-tagged reference, and unallocated credit sits at the settlement point | 2026-11-15 | `OQ-030` `OQ-038` `OQ-040` |
 | `ADR-0034` | An accepted ADR is a historical record of the decision as taken; corrections live outside it and superseding is reserved for re-deciding | 2026-11-15 | `HOT-012` `HOT-013` |
-| `ADR-0035` | Dimensions ride on the transfer in `Transfer.code`, not in `user_data` | 2026-11-15 | `HOT-013` `SPIKE-003` |
+| `ADR-0036` | The ledger carries keys, not classifications — product line is derived at report time | 2026-11-15 | `HOT-013` `HOT-014` |
 
 ## Spikes
 
