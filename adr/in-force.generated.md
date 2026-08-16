@@ -108,21 +108,21 @@ Accepted and not superseded, as of the last `deno task gen`.
 
 # Proposed, not yet in force
 
-| ADR | Title | Review by | Blocked on |
-|---|---|---|---|
-| [ADR-0009](ADR-0009-anticorruption-layer.md) | Anticorruption layer — foreign identifiers never enter domain models | 2026-09-15 | HOT-006 |
-| [ADR-0010](ADR-0010-accounting-date-vs-posting-timestamp.md) | Accounting date vs posting timestamp policy | 2026-11-01 | HOT-005, OQ-009, SPIKE-003 |
-| [ADR-0013](ADR-0013-linode-self-hosted.md) | Self-host on Linode, with Caddy fronting TLS | 2026-10-01 | SPIKE-011 |
-| [ADR-0015](ADR-0015-reservations-as-pending-transfers.md) | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-11-01 | SPIKE-002, SPIKE-012 |
-| [ADR-0019](ADR-0019-labour-costing-is-actual.md) | Labour costing is actual; absorption measures utilisation, not rate variance | 2026-10-01 | HOT-003, HOT-004, HOT-010, OQ-005, OQ-006, OQ-008, OQ-011, OQ-017, OQ-018, OQ-019 |
-| [ADR-0020](ADR-0020-xero-history-is-restated.md) | Xero history is restated, not imported as-is | 2026-10-15 | HOT-006, OQ-012 |
-| [ADR-0025](ADR-0025-dimension-obligation-is-per-account.md) | The dimension obligation is per account, and what is refused is absence rather than null | 2026-10-01 | HOT-011, OQ-021, OQ-022, OQ-025 |
-| [ADR-0027](ADR-0027-retain-mapbox-and-resend-at-the-boundary.md) | Retain Mapbox for geocoding and Resend for transactional email, at the boundary | 2026-10-01 | — |
-| [ADR-0028](ADR-0028-self-hosted-tier-gotenberg-and-victoria.md) | The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability | 2026-10-01 | — |
-| [ADR-0029](ADR-0029-the-ledger-records-unallocated-facts.md) | The ledger records un-allocated facts; allocation is a specified reporting act | 2026-10-01 | OQ-006, OQ-018 |
-| [ADR-0030](ADR-0030-vehicle-cost-moves-into-cogs.md) | Vehicle cost moves from operating expense into COGS, absorbed and unabsorbed | 2026-11-01 | SPIKE-005 |
-| [ADR-0031](ADR-0031-allocation-basis-is-goods-revenue-on-the-causal-order.md) | The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy | 2026-11-01 | OQ-006, OQ-018, OQ-031, OQ-032, OQ-033 |
-| [ADR-0032](ADR-0032-the-customer-tree-is-a-liability-tree.md) | The organization tree is a liability tree; projects and settlement points are addressing beneath it | 2026-11-15 | OQ-035, OQ-036, OQ-038, OQ-039, HOT-006 |
-| [ADR-0033](ADR-0033-ar-addressing-is-header-only-and-credit-sits-at-the-settlement-point.md) | A document is addressed to exactly one node by a level-tagged reference, and unallocated credit sits at the settlement point | 2026-11-15 | OQ-030, OQ-038, OQ-040 |
-| [ADR-0034](ADR-0034-an-accepted-adr-is-a-historical-record.md) | An accepted ADR is a historical record of the decision as taken; corrections live outside it and superseding is reserved for re-deciding | 2026-11-15 | HOT-012, HOT-013 |
-| [ADR-0036](ADR-0036-the-ledger-carries-keys-not-classifications.md) | The ledger carries keys, not classifications — product line is derived at report time | 2026-11-15 | HOT-013, HOT-014 |
+| ADR | Title | Review by | Supersedes on acceptance | Blocked on |
+|---|---|---|---|---|
+| [ADR-0009](ADR-0009-anticorruption-layer.md) | Anticorruption layer — foreign identifiers never enter domain models | 2026-09-15 | — | HOT-006 |
+| [ADR-0010](ADR-0010-accounting-date-vs-posting-timestamp.md) | Accounting date vs posting timestamp policy | 2026-11-01 | — | HOT-005, OQ-009, SPIKE-003 |
+| [ADR-0013](ADR-0013-linode-self-hosted.md) | Self-host on Linode, with Caddy fronting TLS | 2026-10-01 | — | SPIKE-011 |
+| [ADR-0015](ADR-0015-reservations-as-pending-transfers.md) | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-11-01 | — | SPIKE-002, SPIKE-012 |
+| [ADR-0019](ADR-0019-labour-costing-is-actual.md) | Labour costing is actual; absorption measures utilisation, not rate variance | 2026-10-01 | — | HOT-003, HOT-004, HOT-010, OQ-005, OQ-006, OQ-008, OQ-011, OQ-017, OQ-018, OQ-019 |
+| [ADR-0020](ADR-0020-xero-history-is-restated.md) | Xero history is restated, not imported as-is | 2026-10-15 | — | HOT-006, OQ-012 |
+| [ADR-0025](ADR-0025-dimension-obligation-is-per-account.md) | The dimension obligation is per account, and what is refused is absence rather than null | 2026-10-01 | — | HOT-011, OQ-021, OQ-022, OQ-025 |
+| [ADR-0027](ADR-0027-retain-mapbox-and-resend-at-the-boundary.md) | Retain Mapbox for geocoding and Resend for transactional email, at the boundary | 2026-10-01 | — | — |
+| [ADR-0028](ADR-0028-self-hosted-tier-gotenberg-and-victoria.md) | The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability | 2026-10-01 | — | — |
+| [ADR-0029](ADR-0029-the-ledger-records-unallocated-facts.md) | The ledger records un-allocated facts; allocation is a specified reporting act | 2026-10-01 | — | OQ-006, OQ-018 |
+| [ADR-0030](ADR-0030-vehicle-cost-moves-into-cogs.md) | Vehicle cost moves from operating expense into COGS, absorbed and unabsorbed | 2026-11-01 | — | SPIKE-005 |
+| [ADR-0031](ADR-0031-allocation-basis-is-goods-revenue-on-the-causal-order.md) | The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy | 2026-11-01 | — | OQ-006, OQ-018, OQ-031, OQ-032, OQ-033 |
+| [ADR-0032](ADR-0032-the-customer-tree-is-a-liability-tree.md) | The organization tree is a liability tree; projects and settlement points are addressing beneath it | 2026-11-15 | — | OQ-035, OQ-036, OQ-038, OQ-039, HOT-006 |
+| [ADR-0033](ADR-0033-ar-addressing-is-header-only-and-credit-sits-at-the-settlement-point.md) | A document is addressed to exactly one node by a level-tagged reference, and unallocated credit sits at the settlement point | 2026-11-15 | — | OQ-030, OQ-038, OQ-040 |
+| [ADR-0034](ADR-0034-an-accepted-adr-is-a-historical-record.md) | An accepted ADR is a historical record of the decision as taken; corrections live outside it and superseding is reserved for re-deciding | 2026-11-15 | — | HOT-012, HOT-013 |
+| [ADR-0036](ADR-0036-the-ledger-carries-keys-not-classifications.md) | The ledger carries keys, not classifications — product line is derived at report time | 2026-11-15 | ADR-0018 | HOT-013, HOT-014 |

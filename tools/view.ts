@@ -78,6 +78,7 @@ interface Adr {
   review_by?: string;
   contexts?: string[];
   supersedes?: string | null;
+  supersedes_on_acceptance?: string | null;
   superseded_by?: string | null;
   relates_to?: string[];
   body: string;
@@ -532,6 +533,11 @@ function renderAdrs(s: Spec): string {
         `<div>supersedes: ${chips(a.supersedes ? [String(a.supersedes)] : [])} · superseded by: ${
           chips(a.superseded_by ? [String(a.superseded_by)] : [])
         } · relates to: ${chips(a.relates_to)}</div>` +
+        // Pending supersession. This viewer runs no gate, so it is exactly the surface that
+        // silently omitted procurement — a new front-matter field lands here in the same commit.
+        (a.supersedes_on_acceptance
+          ? `<div>supersedes on acceptance: ${chips([String(a.supersedes_on_acceptance)])}</div>`
+          : "") +
         `<div>blocked on: ${chips(blockersFor(a.id))}</div>`;
       return card(a.id, "ADR", esc(a.title ?? ""), meta, renderMarkdown(a.body));
     })

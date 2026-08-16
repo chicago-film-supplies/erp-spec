@@ -23,11 +23,12 @@ is ever deleted.
 **An accepted ADR is a HISTORICAL RECORD of the decision as taken, not a statement of current fact**
 (ADR-0034, resolving HOT-012). Three consequences, and the third is the one that gets forgotten:
 
-| The ADR's decision                        | What you do                                                                                          |
-| ----------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| **changed**                               | supersede — symmetric `supersedes` / `superseded_by`, which gate 6 checks                            |
-| **stands, but left a question open**      | a **new narrow ADR** that `relates_to` it and supersedes **nothing** (ADR-0025 is the precedent)     |
-| **stands, but a fact it cited was wrong** | **no new ADR.** A dated note in `inbox/`, plus a `hotspots.yaml` entry when it contradicts something |
+| The ADR's decision                                  | What you do                                                                                                                                                    |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **changed**                                         | supersede — symmetric `supersedes` / `superseded_by`, which gate 6 checks                                                                                      |
+| **changed, but the superseder is still `proposed`** | `supersedes_on_acceptance:` on the superseder. **One-way** — nothing is written onto the target, so it stays in force until something has actually replaced it |
+| **stands, but left a question open**                | a **new narrow ADR** that `relates_to` it and supersedes **nothing** (ADR-0025 is the precedent)                                                               |
+| **stands, but a fact it cited was wrong**           | **no new ADR.** A dated note in `inbox/`, plus a `hotspots.yaml` entry when it contradicts something                                                           |
 
 - The body is frozen at acceptance — no errata block, no inline correction, no appended "see also".
   `relates_to` may still gain ids: it is an index, not a claim, and it is the correction index.
@@ -35,6 +36,14 @@ is ever deleted.
   bullet would mean re-opening "replace Xero", which nobody is asking to reopen.
 - ⚠️ **Immutability bites only at `accepted`.** ADR-0032 was amended substantially while `proposed`.
   Draft freely; acceptance is the irreversible act, and it is never Claude's to make (rule 3 below).
+- ⚠️ **A supersession declared while `proposed` is one-way and gets its own field.** Writing
+  `superseded_by` onto the target is what removes it from in-force (`generate.ts` reads
+  `status === "accepted" && !superseded_by`), so declaring the link early would retire a decision
+  before its replacement was accepted. `supersedes_on_acceptance:` records the intent without
+  touching the target; **at acceptance three fields move together** — promote it to `supersedes`,
+  and write `superseded_by` **and** `status: superseded` on the target. Gate 6 fails on an
+  `accepted` ADR that still carries the promise, and on a `superseded_by` set without the matching
+  status, so neither half can be forgotten (erp-spec#18).
 - ✅ **Enforced by `validate` gate 14.** An accepted or superseded ADR carries `frozen_sha256:` in
   its front matter, recomputed over the body on every run — edit the body and CI goes red. **Front
   matter is not hashed**, which is what lets `relates_to` gain the id of a later correction and lets

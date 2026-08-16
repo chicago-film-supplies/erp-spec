@@ -158,6 +158,11 @@ interface Adr {
   review_by?: Date;
   contexts: string[];
   supersedes: string | null;
+  /**
+   * A supersession DECLARED but not yet in effect, because the superseder is still `proposed`.
+   * One-way on purpose — see gate 6 (erp-spec#18).
+   */
+  supersedes_on_acceptance: string | null;
   superseded_by: string | null;
   relates_to: string[];
   frozen_sha256?: string;
@@ -178,6 +183,7 @@ function toAdr(fm: unknown, file: string, body: string): Adr | null {
     review_by: dateVal(fm.review_by),
     contexts: strList(fm.contexts),
     supersedes: str(fm.supersedes) ?? null,
+    supersedes_on_acceptance: str(fm.supersedes_on_acceptance) ?? null,
     superseded_by: str(fm.superseded_by) ?? null,
     relates_to: strList(fm.relates_to),
     frozen_sha256: str(fm.frozen_sha256),
@@ -494,6 +500,56 @@ for (const e of evts) {
           })`,
         );
       }
+    }
+
+    /**
+     * A supersession a `proposed` ADR has DECLARED but cannot yet enact (erp-spec#18).
+     *
+     * Symmetry above is checked unconditionally on status, and `generate.ts`'s in-force filter
+     * drops a target on `superseded_by` ALONE, without reading its status. Together those made the
+     * proposed branch unreachable: satisfying the symmetry gate meant writing `superseded_by` onto
+     * the target, which removed it from in-force while nothing had replaced it. ADR-0036 hit this
+     * against ADR-0018 and the repo would have held no in-force decision on the chart of accounts.
+     *
+     * So the intent gets its own field, and it is deliberately ONE-WAY: nothing is written onto the
+     * target until acceptance, so in-force needs no change and cannot drop it early. What is
+     * checked here is that the promise resolves and that it is eventually KEPT — CLAUDE.md's rule
+     * is that a stated guarantee nothing executes is not a guarantee, and the previous shape of
+     * this was a comment in ADR-0036's front matter.
+     */
+    if (a.supersedes_on_acceptance) {
+      const target = a.supersedes_on_acceptance;
+      if (!byId.has(String(target))) {
+        fail("6", `${a.id}: supersedes_on_acceptance "${target}" does not resolve`);
+      }
+      if (a.supersedes === target) {
+        fail(
+          "6",
+          `${a.id}: names "${target}" in BOTH supersedes and supersedes_on_acceptance — the second is the promise, the first is the act`,
+        );
+      }
+      // The promotion is the whole point. An accepted ADR still carrying the promise means
+      // acceptance happened and the two-file edit did not.
+      if (a.status === "accepted") {
+        fail(
+          "6",
+          `${a.id}: is \`accepted\` but still carries supersedes_on_acceptance "${target}" — promote it to \`supersedes\`, and set ${target}.superseded_by + \`status: superseded\``,
+        );
+      }
+    }
+
+    /**
+     * `superseded_by` and `status: superseded` are one fact written in two places, and nothing
+     * required them to agree. Gate 6 checked symmetry only; `generate.ts` drops from in-force on
+     * `superseded_by` regardless of status. So a target could sit at `status: accepted`, absent
+     * from in-force, still labelled accepted, with CI green. ADR-0006 and ADR-0008 held the
+     * convention by hand.
+     */
+    if (a.superseded_by && a.status !== "superseded") {
+      fail(
+        "6",
+        `${a.id}: superseded_by "${a.superseded_by}" is set but status is "${a.status}" — a superseded ADR must say so, or it leaves in-force while still reading as ${a.status}`,
+      );
     }
 
     for (const c of a.contexts ?? []) {

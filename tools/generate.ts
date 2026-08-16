@@ -103,6 +103,7 @@ const adrs: {
   relates_to?: string[];
   superseded_by?: string | null;
   supersedes?: string | null;
+  supersedes_on_acceptance?: string | null;
   y: string;
   file: string;
 }[] = [];
@@ -278,13 +279,14 @@ md += `# Proposed, not yet in force\n\n`;
 if (proposed.length === 0) {
   md += `None.\n`;
 } else {
-  md += `| ADR | Title | Review by | Blocked on |\n|---|---|---|---|\n`;
+  md +=
+    `| ADR | Title | Review by | Supersedes on acceptance | Blocked on |\n|---|---|---|---|---|\n`;
   for (const a of proposed) {
     const blockers = (a.relates_to ?? []).filter((x) => /^(HOT|OQ|SPIKE)-/.test(x)).join(", ") ||
       "—";
     md += `| [${a.id}](${basename(a.file)}) | ${a.title ?? ""} | ${
       a.review_by ? ymd(a.review_by) : "**unset**"
-    } | ${blockers} |\n`;
+    } | ${a.supersedes_on_acceptance ?? "—"} | ${blockers} |\n`;
   }
 }
 await Deno.writeTextFile(`${ROOT}/adr/in-force.generated.md`, md);
@@ -384,12 +386,16 @@ for (const a of inForce) st += `- \`${a.id}\` — ${a.title ?? ""}\n`;
 st += `\n### Proposed (${proposed.length})\n\n`;
 if (proposed.length === 0) st += `None.\n\n`;
 else {
-  st += `| ADR | Title | Review by | Blocked on |\n|---|---|---|---|\n`;
+  // `Supersedes on acceptance` is a PENDING structural claim — the ADR it will displace is still
+  // in force until someone accepts this one. It belongs on the dashboard rather than only in front
+  // matter, because the acceptance is a two-file edit a human performs (erp-spec#18).
+  st +=
+    `| ADR | Title | Review by | Supersedes on acceptance | Blocked on |\n|---|---|---|---|---|\n`;
   for (const a of proposed) {
     const blockers = (a.relates_to ?? []).filter((x) => /^(HOT|OQ|SPIKE)-/.test(x));
     st += `| \`${a.id}\` | ${a.title ?? ""} | ${a.review_by ? ymd(a.review_by) : "**unset**"} | ${
-      blockers.map((b) => `\`${b}\``).join(" ") || "—"
-    } |\n`;
+      a.supersedes_on_acceptance ? `\`${a.supersedes_on_acceptance}\`` : "—"
+    } | ${blockers.map((b) => `\`${b}\``).join(" ") || "—"} |\n`;
   }
   st += `\n`;
 }
