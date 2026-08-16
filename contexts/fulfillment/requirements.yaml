@@ -7,5 +7,116 @@
 #
 # Statements are implementation-free. "The system shall record the acting crew member on every
 # leg" — not "add an actor_id column".
+#
+# ── These five were MINED FROM ADR-0011, and that is the first time this repo has used an ADR as a
+# `source:` rather than an inbox note. Worth stating how, because the pattern is meant to be copied:
+#
+#   An ADR does not BECOME a requirement. An ADR says "we chose X over Y because Z" — past tense,
+#   dated, immutable, with alternatives. A requirement says "the system shall …" — present tense and
+#   testable, and gate 3 refuses it without a Gherkin scenario. What an ADR carries is a set of
+#   OBLIGATIONS, spread across its Decision table and its Consequences, and each is mined into one
+#   requirement that cites the clause it came from.
+#
+#   Two of these came from the Decision (001, 003) and three from the Consequences (002, 004, 005) —
+#   which is the part worth noticing. A Consequences section is where the obligations that are
+#   easiest to forget live, because they read as commentary rather than as decisions.
 
-requirements: []
+requirements:
+  - id: REQ-FUL-001
+    statement: >-
+      Every fulfillment leg shall be a recorded event with its own identity, and shall record the
+      acting crew member, the clock-in and clock-out times, and the shift it belongs to. A leg shall
+      never be inferred from an order's or destination's flags.
+    rationale: >-
+      This is the decision ADR-0011 exists to make, and the whole labour-costing model rests on it.
+      A derived leg cannot carry an actor, a clock-in or a shift id, so there is no basis for
+      attributing a crew-day to the job that caused it and labour allocation is not possible at all
+      (HOT-007).
+      Verified 2026-08-08: the current system derives legs from
+      `destinations[].customer_collecting` / `.customer_returning`, which are stored per
+      DESTINATION — so today's corpus contains no leg-level actor or shift anywhere.
+    source: adr/ADR-0011-fulfillment-legs-first-class.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [HOT-007, ADR-0019]
+
+  - id: REQ-FUL-002
+    statement: >-
+      A leg that did not occur and a leg that occurred but was not recorded shall be distinguishable,
+      and any costing computed from leg records shall report the unrecorded population rather than
+      treating it as zero.
+    rationale: >-
+      ADR-0011: "a leg record that is routinely skipped is worse than none because it makes the
+      costing look complete when it is not." Capture is named there as a first-order requirement
+      rather than a follow-up, and this is that consequence made testable.
+      It is the same absence-versus-null distinction REQ-LED-001 already enforces on dimensions, and
+      that `EVT-TAX-002` uses for exemptions — "no tax" and "no tax BECAUSE" audit differently. A
+      customer-collected leg genuinely has no CFS actor; an unrecorded delivery has one nobody wrote
+      down. Both are empty, and only one is correct.
+      ⚠️ Without this, absorption silently improves as capture degrades: fewer recorded legs means
+      fewer person-days charged to jobs, which reads as better margin.
+    source: adr/ADR-0011-fulfillment-legs-first-class.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [ADR-0019, REQ-LED-001]
+
+  - id: REQ-FUL-003
+    statement: >-
+      Fulfillment mode shall be recorded per destination and the collecting and returning flags per
+      leg; no read shall assume a single fulfillment mode for an order.
+    rationale: >-
+      ADR-0011's Decision table, settling OQ-003 and OQ-007: mode is per destination, flags are per
+      leg. Its own consequence spells out the failure mode — "one order can mix modes, counter pickup
+      for one destination and delivery for another. **Any read that assumes a single mode per order
+      is wrong.**"
+      Measured 2026-08-09 (HOT-002, all 977 orders): 97.2% of revenue is symmetric and 2.77% sits on
+      asymmetric collecting/returning combinations across 26 orders. **The 2.77% is the whole
+      point** — a read that assumes one mode per order is correct on almost everything and wrong on
+      exactly the orders where the answer matters.
+    source: adr/ADR-0011-fulfillment-legs-first-class.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [HOT-002]
+
+  - id: REQ-FUL-004
+    statement: >-
+      A fulfillment's item list shall remain in parity with the items of the order it fulfills; a leg
+      shall reference order items rather than hold an independently editable copy of them.
+    rationale: >-
+      ADR-0011 names this as "the constraint most likely to be broken by giving legs their own
+      lifecycle" — first-class legs must not become a second, divergent copy of the order's items.
+      The current system holds this with a single path-computing normalizer, and the workspace's
+      items-array rule is the evidence for why one author matters: `path` has exactly one author
+      because a client-supplied chain that skips or misnames an intermediate must not survive a
+      write.
+      ⚠️ The verification must not be a fixed-point check. "The fulfillment's items equal what the
+      recompute produces" is defined in terms of the normalizer and can only ever agree with it —
+      the failure that certified 79 provably-wrong invoice items as clean corpus-wide until
+      2026-07-28. Pair it with a property that holds independently of the normalizer.
+    source: adr/ADR-0011-fulfillment-legs-first-class.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: []
+
+  - id: REQ-FUL-005
+    statement: >-
+      A trip shall be a record in its own right that each leg references, shall be able to span more
+      than one order, and its shared cost shall be attributable across the jobs that caused it.
+    rationale: >-
+      ADR-0011, settling OQ-002: a trip is a fulfillment-level aggregate that MAY span orders, "so it
+      cannot live under one" and "is not reachable by walking down from an order".
+      The consequence is a costing one: a shared van run serving two customers is one trip, so its
+      travel cost must be split across the jobs that caused it rather than duplicated onto each or
+      assigned arbitrarily to one.
+      ⚠️ The allocation itself is NOT specified here — `trip_travel` is one of the three pools
+      erp-spec#12 records as named but not yet expressible. This requirement obliges the trip to be
+      addressable and its cost attributable; which basis divides it is ADR-0031's territory.
+    source: adr/ADR-0011-fulfillment-legs-first-class.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: []

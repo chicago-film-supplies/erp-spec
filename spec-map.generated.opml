@@ -394,7 +394,12 @@
           <outline text="EVT-LED-001 — JournalEntryPosted" _note="ledger → banking"/>
           <outline text="EVT-LED-002 — PeriodClosed" _note="ledger → fixed-assets, billing, tax"/>
         </outline>
-        <outline text="fulfillment (FUL)" _note="0 requirement(s) · 7 event(s)">
+        <outline text="fulfillment (FUL)" _note="5 requirement(s) · 7 event(s)">
+          <outline text="REQ-FUL-001 — Every fulfillment leg shall be a recorded event with its own identity, and shall record the acting…"/>
+          <outline text="REQ-FUL-002 — A leg that did not occur and a leg that occurred but was not recorded shall be distinguishable, and…"/>
+          <outline text="REQ-FUL-003 — Fulfillment mode shall be recorded per destination and the collecting and returning flags per leg;…"/>
+          <outline text="REQ-FUL-004 — A fulfillment's item list shall remain in parity with the items of the order it fulfills; a leg sha…"/>
+          <outline text="REQ-FUL-005 — A trip shall be a record in its own right that each leg references, shall be able to span more than…"/>
           <outline text="EVT-FUL-001 — LegCompleted" _note="fulfillment → billing, availability, ledger"/>
           <outline text="EVT-FUL-002 — ShiftRecorded" _note="fulfillment → ledger"/>
           <outline text="EVT-FUL-003 — TripPlanned" _note="fulfillment → ledger"/>

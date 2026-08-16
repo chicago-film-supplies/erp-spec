@@ -205,11 +205,30 @@ const rows = reqs
     status: r.status ?? null,
     priority: r.priority ?? null,
     statement: (r.statement ?? "").replace(/\s+/g, " ").trim(),
-    inbox_source: r.source ?? null,
-    adrs: adrs.filter((a) =>
-      (a.relates_to ?? []).includes(r.id) || (r.relates_to ?? []).includes(a.id)
-    )
-      .map((a) => a.id).sort(),
+    source: r.source ?? null,
+    // ⚠️ This was `inbox_source`, and `adrs` was computed from `relates_to` ALONE. CLAUDE.md rule 2
+    // has always permitted three kinds of source — an inbox file, an ADR, or a verification query —
+    // but every requirement in the repo cited an inbox note until 2026-08-16, so the narrower name
+    // stayed true by accident. The moment requirements were mined from an ADR, the field held an
+    // `adr/…` path under an inbox label AND the mined-from ADR appeared nowhere in `adrs`:
+    // REQ-FUL-003/004/005 each cite ADR-0011 as their source and were reported in
+    // `gaps.requirements_without_adr`. A traceability matrix that drops the strongest link it has
+    // is worse than one that never claimed to carry it.
+    source_kind: !r.source
+      ? null
+      : r.source.startsWith("inbox/")
+      ? "inbox"
+      : /^adr\/ADR-\d{4}/.test(r.source)
+      ? "adr"
+      : "other",
+    adrs: [
+      ...new Set([
+        ...((r.source ?? "").match(/^adr\/(ADR-\d{4})/)?.slice(1, 2) ?? []),
+        ...adrs
+          .filter((a) => (a.relates_to ?? []).includes(r.id) || (r.relates_to ?? []).includes(a.id))
+          .map((a) => a.id),
+      ]),
+    ].sort(),
     events: events.filter((e) => e.context === r.context).map((e) => e.id).sort(),
     scenarios: (scenarios[r.id] ?? []).sort(),
   }))
