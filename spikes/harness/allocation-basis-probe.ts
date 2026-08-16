@@ -5,200 +5,465 @@
  * which bases the corpus can actually support and how far they disagree, so the ADR cites numbers
  * rather than a preference.
  *
- * READ-ONLY. It calls the prod CFS API's `db_*` MCP tools, which is the sanctioned verification
- * path (`CLAUDE.md` -> Verification etiquette). It writes nothing, and it never touches Xero or
- * CRMS.
+ *   deno task allocation
  *
- * The token is read from the environment and is NOT in this repo:
+ * READ-ONLY, prod, under Application Default Credentials. **No token.** See `corpus.ts` for the auth
+ * path and why it changed (erp-spec#15): the old `CFS_API_TOKEN` header documented a shared bearer
+ * against `/mcp/cfs`, that route moved to OAuth, and the documented invocation returned
+ * `{"error":"unauthorized"}` — which is what left every figure below un-runnable and therefore
+ * merely believed. The probe writes nothing and cannot reach Xero or CRMS.
  *
- *   CFS_API_TOKEN=... deno task allocation
+ * ── Three things this run does that the 2026-08-09 measurement did not ──────────────────────────
  *
- * Recover it from the local MCP client config (`~/.claude.json`, server `cfs-api-prod`) or from
- * Secret Manager. Results as of 2026-08-09 are recorded in
- * `inbox/2026-08-09-allocation-bases-measured-only-goods-revenue-survives.md`.
+ * 1. **The goods/activity split and the set of SPREADING pools are read from the spec**, not held
+ *    here. The probe used to carry its own `ACTIVITY` set, and when OQ-034 restored `Transport` as an
+ *    activity line it kept classifying it as **goods by omission** — silently putting $39,665 into
+ *    the base. `tools/validate.ts` does not read `spikes/`, so no gate could have caught it. See
+ *    `loadClassification` in `corpus.ts`.
+ * 2. **The base follows the spec's own definition** — a goods line carrying `product_line: null` is
+ *    IN the base, decided by the ACCOUNT (`reporting/queries/product-line-pl.sql`,
+ *    `reporting/allocation-bases.yaml`). The 2026-08-09 run excluded every null line, which is
+ *    exactly the mismatch
+ *    `inbox/2026-08-09-correction-the-unallocable-population-is-smaller-and-is-one-customer.md`
+ *    exists to record. Both definitions are reported here, so both recorded figures are comparable.
+ * 3. **Voids are excluded**, per ADR-0031 clause 6. The 2026-08-09 headline included them. Both are
+ *    reported, for the same reason.
+ *
+ * ── The spread is a faithful port of the spec's SQL, in integer cents ───────────────────────────
+ *
+ * Floor each share, hand the residual cents to the largest integer remainders, break ties on the
+ * product line so the result is deterministic. `pool × base ÷ total` is staged as multiply-then-
+ * divide in integer minor units so nothing rounds in between — quantizing the ratio first is the
+ * defect class the workspace money rules exist to prevent, and its error is unbounded rather than
+ * one cent. Headroom is asserted rather than assumed.
  */
 
-const URL_ = "https://api.chicagofilmsupplies.com/mcp/cfs";
-const TOKEN = Deno.env.get("CFS_API_TOKEN");
-if (!TOKEN) {
-  console.error("CFS_API_TOKEN is not set. See the header comment.");
-  Deno.exit(2);
-}
+import {
+  type Classification,
+  GOODS_ACCOUNTS,
+  type Invoice,
+  INVOICE_FIELDS,
+  type Line,
+  loadClassification,
+  pageAll,
+  pct,
+  STRUCTURAL,
+  usd,
+} from "./corpus.ts";
 
-let sessionId: string | null = null;
-let rpcId = 0;
-
-async function post(payload: Record<string, unknown>, notify = false): Promise<unknown> {
-  if (!notify) payload.id = ++rpcId;
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    "Accept": "application/json, text/event-stream",
-    "Authorization": `Bearer ${TOKEN}`,
-    // Cloudflare 1010-bans some default client UAs on this zone — the same trap the workspace
-    // CLAUDE.md records for jsr.io ("jsr.io 403s python's default UA").
-    "User-Agent": "cfs-erp-spec-harness/1.0",
-  };
-  if (sessionId) headers["Mcp-Session-Id"] = sessionId;
-  const res = await fetch(URL_, { method: "POST", headers, body: JSON.stringify(payload) });
-  const sid = res.headers.get("Mcp-Session-Id");
-  if (sid) sessionId = sid;
-  const raw = await res.text();
-  if (!raw.trim()) return null;
-  // The endpoint may answer as SSE framing rather than a bare JSON body.
-  if (raw.trimStart().startsWith("event:") || raw.trimStart().startsWith("data:")) {
-    let out: unknown = null;
-    for (const line of raw.split("\n")) {
-      if (line.startsWith("data:")) out = JSON.parse(line.slice(5).trim());
-    }
-    return out;
-  }
-  return JSON.parse(raw);
-}
-
-async function init() {
-  await post({
-    jsonrpc: "2.0",
-    method: "initialize",
-    params: {
-      protocolVersion: "2024-11-05",
-      capabilities: {},
-      clientInfo: { name: "erp-spec-harness", version: "1.0" },
-    },
-  });
-  await post({ jsonrpc: "2.0", method: "notifications/initialized", params: {} }, true);
-}
-
-// deno-lint-ignore no-explicit-any
-async function callTool(name: string, args: Record<string, string>): Promise<any> {
-  const r = await post({ jsonrpc: "2.0", method: "tools/call", params: { name, arguments: args } });
-  // deno-lint-ignore no-explicit-any
-  const res = r as any;
-  if (!res?.result) throw new Error(JSON.stringify(r).slice(0, 500));
-  const text = (res.result.content ?? []).map((c: { text?: string }) => c.text ?? "").join("");
-  return JSON.parse(text);
-}
-
-interface Line {
-  uid: string;
-  type: string;
-  tracking_category: string | null;
-  quantity: number | null;
-  path?: string[];
-  price?: { subtotal_discounted_cents?: number | null };
-}
-interface Invoice {
-  uid: string;
-  number: number;
-  status: string;
-  items: Line[];
-}
-
-/** `next_cursor` is echoed on the final page too, so a short page is the only end signal. */
-async function pageInvoices(select: string, limit = 200): Promise<Invoice[]> {
-  const out: Invoice[] = [];
-  let cursor: string | undefined;
-  while (true) {
-    const args: Record<string, string> = { select, limit: String(limit) };
-    if (cursor) args.start_after = cursor;
-    const res = await callTool("db_invoices_query", args);
-    const docs = res.docs ?? [];
-    for (const d of docs) out.push(d.data ?? d);
-    cursor = res.next_cursor;
-    if (!cursor || docs.length < limit) break;
-  }
-  return out;
-}
-
-const STRUCTURAL = new Set(["order", "destination", "group"]);
-/** Revenue that describes something DONE, not something supplied. */
-const ACTIVITY = new Set(["Delivery", "Crew", "Trash & Cleanup", "Transaction Fees"]);
+/** The 2026-08-09 figures, so "a reading that moves the other way is a finding" is checkable here. */
+const BASELINE = {
+  poolCents: 21605025, // $216,050.25 Delivery revenue, voids INCLUDED
+  overGroups: 115,
+  overOfAllocable: 305,
+  overCents: 8942500, // $89,425.00
+  overShare: 0.414, // 41.4% of delivery revenue
+  ratioMedian: 0.775,
+  ratioP90: 3.13,
+  ratioMax: 25.0,
+  unallocableSpecExVoid: { groups: 11, cents: 1115000, share: 0.0516 }, // 5.16%
+  unallocableNullExcluded: { groups: 15, cents: 1241025, share: 0.0574 }, // 5.74%
+  divergence: { revenue_lines: 0.274, revenue_quantity: 0.315, lines_quantity: 0.335 },
+  craftyOwn: 1173500, // $11,735.00
+  craftyAllocated: 2195800, // $21,958.00
+  /** The five orders that were 85.5% of the unallocable bucket. */
+  netflixDuradeck: [1799, 1803, 1822, 1856, 1875],
+};
 
 type Basis = "revenue" | "lines" | "quantity";
 const BASES: Basis[] = ["revenue", "lines", "quantity"];
 
-interface Group {
-  number: number;
-  status: string;
-  delivery: number;
-  goods: { line: string; cents: number; qty: number }[];
-  goodsCents: number;
-}
-
 /**
  * Spread `pool` over `weights` by largest remainder, so the shares sum EXACTLY to the pool.
- * Integer minor units throughout — no float ever holds a money value (workspace CLAUDE.md).
- * Returns null when the basis has no positive denominator: that is a real population here, not an
- * error, and the caller must account for it rather than silently drop it.
+ *
+ * Integer minor units throughout — no float ever holds a money value. Returns null when the base has
+ * no positive denominator: that is a real population here, not an error, and the caller must account
+ * for it rather than silently drop it.
  */
-function spread(pool: number, weights: number[]): number[] | null {
+function spread(pool: number, weights: number[], keys: string[]): number[] | null {
   const denom = weights.reduce((a, b) => a + b, 0);
   if (denom <= 0) return null;
-  const raw = weights.map((w) => (pool * w) / denom);
-  const shares = raw.map((r) => Math.floor(r));
+  if (pool * denom > Number.MAX_SAFE_INTEGER) {
+    throw new Error(`headroom: pool ${pool} × denom ${denom} exceeds 2^53`);
+  }
+  const shares = weights.map((w) => Math.floor((pool * w) / denom));
+  const remainders = weights.map((w, i) => pool * w - shares[i] * denom);
   let residual = pool - shares.reduce((a, b) => a + b, 0);
-  const order = raw
-    .map((r, i) => [r - Math.floor(r), i] as const)
-    .sort((a, b) => b[0] - a[0]);
-  for (const [, i] of order) {
+  // Rank by integer remainder, ties broken on the key — the same ORDER BY the spec's SQL uses, and
+  // for the same reason: a tie broken by scan order makes the report irreproducible.
+  const order = remainders
+    .map((r, i) => [r, keys[i], i] as const)
+    .sort((a, b) => b[0] - a[0] || (a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0));
+  for (const [, , i] of order) {
     if (residual-- <= 0) break;
     shares[i] += 1;
   }
   return shares;
 }
 
-await init();
+// ── read ─────────────────────────────────────────────────────────────────────────────────────────
 
-const SELECT = "uid,number,status,items[].type,items[].tracking_category,items[].quantity," +
-  "items[].price.subtotal_discounted_cents,items[].path";
-const invoices = await pageInvoices(SELECT);
-console.log(`invoices paged: ${invoices.length}`);
+const cls: Classification = await loadClassification();
+const invoices = await pageAll<Invoice>("invoices", INVOICE_FIELDS);
 
-const byStatus = new Map<string, number>();
-for (const i of invoices) byStatus.set(i.status, (byStatus.get(i.status) ?? 0) + 1);
-console.log("by status:", Object.fromEntries(byStatus));
+console.log(`# Allocation basis, re-measured\n`);
+console.log(`corpus: ${invoices.length} invoices (999 on 2026-08-09, +${invoices.length - 999})`);
+console.log(
+  `spreading pools: ${[...cls.spreads].join(", ") || "(none)"} · ` +
+    `activity lines that do NOT spread: ${
+      [...cls.kind].filter(([k, v]) => v === "activity" && !cls.spreads.has(k)).map(([k]) => k)
+        .join(", ")
+    }`,
+);
 
-// ── bucket every revenue line under (invoice, causal order) ──────────────────────────────────────
+// ── classify every revenue line, then group by causal order ──────────────────────────────────────
+
+/** The spec's base test. `null` on a goods ACCOUNT is in; `null` elsewhere is neither pool nor base. */
+function isSpecBase(it: Line): boolean {
+  const tc = it.tracking_category ?? null;
+  if (tc === null) return it.coa_revenue != null && GOODS_ACCOUNTS.has(it.coa_revenue);
+  return cls.kind.get(tc) === "goods";
+}
+/** The 2026-08-09 probe's test — every null line excluded. Kept only to reproduce that figure. */
+function isLegacyBase(it: Line): boolean {
+  const tc = it.tracking_category ?? null;
+  return tc !== null && cls.kind.get(tc) === "goods";
+}
+
+/**
+ * The 2026-08-09 probe's ACTIVITY set, verbatim, so the failed prediction can be DECOMPOSED rather
+ * than narrated.
+ *
+ * Judging "must FALL" needs a row measured under the same base rule AND the same classification as
+ * the figure being compared to. Three things changed at once between the two runs — the corpus grew,
+ * the denorm was repaired, and OQ-034/OQ-032 moved two values — and attributing a direction to one of
+ * them while silently changing the other two is how a comparison becomes a story.
+ *
+ * ⚠️ The difference is not cosmetic: this set omits `Transport`, so $39,665 of activity revenue lands
+ * in the BASE under it. That inflates the denominator on exactly the thin groups the prediction was
+ * about, so it makes the pool-exceeds-base share look SMALLER than it is.
+ */
+const ACTIVITY_2026_08_09: ReadonlySet<string> = new Set([
+  "Delivery",
+  "Crew",
+  "Trash & Cleanup",
+  "Transaction Fees",
+]);
+function isLegacyClassBase(it: Line): boolean {
+  const tc = it.tracking_category ?? null;
+  return tc !== null && !ACTIVITY_2026_08_09.has(tc);
+}
+
+interface Group {
+  key: string;
+  number: number;
+  status: string;
+  year: string;
+  poolCents: number;
+  /** One entry per product-line bucket in the base. `null` reports under its own key. */
+  base: Map<string, { cents: number; qty: number; lines: number }>;
+  legacyBaseCents: number;
+  legacyClassBaseCents: number;
+  /**
+   * What a group carries that is NEITHER pool nor base, described. A zero-base group is the whole
+   * point of the `unallocated` row, so "base $0.00" is not an answer — it matters enormously whether
+   * the group carries nothing else at all, or carries revenue the base definition declines to count.
+   * ADR-0031 predicted five specific orders would leave this bucket; without this, a run can report
+   * that they did not and be unable to say why.
+   */
+  other: string[];
+}
+
 const groups = new Map<string, Group>();
-let lineTotal = 0, revenueLines = 0;
+let rows = 0, revenueLines = 0;
+let poolAll = 0, poolExVoid = 0;
+const excluded = new Map<string, { lines: number; cents: number }>();
+const ownRevenue = new Map<string, number>();
+let noOrderDivider = 0, multiOrder = 0;
+
 for (const inv of invoices) {
   const items = inv.items ?? [];
   const typeByUid = new Map(items.map((i) => [i.uid, i.type]));
+  const orderUids = new Set(items.filter((i) => i.type === "order").map((i) => i.uid));
+  if (orderUids.size === 0) noOrderDivider++;
+  if (orderUids.size > 1) multiOrder++;
+
   for (const it of items) {
-    lineTotal++;
+    rows++;
     if (STRUCTURAL.has(it.type)) continue;
     revenueLines++;
+    const cents = it.price?.subtotal_discounted_cents ?? 0;
+    const tc = it.tracking_category ?? null;
     const orderUid = (it.path ?? []).find((u) => typeByUid.get(u) === "order") ?? "-";
     const key = `${inv.uid}::${orderUid}`;
     let g = groups.get(key);
     if (!g) {
-      g = { number: inv.number, status: inv.status, delivery: 0, goods: [], goodsCents: 0 };
+      g = {
+        key,
+        number: inv.number,
+        status: inv.status,
+        year: (inv.date ?? "----").slice(0, 4),
+        poolCents: 0,
+        base: new Map(),
+        legacyBaseCents: 0,
+        legacyClassBaseCents: 0,
+        other: [],
+      };
       groups.set(key, g);
     }
-    const tc = it.tracking_category;
-    const cents = it.price?.subtotal_discounted_cents ?? 0;
-    if (tc === "Delivery") g.delivery += cents;
-    else if (tc !== null && !ACTIVITY.has(tc)) {
-      g.goods.push({ line: tc, cents, qty: it.quantity ?? 0 });
-      g.goodsCents += cents;
+
+    ownRevenue.set(tc ?? "«none»", (ownRevenue.get(tc ?? "«none»") ?? 0) + cents);
+
+    // The two reproduction counters accumulate OUTSIDE the branch below, because a line the current
+    // classification excludes from the base is exactly the line an older classification included.
+    if (isLegacyBase(it)) g.legacyBaseCents += cents;
+    if (isLegacyClassBase(it)) g.legacyClassBaseCents += cents;
+
+    const isPool = tc !== null && cls.spreads.has(tc);
+    if (isPool) {
+      g.poolCents += cents;
+      poolAll += cents;
+      if (inv.status !== "void") poolExVoid += cents;
+    } else if (isSpecBase(it)) {
+      const bk = tc ?? "«none»";
+      const b = g.base.get(bk) ?? { cents: 0, qty: 0, lines: 0 };
+      b.cents += cents;
+      b.qty += it.quantity ?? 0;
+      b.lines += 1;
+      g.base.set(bk, b);
+    } else {
+      // Neither pool nor base. Named rather than dropped: this is where a taxonomy change shows up.
+      const why = tc === null
+        ? `null product line on a non-goods account (${it.coa_revenue ?? "no account"})`
+        : cls.kind.get(tc) === undefined
+        ? `"${tc}" is not classified in \`line_kinds\``
+        : `activity line "${tc}" whose pool does not spread (${cls.poolStatus.get(tc) ?? "?"})`;
+      const e = excluded.get(why) ?? { lines: 0, cents: 0 };
+      e.lines++;
+      e.cents += cents;
+      excluded.set(why, e);
+      g.other.push(`${it.type}/${it.coa_revenue ?? "—"} ${tc ?? "«none»"} ${usd(cents)}`);
     }
   }
 }
-console.log(`lines: ${lineTotal} total, ${revenueLines} revenue-bearing`);
-console.log(`(invoice, order) groups: ${groups.size}`);
 
-const withDelivery = [...groups.values()].filter((g) => g.delivery !== 0);
-const totalDelivery = withDelivery.reduce((n, g) => n + g.delivery, 0);
-const noGoods = withDelivery.filter((g) => g.goods.length === 0);
+console.log(`rows: ${rows}, revenue-bearing: ${revenueLines}`);
+console.log(`(invoice, causal order) groups: ${groups.size}`);
 console.log(
-  `\ngroups carrying Delivery: ${withDelivery.length}, ` +
-    `$${(totalDelivery / 100).toLocaleString()}`,
+  `invoices with no order divider: ${noOrderDivider} · billing more than one order: ${multiOrder} ` +
+    `(0 of 999 on 2026-08-09 — the measurement that made order-scope free)`,
 );
 console.log(
-  `  DEGENERATE — no goods line at all: ${noGoods.length} groups, ` +
-    `$${(noGoods.reduce((n, g) => n + g.delivery, 0) / 100).toLocaleString()}`,
+  `\npool (${[...cls.spreads].join("+")}) revenue: ${usd(poolAll)} incl. void, ` +
+    `**${usd(poolExVoid)} ex-void** · void carve-out ${usd(poolAll - poolExVoid)} = ${
+      pct(poolAll - poolExVoid, poolAll)
+    } of the pool`,
 );
+console.log(
+  `baseline 2026-08-09: ${usd(BASELINE.poolCents)} incl. void ` +
+    `(Δ ${poolAll >= BASELINE.poolCents ? "+" : "−"}${
+      usd(Math.abs(poolAll - BASELINE.poolCents))
+    })`,
+);
+
+console.log(`\n## Revenue that is neither pool nor base\n`);
+console.log("| why | lines | revenue |");
+console.log("| --- | ---: | ---: |");
+for (const [why, e] of [...excluded].sort((a, b) => b[1].cents - a[1].cents)) {
+  console.log(`| ${why} | ${e.lines} | ${usd(e.cents)} |`);
+}
+
+// ── the populations ADR-0031 names ───────────────────────────────────────────────────────────────
+
+/** Every group that carries pool revenue. Voids excluded is the primary view (ADR-0031 clause 6). */
+const withPool = [...groups.values()].filter((g) => g.poolCents !== 0);
+const exVoid = withPool.filter((g) => g.status !== "void");
+
+function baseTotal(g: Group): number {
+  let n = 0;
+  for (const b of g.base.values()) n += b.cents;
+  return n;
+}
+
+interface Population {
+  label: string;
+  groups: Group[];
+  poolCents: number;
+  baseOf: (g: Group) => number;
+}
+const populations: Population[] = [
+  {
+    label: "spec base, ex-void (ADR-0031's own definition)",
+    groups: exVoid,
+    poolCents: poolExVoid,
+    baseOf: baseTotal,
+  },
+  { label: "spec base, incl. void", groups: withPool, poolCents: poolAll, baseOf: baseTotal },
+  {
+    label: "2026-08-09 base rule (null excluded), CURRENT classification, incl. void",
+    groups: withPool,
+    poolCents: poolAll,
+    baseOf: (g) => g.legacyBaseCents,
+  },
+  {
+    label:
+      "2026-08-09 base rule AND 2026-08-09 classification, incl. void — the true like-for-like",
+    groups: withPool,
+    poolCents: poolAll,
+    baseOf: (g) => g.legacyClassBaseCents,
+  },
+];
+
+console.log(`\n## Structurally unallocable — pool revenue with a zero base\n`);
+console.log("| base definition | groups | pool revenue | share of pool |");
+console.log("| --- | ---: | ---: | ---: |");
+for (const p of populations) {
+  const zero = p.groups.filter((g) => p.baseOf(g) <= 0);
+  const cents = zero.reduce((n, g) => n + g.poolCents, 0);
+  console.log(
+    `| ${p.label} | ${zero.length} | ${usd(cents)} | ${pct(cents, p.poolCents)} |`,
+  );
+}
+console.log(
+  `\nbaseline: spec base ex-void **${BASELINE.unallocableSpecExVoid.groups} groups / ${
+    usd(BASELINE.unallocableSpecExVoid.cents)
+  } / ${(100 * BASELINE.unallocableSpecExVoid.share).toFixed(2)}%** · ` +
+    `2026-08-09 definition ${BASELINE.unallocableNullExcluded.groups} / ${
+      usd(BASELINE.unallocableNullExcluded.cents)
+    } / ${(100 * BASELINE.unallocableNullExcluded.share).toFixed(2)}%`,
+);
+console.log(
+  `⚠️ **predicted direction: must FALL, possibly to ~0.** A reading that rises is a finding.`,
+);
+
+const unallocableSpec = exVoid.filter((g) => baseTotal(g) <= 0);
+{
+  const cents = unallocableSpec.reduce((n, g) => n + g.poolCents, 0);
+  const share = cents / poolExVoid;
+  const b = BASELINE.unallocableSpecExVoid;
+  // Three things move independently and only one of them is the prediction: the SHARE can fall
+  // purely because the pool denominator grew. Judge all three, or a growing bucket reports as
+  // progress.
+  console.log(
+    `\n**VERDICT** (spec base ex-void both sides): share ${(100 * b.share).toFixed(2)}% → ` +
+      `**${(100 * share).toFixed(2)}%** ${share < b.share ? "(fell)" : "(ROSE)"} · ` +
+      `amount ${usd(b.cents)} → **${usd(cents)}** ${cents < b.cents ? "(fell)" : "(ROSE)"} · ` +
+      `groups ${b.groups} → **${unallocableSpec.length}** ${
+        unallocableSpec.length < b.groups ? "(fell)" : "(ROSE)"
+      }.`,
+  );
+  if (share < b.share && cents >= b.cents) {
+    console.log(
+      `⚠️⚠️ **The share fell only because the POOL grew.** Nothing became allocable — the amount and ` +
+        `the group count both rose. Quoting the share alone would report this as the predicted ` +
+        `improvement. This is the same base-mismatch failure the corpus has already produced three ` +
+        `times, in its subtlest form: same base definition, different DENOMINATOR SIZE.`,
+    );
+  }
+}
+if (unallocableSpec.length) {
+  const byYear = new Map<string, { groups: number; cents: number }>();
+  for (const g of unallocableSpec) {
+    const y = byYear.get(g.year) ?? { groups: 0, cents: 0 };
+    y.groups++;
+    y.cents += g.poolCents;
+    byYear.set(g.year, y);
+  }
+  console.log(
+    `\nby year: ${
+      [...byYear].sort().map(([y, v]) => `${y} ${v.groups} groups ${usd(v.cents)}`).join(" · ")
+    }`,
+  );
+  console.log(
+    `largest: ${
+      [...unallocableSpec].sort((a, b) => b.poolCents - a.poolCents).slice(0, 8)
+        .map((g) => `inv ${g.number} ${usd(g.poolCents)}`).join(", ")
+    }`,
+  );
+}
+
+// The five Netflix Duradeck invoices were 85.5% of the recorded bucket, and ADR-0031 predicts they
+// leave it once Duradeck reads `Surface Protection`. Named explicitly because "the share fell" and
+// "the specific case predicted to move did move" are different claims.
+console.log(`\n### The five Netflix Duradeck orders (85.5% of the recorded bucket)\n`);
+for (const n of BASELINE.netflixDuradeck) {
+  const gs = [...groups.values()].filter((g) => g.number === n);
+  if (!gs.length) {
+    console.log(`- inv ${n}: not in the corpus`);
+    continue;
+  }
+  for (const g of gs) {
+    const bt = baseTotal(g);
+    console.log(
+      `- inv ${n} (${g.status}, ${g.year}): pool ${usd(g.poolCents)}, base ${usd(bt)} across ` +
+        `${[...g.base.keys()].join("+") || "nothing"} → ${
+          bt > 0 ? "**allocable**" : "still unallocable"
+        }`,
+    );
+    if (bt <= 0) {
+      console.log(`    everything else on the order: ${g.other.join(" | ") || "(nothing)"}`);
+    }
+  }
+}
+
+// ── pool bigger than its own base ────────────────────────────────────────────────────────────────
+
+console.log(`\n## Groups where the pool EXCEEDS the base it spreads over\n`);
+console.log(
+  "| base definition | over / allocable | pool held | share of pool | median | p90 | max |",
+);
+console.log("| --- | ---: | ---: | ---: | ---: | ---: | ---: |");
+for (const p of populations) {
+  const allocable = p.groups.filter((g) => p.baseOf(g) > 0);
+  const over = allocable.filter((g) => g.poolCents > p.baseOf(g));
+  const held = over.reduce((n, g) => n + g.poolCents, 0);
+  const ratios = allocable.map((g) => g.poolCents / p.baseOf(g)).sort((a, b) => a - b);
+  const at = (q: number) => ratios.length ? ratios[Math.floor(q * ratios.length)] : NaN;
+  console.log(
+    `| ${p.label} | ${over.length} / ${allocable.length} | ${usd(held)} | ${
+      pct(held, p.poolCents)
+    } | ${at(0.5).toFixed(3)} | ${at(0.9).toFixed(2)} | ${
+      (ratios[ratios.length - 1] ?? NaN).toFixed(2)
+    } |`,
+  );
+}
+console.log(
+  `\nbaseline 2026-08-09: **${BASELINE.overGroups} of ${BASELINE.overOfAllocable} groups / ${
+    usd(BASELINE.overCents)
+  } / ${(100 * BASELINE.overShare).toFixed(1)}% of delivery revenue**, ` +
+    `median ${BASELINE.ratioMedian}, p90 ${BASELINE.ratioP90}, max ${BASELINE.ratioMax}`,
+);
+console.log(
+  `⚠️ **predicted direction: must FALL** — the base grows on exactly the thinnest groups.`,
+);
+
+// The verdict is computed, not eyeballed. The baseline was measured under the 2026-08-09 definition
+// (all null lines excluded, voids included), so that is the row the prediction is judged against —
+// comparing the spec-base row to it would fold a definitional change into a direction claim.
+{
+  const p = populations[3];
+  const allocable = p.groups.filter((g) => p.baseOf(g) > 0);
+  const over = allocable.filter((g) => g.poolCents > p.baseOf(g));
+  const held = over.reduce((n, g) => n + g.poolCents, 0);
+  const share = held / p.poolCents;
+  const ratios = allocable.map((g) => g.poolCents / p.baseOf(g)).sort((a, b) => a - b);
+  const median = ratios[Math.floor(0.5 * ratios.length)];
+  const fell = share < BASELINE.overShare;
+  console.log(
+    `\n**LIKE-FOR-LIKE VERDICT** (2026-08-09 definition both sides): ` +
+      `${(100 * BASELINE.overShare).toFixed(1)}% → **${(100 * share).toFixed(2)}%**, ` +
+      `${BASELINE.overGroups}/${BASELINE.overOfAllocable} → ${over.length}/${allocable.length} groups, ` +
+      `median ratio ${BASELINE.ratioMedian} → ${median.toFixed(3)}. ` +
+      (fell
+        ? `Prediction HELD — it fell.`
+        : `⚠️⚠️ **THE PREDICTION FAILED — it ROSE.** The pool grew faster than the base on the ` +
+          `typical group, which is the opposite of what "the base grows on exactly the thin groups" ` +
+          `assumed. This is a finding, not a result.`),
+  );
+}
 
 // ── allocate under each basis ────────────────────────────────────────────────────────────────────
+
 const alloc: Record<Basis, Map<string, number>> = {
   revenue: new Map(),
   lines: new Map(),
@@ -206,57 +471,65 @@ const alloc: Record<Basis, Map<string, number>> = {
 };
 const unallocable: Record<Basis, number> = { revenue: 0, lines: 0, quantity: 0 };
 
-for (const g of withDelivery) {
+for (const g of exVoid) {
+  const keys = [...g.base.keys()];
   for (const basis of BASES) {
-    const weights = g.goods.map((x) =>
-      basis === "revenue" ? x.cents : basis === "lines" ? 1 : x.qty
-    );
-    const shares = spread(g.delivery, weights);
+    const weights = keys.map((k) => {
+      const b = g.base.get(k)!;
+      return basis === "revenue" ? b.cents : basis === "lines" ? b.lines : b.qty;
+    });
+    const shares = spread(g.poolCents, weights, keys);
     if (!shares) {
-      unallocable[basis] += g.delivery;
+      unallocable[basis] += g.poolCents;
       continue;
     }
-    g.goods.forEach((x, i) => {
-      alloc[basis].set(x.line, (alloc[basis].get(x.line) ?? 0) + shares[i]);
-    });
+    keys.forEach((k, i) => alloc[basis].set(k, (alloc[basis].get(k) ?? 0) + shares[i]));
   }
 }
 
-console.log("\nunallocable delivery revenue (no positive denominator):");
-for (const b of BASES) {
+// The control total the spec's SQL names as the invariant that can actually fail.
+for (const basis of BASES) {
+  const allocated = [...alloc[basis].values()].reduce((a, b) => a + b, 0);
+  const sum = allocated + unallocable[basis];
+  const ok = sum === poolExVoid;
   console.log(
-    `  ${b.padEnd(9)}: $${(unallocable[b] / 100).toLocaleString()} ` +
-      `(${(100 * unallocable[b] / totalDelivery).toFixed(1)}%)`,
+    `\ncontrol total (${basis}): allocated ${usd(allocated)} + unallocated ${
+      usd(unallocable[basis])
+    } = ${usd(sum)} ${ok ? "✅ equals the pool" : `❌ pool is ${usd(poolExVoid)}`}`,
   );
+  if (!ok) throw new Error(`control total failed for basis ${basis}`);
 }
 
-const own = new Map<string, number>();
-const ownQty = new Map<string, number>();
-for (const g of groups.values()) {
-  for (const x of g.goods) {
-    own.set(x.line, (own.get(x.line) ?? 0) + x.cents);
-    ownQty.set(x.line, (ownQty.get(x.line) ?? 0) + x.qty);
+console.log(`\n## Allocated pool revenue per product line, by basis (ex-void)\n`);
+console.log("| product line | own revenue | by revenue | by lines | by quantity | units / $100 |");
+console.log("| --- | ---: | ---: | ---: | ---: | ---: |");
+const baseOwn = new Map<string, { cents: number; qty: number }>();
+for (const g of exVoid) {
+  for (const [k, b] of g.base) {
+    const o = baseOwn.get(k) ?? { cents: 0, qty: 0 };
+    o.cents += b.cents;
+    o.qty += b.qty;
+    baseOwn.set(k, o);
   }
 }
-
-console.log("\n=== allocated delivery revenue per product line, by basis ===");
-console.log(
-  "product line".padEnd(28) + "own rev".padStart(12) + "by revenue".padStart(13) +
-    "by lines".padStart(12) + "by qty".padStart(12) + "units/$100".padStart(12),
-);
-for (const line of [...own.keys()].sort((a, b) => own.get(b)! - own.get(a)!)) {
-  const rev = own.get(line)! / 100;
-  const ratio = rev > 0 ? ownQty.get(line)! / (rev / 100) : NaN;
+for (const k of [...baseOwn.keys()].sort((a, b) => baseOwn.get(b)!.cents - baseOwn.get(a)!.cents)) {
+  const o = baseOwn.get(k)!;
+  const per100 = o.cents > 0 ? (o.qty / (o.cents / 10000)).toFixed(2) : "n/a";
   console.log(
-    line.padEnd(28) + rev.toFixed(0).padStart(12) +
-      ((alloc.revenue.get(line) ?? 0) / 100).toFixed(0).padStart(13) +
-      ((alloc.lines.get(line) ?? 0) / 100).toFixed(0).padStart(12) +
-      ((alloc.quantity.get(line) ?? 0) / 100).toFixed(0).padStart(12) +
-      ratio.toFixed(2).padStart(12),
+    `| ${k} | ${usd(o.cents)} | ${usd(alloc.revenue.get(k) ?? 0)} | ${
+      usd(alloc.lines.get(k) ?? 0)
+    } | ${usd(alloc.quantity.get(k) ?? 0)} | ${per100} |`,
   );
 }
 
-console.log("\n=== divergence between bases (sum of absolute per-line differences) ===");
+console.log(`\n## Divergence between bases (sum of absolute per-line differences, ex-void)\n`);
+console.log("| pair | reassigned | share of pool | 2026-08-09 |");
+console.log("| --- | ---: | ---: | ---: |");
+const baselineDiv: Record<string, number> = {
+  "revenue vs lines": BASELINE.divergence.revenue_lines,
+  "revenue vs quantity": BASELINE.divergence.revenue_quantity,
+  "lines vs quantity": BASELINE.divergence.lines_quantity,
+};
 for (let i = 0; i < BASES.length; i++) {
   for (let j = i + 1; j < BASES.length; j++) {
     const a = alloc[BASES[i]], b = alloc[BASES[j]];
@@ -264,25 +537,51 @@ for (let i = 0; i < BASES.length; i++) {
     for (const k of new Set([...a.keys(), ...b.keys()])) {
       d += Math.abs((a.get(k) ?? 0) - (b.get(k) ?? 0));
     }
+    const label = `${BASES[i]} vs ${BASES[j]}`;
     console.log(
-      `  ${BASES[i].padEnd(9)} vs ${BASES[j].padEnd(9)}: $${(d / 100).toLocaleString()} = ` +
-        `${(100 * d / totalDelivery).toFixed(1)}% of delivery revenue reassigned`,
+      `| ${label} | ${usd(d)} | ${pct(d, poolExVoid)} | ${
+        (100 * baselineDiv[label]).toFixed(1)
+      }% |`,
     );
   }
 }
+console.log(`\n⚠️ **predicted direction: unknown.** More lines in the base cuts both ways.`);
 
-// ── is the pool bigger than its own base? ────────────────────────────────────────────────────────
-const allocable = withDelivery.filter((g) => g.goodsCents > 0);
-const over = allocable.filter((g) => g.delivery > g.goodsCents);
-const ratios = allocable.map((g) => g.delivery / g.goodsCents).sort((a, b) => a - b);
+// ── the Crafty case ADR-0031 uses as its illustration ────────────────────────────────────────────
+
+const craftyOwn = baseOwn.get("Crafty")?.cents ?? 0;
+const craftyAlloc = alloc.revenue.get("Crafty") ?? 0;
+console.log(`\n## The \`Crafty\` illustration\n`);
 console.log(
-  `\ngroups where delivery revenue EXCEEDS the goods it spreads over: ` +
-    `${over.length} of ${allocable.length}, holding ` +
-    `$${(over.reduce((n, g) => n + g.delivery, 0) / 100).toLocaleString()} ` +
-    `(${(100 * over.reduce((n, g) => n + g.delivery, 0) / totalDelivery).toFixed(1)}%)`,
+  `own revenue on pool-bearing groups **${usd(craftyOwn)}** (was ${usd(BASELINE.craftyOwn)}); ` +
+    `allocated by revenue **${usd(craftyAlloc)}** (was ${usd(BASELINE.craftyAllocated)}) = ` +
+    `**${pct(craftyAlloc, craftyOwn)} of its own** (was ${
+      pct(BASELINE.craftyAllocated, BASELINE.craftyOwn)
+    }).`,
 );
-console.log(
-  `  delivery/goods ratio: median ${ratios[Math.floor(ratios.length / 2)].toFixed(3)}, ` +
-    `p90 ${ratios[Math.floor(0.9 * ratios.length)].toFixed(3)}, ` +
-    `max ${ratios[ratios.length - 1].toFixed(2)}`,
-);
+
+// ── every activity pool's own revenue, spreading or not ──────────────────────────────────────────
+
+console.log(`\n## Activity pools — own revenue and whether it spreads (all invoices)\n`);
+console.log("| product line | pool status | own revenue | share of line revenue |");
+console.log("| --- | --- | ---: | ---: |");
+const lineRevenue = [...ownRevenue.values()].reduce((a, b) => a + b, 0);
+for (const [k, kind] of [...cls.kind].filter(([, v]) => v === "activity")) {
+  console.log(
+    `| ${k} | ${cls.poolStatus.get(k) ?? "⚠️ no pool"} | ${usd(ownRevenue.get(k) ?? 0)} | ${
+      pct(ownRevenue.get(k) ?? 0, lineRevenue)
+    } |`,
+  );
+  void kind;
+}
+console.log(`\nline revenue (all invoices, tax-exclusive): ${usd(lineRevenue)}`);
+if ((ownRevenue.get("Shipping") ?? 0) === 0 && cls.declared.has("Shipping")) {
+  console.log(
+    `\n⚠️ **\`Shipping\` reads $0.00 and is NOT a repeat of the \`Transport\` failure.** OQ-034 split ` +
+      `the two values in the spec on 2026-08-16; the corpus still carries one value \`Transport\` ` +
+      `spanning both accounts. The split is derivable by account and reproduces the spec's stated ` +
+      `figures exactly — see \`deno task matrix-lines\`, which measures 4100 (trucking) and 4150 ` +
+      `(shipping) separately. What is outstanding is the historical restatement, an ADR-0020 ` +
+      `obligation, not a re-declaration.`,
+  );
+}
