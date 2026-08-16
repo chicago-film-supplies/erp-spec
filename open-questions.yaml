@@ -567,7 +567,29 @@ open_questions:
     owner: alex
     decide_by: 2026-09-15
     blocks: [REQ-LED]
-    status: open
+    status: answered
+    answer: >-
+      **A supplier discount is a CONTRA-COGS. `5001` survives and `4300 Discounts Received` is
+      retired (merge_into: 5001).** Owner accepted the survey recommendation 2026-08-16.
+      ⚠️ **The question was reframed by the survey, and the reframing is the answer.** ASC 330 treats
+      a cash discount as reducing the cost of the goods — but the guidance **permits either
+      treatment** and **requires consistency**. So the defect was never which account is right; it
+      was that BOTH were Active, making the treatment whichever the operator picked. Under a standard
+      that permits either while requiring consistency, operator-by-operator choice is the one thing
+      not permitted.
+      A prediction made before the survey — that "GAAP likely has a firm answer here, which would
+      make this narrower than it looks" — was **wrong**, and is exactly the prior the survey rule
+      exists to catch
+      (`inbox/2026-08-16-survey-a-vendor-side-amount-becomes-revenue-only-where-control-or-a-markup-does.md`).
+      **Both accounts now carry `dimensions: []`.** A supplier discount reduces what CFS PAID, not
+      what CFS sold, so it has no customer product line; ADR-0025 makes that obligation per account.
+      **Population, from the owner 2026-08-16**: discounts are "often none"; where they exist it is
+      net-30 style terms with account vendors. Early-payment terms and small — not volume rebates,
+      not marketing or co-op allowances, each of which GAAP treats differently again.
+      ⚠️ **One migration precondition, recorded on 4300 rather than left here**: whether 4300 has ever
+      been posted to is UNMEASURED. Never → the merge is free. Ever → a restatement under ADR-0020,
+      in scope because it alters no amount. AP is thin today (OQ-020), so the answer may exist only
+      in Xero.
     notes: >-
       `4300 Discounts Received` (Revenue) and `5001 Cost of Goods Sold: Purchase Discounts`
       (contra-Expense) record the same economic event on opposite sides of the P&L, and **both are
@@ -1400,7 +1422,38 @@ open_questions:
     owner: alex
     decide_by: 2026-11-15
     blocks: []
-    status: open
+    status: answered
+    answer: >-
+      **`product_line: null`, and the obligation to DECLARE stands.** Owner accepted the survey
+      recommendation 2026-08-16. Both `4140 Pass Through Income` and `5150 Cost of Goods Sold: Pass
+      Through` carry `dimensions: [product_line]`, and the value written is normally null.
+      `ledger/dimensions.yaml` already defines that exact fact — "this IS a categorised kind of sale,
+      and no tracked product line applies to it" — and a pass-through is precisely that: a real sale
+      of a thing that by rule is not in the catalogue.
+      ⚠️ **Deliberately DIFFERENT from what 4700/5500 took the same day**, which is no dimension
+      obligation at all. A card fee is not a sale; a pass-through is. Two empty-looking answers, two
+      different reasons, and keeping them apart is what `dimensions.yaml` exists for.
+      ✅ **Observed, not only proposed**: the one pass-through line in the corpus
+      (`1Qr50IQXdPjKC2cB7WyV` — "Internet @ Firehouse", $800.00) already carries
+      `tracking_category: null`.
+      **The prior question — gross or net — was settled by the survey: CFS is a PRINCIPAL, so the
+      presentation is GROSS.** 4140 carries the full re-billed amount, 5150 the full vendor cost.
+      ASC 606's test is CONTROL, and responsibility-for-acceptability plus price discretion establish
+      it; SAP's third-party order processing explains the remaining indicator, since a **statistical
+      goods receipt** is exactly how a principal holds no inventory. NetSuite's default is the
+      opposite (net, unless "Track Billable Expense in" is set), so gross is a recorded decision
+      rather than an assumption.
+      ✅ **A rule accepted with it**: pass-through items are **exclusively custom items, never
+      product/service catalogue entries** (owner). Self-enforcing by its own logic — a durable
+      wholesale price warrants a catalogue product instead — and already true of the corpus: 0 of 549
+      products carry `coa_revenue: 4140`. **Requirement-shaped and enforceable: a PRODUCT configured
+      to 4140 should be refused.** Tracked as erp-spec work rather than left in prose.
+      ⚠️ **Accepted as unmeasurable**: where the vendor cost landed in Xero cannot be established
+      from CFS data — a pass-through's cost is an ACCPAY bill and CFS deliberately mirrors none, and
+      this repo must not call the Xero API. The revenue half IS visible and IS gross.
+      ⚠️ **Rests on the arrangement, not on volume.** One line is not a population. The determination
+      assumes CFS is primarily responsible on every pass-through; if that ever varies, one account
+      cannot carry both treatments and the determination becomes per-arrangement.
     notes: >-
       Raised 2026-08-16 while pairing a cost account to `4140 Pass Through Income`. Owner: CFS buys
       something for a customer, marks it up and bills them for it, "usually from a vendor that isnt

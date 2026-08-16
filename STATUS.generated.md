@@ -11,7 +11,7 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 8 open | 33 answered of 41 · **0 with no owner or no decide-by** |
+| Open questions | 6 open | 35 answered of 41 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 13 | 1 open |
 | Decisions (ADR) | 34 | 17 in force · 15 proposed |
 | Spikes | 12 | 9 open |
@@ -22,14 +22,12 @@ is `deno task validate`'s judgement, not this file's.
 
 ## The bottleneck: undecided questions
 
-**8 of 41 still open**, soonest decide-by first.
+**6 of 41 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
-| `OQ-026` | Is a supplier discount other income (4300) or a contra-COGS (5001), and which of the two… | alex | 2026-09-15 | `REQ-LED` |
 | `OQ-030` | Does CFS introduce a forced-call (short-turnaround) premium, and if so what is the turnar… | alex | 2026-10-15 | `REQ-LED` |
 | `OQ-035` | Does CFS introduce a production-type classification — `studio | indie | corporate/commerc… | alex | 2026-10-15 | — |
-| `OQ-041` | Does a pass-through purchase carry a product line — and if so, which one: the line of the… | alex | 2026-11-15 | — |
 | `OQ-033` | Once the shipping specs are populated, which physical basis becomes allocation basis v2 —… | alex | 2026-12-15 | `ADR-0031` |
 | `OQ-038` | Does CFS operate credit limits and credit holds in v2 — what triggers a hold, who overrid… | alex | 2026-12-15 | — |
 | `OQ-040` | Is `settlement_point` a declared LEDGER DIMENSION, or a document attribute the read side… | alex | 2026-12-15 | `ADR-0033` |

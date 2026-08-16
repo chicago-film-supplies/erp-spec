@@ -894,14 +894,16 @@ accounts:
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
-    dimensions: undecided
-    blocked_by: [OQ-041]
-    reason: >-
-      A rebilled purchase may belong to no CFS product line at all — CFS is buying a thing it does
-      not stock from a vendor it does not normally use. This entry previously ASSERTED that "a
-      rebilled cost takes the product line of the thing passed through"; that is the assumption
-      OQ-041 tests rather than a settled rule.
+    dimensions: [product_line]
     note: >-
+      ✅ **Dimension decided 2026-08-16 (OQ-041): the obligation to DECLARE stands, and the value is
+      normally `null`.** A pass-through is a real sale of a thing that by rule is not in the
+      catalogue, which is exactly the fact `ledger/dimensions.yaml` reserves null for — "this IS a
+      categorised kind of sale, and no tracked product line applies to it". ⚠️ Deliberately DIFFERENT
+      from 4700/5500, which carry no obligation at all: a card fee is not a sale. Two empty-looking
+      answers, two different reasons, and keeping them apart is what that file exists for.
+      Observed rather than only proposed — the one pass-through line in the corpus
+      (`1Qr50IQXdPjKC2cB7WyV`) already carries `tracking_category: null`.
       One of the five `name: "TODO"` accounts. **CFS buys something for a customer, marks it up and
       bills them for it — usually from a vendor that is unwilling or unable to onboard the customer
       direct** (owner, 2026-08-16). CFS is acting as a purchasing agent.
@@ -957,12 +959,21 @@ accounts:
     name: "Discounts Received"
     class: revenue
     normal_balance: credit
-    dimensions: undecided
-    blocked_by: [OQ-026]
-    disposition: undecided
+    dimensions: []
+    disposition: merge
+    merge_into: 5001
     status_live: Active
     reason: >-
-      Overlaps `5001 Cost of Goods Sold: Purchase Discounts`, which records the same economic
+      ✅ **RETIRED 2026-08-16 (OQ-026): a supplier discount is a contra-COGS, and 5001 survives.**
+      ASC 330 treats a cash discount as reducing the cost of the goods, and while the guidance permits
+      either treatment it **requires consistency** — so the defect was never which account, it was
+      that BOTH were Active and the treatment was whichever the operator picked. That is the one
+      thing a consistency requirement forbids.
+      ⚠️ **Migration precondition, not a spec blocker**: whether this account has ever been posted to
+      is UNMEASURED. Never → the merge is free. Ever → a restatement under ADR-0020, which is in
+      scope because moving a line between accounts alters no amount. AP is thin in the current
+      system (OQ-020), so the answer may only exist in Xero.
+      Historical context, retained: it overlaps `5001 Cost of Goods Sold: Purchase Discounts`, which records the same economic
       event on the other side of the P&L. Whether a supplier discount is other income or a
       contra-COGS changes reported gross margin without changing net income, so it is a
       presentation decision for the owner and the CPA, not a mechanical one. Both accounts are
@@ -1094,14 +1105,16 @@ accounts:
     class: expense
     normal_balance: credit
     contra: true
-    dimensions: undecided
-    blocked_by: [OQ-026]
+    dimensions: []
     disposition: adopt
     status_live: Active
-    reason: >-
-      Undecided for the same reason as 4300, with which this account overlaps: until OQ-026 says
-      whether a supplier discount is other income or a contra-COGS, it is not settled which of the
-      two accounts survives — and the dimension follows that answer.
+    note: >-
+      ✅ **The surviving account for supplier discounts, decided 2026-08-16 (OQ-026)**; `4300
+      Discounts Received` merges into it. ASC 330's default treatment is a reduction of the cost of
+      the goods, and the binding requirement is consistency rather than the choice itself.
+      **Carries no product line.** A supplier discount has no CUSTOMER product line — it reduces what
+      CFS paid, not what CFS sold — and ADR-0025 makes the obligation per account, so `[]` is a legal
+      shape here. Same empty list as 4700/5500 and for the same reason: this is not a sale.
     source: "api:2026-08-09:db_chart_of_accounts_query"
 
   - code: 5100
@@ -1123,8 +1136,7 @@ accounts:
     name: "Cost of Goods Sold: Pass Through"
     class: expense
     normal_balance: debit
-    dimensions: undecided
-    blocked_by: [OQ-041]
+    dimensions: [product_line]
     disposition: new
     status_live: absent
     reason: >-
