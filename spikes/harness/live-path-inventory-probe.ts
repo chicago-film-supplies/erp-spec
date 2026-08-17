@@ -53,6 +53,22 @@ import { todayUTC } from "../../tools/dates.ts";
 const ID_KEY =
   /^(custom-)?([A-Za-z0-9_-]{20}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|\d+)$/;
 
+/**
+ * ⚠️ **`ID_KEY` alone is too loose to accuse a single segment**, and firing it at one is how a
+ * reporter becomes noise. `[A-Za-z0-9_-]{20}` matches a Firestore auto-id — and it also matches
+ * `recurrence_overrides`, `crms_opportunity_ids`, `crms_stock_level_ids` and
+ * `last_message_preview`, every one of them exactly 20 characters and every one a real field. The
+ * first run of the leak reporter below returned all four and nothing else, which is a reporter
+ * nobody would read twice.
+ *
+ * The looseness is SAFE in the collapse, because the collapse needs three or more SIBLINGS all
+ * matching — three field names of exactly 20 characters side by side, with no other key, does not
+ * happen. It is not safe on its own. So the accusation adds what an auto-id actually looks like:
+ * no `_` or `-`, and mixed case.
+ */
+const LOOKS_GENERATED = (seg: string) =>
+  ID_KEY.test(seg) && !/[_-]/.test(seg) && /[a-z]/.test(seg) && /[A-Z]/.test(seg);
+
 /** Dynamic-map paths collapsed to `<key>`, reported so the collapse is auditable, never silent. */
 const collapsed = new Set<string>();
 
@@ -65,30 +81,84 @@ const collapsed = new Set<string>();
  * "the children are homogeneous", is deliberately NOT used — plenty of real field groups are
  * homogeneous (`address.city`/`.street`/`.postcode`), and it would collapse them.
  */
-const paths = (node: unknown, prefix: string, out: Set<string>, depth = 0): void => {
+const paths = (
+  node: unknown,
+  prefix: string,
+  out: Set<string>,
+  depth = 0,
+  dyn?: Set<string>,
+): void => {
   if (depth > 12) return; // pathological nesting; nothing in this corpus approaches it
   if (Array.isArray(node)) {
     // An array of scalars is a leaf (`query_by_orders[]`); an array of maps opens `[]`.
     if (node.length === 0) out.add(`${prefix}[]`);
     else if (node.some((v) => v !== null && typeof v === "object" && !(v instanceof Date))) {
-      for (const v of node) paths(v, `${prefix}[]`, out, depth + 1);
+      for (const v of node) paths(v, `${prefix}[]`, out, depth + 1, dyn);
     } else out.add(`${prefix}[]`);
     return;
   }
   if (node !== null && typeof node === "object" && !(node instanceof Date)) {
     const entries = Object.entries(node as Record<string, unknown>);
     if (entries.length === 0) out.add(prefix);
-    const dynamic = entries.length >= 3 && entries.every(([k]) => ID_KEY.test(k));
+    const dynamic = dyn ? dyn.has(prefix) : isDynamicMap(entries.map(([k]) => k));
     if (dynamic) {
       if (prefix) collapsed.add(prefix);
       // One representative child is enough — they are the same record shape by construction.
-      for (const [, v] of entries) paths(v, `${prefix}.<key>`, out, depth + 1);
+      for (const [, v] of entries) paths(v, `${prefix}.<key>`, out, depth + 1, dyn);
       return;
     }
-    for (const [k, v] of entries) paths(v, prefix ? `${prefix}.${k}` : k, out, depth + 1);
+    for (const [k, v] of entries) paths(v, prefix ? `${prefix}.${k}` : k, out, depth + 1, dyn);
     return;
   }
   if (prefix) out.add(prefix);
+};
+
+/**
+ * At least three entries and every key id-shaped. Three, not one: a two-key map of real field names
+ * whose names happen to look like ids is implausible, and a genuine record map always has many. The
+ * alternative heuristic, "the children are homogeneous", is deliberately NOT used — plenty of real
+ * field groups are homogeneous (`address.city`/`.street`/`.postcode`), and it would collapse them.
+ */
+const isDynamicMap = (keys: string[]) => keys.length >= 3 && keys.every((k) => ID_KEY.test(k));
+
+/**
+ * ⚠️ **The threshold has to be applied per COLLECTION, and applying it per DOCUMENT was a real
+ * defect** — found 2026-08-16 while wiring m6's criterion, because 31 measured "paths" were doc ids.
+ *
+ * Paths are unioned across documents but the collapse decision was taken inside a single document,
+ * so a `tracking-categories` record whose `products` map held **two** entries failed the `>= 3`
+ * test, kept its literal uid keys, and put them in the union beside the `<key>` form contributed by
+ * a record that held three. Both readings of the same map, in one inventory. `tracking-categories`
+ * carried 14 such paths and `products.crms_stock_level_ids` 3.
+ *
+ * That is the same defect this file's own header describes fixing ("1,123 paths across 20
+ * documents") — **the fix was incomplete and nothing could see it**, because the collapse reported
+ * what it DID collapse and never looked at what it left behind. The pre-pass below decides
+ * dynamic-ness from the union of keys seen at each prefix across every document, and the assertion
+ * after it is what makes the incompleteness visible next time.
+ *
+ * ⚠️ It cannot catch every case, and the one it misses is named rather than left implicit:
+ * `uploadcare-sweep.ref_counts` is keyed `<project>/<collection>`, which is a composite NAME and not
+ * id-shaped. No heuristic over key spelling will find that; it is settled in the field map instead.
+ */
+const keysAtPrefix = (node: unknown, prefix: string, acc: Map<string, Set<string>>, depth = 0) => {
+  if (depth > 12) return;
+  if (Array.isArray(node)) {
+    for (const v of node) {
+      if (v !== null && typeof v === "object" && !(v instanceof Date)) {
+        keysAtPrefix(v, `${prefix}[]`, acc, depth + 1);
+      }
+    }
+    return;
+  }
+  if (node === null || typeof node !== "object" || node instanceof Date) return;
+  const entries = Object.entries(node as Record<string, unknown>);
+  if (prefix) {
+    const set = acc.get(prefix) ?? new Set<string>();
+    for (const [k] of entries) set.add(k);
+    acc.set(prefix, set);
+  }
+  for (const [k, v] of entries) keysAtPrefix(v, prefix ? `${prefix}.${k}` : k, acc, depth + 1);
 };
 
 const collections = await listCollections();
@@ -101,10 +171,25 @@ const inventory: {
   paths: string[];
 }[] = [];
 
+/** Paths whose last segment is still an id — what the collapse missed. Reported, never swallowed. */
+const leaked = new Set<string>();
+
 for (const c of collections) {
   const { scanned, capped, docs } = await pathScan(c, 60000);
+  // Pre-pass: which prefixes are dynamic maps, decided across the WHOLE collection.
+  const keys = new Map<string, Set<string>>();
+  for (const d of docs) keysAtPrefix(d, "", keys);
+  const dyn = new Set<string>();
+  for (const [prefix, ks] of keys) if (isDynamicMap([...ks])) dyn.add(prefix);
+
   const set = new Set<string>();
-  for (const d of docs) paths(d, "", set);
+  for (const d of docs) paths(d, "", set, 0, dyn);
+  for (const p of set) {
+    if (p.includes("<key>")) continue; // already collapsed; the `<key>` IS the report
+    if (p.split(".").some((seg) => LOOKS_GENERATED(seg.replace(/\[\]$/, "")))) {
+      leaked.add(`${c}.${p}`);
+    }
+  }
   const sorted = [...set].sort();
   inventory.push({ collection: c, documents: scanned, capped, paths: sorted });
   console.log(
@@ -124,6 +209,19 @@ if (collapsed.size) {
     `\ndynamic maps collapsed to \`<key>\` (${collapsed.size}) — a key identifying a RECORD, not a field:`,
   );
   for (const p of [...collapsed].sort()) console.log(`  ${p}.<key>`);
+}
+// ⚠️ **The arm that would have caught the per-document collapse.** A path segment that is still
+// id-shaped after the pre-pass is a record key being reported as a field — the exact defect this
+// probe's header says it fixed and did not. Reported by name, because a count alone would not say
+// which heuristic gave up.
+if (leaked.size) {
+  console.log(
+    `\n⚠️ ${leaked.size} path(s) still carry an id-shaped segment — a RECORD key reported as a` +
+      ` FIELD. Either the collapse threshold missed a map, or the key is a composite name no` +
+      ` heuristic over spelling can detect (\`uploadcare-sweep.ref_counts.<project>/<collection>\`).` +
+      ` Settle each in migration/field-map.yaml rather than leaving it in the denominator:`,
+  );
+  for (const p of [...leaked].sort()) console.log(`  ${p}`);
 }
 // ⚠️ No silent caps. A partial sweep that reads as exhaustive is worse than no sweep.
 if (cappedCollections.length) {

@@ -1921,3 +1921,36 @@ open_questions:
       current system has no absorbed-labour stage at all (erp-spec#14) — so there is no corpus figure
       to size this from. `compensation` being present from day one is what makes the population
       countable the moment the stage exists.
+  - id: OQ-049
+    question: >-
+      Does v2 carry the operational collaboration surface — the board (`cards`, `lists`) and the
+      comment threads (`threads`, `comments`) — or does the charter's silence mean it is out of
+      scope?
+    owner: alex
+    decide_by: 2027-01-31
+    blocks: []
+    status: open
+    notes: >-
+      Opened 2026-08-16 while authoring the m6 collection dispositions (erp-spec#8). **5,315
+      documents across four collections turn on a silence**: the charter's in-scope list runs order →
+      fulfillment → invoice → posting → report and never reaches a board, and its out-of-scope list —
+      which is explicit about payroll, multi-currency, multi-entity, CRMS and a general-purpose
+      accounting product — does not exclude one either.
+      **Measured 2026-08-16** (`migration/live-paths.measured.yaml`): `cards` 1,114 docs / 56 paths,
+      `lists` 4 / 16, `threads` 4,153 / 18, `comments` 44 / 21.
+      ⚠️ **The four are NOT one object, and treating them as one is the trap.** A card is a scheduled
+      unit of work carrying `sources[].{collection,uid}` back to the order or booking that caused it,
+      plus a destination, a recurrence and an `action` — it is downstream of the Trello integration
+      the migration drops, so "the board goes" is at least arguable. **Threads are broader**: `cards`,
+      `roles` and the template projection all carry a `uid_thread`, so a comment thread attaches to
+      domain objects the board has nothing to do with. Dropping the board does not settle threads.
+      ⚠️ **And the thread corpus is mostly empty.** 4,153 threads against 44 comments — the known
+      cause is event-card delete/recreate churn leaving orphans behind, symptom-fixed in v1 on
+      2026-06-24 with the deeper root deferred (api-cloudrun#227). So a second question sits inside
+      the first: if threads survive, is a corpus that is ~99% empty containers MIGRATED or REBUILT? A
+      migration that carries them forward imports the defect rather than the data.
+      **Held as `quarantine` in `migration/field-map.yaml` meanwhile**, which is one of the three
+      dispositions m6's criterion accepts — so these count as settled for the milestone and remain
+      unsettled for the migration. ⚠️ That is the correct reading, because "hold it aside" IS a
+      migration behaviour, and it is also exactly the reading that would let a milestone look
+      finished. Do not read `quarantine` as `mapped`.

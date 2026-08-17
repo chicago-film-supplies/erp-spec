@@ -11,7 +11,12 @@
 import { parse as parseYaml } from "@std/yaml";
 import { walk } from "@std/fs";
 import { basename, relative } from "@std/path";
-import { CHECKS, CLOCK_DEPENDENT, evaluateMilestones } from "./milestone-checks.ts";
+import {
+  CHECKS,
+  CLOCK_DEPENDENT,
+  evaluateMilestones,
+  TERMINAL_DISPOSITIONS,
+} from "./milestone-checks.ts";
 import { CONTEXT_CODE_ALTERNATION, CONTEXT_DIRS } from "./contexts.ts";
 
 const ROOT = new URL("..", import.meta.url).pathname.replace(/\/$/, "");
@@ -2529,6 +2534,346 @@ for (const e of evts) {
   }
 }
 
+// ── gate 15: the migration field map against the MEASURED live inventory ────
+/**
+ * erp-spec#8. `migration/field-map.yaml` is authored; `migration/live-paths.measured.yaml` is
+ * measured against prod by `spikes/harness/live-path-inventory-probe.ts`. m6's first exit criterion
+ * counts one against the other (`live_paths_dispositioned`); this gate checks the map is INTERNALLY
+ * coherent with the measurement, which is the other direction and a different failure.
+ *
+ * ⚠️ **Only one direction belongs here.** "Every measured collection has an entry" is m6's
+ * criterion, and asserting it here too would be two oracles for one property. This gate asserts the
+ * converse — **the map may not name something prod does not have** — which no other check makes.
+ *
+ * ⚠️ **`live-paths.measured.yaml` is NOT a `.generated.` file** and the stale-generated gate must
+ * never try to rebuild it: it needs prod credentials, which CI does not have. Its freshness is a
+ * WARNING here instead, which is legal because `validate.ts` writes nothing and may read the clock.
+ */
+{
+  const G = "15";
+  const inv = await readYaml<{
+    measured_at_utc?: unknown;
+    collections?: unknown;
+    total_paths?: unknown;
+    inventory?: { collection?: string; paths?: string[] }[];
+  }>(`${ROOT}/migration/live-paths.measured.yaml`);
+  const fm = await readYaml<{
+    collections?: {
+      collection?: string;
+      disposition?: string;
+      reason?: unknown;
+      paths_default?: string;
+      paths_default_reason?: unknown;
+      paths_default_to?: unknown;
+      paths?: { path?: string; disposition?: string; reason?: unknown; to?: unknown }[];
+    }[];
+    mappings?: { from?: string }[];
+  }>(`${ROOT}/migration/field-map.yaml`);
+
+  if (!inv?.inventory) {
+    fail(
+      G,
+      "migration/live-paths.measured.yaml: no `inventory` — nothing can be checked against it",
+    );
+  } else {
+    const live = new Map(inv.inventory.map((c) => [String(c.collection), new Set(c.paths ?? [])]));
+
+    // The counters in the file header. When a doc states a count, something must count it — the
+    // chart header carried "138 entries, four minted" wrong in both halves for weeks.
+    const realPaths = inv.inventory.reduce((n, c) => n + (c.paths ?? []).length, 0);
+    if (Number(inv.collections) !== inv.inventory.length) {
+      fail(
+        G,
+        `live-paths.measured.yaml: header says collections: ${inv.collections}, inventory holds ${inv.inventory.length}`,
+      );
+    }
+    if (Number(inv.total_paths) !== realPaths) {
+      fail(
+        G,
+        `live-paths.measured.yaml: header says total_paths: ${inv.total_paths}, inventory holds ${realPaths}`,
+      );
+    }
+
+    // Freshness. A warning, never a failure: the refresh needs prod ADC and a stale measurement is
+    // still a measurement — what it must not be is silently stale.
+    const stamp = inv.measured_at_utc ? new Date(String(inv.measured_at_utc)) : null;
+    if (!stamp || Number.isNaN(stamp.getTime())) {
+      fail(G, "live-paths.measured.yaml: `measured_at_utc` missing or unparseable");
+    } else {
+      // Same clock convention as gates 6 and 9 — real by default, `SPEC_TODAY` so the arm can be
+      // fired without waiting for the calendar.
+      const envToday = Deno.env.get("SPEC_TODAY");
+      const now = envToday ? new Date(envToday) : new Date();
+      const days = Math.floor((now.getTime() - stamp.getTime()) / 86_400_000);
+      if (days > 45) {
+        warn(
+          G,
+          `live-paths.measured.yaml was measured ${days} days ago — re-run \`cd spikes/harness && deno task inventory --write\``,
+        );
+      }
+    }
+
+    const LEGAL = new Set(["map", "drop", "quarantine", "defective"]);
+    const seen = new Set<string>();
+    for (const c of fm?.collections ?? []) {
+      const name = String(c.collection ?? "");
+      const at = `field-map.yaml collections[${name || "(no name)"}]`;
+      if (!name) {
+        fail(G, `${at}: missing \`collection\``);
+        continue;
+      }
+      if (seen.has(name)) fail(G, `${at}: named twice — one disposition per collection`);
+      seen.add(name);
+      if (!live.has(name)) {
+        fail(
+          G,
+          `${at}: names a collection prod does not have — it is not in live-paths.measured.yaml`,
+        );
+        continue;
+      }
+      if (!LEGAL.has(String(c.disposition))) {
+        fail(G, `${at}: disposition "${c.disposition}" is not one of ${[...LEGAL].join(" | ")}`);
+      }
+      // A stated reason, in whichever of the two fields carries it. A survivor whose collection
+      // disposition and `paths_default` say the same thing would otherwise have to write the same
+      // sentence twice, and this repo's standing complaint about scatter applies to its own gates.
+      // A terminal collection cannot declare `paths_default` at all (below), so it still needs
+      // `reason` — the relaxation reaches only the case where something else already explains it.
+      const reasoned = [c.reason, c.paths_default_reason].some((r) =>
+        String(r ?? "").trim() !== ""
+      );
+      if (!reasoned) {
+        fail(G, `${at}: every disposition carries a \`reason\` — a bare verdict is not a decision`);
+      }
+      // A blanket over every unnamed path is a deliberate act and says so out loud.
+      if (c.paths_default !== undefined) {
+        if (!LEGAL.has(String(c.paths_default))) {
+          fail(
+            G,
+            `${at}: paths_default "${c.paths_default}" is not one of ${[...LEGAL].join(" | ")}`,
+          );
+        }
+        if (!c.paths_default_reason || String(c.paths_default_reason).trim() === "") {
+          fail(
+            G,
+            `${at}: \`paths_default\` covers every unnamed path at once and requires \`paths_default_reason\``,
+          );
+        }
+        // ⚠️ The arm that stops m6's criterion from being satisfied by a promise. The criterion says
+        // a path "maps to a NEW FIELD"; `paths_default: map` on its own says only "these map", which
+        // is an intention wearing a disposition's clothes. A `map` names where it lands.
+        if (String(c.paths_default) === "map" && String(c.paths_default_to ?? "").trim() === "") {
+          fail(
+            G,
+            `${at}: \`paths_default: map\` requires \`paths_default_to\` — "these map" is not a mapping, name what they map ONTO`,
+          );
+        }
+        if (TERMINAL_DISPOSITIONS.has(String(c.disposition))) {
+          fail(
+            G,
+            `${at}: \`paths_default\` on a \`${c.disposition}\` collection — a terminal disposition already settles every path, so the default decides nothing`,
+          );
+        }
+      }
+      const paths = live.get(name)!;
+      const named = new Set<string>();
+      for (const p of c.paths ?? []) {
+        const path = String(p.path ?? "");
+        if (!path) {
+          fail(G, `${at}: a paths[] entry with no \`path\``);
+          continue;
+        }
+        if (named.has(path)) fail(G, `${at}: path "${path}" named twice`);
+        named.add(path);
+        if (!paths.has(path)) {
+          fail(G, `${at}: path "${path}" is not a measured path of \`${name}\``);
+        }
+        if (!LEGAL.has(String(p.disposition))) {
+          fail(
+            G,
+            `${at}.${path}: disposition "${p.disposition}" is not one of ${[...LEGAL].join(" | ")}`,
+          );
+        }
+        if (!p.reason || String(p.reason).trim() === "") {
+          fail(G, `${at}.${path}: an exception to the collection's disposition needs a \`reason\``);
+        }
+        if (String(p.disposition) === "map" && String(p.to ?? "").trim() === "") {
+          fail(G, `${at}.${path}: a \`map\` names its target — add \`to:\``);
+        }
+      }
+    }
+
+    /**
+     * The prose `mappings:` block predates the collection layer and its `from:` is deliberately
+     * expressive — `*.{_cents fields}`, `organizations (the record)`, `invoices.status == "void"`.
+     * Those are patterns and this gate does not parse them. A `from:` whose head segment IS a live
+     * collection and which carries no pattern syntax is a CONCRETE path, and must resolve.
+     *
+     * ⚠️ The head is also checked for `[]`. `destinations[].customer_collecting` reads as if the
+     * collection were an array; the measured form is `destinations` → `customer_collecting`, and
+     * without this arm the entry would be silently classified as a pattern and never checked.
+     */
+    for (const m of fm?.mappings ?? []) {
+      const from = String(m.from ?? "");
+      if (!from) continue;
+      const dot = from.indexOf(".");
+      if (dot < 0) continue;
+      const head = from.slice(0, dot);
+      const rest = from.slice(dot + 1);
+      if (head.endsWith("[]") && live.has(head.slice(0, -2))) {
+        fail(
+          G,
+          `field-map.yaml mappings.from "${from}": the collection is written as an array — it is \`${
+            head.slice(0, -2)
+          }.${rest}\``,
+        );
+        continue;
+      }
+      if (!live.has(head)) continue; // a pattern, or a concept rather than a collection
+      if (/[{}*\s=]/.test(rest)) continue; // a pattern over paths, not one path
+      if (!live.get(head)!.has(rest)) {
+        fail(
+          G,
+          `field-map.yaml mappings.from "${from}": \`${rest}\` is not a measured path of \`${head}\``,
+        );
+      }
+    }
+  }
+}
+
+// ── gate 16: the spec chart against the MEASURED live chart ─────────────────
+/**
+ * erp-spec#8 step 4 — "the live→target GL account correspondence".
+ *
+ * ⚠️ **The issue says it "exists nowhere". It exists, and it is `ledger/chart-of-accounts.yaml`
+ * itself** — every entry already carries `disposition:` and `status_live:`. Measured 2026-08-16 it
+ * is also exact: 139 spec entries against 134 live plus 5 minted, with 0 live codes missing, 0
+ * `status_live` disagreements and 0 name disagreements.
+ *
+ * **So what was missing is an EXECUTION, not an artifact.** Nothing counted 139 against 134 + 5,
+ * nothing compared `status_live` to the live `status`, and the chart's own header read "138
+ * entries, four minted" — wrong in both halves from the day 5150 was added. A correspondence
+ * nothing can falsify is the class of claim this repo keeps paying for.
+ *
+ * `spikes/harness/live-chart-probe.ts` writes the live half from CFS's Firestore mirror (never the
+ * Xero API — single tenant, live, shared quota). Neither side can pass by agreeing with itself.
+ *
+ * ⚠️ **A NAME divergence fails only under `adopt`.** `adopt` means "keep as is", so a rename there
+ * is a defect; under `merge`, `drop` or `undecided` a different name is the decision being recorded,
+ * and failing on it would punish the spec for doing its job.
+ */
+{
+  const G = "16";
+  const liveChart = await readYaml<{
+    measured_at_utc?: unknown;
+    accounts_total?: unknown;
+    accounts?: { code?: number; name?: string; status?: string }[];
+  }>(`${ROOT}/migration/live-chart.measured.yaml`);
+  const specChart = await readYaml<{
+    accounts?: { code?: unknown; name?: unknown; disposition?: unknown; status_live?: unknown }[];
+  }>(`${ROOT}/ledger/chart-of-accounts.yaml`);
+
+  if (!liveChart?.accounts) {
+    fail(
+      G,
+      "migration/live-chart.measured.yaml is missing or has no `accounts` — run `cd spikes/harness && deno task chart --write`",
+    );
+  } else if (!specChart?.accounts) {
+    fail(G, "ledger/chart-of-accounts.yaml has no `accounts`");
+  } else {
+    const live = new Map(liveChart.accounts.map((a) => [Number(a.code), a]));
+    const spec = new Map(specChart.accounts.map((a) => [Number(a.code), a]));
+
+    if (Number(liveChart.accounts_total) !== liveChart.accounts.length) {
+      fail(
+        G,
+        `live-chart.measured.yaml: header says accounts_total: ${liveChart.accounts_total}, file holds ${liveChart.accounts.length}`,
+      );
+    }
+
+    const envToday = Deno.env.get("SPEC_TODAY");
+    const stamp = liveChart.measured_at_utc ? new Date(String(liveChart.measured_at_utc)) : null;
+    if (!stamp || Number.isNaN(stamp.getTime())) {
+      fail(G, "live-chart.measured.yaml: `measured_at_utc` missing or unparseable");
+    } else {
+      const days = Math.floor(
+        ((envToday ? new Date(envToday) : new Date()).getTime() - stamp.getTime()) / 86_400_000,
+      );
+      if (days > 45) {
+        warn(
+          G,
+          `live-chart.measured.yaml was measured ${days} days ago — re-run \`cd spikes/harness && deno task chart --write\``,
+        );
+      }
+    }
+
+    // 16a — every live account is accounted for. A live code the spec does not name is an account
+    // the migration would silently lose, and it is the direction nobody checks by reading.
+    for (const [code, a] of live) {
+      if (!spec.has(code)) {
+        fail(
+          G,
+          `live account ${code} "${a.name}" appears in no \`ledger/chart-of-accounts.yaml\` entry — every live account is adopted, merged or explicitly dropped, never omitted`,
+        );
+      }
+    }
+
+    // 16b — the spec's claims about the live world are true.
+    let minted = 0;
+    for (const [code, s] of spec) {
+      const l = live.get(code);
+      const disp = String(s.disposition ?? "");
+      const claimed = String(s.status_live ?? "");
+      if (!l) {
+        minted++;
+        if (disp !== "new") {
+          fail(
+            G,
+            `${code}: \`disposition: ${disp}\` but no live account has that code — only a \`new\` account may be absent`,
+          );
+        }
+        if (claimed !== "absent") {
+          fail(
+            G,
+            `${code}: \`status_live: ${claimed}\` but the account is not in the live chart — a minted account reads \`absent\``,
+          );
+        }
+        continue;
+      }
+      if (disp === "new") {
+        fail(
+          G,
+          `${code}: \`disposition: new\` but live account ${code} "${l.name}" already exists — minting a code the live chart occupies is how 5800's first revision landed on 5100`,
+        );
+      }
+      if (claimed !== String(l.status)) {
+        fail(
+          G,
+          `${code}: \`status_live: ${claimed}\` but the live chart says "${l.status}"`,
+        );
+      }
+      if (disp === "adopt" && String(s.name ?? "") !== String(l.name)) {
+        fail(
+          G,
+          `${code}: \`adopt\` keeps the live name — spec "${s.name}" vs live "${l.name}". Use \`merge\` or \`drop\` if the rename is the decision`,
+        );
+      }
+    }
+
+    // 16c — the arithmetic the chart header states in prose. Something counts it now.
+    if (spec.size !== live.size + minted) {
+      fail(
+        G,
+        `chart arithmetic: ${spec.size} spec entries against ${live.size} live + ${minted} minted`,
+      );
+    }
+    notes.push(
+      `gate 16: ${spec.size} spec accounts = ${live.size} live + ${minted} minted; ` +
+        `measured ${String(liveChart.measured_at_utc)}`,
+    );
+  }
+}
+
 // ── report ──────────────────────────────────────────────────────────────────
 const GATE_NAMES: Record<string, string> = {
   "1": "ids unique and well-formed",
@@ -2545,6 +2890,8 @@ const GATE_NAMES: Record<string, string> = {
   "12": "milestone exit criteria are wired to a check or declared prose",
   "13": "reporting content — allocation bases, pools, line classification, golden vectors",
   "14": "accepted ADR bodies are frozen",
+  "15": "the migration field map against the measured live inventory",
+  "16": "the spec chart of accounts against the measured live chart",
   xref: "cross-references resolve",
   parse: "files parse",
 };
