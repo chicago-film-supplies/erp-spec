@@ -4,7 +4,7 @@
 - **Repo:** erp-spec
 - **Status:** ⏳ #16, #18 (PR #21) · #15, #13 (PR #23) · **#14 (PR #25) — `m3` COMPLETE** · PRs
   #26–#29 · **PR #30 — five ADRs ACCEPTED, 0 conflicts open** · **PR #31 — #19 + #20 + four owner
-  rulings** · **7 issues open, 4 blocked**
+  rulings** · **7 issues open, 5 blocked, 2 startable**
 - **Origin:** a review of the open issue queue, requested because #18 was on the owner's mind
 - **Related:** open — #3, #4, #6, #8, #12, #17, **#32** · closed by this work: #13, #14, #15, #16,
   #18, #19, #20 · HOT-015 resolved · OQ-045 opened; **OQ-046/047 opened AND answered, OQ-048
@@ -17,17 +17,17 @@
 `main` is CI-green. **Units 1–5 done. The largest unit in the repo (#19, with #20 folded in) landed
 2026-08-16.**
 
-### The queue: 7 open, 4 blocked
+### The queue: 7 open, 5 blocked, 2 startable
 
-|               | Issue   | State                                                   |
-| ------------- | ------- | ------------------------------------------------------- |
-| **startable** | **#8**  | ⏳ in progress — instrument built, authoring left       |
-| **startable** | **#6**  | not begun; re-measure first, its own numbers are stale  |
-| **startable** | **#32** | the imputed-labour view — blocked on OQ-048 (the rate)  |
-| blocked       | #17     | OQ-039 + ADR-0032/0033 acceptance, and an ordering gate |
-| blocked       | #12     | three undecided things, none of them work               |
-| blocked       | #4      | only the m5 formal-methods ADR remains — detection DONE |
-| blocked       | #3      | the spare u16: **two** contenders, not three            |
+|               | Issue  | State                                                    |
+| ------------- | ------ | -------------------------------------------------------- |
+| **startable** | **#8** | ⏳ in progress — instrument built, authoring left        |
+| **startable** | **#6** | not begun; re-measure first, its own numbers are stale   |
+| blocked       | #32    | the imputed-labour view — needs OQ-048, the imputed rate |
+| blocked       | #17    | OQ-039 + ADR-0032/0033 acceptance, and an ordering gate  |
+| blocked       | #12    | three undecided things, none of them work                |
+| blocked       | #4     | only the m5 formal-methods ADR remains — detection DONE  |
+| blocked       | #3     | the spare u16: **two** contenders, not three             |
 
 ### What is still the owner's
 
@@ -334,12 +334,20 @@ collections, 1,537 paths.** The "~30" came from the MCP `db_schema` enum, which 
 `disposition: defective` on the strength of OQ-013's non-reproducing 55; it is `map`, with the
 handling rule retained on its own merits.
 
-✅ **m6's first exit criterion is now checkable, which it was not.** `roadmap/milestones.yaml`
-marked it `prose_only: true` because _"a checker would compare the map against itself and always
-pass"_ — correct, and this repo's own first rule. `spikes/harness/live-path-inventory-probe.ts`
-writes the inventory from `db.listCollections()` + an unprojected scan; the checker reads the
-written file. The same shape as `tb-field-budget_test.ts` against `tigerbeetle-node`. **Refresh with
-`cd spikes/harness && deno task inventory --write`.**
+⚠️ **m6's first exit criterion is MAKEABLE-checkable and is NOT YET CHECKED — an earlier revision of
+this doc overstated it, and the overstatement is corrected here.** It said the criterion "is now
+checkable"; `roadmap/milestones.yaml` still carries `prose_only: true` with its original reason, _"a
+checker would compare the map against itself and always pass"_. **What changed is that the reason
+stopped being true**, not that anything was wired: `spikes/harness/live-path-inventory-probe.ts`
+writes the inventory from `db.listCollections()` + an unprojected scan, so a checker now has an
+independent file to read rather than the map itself. Same shape as `tb-field-budget_test.ts` against
+`tigerbeetle-node`. **Wiring it is step 2 below.** Refresh the inventory with
+`cd spikes/harness && deno task inventory --write`.
+
+⚠️ **MEASURED 2026-08-16 — `m6` reads `0 met / 0 unmet / 4 prose`.** It is the only milestone about
+which **nothing is being asked at all**: no criterion is met, and none can fail either. m7 depends
+on it. That is the strongest single argument for taking #8, and it is a fact about STATUS rather
+than about the issue's own text.
 
 **What is left, in order:**
 
