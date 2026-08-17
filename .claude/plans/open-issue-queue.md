@@ -2,49 +2,61 @@
 
 - **Date:** 2026-08-16
 - **Repo:** erp-spec
-- **Status:** ⏳ #16, #18 closed (PR #21) · #15, #13 closed (PR #23) · **#14 closed (PR #25) — `m3`
-  is COMPLETE** · 8 issues open
+- **Status:** ⏳ #16, #18 (PR #21) · #15, #13 (PR #23) · **#14 (PR #25) — `m3` COMPLETE** · plus PRs
+  #26–#29 (gate 11, transfer field budget, labels, m6 inventory) · **8 issues open, 6 of them
+  blocked on an owner decision**
 - **Origin:** a review of the open issue queue, requested because #18 was on the owner's mind
 - **Related:** open — #3, #4, #6, #8, #12, #17, #19, #20 · closed by this work: #13, #14, #15, #16,
-  #18 · HOT-015 (resolved) · OQ-045 (opened) · `tools/validate.ts`,
-  `spikes/harness/{corpus,allocation-basis-probe,product-line-matrix-probe}.ts`,
-  `ledger/posting-rules.yaml`
+  #18 · HOT-015 resolved · OQ-045 opened · api-cloudrun#538 filed ·
+  `tools/{validate,dates,labels}.ts`, `spikes/harness/`,
+  `ledger/{posting-rules,tigerbeetle-accounts}.yaml`, `migration/live-paths.measured.yaml`
 
 ## START HERE
 
-**Units 1–4 are done.** #16 and #18 closed via PR #21; #15 and #13 via PR #23; **#14 via PR #25**
-(2026-08-16), which took **`m3` to 4 met / 0 unmet / 0 prose — the first finished milestone in the
-repo.** `main` is CI-green at `ef84a6c`.
+`main` is CI-green at `68024e7`. **Units 1–4 are done and #8 is started.**
 
-**Eight issues remain open.** In priority order:
+**The queue is now labelled, and the labels are the triage.** `blocked:owner-decision` marks what
+nobody can pick up: **6 of 8**.
 
-|        | Issue                             | State                                                           |
-| ------ | --------------------------------- | --------------------------------------------------------------- |
-| Unit 5 | **#8**                            | startable, cheapest real win (one 5-minute fix + bulk coverage) |
-| Unit 6 | **#6**                            | startable, but **its numbers are stale** — re-measure first     |
-| —      | **#19**, **#3**                   | gated on **ADR-0036 acceptance**, an owner action               |
-| —      | **#17**, **#12**, **#20**, **#4** | not startable — see the sections below                          |
+|               | Issue        | State                                                               |
+| ------------- | ------------ | ------------------------------------------------------------------- |
+| **startable** | **#8**       | ⏳ **IN PROGRESS** — instrument built, authoring left               |
+| **startable** | **#6**       | not begun; its own numbers are stale, re-measure first              |
+| blocked       | #19, #3, #20 | **ADR-0036 acceptance**                                             |
+| blocked       | #17          | OQ-039 + ADR-0032/0033 acceptance, and an ordering gate             |
+| blocked       | #12          | three undecided things, none of them work                           |
+| blocked       | #4           | only the m5 formal-methods ADR remains — its detection half is DONE |
 
-⚠️ **The roadmap picture changed with Unit 4, and it changes what is worth doing next.** m3 gated m4
-and m7. m4's two remaining criteria are `spikes_closed_with_adr` (12 spikes, 9 open) and
-`hotspots_resolved` (2 unresolved) — **and accepting ADR-0036 resolves both open hotspots.** So
-after Unit 4, the single owner action below is no longer just an unblocker for two issues; it is one
-of the two things standing between the repo and m4.
+### The one thing that moves the most, and it is not work
 
-If you want one thing to move the most: **accept ADR-0036**. It resolves both open hotspots, moves
-m4, and unblocks #19 and #3 — and Unit 1 of this plan is what makes taking that action safe.
+**Accept or reject ADR-0036.** It resolves both open hotspots — one of m4's two remaining criteria —
+and unblocks #19, #20 and the live half of #3. Everything measured on 2026-08-16 is folded into it
+**while it is still `proposed`**, including three things it would otherwise have been accepted
+without:
 
-⚠️ **New capability every remaining unit should use.** `spikes/harness/corpus.ts` reads prod
-Firestore read-only under ADC — no token, project hardcoded to `cfs-3100`, `--allow-net` narrowed so
-it cannot reach Xero or CRMS, write verbs unreachable by construction. **This retires "a full sweep
-needs a script rather than MCP paging"**, which the spec was carrying as an accepted limit in at
-least one place (`chart-of-accounts` 4140, now measured corpus-wide). Unit 5 (#8) in particular is a
-~30-collection sweep that was priced as manual work and is not any more.
+- its shared-key economy **saves one field, not two** — a path subsumes `source_document_ref` but
+  cannot absorb `journal_entry_id`;
+- **a path does not fit any TigerBeetle field** — depth 7, 178 bytes, 14,410 of 14,410 over a u128's
+  16 — so line identity is a hash or a surrogate, and the cost is opacity, not collision;
+- its precondition (`api-cloudrun#485`) is a **false green** — closed `NOT_PLANNED` with the
+  divergence standing, and the divergence measures **59 lines, six times the reported 10**.
+
+✅ Owner rulings recorded 2026-08-16: **"we can allow source order null"** (so absence is refused
+and an explicit null is recorded — the rule the repo already runs on everywhere else) and **"we can
+change order path to match invoice path in v1"** (filed as api-cloudrun#538).
+
+### Two capabilities every remaining unit should use
+
+- `spikes/harness/corpus.ts` reads prod Firestore read-only under ADC — project hardcoded to
+  `cfs-3100`, `--allow-net` narrowed so it cannot reach Xero or CRMS, write verbs unreachable by
+  construction. It now also exposes `listCollections` and `pathScan`. **This retires "a full sweep
+  needs a script rather than MCP paging".**
+- ⚠️ **The MCP `db_schema` enum is not a list of the collections.** It carries 35; there are **50**.
+  Anything scoped from it is scoped short — #8 was.
 
 ⚠️ **This triage is the corrected one.** The first pass covered 6 of 11 open issues: the initial
 `gh issue list` was piped through `head -60` and #13's comment bodies consumed the output, silently
-truncating #12, #8, #6, #4 and #3. #19 was filed by a parallel session while planning. Anything
-citing "six open issues" predates the correction.
+truncating #12, #8, #6, #4 and #3. Anything citing "six open issues" predates the correction.
 
 ## Done
 
@@ -184,27 +196,90 @@ v2 event produces one.
   MORE is decided (the excess is an ordinary direct line, and **no variance account was minted** —
   2600 Rounding was dropped on the same reasoning), and a partial bill is normal, not an error.
 
+### Also landed 2026-08-16, outside the units (PRs #26–#29)
+
+- **Gate 11 widened** to `contexts/`, `ledger/`, `reporting/`, `migration/`, `roadmap/` (it scanned
+  only `adr/` + `spikes/`). Green on 189 files, fired red twice first. ⚠️ `inbox/` and
+  `research-drop/` stay OUT: they are append-only, so a citation gone stale there has no legal fix
+  but an exemption, and that allowlist would grow forever. **This closes the detection half of #4.**
+- **erp-spec#3's arithmetic settled** — `Transfer.code` is a fourth discretionary field; both
+  candidate evictions are closed and neither frees a slot; the query surface is measured. **#3 stays
+  open**: one spare u16, **three contenders** (dimensions, the actor ref, the causal order), decided
+  on entirely different grounds and therefore not tradeable on capacity.
+- **The actor ref** is recorded as a claimant. It passes ADR-0036's own criterion — an actor is a
+  KEY, an immutable fact about an event, not a mutable master attribute. Cardinality is not the
+  constraint (166 actors, u16 has 65k); **encoding is** — uids are strings, so it needs a registry
+  or a hash.
+- **Issue labels, derived not typed** (`deno task labels`): contexts from `CONTEXT_CODE_OF`, areas
+  from the spec directories, plus the single state label. A hand-typed set would have been another
+  hand-maintained list of the domains.
+- **`tools/dates.ts`** — the calendar-day reduction had **six** copies. UTC, deliberately, for
+  machine-independence; **not date-fns**, because `tools/` has zero npm deps by design and the
+  workspace's date-fns rule governs _business datetimes in Firestore_, not tool stamps.
+
+### ⚠️ The pattern behind three of those, now a rule in `CLAUDE.md`
+
+**A fact about a third-party API has ONE owner in the structured spec, and something executes
+against the API.** `research-drop/reference/tigerbeetle.md` claimed `user_data_128/64/32` were "the
+**only**" per-transfer reference fields — an exhaustiveness claim about someone else's software,
+unfalsifiable in-repo — and it propagated into #3's title, HOT-013 and ADR-0026. `Transfer.code` had
+to be re-discovered **twice**.
+
+Two halves, and the second was the missing one: **one owner** (`ledger/tigerbeetle-accounts.yaml`;
+the reference note now points rather than restates) and **something executes**
+(`spikes/harness/tb-field-budget_test.ts`, fails closed, `deno task tb-budget`).
+
+⚠️ **A consolidation without a gate is not a fix** — `view.ts` held a stale copy of the context
+registry _after_ erp-spec#10 consolidated four of them, and held a stale copy of the date helper
+today, both because **it runs no gate and so can never go red**.
+
+⚠️ **Not all restatement is scatter.** An `adr/` or `inbox/` file repeating an old number is a
+historical record (ADR-0034) or dated evidence. Only live, mutable, authority-claiming copies count
+— there were three, not the 17 a grep suggests.
+
 ## Remaining
 
-### Unit 5 — #8, the m6 field map (cheapest real win, and now the top of the queue)
+### Unit 5 — #8, the m6 field map — ⏳ IN PROGRESS, instrument built, authoring left
 
-`migration/field-map.yaml` holds ~10 mappings against ~30 Firestore collections, against an m6 exit
-criterion of "every current Firestore path maps to a new field, an explicit drop, or a quarantine".
-Unblocked and parallelisable with everything else.
+**PR #29 landed the instrument. Nothing is authored yet.** Pick up here.
 
-Two parts, very different sizes:
+⚠️ **The issue's scope is wrong and it is wrong in the expensive direction.** It says "~10 mappings
+against ~30 Firestore collections". Measured 2026-08-16 (`migration/live-paths.measured.yaml`): **50
+collections, 1,537 paths.** The "~30" came from the MCP `db_schema` enum, which carries 35 and omits
+`credit-notes` and `settlements` — both of which the field map already maps.
 
-- **Five minutes:** `invoices.query_by_orders` carries `disposition: defective` on the strength of
-  "55 referenced order uids reportedly do not exist" — **OQ-013 answered that with a measured 0**
-  (`inbox/2026-08-09-hard-deleted-order-uids-do-not-reproduce.md`). Do what `charter.md` already
-  does for the no-hard-deletes fence: keep the disposition if it stands on other grounds, and say
-  plainly that the original evidence does not reproduce.
-- **The bulk:** the remaining ~20 collections. Also the live→target GL account correspondence, which
-  belongs here and exists nowhere — `ledger/chart-of-accounts.yaml` deliberately carries no
-  `xero_id` (ADR-0009 fences foreign identifiers out of domain models).
+✅ **The five-minute fix is already done.** `invoices.query_by_orders` no longer reads
+`disposition: defective` on the strength of OQ-013's non-reproducing 55; it is `map`, with the
+handling rule retained on its own merits.
 
-⚠️ Same milestone as **#17**, which is deferred. #8 does not depend on it and should not wait for
-it.
+✅ **m6's first exit criterion is now checkable, which it was not.** `roadmap/milestones.yaml`
+marked it `prose_only: true` because _"a checker would compare the map against itself and always
+pass"_ — correct, and this repo's own first rule. `spikes/harness/live-path-inventory-probe.ts`
+writes the inventory from `db.listCollections()` + an unprojected scan; the checker reads the
+written file. The same shape as `tb-field-budget_test.ts` against `tigerbeetle-node`. **Refresh with
+`cd spikes/harness && deno task inventory --write`.**
+
+**What is left, in order:**
+
+1. **Per-collection dispositions for the 50.** A path-by-path map of 1,537 rows is neither tractable
+   nor useful; the shape is a collection-level disposition plus per-path exceptions, which is what
+   the file already does for `*.{_cents fields}`. Many are obviously infrastructure and drop as a
+   unit — `sessions` (2,318), `stock-locks`, `mcp-oauth-*`, `migration-state`, `trello-lookup`,
+   `uploadcare-sweep`, `webhooks`, `xero-budget`, `counters`, `typesense`,
+   `current-replacement-lookup`, `cache-geocodes`. ⚠️ `customers` (150 docs) is NOT `contacts` and
+   NOT `organizations` — check what it is before disposing of it.
+2. **Wire m6's criterion to a real check** in `tools/milestone-checks.ts`, reading the inventory and
+   the field map. It will report a low number and that is fine — gate 12 does not fail on an unmet
+   criterion, only on one wired to nothing, so CI stays green while STATUS tells the truth.
+3. **A `validate` gate** for internal consistency: every collection the map names must exist in the
+   inventory, and the inventory's `measured_at_utc` earns a staleness _warning_ (validate reads the
+   clock; generated files may not).
+4. **The live→target GL account correspondence**, which belongs here and exists nowhere —
+   `ledger/chart-of-accounts.yaml` deliberately carries no `xero_id` (ADR-0009). ⚠️ Its **138**
+   entries include **four minted accounts with no live counterpart at all** (5800, 5801, 2050, 2010)
+   — a distinct case the map must state rather than leave blank.
+
+⚠️ Same milestone as **#17**, which is blocked. #8 does not depend on it and must not wait for it.
 
 ### Unit 6 — #6, the requirements promotion backlog
 
@@ -294,20 +369,21 @@ all under ADR-0036's own criterion.
 
 ## Context recommendation
 
-**CLEAR CONTEXT.** Units 5 and 6 are executable from this doc plus `CLAUDE.md`, and they touch
-entirely different material from Units 1-4 — a Firestore-collection sweep and a
-requirements-promotion backlog, against an accounting survey and a ledger rule. **Take #8 next**: it
-is the cheapest remaining win, it is unblocked, and it is the m6 exit criterion.
+**CLEAR CONTEXT.** The remaining work is authoring, and it touches entirely different material from
+what the last session held — 50 collections' worth of migration dispositions and a requirements
+backlog, against TigerBeetle field budgets, path widths and date helpers. Nothing needed is in
+anyone's head: the inventory, the field map, `milestone-checks.ts` and this doc are all on disk.
 
-Three things to carry across the clear, none obvious from the issue text:
+**Take #8.** It is one of two unblocked issues, the instrument is built, and step 1 is the bulk.
+Then #6 — but **re-measure first**: its own numbers say "2 requirements, 6 of 8 contexts empty" and
+STATUS says 21 requirements, 0 without a scenario, 4 contexts uncovered.
 
-- **The "needs a script rather than MCP paging" excuse is gone.** `spikes/harness/corpus.ts` pages
-  any prod collection read-only under ADC in a few lines, and Units 5 and 6 were both scoped
-  assuming that was expensive.
-- **`ledger/chart-of-accounts.yaml` deliberately carries no `xero_id`** (ADR-0009 fences foreign
-  identifiers out of domain models), so the live→target GL correspondence #8 needs exists nowhere
-  and has to be authored. It now has **138** entries, four of them minted (5800, 5801, 2050, 2010) —
-  the minted ones have no live counterpart at all, which is a distinct case the field map must state
-  rather than leave blank.
-- **The next big lever is not an issue.** Accepting ADR-0036 resolves both open hotspots, which is
-  one of m4's two remaining criteria, and unblocks #19 and #3. It is an owner action, not work.
+Three things to carry across the clear, because none is obvious from the issue text:
+
+- **The `db_schema` enum is not the collection list** — 35 against 50. #8 was scoped from it and is
+  therefore scoped short. Anything else scoped that way is too.
+- **A gate that lands green is still worth landing, but fire it red first.** Every check added this
+  week landed green on real data and was fired red deliberately before landing; that is the only
+  evidence a green gate is a gate.
+- **The queue's real shape is 6 blocked / 2 startable**, and the labels say so now. Do not re-triage
+  from issue text — several issues carry numbers that are stale in their own favour.
