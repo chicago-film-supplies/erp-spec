@@ -2,9 +2,9 @@
 
 - **Date:** 2026-08-16
 - **Repo:** erp-spec
-- **Status:** ⏳ #16, #18 (PR #21) · #15, #13 (PR #23) · **#14 (PR #25) — `m3` COMPLETE** · plus PRs
-  #26–#29 (gate 11, transfer field budget, labels, m6 inventory) · **8 issues open, 6 of them
-  blocked on an owner decision**
+- **Status:** ⏳ #16, #18 (PR #21) · #15, #13 (PR #23) · **#14 (PR #25) — `m3` COMPLETE** · PRs
+  #26–#29 (gate 11, transfer field budget, labels, m6 inventory) · **PR #30 — five ADRs ACCEPTED,
+  ADR-0018 superseded, 0 conflicts open, m4 half met** · **8 issues open, 4 blocked**
 - **Origin:** a review of the open issue queue, requested because #18 was on the owner's mind
 - **Related:** open — #3, #4, #6, #8, #12, #17, #19, #20 · closed by this work: #13, #14, #15, #16,
   #18 · HOT-015 resolved · OQ-045 opened · api-cloudrun#538 filed ·
@@ -13,50 +13,67 @@
 
 ## START HERE
 
-`main` is CI-green at `68024e7`. **Units 1–4 are done and #8 is started.**
+`main` is CI-green at `84c9d01`. **Units 1–4 done, #8 started, and five ADRs accepted 2026-08-16.**
 
-**The queue is now labelled, and the labels are the triage.** `blocked:owner-decision` marks what
-nobody can pick up: **6 of 8**.
+**⚠️ The biggest lever of the last session has been PULLED.** ADR-0036 is accepted, ADR-0018 is
+superseded, and **both hotspots are resolved — `0 conflicts open`**. In force **17 → 21**, proposed
+**16 → 11**. `m4` moved from 0 met / 2 unmet to **1 met / 1 unmet**; what remains there is
+`spikes_closed_with_adr` (9 of 12 spikes open), which is **work, not a decision**.
 
-|               | Issue        | State                                                               |
-| ------------- | ------------ | ------------------------------------------------------------------- |
-| **startable** | **#8**       | ⏳ **IN PROGRESS** — instrument built, authoring left               |
-| **startable** | **#6**       | not begun; its own numbers are stale, re-measure first              |
-| blocked       | #19, #3, #20 | **ADR-0036 acceptance**                                             |
-| blocked       | #17          | OQ-039 + ADR-0032/0033 acceptance, and an ordering gate             |
-| blocked       | #12          | three undecided things, none of them work                           |
-| blocked       | #4           | only the m5 formal-methods ADR remains — its detection half is DONE |
+Accepted: **ADR-0009** (anticorruption), **ADR-0010** (accounting date vs posting timestamp),
+**ADR-0013** (Linode), **ADR-0034** (an accepted ADR is a historical record), **ADR-0036** (the
+ledger carries keys, not classifications).
 
-### The one thing that moves the most, and it is not work
+### The queue: 8 open, 4 blocked
 
-**Accept or reject ADR-0036.** It resolves both open hotspots — one of m4's two remaining criteria —
-and unblocks #19, #20 and the live half of #3. Everything measured on 2026-08-16 is folded into it
-**while it is still `proposed`**, including three things it would otherwise have been accepted
-without:
+|               | Issue   | State                                                             |
+| ------------- | ------- | ----------------------------------------------------------------- |
+| **startable** | **#19** | ⭐ **largest unit in the repo, just unblocked.** Fold #20 into it |
+| **startable** | **#8**  | ⏳ in progress — instrument built, authoring left                 |
+| **startable** | **#20** | do NOT do standalone — see below                                  |
+| **startable** | **#6**  | not begun; re-measure first, its own numbers are stale            |
+| blocked       | #17     | OQ-039 + ADR-0032/0033 acceptance, and an ordering gate           |
+| blocked       | #12     | three undecided things, none of them work                         |
+| blocked       | #4      | only the m5 formal-methods ADR remains — detection half DONE      |
+| blocked       | #3      | the spare u16: **two** contenders now, not three                  |
 
-- its shared-key economy **saves one field, not two** — a path subsumes `source_document_ref` but
-  cannot absorb `journal_entry_id`;
-- **a path does not fit any TigerBeetle field** — depth 7, 178 bytes, 14,410 of 14,410 over a u128's
-  16 — so line identity is a hash or a surrogate, and the cost is opacity, not collision;
-- its precondition (`api-cloudrun#485`) is a **false green** — closed `NOT_PLANNED` with the
-  divergence standing, and the divergence measures **59 lines, six times the reported 10**.
+### ⭐ Take #19, and take #20 with it
 
-✅ Owner rulings recorded 2026-08-16: **"we can allow source order null"** (so absence is refused
-and an explicit null is recorded — the rule the repo already runs on everywhere else) and **"we can
-change order path to match invoice path in v1"** (filed as api-cloudrun#538).
+⚠️ **#20 must not be built first.** It guards the chart's `dimensions:` lists, and **#19's sweep
+empties them** — same files, one pass. Building it standalone means writing a guard for machinery
+the sweep deletes.
+
+Three things that post-date #19's own text and change what it does:
+
+- **The spelling is `labor_line`, American, and the live books decided it** — of 134 accounts,
+  `4120 Contract **Labor** Income` is the only one naming the concept and none contains "Labour".
+  The issue title says `labour_line`; that is superseded.
+- **`labor_line` is not a posting field at all** (OQ-042) — it is derived in Mongo off the shift's
+  allocation row. So `5800`'s `dimensions: [product_line, cost_type]` becomes `[]`.
+- **Blast radius**: every account's `dimensions:` list (19 of 138 non-empty), gates 10h and 10n
+  (10n's `DIM_OF` hardcodes `"cost type" → cost_type`), `ledger/dimensions.yaml` (becomes a
+  _reporting_ taxonomy), every vector — rejections move from "missing dimension" to **"missing
+  key"**, plus a new accept vector for a **declared-null causal order**.
+
+### What is still the owner's
+
+- **ADR-0032 + ADR-0033 + OQ-039** → unblocks #17.
+- **ADR-0030's accounts**, a leg-capture decision, a warehouse-overhead ADR → unblocks #12.
+- **Who gets `Transfer.code`** → #3's live half. Two contenders: the actor ref, and the causal order
+  where `path[0]` cannot supply it. ⚠️ The second may need nothing — the owner ruled an explicit
+  null causal order is legal.
+- **11 ADRs remain proposed**, and the spec still cites some heavily as settled: **ADR-0025 48×**,
+  **ADR-0019 34×**, **ADR-0020 30×**. ⚠️ **ADR-0025 should not be accepted before #19 lands** —
+  ADR-0036 obsoleted its mechanism, so #19 is what rewrites the ground under it.
 
 ### Two capabilities every remaining unit should use
 
 - `spikes/harness/corpus.ts` reads prod Firestore read-only under ADC — project hardcoded to
   `cfs-3100`, `--allow-net` narrowed so it cannot reach Xero or CRMS, write verbs unreachable by
-  construction. It now also exposes `listCollections` and `pathScan`. **This retires "a full sweep
-  needs a script rather than MCP paging".**
+  construction. Also `listCollections` and `pathScan`. **This retires "a full sweep needs a script
+  rather than MCP paging".**
 - ⚠️ **The MCP `db_schema` enum is not a list of the collections.** It carries 35; there are **50**.
   Anything scoped from it is scoped short — #8 was.
-
-⚠️ **This triage is the corrected one.** The first pass covered 6 of 11 open issues: the initial
-`gh issue list` was piped through `head -60` and #13's comment bodies consumed the output, silently
-truncating #12, #8, #6, #4 and #3. Anything citing "six open issues" predates the correction.
 
 ## Done
 
@@ -294,28 +311,35 @@ The trap the issue names is still live: **adding a requirement trips gate 3**, w
 tagged Gherkin scenario. Promotion is requirement + scenario, never requirement alone. And as of
 this session those scenarios are also checked by gate 10n.
 
-## Gated on ADR-0036 acceptance — the single biggest unblocker left
+## ✅ ADR-0036 — ACCEPTED 2026-08-16. What it settled, and what it did not
 
-Accepting ADR-0036 is now **one owner action that moves four things**, and Unit 1 is what makes it
-safe to take: the promise is machine-enforced rather than remembered, and ADR-0018 stays in force
-until the moment of acceptance.
+The section that used to sit here said accepting it was "one owner action that moves four things".
+It moved them. Kept because the _consequences_ are what the next session works from.
 
-- **HOT-013 and HOT-014** — the repo's only two open conflicts. ADR-0036 is the sole proposed
-  resolution of both, and they are 1 of m4's 3 unmet criteria.
-- **#19 — `cost_type` → `labour_line` (3 → 7 values) plus the keys-not-classifications rework.** The
-  issue says explicitly **do not start before ADR-0036 is accepted**: it reworks the same files, and
-  renaming first means touching every vector twice.
-- **#3 — the TigerBeetle `user_data` budget (three fields, four claimants).** Its premise moves
-  under ADR-0036, which changes what a posting carries at all. Do not re-litigate the eviction
-  before the decision lands. It is HOT-013's subject.
+**Accepted after being amended on measurements taken the same day** — three things it would
+otherwise have been accepted without, all now frozen into its body:
 
-⚠️ **#19 lands directly on top of what this session built.** It renames `cost_type`, and its own
-editable list names `tools/validate.ts` (gate 10) and
-`contexts/ledger/features/dimensional-postings.feature` — gate 10n's `DIM_OF` map hardcodes
-`"cost type" → cost_type`, and the amended scenarios use the value `delivery`. Both move in the
-sweep. Two things #19 flags that must be settled first: the British/American spelling
-(`labour_line`, per ADR-0019 and `labour_cogs`), and whether `labour_line` stays a posting field at
-all under ADR-0036's own criterion.
+- its shared-key economy **saves one field, not two** — a path subsumes `source_document_ref` but
+  cannot absorb `journal_entry_id` (3 of 13 rules span source documents);
+- **a path does not fit any TigerBeetle field** — depth 7, 178 bytes, 14,410 of 14,410 over a u128's
+  16 — so line identity is a hash or a surrogate. Collision is not the risk (~1e-11 on 64 bits);
+  **opacity is**;
+- its precondition (`api-cloudrun#485`) was a **false green** — closed `NOT_PLANNED` with the
+  divergence standing, measuring **59 lines against the reported 10**.
+
+**HOT-013 DISSOLVED** — the claimants were removed, not accommodated. ⚠️ Not for want of a slot:
+`Transfer.code` is a fourth discretionary field and the payload is 7 bits of 16. It is declined on
+ADR-0036's criterion, not on capacity. **HOT-014 ABSORBED** — the gap was real and ADR-0036 makes it
+a decision.
+
+⚠️ **First real use of `supersedes_on_acceptance`** (Unit 1 / #18). All three gate-6 arms were fired
+against the real ADRs and reverted: the promise left on an accepted ADR, `superseded_by` without the
+matching status, and the promise promoted without telling the target. Three fields move together and
+no half can be forgotten — now evidenced rather than claimed.
+
+✅ Owner rulings the same day: **"we can allow source order null"** (absence refused, explicit null
+recorded — the rule the repo already runs on) and **"we can change order path to match invoice path
+in v1"** (api-cloudrun#538).
 
 ## Not startable — leave open
 
