@@ -12,11 +12,11 @@ is `deno task validate`'s judgement, not this file's.
 | | Count | |
 |---|---:|---|
 | Open questions | 11 open | 39 answered of 50 · **0 with no owner or no decide-by** |
-| Conflicts (HOT) | 15 | 0 open |
+| Conflicts (HOT) | 16 | 0 open |
 | Decisions (ADR) | 36 | 22 in force · 10 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 21 | 0 without a scenario |
-| Inbox | 84 | 65 unpromoted |
+| Inbox | 85 | 65 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
@@ -76,7 +76,7 @@ None.
 | ADR | Title | Review by | Supersedes on acceptance | Blocked on |
 |---|---|---|---|---|
 | `ADR-0015` | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-11-01 | — | `SPIKE-002` `SPIKE-012` |
-| `ADR-0019` | Labor costing is actual; absorption measures utilisation, not rate variance | 2026-10-01 | — | `HOT-003` `HOT-004` `HOT-010` `OQ-005` `OQ-006` `OQ-008` `OQ-011` `OQ-017` `OQ-018` `OQ-019` `OQ-050` |
+| `ADR-0019` | Labor costing is NORMAL costing — wages actual per person, burden apportioned per run — and absorption measures utilisation together with rate variance | 2026-10-01 | — | `HOT-003` `HOT-004` `HOT-010` `OQ-005` `OQ-006` `OQ-008` `OQ-011` `OQ-017` `OQ-018` `OQ-019` `OQ-050` |
 | `ADR-0020` | Xero history is restated, not imported as-is | 2026-10-15 | — | `HOT-006` `OQ-012` |
 | `ADR-0025` | The dimension obligation is per account, and what is refused is absence rather than null | 2026-10-01 | — | `HOT-011` `OQ-021` `OQ-022` `OQ-025` |
 | `ADR-0027` | Retain Mapbox for geocoding and Resend for transactional email, at the boundary | 2026-10-01 | — | — |

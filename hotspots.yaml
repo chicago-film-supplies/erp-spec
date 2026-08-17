@@ -638,3 +638,72 @@ hotspots:
       not that the dimension applies to the account a scenario posts to — and the scenarios did not
       name an account until this amendment. Three of the six now do, which is the precondition such
       a gate would need. Filed as erp-spec#20.
+
+  - id: HOT-016
+    statement: >-
+      `adr/ADR-0030` — ACCEPTED and FROZEN 2026-08-16 — asserts as a supporting contrast that
+      "ADR-0019 could say 'absorption measures utilisation, not rate variance' because labor is
+      costed at actual, from a real per-contact wage on a real bill". **Measured 2026-08-17 against
+      the Wrapbook payroll exports (OQ-050), labor is NOT costed at actual**: wages are itemised per
+      person but BURDEN is priced per RUN and must be apportioned, so labor costing is normal
+      costing with a standard-rate component and `labor_variance` fires. ADR-0019's amended body now
+      states the opposite of what ADR-0030's frozen body assumes about it.
+    contexts: [ledger, fulfillment]
+    why_it_matters: >-
+      ⚠️ **The DECISION is unaffected and that is what makes this a hotspot rather than a
+      supersession.** Vehicle absorption is still rate-based, 5901 still means utilisation plus rate
+      deviation, and no account or basis in ADR-0030 changes. What is wrong is the CONTRAST it drew,
+      not the conclusion it reached — ADR-0034's third row exactly: "stands, but a fact it cited was
+      wrong ⇒ no new ADR; a dated note in inbox/, plus a hotspots.yaml entry when it contradicts
+      something".
+      ⚠️ **FIRST USE OF THAT PATH.** HOT-006 through HOT-015 are all `resolved` and all carry
+      `resolved_by: ADR-XXXX` — every one is "two statements conflict and a DECISION settles it".
+      None is "an accepted ADR cited a fact that later measured false". Under this repo's own rule
+      that an unexercised branch is a claim rather than a capability, the machinery was assumed not
+      to work until taken.
+      ⚠️ **And FIVE MUTABLE artifacts repeated the refuted claim, two of them left behind by the
+      very amendment that found the defect.** ⚠️ **This entry said THREE until the sweep ran** — the
+      count came from a single grep pattern, and two more surfaced under different phrasing: the
+      golden vector `guaranteed-hours-unworked-land-in-5801.yaml` ("costing is actual at that
+      person's own wage, so no standard rate exists to deviate from") and `glossary.yaml`'s
+      `standard cost` term ("the target system does not implement this"). **A count stated from one
+      search is a count of that search.** ADR-0019's body was corrected to the measurement while
+      its TITLE and its SUMMARY BLOCKQUOTE were not — and ADR-0019 has **121 citations** across the
+      spec, so a title is what most readers take away. `5800`'s chart reason repeated it too.
+      ⚠️ **AND IT HAPPENED A FOURTH TIME, INSIDE THIS HOTSPOT.** The file was renamed
+      `…-is-actual.md` → `…-is-normal-costing.md` as part of resolving this, and the evidence list
+      above still cited the old path. **Gate 11 caught it** — which is the difference between this
+      instance and the three before it: the earlier ones survived because nothing executed on them.
+      **That is the HOT-011 / HOT-015 pattern for the third time** — HOT-015's own text calls itself
+      "HOT-011 surviving in the one artifact its resolution did not sweep" — and the first time the
+      incomplete sweep was made by the same session that opened the hotspot. **Amending a body is
+      not amending a decision.**
+    evidence: >-
+      Measured 2026-08-17.
+      · `adr/ADR-0030-vehicle-cost-moves-into-cogs.md:231` — the frozen contrast, `status: accepted`
+        with `frozen_sha256` set, so gate 14 forbids editing it and ADR-0034 says it should not be
+        edited: an accepted ADR is a historical record of the decision AS TAKEN.
+      · Wrapbook payroll 759715 Invoice Fee Summary — burden priced on one applicable-wages base per
+        RUN (FICA 6.20 / Medicare 1.45 / FUTA 0.60 / IL SUTA 7.05 / comp 3.06 / platform 1.49 =
+        19.85%), not per person. Payroll Register — wages itemised per person per day.
+      · `inbox/2026-08-17-oq-050-answered-wrapbook-itemises-wages-per-person-per-day-but-prices-burden-per-RUN-so-the-cost-rate-is-an-estimate.md`
+      · The three mutable repetitions: `adr/ADR-0019-labor-costing-is-normal-costing.md` title and summary
+        blockquote, and `ledger/chart-of-accounts.yaml` 5800's `reason`.
+      · `deno task ci` was GREEN with the contradiction in place — nothing executes on it.
+    blocks: [ADR-0019]
+    status: resolved
+    resolved_by: OQ-050
+    measured: >-
+      Resolved 2026-08-17 by amending the three mutable artifacts to the measurement. **ADR-0030 is
+      NOT touched** — its body stays as written, which is correct rather than a compromise: an
+      accepted ADR is a historical record of the decision as taken (ADR-0034), and the record
+      includes a premise that was true when taken.
+      ⚠️ **THE MACHINERY GAP THE FIRST USE FOUND: `resolved_by` had no legal value.** Every prior
+      hotspot names an ADR, because every prior hotspot was settled by a DECISION. This one is
+      settled by a MEASUREMENT — the payroll exports — with no decision taken at all, and no ADR to
+      point at. `resolved_by: OQ-050` is used because OQ-050 is where that measurement is recorded
+      and answered, and it is the closest thing to an authority the schema can express.
+      ⇒ **The field's implicit contract was "the DECISION that settled it" and it is really "the
+      AUTHORITY that settled it"** — which can be an ADR, an answered OQ, or in principle a
+      measurement with no home. Recorded rather than fixed, because widening the field is a schema
+      change nobody has asked for and one instance is not yet a pattern.

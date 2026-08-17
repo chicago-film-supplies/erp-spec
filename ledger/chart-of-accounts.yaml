@@ -1289,8 +1289,12 @@ accounts:
     disposition: new
     status_live: absent
     reason: >-
-      Required by ADR-0019. Hours actually worked on a job, at that person's actual per-contact
-      wage. ⚠️ This reason read "dimensioned to the job's product line and the work's cost type"
+      Required by ADR-0019. Hours actually worked on a job, costed from **what the EOR charges** for
+      that person — wages itemised per person and per day, employer burden apportioned from the
+      payroll run's own rate (OQ-050, measured 19.85% on run 759715). ⚠️ **This read "at that
+      person's actual per-contact wage" until 2026-08-17**, which was the refuted claim HOT-016
+      records: a per-contact WAGE is what CFS agreed the worker receives, and the COST is the
+      invoice. ⚠️ This reason read "dimensioned to the job's product line and the work's cost type"
       until 2026-08-16 — **5800 was the only account in the chart naming two dimensions, and under
       ADR-0036 it names none.** What the posting carries instead is the CAUSAL JOB; both
       classifications are derived from the shift's own allocation row at report time (OQ-042).

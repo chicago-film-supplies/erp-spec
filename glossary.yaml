@@ -191,10 +191,15 @@ terms:
   - term: standard cost
     definition: >-
       A predetermined per-unit labor cost applied to a job when it is performed, rather than the
-      actual cost of the crew-day. **CFS does not use standard labor rates and the target system
-      does not implement this** — ADR-0019 costs labor at actual, from a per-contact wage. The
-      term is kept because it is needed to read the charter's earlier wording and the inbox note
-      that introduced it, not because it describes anything CFS does.
+      actual cost of the crew-day. ⚠️ **This definition said "CFS does not use standard labor rates
+      and the target system does not implement this" until 2026-08-17, and the second half is
+      wrong.** Measured against the EOR's exports (OQ-050, HOT-016): wages are itemised per person,
+      **employer burden is priced per payroll RUN**, and apportioning a run's burden pro-rata by
+      wages IS a standard rate applied to actual hours. So the target system implements **normal
+      costing** — actual direct cost with an applied rate — and the term describes a real component
+      of it rather than only the charter's earlier wording.
+      ⚠️ CFS still has no standard WAGE, which is what made the old wording feel true: the standard
+      rate sits one level down, in the burden factor.
     aliases: [applied cost]
     contexts: [ledger]
     source: inbox/2026-08-08-standard-cost-with-variance.md
@@ -228,7 +233,7 @@ terms:
       by design" until 2026-08-16 (ADR-0036).
     aliases: [idle capacity, unabsorbed]
     contexts: [ledger]
-    source: adr/ADR-0019-labor-costing-is-actual.md
+    source: adr/ADR-0019-labor-costing-is-normal-costing.md
     verified: true
 
   # ── Accounting core ─────────────────────────────────────────────────────────

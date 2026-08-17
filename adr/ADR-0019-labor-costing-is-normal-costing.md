@@ -1,6 +1,6 @@
 ---
 id: ADR-0019
-title: Labor costing is actual; absorption measures utilisation, not rate variance
+title: Labor costing is NORMAL costing — wages actual per person, burden apportioned per run — and absorption measures utilisation together with rate variance
 status: proposed
 date: 2026-08-09
 review_by: 2026-10-01
@@ -26,11 +26,15 @@ supersedes:
 superseded_by:
 ---
 
-> **In the context of** bringing crew cost into COGS against the job that caused it, **facing** a
-> business that pays actual per-person wages rather than standard rates, **we decided** to cost
-> labor at actual and let absorption measure utilisation, **to achieve** a variance that reflects
-> something real, **accepting** that the charter's "standard-cost absorption" wording no longer
-> describes the model.
+> **In the context of** bringing crew cost into COGS against the job that caused it, **facing** an
+> employer of record that itemises wages per person and per day but prices employer burden per
+> payroll RUN, **we decided** to cost labor as **normal costing** — wages actual, burden apportioned
+> — **to achieve** a per-shift cost that reconciles to the invoice CFS actually pays, **accepting**
+> a rate variance that is systematic rather than random and owes a period-close true-up.
+>
+> ⚠️ **This summary read "we decided to cost labor at actual and let absorption measure utilisation"
+> until 2026-08-17**, when the Wrapbook exports measured otherwise (OQ-050, HOT-016). The title said
+> the same and both were left behind by an amendment that corrected only the body.
 
 ## Context
 
