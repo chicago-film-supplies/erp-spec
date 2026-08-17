@@ -11,18 +11,18 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 12 open | 38 answered of 50 · **0 with no owner or no decide-by** |
+| Open questions | 11 open | 39 answered of 50 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 15 | 0 open |
 | Decisions (ADR) | 36 | 22 in force · 10 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 21 | 0 without a scenario |
-| Inbox | 82 | 63 unpromoted |
+| Inbox | 83 | 64 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
 ## The bottleneck: undecided questions
 
-**12 of 50 still open**, soonest decide-by first.
+**11 of 50 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
@@ -36,7 +36,6 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-039` | `organizations.tax_profile` carries two different concepts in one enum — who owes (applie… | alex | 2027-01-15 | — |
 | `OQ-049` | Does v2 carry the operational collaboration surface — the board (`cards`, `lists`) and th… | alex | 2027-01-31 | — |
 | `OQ-045` | When a vendor bills LESS than was accrued, what retires the residual left in `2010 Accrue… | alex | 2027-02-15 | — |
-| `OQ-050` | Does the EOR's charge for a W-2 crew member reconcile PER PERSON and PER SHIFT, or only i… | alex | 2027-02-28 | `ADR-0019` |
 | `OQ-048` | At what rate is a contributed (unpaid owner) shift costed in the IMPUTED labor view — the… | alex | 2027-03-15 | — |
 
 Whether any of these dates has PASSED is `deno task validate`'s judgement — gate 7 fails on an open question past its decide-by. This file reads no clock and so cannot say.

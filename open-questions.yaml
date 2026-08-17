@@ -1962,7 +1962,39 @@ open_questions:
     owner: alex
     decide_by: 2027-02-28
     blocks: [ADR-0019]
-    status: open
+    status: answered
+    answer: >-
+      **BOTH, on different halves of the same payroll — which is why guessing which one it would be
+      could not have worked.** Measured 2026-08-17 against Wrapbook payroll 759715 (owner-supplied
+      Payroll Register + Invoice Fee Summary):
+      · **WAGES are itemised per person, per day, per project**, with hours and dollars — actual and
+      attributable;
+      · **BURDEN is priced per RUN** — one applicable-wages base with an effective rate per
+      component — so reaching a per-shift cost requires APPORTIONMENT.
+      ⇒ **A per-shift labor cost is part actual and part apportioned, and pro-rata apportionment IS
+      a standard rate applied to actual hours.** ADR-0019's "a rate variance cannot exist where
+      there is no standard rate" fails on measurement, not on argument.
+      **Run 759715: wages $2,323.50 + fees $461.23 = CFS cost $2,784.73, an effective 19.85%** —
+      statutory 18.36% plus a 1.49% platform fee. ⚠️ **3.15 points BELOW the 23% blended average**,
+      so the dispersion between runs is real.
+      ⚠️ **AND THE BURDEN IS CAPPED PER PERSON PER YEAR, so a flat factor is SYSTEMATICALLY wrong
+      rather than imprecise.** FUTA (0.60%) stops at ~$7,000 and Illinois SUTA (7.05%, the largest
+      component) at ~$13,600 — about 233 and 453 hours at $30/hr — leaving a ~4.51% uncapped floor
+      of Medicare plus workers comp. A regular crew member crosses both inside a season, so a flat
+      rate over-states late-year hours and under-states early-year ones, biasing early-season job
+      margins against late-season ones with nothing in the numbers looking wrong.
+      ⇒ **The apportionment needs a period-close true-up** — exactly SAP's confirm-at-plan,
+      revalue-at-actual shape, which the survey found and ADR-0019 does not consider.
+      ⚠️ **Two things the register settles incidentally.** `Job Title & Union / Local` reads
+      "Production Staff / Non-Union", confirming the owner's statement in the data. And the fee
+      summary carries `Contractor Wages` and `Loan-Out Wages` lines (both $0.00 this run), so
+      Wrapbook CAN run contractors — **"the payment channel determines the classification" is not
+      quite the rule**; the discriminator is `Worker Type` on the record, not the rail.
+      ⚠️ **`Project` reads `CFS2` — the company, not a job.** Wrapbook says who worked, when and for
+      how long, and NOT which order those hours served. **The causal job comes from CFS's shift
+      records.** ADR-0019 assumes that half correctly and wrongly assumes CFS also owns the first.
+      Evidence:
+      `inbox/2026-08-17-oq-050-answered-wrapbook-itemises-wages-per-person-per-day-but-prices-burden-per-RUN-so-the-cost-rate-is-an-estimate.md`.
     notes: >-
       Opened 2026-08-17 by the ADR-0019 survey
       (`inbox/2026-08-17-survey-labor-costing-is-normal-costing-not-actual-the-crew-is-two-populations-with-two-true-costs-and-idle-time-splits-normal-from-abnormal.md`).

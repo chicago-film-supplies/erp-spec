@@ -77,16 +77,23 @@ superseded_by:
   ADR-0030 does. It was found by checking every proposed ADR after ADR-0030 turned out to be blocked
   the same way — **seven of ten cite none**.
 - ⚠️ **This bullet used to read "a rate variance cannot exist where there is no standard rate, so
-  `labor_variance` … would be a posting rule that can never fire", and the owner's own number
-  refutes it.** Owner, 2026-08-17: CFS is **non-union** and **average payroll fringe is 23%**. **An
-  average IS a standard rate.** Applying one fringe factor to every W-2 hour is a standard rate over
-  actual hours — normal costing — and the gap between 23% and a given person's actual fringe is
-  exactly a rate variance. The premise is false the moment one factor is used, and it is false for
-  the very reason the ADR exists: nobody wants to compute per-person fringe per shift. ⇒
-  `labor_variance` is a rule that **fires rarely with small amounts**, not one deleted for
-  impossibility. HOT-010 still resolves here, on the corrected reasoning. ⚠️ **The wage is still
-  actual and per-person.** The standard rate is one level down, in the fringe factor — which is
-  where "we have no standard rates" is easiest to say honestly and still be wrong.
+  `labor_variance` … would be a posting rule that can never fire". MEASURED 2026-08-17, IT IS
+  WRONG** — OQ-050, against Wrapbook payroll 759715. **The EOR does both, on different halves of the
+  same payroll.** Wages are itemised **per person, per day, per project**, with hours and dollars —
+  actual and attributable. **Burden is priced per RUN**: one applicable-wages base with an effective
+  rate per component. So reaching a per-shift cost requires **apportionment**, and pro-rata
+  apportionment IS a standard rate over actual hours. Run 759715: wages
+  **$2,323.50** + fees **$461.23** = CFS's cost **$2,784.73**, an effective
+  **19.85%** — statutory 18.36% plus a 1.49% platform fee, and **3.15 points below** the 23% blended
+  average.
+  ⚠️ **And the burden is CAPPED per person per year, so a flat factor is SYSTEMATICALLY wrong rather
+  than imprecise.** FUTA (0.60%) stops at ~$7,000 and Illinois SUTA — **7.05%, the largest
+  component** — at ~$13,600, about 233 and 453 hours at $30/hr, leaving a ~4.51% uncapped floor of
+  Medicare plus workers comp. A regular crew member crosses both inside a season, so a flat rate
+  **over-states late-year hours and under-states early-year ones**, biasing early-season job margins
+  against late-season ones with nothing in the numbers looking wrong. ⇒ `labor_variance` **fires**,
+  and the apportionment owes a **period-close true-up** — SAP's confirm-at-plan, revalue-at-actual
+  shape. HOT-010 resolves here on that reasoning, not on impossibility.
 
 ## Decision
 
@@ -98,11 +105,14 @@ plan price and **revalues to actual at close**, and Intacct's criterion is not r
 but **at what granularity payroll reconciles**.
 
 ⚠️ **The costing input is the EOR's CHARGE, not CFS's wage table — and this ADR reasons from the
-wrong source.** It costs a shift at _"that person's actual rate"_ from a wage _"carried per contact
-and overridable"_. Under a true EOR the **wage** is what CFS agreed the worker receives (a
-scheduling fact) and the **cost** is what Wrapbook charges (an invoice fact). Those can diverge, and
-only the second belongs in COGS — structurally the same defect as leaning on `5200`: reasoning from
-a source that is not the authority for the number needed.
+wrong source.** ✅ Confirmed 2026-08-17: the register carries hours and dollars per person, and
+`Project` reads **`CFS2` — the company, not a job**, so **Wrapbook owns _who, when, how long, how
+much paid_ and CFS owns _which job those hours served_.** This ADR assumes the second half correctly
+and wrongly assumes CFS owns the first. It costs a shift at _"that person's actual rate"_ from a
+wage _"carried per contact and overridable"_. Under a true EOR the **wage** is what CFS agreed the
+worker receives (a scheduling fact) and the **cost** is what Wrapbook charges (an invoice fact).
+Those can diverge, and only the second belongs in COGS — structurally the same defect as leaning on
+`5200`: reasoning from a source that is not the authority for the number needed.
 
 **The per-contact figure is a COST rate, and it is NOT the wage rate.** Two fields, because they are
 two facts: burdened for W-2, contracted for 1099, while the wage still exists for the pay side the
