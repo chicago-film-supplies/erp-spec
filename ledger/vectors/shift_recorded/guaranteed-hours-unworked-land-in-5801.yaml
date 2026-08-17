@@ -45,7 +45,7 @@ derivation: >-
   obligation is read off the accounts (ADR-0025). Idle time belongs to no product line and to no
   kind of work; giving it either would turn the account into a plug that quietly absorbs whatever
   the allocation could not place, and the KPI would stop meaning anything. See
-  `product-line-on-unabsorbed-hours-rejected`.
+  `causal-order-on-unabsorbed-hours-rejected`.
   The absorbed line carries both dimensions, because 5800 names both.
   Contrast `overtime-premium-pro-rata-across-the-days-jobs`, where the day overflowed instead of
   underflowing: same account pair, opposite direction, and only one of the two legs is written in

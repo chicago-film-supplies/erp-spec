@@ -1,4 +1,4 @@
-name: overhead-accrual-carries-no-product-line
+name: overhead-accrual-carries-no-causal-order
 posting_rule: obligation_accrued
 kind: accept
 source: >-

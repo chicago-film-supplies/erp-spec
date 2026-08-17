@@ -26,7 +26,7 @@ given:
 derivation: >-
   **One entry, two source documents.** A single check for $1,500.31 clears two invoices — the
   $500.00 of `invoice_issued/single-line-no-tax` and the $1,000.31 of
-  `two-lines-two-product-lines-with-tax`. Both invoices have posted AR, so both have a receivable to
+  `two-lines-two-causal-orders-with-tax`. Both invoices have posted AR, so both have a receivable to
   relieve.
   The fan is over the session's rows, so the entry is two transfers debiting **one** deposit account
   and crediting 1200 twice. `control_total` = 50000 + 100031 = **150031** = the money that arrived.

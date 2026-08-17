@@ -1393,7 +1393,36 @@ for (const e of evts) {
     const where = rel(v._file);
     const dir = basename(v._file.replace(/\/[^/]+$/, ""));
 
+    /**
+     * 10o — a vector's `name` equals its filename stem.
+     *
+     * ⚠️ **Added 2026-08-16 (erp-spec#19) because the sweep broke it and nothing noticed.** Five
+     * vectors were renamed; `overhead-accrual-carries-no-causal-order.yaml` kept
+     * `name: overhead-accrual-carries-no-product-line` inside it, and every gate stayed green — the
+     * `name` was present, the rule resolved, the directory matched. A vector whose stated identity
+     * disagrees with its location is one a `differs_from` can never find.
+     *
+     * ⚠️ **The BROADER check — vector-to-vector cross-references in prose — is deliberately NOT
+     * built, and the measurement is the reason.** Vectors cite each other by bare name constantly
+     * ("contrast `overhead-accrual-carries-no-causal-order`"), those names are not repo paths so
+     * gate 11 cannot see them, and the same sweep left four dead ones. But of 36 distinct
+     * hyphenated backticked tokens under `ledger/`, **10 do not resolve to a vector and 8 of those
+     * are correct**: seven are old names quoted inside deliberate "renamed from `X`" annotations —
+     * the repo's retraction convention — and one is a uuid. A gate here would turn CI red on
+     * exactly the notes this repo asks people to write, which is the trap that forced 10n to read
+     * step lines only. **The 10th was a real defect and was found by hand**: a citation of
+     * `allocations-short-of-the-money-received-rejected`, a vector that has never existed.
+     */
     if (!v.name) fail(G, `${where}: no \`name\``);
+    else {
+      const stem = basename(v._file).replace(/\.yaml$/, "");
+      if (v.name !== stem) {
+        fail(
+          G,
+          `${where}: \`name: ${v.name}\` does not match its filename \`${stem}\` — a vector whose stated identity disagrees with its location is one a \`differs_from\` can never find`,
+        );
+      }
+    }
     if (!v.source) fail(G, `${where}: no \`source\` — a vector with no provenance is a fixture`);
     if (!v.kind || !["accept", "reject"].includes(v.kind)) {
       fail(G, `${where}: kind "${v.kind}" not accept | reject`);
