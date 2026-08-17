@@ -818,30 +818,30 @@ accounts:
     name: "Owner's Capital: Owner's Billable Time"
     class: equity
     normal_balance: credit
-    disposition: undecided
+    disposition: drop
     status_live: Archived
-    blocked_by: [OQ-047]
     reason: >-
-      ⚠️ **MOVED FROM `drop` TO `undecided` 2026-08-16, and the reason it was dropped MISREAD THE
-      ACCOUNT.** It read: "Owner time that is billable is labour, and under ADR-0019 labour is costed
-      at actual into 5800/5801 against the job that caused it — booking it to equity would put the
-      cost outside COGS entirely and leave it out of every margin."
-      **That reads this account as the DEBIT side. It is the CREDIT side.** Booking owner time to
-      equity *instead of* COGS would lose it from every margin, which is true and is not what the
-      account does. Debit 5800 and credit owner's capital and the opposite happens: the job bears the
-      cost, and the credit records that the labour was **contributed rather than owed**.
-      **The owner reopened exactly this on 2026-08-16** — "a line in the labor pos or bills that
-      allows for an owner shift unpaid or paid, so that unpaid owner shifts dont dilute cogs" — and
-      the survey found that **every one of six references fences an uncompensated labour cost away
-      from the financial statements, and not one of them credits a payable**
+      ✅ **DROP — and the reason it was ORIGINALLY dropped was wrong, which is why this entry says so
+      at length.** It read: "booking it to equity would put the cost outside COGS entirely and leave
+      it out of every margin." **That reads this account as the DEBIT side. It is the CREDIT side.**
+      Debit 5800 and credit owner's capital and the opposite happens: the job bears the cost, and the
+      credit records that the labour was **contributed rather than owed**. This account was correct
+      machinery, described as if it were something else.
+      **It is dropped because the treatment it serves was not chosen** (OQ-047, owner 2026-08-16:
+      "stick with gaap"). A contributed owner shift writes **no transfer at all** — no obligation was
+      incurred, so no expense is recognised, and ASC 958-605 (which lets an entity recognise donated
+      services) is not-for-profit only. **With nothing posted there is nothing to offset**, so no
+      credit account is needed.
+      ⚠️ **The rejected alternative is live and this account is what it would have used**: Dr 5800 /
+      Cr owner's capital, which is NetSuite's and Intacct's shape — post the imputed cost, fence the
+      credit. It is refused on GAAP rather than on convenience, and if that trade is ever re-opened
+      **this is the account to un-archive**
       (`inbox/2026-08-16-survey-an-unpaid-owner-shift-is-not-an-expense-and-every-reference-fences-imputed-labour-out-of-the-statements.md`).
-      Crediting **2010 Accrued Expenses: Received Not Invoiced** for an owner shift asserts a
-      liability no bill can ever relieve, which is the defect this account exists to avoid.
-      ⚠️ **So the incumbent already held the fenced offset the survey says every system needs, and
-      this file proposed deleting it while describing a different account.** Whether v2 keeps it is
-      OQ-047: the recommendation is that a contributed shift posts NOTHING (the GAAP answer for a
-      for-profit entity, and the majority of the six), in which case this account is genuinely
-      unnecessary and `drop` is right — but that is a decision, and it was being taken by accident.
+      ⚠️ **The near-miss is worth keeping.** This entry sat at `drop` on a misreading for as long as
+      it existed; the disposition was right and the reasoning was not, so nothing could have caught
+      it. It took the owner asking a question the account already answered. **A correct conclusion
+      reached by wrong reasoning is not a checked conclusion** — the same lesson as the `transport`
+      pool selecting delivery labour, found the same day.
       ⚠️ This reason also read "an equity account cannot carry a dimension" until 2026-08-16; no
       account carries one now (ADR-0036), and the real objection was always the P&L placement.
     source: "api:2026-08-09:db_chart_of_accounts_query"

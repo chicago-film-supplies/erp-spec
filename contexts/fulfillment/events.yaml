@@ -20,10 +20,14 @@ events:
   - id: EVT-FUL-002
     name: ShiftRecorded
     description: >-
-      One PERSON's paid span for one day closed, naming its causal job (OQ-005 — per person, not
+      One PERSON's span for one day closed, naming its causal job (OQ-005 — per person, not
       per crew, so leg->shift is many-to-many). Costed at that person's ACTUAL wage (ADR-0019);
       there is no standard rate. Byproduct work performed during the shift absorbs no incremental
       cost (OQ-006).
+      ⚠️ **This read "one PERSON's PAID span" until 2026-08-16.** A shift is not necessarily paid:
+      an owner may work one and take no wage for it, and `compensation` is what says which
+      (OQ-047). The word was load-bearing in the wrong direction — it made an unpaid shift
+      unrepresentable, which is how its cost ends up asserted as a liability nobody owes.
     producer: fulfillment
     consumers: [ledger]
     terminal: false
@@ -32,10 +36,30 @@ events:
       person_ref,
       causal_job_ref,
       wage_rate_minor,
+      compensation,
       clock_in,
       clock_out,
       overtime_hours,
     ]
+    note: >-
+      ⚠️ **`compensation` is `paid | contributed`, and it decides whether this event POSTS AT ALL**
+      (OQ-047, owner 2026-08-16). A `contributed` shift is one an owner worked and took no wage for:
+      **no obligation was incurred, so the GAAP books say nothing** and `shift_recorded` writes no
+      transfer. A `paid` shift posts exactly as before.
+      **The event is recorded either way, and that is the point of putting the discriminator here
+      rather than suppressing the event.** The shift, its hours and its `absorbed_allocations` are
+      written for a contributed shift too, so the costing layer keeps everything it needs to impute
+      a cost at report time — which is where the imputed view lives (ADR-0036's two layers:
+      TigerBeetle holds the GL, Mongo holds the projection).
+      ⚠️ **Without the discriminator the cost is not merely wrong, it is wrong in a way nothing
+      catches.** `shift_recorded` credits **2010 Accrued Expenses: Received Not Invoiced**, so an
+      unpaid owner shift would assert a liability that no bill can ever relieve, in the one account
+      whose entire purpose is "received not invoiced". The entry balances, the control total
+      matches, and 2010's balance silently stops meaning anything.
+      **Surveyed before deciding** (CLAUDE.md → _Accounting decisions_): GAAP, Xero, SAP and Odoo
+      keep an uncompensated labour cost out of the financial statements; NetSuite and Intacct post
+      it but fence the offset; **all six agree that nothing credits a payable**
+      (`inbox/2026-08-16-survey-an-unpaid-owner-shift-is-not-an-expense-and-every-reference-fences-imputed-labour-out-of-the-statements.md`).
 
   - id: EVT-FUL-003
     name: TripPlanned

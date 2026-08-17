@@ -434,6 +434,46 @@ report:
         This entry is about rent and utilities, which are not in COGS at all and have no causal
         order to spread from. **Two facts that share a word.**
 
+  # ── the imputed-labour view, REQUIRED and NOT official ───────────────────────────────────────
+  # ⚠️ **A contributed owner shift posts NOTHING** (OQ-047, owner 2026-08-16: "stick with gaap"). No
+  # obligation was incurred, so no expense is recognised — ASC 958-605, which lets an entity
+  # recognise donated services, is not-for-profit only. **The consequence lands here:** real work
+  # was performed, no cost reaches the job, and this report's gross margin is flattered by exactly
+  # that labour.
+  #
+  # **That is what GAAP requires, and it is why the imputed view is REQUIRED rather than optional.**
+  # A margin that is honest only in a report nobody runs is not honest. The shift record survives a
+  # contributed shift in full — hours, causal job, allocation-row identity, `labor_line` — so
+  # everything the imputed view needs is already captured; nothing further has to be recorded at
+  # posting time for it to become computable later.
+  #
+  # ⚠️ **It is explicitly NOT the official allocation, and that fence is ADR-0029's.** This is a
+  # SECOND number for the same thing, and ADR-0029 exists because two reports that disagree about
+  # the margin on the same product line have no authority to appeal to. The imputed view is
+  # management information; the official product-line P&L above is the managed number. **The same
+  # discipline this file already applies** to the un-allocated view, which "must never be published
+  # as the product-line margin".
+  imputed_labour_view:
+    required: true
+    official: false
+    status: unwritten
+    blocked_by: [OQ-048]
+    issue: erp-spec#32
+    reason: >-
+      **What rate to impute is not decided.** ADR-0019 costs labour at "that person's actual
+      per-contact wage", and an owner who is never paid has no actual wage — the field may be empty
+      or may hold a number nobody has ever honoured. Three candidates answering different questions
+      (the person's own rate, a replacement-hire rate, a single notional owner rate), and the
+      agricultural-extension literature's answer is the second: owner-operator compensation "should
+      be equivalent to hired compensation for accurate profitability measurement". OQ-048.
+      ⚠️ **Whatever is chosen is a BASIS and owes a version**, on this file's existing discipline —
+      two imputed views computed at different rates would disagree about the same job's margin.
+      ⚠️ **Unmeasurable until v2 runs.** How many owner shifts exist is recorded nowhere, because the
+      current system has no absorbed-labour stage at all (erp-spec#14). `compensation` being present
+      from day one is what makes the population countable the moment the stage exists — and until
+      then **the size of the distortion this view corrects is unknown**, which is an argument for
+      writing it early rather than waiting to see whether it matters.
+
   # ── presentation ─────────────────────────────────────────────────────────────────────────────
   presentation:
     own_and_allocated_shown_separately: true

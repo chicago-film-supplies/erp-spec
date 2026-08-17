@@ -1801,7 +1801,36 @@ open_questions:
     owner: alex
     decide_by: 2027-01-15
     blocks: []
-    status: open
+    status: answered
+    answer: >-
+      **STICK WITH GAAP. A `contributed` shift writes NO TRANSFER.** Owner, 2026-08-16, accepting the
+      survey's recommendation: "stick with gaap, and your rec".
+      `EVT-FUL-002` gains **`compensation: paid | contributed`**. A `paid` shift posts exactly as
+      before (Dr 5800/5801, Cr 2010). A `contributed` shift — one an owner worked and took no wage
+      for — posts **nothing**: no obligation was incurred, so no expense was incurred. ASC 958-605,
+      the standard that lets an entity recognise donated services, is **not-for-profit only**.
+      ✅ **No conditional is needed in the posting rule.** `cost_minor` is zero on a contributed
+      shift, and `ledger/posting-rules.yaml` already rules that a posting whose amount is zero is not
+      written — both legs and the control total fall out of machinery that already exists.
+      **THE SHIFT AND ITS ALLOCATIONS ARE STILL RECORDED**, and that is the whole design: hours,
+      causal job, allocation-row identity and `labor_line` all survive, so the costing layer keeps
+      everything it needs. **Suppressing the EVENT would have been the wrong fix** — it would lose
+      the hours, and with them any chance of measuring how much contributed labour the business runs
+      on. Under ADR-0036 the ledger holds keys and the projection holds everything derived; an
+      imputed labour cost is a projection fact by exactly that argument.
+      ⇒ **`3130 Owner's Capital: Owner's Billable Time` returns to `disposition: drop`**, and this
+      time for the right reason: the GAAP answer needs no fenced offset at all, because nothing is
+      posted to offset. The account was correct machinery for the treatment that was NOT chosen.
+      ⚠️ **What this does NOT fix, and it is a consequence rather than an oversight:** the GAAP gross
+      margin stays flattered by contributed labour. **That is what GAAP requires**, and it is why the
+      imputed view has to EXIST rather than be optional — a margin that is honest only in a report
+      nobody runs is not honest. The imputed view is one of the "other combos" the owner's
+      `labor_line` ruling makes cheap, and **what rate to impute is not decided** — see OQ-048.
+      **Golden vectors:** `contributed-owner-shift-posts-nothing` (accept) and
+      `contributed-shift-that-posts-rejected` (reject, its minimal pair). ⚠️ The reject is the
+      load-bearing one: a contributed shift posted anyway **balances**, matches its control total and
+      passes every other gate in the file, so nothing arithmetic can see it. Without that vector the
+      discriminator is a field an implementation can read and ignore.
     notes: >-
       Opened 2026-08-16. Owner: *"i think what we need is a line in the labor pos or bills that
       allows for an owner shift unpaid or paid, so that unpaid owner shifts dont dilute cogs."*
@@ -1855,3 +1884,40 @@ open_questions:
       current system has no absorbed-labour stage at all (erp-spec#14). **What would measure it is
       the discriminator itself**, present from day one so the population is countable the moment the
       stage exists.
+  - id: OQ-048
+    question: >-
+      At what rate is a contributed (unpaid owner) shift costed in the IMPUTED labour view — the
+      person's own wage had they been paid, a replacement-hire rate, or a single notional owner
+      rate?
+    owner: alex
+    decide_by: 2027-03-15
+    blocks: []
+    status: open
+    notes: >-
+      Opened 2026-08-16 by OQ-047's answer. **The GAAP decision does not depend on this and is not
+      waiting for it** — a contributed shift posts nothing whatever rate is chosen. What waits is
+      the imputed view, which OQ-047 makes required rather than optional.
+      **Why it is a real decision and not a lookup.** ADR-0019 costs labour at "that person's actual
+      per-contact wage", and **an owner who is never paid has no actual wage** — the field may be
+      empty, or may hold a number nobody has ever honoured. So the imputed view needs a rate the
+      shift record does not supply. Three candidates, and they answer different questions:
+      · **the person's own wage rate**, if one is recorded — cheapest, and it measures "what this
+        shift would have cost if we had paid it";
+      · **a replacement-hire rate** — what it would cost to have someone else do the work, which is
+        the number that matters for "can this business run without the owner working for free";
+      · **a single notional owner rate** — simplest to administer and the least defensible per-hour,
+        because an owner delivering and an owner doing books are not the same cost.
+      ⚠️ **The agricultural-extension literature calls this an imputed owner labour and management
+      charge and treats the SECOND as the correct one** — owner-operator compensation "should be
+      equivalent to hired compensation for accurate profitability measurement". That is a
+      recommendation from a field that has thought about owner-operated businesses for decades, and
+      it is the starting point rather than the answer.
+      ⚠️ **Whatever is chosen is a BASIS and owes a version** — `reporting/allocation-bases.yaml`'s
+      discipline applies, because two imputed views computed at different rates would disagree about
+      the same job's margin, which is the failure ADR-0029 exists to prevent. It is also why the
+      imputed view must be explicitly NON-OFFICIAL: ADR-0029 permits exactly one official
+      allocation, and this is a second number for the same thing.
+      ⚠️ **Unmeasurable until v2 runs.** How many owner shifts exist is recorded nowhere — the
+      current system has no absorbed-labour stage at all (erp-spec#14) — so there is no corpus figure
+      to size this from. `compensation` being present from day one is what makes the population
+      countable the moment the stage exists.

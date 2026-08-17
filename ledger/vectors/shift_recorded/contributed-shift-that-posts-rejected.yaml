@@ -1,0 +1,85 @@
+name: contributed-shift-that-posts-rejected
+posting_rule: shift_recorded
+kind: reject
+source: >-
+  OQ-047 (owner, 2026-08-16, "stick with gaap"). This is the failure the discriminator exists to
+  prevent, and it is a SILENT one — the entry balances and the control total matches, so no
+  arithmetic check anywhere in this spec can see it. The same class as
+  `vendor_bill_received/reclassification-rebooks-the-expense-rejected`, which is the other place a
+  perfectly balanced entry is the defect.
+
+differs_from: contributed-owner-shift-posts-nothing
+differs_in:
+  [
+    "shift.base_minor",
+    "shift.cost_minor",
+    "shift.absorbed_allocations[0].amount_minor",
+    "shift.absorbed_allocations[1].amount_minor",
+  ]
+
+given:
+  ledger_state:
+    closed_periods: []
+    consecutive_days_worked: 2
+  shift:
+    id: SH-VEC-0008
+    person: PER-VEC-0002
+    compensation: contributed
+    date: "2026-08-06"
+    wage_minor_per_hour: 3000
+    hours_worked: 6
+    hours_at_premium: 0
+    premium_minor: 0
+    base_minor: 18000
+    cost_minor: 18000
+    unabsorbed_minor: 0
+    absorbed_allocations:
+      - {
+          id: ALC-VEC-0051,
+          causal_job: ORD-VEC-0001,
+          hours: 4,
+          base_minor: 12000,
+          premium_share_minor: 0,
+          amount_minor: 12000,
+        }
+      - {
+          id: ALC-VEC-0052,
+          causal_job: ORD-VEC-0002,
+          hours: 2,
+          base_minor: 6000,
+          premium_share_minor: 0,
+          amount_minor: 6000,
+        }
+
+derivation: >-
+  Identical to `contributed-owner-shift-posts-nothing` except that the shift has been costed at the
+  wage anyway — six hours at $30.00 = **18000**, split 12000 / 6000 across the two causal jobs.
+  **It is refused because `compensation: contributed` and a cost was computed.**
+  ⚠️ **IT BALANCES, AND THAT IS THE DANGER.** Dr 5800 $180.00 / Cr 2010 $180.00 is a valid entry: Σ
+  debits equals Σ credits by construction, `control_total` matches `shift.cost_minor`, both accounts
+  exist, every key is declared and every allocation row carries its own identity. **Every other gate
+  in this file passes.** The defect is that 2010 Accrued Expenses: Received Not Invoiced now carries
+  $180.00 that no vendor will ever bill — in the one account whose entire purpose is "received not
+  invoiced" — and it stays there forever, because `vendor_bill_received` can only relieve an
+  obligation a bill resolves.
+  **Two ways to arrive here, and neither looks like a mistake at the time.** An operator marks the
+  shift contributed but the wage field is still populated from the person's record, so the cost
+  computes; or a well-meaning implementation decides the margin looks wrong without the labour and
+  books it "for accuracy". The second is the more dangerous, because it is a reasoned choice.
+  ⚠️ **The right place for that instinct is the IMPUTED REPORT, not the ledger.** The instinct is
+  correct — real work was performed and the GAAP margin is flattered — and GAAP still says no
+  expense was incurred, because no obligation was. Under ADR-0036 that tension has a home: the
+  ledger holds keys, the projection holds everything derived, and an imputed labour cost is a
+  projection fact. Booking it here trades a flattered margin for a corrupted liability balance,
+  which is the worse of the two.
+  **The whole entry is refused, not the offending leg.** A partial acceptance would debit 5800 for
+  hours while crediting nothing, which no control total could reconcile.
+  ⚠️ **This vector is what makes the discriminator a capability rather than a claim.** Without it,
+  `compensation: contributed` is a field an implementation can read and ignore, and the accept
+  vector alone proves only that a zero-cost shift posts nothing — which a shift with no hours would
+  also do.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "shift SH-VEC-0008 is `compensation: contributed` and carries a cost of 18000 — no obligation was incurred, so nothing is recognised; crediting 2010 Accrued Expenses: Received Not Invoiced would assert a liability no bill can ever relieve (OQ-047, ASC 958-605 is not-for-profit only)"

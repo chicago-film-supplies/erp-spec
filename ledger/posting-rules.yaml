@@ -626,6 +626,36 @@ rules:
     control_total: shift.cost_minor
     invariants:
       - >-
+          ⚠️ **A `contributed` SHIFT WRITES NO TRANSFER** (OQ-047, owner 2026-08-16; GAAP). An owner
+          may work a shift and take no wage for it. **No obligation was incurred, so nothing is
+          recognised** — ASC 958-605, which lets an entity recognise donated services, is
+          not-for-profit ONLY, and a for-profit entity records no expense for owner labour it did
+          not pay for. `shift.compensation` is the discriminator (`paid | contributed`) and it
+          arrives on `EVT-FUL-002`.
+          ⚠️ **Posting one anyway is the failure this refuses, and it is a SILENT one.** The credit
+          leg is 2010 Accrued Expenses: Received Not Invoiced, so a contributed shift posted as a
+          normal one asserts a liability that no bill can ever relieve — in the one account whose
+          entire purpose is "received not invoiced". The entry balances, the control total matches,
+          and 2010's balance stops meaning anything. `contributed-owner-shift-posts-nothing` is the
+          accept vector and `contributed-shift-that-posts-rejected` is its minimal pair.
+          **The shift and its `absorbed_allocations` are still RECORDED** — hours, causal job and
+          `labor_line` all survive, because they are what the costing layer needs. **The imputed
+          cost is a REPORT, not a posting** (ADR-0036's two layers: TigerBeetle holds the GL, Mongo
+          holds the projection). ⚠️ **The GAAP gross margin is therefore flattered by contributed
+          labour, and that is what GAAP requires** — which is why the imputed view has to EXIST
+          rather than be optional. A margin that is honest only in a report nobody runs is not
+          honest.
+          **Surveyed before deciding** (CLAUDE.md → _Accounting decisions_). GAAP, Xero, SAP and
+          Odoo keep an uncompensated labour cost out of the financial statements; NetSuite posts it
+          against a cost-variance account and Intacct into a 9xxx range excluded from all standard
+          reports. **All six agree on the credit side: nothing credits a payable.** The rejected
+          alternative — Dr 5800 / Cr an owner-contribution account, which is what live `3130 Owner's
+          Capital: Owner's Billable Time` was for — is refused on GAAP rather than on convenience
+          (`inbox/2026-08-16-survey-an-unpaid-owner-shift-is-not-an-expense-and-every-reference-fences-imputed-labour-out-of-the-statements.md`).
+          ✅ **This needs no conditional in the rule.** `cost_minor` is zero on a contributed shift,
+          and this file already rules that a posting whose amount is zero is not written — so both
+          legs and the control total fall out of the existing machinery.
+      - >-
           **The credit leg is NOT a payroll liability, because CFS has no payroll liability and never
           has** (OQ-024). Payroll processing is a charter non-goal: an external employer of record
           stays, and CFS "does not calculate withholding, file payroll tax, or move payroll money".
@@ -723,7 +753,7 @@ rules:
           work performed is cost incurred, and refusing to post it would understate COGS and hide the
           breach in the one system that noticed it. The control belongs where the action is taken, not
           where the fact is recorded, which is the same reasoning OQ-028 applied to an overpayment.
-    relates_to: [ADR-0019, ADR-0025, REQ-LED-001]
+    relates_to: [ADR-0019, ADR-0025, ADR-0036, REQ-LED-001]
     vectors_dir: ledger/vectors/shift_recorded/
 
   - id: depreciation_run

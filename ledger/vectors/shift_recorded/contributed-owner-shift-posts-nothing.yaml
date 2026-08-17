@@ -1,0 +1,77 @@
+name: contributed-owner-shift-posts-nothing
+posting_rule: shift_recorded
+kind: accept
+source: >-
+  OQ-047, decided by the owner 2026-08-16 after the six-reference survey
+  (`inbox/2026-08-16-survey-an-unpaid-owner-shift-is-not-an-expense-and-every-reference-fences-imputed-labour-out-of-the-statements.md`).
+  Owner: "a line in the labor pos or bills that allows for an owner shift unpaid or paid, so that
+  unpaid owner shifts dont dilute cogs", then: "stick with gaap, and your rec". Hours and wage shape
+  taken from `overtime-premium-pro-rata-across-the-days-jobs`; the wage is what would have been paid
+  and is recorded for the costing layer, never posted.
+
+given:
+  ledger_state:
+    closed_periods: []
+    consecutive_days_worked: 2
+  shift:
+    id: SH-VEC-0007
+    person: PER-VEC-0002
+    compensation: contributed
+    date: "2026-08-06"
+    wage_minor_per_hour: 3000
+    hours_worked: 6
+    hours_at_premium: 0
+    premium_minor: 0
+    base_minor: 0
+    cost_minor: 0
+    unabsorbed_minor: 0
+    absorbed_allocations:
+      - {
+          id: ALC-VEC-0041,
+          causal_job: ORD-VEC-0001,
+          hours: 4,
+          base_minor: 0,
+          premium_share_minor: 0,
+          amount_minor: 0,
+        }
+      - {
+          id: ALC-VEC-0042,
+          causal_job: ORD-VEC-0002,
+          hours: 2,
+          base_minor: 0,
+          premium_share_minor: 0,
+          amount_minor: 0,
+        }
+
+derivation: >-
+  **An owner worked six hours across two jobs and took no wage. Nothing posts.** `control_total` = 0
+  = `shift.cost_minor`, and both legs are absent rather than zero-valued — this file's rule that a
+  posting whose amount is zero is not written does the whole job, so the rule needs no conditional.
+  **The reason is GAAP and it is not a preference.** No obligation was incurred, so no expense was
+  incurred. ASC 958-605 — the standard that lets an entity recognise donated services — is
+  **not-for-profit only**; a for-profit entity records nothing for owner labour it did not pay for.
+  Four of the six surveyed references agree (GAAP, Xero, SAP, Odoo) and the two that do post an
+  imputed cost fence the offset (NetSuite a cost-variance account, Intacct a 9xxx range excluded
+  from standard reports). ⚠️ **All six agree on the credit side: nothing credits a payable**, which
+  is exactly what posting this shift would do.
+  ⚠️ **THE SHIFT AND ITS ALLOCATIONS ARE STILL RECORDED, and that is the point of the vector.** Six
+  hours, two causal jobs, two allocation rows with their own identities — everything the costing
+  layer needs to impute a cost at report time survives. **Suppressing the EVENT would have been the
+  wrong fix**: it would lose the hours, and with them any chance of ever measuring how much
+  contributed labour the business runs on. Under ADR-0036 the ledger holds keys and the projection
+  holds everything derived; an imputed labour cost is a projection fact by exactly that argument.
+  ⚠️ **`amount_minor: 0` on the allocation rows is deliberate and is NOT the same as the rows being
+  absent.** The allocation still happened — six hours split four and two — and the money attaching
+  to it is zero. A reader who deletes these rows because they carry no money loses the hours, which
+  are the only thing worth keeping here.
+  ⚠️ **5801 is untouched, and that follows rather than being an exception.** The unabsorbed leg
+  measures idle capacity that was PAID FOR; there is no idle-capacity cost for capacity nobody paid
+  for. `unabsorbed_minor` is 0 and no 5801 leg is written.
+  ⚠️ **What this vector does NOT fix, recorded so it is not discovered later:** the GAAP gross margin
+  on ORD-VEC-0001 and ORD-VEC-0002 is flattered — real work was performed and no cost lands on
+  either job. **That is what GAAP requires**, and it is why the imputed view has to exist rather than
+  be optional. A margin that is honest only in a report nobody runs is not honest.
+
+expect:
+  transfers: []
+  rejects: []
