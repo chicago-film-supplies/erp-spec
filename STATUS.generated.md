@@ -13,7 +13,7 @@ is `deno task validate`'s judgement, not this file's.
 |---|---:|---|
 | Open questions | 11 open | 39 answered of 50 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 16 | 0 open |
-| Decisions (ADR) | 36 | 23 in force · 9 proposed |
+| Decisions (ADR) | 37 | 23 in force · 10 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 21 | 0 without a scenario |
 | Inbox | 85 | 65 unpromoted |
@@ -72,7 +72,7 @@ None.
 - `ADR-0034` — An accepted ADR is a historical record of the decision as taken; corrections live outside it and superseding is reserved for re-deciding
 - `ADR-0036` — The ledger carries keys, not classifications — product line is derived at report time
 
-### Proposed (9)
+### Proposed (10)
 
 | ADR | Title | Review by | Supersedes on acceptance | Blocked on |
 |---|---|---|---|---|
@@ -85,6 +85,7 @@ None.
 | `ADR-0031` | The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy | 2026-11-01 | — | `OQ-006` `OQ-018` `OQ-031` `OQ-032` `OQ-033` |
 | `ADR-0032` | The organization tree is a liability tree; projects and settlement points are addressing beneath it | 2026-11-15 | — | `OQ-035` `OQ-036` `OQ-038` `OQ-039` `HOT-006` |
 | `ADR-0033` | A document is addressed to exactly one node by a level-tagged reference, and unallocated credit sits at the settlement point | 2026-11-15 | — | `OQ-030` `OQ-038` `OQ-040` |
+| `ADR-0037` | A decision asserts addressable CLAIMS, and a premise is typed apart from a decision | 2026-12-01 | — | `HOT-016` |
 
 ## Spikes
 

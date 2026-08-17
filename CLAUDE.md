@@ -150,6 +150,45 @@ Not every tool has an upstream dump, and the difference is worth knowing before 
 - **Quint** also ships official agent skills, enabled as a plugin in `.claude/settings.json` — those
   beat both halves for authoring `.qnt`.
 
+## Footguns — check these, they have all bitten
+
+**Claims**
+
+- Amending a body is not amending a decision. Sweep the **title, the summary blockquote**, the chart
+  `reason`, the glossary term, golden-vector prose and every citation.
+- Grep a claim with **two or more phrasings** before stating a count. A count from one search is a
+  count of that search.
+- Rename a file and its citations break — including inside the note doing the renaming.
+- Accepting an ADR freezes its **premises**, not just its decision. Check what it asserts as fact.
+
+**Figures**
+
+- Before using a number, ask what it is a figure **OF** — which population, whose cost, what basis.
+- Do not mint an account, branch or enum value before **measuring its population**.
+- An **average IS a standard rate**, and produces a variance.
+- A vendor total is not a per-item cost. Check the **granularity** of the source document before
+  attributing it.
+- "Present but wrong" beats "absent" at passing every existence check. Coordinates, denorms and
+  defaults are where it hides.
+
+**Checks**
+
+- Land every gate **red** first. A gate that reads green while matching nothing is indistinguishable
+  from one that passes.
+- Ask what a gate does **NOT** check — and whether its silence means "clean" or "not looked at".
+- An **incomplete** fix is invisible in a way a missing one is not. When something reports its
+  successes, ask what reports its failures.
+- A check that bans a word cannot name it; a check that diffs a tree fails on work in progress.
+  Exempt by identity, and say why.
+- Minting an account creates no posting rule. Nothing currently notices.
+
+**Data**
+
+- Payroll, contact and customer exports carry PII. **Record structure and aggregates, never rows.**
+- Xero: read from the Firestore mirror; the API is single-tenant, live, and quota is shared.
+- A failed Actions run in ~2s is a **billing block**, not a code failure. No run at all is an
+  outage.
+
 ## Four rules that exist because something here broke on them
 
 The first two are already enforced in the `~/cfs` workspace. All four are load-bearing here:
