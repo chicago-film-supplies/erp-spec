@@ -818,14 +818,32 @@ accounts:
     name: "Owner's Capital: Owner's Billable Time"
     class: equity
     normal_balance: credit
-    disposition: drop
+    disposition: undecided
     status_live: Archived
+    blocked_by: [OQ-047]
     reason: >-
-      Archived. Owner time that is billable is labour, and under ADR-0019 labour is costed at
-      actual into 5800/5801 against the job that caused it — booking it to equity would put the cost
-      outside COGS entirely and leave it out of every margin. ⚠️ This reason read "an equity account
-      cannot carry a dimension" until 2026-08-16; no account carries one now (ADR-0036), and the
-      real objection was always the P&L placement rather than the dimension.
+      ⚠️ **MOVED FROM `drop` TO `undecided` 2026-08-16, and the reason it was dropped MISREAD THE
+      ACCOUNT.** It read: "Owner time that is billable is labour, and under ADR-0019 labour is costed
+      at actual into 5800/5801 against the job that caused it — booking it to equity would put the
+      cost outside COGS entirely and leave it out of every margin."
+      **That reads this account as the DEBIT side. It is the CREDIT side.** Booking owner time to
+      equity *instead of* COGS would lose it from every margin, which is true and is not what the
+      account does. Debit 5800 and credit owner's capital and the opposite happens: the job bears the
+      cost, and the credit records that the labour was **contributed rather than owed**.
+      **The owner reopened exactly this on 2026-08-16** — "a line in the labor pos or bills that
+      allows for an owner shift unpaid or paid, so that unpaid owner shifts dont dilute cogs" — and
+      the survey found that **every one of six references fences an uncompensated labour cost away
+      from the financial statements, and not one of them credits a payable**
+      (`inbox/2026-08-16-survey-an-unpaid-owner-shift-is-not-an-expense-and-every-reference-fences-imputed-labour-out-of-the-statements.md`).
+      Crediting **2010 Accrued Expenses: Received Not Invoiced** for an owner shift asserts a
+      liability no bill can ever relieve, which is the defect this account exists to avoid.
+      ⚠️ **So the incumbent already held the fenced offset the survey says every system needs, and
+      this file proposed deleting it while describing a different account.** Whether v2 keeps it is
+      OQ-047: the recommendation is that a contributed shift posts NOTHING (the GAAP answer for a
+      for-profit entity, and the majority of the six), in which case this account is genuinely
+      unnecessary and `drop` is right — but that is a decision, and it was being taken by accident.
+      ⚠️ This reason also read "an equity account cannot carry a dimension" until 2026-08-16; no
+      account carries one now (ADR-0036), and the real objection was always the P&L placement.
     source: "api:2026-08-09:db_chart_of_accounts_query"
 
   - code: 3200

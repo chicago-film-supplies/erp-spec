@@ -97,13 +97,15 @@ report:
     Shipping: activity
 
   # ── which LABOUR enters which pool ───────────────────────────────────────────────────────────
-  # ⚠️ **`labor_line` is the pool's COST SELECTOR, and this is the map that makes it executable.**
-  # Owner, 2026-08-16: "the p&l by product line will distribute labor costs with labor_line delivery
-  # across product lines, the same mechanism will allow other combos for future reporting."
+  # ⚠️ **`labor_line` is the pool's COST SELECTOR, and EVERY declared value is selected by exactly
+  # one pool.** Owner, 2026-08-16: "the p&l by product line will distribute labor costs with
+  # labor_line delivery across product lines, the same mechanism will allow other combos for future
+  # reporting", and then: **"counter and warehouse can bill goods too (just like delivery does)."**
   #
   # A report in this family is three things — **(cost selector) → spread over (base) by (basis)** —
-  # and the official product-line P&L is `labor_line: delivery` → goods revenue on the causal order
-  # → largest remainder. "Other combos" are new rows of CONFIGURATION, not new machinery.
+  # and the official product-line P&L is `labor_line: {delivery, counter, warehouse}` → goods revenue
+  # on the causal order → largest remainder. "Other combos" are new rows of CONFIGURATION, not new
+  # machinery.
   # ⚠️ That generality must not leak into the AUTHORITY. ADR-0029's "exactly ONE official
   # allocation" stands: a configurable mechanism makes a second number cheap to produce, and
   # ADR-0029 is what says only one of them is the managed one.
@@ -112,53 +114,30 @@ report:
   # (`delivery`, `counter`, `warehouse`) exactly one activity pool could name its own labour and the
   # rest had nowhere to point — so `transport` pointed at `labor_line: delivery` and would have
   # spread a long-haul crew-day across goods lines while reporting Transport at a ~100% margin. With
-  # seven, every severable pool selects its own cost. **Five of the seven mirror an activity product
-  # line and there are exactly five activity lines**, so the correspondence is total, which is what
-  # makes this gate possible at all.
+  # seven, every pool selects its own cost.
   #
   # ⚠️ **The mapping is NOT derivable from the names.** `trucking` ↔ `Transport` is the
   # counter-example: `Transport` is the incumbent Xero tracking category and `trucking` is what the
   # owner calls the work. A convention matching on the string would silently drop that pool, which
   # is why the link is declared on each pool's `cost_sources.labor_line` and never inferred.
   #
-  # Gate 13h requires every declared `labor_line` to appear here exactly once, every `billable` one
-  # to be selected by exactly one pool, and every `bills_nobody` one to be selected by none and to
-  # carry an entry below. Adding a value to `ledger/dimensions.yaml` without deciding where its cost
-  # lands is a build break, not a silent default — and the silent default would be "vanishes", which
-  # understates COGS on every line it should have reached.
-  labor_line_kinds:
-    delivery: billable
-    trucking: billable
-    shipping_&_handling: billable
-    trash_&_cleanup: billable
-    crew: billable
-    counter: bills_nobody
-    warehouse: bills_nobody
-
-  # The honest bucket, on the same terms as `deferred_pools` below and `unwritten` in
-  # `ledger/posting-rules.yaml`: labour that is real, absorbed, and lands nowhere yet. Every entry
-  # owes a live blocker, and gate 13h fails on one that does not carry it.
-  unpooled_labor_lines:
-    - labor_line: counter
-      blocked_by: [OQ-046]
-      reason: >-
-        A counter hour is real absorbed labour — it absorbs into 5800 against a causal job like any
-        other — and it names no product line, so no pool selects it. **Where its cost lands is
-        undecided**, and the three available shapes are genuinely different: spread like `delivery`
-        on the argument that counter time is a joint cost of goods revenue and not severable;
-        reported unallocated, which is honest and leaves goods COGS understated; or attached to the
-        causal order's goods directly without spreading, which is the causal-job rule `crew` and
-        `trash_cleanup` use and is NOT the same thing as spreading.
-    - labor_line: warehouse
-      blocked_by: [OQ-046]
-      reason: >-
-        Same shape as `counter`, and deliberately NOT the same question as `deferred_pools`'
-        `warehouse_overhead`. That entry is about rent and utilities — an operating expense below
-        this report's gross margin until an ADR moves it into COGS. This is about a warehouse HOUR,
-        which is already in COGS via 5800 and already absorbed against a causal job. ⚠️ The two were
-        conflated in `warehouse_overhead`'s own reason until 2026-08-16, which said `labor_line:
-        warehouse` "is the narrower thing and is not the same claim" without saying where the
-        narrower thing goes.
+  # ⚠️ **There is NO "bills nobody" branch, and it was removed on the owner's ruling the day it was
+  # written.** This file carried `labor_line_kinds` (`billable` / `bills_nobody`) with `counter` and
+  # `warehouse` in the second bucket and an `unpooled_labor_lines` honest-bucket beside it. The
+  # owner's ruling collapsed it: counter and warehouse hours are absorbed against a causal job like
+  # any other, so they bill goods exactly as delivery does. **A branch with no members is a claim
+  # rather than a capability** — this repo's own standard — so the branch went rather than being
+  # kept empty against a hypothetical.
+  # ✅ **And the collapse is structural, not a coincidence.** `labor_line` is read off the shift's
+  # ABSORBED ALLOCATION row, and an absorbed allocation names a causal job by definition — hours
+  # belonging to no job are UNABSORBED, post to 5801, and have no allocation row and therefore no
+  # `labor_line` at all. So every value this taxonomy can hold is, by construction, attributable to
+  # a job whose goods can bear it. **Total coverage is a property of the design, not an assumption.**
+  #
+  # Gate 13h requires every declared `labor_line` to be selected by exactly one pool, and every pool
+  # to declare a selector. Adding a value to `ledger/dimensions.yaml` without deciding which pool
+  # spreads it is a build break, not a silent default — and the silent default would be "vanishes",
+  # which understates COGS on every line it should have reached.
 
   # ── the pools ────────────────────────────────────────────────────────────────────────────────
   # One entry per ACTIVITY line, and every one of them lands in exactly one bucket — the same
@@ -166,6 +145,7 @@ report:
   # state this file can be in.
   pools:
     - id: delivery
+      kind: activity_line
       product_line: Delivery
       status: allocated
       basis: goods_revenue_on_causal_order
@@ -236,6 +216,7 @@ report:
         costs with labor_line delivery across product lines" (2026-08-16).
 
     - id: shipping
+      kind: activity_line
       product_line: Shipping
       status: not_allocated
       accounts: [4150, 5300]
@@ -262,6 +243,7 @@ report:
         corpus still carries one `Transport` value and 4150 under it is entirely this pool.
 
     - id: transport
+      kind: activity_line
       product_line: Transport
       status: not_allocated
       accounts: [4100]
@@ -303,6 +285,7 @@ report:
         `Transport` value. ⚠️ The corpus has NOT been restated into two values; that is an ADR-0020
         obligation, and `Shipping` therefore reads 0 lines when the dimension is read directly.
     - id: crew
+      kind: activity_line
       product_line: Crew
       status: not_allocated
       accounts: [4100]
@@ -330,6 +313,7 @@ report:
         Measured 2026-08-16: 9 lines, **$3,550.00**, 0.21% of revenue — unchanged on both figures.
 
     - id: trash_cleanup
+      kind: activity_line
       product_line: Trash & Cleanup
       status: not_allocated
       accounts: [4100]
@@ -356,6 +340,58 @@ report:
         attributes to this line because that is the job that caused it. $144,975 of revenue on its
         own P&L line with no cost against it would report a margin near 100% and would be the most
         misleading number this report could produce.
+
+    # ── cost-only pools: real absorbed labour that bills nobody DIRECTLY ─────────────────────
+    # ⚠️ **`kind: cost_only` is the schema's second pool shape, added 2026-08-16 on the owner's
+    # ruling.** An activity pool has revenue AND cost and asks "does its cost land on the goods";
+    # a cost-only pool has cost and NO revenue, so the question does not arise — it has nowhere
+    # else to go. **A cost-only pool must therefore be `allocated`**, and gate 13d fails on one
+    # that is not: a cost pool that does not spread is a cost that reaches no report at all,
+    # which is the "vanishes" default in its purest form.
+    #
+    # These two do not appear as P&L lines of their own. Their cost spreads into the goods lines
+    # of the orders that caused it, which is what "can bill goods too" means.
+
+    - id: counter
+      kind: cost_only
+      status: allocated
+      basis: goods_revenue_on_causal_order
+      basis_version: 1
+      cost_sources:
+        labor_line: counter
+        labour_accounts: [5800]
+      reason: >-
+        **Counter hours bill goods, exactly as delivery does** (owner, 2026-08-16: "counter and
+        warehouse can bill goods too (just like delivery does)"). A counter hour is spent serving a
+        customer collecting or returning an order, so it is a joint cost of that order's goods
+        revenue and it is not severable — nobody buys a counter hour. That is ADR-0029's criterion
+        for `Delivery` applied unchanged, and it reaches the same answer.
+        ⚠️ **It has no product line and needs none.** `Delivery` has one because a delivery is
+        CHARGED FOR and an operator picks the line; a counter hour is never billed as a line, so
+        there is no revenue to categorise. The absence is the reason this is a cost-only pool, not
+        an omission.
+        ⚠️ **Its size is unmeasured and will stay unmeasured until v2 runs.** The current system has
+        never had the absorbed-labour stage, so counter hours measure as zero everywhere
+        (erp-spec#14). **Decided on the criterion rather than on the number**, which is the right
+        way round: severability does not depend on magnitude.
+
+    - id: warehouse
+      kind: cost_only
+      status: allocated
+      basis: goods_revenue_on_causal_order
+      basis_version: 1
+      cost_sources:
+        labor_line: warehouse
+        labour_accounts: [5800]
+      reason: >-
+        **Warehouse hours bill goods, exactly as delivery does** (owner, 2026-08-16). Prep, pull,
+        check-in and put-away are performed for a specific order and absorb against it, so the
+        goods of that order bear the cost. Not severable — nobody buys a warehouse hour.
+        ⚠️ **NOT the same thing as `deferred_pools.warehouse_overhead`, and the two were conflated
+        until 2026-08-16.** That entry is rent and utilities: an operating expense below this
+        report's gross margin until an ADR moves it into COGS (erp-spec#12). This is a warehouse
+        HOUR, which is already in COGS via 5800 and already absorbed against a causal job. One is a
+        facility cost with no causal order; the other is labour with one.
 
   # ── pools that are the same shape and are NOT yet expressible ────────────────────────────────
   # `pools` above is keyed by an ACTIVITY PRODUCT LINE, because that is what today's data has: an
@@ -392,10 +428,11 @@ report:
         no ADR has made.
         ⚠️ **NOT the same question as `labor_line: warehouse`, and this entry used to leave that
         dangling.** It said the labour classification "already exists … which is the narrower thing
-        and is not the same claim" without saying where the narrower thing goes. A warehouse HOUR is
-        already in COGS via 5800 and already absorbed against a causal job; what is undecided is
-        which pool claims it, and that is `unpooled_labor_lines` and OQ-046. This entry is about
-        rent and utilities, which are not in COGS at all.
+        and is not the same claim" without saying where the narrower thing goes. ✅ It goes to the
+        **`warehouse` cost-only pool** above (owner, 2026-08-16) — a warehouse HOUR is already in
+        COGS via 5800, already absorbed against a causal job, and spreads onto that job's goods.
+        This entry is about rent and utilities, which are not in COGS at all and have no causal
+        order to spread from. **Two facts that share a word.**
 
   # ── presentation ─────────────────────────────────────────────────────────────────────────────
   presentation:
