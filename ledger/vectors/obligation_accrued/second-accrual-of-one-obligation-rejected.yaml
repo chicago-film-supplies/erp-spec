@@ -20,7 +20,7 @@ given:
     accrual_date: "2026-08-12"
     amount_minor: 185000
     debit_account: 5100
-    product_line: "Power, Lights & Tools"
+    causal_orders: ["ORD-VEC-4471"]
     source_document_ref: "subrental receipt SR-VEC-4471"
 
 derivation: >-

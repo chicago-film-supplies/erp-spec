@@ -1,0 +1,67 @@
+name: declared-null-causal-order-recorded
+posting_rule: invoice_issued
+kind: accept
+source: >-
+  ⚠️ **The population is MEASURED, not synthetic in shape** (`spikes/harness/posting-key-width-probe.ts`,
+  whole corpus, 2026-08-16): **30 of 1,010 issued invoices carry no `order` divider at all**, holding
+  **87 revenue-bearing lines worth $87,839.76**. The discriminator is decisive — **0 of the 30
+  reference an order and 30 of 30 carry a `crms_id`** — so they are legacy CRMS imports, a migration
+  population rather than a live pattern. Amounts below are synthetic; the shape is theirs.
+  ⚠️ **Renamed from `declared-null-product-line-recorded` on 2026-08-16** (ADR-0036). The vector it
+  replaces made the same point about a product line, which postings no longer carry.
+
+given:
+  ledger_state:
+    closed_periods: []
+  invoice:
+    id: INV-VEC-0008
+    invoice_date: "2026-07-20"
+    crms_id: "opportunity-4471"
+    total_minor: 180000
+    lines:
+      - net_minor: 180000
+        revenue_account: 4100
+        causal_orders: null
+        path: [DEST-VEC-0008, ITEM-VEC-0008]
+        description: "Warehouse Rental — 30 days"
+    tax_components: []
+
+derivation: >-
+  **The accept case that makes the rejection vectors mean something.** REQ-LED-001 requires every
+  posting to DECLARE its causal order — and this one does, as an explicit null: the invoice
+  references no order, so there is none to name. Contrast the three rejects, all the same shape with
+  a different value:
+    · `missing-causal-order-rejected`     — the key is ABSENT. Nobody decided. Refused.
+    · `empty-causal-order-list-rejected`  — `[]`. Passes a naive presence check, means nothing. Refused.
+    · `unresolvable-causal-order-rejected` — names an order that does not exist. Refused.
+  Only the declared null is recorded, and the difference between it and the first is the entire
+  content of REQ-LED-001.
+  ⚠️ **"There is no defensible null causal order" was ADR-0036's own draft claim, and the corpus
+  falsified it.** Refusing these 30 invoices outright makes 30 historical documents unpostable, which
+  ADR-0020's "the restatement must not alter any amount" forbids. The rejected alternative was
+  minting a synthetic order per legacy invoice — fabricating a document that never existed. ✅ Owner,
+  2026-08-16: **"we can allow source order null."** Nothing is fabricated and the population stays
+  countable: "share of postings with no causal order" is a number the read side publishes, and if it
+  grows on NEW postings that is a finding rather than a silent default.
+  **The line carries a `path` with no order divider**, which is exactly what the 30 look like — the
+  invoice has destination and group levels and no `order` level, so `path[0]` is a destination and
+  there is nothing for the causal-order key to read. It still carries a LINE key: the row exists and
+  is identifiable, which is what lets the product-line join work even where the order join cannot.
+  **The line stays on 4100.** Warehouse Rental is operating service revenue; moving it to 4800 Other
+  Income would understate operating revenue and, for the historical population, would move money
+  between P&L sections — which ADR-0020 forbids outright.
+  control_total = 180000 = the single transfer amount. No tax component: 4100 carries
+  `default_tax_profile: tax_none` live.
+
+expect:
+  transfers:
+    - {
+        debit_account: 1200,
+        credit_account: 4100,
+        amount_minor: 180000,
+        accounting_date: "2026-07-20",
+        causal_orders: null,
+        invoice: INV-VEC-0008,
+        line: [DEST-VEC-0008, ITEM-VEC-0008],
+      }
+  rejects: []

@@ -25,31 +25,28 @@ given:
     unabsorbed_minor: 0
     absorbed_allocations:
       - {
+          id: ALC-VEC-0001,
           causal_job: ORD-VEC-0001,
           hours: 5,
           base_minor: 15000,
           premium_share_minor: 2046,
           amount_minor: 17046,
-          product_line: "Delivery",
-          cost_type: delivery,
         }
       - {
+          id: ALC-VEC-0002,
           causal_job: ORD-VEC-0002,
           hours: 4,
           base_minor: 12000,
           premium_share_minor: 1636,
           amount_minor: 13636,
-          product_line: "Crew",
-          cost_type: counter,
         }
       - {
+          id: ALC-VEC-0003,
           causal_job: ORD-VEC-0003,
           hours: 2,
           base_minor: 6000,
           premium_share_minor: 818,
           amount_minor: 6818,
-          product_line: "Tables & Chairs",
-          cost_type: warehouse,
         }
 
 derivation: >-
@@ -70,9 +67,15 @@ derivation: >-
   **Chronological attribution is what this refuses.** Under it the premium would land entirely on
   whichever job the clock was on after hour eight, so running ORD-VEC-0003 first instead of last
   would change all three jobs' COGS without changing a single hour worked.
-  **This is the only vector in the spec that exercises `cost_type`**, and it uses all three declared
-  values. Both dimensions are required here because 5800 is the one account in the chart naming
-  `cost_type`; 2010 names none, so the union is exactly what each transfer declares.
+  ⚠️ **This was the only vector in the spec that exercised `cost_type`, and it no longer does** —
+  under ADR-0036 the posting carries the causal job and the allocation ROW, and both classifications
+  are read off that row at report time (OQ-042). Nothing in `ledger/` exercises `labor_line` now,
+  which is OQ-046 rather than a tidy consequence.
+  **What the three transfers exercise instead is HOT-014's shape, and it is the stronger thing.**
+  One shift becomes three transfers because it served three jobs, so the causal order alone does not
+  identify a row — `source_document` resolves only to the shift, and two allocations to the same job
+  on one shift would be indistinguishable without `allocation.id`. That is why the posting carries
+  the row's identity, and it is what made deriving `labor_line` free rather than a new field.
   No unabsorbed leg: `unabsorbed_minor` is 0 and a zero-amount posting is not written.
 
 expect:
@@ -82,23 +85,23 @@ expect:
         credit_account: 2010,
         amount_minor: 17046,
         accounting_date: "2026-08-06",
-        product_line: "Delivery",
-        cost_type: delivery,
+        causal_orders: ["ORD-VEC-0001"],
+        line: ALC-VEC-0001,
       }
     - {
         debit_account: 5800,
         credit_account: 2010,
         amount_minor: 13636,
         accounting_date: "2026-08-06",
-        product_line: "Crew",
-        cost_type: counter,
+        causal_orders: ["ORD-VEC-0002"],
+        line: ALC-VEC-0002,
       }
     - {
         debit_account: 5800,
         credit_account: 2010,
         amount_minor: 6818,
         accounting_date: "2026-08-06",
-        product_line: "Tables & Chairs",
-        cost_type: warehouse,
+        causal_orders: ["ORD-VEC-0003"],
+        line: ALC-VEC-0003,
       }
   rejects: []

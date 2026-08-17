@@ -1,0 +1,52 @@
+name: empty-causal-order-list-rejected
+posting_rule: invoice_issued
+kind: reject
+source: >-
+  No live population — this vector exists to close the gap ADR-0018 named and ADR-0036 inherited:
+  with nothing structural catching a missing key, the declaration rule is the whole enforcement.
+  ⚠️ **Renamed from `empty-string-product-line-rejected` on 2026-08-16** (ADR-0036). The defect it
+  refuses is unchanged in kind and changed in shape: `""` was the value that satisfies a naive NOT
+  NULL check while meaning nothing; `[]` is the same trap for a plural key.
+
+differs_from: two-lines-two-causal-orders-with-tax
+differs_in: ["invoice.lines[1].causal_orders"]
+
+given:
+  ledger_state:
+    closed_periods: []
+  invoice:
+    id: INV-VEC-0004
+    invoice_date: "2026-07-31"
+    total_minor: 100031
+    lines:
+      - net_minor: 75000
+        revenue_account: 4000
+        causal_orders: ["ORD-VEC-0001"]
+        path: [ORD-VEC-0001, DEST-VEC-0001, GRP-VEC-0001, ITEM-VEC-0001]
+      - net_minor: 12500
+        revenue_account: 4200
+        causal_orders: []
+        path: [ORD-VEC-0002, DEST-VEC-0002, GRP-VEC-0002, ITEM-VEC-0002]
+    tax_components:
+      - { payable_account: 2200, amount_minor: 11250 }
+      - { payable_account: 2200, amount_minor: 1281 }
+
+derivation: >-
+  **An empty list is not a declaration, and this is a different failure from an absent key.** A rule
+  implemented as a presence check — "is `causal_orders` on the object?" — passes this input and
+  records a posting that names no order while claiming to have decided. The key exists, reports as a
+  distinct population, and means nothing.
+  ⚠️ **The plural made this reachable, and it is the price of `causal_orders` being a LIST.** ADR-0036
+  makes the key plural by construction — a shared run serves several jobs — so the "present but
+  vacuous" value that `""` was for a scalar dimension is `[]` here. A spec that only refused absence
+  would have left it open.
+  **The correct way to say "none applies" is an explicit null**, which IS accepted — see
+  `declared-null-causal-order-recorded`, and the 30 legacy CRMS invoices behind it. `[]` is refused
+  precisely because it is neither: not a set of orders, and not a stated determination that there are
+  none.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "causal_orders is the empty list on transfer 2 — it satisfies a naive presence check while stating nothing; write an explicit null to record that no causal order applies (REQ-LED-001, ADR-0036)"
+      line: 1

@@ -57,7 +57,7 @@
           <outline text="[object Object]"/>
         </outline>
       </outline>
-      <outline text="Open questions (9 of 45 still open)" _note="The bottleneck. Each blocks what is listed under it.">
+      <outline text="Open questions (10 of 48 still open)" _note="The bottleneck. Each blocks what is listed under it.">
         <outline text="OQ-001 — Are fulfillment legs first-class recorded events with their own identity, or derived from the order…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-007"/>
           <outline text="blocks ADR-0011"/>
@@ -186,6 +186,9 @@
         <outline text="OQ-043 — Should the product and organization masters carry an EVENT HISTORY, so that a classification as it…" _note="owner: alex · decide by: 2026-12-15"/>
         <outline text="OQ-044 — Once wages move into COGS, what stays in `6600 Wages` — and can salaried sales/admin staff who neve…" _note="owner: alex · decide by: 2026-12-15"/>
         <outline text="OQ-045 — When a vendor bills LESS than was accrued, what retires the residual left in `2010 Accrued Expenses…" _note="owner: alex · decide by: 2027-02-15"/>
+        <outline text="OQ-046 — `counter` and `warehouse` labour bill nobody and name no product line, so no allocation pool select…" _note="owner: alex · decide by: 2027-01-15"/>
+        <outline text="OQ-047 — An owner works a shift and is not paid for it. Does the ledger post the cost — and if so, what does…" _note="owner: alex · decide by: 2027-01-15"/>
+        <outline text="OQ-048 — At what rate is a contributed (unpaid owner) shift costed in the IMPUTED labour view — the person's…" _note="owner: alex · decide by: 2027-03-15"/>
       </outline>
       <outline text="Conflicts (0 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labour) or an own long-haul run (labour-bearing)?…" _note="Decides whether a trucked fulfillment absorbs labour cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
@@ -238,7 +241,7 @@
           <outline text="blocks ADR-0031"/>
           <outline text="blocks ADR-0036"/>
         </outline>
-        <outline text="HOT-015 — `contexts/ledger/features/dimensional-postings.feature` still states the reading ADR-0025 REFUTED.…" _note="This is **HOT-011 surviving in the one artifact its resolution did not sweep**. ADR-0025 amended REQ-LED-001, re-scoped `cost_type` in `ledger/dimensions.yaml` and set the per-account `dimensions:` lists in `ledger/chart-of-accounts.yaml` — three artifacts. The `.feature` file was left stating the refuted reading, and it is not a fourth copy of the rule: gate 3 ties every requirement to a Gherkin scenario, so **these scenarios are REQ-LED-001's only executable statement**. A scenario that overstates the obligation is what an implementer builds to, and building it re-introduces exactly what OQ-021 removed — a &quot;kind of work&quot; demanded on `5000 Cost of Goods Sold: Retail Inventory`, where none of `delivery` / `counter` / `warehouse` is true. It survived because **nothing reads a `.feature` file's dimension claims**. Gate 10 checks every golden vector in `ledger/vectors/` against `ledger/dimensions.yaml` and stops there (erp-spec#16). The value-set gate added for that issue does not catch this one either: every value used here — `Transport`, `delivery`, `Crew` — is legally DECLARED. What is wrong is APPLICABILITY, not vocabulary.">
+        <outline text="HOT-015 — `contexts/ledger/features/posting-keys.feature` — then named `dimensional-postings.feature` — still…" _note="This is **HOT-011 surviving in the one artifact its resolution did not sweep**. ADR-0025 amended REQ-LED-001, re-scoped `cost_type` in `ledger/dimensions.yaml` and set the per-account `dimensions:` lists in `ledger/chart-of-accounts.yaml` — three artifacts. The `.feature` file was left stating the refuted reading, and it is not a fourth copy of the rule: gate 3 ties every requirement to a Gherkin scenario, so **these scenarios are REQ-LED-001's only executable statement**. A scenario that overstates the obligation is what an implementer builds to, and building it re-introduces exactly what OQ-021 removed — a &quot;kind of work&quot; demanded on `5000 Cost of Goods Sold: Retail Inventory`, where none of `delivery` / `counter` / `warehouse` is true. It survived because **nothing reads a `.feature` file's dimension claims**. Gate 10 checks every golden vector in `ledger/vectors/` against `ledger/dimensions.yaml` and stops there (erp-spec#16). The value-set gate added for that issue does not catch this one either: every value used here — `Transport`, `delivery`, `Crew` — is legally DECLARED. What is wrong is APPLICABILITY, not vocabulary.">
           <outline text="blocks REQ-LED-001"/>
         </outline>
       </outline>
@@ -394,7 +397,7 @@
       </outline>
       <outline text="Contexts (9)">
         <outline text="ledger (LED)" _note="1 requirement(s) · 2 event(s)">
-          <outline text="REQ-LED-001 — Every posting to an account whose chart entry names a required dimension shall DECLARE that dimensi…"/>
+          <outline text="REQ-LED-001 — Every posting shall DECLARE its causal order — either the order or orders that caused it, or an exp…"/>
           <outline text="EVT-LED-001 — JournalEntryPosted" _note="ledger → banking"/>
           <outline text="EVT-LED-002 — PeriodClosed" _note="ledger → fixed-assets, billing, tax"/>
         </outline>
@@ -470,7 +473,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (54 unpromoted of 73)" _note="no drops pending">
+      <outline text="Capture (56 unpromoted of 75)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -515,10 +518,12 @@
         <outline text="ADR-0031's allocation figures re-measured on the repaired corpus — pool-exceeds-base ROSE against a…" _note="inbox/2026-08-16-adr-0031s-figures-re-measured-two-of-three-predicted-directions-failed.md"/>
         <outline text="Correction — the 2026-08-10 retraction of the service-only-jobs finding reasoned from a product NAM…" _note="inbox/2026-08-16-correction-the-duradeck-retraction-reasoned-from-a-product-name.md"/>
         <outline text="Correction — two of the three &quot;not reachable&quot; references in the vendor-side survey were a malformed…" _note="inbox/2026-08-16-correction-two-of-three-unreachable-references-were-a-bad-query-and-sap-models-this-case-exactly.md"/>
+        <outline text="`labor_line` is the allocation pool's COST SELECTOR — the product-line P&amp;L distributes `labor_line:…" _note="inbox/2026-08-16-labor-line-is-the-pools-cost-selector-and-a-report-is-a-selector-crossed-with-a-base.md"/>
         <outline text="Seven owner rulings on the keys-not-classifications design — line identity is `item.path`, an align…" _note="inbox/2026-08-16-owner-rulings-line-identity-is-item-path-ephemeral-reports-are-never-sealed-and-cost-type-becomes-labour-line.md"/>
         <outline text="Owner — shipping.weight will exist for MANY products by the time basis v2 is in dev, which makes pa…" _note="inbox/2026-08-16-owner-shipping-weight-will-exist-for-many-products-by-the-time-v2-is-in-dev.md"/>
         <outline text="Combined survey — when does a vendor-side amount become revenue rather than an adjustment to cost?…" _note="inbox/2026-08-16-survey-a-vendor-side-amount-becomes-revenue-only-where-control-or-a-markup-does.md"/>
         <outline text="Survey — every one of six references keeps the analytical dimension in the same durable store as th…" _note="inbox/2026-08-16-survey-all-six-references-keep-the-dimension-in-the-same-store-as-the-balance-and-only-odoo-splits-the-record.md"/>
+        <outline text="Survey — an unpaid owner shift is not an expense under GAAP, and all six references fence imputed l…" _note="inbox/2026-08-16-survey-an-unpaid-owner-shift-is-not-an-expense-and-every-reference-fences-imputed-labour-out-of-the-statements.md"/>
         <outline text="Survey — the accrued-expense account CFS needs is a MATCHED clearing account, not a period-end esti…" _note="inbox/2026-08-16-survey-the-accrued-liability-is-a-matched-clearing-account-and-the-bill-reclassifies-rather-than-reverses.md"/>
         <outline text="Survey — five of six references put the customer on the SUBLEDGER and dimensions on the GL, and Odo…" _note="inbox/2026-08-16-survey-the-party-is-a-subledger-key-and-the-dimension-is-a-gl-slice-and-they-ride-different-legs.md"/>
         <outline text="The owner's reason for allocation-as-reporting is RE-RUNNABILITY — multiple bases, and re-allocatin…" _note="inbox/2026-08-16-the-owner-wants-allocation-re-runnable-and-nothing-in-the-spec-carries-the-key-it-would-re-run-on.md"/>

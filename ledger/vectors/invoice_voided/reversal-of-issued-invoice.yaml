@@ -2,7 +2,7 @@ name: reversal-of-issued-invoice
 posting_rule: invoice_voided
 kind: accept
 source: >-
-  Reverses the entry produced by `invoice_issued/two-lines-two-product-lines-with-tax`. 41 of 999
+  Reverses the entry produced by `invoice_issued/two-lines-two-causal-orders-with-tax`. 41 of 999
   prod invoices carry `status: "void"` — `api:2026-08-09:db_invoices_query`.
 
 given:
@@ -21,16 +21,32 @@ given:
           debit_account: 1200,
           credit_account: 4000,
           amount_minor: 75000,
-          product_line: "Power, Lights & Tools",
+          causal_orders: ["ORD-VEC-0001"],
+          invoice: INV-VEC-0002,
+          line: [ORD-VEC-0001, DEST-VEC-0001, GRP-VEC-0001, ITEM-VEC-0001],
         }
       - {
           debit_account: 1200,
           credit_account: 4200,
           amount_minor: 12500,
-          product_line: "Expendables",
+          causal_orders: ["ORD-VEC-0002"],
+          invoice: INV-VEC-0002,
+          line: [ORD-VEC-0002, DEST-VEC-0002, GRP-VEC-0002, ITEM-VEC-0002],
         }
-      - { debit_account: 1200, credit_account: 2200, amount_minor: 11250 }
-      - { debit_account: 1200, credit_account: 2200, amount_minor: 1281 }
+      - {
+          debit_account: 1200,
+          credit_account: 2200,
+          amount_minor: 11250,
+          causal_orders: null,
+          invoice: INV-VEC-0002,
+        }
+      - {
+          debit_account: 1200,
+          credit_account: 2200,
+          amount_minor: 1281,
+          causal_orders: null,
+          invoice: INV-VEC-0002,
+        }
 
 derivation: >-
   Each original transfer reappears with its two accounts EXCHANGED and its amount and dimensions
@@ -50,25 +66,33 @@ expect:
         credit_account: 1200,
         amount_minor: 75000,
         accounting_date: "2026-07-31",
-        product_line: "Power, Lights & Tools",
+        causal_orders: ["ORD-VEC-0001"],
+        invoice: INV-VEC-0002,
+        line: [ORD-VEC-0001, DEST-VEC-0001, GRP-VEC-0001, ITEM-VEC-0001],
       }
     - {
         debit_account: 4200,
         credit_account: 1200,
         amount_minor: 12500,
         accounting_date: "2026-07-31",
-        product_line: "Expendables",
+        causal_orders: ["ORD-VEC-0002"],
+        invoice: INV-VEC-0002,
+        line: [ORD-VEC-0002, DEST-VEC-0002, GRP-VEC-0002, ITEM-VEC-0002],
       }
     - {
         debit_account: 2200,
         credit_account: 1200,
         amount_minor: 11250,
         accounting_date: "2026-07-31",
+        causal_orders: null,
+        invoice: INV-VEC-0002,
       }
     - {
         debit_account: 2200,
         credit_account: 1200,
         amount_minor: 1281,
         accounting_date: "2026-07-31",
+        causal_orders: null,
+        invoice: INV-VEC-0002,
       }
   rejects: []

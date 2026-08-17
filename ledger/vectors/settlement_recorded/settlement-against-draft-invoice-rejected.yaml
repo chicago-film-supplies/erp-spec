@@ -35,8 +35,14 @@ derivation: >-
   invoice exists is a customer prepayment, which is a different fact with a different account, and
   the remedy is to issue the invoice or record the prepayment — not to settle against nothing.
   ⚠️ The whole session is refused, not the offending row. A partial acceptance would debit the bank
-  for 150031 while crediting 50000 of AR, which is the same unreconcilable state
-  `allocations-short-of-the-money-received-rejected` refuses, arrived at from the other side.
+  for 150031 while crediting 50000 of AR, and the CONTROL TOTAL is what makes that visible: gate 10i
+  requires the transfers to sum to `session.amount_minor`, so a session that accepts some rows and
+  drops others fails on arithmetic rather than on judgement.
+  ⚠️ **This sentence cited `allocations-short-of-the-money-received-rejected` until 2026-08-16 — a
+  vector that has never existed.** Found by the erp-spec#19 sweep while auditing cross-references,
+  not by any gate: a vector name in prose is not a repo path, so gate 11 cannot see it, and a
+  general check is refused for a stated reason (see gate 10o in `tools/validate.ts`). The claim it
+  was making is true and is now attached to the mechanism that enforces it.
 
 expect:
   transfers: []

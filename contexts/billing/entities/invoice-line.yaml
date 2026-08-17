@@ -10,5 +10,20 @@ fields:
     required: false,
     note: "percent bounded [0,100], or flat dollars-per-unit-per-factor. never a bare number",
   }
-  product_line: { type: dimension_ref, required: true }
+  path: {
+    type: "list<uid>",
+    required: true,
+    note: "ADR-0036 — the ROW identity, self-inclusive (`path.at(-1) === line_id`) and authored by exactly one function. `INVOICE_ITEM_LEVELS` is [order, destination, group], so `path[0]` is the causal order where an order divider exists. This is the key the posting carries; the product line is derived from `product_ref` at report time.",
+  }
+  causal_orders: {
+    type: "list<order_ref> | null",
+    required: true,
+    nullable: true,
+    note: "ADR-0036, REQ-LED-001 — normally `path[0]`. An explicit null where the invoice references no order at all: 30 of 1,010 prod invoices, 87 lines, $87,839.76, every one a legacy CRMS import. Absence is refused; a declared null is not.",
+  }
   tax_determined: { type: tax_result_ref, required: true }
+# ⚠️ `product_line: { type: dimension_ref, required: true }` was a field here until 2026-08-16.
+# ADR-0036 supersedes ADR-0018: a product line is `products.uid_tracking_category`, a mutable field
+# on a mutable master, and a line-level copy of it is exactly the denormalisation that produced
+# api-cloudrun#473 and #537 in the current system — the copy was null on 227 categorised lines, and
+# the writer restamps issued invoices with the product's CURRENT category. **v2 stores no copy.**

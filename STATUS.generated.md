@@ -11,18 +11,18 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 9 open | 36 answered of 45 · **0 with no owner or no decide-by** |
+| Open questions | 10 open | 38 answered of 48 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 15 | 0 open |
 | Decisions (ADR) | 36 | 21 in force · 11 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 21 | 0 without a scenario |
-| Inbox | 73 | 54 unpromoted |
+| Inbox | 75 | 56 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
-| Glossary terms | 27 | 0 still `TODO` |
+| Glossary terms | 28 | 0 still `TODO` |
 
 ## The bottleneck: undecided questions
 
-**9 of 45 still open**, soonest decide-by first.
+**10 of 48 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
@@ -35,6 +35,7 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-044` | Once wages move into COGS, what stays in `6600 Wages` — and can salaried sales/admin staf… | alex | 2026-12-15 | — |
 | `OQ-039` | `organizations.tax_profile` carries two different concepts in one enum — who owes (applie… | alex | 2027-01-15 | — |
 | `OQ-045` | When a vendor bills LESS than was accrued, what retires the residual left in `2010 Accrue… | alex | 2027-02-15 | — |
+| `OQ-048` | At what rate is a contributed (unpaid owner) shift costed in the IMPUTED labour view — th… | alex | 2027-03-15 | — |
 
 Whether any of these dates has PASSED is `deno task validate`'s judgement — gate 7 fails on an open question past its decide-by. This file reads no clock and so cannot say.
 

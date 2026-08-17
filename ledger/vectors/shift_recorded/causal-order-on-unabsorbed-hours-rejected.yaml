@@ -1,0 +1,75 @@
+name: causal-order-on-unabsorbed-hours-rejected
+posting_rule: shift_recorded
+kind: reject
+source: >-
+  ADR-0019 — 5801 **IS the idle-capacity KPI, not a plug**. ADR-0036 moves the obligation off the
+  account and onto the posting rule, which states that the unabsorbed leg declares
+  `causal_orders: null`; a rule that names no key refuses one just as firmly as a rule that names one
+  refuses its absence.
+  ⚠️ **Renamed from `product-line-on-unabsorbed-hours-rejected` on 2026-08-16.** The old vector
+  refused a product line on the idle leg. **The rename makes it strictly stronger**: a product line
+  was a classification anyone could later revise, while a causal order is a claim that three unworked
+  hours were caused by a specific job — and it is frozen into an immutable transfer.
+
+differs_from: guaranteed-hours-unworked-land-in-5801
+differs_in: ["shift.unabsorbed_causal_job"]
+
+given:
+  ledger_state:
+    closed_periods: []
+    consecutive_days_worked: 2
+  shift:
+    id: SH-VEC-0005
+    person: PER-VEC-0001
+    date: "2026-08-06"
+    wage_minor_per_hour: 3000
+    hours_guaranteed: 8
+    hours_worked: 5
+    hours_idle: 3
+    hours_at_premium: 0
+    premium_minor: 0
+    base_minor: 24000
+    cost_minor: 24000
+    unabsorbed_minor: 9000
+    unabsorbed_causal_job: ORD-VEC-0001
+    absorbed_allocations:
+      - {
+          id: ALC-VEC-0011,
+          causal_job: ORD-VEC-0001,
+          hours: 5,
+          base_minor: 15000,
+          premium_share_minor: 0,
+          amount_minor: 15000,
+        }
+
+derivation: >-
+  Identical to `guaranteed-hours-unworked-land-in-5801` except that the idle three hours are handed a
+  causal job — `ORD-VEC-0001`, the same one the worked hours carry, which is what makes it plausible
+  rather than obviously wrong. Amounts balance and the control total is satisfied. It is refused on
+  the key alone.
+  **The unabsorbed posting's rule declares `causal_orders: null`, so a transfer supplying one is
+  refused.** Declaring a key the rule does not name is the same class of error as omitting one it
+  does, and gate 10h treats it the same way. ⚠️ This derivation argued from the CHART until
+  2026-08-16 — "5801 names no dimension, so a posting to it may declare none" — and the chart no
+  longer states obligations (ADR-0036). The refusal is unchanged; its authority moved to
+  `ledger/posting-rules.yaml`.
+  **The reason is not tidiness.** Idle time is caused by no job; that is the definition of
+  unabsorbed. Attaching a causal order to it asserts that three unworked hours were caused by that
+  order, which would inflate its cost with capacity it never consumed and — worse — make the account
+  *look* attributable. **5801 is the one account whose value comes from being un-attributable**: the
+  gap between it and 5800 is the utilisation number, and it only means something if nothing can be
+  quietly pushed across the boundary.
+  Once 5801 can carry a causal order it becomes a plug — a place to put whatever the allocation could
+  not place, dressed as an allocation. The next step down that path is deciding idle time "really
+  belonged" to a job after all, and then the KPI reports zero forever.
+  ⚠️ **A null here is a DECLARATION, not a blank**, and the difference is what stops the account
+  becoming invisible instead of becoming a plug. "Hours attributable to no job" is a countable,
+  reportable population precisely because the key is written down as null rather than left off.
+  The right way to say these hours were caused by that order is to have worked them: absorb them into
+  5800 against the causal job, which `guaranteed-hours-unworked-land-in-5801` does with the five
+  hours that were.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "the unabsorbed leg declares a causal order, and `shift_recorded`'s 5801 posting declares `causal_orders: null` — a key the rule does not name is refused, and 5801 is the idle-capacity KPI that must not become a plug (ADR-0019, ADR-0036)"

@@ -4,7 +4,7 @@ kind: accept
 source: >-
   The variance case, decided by the survey rather than by a variance account:
   `inbox/2026-08-16-survey-the-accrued-liability-is-a-matched-clearing-account-and-the-bill-reclassifies-rather-than-reverses.md`.
-  Accounts live — 5100 Cost of Goods Sold: Subrentals, `dimensions: [product_line]`; 2010 and 2000
+  Accounts live — 5100 Cost of Goods Sold: Subrentals; 2010 and 2000
   (`api:2026-08-16:db_chart_of_accounts_query`). Continues `obligation_accrued`'s
   `subrental-received-before-the-vendor-invoices`; amounts synthetic.
 
@@ -26,7 +26,8 @@ given:
       - {
           debit_account: 5100,
           amount_minor: 14500,
-          product_line: "Power, Lights & Tools",
+          causal_orders: ["ORD-VEC-4471"],
+          path: [BILL-VEC-0003, LINE-VEC-0001],
         }
 
 derivation: >-
@@ -43,11 +44,17 @@ derivation: >-
   knew about the delivery charge on the 12th; the information arrived on the 20th, and that is when
   the ledger learned it. Back-dating it to the accrual date would restate a period on the strength
   of a fact that did not exist in it.
-  **The direct line declares `product_line` and the reclassification cannot.** 5100 names it, so the
-  new cost carries the line it serves. 2010 and 2000 name none, so the reclassification is
-  structurally incapable of carrying one — which is what stops an AP move from silently restating a
-  dimensional report. **The same bill therefore has one leg that must declare and one that must
-  not**, read off the accounts rather than off the document (ADR-0025).
+  **The direct line carries the causal order and its own row, and the reclassification carries
+  neither.** The direct line is the FIRST posting of that cost, so it states what the cost was for;
+  the reclassification moves a liability whose keys were declared at the accrual and stay there.
+  ⚠️ **The asymmetry is the point, and its authority moved on 2026-08-16.** This read "5100 names it,
+  so the new cost carries the line it serves. 2010 and 2000 name none, so the reclassification is
+  structurally incapable of carrying one… read off the accounts rather than off the document
+  (ADR-0025)". Under ADR-0036 it is read off the POSTING RULE, which is the better place: whether a
+  transfer is recording new cost or moving an old liability is a fact about the event, not about
+  where it landed. The fence is unchanged — an AP move still cannot silently re-key a cost, which is
+  what ADR-0020 forbids. **The same bill therefore has one leg that must declare and one that must
+  not**, and gate 10h fails on either half.
   **The accrual is relieved in FULL, and that is what makes the excess a separate line.** A partial
   relief is legal too and leaves a residual in 2010 — the received-not-invoiced population, which
   both SAP and NetSuite treat as the ordinary state with a reconciliation practice attached. What is
@@ -61,12 +68,14 @@ expect:
         credit_account: 2000,
         amount_minor: 185000,
         accounting_date: "2026-08-20",
+        causal_orders: null,
       }
     - {
         debit_account: 5100,
         credit_account: 2000,
         amount_minor: 14500,
         accounting_date: "2026-08-20",
-        product_line: "Power, Lights & Tools",
+        causal_orders: ["ORD-VEC-4471"],
+        line: [BILL-VEC-0003, LINE-VEC-0001],
       }
   rejects: []

@@ -1,0 +1,88 @@
+name: absorbed-line-missing-causal-job-rejected
+posting_rule: shift_recorded
+kind: reject
+source: >-
+  REQ-LED-001 and ADR-0036 — every posting DECLARES its causal order, and an ABSORBED labour
+  allocation is by definition absorbed INTO a job. This is the arm where an explicit null is not
+  available: 5801 exists precisely so that hours belonging to no job have somewhere to go, so a 5800
+  posting with no causal job is not a determination, it is a misfiled cost.
+  ⚠️ **Renamed from `absorbed-line-missing-cost-type-rejected` on 2026-08-16** (ADR-0036, OQ-042).
+  The old vector was the ONLY place `cost_type` was exercised in the entire spec; the field is now
+  `labor_line`, is derived from this same allocation row rather than posted, and has no vector
+  because it reaches no transfer. What the row is still needed for is its causal job and its own
+  identity — which is what this vector now refuses to do without.
+
+differs_from: overtime-premium-pro-rata-across-the-days-jobs
+differs_in: ["shift.absorbed_allocations[1].causal_job"]
+
+given:
+  ledger_state:
+    closed_periods: []
+    consecutive_days_worked: 3
+  shift:
+    id: SH-VEC-0004
+    person: PER-VEC-0001
+    date: "2026-08-06"
+    wage_minor_per_hour: 3000
+    hours_worked: 11
+    hours_at_straight_time: 8
+    hours_at_premium: 3
+    premium_minor: 4500
+    base_minor: 33000
+    cost_minor: 37500
+    unabsorbed_minor: 0
+    absorbed_allocations:
+      - {
+          id: ALC-VEC-0001,
+          causal_job: ORD-VEC-0001,
+          hours: 5,
+          base_minor: 15000,
+          premium_share_minor: 2046,
+          amount_minor: 17046,
+        }
+      # causal_job ABSENT on this line — the only difference from the accept vector
+      - {
+          id: ALC-VEC-0002,
+          hours: 4,
+          base_minor: 12000,
+          premium_share_minor: 1636,
+          amount_minor: 13636,
+        }
+      - {
+          id: ALC-VEC-0003,
+          causal_job: ORD-VEC-0003,
+          hours: 2,
+          base_minor: 6000,
+          premium_share_minor: 818,
+          amount_minor: 6818,
+        }
+
+derivation: >-
+  Identical to the accept vector except that allocation 2's `causal_job` **KEY IS ABSENT**. Every
+  amount is right, the control total balances, the row carries its own id — the entry is refused on
+  one missing key.
+  **What is refused is ABSENCE, not null** (REQ-LED-001) — and here the two are not interchangeable
+  in the way they are on an invoice. An invoice can legitimately reference no order (30 of 1,010 do,
+  all legacy CRMS imports), so `causal_orders: null` is a real determination there. **An ABSORBED
+  allocation cannot be**: absorbed means "into a job", and hours belonging to no job are unabsorbed
+  and post to 5801 instead. So this rule's null arm lives on its other posting, not on this one, and
+  that asymmetry is the shape of the rule rather than an inconsistency in it.
+  ⚠️ **`allocation.id` is a second key and it is not decoration** (HOT-014). One shift produces three
+  transfers here because it served three jobs; the causal order alone does not identify a row, and
+  two allocations to the same job on one shift would be indistinguishable in the projection without
+  it. **This is the fact that stopped HOT-014 being a gap and made it a decision** — ADR-0036
+  absorbed it rather than resolving it, because the posting has to gain the field either way.
+  ⚠️ **This vector no longer exercises `labor_line`, and nothing does.** Under ADR-0025 it was the
+  only place `cost_type` appeared in a transfer in the whole spec; under ADR-0036 the classification
+  is derived from this very allocation row at report time (OQ-042), so it reaches no ledger artifact.
+  That leaves `labor_line` a declared taxonomy with nothing executing against it — **a claim rather
+  than a capability by this repo's own standard** — and it is recorded as **OQ-046** rather than
+  quietly accepted.
+  **The whole entry is refused, not the line.** A partial posting would credit 2010 for a day's cost
+  the debit side does not add up to, which the control total is what makes visible.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "causal_job is not declared on absorbed allocation 2 — every posting declares its causal order, and an absorbed allocation has no legal null: hours belonging to no job are unabsorbed and post to 5801 (REQ-LED-001, ADR-0019, ADR-0036)"
+      allocation: 1

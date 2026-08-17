@@ -409,6 +409,17 @@ open_questions:
       `required_on: [cogs]` to `[labour_cogs]`; and the chart of accounts now states the obligation
       **per account** as an explicit `dimensions:` list rather than leaving it to be inferred from
       class. Resolves HOT-011.
+      ⚠️ **SUPERSEDED IN ITS ENTIRETY BY ADR-0036, accepted 2026-08-16 — the question is MOOT, not
+      re-answered.** "Which postings must carry which dimensions" has no answer because no posting
+      carries a dimension: a posting records KEYS and every classification is derived at report time.
+      The chart carries no `dimensions:` key at all (gate 10a refuses one), `ledger/dimensions.yaml`
+      is a REPORTING taxonomy with no `required_on`, and `cost_type` is renamed `labor_line` and
+      derived from the shift's allocation row (OQ-042).
+      ✅ **The answer above was correct when it was taken, and it is retained rather than rewritten**
+      — it is what resolved HOT-011, and the per-account reading is what made ADR-0025's exemption
+      for 5801 expressible instead of special-cased. **What ADR-0036 changed is the premise, not the
+      reasoning**: ADR-0025 correctly refused to infer an obligation from a class, and ADR-0036
+      refuses the obligation itself.
     notes: >-
       Three statements disagree and all three are load-bearing. REQ-LED-001 says both dimensions on
       every revenue and COGS posting; `ledger/dimensions.yaml` says `product_line` on revenue and
@@ -1374,8 +1385,15 @@ open_questions:
     notes: >-
       Surfaced 2026-08-11 while writing EVT-BIL-007's `no_posting` entry, which could not state where
       each leg's node attribution lives.
-      **The gap is concrete.** `ledger/dimensions.yaml` declares exactly two dimensions —
-      `product_line` and `cost_type` — and neither can express "which department owes this". ADR-0033
+      ⚠️ **REFRAMED 2026-08-16 by ADR-0036, which sharpens this question rather than answering it.**
+      It was posed as "a third declared DIMENSION or a document attribute". There are no dimensions
+      on a posting any more, so the live form is **"is a settlement point a KEY?"** — and ADR-0036's
+      own criterion cuts both ways here, which is exactly why it is still open. A settlement point is
+      a node in a customer tree (ADR-0032/0033): master data, mutable, therefore not a key. But which
+      node a leg was ATTRIBUTED to at the time is an event fact, therefore a key. Nothing below is
+      invalidated; read "dimension" as "key" throughout.
+      **The gap is concrete.** `ledger/dimensions.yaml` declares exactly two classifications —
+      `product_line` and `labor_line` — and neither can express "which department owes this". ADR-0033
       requires that the sum of settlement-point balances be checkable **without traversing the tree**,
       because the tree walk is the thing being checked and a guard that consults its own oracle is not
       a guard. That independent property needs the node to be readable somewhere the ledger can group
@@ -1445,9 +1463,19 @@ open_questions:
     blocks: []
     status: answered
     answer: >-
-      **`product_line: null`, and the obligation to DECLARE stands.** Owner accepted the survey
-      recommendation 2026-08-16. Both `4140 Pass Through Income` and `5150 Cost of Goods Sold: Pass
-      Through` carry `dimensions: [product_line]`, and the value written is normally null.
+      **A pass-through resolves to NO product line.** Owner accepted the survey recommendation
+      2026-08-16.
+      ⚠️ **The LEDGER half of this answer is moot as of the same day (ADR-0036).** It read
+      "`product_line: null`, and the obligation to DECLARE stands. Both `4140 Pass Through Income`
+      and `5150 Cost of Goods Sold: Pass Through` carry `dimensions: [product_line]`, and the value
+      written is normally null." There is no obligation and no `dimensions:` list — the chart states
+      neither. **The underlying fact survives and changes audience**: a pass-through is a real sale
+      of a thing that by rule is not in the catalogue, so its line resolves against no product master
+      and reports as `unallocated` (`reporting/product-line-pl.yaml`).
+      ⚠️ **The distinction from 4700/5500 also survives and can no longer be drawn in the chart.**
+      It was "a pass-through owes a declaration and a card fee owes none"; both now owe nothing at
+      the posting. The real difference — a pass-through IS a sale, a card fee is a recharge caused by
+      how the customer paid — has to be carried by the REPORT.
       `ledger/dimensions.yaml` already defines that exact fact — "this IS a categorised kind of sale,
       and no tracked product line applies to it" — and a pass-through is precisely that: a real sale
       of a thing that by rule is not in the catalogue.
@@ -1714,3 +1742,182 @@ open_questions:
       evidence the write-off is a separate, deliberate act everywhere.
       Not blocking: 2010's residual is visible and reportable either way, and nothing in m3 depends
       on it.
+  - id: OQ-046
+    question: >-
+      `counter` and `warehouse` labour bill nobody and name no product line, so no allocation pool
+      selects them. Where does their cost land — spread like `delivery`, reported unallocated, or
+      attached to the causal order's goods directly?
+    owner: alex
+    decide_by: 2027-01-15
+    blocks: []
+    status: answered
+    answer: >-
+      **SPREAD, exactly as `delivery` does.** Owner, 2026-08-16: *"counter and warehouse can bill
+      goods too (just like delivery does)."* A counter hour serves a customer collecting or
+      returning an order and a warehouse hour preps, pulls, checks in or puts away for one — both
+      are joint costs of that order's goods revenue and neither is severable, because nobody buys a
+      counter hour. That is ADR-0029's criterion for `Delivery` applied unchanged.
+      They are **cost-only pools** — `kind: cost_only` in `reporting/product-line-pl.yaml`, a second
+      pool shape added the same day. An activity pool has revenue AND cost and asks whether that
+      cost lands on the goods; a cost-only pool has cost and no revenue to categorise, so the
+      question does not arise and it has nowhere else to go. ⇒ **a cost-only pool must be
+      `allocated`**, and gate 13d fails on one that is not.
+      ✅ **The ruling made coverage TOTAL, and the two-branch structure this question created was
+      deleted the day it was written.** `reporting/product-line-pl.yaml` briefly carried
+      `labor_line_kinds` (`billable` / `bills_nobody`) with an `unpooled_labor_lines` honest-bucket
+      beside it; with nothing left in the second branch, **a branch with no members is a claim
+      rather than a capability** and it went. Gate 13h now simply requires every declared
+      `labor_line` to be selected by exactly one pool.
+      ✅ **And that totality is structural rather than lucky.** `labor_line` is read off the shift's
+      ABSORBED ALLOCATION row, and an absorbed allocation names a causal job by definition — hours
+      belonging to no job are UNABSORBED, post to 5801, carry no allocation row and therefore no
+      `labor_line` at all. Every value the taxonomy can hold is attributable to a job whose goods
+      can bear it.
+    notes: >-
+      ⚠️ **RESTATED TWICE ON 2026-08-16, the day it was opened, and the original was WRONG in its
+      conclusion.** It first asked "what exercises `labor_line`? … since ADR-0036 nothing in the repo
+      consumes it." **The report consumes it** — `labor_line` is an allocation pool's COST SELECTOR
+      (owner, same day), declared as `cost_sources.labor_line` per pool. Nothing in `ledger/`
+      exercises it and nothing ever will, because ADR-0036 makes it derived; the consumer was one
+      directory away, describing the selection in a pool's prose instead of declaring it, **which
+      reads as "no consumer" to a grep and to a gate**. The evidence was right and the conclusion
+      was not, which is why the history is kept here rather than overwritten.
+      ⚠️ **`warehouse` here was never `deferred_pools.warehouse_overhead`, and the two were conflated
+      until this was answered.** That entry is rent and utilities — an operating expense below this
+      report's gross margin until an ADR moves it into COGS (erp-spec#12), with no causal order to
+      spread from. This is a warehouse HOUR, already in COGS via 5800 and already absorbed against a
+      job. Two facts that share a word.
+      ⚠️ **The size of either pool is unmeasured and will stay unmeasured until v2 runs** — the
+      current system has never had the absorbed-labour stage, so both measure as zero everywhere
+      (erp-spec#14). **Decided on the criterion rather than on the number**, which is the right way
+      round: severability does not depend on magnitude.
+      (`inbox/2026-08-16-labor-line-is-the-pools-cost-selector-and-a-report-is-a-selector-crossed-with-a-base.md`)
+
+  - id: OQ-047
+    question: >-
+      An owner works a shift and is not paid for it. Does the ledger post the cost — and if so, what
+      does it credit, given that no vendor will ever invoice for it and 2010 Accrued Expenses:
+      Received Not Invoiced would be asserting a liability that cannot be relieved?
+    owner: alex
+    decide_by: 2027-01-15
+    blocks: []
+    status: answered
+    answer: >-
+      **STICK WITH GAAP. A `contributed` shift writes NO TRANSFER.** Owner, 2026-08-16, accepting the
+      survey's recommendation: "stick with gaap, and your rec".
+      `EVT-FUL-002` gains **`compensation: paid | contributed`**. A `paid` shift posts exactly as
+      before (Dr 5800/5801, Cr 2010). A `contributed` shift — one an owner worked and took no wage
+      for — posts **nothing**: no obligation was incurred, so no expense was incurred. ASC 958-605,
+      the standard that lets an entity recognise donated services, is **not-for-profit only**.
+      ✅ **No conditional is needed in the posting rule.** `cost_minor` is zero on a contributed
+      shift, and `ledger/posting-rules.yaml` already rules that a posting whose amount is zero is not
+      written — both legs and the control total fall out of machinery that already exists.
+      **THE SHIFT AND ITS ALLOCATIONS ARE STILL RECORDED**, and that is the whole design: hours,
+      causal job, allocation-row identity and `labor_line` all survive, so the costing layer keeps
+      everything it needs. **Suppressing the EVENT would have been the wrong fix** — it would lose
+      the hours, and with them any chance of measuring how much contributed labour the business runs
+      on. Under ADR-0036 the ledger holds keys and the projection holds everything derived; an
+      imputed labour cost is a projection fact by exactly that argument.
+      ⇒ **`3130 Owner's Capital: Owner's Billable Time` returns to `disposition: drop`**, and this
+      time for the right reason: the GAAP answer needs no fenced offset at all, because nothing is
+      posted to offset. The account was correct machinery for the treatment that was NOT chosen.
+      ⚠️ **What this does NOT fix, and it is a consequence rather than an oversight:** the GAAP gross
+      margin stays flattered by contributed labour. **That is what GAAP requires**, and it is why the
+      imputed view has to EXIST rather than be optional — a margin that is honest only in a report
+      nobody runs is not honest. The imputed view is one of the "other combos" the owner's
+      `labor_line` ruling makes cheap, and **what rate to impute is not decided** — see OQ-048.
+      **Golden vectors:** `contributed-owner-shift-posts-nothing` (accept) and
+      `contributed-shift-that-posts-rejected` (reject, its minimal pair). ⚠️ The reject is the
+      load-bearing one: a contributed shift posted anyway **balances**, matches its control total and
+      passes every other gate in the file, so nothing arithmetic can see it. Without that vector the
+      discriminator is a field an implementation can read and ignore.
+    notes: >-
+      Opened 2026-08-16. Owner: *"i think what we need is a line in the labor pos or bills that
+      allows for an owner shift unpaid or paid, so that unpaid owner shifts dont dilute cogs."*
+      Surveyed per CLAUDE.md → _Accounting decisions_
+      (`inbox/2026-08-16-survey-an-unpaid-owner-shift-is-not-an-expense-and-every-reference-fences-imputed-labour-out-of-the-statements.md`).
+      **Two failures, and they are opposite.** Posting a contributed shift as a normal one credits
+      2010 for a bill that will never arrive, and 2010's whole purpose is "received not invoiced".
+      Posting nothing leaves the job's COGS excluding real work, so gross margin is overstated and
+      the absorbed/unabsorbed utilisation number silently omits owner hours — **the "dilute COGS"
+      the owner names**.
+      ⚠️ **THE SURVEY DOES NOT COME BACK UNANIMOUS, and the split is the useful part.** GAAP, Xero,
+      SAP and Odoo keep an uncompensated labour cost out of the financial statements entirely
+      (ASC 958-605 is not-for-profit ONLY; "Xero Projects isn't integrated into the P&L"; SAP's
+      secondary cost elements "do not cause any change in any values in Financial Accounting";
+      Odoo's timesheet cost is analytic with "no exact counterparts in the general accounts").
+      **NetSuite and Intacct DO post it** — NetSuite against a project **cost variance** account,
+      Intacct into a **9xxx range excluded from all standard financial reports**, and Intacct states
+      the two-books structure outright: "these are ESTIMATED labor costs used for project costing;
+      ACTUAL labor cost will come from Payroll."
+      **THE CRITERION all six agree on**, which is worth more than the default: *does this cost
+      represent an obligation the entity actually incurred?* If yes it belongs in the statements; if
+      no it belongs in a costing layer fenced off from them — and each fences it differently. ⚠️
+      **The unanimous part is the CREDIT side: nobody credits a payable.** That is exactly the
+      defect at issue.
+      **RECOMMENDATION (owner's call): a `compensation` discriminator on the shift, and a
+      contributed shift writes NO TRANSFER.** `paid` posts as today; `contributed` posts nothing,
+      because no obligation was incurred — the majority answer and the one GAAP requires of a
+      for-profit entity. The shift record and its `absorbed_allocations` are written regardless, so
+      the costing layer keeps the hours and the causal job, and **the imputed cost becomes a REPORT
+      rather than a posting**. ADR-0036 already built that two-layer split — TigerBeetle holds the
+      GL, Mongo holds the projection, every classification is derived — so the survey's criterion and
+      this repo's existing architecture agree, which is the strongest form the recommendation can
+      take. It is also one of the "other combos" the owner's `labor_line` ruling makes cheap.
+      ⚠️ **What the recommendation does NOT fix, stated so it is not discovered later:** the GAAP
+      gross margin stays flattered by contributed labour. That is what GAAP requires, and it is why
+      the imputed report has to EXIST rather than be optional — **a margin that is honest only in a
+      report nobody runs is not honest.**
+      ⚠️ **The rejected alternative is live and is NetSuite's**: Dr 5800 / Cr an owner-contribution
+      account, so the GAAP margin is right and the credit is fenced. Refused on GAAP rather than on
+      convenience — a for-profit entity recognising an expense and a capital contribution for donated
+      owner services is not a treatment the standard permits. **If the owner's priority is one honest
+      margin over statement conformity, that is the trade to re-open.**
+      ⚠️ **THE INCUMBENT ALREADY HAD THE FENCED OFFSET AND THIS REPO PROPOSED DELETING IT.**
+      `3130 Owner's Capital: Owner's Billable Time` is Archived in the live chart and carried
+      `disposition: drop`, on the reason that "booking it to equity would put the cost outside COGS
+      entirely". **That reads the account as the DEBIT side and it is the CREDIT side** — debit 5800,
+      credit owner's capital, and the job bears the cost while the credit records that it was
+      contributed rather than owed. Its disposition moves to `undecided`, blocked here.
+      ⚠️ **The migration delta cannot be measured before v2 runs**, and that is the finding rather
+      than a gap: how many owner shifts have ever been worked is recorded nowhere, because the
+      current system has no absorbed-labour stage at all (erp-spec#14). **What would measure it is
+      the discriminator itself**, present from day one so the population is countable the moment the
+      stage exists.
+  - id: OQ-048
+    question: >-
+      At what rate is a contributed (unpaid owner) shift costed in the IMPUTED labour view — the
+      person's own wage had they been paid, a replacement-hire rate, or a single notional owner
+      rate?
+    owner: alex
+    decide_by: 2027-03-15
+    blocks: []
+    status: open
+    notes: >-
+      Opened 2026-08-16 by OQ-047's answer. **The GAAP decision does not depend on this and is not
+      waiting for it** — a contributed shift posts nothing whatever rate is chosen. What waits is
+      the imputed view, which OQ-047 makes required rather than optional.
+      **Why it is a real decision and not a lookup.** ADR-0019 costs labour at "that person's actual
+      per-contact wage", and **an owner who is never paid has no actual wage** — the field may be
+      empty, or may hold a number nobody has ever honoured. So the imputed view needs a rate the
+      shift record does not supply. Three candidates, and they answer different questions:
+      · **the person's own wage rate**, if one is recorded — cheapest, and it measures "what this
+        shift would have cost if we had paid it";
+      · **a replacement-hire rate** — what it would cost to have someone else do the work, which is
+        the number that matters for "can this business run without the owner working for free";
+      · **a single notional owner rate** — simplest to administer and the least defensible per-hour,
+        because an owner delivering and an owner doing books are not the same cost.
+      ⚠️ **The agricultural-extension literature calls this an imputed owner labour and management
+      charge and treats the SECOND as the correct one** — owner-operator compensation "should be
+      equivalent to hired compensation for accurate profitability measurement". That is a
+      recommendation from a field that has thought about owner-operated businesses for decades, and
+      it is the starting point rather than the answer.
+      ⚠️ **Whatever is chosen is a BASIS and owes a version** — `reporting/allocation-bases.yaml`'s
+      discipline applies, because two imputed views computed at different rates would disagree about
+      the same job's margin, which is the failure ADR-0029 exists to prevent. It is also why the
+      imputed view must be explicitly NON-OFFICIAL: ADR-0029 permits exactly one official
+      allocation, and this is a second number for the same thing.
+      ⚠️ **Unmeasurable until v2 runs.** How many owner shifts exist is recorded nowhere — the
+      current system has no absorbed-labour stage at all (erp-spec#14) — so there is no corpus figure
+      to size this from. `compensation` being present from day one is what makes the population
+      countable the moment the stage exists.

@@ -43,7 +43,12 @@ derivation: >-
   which an operator can override, as they must, because the fact is real and merely unusual.
   On an ordinary fully-applied payment `unapplied_minor` is 0 and the third leg is **not written**
   — see `one-payment-across-two-invoices`, whose entry is two transfers.
-  No dimension: 1001, 1200 and 2050 all name none.
+  ⚠️ **The unapplied leg carries NO invoice key, and the two settlement legs do** — which is the
+  whole difference between the three transfers stated in keys rather than in prose. Money that
+  relieves a receivable names the receivable; money that relieves none cannot, which is exactly why
+  it credits 2050 instead of 1200. All three declare `causal_orders: null`. (This read "No dimension:
+  1001, 1200 and 2050 all name none" until 2026-08-16; ADR-0036 removed the dimensions and the chart
+  no longer states obligations.)
 
 expect:
   transfers:
@@ -52,17 +57,22 @@ expect:
         credit_account: 1200,
         amount_minor: 50000,
         accounting_date: "2026-08-05",
+        causal_orders: null,
+        invoice: INV-VEC-0001,
       }
     - {
         debit_account: 1001,
         credit_account: 1200,
         amount_minor: 100031,
         accounting_date: "2026-08-05",
+        causal_orders: null,
+        invoice: INV-VEC-0002,
       }
     - {
         debit_account: 1001,
         credit_account: 2050,
         amount_minor: 10000,
         accounting_date: "2026-08-05",
+        causal_orders: null,
       }
   rejects: []

@@ -36,7 +36,7 @@ derivation: >-
   what makes these two vectors a pair worth reading together.
   **No dimension**: 6004 names none and 2000 names none, so the key is absent rather than null.
   Insurance is not a categorised kind of sale and belongs to no product line — the same third
-  category `overhead-accrual-carries-no-product-line` pins on the accrual side.
+  category `overhead-accrual-carries-no-causal-order` pins on the accrual side.
   **The accounting date is the bill's own**, and August is open (ADR-0017).
 
 expect:
@@ -46,5 +46,6 @@ expect:
         credit_account: 2000,
         amount_minor: 120000,
         accounting_date: "2026-08-05",
+        causal_orders: null,
       }
   rejects: []

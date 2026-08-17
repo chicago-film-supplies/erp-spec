@@ -21,11 +21,13 @@ given:
     revenue_reversal_lines:
       - net_minor: 15000
         revenue_account: 4000
-        product_line: "Carts & Ramps"
+        causal_orders: ["ORD-VEC-0011"]
+        path: [ORD-VEC-0011, DEST-VEC-0011, GRP-VEC-0011, ITEM-VEC-0011]
         description: "Metro Rack 24\" — returned early"
       - net_minor: 5000
         revenue_account: 4000
-        product_line: "Tables & Chairs"
+        causal_orders: ["ORD-VEC-0011"]
+        path: [ORD-VEC-0011, DEST-VEC-0011, GRP-VEC-0011, ITEM-VEC-0012]
         description: "6' Folding Table — returned early"
     write_off_lines: []
     tax_components:
@@ -45,7 +47,9 @@ derivation: >-
   named yet — allocation is `credit_note_allocated`, a separate event, and until it happens this
   balance belongs to the organization rather than to any receivable. Crediting 1200 here instead
   would put $230.00 into the AR control account that no invoice in the subledger carries.
-  **Each reversal carries the product line of the sale it reverses.** 4000 names `product_line` in
+  **Each reversal carries the CAUSAL ORDER and the LINE of the sale it reverses** (ADR-0036), so both
+  halves resolve to the same product master and cannot disagree. ⚠️ This read "Each reversal carries
+  the product line of the sale it reverses. 4000 names `product_line` in
   its chart entry, and the two lines carry different values on purpose: a reversal that dropped them
   would net the company total to zero while leaving `Carts & Ramps` and `Tables & Chairs` revenue
   standing in every dimensional report. The tax transfer carries none — 2200 and 2050 both name no
@@ -62,19 +66,22 @@ expect:
         credit_account: 2050,
         amount_minor: 15000,
         accounting_date: "2026-08-04",
-        product_line: "Carts & Ramps",
+        causal_orders: ["ORD-VEC-0011"],
+        line: [ORD-VEC-0011, DEST-VEC-0011, GRP-VEC-0011, ITEM-VEC-0011],
       }
     - {
         debit_account: 4000,
         credit_account: 2050,
         amount_minor: 5000,
         accounting_date: "2026-08-04",
-        product_line: "Tables & Chairs",
+        causal_orders: ["ORD-VEC-0011"],
+        line: [ORD-VEC-0011, DEST-VEC-0011, GRP-VEC-0011, ITEM-VEC-0012],
       }
     - {
         debit_account: 2200,
         credit_account: 2050,
         amount_minor: 3000,
         accounting_date: "2026-08-04",
+        causal_orders: null,
       }
   rejects: []

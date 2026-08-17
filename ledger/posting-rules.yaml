@@ -39,7 +39,7 @@
 #                              debit_account / credit_account   a GL code, or a dotted path
 #                              per                              fans the posting over a collection
 #                              amount                           a dotted path — NEVER an expression
-#                              dimensions                       `none`, or a map of dimension paths
+#                              keys                             which KEYS this transfer carries
 #   control_total            a field of the source document the transfer amounts must sum to
 #   invariants[]             what must hold, in prose, each traceable to a REQ/ADR
 #   vectors_dir              ledger/vectors/<id>/
@@ -59,10 +59,41 @@
 # also what stops OQ-018's overtime-premium allocation from quietly landing inside a posting rule
 # instead of inside the shift record.
 #
-# **Dimensions ride on the transfer, not the account** (ADR-0018) — but WHICH dimensions a transfer
-# owes is read off its accounts' own `dimensions:` lists in `chart-of-accounts.yaml` (ADR-0025),
-# never inferred from a class. Gate 10 checks that against `dimensions.yaml`'s value sets — two
-# files the rule does not control, so the check is independent of the rule it is checking.
+# ── KEYS, and why this file is now the authority on them (ADR-0036, superseding ADR-0018) ───────
+# **A transfer carries KEYS, not classifications.** Until 2026-08-16 each posting declared a
+# `dimensions:` map, and WHICH dimensions it owed was read off its accounts' own `dimensions:` lists
+# in `chart-of-accounts.yaml` (ADR-0025). ADR-0036 removed both: a product line is
+# `products.uid_tracking_category`, a mutable field on a mutable master that has moved twice in one
+# month, and freezing it into an immutable transfer is the defect whichever field holds it.
+#
+# ⚠️ **The authority MOVED, it did not disappear, and it moved to this file.** Which keys a posting
+# owes is a property of WHAT HAPPENED, not of where it landed — so it is stated per posting here,
+# and `chart-of-accounts.yaml` no longer carries a `dimensions:` key at all (gate 10a fails on one).
+# Gate 10h checks every golden vector's transfers against the rule the vector names: two files the
+# rule does not control, so the check stays independent of the thing it is checking.
+#
+#   keys:
+#     causal_orders:  a dotted path to the order or orders that caused the transfer, or the literal
+#                     `null` where this rule ALWAYS declares that none applies. **Present on every
+#                     posting of every rule** — that universality is REQ-LED-001.
+#     invoice:        a dotted path, only where the posting arises from billing.
+#     line:           a dotted path to the ROW within the source document — `item.path`, never
+#                     `item.uid` (`uid` identifies the product and repeats within one document).
+#   keys: mirrors_original_transfer / mirrors_retracted_transfer
+#                     a reversal copies the keys of what it reverses. ⚠️ **A stated limit**: gate
+#                     10h can enforce the universal `causal_orders` arm on these and cannot check
+#                     the rest, because the key set varies per mirrored transfer rather than per
+#                     rule. `invoice_voided` and `settlement_reversed` are the only two.
+#
+# **ABSENCE is refused; an explicit null is not** (REQ-LED-001). A declared null is a determination —
+# countable, reportable, attributable — while a missing key is indistinguishable from an oversight.
+# An empty list is refused alongside absence, for the reason `""` was refused for a dimension: it
+# satisfies a naive presence check while meaning nothing.
+#
+# ⚠️ **A key the rule does not name is refused as firmly as a missing one.** That arm has bitten
+# already — gate 10h was fired red against a `vendor_bill_received` vector on 2026-08-16 with
+# `transfer[N]: declares \`product_line\` but neither account requires it`. It is the arm erp-spec#20
+# recorded as "genuinely undecided", which was stale when it was written.
 
 rules:
   # ══════════════════════════════════════════════════════════════════════════════════════════════
@@ -80,27 +111,44 @@ rules:
         credit_account: line.revenue_account
         per: invoice.lines
         amount: line.net_minor
-        dimensions:
-          product_line: line.product_line
+        keys:
+          causal_orders: line.causal_orders
+          invoice: invoice.id
+          line: line.path
       - debit_account: 1200
         credit_account: tax_component.payable_account
         per: invoice.tax_components
         amount: tax_component.amount_minor
-        dimensions: none
+        keys:
+          causal_orders: null
+          invoice: invoice.id
     control_total: invoice.total_minor
     invariants:
       - >-
-          A transfer carries every dimension named by its accounts' own `dimensions:` lists in
-          `ledger/chart-of-accounts.yaml`, with a value from that dimension's declared set in
-          `ledger/dimensions.yaml`, or the posting is REFUSED rather than recorded (REQ-LED-001,
-          ADR-0025). For a revenue transfer that is `product_line`; `cost_type` is a labour dimension
-          and appears on 5800 alone.
-          **What is refused is ABSENCE, not null** (ADR-0025). An explicit `product_line: null`
-          records that no tracked product line applies and is recorded; a missing key means nobody
-          decided and is refused. An empty string is refused as well — it passes a naive NOT NULL
-          check while meaning nothing — and so is a value outside the declared set. There is no
-          `Other` to fall back on, and a receipt that is not a categorised sale at all belongs in
-          4800 Other Income, which requires no dimension.
+          **A revenue transfer carries three keys and no classification** (ADR-0036, REQ-LED-001):
+          the causal order, the invoice, and the row within it. The product line is NOT among them —
+          it is derived at report time by joining `line` to the product master.
+          **What is refused is ABSENCE, not null.** An explicit `causal_orders: null` records that no
+          causal order applies and is recorded; a missing key means nobody decided and is refused, as
+          is an empty list. ⚠️ **The null arm is not hypothetical here** — 30 of 1,010 issued
+          invoices carry no `order` divider at all, holding 87 revenue-bearing lines worth
+          $87,839.76, and **0 of the 30 reference an order while 30 of 30 carry a `crms_id`**. They
+          are legacy CRMS imports: a migration population, not a live pattern. Owner, 2026-08-16:
+          "we can allow source order null."
+          **One key may serve all three.** `INVOICE_ITEM_LEVELS` is `[order, destination, group]`
+          against `ORDER_ITEM_LEVELS`'s `[destination, group]`, so an invoice item's path is the
+          order item's path prefixed by an order divider and `path[0]` IS the causal order. ✅ Owner,
+          2026-08-16: "we can change order path to match invoice path in v1" (api-cloudrun#538),
+          which turns "where the two agree" from a conditional into an invariant for everything the
+          live system produces. It cannot reach the 30 — they reference no order, so there is nothing
+          for a divider to name.
+          ⚠️ **A posting keyed on a wrong path is wrong forever.** 59 of 9,307 comparable invoice
+          lines (0.634%) sit at a different path than their order line — six times the count
+          api-cloudrun#485 reported before it was closed `NOT_PLANNED` with the divergence standing.
+          The 267 invoice-only lines are NOT part of that number; counting all 326 would manufacture
+          a defect out of ordinary invoicing.
+          **4800 Other Income is unaffected and still means what it meant** — "this was not a
+          categorised sale at all". An account is a ledger fact; a category is not.
       - >-
           No posting takes an accounting date inside a closed period (ADR-0010, ADR-0017). The check
           is on accounting date, never on posting timestamp.
@@ -128,16 +176,20 @@ rules:
         credit_account: original_transfer.debit_account
         per: original_journal_entry.transfers
         amount: original_transfer.amount_minor
-        dimensions:
-          product_line: original_transfer.product_line
-          cost_type: original_transfer.cost_type
+        keys: mirrors_original_transfer
     control_total: invoice.total_minor
     invariants:
       - >-
           **A reversal, never a delete** (REQ-BIL-001, the no-hard-deletes fence). Every transfer of
-          the original entry reappears with its two accounts exchanged and its amount and dimensions
-          unchanged — so the reversal carries the same dimensions as what it reverses, and a
-          dimensional report nets to zero rather than losing both sides.
+          the original entry reappears with its two accounts exchanged and its amount and KEYS
+          unchanged — so the reversal is keyed to the same causal order, invoice and line as what it
+          reverses, and any report derived from those keys nets to zero rather than losing one side.
+          ⚠️ **This invariant read "the same dimensions" until 2026-08-16 and the substitution is not
+          cosmetic.** Under ADR-0018 the reversal had to copy a CLASSIFICATION, so a category renamed
+          between the posting and the void would net two different product lines against each other
+          and leave both standing in the report. Under ADR-0036 both legs resolve through the same
+          key to the same master record, whatever it says today — **the netting is now structural
+          rather than dependent on nobody having reclassified anything in between.**
       - >-
           **If the original's period is closed, the reversal takes an accounting date in an OPEN
           period** (ADR-0017, EVT-BIL-002). A closed period's Parquet artifact is immutable and
@@ -207,11 +259,14 @@ rules:
         credit_account: 1200
         per: session.settlements
         amount: settlement.amount_minor
-        dimensions: none
+        keys:
+          causal_orders: null
+          invoice: settlement.invoice
       - debit_account: session.deposit_account
         credit_account: 2050
         amount: session.unapplied_minor
-        dimensions: none
+        keys:
+          causal_orders: null
     control_total: session.amount_minor
     invariants:
       - >-
@@ -248,8 +303,14 @@ rules:
           debited AR, so crediting it manufactures a negative receivable (ADR-0022). Money received
           before an invoice exists is a customer prepayment, not a settlement.
       - >-
-          Neither account carries a dimension: 1200 and the cash accounts all name none. Settlement
-          moves money that has **already been dimensioned** at the sale.
+          **Both legs declare `causal_orders: null`, and the settlement leg carries the INVOICE.**
+          Settlement moves money that was already keyed at the sale; a payment is caused by a
+          customer paying, not by a job, and splitting one cheque across the orders behind an invoice
+          would be an allocation with no basis. The unapplied leg carries no invoice either — it
+          relieves no receivable, which is the whole reason it credits 2050 rather than 1200.
+          ⚠️ This invariant read "Neither account carries a dimension: 1200 and the cash accounts all
+          name none" until 2026-08-16. **That was an argument from the CHART, and the chart no longer
+          answers it** (ADR-0036): the reason is now stated about the event.
     relates_to: [ADR-0010, ADR-0014, ADR-0022]
     vectors_dir: ledger/vectors/settlement_recorded/
 
@@ -268,7 +329,7 @@ rules:
         credit_account: retracted_transfer.debit_account
         per: reversal.retracted_transfers
         amount: retracted_transfer.amount_minor
-        dimensions: none
+        keys: mirrors_retracted_transfer
     control_total: reversal.amount_minor
     invariants:
       - >-
@@ -312,18 +373,21 @@ rules:
         credit_account: 2050
         per: credit_note.revenue_reversal_lines
         amount: line.net_minor
-        dimensions:
-          product_line: line.product_line
+        keys:
+          causal_orders: line.causal_orders
+          line: line.path
       - debit_account: 6900
         credit_account: 2050
         per: credit_note.write_off_lines
         amount: line.net_minor
-        dimensions: none
+        keys:
+          causal_orders: null
       - debit_account: tax_component.payable_account
         credit_account: 2050
         per: credit_note.tax_components
         amount: tax_component.amount_minor
-        dimensions: none
+        keys:
+          causal_orders: null
     control_total: credit_note.total_minor
     invariants:
       - >-
@@ -353,9 +417,18 @@ rules:
           a correction may be adding a credit that was missed or removing one that never happened, so
           the account depends on what is being corrected and the operator must state it.
       - >-
-          A revenue-reversal line carries the **product line of the sale it reverses** (REQ-LED-001,
-          ADR-0025) — otherwise the reversal nets the total to zero while leaving the original standing
-          in every dimensional report. A write-off carries none, because 6900 and 2050 both name none.
+          **A revenue-reversal line carries the CAUSAL ORDER and the LINE of the sale it reverses**
+          (REQ-LED-001, ADR-0036) — otherwise the reversal nets the total to zero while leaving the
+          original standing in every derived report. ⚠️ This read "carries the product line of the
+          sale it reverses" until 2026-08-16; keying to the line is strictly stronger, because the
+          product line is then read off the same master record for both halves and cannot disagree.
+          **It carries NO invoice key, and that is ADR-0033 rather than an omission.** A credit note
+          is issued against a SETTLEMENT POINT and allocated to invoices afterwards, so between the
+          two it is attached to no invoice — which is also why the credit side is 2050 and not 1200.
+          `credit_note_allocated` is where the invoice key appears.
+          **A write-off declares `causal_orders: null`.** Bad debt is caused by the customer not
+          paying, not by the job that earned the revenue; the sale stands and its own posting keeps
+          its keys.
     relates_to: [REQ-LED-001, ADR-0022, ADR-0025]
     vectors_dir: ledger/vectors/credit_note_issued/
 
@@ -374,7 +447,9 @@ rules:
         credit_account: 1200
         per: session.allocations
         amount: allocation.amount_minor
-        dimensions: none
+        keys:
+          causal_orders: null
+          invoice: allocation.invoice
     control_total: session.amount_minor
     invariants:
       - >-
@@ -433,11 +508,13 @@ rules:
       - debit_account: asset.accumulated_depreciation_account
         credit_account: asset.asset_account
         amount: disposal.accumulated_gaap_minor
-        dimensions: none
+        keys:
+          causal_orders: null
       - debit_account: 1998
         credit_account: asset.asset_account
         amount: disposal.nbv_gaap_minor
-        dimensions: none
+        keys:
+          causal_orders: null
     control_total: asset.cost_minor
     invariants:
       - >-
@@ -484,7 +561,8 @@ rules:
         credit_account: capitalisation.funding_account
         per: adjustment.capitalisations
         amount: capitalisation.amount_minor
-        dimensions: none
+        keys:
+          causal_orders: null
     control_total: adjustment.capitalised_minor
     invariants:
       - >-
@@ -510,7 +588,10 @@ rules:
           **Cost basis is per book** (ADR-0007), so an adjustment names the book it applies to. An
           improvement that raises both bases is two register facts and one GL posting.
       - >-
-          No dimension applies: asset, payable and clearing accounts all name none.
+          **`causal_orders: null`, declared rather than omitted.** A capital improvement is caused by
+          the asset needing it, not by a job. ⚠️ This invariant read "No dimension applies: asset,
+          payable and clearing accounts all name none" until 2026-08-16 — an argument from the chart,
+          which no longer answers it (ADR-0036).
     relates_to: [ADR-0007, ADR-0010, ADR-0017, ADR-0026]
     vectors_dir: ledger/vectors/asset_basis_adjusted/
 
@@ -534,15 +615,46 @@ rules:
         credit_account: 2010
         per: shift.absorbed_allocations
         amount: allocation.amount_minor
-        dimensions:
-          product_line: allocation.product_line
-          cost_type: allocation.cost_type
+        keys:
+          causal_orders: allocation.causal_job
+          line: allocation.id
       - debit_account: 5801
         credit_account: 2010
         amount: shift.unabsorbed_minor
-        dimensions: none
+        keys:
+          causal_orders: null
     control_total: shift.cost_minor
     invariants:
+      - >-
+          ⚠️ **A `contributed` SHIFT WRITES NO TRANSFER** (OQ-047, owner 2026-08-16; GAAP). An owner
+          may work a shift and take no wage for it. **No obligation was incurred, so nothing is
+          recognised** — ASC 958-605, which lets an entity recognise donated services, is
+          not-for-profit ONLY, and a for-profit entity records no expense for owner labour it did
+          not pay for. `shift.compensation` is the discriminator (`paid | contributed`) and it
+          arrives on `EVT-FUL-002`.
+          ⚠️ **Posting one anyway is the failure this refuses, and it is a SILENT one.** The credit
+          leg is 2010 Accrued Expenses: Received Not Invoiced, so a contributed shift posted as a
+          normal one asserts a liability that no bill can ever relieve — in the one account whose
+          entire purpose is "received not invoiced". The entry balances, the control total matches,
+          and 2010's balance stops meaning anything. `contributed-owner-shift-posts-nothing` is the
+          accept vector and `contributed-shift-that-posts-rejected` is its minimal pair.
+          **The shift and its `absorbed_allocations` are still RECORDED** — hours, causal job and
+          `labor_line` all survive, because they are what the costing layer needs. **The imputed
+          cost is a REPORT, not a posting** (ADR-0036's two layers: TigerBeetle holds the GL, Mongo
+          holds the projection). ⚠️ **The GAAP gross margin is therefore flattered by contributed
+          labour, and that is what GAAP requires** — which is why the imputed view has to EXIST
+          rather than be optional. A margin that is honest only in a report nobody runs is not
+          honest.
+          **Surveyed before deciding** (CLAUDE.md → _Accounting decisions_). GAAP, Xero, SAP and
+          Odoo keep an uncompensated labour cost out of the financial statements; NetSuite posts it
+          against a cost-variance account and Intacct into a 9xxx range excluded from all standard
+          reports. **All six agree on the credit side: nothing credits a payable.** The rejected
+          alternative — Dr 5800 / Cr an owner-contribution account, which is what live `3130 Owner's
+          Capital: Owner's Billable Time` was for — is refused on GAAP rather than on convenience
+          (`inbox/2026-08-16-survey-an-unpaid-owner-shift-is-not-an-expense-and-every-reference-fences-imputed-labour-out-of-the-statements.md`).
+          ✅ **This needs no conditional in the rule.** `cost_minor` is zero on a contributed shift,
+          and this file already rules that a posting whose amount is zero is not written — so both
+          legs and the control total fall out of the existing machinery.
       - >-
           **The credit leg is NOT a payroll liability, because CFS has no payroll liability and never
           has** (OQ-024). Payroll processing is a charter non-goal: an external employer of record
@@ -560,8 +672,10 @@ rules:
           worked**, so there is no invoice, no terms and no trade payable; there is a known amount
           owed for work already performed, which is a matched accrual. `vendor_bill_received`
           reclassifies it into 2000 when the EOR's invoice arrives.
-          Nothing else about this rule moved: the amount, the dates, the absorbed/unabsorbed split
-          and both dimensions are unchanged, and the golden vectors changed one account code each.
+          Nothing else about this rule moved at the time: the amount, the dates and the
+          absorbed/unabsorbed split were unchanged, and the golden vectors changed one account code
+          each. (Both dimensions were still on the transfer then; ADR-0036 removed them later the
+          same day.)
           **This is the correction erp-spec#14 called "not a pure addition"**, and it is the reason
           the issue's own "nothing is blocked" framing understated it — until 2010 existed, every
           shift in the ledger overstated trade payables by its own cost.
@@ -572,11 +686,19 @@ rules:
           guaranteed-but-unworked balance of the day lands in 5801, and the gap between the two IS the
           idle-capacity number.
       - >-
-          **5801 is undimensioned BY DESIGN and that is load-bearing.** Its chart entry names no
-          dimension, so a posting to it may not declare one — idle time belongs to no product line and
-          no kind of work, and letting it carry either would make it a plug that absorbs whatever the
-          allocation could not place. 5800 names **both** `product_line` and `cost_type`; it is the
-          only account in the chart that names `cost_type` at all (ADR-0025).
+          **5801 declares `causal_orders: null` BY DESIGN and that is load-bearing.** Idle time
+          belongs to no job, and an unabsorbed posting that named one would make 5801 a plug
+          absorbing whatever the allocation could not place — the account IS the idle-capacity KPI,
+          so a wrong key there is a wrong KPI. The null is DECLARED rather than the key omitted,
+          which is the whole of REQ-LED-001: a determination someone can be asked about, not an
+          oversight.
+          ⚠️ This invariant read "5801 is undimensioned BY DESIGN. Its chart entry names no dimension,
+          so a posting to it may not declare one… 5800 names **both** `product_line` and `cost_type`;
+          it is the only account in the chart that names `cost_type` at all (ADR-0025)." **Both
+          halves are gone** (ADR-0036): no account names a dimension, and `cost_type` is renamed
+          `labor_line` and derived from the shift's own allocation row rather than posted (OQ-042).
+          The absorbed/unabsorbed distinction survives untouched — it is an ACCOUNT distinction, and
+          accounts are exactly what ADR-0036 keeps.
       - >-
           **The overtime hour splits in two** (OQ-018). The BASE rate for every hour, overtime
           included, is direct labour charged to the causal job worked. The **PREMIUM** is allocated
@@ -585,14 +707,22 @@ rules:
           whichever job was on the clock after hour eight. Chronological attribution would make the
           same two jobs in the opposite order produce different COGS.
       - >-
-          **A labour posting takes the product line of the REVENUE it serves** — not of the goods that
-          happened to be on the order. That is what makes gross margin by product line computable at
-          all, which is the entire reason `product_line` sits on revenue and COGS alike. Delivery
-          labour serving a delivery charge is `Delivery`; crew prepping a table rental is
-          `Tables & Chairs`.
+          **A labour posting is keyed to the CAUSAL JOB, and its product line is read off the shift's
+          allocation row at report time** (ADR-0036, OQ-042). ⚠️ This invariant read "A labour posting
+          takes the product line of the REVENUE it serves… which is the entire reason `product_line`
+          sits on revenue and COGS alike" until 2026-08-16. **The economics are unchanged and the
+          mechanism is not**: delivery labour serving a delivery charge still lands in `Delivery` and
+          crew prepping a table rental in `Tables & Chairs` — the report derives it, the transfer does
+          not carry it. Gross margin by product line stays computable because both the revenue and
+          the cost resolve through their own keys to the same master data.
+          ⚠️ **`allocation.id` is a key in its own right, and HOT-014 is why.** One shift produces
+          three transfers when it serves three jobs, so the causal order alone does not identify a
+          row; the allocation row needs its own identity or two of the three become indistinguishable
+          in the projection.
           **It is NOT allocated across the order's goods** (ADR-0029). A delivery serving a mixed
-          order posts to `Delivery` whole, because allocation is destructive and the official
-          product-line P&L can spread it afterwards — where posting it spread cannot be undone.
+          order is keyed to the delivery job whole, because allocation is destructive and the
+          official product-line P&L can spread it afterwards — where posting it spread cannot be
+          undone.
           Measured: `Delivery` is the largest tracked line in the business at **$236,487.75 and
           13.91% of revenue**, so this rule decides where a large number lands
           (re-measured 2026-08-10,
@@ -623,7 +753,7 @@ rules:
           work performed is cost incurred, and refusing to post it would understate COGS and hide the
           breach in the one system that noticed it. The control belongs where the action is taken, not
           where the fact is recorded, which is the same reasoning OQ-028 applied to an overpayment.
-    relates_to: [ADR-0019, ADR-0025, REQ-LED-001]
+    relates_to: [ADR-0019, ADR-0025, ADR-0036, REQ-LED-001]
     vectors_dir: ledger/vectors/shift_recorded/
 
   - id: depreciation_run
@@ -687,7 +817,8 @@ rules:
       - debit_account: acquisition.debit_account
         credit_account: 2010
         amount: acquisition.cost_minor
-        dimensions: none
+        keys:
+          causal_orders: null
     control_total: acquisition.cost_minor
     invariants:
       - >-
@@ -720,8 +851,8 @@ rules:
           into 2000 when the vendor bills.
           **An asset is acquired on the day it is received, and the vendor invoices later** — so on
           the acquisition date there is no invoice and no terms, and 2000 would be asserting trade
-          debt that does not exist yet. Neither account carries a dimension, so nothing else about
-          this posting changes.
+          debt that does not exist yet. The posting declares `causal_orders: null` either way, so
+          nothing else about it changes.
       - >-
           **Below the capitalisation threshold there is no acquisition at all.** The live chart draws
           the line at $1,000 in the account names themselves — 6300 Tools, Machinery & Equipment (Less
@@ -729,8 +860,11 @@ rules:
           A cheap purchase is an expense, never an asset with a schedule, and routing one here would
           create a depreciating asset out of a box of clamps.
       - >-
-          No dimension: asset accounts, 1999 and 2000 all name none. An acquisition is not a sale and
-          has no product line — the goods acquire one when they earn revenue (ADR-0029).
+          **`causal_orders: null`, declared rather than omitted** (REQ-LED-001, ADR-0036). An
+          acquisition is not caused by a job — CFS buys a truck, not a truck for order 4471 — and the
+          goods acquire a product line only when they earn revenue (ADR-0029). ⚠️ This invariant read
+          "No dimension: asset accounts, 1999 and 2000 all name none" until 2026-08-16, which argued
+          from the chart; the chart no longer answers it, and the reason was always about the event.
     relates_to: [ADR-0007, ADR-0026, ADR-0029]
     vectors_dir: ledger/vectors/asset_acquired/
 
@@ -748,8 +882,8 @@ rules:
       - debit_account: obligation.debit_account
         credit_account: 2010
         amount: obligation.amount_minor
-        dimensions:
-          product_line: obligation.product_line
+        keys:
+          causal_orders: obligation.causal_orders
     control_total: obligation.amount_minor
     invariants:
       - >-
@@ -778,16 +912,18 @@ rules:
           ⚠️ **Labour never accrues through this rule.** A shift is one person's paid span for one
           day (OQ-005) costed at their actual wage (ADR-0019), and `shift_recorded` already performs
           the absorbed/unabsorbed split and the overtime pro-rata that no generic accrual could. So
-          an obligation never debits 5800, and `cost_type` — which 5800 alone names (ADR-0025) —
-          can never be owed by a transfer of this rule. That is why the dimension map above declares
-          `product_line` and nothing else.
+          an obligation never debits 5800 and never carries a labour classification. (This invariant
+          argued the point through `cost_type`, "which 5800 alone names"; ADR-0036 removed the field
+          from every posting, so the fence is now simply that this rule does not touch 5800.)
       - >-
-          **`product_line` is declared where the debit account names it and omitted where it does
-          not** (REQ-LED-001, ADR-0025), read off the account rather than inferred. A subrental
-          accrual debits 5100, which names `product_line`; an insurance or fuel accrual debits a
-          6xxx overhead account, which names none, and writing the key there would be refused just
-          as firmly as omitting it on 5100. **Both arms are exercised by vectors** — an
-          undimensioned arm alone would leave the dimensioned one a claim.
+          **`causal_orders` is DECLARED on every transfer, and both arms are exercised by vectors**
+          (REQ-LED-001, ADR-0036). A subrental received for a specific job names it; an insurance or
+          fuel accrual is caused by no job and declares an explicit null. ⚠️ This invariant read
+          "`product_line` is declared where the debit account names it and omitted where it does not
+          … read off the account rather than inferred" — **the account no longer answers it**, and the
+          new subject is better: what a receipt was FOR is a fact about the receipt, while its
+          category was a fact about a master record. **A single-arm vector set would leave the other
+          arm a claim**, which is why both are written.
       - >-
           **The accounting date is when the obligation was INCURRED, not when anyone recorded it**
           (ADR-0010, charter fence). That is the entire value of the stage: the ledger becomes
@@ -815,13 +951,15 @@ rules:
         credit_account: 2000
         per: bill.reclassifications
         amount: reclassification.amount_minor
-        dimensions: none
+        keys:
+          causal_orders: null
       - debit_account: line.debit_account
         credit_account: 2000
         per: bill.direct_lines
         amount: line.amount_minor
-        dimensions:
-          product_line: line.product_line
+        keys:
+          causal_orders: line.causal_orders
+          line: line.path
     control_total: bill.amount_minor
     invariants:
       - >-
@@ -871,13 +1009,16 @@ rules:
           reclassification to the accrual date would restate a period that may already be sealed and
           hashed, and would move nothing that needed moving.
       - >-
-          ⚠️ **The reclassification leg carries NO dimension, and that is load-bearing rather than
-          incidental.** 2010 and 2000 both name none, so a transfer declaring one is refused — which
-          means a reclassification **cannot** move a cost between product lines. The dimensions were
-          decided at the accrual and stay on the accrual's transfer. Without this fence an AP move
-          would be a silent restatement of a dimensional report, which is the thing ADR-0020 forbids
-          outright. A direct line, by contrast, is the first posting of that cost and declares
-          whatever its own debit account names.
+          ⚠️ **The reclassification leg declares `causal_orders: null` and carries no line, and that
+          is load-bearing rather than incidental.** It moves a LIABILITY between two liability
+          accounts; the keys that say what the cost was for were declared at the accrual and stay on
+          the accrual's transfer. Declaring a causal order here would let an AP move silently re-key
+          a cost to a different job — a restatement of a derived report through a liability
+          reclassification, which is the thing ADR-0020 forbids outright. A direct line, by contrast,
+          is the FIRST posting of that cost and carries its own causal order and line.
+          ⚠️ This invariant read "2010 and 2000 both name none, so a transfer declaring one is
+          refused" — an argument from the chart, which ADR-0036 stopped answering. The refusal itself
+          is unchanged: gate 10h still fails on a key the rule does not name.
       - >-
           **One entry per BILL, spanning as many obligations as the bill covers.** An EOR invoice for
           a fortnight matches every shift accrued in it, so a bill routinely references several
@@ -983,9 +1124,15 @@ no_posting:
       ⚠️ It reaches the ledger for one reason: the attribution of each leg to a settlement point is
       what makes per-department aging computable, and the posting rule for `credit_note_allocated`
       must read `from_billed_to` / `to_billed_to` rather than assume both legs sit at the same node.
-      **Whether settlement point is a declared ledger DIMENSION or a document attribute is not
-      settled** — `ledger/dimensions.yaml` declares only `product_line` and `cost_type`, and ADR-0025
-      makes dimension obligation per-account. That is a real gap and it is tracked, not hidden.
+      ⚠️ **Whether settlement point is a ledger KEY or a document attribute is not settled, and
+      ADR-0036 sharpens the question rather than answering it.** It was previously framed as "a
+      declared ledger DIMENSION or a document attribute", against a `ledger/dimensions.yaml` that
+      declared only `product_line` and `cost_type`. That framing is dead: there are no dimensions.
+      **The question that replaces it is whether a settlement point is a KEY** — and ADR-0036's own
+      criterion applies directly. A settlement point under ADR-0032/0033 is a node in a customer
+      tree, which is master data and mutable, so on that criterion it is NOT a key; but which node a
+      leg was ATTRIBUTED to at the time is an event fact, which is. That is a real gap, it is
+      tracked, and it is why ADR-0032 and ADR-0033 being un-accepted blocks erp-spec#17.
 
 # ══════════════════════════════════════════════════════════════════════════════════════════════════
 # UNWRITTEN — in scope, nothing blocking them, not written yet. Each names its issue.

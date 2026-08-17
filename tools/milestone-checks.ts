@@ -270,11 +270,51 @@ export const CHECKS: Record<string, Check> = {
         `${w.accounts.length} accounts, ${todo.length} named TODO, ${labour.length} of 2 labour accounts present`,
     };
   },
+  /**
+   * m3: "Reporting dimensions defined with their full value sets, and every posting rule declaring
+   * its keys."
+   *
+   * ⚠️ **The criterion read "…and their DECLARATION RULE" until 2026-08-16, and this check has
+   * never verified that half.** It counted value sets and stopped, so a criterion naming two things
+   * was reported met on one — the exact shape of a gate that reads green while covering less than
+   * it claims. ADR-0036 then removed the thing the missing half named: no posting declares a
+   * dimension, so there is no declaration rule to verify.
+   *
+   * **The rule did not disappear, it moved to the KEYS** (REQ-LED-001), so the second arm is now
+   * written rather than dropped: every `specified` posting rule must declare `causal_orders` on
+   * every posting. That is the universal arm gate 10h enforces on vectors; here it is enforced on
+   * the RULES, which is what makes the milestone criterion mean something a vector cannot supply —
+   * a rule with no vectors at all would slip past 10h entirely.
+   *
+   * A mirror marker (`mirrors_original_transfer` / `mirrors_retracted_transfer`) satisfies it: a
+   * reversal copies the keys of what it reverses, `causal_orders` included.
+   */
   dimensions_defined: (w) => {
     const withValues = w.dimensions.filter((d) => Array.isArray(d.values) && d.values.length > 0);
+    const MIRROR = ["mirrors_original_transfer", "mirrors_retracted_transfer"];
+    const undeclared: string[] = [];
+    for (const r of w.rules) {
+      if (r.status !== "specified") continue;
+      const postings = (r.postings ?? []) as { keys?: unknown }[];
+      postings.forEach((post, i) => {
+        const k = post.keys;
+        if (typeof k === "string" && MIRROR.includes(k)) return;
+        if (
+          !k || typeof k !== "object" || Array.isArray(k) ||
+          !Object.prototype.hasOwnProperty.call(k, "causal_orders")
+        ) {
+          undeclared.push(`${r.id}[${i}]`);
+        }
+      });
+    }
+    const specified = w.rules.filter((r) => r.status === "specified").length;
     return {
-      ok: w.dimensions.length > 0 && withValues.length === w.dimensions.length,
-      detail: `${w.dimensions.length} dimensions, ${withValues.length} with a non-empty value set`,
+      ok: w.dimensions.length > 0 && withValues.length === w.dimensions.length &&
+        undeclared.length === 0,
+      detail:
+        `${w.dimensions.length} reporting dimensions, ${withValues.length} with a non-empty ` +
+        `value set; ${specified} specified rules, ${undeclared.length} posting(s) not declaring ` +
+        `\`causal_orders\`${undeclared.length ? ` — ${undeclared.join(", ")}` : ""}`,
     };
   },
   posting_rules_cover_events: (w) => {

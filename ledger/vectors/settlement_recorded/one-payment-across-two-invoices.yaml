@@ -26,7 +26,7 @@ given:
 derivation: >-
   **One entry, two source documents.** A single check for $1,500.31 clears two invoices — the
   $500.00 of `invoice_issued/single-line-no-tax` and the $1,000.31 of
-  `two-lines-two-product-lines-with-tax`. Both invoices have posted AR, so both have a receivable to
+  `two-lines-two-causal-orders-with-tax`. Both invoices have posted AR, so both have a receivable to
   relieve.
   The fan is over the session's rows, so the entry is two transfers debiting **one** deposit account
   and crediting 1200 twice. `control_total` = 50000 + 100031 = **150031** = the money that arrived.
@@ -38,8 +38,13 @@ derivation: >-
   derived as (source document, posting event) and freed from `user_data_128`. Here one journal entry
   references two invoices, so the grouping is not a function of any single source-document
   reference, and the field stays reserved. `credit_note_allocated` is the other half.
-  Neither account carries a dimension — 1001 and 1200 both name none in the chart. Settlement moves
-  money that was dimensioned when it was earned; re-dimensioning it here would double-count every
+  **Each leg carries the INVOICE it relieves and declares `causal_orders: null`** (ADR-0036). That
+  is what makes a session spanning two invoices legible on the ledger's own face: two legs, two
+  invoice keys, one entry. ⚠️ This paragraph read "Neither account carries a dimension — 1001 and
+  1200 both name none in the chart" until 2026-08-16, which argued from the chart; the chart no
+  longer answers it, and the reason was always about the event. A payment is caused by a customer
+  paying, not by a job, and splitting one cheque across the orders behind an invoice would be an
+  allocation with no basis. Settlement moves money that was keyed when it was earned; re-keying it here would double-count every
   product line on the cash side.
 
 expect:
@@ -49,11 +54,15 @@ expect:
         credit_account: 1200,
         amount_minor: 50000,
         accounting_date: "2026-08-05",
+        causal_orders: null,
+        invoice: INV-VEC-0001,
       }
     - {
         debit_account: 1001,
         credit_account: 1200,
         amount_minor: 100031,
         accounting_date: "2026-08-05",
+        causal_orders: null,
+        invoice: INV-VEC-0002,
       }
   rejects: []

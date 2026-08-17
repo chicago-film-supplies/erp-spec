@@ -49,7 +49,7 @@ events:
         accrual_date,
         amount_minor,
         debit_account,
-        product_line,
+        causal_orders,
         source_document_ref,
       ]
     note: >-
@@ -65,11 +65,16 @@ events:
       services under a purchase order. Accruing a crew day here would double-count it against
       `shift_recorded` in a way that still balances
       (`ledger/vectors/obligation_accrued/labour-accrued-through-this-rule-rejected.yaml`).
-      ⚠️ **`debit_account` and `product_line` were added to `carries` when the rule was written.** The
-      posting rule's `amount:` is a dotted path with no arithmetic and its dimensions are read off the
-      debit account (ADR-0025), so both facts have to arrive ON the event; an event that carried only
-      an amount could not produce a legal transfer. `cost_type` is deliberately NOT here — 5800 is
-      the only account naming it and labour never accrues through this rule.
+      ⚠️ **`debit_account` and a dimension were added to `carries` when the rule was written, and
+      the dimension became `causal_orders` on 2026-08-16** (ADR-0036). The posting rule's `amount:`
+      is a dotted path with no arithmetic, so both facts have to arrive ON the event; an event
+      carrying only an amount could not produce a legal transfer.
+      The entry read `product_line`, "read off the debit account (ADR-0025)". ADR-0036 removed
+      dimensions from postings entirely, and what the transfer needs instead is what the receipt was
+      FOR — an explicit null where it was for no job, as warehouse rent is. **That is a better fact
+      to carry on an event**: a category is a lookup against a master that can move, while a causal
+      order is something the receiving operator knows. `line` is deliberately NOT here: an accrual is
+      one amount from one source document, not a row within one.
 
   - id: EVT-PRO-003
     name: VendorBillReceived

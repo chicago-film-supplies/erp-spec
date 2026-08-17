@@ -4,13 +4,13 @@ kind: reject
 source: >-
   ADR-0019 (costing is ACTUAL at the person's own wage), OQ-005 (a shift is one person's paid span
   for one day), OQ-018 (the overtime premium is allocated pro-rata across the day's causal jobs) and
-  ADR-0025 (5800 is the only account in the chart naming `cost_type`). The boundary this vector pins
+  HOT-014 (one shift becomes several transfers, so each absorbed row needs its own identity). The boundary this vector pins
   is `contexts/procurement/context.md`'s own: procurement owns the accrual STAGE, not every document
   that reaches it.
 
 differs_from: subrental-received-before-the-vendor-invoices
 differs_in:
-  ["obligation.debit_account", "obligation.product_line", "obligation.source_document_ref"]
+  ["obligation.debit_account", "obligation.source_document_ref"]
 
 given:
   ledger_state:
@@ -22,7 +22,7 @@ given:
     accrual_date: "2026-08-12"
     amount_minor: 185000
     debit_account: 5800
-    product_line: "Delivery"
+    causal_orders: ["ORD-VEC-4471"]
     source_document_ref: "crew day, 4 people"
 
 derivation: >-
@@ -34,12 +34,17 @@ derivation: >-
      same hours, and each entry balances on its own — so the ledger would carry the crew day twice
      with a clean trial balance. The same silent, balanced failure `vendor_bill_received` guards the
      other end of.
-  2. **This rule structurally cannot produce a legal 5800 transfer.** 5800 names **both**
-     `product_line` and `cost_type`, and `cost_type` applies to 5800 alone in the whole chart
-     (ADR-0025). `EVT-PRO-002` carries no `cost_type` and could not: the value is a property of the
-     work performed, decided in the shift record. So the transfer would be refused by REQ-LED-001
-     for an absent dimension even if the double-count did not exist. **A rule boundary that is also
-     a dimension boundary is worth having** — the weaker of the two enforcements still fires.
+  2. **This rule structurally cannot produce a legal 5800 transfer.** A 5800 posting is one per
+     ABSORBED ALLOCATION and carries that row's identity (HOT-014, ADR-0036) — one shift becomes
+     several transfers, and `source_document` resolves only to the shift. `EVT-PRO-002` has no
+     allocation rows and could not: the split is a property of the work performed, decided in the
+     shift record. So the transfer would be refused for a missing `line` key even if the
+     double-count did not exist. **A rule boundary that is also a key boundary is worth having** —
+     the weaker of the two enforcements still fires.
+     ⚠️ This reason argued through `cost_type` until 2026-08-16 — "5800 names both `product_line`
+     and `cost_type`, and `cost_type` applies to 5800 alone" (ADR-0025). ADR-0036 removed both
+     dimensions from every posting; the boundary survived the change of subject, which is some
+     evidence it was a real boundary rather than an artefact of the dimension scheme.
   ⚠️ **What is refused is the ROUTE, not the accrual.** The cost is real, it belongs on 2026-08-12,
   and `shift_recorded` posts it — with the absorbed/unabsorbed split (5800/5801) and the overtime
   pro-rata that no generic accrual could perform, because `amount:` is a path with no arithmetic and
@@ -49,4 +54,4 @@ expect:
   transfers: []
   rejects:
     - reason: "obligation.debit_account 5800 is a labour account — labour accrues through shift_recorded, which already debits 5800 and credits 2010; accruing it here books the crew day twice in a way that still balances (ADR-0019, OQ-005)"
-    - reason: "5800 names cost_type and EVT-PRO-002 carries none — an absent dimension on a dimensioned account is refused, never defaulted (REQ-LED-001, ADR-0025)"
+    - reason: "EVT-PRO-002 carries no allocation row, so a transfer of this rule can supply no line identity — but 5800's postings are one per absorbed allocation (HOT-014), and an entry that debits it with a single undifferentiated amount cannot be reconciled to any shift (ADR-0019, ADR-0036)"

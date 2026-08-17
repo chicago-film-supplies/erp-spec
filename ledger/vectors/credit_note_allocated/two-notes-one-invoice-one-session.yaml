@@ -37,8 +37,11 @@ derivation: >-
   Verified 6 of 6 on prod and already load-bearing in the current system, where an allocation carries
   its own date because Xero must post journals on both a cash and an accrual basis when an allocation
   is made (`code:2026-08-09:core@33f5654:src/schemas/settlement.ts`).
-  Neither leg carries a dimension: 2050 and 1200 both name none. The product lines were reversed when
-  each note was **issued**; re-carrying them here would double the reversal in every dimensional
+  **Both legs carry the INVOICE and declare `causal_orders: null`** (ADR-0036) — and the invoice key
+  is what this rule is FOR: it is the event that attaches a credit to a receivable, which is the one
+  thing `credit_note_issued` deliberately cannot do (ADR-0033). ⚠️ This read "Neither leg carries a
+  dimension: 2050 and 1200 both name none" until 2026-08-16. The revenue was re-keyed when
+  each note was **issued**; re-carrying those keys here would double the reversal in every derived
   report.
 
 expect:
@@ -48,11 +51,15 @@ expect:
         credit_account: 1200,
         amount_minor: 24775,
         accounting_date: "2026-05-09",
+        causal_orders: null,
+        invoice: INV-VEC-1767,
       }
     - {
         debit_account: 2050,
         credit_account: 1200,
         amount_minor: 2726,
         accounting_date: "2026-05-09",
+        causal_orders: null,
+        invoice: INV-VEC-1767,
       }
   rejects: []

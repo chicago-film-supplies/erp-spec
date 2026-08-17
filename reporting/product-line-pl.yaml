@@ -96,17 +96,69 @@ report:
     Transport: activity
     Shipping: activity
 
+  # ── which LABOUR enters which pool ───────────────────────────────────────────────────────────
+  # ⚠️ **`labor_line` is the pool's COST SELECTOR, and EVERY declared value is selected by exactly
+  # one pool.** Owner, 2026-08-16: "the p&l by product line will distribute labor costs with
+  # labor_line delivery across product lines, the same mechanism will allow other combos for future
+  # reporting", and then: **"counter and warehouse can bill goods too (just like delivery does)."**
+  #
+  # A report in this family is three things — **(cost selector) → spread over (base) by (basis)** —
+  # and the official product-line P&L is `labor_line: {delivery, counter, warehouse}` → goods revenue
+  # on the causal order → largest remainder. "Other combos" are new rows of CONFIGURATION, not new
+  # machinery.
+  # ⚠️ That generality must not leak into the AUTHORITY. ADR-0029's "exactly ONE official
+  # allocation" stands: a configurable mechanism makes a second number cheap to produce, and
+  # ADR-0029 is what says only one of them is the managed one.
+  #
+  # ⚠️ **THIS IS WHAT THE 3 → 7 ENUM GROWTH WAS FOR, and it is not cosmetic.** With three values
+  # (`delivery`, `counter`, `warehouse`) exactly one activity pool could name its own labour and the
+  # rest had nowhere to point — so `transport` pointed at `labor_line: delivery` and would have
+  # spread a long-haul crew-day across goods lines while reporting Transport at a ~100% margin. With
+  # seven, every pool selects its own cost.
+  #
+  # ⚠️ **The mapping is NOT derivable from the names.** `trucking` ↔ `Transport` is the
+  # counter-example: `Transport` is the incumbent Xero tracking category and `trucking` is what the
+  # owner calls the work. A convention matching on the string would silently drop that pool, which
+  # is why the link is declared on each pool's `cost_sources.labor_line` and never inferred.
+  #
+  # ⚠️ **There is NO "bills nobody" branch, and it was removed on the owner's ruling the day it was
+  # written.** This file carried `labor_line_kinds` (`billable` / `bills_nobody`) with `counter` and
+  # `warehouse` in the second bucket and an `unpooled_labor_lines` honest-bucket beside it. The
+  # owner's ruling collapsed it: counter and warehouse hours are absorbed against a causal job like
+  # any other, so they bill goods exactly as delivery does. **A branch with no members is a claim
+  # rather than a capability** — this repo's own standard — so the branch went rather than being
+  # kept empty against a hypothetical.
+  # ✅ **And the collapse is structural, not a coincidence.** `labor_line` is read off the shift's
+  # ABSORBED ALLOCATION row, and an absorbed allocation names a causal job by definition — hours
+  # belonging to no job are UNABSORBED, post to 5801, and have no allocation row and therefore no
+  # `labor_line` at all. So every value this taxonomy can hold is, by construction, attributable to
+  # a job whose goods can bear it. **Total coverage is a property of the design, not an assumption.**
+  #
+  # Gate 13h requires every declared `labor_line` to be selected by exactly one pool, and every pool
+  # to declare a selector. Adding a value to `ledger/dimensions.yaml` without deciding which pool
+  # spreads it is a build break, not a silent default — and the silent default would be "vanishes",
+  # which understates COGS on every line it should have reached.
+
   # ── the pools ────────────────────────────────────────────────────────────────────────────────
   # One entry per ACTIVITY line, and every one of them lands in exactly one bucket — the same
   # coverage discipline `ledger/posting-rules.yaml` applies to events. "Nobody decided" is not a
   # state this file can be in.
   pools:
     - id: delivery
+      kind: activity_line
       product_line: Delivery
       status: allocated
       basis: goods_revenue_on_causal_order
       basis_version: 1
       accounts: [4100, 4110]
+      cost_sources:
+        labor_line: delivery
+        labour_accounts: [5800]
+        pending: >-
+          Vehicle COGS. ADR-0030 moves vehicle running cost into COGS on the 5800/5801 pattern and
+          explicitly does not choose the accounts, so there is nothing to name yet
+          (`deferred_pools.vehicle_cogs`, erp-spec#12). **This pool currently carries almost no
+          cost, which is exactly why the un-allocated view shows Delivery at a loss.**
       note: >-
         **Both accounts, and the delivery line's margin includes both.** 4100 Service Income is the
         delivery / setup / removal charge, a service a person performs and therefore labour-bearing;
@@ -155,13 +207,23 @@ report:
         what the un-allocated view can be READ as.
         (OQ-006, and
         `inbox/2026-08-09-4110-is-a-third-distance-charges-and-distance-is-performed.md`.)
-        Cost joins this pool as it arrives: labour COGS carrying `cost_type: delivery` (ADR-0019,
-        5800/5801) is in the ledger now; vehicle COGS is ADR-0030 and its accounts are unchosen.
+        **The cost side is now DECLARED rather than described** — see `cost_sources` above. Labour
+        COGS whose shift allocation resolves to `labor_line: delivery` (ADR-0019, 5800/5801) is in
+        the ledger now; vehicle COGS is ADR-0030 and its accounts are unchosen. ⚠️ This read "labour
+        COGS carrying `cost_type: delivery`" until 2026-08-16 — under ADR-0036 the posting carries
+        the causal job and its allocation row, and the classification is read off that row (OQ-042).
+        **This is the pool the owner's ruling names**: "the p&l by product line will distribute labor
+        costs with labor_line delivery across product lines" (2026-08-16).
 
     - id: shipping
+      kind: activity_line
       product_line: Shipping
       status: not_allocated
       accounts: [4150, 5300]
+      cost_sources:
+        labor_line: shipping_&_handling
+        labour_accounts: [5800]
+        bought_in_accounts: [5300]
       reason: >-
         **Severable, and its cost is BOUGHT IN rather than performed.** Split out of `Transport` by
         OQ-034 on 2026-08-16 — owner: "shipping is a pass through, trucking is our own longer or
@@ -181,9 +243,16 @@ report:
         corpus still carries one `Transport` value and 4150 under it is entirely this pool.
 
     - id: transport
+      kind: activity_line
       product_line: Transport
       status: not_allocated
       accounts: [4100]
+      cost_sources:
+        labor_line: trucking
+        labour_accounts: [5800]
+        pending: >-
+          Vehicle COGS, as for `delivery` — a haul is the most vehicle-intensive work CFS does, so
+          this pool's margin is the one most understated while ADR-0030's accounts are unchosen.
       reason: >-
         **Severable — carries its own margin.** OQ-034, owner 2026-08-16: "trucking is our own
         longer or bigger haul that doesn't fit into the standard delivery charge paradigm, it should
@@ -197,18 +266,32 @@ report:
         `Trucking` mean third-party freight or an own long-haul run?" — structurally instead of in
         prose. Trucking is CFS-performed and labour-bearing, per ADR-0011's ruling on OQ-010: a
         trucked leg generates a shift and absorbs a person-day.
-        ⚠️ **This pool's margin is NOT yet readable, and that is the trap the file header warns about
-        for `Delivery`.** Revenue is on 4100; the cost is labour COGS carrying `cost_type: delivery`
-        (ADR-0019, 5800/5801) plus vehicle, and **ADR-0030 has not chosen the vehicle COGS
-        accounts**. Until it does, a Transport margin read off this pool overstates trucking.
+        ⚠️ **THIS POOL SELECTED THE WRONG LABOUR UNTIL 2026-08-16, and the defect was invisible
+        while the enum had three values.** It read "the cost is labour COGS resolving to
+        `labor_line: delivery`" — written when `cost_type` was `[delivery, counter, warehouse]` and
+        trucking labour had nowhere else to point. **`labor_line: trucking` is what this pool
+        selects**, and the 3 → 7 growth exists precisely so it can. Built as written, a long-haul
+        crew-day would have entered the `delivery` pool and **spread across goods lines**, while
+        Transport reported revenue with no cost against it — the near-100%-margin failure `crew` and
+        `trash_cleanup` already warn about, arrived at from the other side, with goods COGS
+        overstated by the same amount.
+        ⚠️ **This pool's margin is still NOT fully readable, and that is the trap the file header
+        warns about for `Delivery`.** Revenue is on 4100, labour is now selected correctly, and
+        **ADR-0030 has not chosen the vehicle COGS accounts**. Until it does, a Transport margin read
+        off this pool overstates trucking — and a haul is the most vehicle-intensive work CFS does,
+        so this is the pool that understatement bites hardest.
         Measured 2026-08-16: 7 lines, **$34,000.00**, 1.98% of revenue — the amount reproduces OQ-034's
         figure exactly and only the share moved. Derived by account: 4100 under the corpus's single
         `Transport` value. ⚠️ The corpus has NOT been restated into two values; that is an ADR-0020
         obligation, and `Shipping` therefore reads 0 lines when the dimension is read directly.
     - id: crew
+      kind: activity_line
       product_line: Crew
       status: not_allocated
       accounts: [4100]
+      cost_sources:
+        labor_line: crew
+        labour_accounts: [5800]
       reason: >-
         **Severable.** ADR-0029's argument for spreading `Delivery` is that delivery is NOT
         severable — "we wouldn't do a delivery with no products, we would rent far fewer products if
@@ -230,9 +313,13 @@ report:
         Measured 2026-08-16: 9 lines, **$3,550.00**, 0.21% of revenue — unchanged on both figures.
 
     - id: trash_cleanup
+      kind: activity_line
       product_line: Trash & Cleanup
       status: not_allocated
       accounts: [4100]
+      cost_sources:
+        labor_line: trash_&_cleanup
+        labour_accounts: [5800]
       reason: >-
         **Severable**, on the same criterion as `crew`: a wrap cleanup is a service contracted on its
         own terms, not a joint cost of the rental. Spreading $144,975 onto goods that did not cause
@@ -253,6 +340,58 @@ report:
         attributes to this line because that is the job that caused it. $144,975 of revenue on its
         own P&L line with no cost against it would report a margin near 100% and would be the most
         misleading number this report could produce.
+
+    # ── cost-only pools: real absorbed labour that bills nobody DIRECTLY ─────────────────────
+    # ⚠️ **`kind: cost_only` is the schema's second pool shape, added 2026-08-16 on the owner's
+    # ruling.** An activity pool has revenue AND cost and asks "does its cost land on the goods";
+    # a cost-only pool has cost and NO revenue, so the question does not arise — it has nowhere
+    # else to go. **A cost-only pool must therefore be `allocated`**, and gate 13d fails on one
+    # that is not: a cost pool that does not spread is a cost that reaches no report at all,
+    # which is the "vanishes" default in its purest form.
+    #
+    # These two do not appear as P&L lines of their own. Their cost spreads into the goods lines
+    # of the orders that caused it, which is what "can bill goods too" means.
+
+    - id: counter
+      kind: cost_only
+      status: allocated
+      basis: goods_revenue_on_causal_order
+      basis_version: 1
+      cost_sources:
+        labor_line: counter
+        labour_accounts: [5800]
+      reason: >-
+        **Counter hours bill goods, exactly as delivery does** (owner, 2026-08-16: "counter and
+        warehouse can bill goods too (just like delivery does)"). A counter hour is spent serving a
+        customer collecting or returning an order, so it is a joint cost of that order's goods
+        revenue and it is not severable — nobody buys a counter hour. That is ADR-0029's criterion
+        for `Delivery` applied unchanged, and it reaches the same answer.
+        ⚠️ **It has no product line and needs none.** `Delivery` has one because a delivery is
+        CHARGED FOR and an operator picks the line; a counter hour is never billed as a line, so
+        there is no revenue to categorise. The absence is the reason this is a cost-only pool, not
+        an omission.
+        ⚠️ **Its size is unmeasured and will stay unmeasured until v2 runs.** The current system has
+        never had the absorbed-labour stage, so counter hours measure as zero everywhere
+        (erp-spec#14). **Decided on the criterion rather than on the number**, which is the right
+        way round: severability does not depend on magnitude.
+
+    - id: warehouse
+      kind: cost_only
+      status: allocated
+      basis: goods_revenue_on_causal_order
+      basis_version: 1
+      cost_sources:
+        labor_line: warehouse
+        labour_accounts: [5800]
+      reason: >-
+        **Warehouse hours bill goods, exactly as delivery does** (owner, 2026-08-16). Prep, pull,
+        check-in and put-away are performed for a specific order and absorb against it, so the
+        goods of that order bear the cost. Not severable — nobody buys a warehouse hour.
+        ⚠️ **NOT the same thing as `deferred_pools.warehouse_overhead`, and the two were conflated
+        until 2026-08-16.** That entry is rent and utilities: an operating expense below this
+        report's gross margin until an ADR moves it into COGS (erp-spec#12). This is a warehouse
+        HOUR, which is already in COGS via 5800 and already absorbed against a causal job. One is a
+        facility cost with no causal order; the other is labour with one.
 
   # ── pools that are the same shape and are NOT yet expressible ────────────────────────────────
   # `pools` above is keyed by an ACTIVITY PRODUCT LINE, because that is what today's data has: an
@@ -286,8 +425,54 @@ report:
       reason: >-
         Still an operating expense, not COGS, so it is below the gross margin this report presents
         and there is no pool to spread. It becomes real only if a decision moves it into COGS, which
-        no ADR has made. `cost_type: warehouse` already exists on 5800 for labour, which is the
-        narrower thing and is not the same claim.
+        no ADR has made.
+        ⚠️ **NOT the same question as `labor_line: warehouse`, and this entry used to leave that
+        dangling.** It said the labour classification "already exists … which is the narrower thing
+        and is not the same claim" without saying where the narrower thing goes. ✅ It goes to the
+        **`warehouse` cost-only pool** above (owner, 2026-08-16) — a warehouse HOUR is already in
+        COGS via 5800, already absorbed against a causal job, and spreads onto that job's goods.
+        This entry is about rent and utilities, which are not in COGS at all and have no causal
+        order to spread from. **Two facts that share a word.**
+
+  # ── the imputed-labour view, REQUIRED and NOT official ───────────────────────────────────────
+  # ⚠️ **A contributed owner shift posts NOTHING** (OQ-047, owner 2026-08-16: "stick with gaap"). No
+  # obligation was incurred, so no expense is recognised — ASC 958-605, which lets an entity
+  # recognise donated services, is not-for-profit only. **The consequence lands here:** real work
+  # was performed, no cost reaches the job, and this report's gross margin is flattered by exactly
+  # that labour.
+  #
+  # **That is what GAAP requires, and it is why the imputed view is REQUIRED rather than optional.**
+  # A margin that is honest only in a report nobody runs is not honest. The shift record survives a
+  # contributed shift in full — hours, causal job, allocation-row identity, `labor_line` — so
+  # everything the imputed view needs is already captured; nothing further has to be recorded at
+  # posting time for it to become computable later.
+  #
+  # ⚠️ **It is explicitly NOT the official allocation, and that fence is ADR-0029's.** This is a
+  # SECOND number for the same thing, and ADR-0029 exists because two reports that disagree about
+  # the margin on the same product line have no authority to appeal to. The imputed view is
+  # management information; the official product-line P&L above is the managed number. **The same
+  # discipline this file already applies** to the un-allocated view, which "must never be published
+  # as the product-line margin".
+  imputed_labour_view:
+    required: true
+    official: false
+    status: unwritten
+    blocked_by: [OQ-048]
+    issue: erp-spec#32
+    reason: >-
+      **What rate to impute is not decided.** ADR-0019 costs labour at "that person's actual
+      per-contact wage", and an owner who is never paid has no actual wage — the field may be empty
+      or may hold a number nobody has ever honoured. Three candidates answering different questions
+      (the person's own rate, a replacement-hire rate, a single notional owner rate), and the
+      agricultural-extension literature's answer is the second: owner-operator compensation "should
+      be equivalent to hired compensation for accurate profitability measurement". OQ-048.
+      ⚠️ **Whatever is chosen is a BASIS and owes a version**, on this file's existing discipline —
+      two imputed views computed at different rates would disagree about the same job's margin.
+      ⚠️ **Unmeasurable until v2 runs.** How many owner shifts exist is recorded nowhere, because the
+      current system has no absorbed-labour stage at all (erp-spec#14). `compensation` being present
+      from day one is what makes the population countable the moment the stage exists — and until
+      then **the size of the distortion this view corrects is unknown**, which is an argument for
+      writing it early rather than waiting to see whether it matters.
 
   # ── presentation ─────────────────────────────────────────────────────────────────────────────
   presentation:
@@ -355,10 +540,18 @@ report:
 
     null_product_line_row_shown: true
     null_product_line_row_reason: >-
-      `product_line: null` is a legal determination, not an absence (ADR-0025, REQ-LED-001), so it
-      is a countable population and gets a row. Goods-account revenue carrying null is part of the
-      allocation BASE and absorbs its share; service and other revenue carrying null is neither pool
-      nor base and reports below the allocated margin.
+      A line that resolves to NO product line is a countable population and gets a row. Goods-account
+      revenue that resolves to none is part of the allocation BASE and absorbs its share; service and
+      other revenue that resolves to none is neither pool nor base and reports below the allocated
+      margin.
+      ⚠️ **REFRAMED 2026-08-16 (ADR-0036).** This read "`product_line: null` is a legal determination,
+      not an absence (ADR-0025, REQ-LED-001), so it is a countable population" — a statement about a
+      DECLARED field on a posting, which no longer exists. The row survives and its meaning is now
+      structural rather than declared: the line either resolves against the product master or it does
+      not, and the two ways it can fail to are stated in `ledger/dimensions.yaml`
+      (`unresolved_cases`) — no product at all, or a product nobody categorised. **The absence-versus-null
+      rule did not disappear from the report; it disappeared from the ledger and became a join
+      outcome**, which is why the population is now measured rather than declared.
       Re-measured 2026-08-16 the untracked share is **14.76% of line revenue** ($253,269.75 of
       $1,715,472.79), and it is exactly the two populations that are not defects: **130 custom lines
       with no product master** ($233,610.63) and **183 lines on genuinely uncategorised products**
@@ -379,14 +572,22 @@ report:
   # ── revenue with no line-level representation ────────────────────────────────────────────────
   revenue_without_line_representation: >-
     **The report is built from POSTINGS, not from invoice lines, and that is what closes this hole.**
-    REQ-LED-001 refuses a posting to a dimensioned account that does not DECLARE its product line,
-    so in the target system there is no revenue invisible to this report: every revenue posting
-    carries a product line or an explicit null, and both have rows here.
+    ⚠️ **The mechanism changed on 2026-08-16 and the guarantee did not weaken — it moved.** This read
+    "REQ-LED-001 refuses a posting to a dimensioned account that does not DECLARE its product line,
+    so every revenue posting carries a product line or an explicit null". Under ADR-0036 a posting
+    carries no product line at all; what REQ-LED-001 now refuses is a posting with no LINE IDENTITY
+    where its rule names one, and the product line is resolved through that key. So there is still no
+    revenue invisible to this report — every revenue posting resolves to a product line or to one of
+    the two unresolved cases, and both have rows here. **The guarantee is arguably stronger**: a
+    declared classification could be wrong and still pass, while a line identity either resolves or
+    is refused.
     ⚠️ The hole is real in HISTORY. The 2023 P&L shows 4120 Contract Labor Income of $156,500 while
     only $31,570 across 3 lines appears in the invoice corpus carrying line-level tracking — the
     rest is not in those 999 invoices at all. That revenue cannot be given a product line by this
     report, because the documents that would say do not exist. It belongs to ADR-0020's restatement,
-    which forbids altering any amount, so the restated postings will carry `product_line: null` and
-    land in the null row. **A pre-cutover period's null row is therefore not comparable to a
+    which forbids altering any amount, so the restated postings will resolve to no product line and
+    land in that row. ⚠️ They will also carry `causal_orders: null` — these are the legacy CRMS
+    imports, 30 invoices referencing no order, and the owner ruled on 2026-08-16 that an explicit
+    null source order is legal precisely so this population stays postable. **A pre-cutover period's null row is therefore not comparable to a
     post-cutover one**, and the report must say which side of the cutover a period falls on rather
     than let a reader compare across it.

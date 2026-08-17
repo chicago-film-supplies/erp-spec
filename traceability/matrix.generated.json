@@ -5,7 +5,7 @@
     "adrs": 36,
     "adrs_accepted": 21,
     "events": 37,
-    "inbox": 73,
+    "inbox": 75,
     "inbox_promoted": 19
   },
   "requirements": [
@@ -411,13 +411,14 @@
       "context_code": "LED",
       "status": "draft",
       "priority": "must",
-      "statement": "Every posting to an account whose chart entry names a required dimension shall DECLARE that dimension — either a value drawn from the dimension's declared set, or an explicit null recording that no tracked value applies — and a posting that does not declare it shall be rejected rather than recorded.",
-      "source": "inbox/2026-08-10-the-untracked-revenue-denorm-is-repaired-and-28-7-percent-is-now-15-percent.md",
+      "statement": "Every posting shall DECLARE its causal order — either the order or orders that caused it, or an explicit null recording that no causal order applies — and a posting that does not declare it shall be rejected rather than recorded. A posting shall further declare every other key its posting rule names, and shall declare no key its posting rule does not name.",
+      "source": "inbox/2026-08-16-owner-rulings-line-identity-is-item-path-ephemeral-reports-are-never-sealed-and-cost-type-becomes-labour-line.md",
       "source_kind": "inbox",
       "adrs": [
         "ADR-0009",
         "ADR-0018",
         "ADR-0025",
+        "ADR-0029",
         "ADR-0036"
       ],
       "events": [
@@ -425,12 +426,13 @@
         "EVT-LED-002"
       ],
       "scenarios": [
-        "contexts/ledger/features/dimensional-postings.feature",
-        "contexts/ledger/features/dimensional-postings.feature",
-        "contexts/ledger/features/dimensional-postings.feature",
-        "contexts/ledger/features/dimensional-postings.feature",
-        "contexts/ledger/features/dimensional-postings.feature",
-        "contexts/ledger/features/dimensional-postings.feature"
+        "contexts/ledger/features/posting-keys.feature",
+        "contexts/ledger/features/posting-keys.feature",
+        "contexts/ledger/features/posting-keys.feature",
+        "contexts/ledger/features/posting-keys.feature",
+        "contexts/ledger/features/posting-keys.feature",
+        "contexts/ledger/features/posting-keys.feature",
+        "contexts/ledger/features/posting-keys.feature"
       ]
     },
     {
@@ -607,10 +609,12 @@
       "inbox/2026-08-16-adr-0031s-figures-re-measured-two-of-three-predicted-directions-failed.md",
       "inbox/2026-08-16-correction-the-duradeck-retraction-reasoned-from-a-product-name.md",
       "inbox/2026-08-16-correction-two-of-three-unreachable-references-were-a-bad-query-and-sap-models-this-case-exactly.md",
+      "inbox/2026-08-16-labor-line-is-the-pools-cost-selector-and-a-report-is-a-selector-crossed-with-a-base.md",
       "inbox/2026-08-16-owner-rulings-line-identity-is-item-path-ephemeral-reports-are-never-sealed-and-cost-type-becomes-labour-line.md",
       "inbox/2026-08-16-owner-shipping-weight-will-exist-for-many-products-by-the-time-v2-is-in-dev.md",
       "inbox/2026-08-16-survey-a-vendor-side-amount-becomes-revenue-only-where-control-or-a-markup-does.md",
       "inbox/2026-08-16-survey-all-six-references-keep-the-dimension-in-the-same-store-as-the-balance-and-only-odoo-splits-the-record.md",
+      "inbox/2026-08-16-survey-an-unpaid-owner-shift-is-not-an-expense-and-every-reference-fences-imputed-labour-out-of-the-statements.md",
       "inbox/2026-08-16-survey-the-accrued-liability-is-a-matched-clearing-account-and-the-bill-reclassifies-rather-than-reverses.md",
       "inbox/2026-08-16-survey-the-party-is-a-subledger-key-and-the-dimension-is-a-gl-slice-and-they-ride-different-legs.md",
       "inbox/2026-08-16-the-owner-wants-allocation-re-runnable-and-nothing-in-the-spec-carries-the-key-it-would-re-run-on.md",

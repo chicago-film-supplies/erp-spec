@@ -1,20 +1,29 @@
 # Chart of accounts.
 #
 # The whole live chart, carried across with an explicit per-account DISPOSITION. Pruning to
-# ADR-0018's "~60 accounts plus a dimension column" is therefore auditable rather than silent, and
+# ADR-0018's "plain chart, one account per GL code" is therefore auditable rather than silent, and
 # this file cannot drift from `migration/field-map.yaml` without the difference being visible.
+# ⚠️ **That sentence used to end "~60 accounts plus a dimension column". There is no dimension
+# column.** ADR-0036 superseded ADR-0018 on 2026-08-16 and the plain-chart half survived unchanged;
+# what went is everything the column was for — see the keys rule below.
 #
 # Measured 2026-08-09 against prod (`db_chart_of_accounts_query`): **134 accounts, 112 Active,
 # 22 Archived**. Every one of the 134 appears below. `code` is a NUMBER in the live collection —
 # a string filter silently returns 0 rows.
 #
-# **138 entries**, because four are minted rather than carried across — each `disposition: new`,
+# **139 entries**, because five are minted rather than carried across — each `disposition: new`,
 # `status_live: absent`, with the rule that needs it named in its `reason`: 5800/5801 for
 # absorbed/unabsorbed labour (ADR-0019), **2050 Customer Credit Balances** for `credit_note_issued`,
-# which had no credit-side account at all (erp-spec#5), and **2010 Accrued Expenses: Received Not
-# Invoiced** for `obligation_accrued`, which had none either (erp-spec#14).
+# which had no credit-side account at all (erp-spec#5), **2010 Accrued Expenses: Received Not
+# Invoiced** for `obligation_accrued`, which had none either (erp-spec#14), and **5150 Cost of Goods
+# Sold: Pass Through**.
+# ⚠️ **This paragraph read "138 entries, because four are minted" until 2026-08-16 and was wrong by
+# one in both halves** — 5150 was added without it being updated, and nothing counts these numbers,
+# so the header could disagree with the file indefinitely. Re-counted here: 139 `code`, 139
+# `status_live` (112 Active / 22 Archived / 5 absent), 139 `disposition` (108 adopt / 21 drop /
+# 4 merge / 5 new / 1 undecided).
 #
-# ⚠️ **All four were minted for a rule that could not otherwise be written, and none of them for
+# ⚠️ **All five were minted for a rule that could not otherwise be written, and none of them for
 # tidiness.** That is the bar: an account enters this file because a posting rule has no legal
 # account for one of its legs, not because a chart "should have" one.
 #
@@ -28,10 +37,6 @@
 #   class           asset | liability | equity | revenue | expense
 #   normal_balance  debit | credit
 #   contra          optional bool — true where normal_balance opposes the class default
-#   dimensions      the dimensions a posting to this account MUST carry — a list drawn from
-#                   `ledger/dimensions.yaml`, `[]` where none apply, or `undecided`. Stated per
-#                   account rather than inferred from class: `cost_type` describes labour and
-#                   applies to 5800 alone, so no rule can derive it from "is this COGS".
 #   disposition     adopt | rename | merge | drop | new | undecided
 #   status_live     Active | Archived | absent   (`absent` = does not exist in the live chart)
 #   class_live      ONLY where the live class differs from `class` above; requires a `note`
@@ -55,25 +60,43 @@
 #    note with it. HOT-010 and ADR-0019 killed the rate variance — with no standard rate it could
 #    never fire — but only `posting-rules.yaml`'s comment followed; the accounts did not.
 #
-# ── the dimension rule, settled (OQ-021, OQ-022, OQ-025 — ADR-0025, resolves HOT-011) ───────────
-# **Revenue accounts carry a product line.** `cost_type` is a LABOUR dimension — its values are
-# delivery / counter / warehouse — so it applies to 5800 alone and to no revenue account and no
-# non-labour COGS account.
+# ── THERE IS NO `dimensions:` KEY, AND THAT IS THE DECISION (ADR-0036, superseding ADR-0018) ────
+# **An account is a GL code and its behaviour. It says nothing about what a posting to it must
+# carry.** Until 2026-08-16 every entry here held a `dimensions:` list — 19 of 139 non-empty, 18
+# `[product_line]` and 5800 alone `[product_line, cost_type]` — and that list was the authority for
+# WHICH postings owed a dimension (ADR-0025, resolving HOT-011). ADR-0036 removed the obligation, so
+# the key was **DELETED rather than emptied to `[]`**, and gate 10a now FAILS on an account that
+# carries one.
 #
-# **There is no `Other` product line. What is refused is ABSENCE, not null.** A posting to an
-# account that names a dimension must DECLARE it — a value from the declared set, or an explicit
-# `null` meaning "no tracked value applies". A missing key means nobody decided and is refused; so
-# is `""`, which passes a naive NOT NULL check while meaning nothing.
+# ⚠️ **The choice between deleting and emptying was deliberate, and ADR-0036's own text reads the
+# other way.** Its Consequences say "`5800`'s `dimensions: [product_line, cost_type]` becomes
+# `dimensions: []`" — the vivid statement of the effect on the one account that owed two. Its next
+# bullet says the lists "are **obsoleted** in their current form". A key that can only hold `[]` on
+# every one of 139 entries carries no information and invites the next author to fill one in; the
+# repo's own rule is to prefer making a defect class unrepresentable over policing it. Deleting is
+# the stronger reading of "obsoleted", and 10a is what makes it enforced rather than asserted.
 #
-# Two mechanisms, stating different facts, and neither substitutes for the other:
-#   · `product_line: null` on an operating revenue account — "this IS a categorised kind of sale
-#     and no tracked product line applies". Where ADR-0020's restatement residue lands.
-#   · **4800 Other Income**, which names no dimension — "this was not a categorised sale at all".
-# Coding a real service to 4800 understates operating revenue; nulling a genuine one-off on 4100
-# overstates it.
+# ── what a posting carries instead: KEYS ────────────────────────────────────────────────────────
+# **Causal order(s), invoice link, line identity** — facts about the event, not classifications of
+# it (ADR-0036). Which keys a given posting owes is read off its POSTING RULE in
+# `ledger/posting-rules.yaml`, never off its account, because the obligation is a property of what
+# happened and not of where it landed. Gate 10h checks a golden vector's transfers against the rule
+# they claim; the chart's job is now only 10g — that the account exists at all.
 #
-# Tax and liability postings — the bottled water tax among them — carry no dimension at all,
-# because 2200 and 2210 name none. That is a third thing again: not a null, but no obligation.
+# ⚠️ **The absence-versus-null rule did not weaken; it MOVED and got stronger.** It used to say a
+# posting to a dimensioned account must DECLARE the dimension — a value, or an explicit null meaning
+# "no tracked value applies" — with a missing key refused and `""` refused alongside it. It now says
+# the same thing about **`causal_orders` on every posting**, which is a better subject: a category
+# can defensibly be absent from a document that never had one, while a posting with no causal order
+# is unallocatable (REQ-LED-001, ADR-0036).
+#
+# **4800 Other Income survives the change and the null did not**, and the difference is exactly why
+# only one of them was ever a ledger fact. An unresolvable product line says "this was a categorised
+# kind of sale and no tracked category applies"; 4800 says "this was not a categorised sale at all"
+# — interest, cashback, a vendor refund. The first is now derived at report time and reported as
+# `unallocated` (`ledger/dimensions.yaml`, `reporting/product-line-pl.yaml`); the second is an
+# ACCOUNT, and accounts are what this file is for. Coding a real service to 4800 still understates
+# operating revenue.
 
 accounts:
   # ══ ASSETS ═══════════════════════════════════════════════════════════════════════════════════
@@ -81,7 +104,6 @@ accounts:
     name: "Chase Checking"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -90,7 +112,6 @@ accounts:
     name: "Cash In Hand"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -99,7 +120,6 @@ accounts:
     name: "Accounts Receivable"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -111,7 +131,6 @@ accounts:
     name: "Prepayments"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -120,7 +139,6 @@ accounts:
     name: "Employee Advances"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -129,7 +147,6 @@ accounts:
     name: "Loans Receivable"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -138,7 +155,6 @@ accounts:
     name: "Vendor Deposits"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: drop
     status_live: Archived
     reason: >-
@@ -152,7 +168,6 @@ accounts:
     name: "Retail Inventory"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -161,7 +176,6 @@ accounts:
     name: "Rental Inventory Assets"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -171,7 +185,6 @@ accounts:
     class: asset
     normal_balance: credit
     contra: true
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -180,7 +193,6 @@ accounts:
     name: "Buildings"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -190,7 +202,6 @@ accounts:
     class: asset
     normal_balance: credit
     contra: true
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -199,7 +210,6 @@ accounts:
     name: "Land"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -209,7 +219,6 @@ accounts:
     name: "Building Improvements"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -219,7 +228,6 @@ accounts:
     class: asset
     normal_balance: credit
     contra: true
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -228,7 +236,6 @@ accounts:
     name: "Tools, Machinery & Equipment"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -238,7 +245,6 @@ accounts:
     class: asset
     normal_balance: credit
     contra: true
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -247,7 +253,6 @@ accounts:
     name: "Computer & Office Equipment"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -257,7 +262,6 @@ accounts:
     class: asset
     normal_balance: credit
     contra: true
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -266,7 +270,6 @@ accounts:
     name: "Vehicles"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -276,7 +279,6 @@ accounts:
     class: asset
     normal_balance: credit
     contra: true
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -286,7 +288,6 @@ accounts:
     class: revenue
     class_live: Asset
     normal_balance: credit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -301,7 +302,6 @@ accounts:
     name: "Fixed Asset Clearing"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -319,7 +319,6 @@ accounts:
     name: "K MCGRAIL"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -328,7 +327,6 @@ accounts:
     name: "A. HUGHES"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -337,7 +335,6 @@ accounts:
     name: "R. ROEDIGER"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -346,7 +343,6 @@ accounts:
     name: "T. LOUNSBURY"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -355,7 +351,6 @@ accounts:
     name: "C. PETERSEN 7626"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -364,7 +359,6 @@ accounts:
     name: "T. VOELKER"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -373,7 +367,6 @@ accounts:
     name: "A. CRANDALL"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -382,7 +375,6 @@ accounts:
     name: "P. LOUGHMAN"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -391,7 +383,6 @@ accounts:
     name: "LORENZO ESQUIVEL"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -400,7 +391,6 @@ accounts:
     name: "LUCIA ESQUIVEL"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -410,7 +400,6 @@ accounts:
     name: "Accounts Payable"
     class: liability
     normal_balance: credit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -419,7 +408,6 @@ accounts:
     name: "Accrued Expenses: Received Not Invoiced"
     class: liability
     normal_balance: credit
-    dimensions: []
     disposition: new
     status_live: absent
     reason: >-
@@ -470,7 +458,6 @@ accounts:
     name: "Gift Card Liability"
     class: liability
     normal_balance: credit
-    dimensions: []
     disposition: drop
     status_live: Archived
     reason: >-
@@ -482,7 +469,6 @@ accounts:
     name: "Customer Credit Balances"
     class: liability
     normal_balance: credit
-    dimensions: []
     disposition: new
     status_live: absent
     reason: >-
@@ -546,7 +532,6 @@ accounts:
     name: "Payroll Wages Payable"
     class: liability
     normal_balance: credit
-    dimensions: []
     disposition: drop
     status_live: Archived
     reason: >-
@@ -560,7 +545,6 @@ accounts:
     name: "Federal Payroll Liability"
     class: liability
     normal_balance: credit
-    dimensions: []
     disposition: drop
     status_live: Archived
     reason: "Same as 2160 — archived, and payroll processing is a charter non-goal."
@@ -570,7 +554,6 @@ accounts:
     name: "Other Payroll Liability"
     class: liability
     normal_balance: credit
-    dimensions: []
     disposition: drop
     status_live: Archived
     reason: "Same as 2160 — archived, and payroll processing is a charter non-goal."
@@ -580,7 +563,6 @@ accounts:
     name: "State Payroll Liability"
     class: liability
     normal_balance: credit
-    dimensions: []
     disposition: drop
     status_live: Archived
     reason: "Same as 2160 — archived, and payroll processing is a charter non-goal."
@@ -590,7 +572,6 @@ accounts:
     name: "A. HUGHES - OLD"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: merge
     merge_into: 2102
     status_live: Archived
@@ -603,7 +584,6 @@ accounts:
     name: "C. PETERSEN - OLD"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: merge
     merge_into: 2105
     status_live: Archived
@@ -614,7 +594,6 @@ accounts:
     name: "T. VOELKER - OLD"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: merge
     merge_into: 2106
     status_live: Archived
@@ -625,7 +604,6 @@ accounts:
     name: "J. LACHANCE - Inactive"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: drop
     status_live: Archived
     reason: >-
@@ -638,7 +616,6 @@ accounts:
     name: "L. PACKARD - Inactive"
     class: asset
     normal_balance: debit
-    dimensions: []
     disposition: drop
     status_live: Archived
     reason: "Archived, no active successor — see 2198."
@@ -648,7 +625,6 @@ accounts:
     name: "Sales Tax"
     class: liability
     normal_balance: credit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -662,7 +638,6 @@ accounts:
     name: "Bottled Water Tax"
     class: liability
     normal_balance: credit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -676,7 +651,6 @@ accounts:
     name: "Unpaid Expense Claims"
     class: liability
     normal_balance: credit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -685,7 +659,6 @@ accounts:
     name: "Line of Credit"
     class: liability
     normal_balance: credit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -694,7 +667,6 @@ accounts:
     name: "Suspense"
     class: liability
     normal_balance: credit
-    dimensions: []
     disposition: undecided
     blocked_by: [SPIKE-004]
     status_live: Active
@@ -710,7 +682,6 @@ accounts:
     name: "Inventory Adjustment Clearing"
     class: liability
     normal_balance: credit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -724,7 +695,6 @@ accounts:
     name: "Historical Adjustment"
     class: liability
     normal_balance: credit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -733,7 +703,6 @@ accounts:
     name: "Rounding"
     class: liability
     normal_balance: credit
-    dimensions: []
     disposition: drop
     status_live: Active
     reason: >-
@@ -748,22 +717,22 @@ accounts:
     name: "Tracking Transfers"
     class: liability
     normal_balance: credit
-    dimensions: []
     disposition: drop
     status_live: Active
     reason: >-
       A Xero mechanism — it exists to move a balance between tracking categories, because in Xero a
-      tracking category is attached at posting time and cannot be restated. Under ADR-0018
-      dimensions are carried on the posting and a reclassification is an ordinary correcting
-      journal between the same accounts with different dimension values. No clearing account
-      required, and none should exist to make the wrong thing easy.
+      tracking category is attached at posting time and cannot be restated. ⚠️ This reason read
+      "Under ADR-0018 dimensions are carried on the posting and a reclassification is an ordinary
+      correcting journal between the same accounts with different dimension values" — **under
+      ADR-0036 there is no journal at all.** A category is derived at report time, so restating one
+      is a master-data edit and the report re-runs. The account is even less needed than the
+      previous reasoning made it, and none should exist to make the wrong thing easy.
     source: "api:2026-08-09:db_chart_of_accounts_query"
 
   - code: 2700
     name: "Non-Current Liabilities"
     class: liability
     normal_balance: credit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -772,7 +741,6 @@ accounts:
     name: "PSA Liability Clearing"
     class: liability
     normal_balance: credit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -786,7 +754,6 @@ accounts:
     name: "PSA: DePaul"
     class: liability
     normal_balance: credit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -800,7 +767,6 @@ accounts:
     name: "PSA: Yellow Flower"
     class: liability
     normal_balance: credit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -809,7 +775,6 @@ accounts:
     name: "PSA: TPS - Beauty In Black S1"
     class: liability
     normal_balance: credit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -819,7 +784,6 @@ accounts:
     name: "Member Equity / Opening Balance"
     class: equity
     normal_balance: credit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -828,7 +792,6 @@ accounts:
     name: "Member Equity / Retained Earnings"
     class: equity
     normal_balance: credit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -843,7 +806,6 @@ accounts:
     name: "Owner's Capital: Owner's Investment"
     class: equity
     normal_balance: credit
-    dimensions: []
     disposition: drop
     status_live: Archived
     reason: >-
@@ -856,13 +818,32 @@ accounts:
     name: "Owner's Capital: Owner's Billable Time"
     class: equity
     normal_balance: credit
-    dimensions: []
     disposition: drop
     status_live: Archived
     reason: >-
-      Archived. Owner time that is billable is labour, and under ADR-0019 labour is costed at
-      actual into 5800/5801 against the job that caused it — an equity account cannot carry a
-      dimension and would put the cost outside COGS entirely.
+      ✅ **DROP — and the reason it was ORIGINALLY dropped was wrong, which is why this entry says so
+      at length.** It read: "booking it to equity would put the cost outside COGS entirely and leave
+      it out of every margin." **That reads this account as the DEBIT side. It is the CREDIT side.**
+      Debit 5800 and credit owner's capital and the opposite happens: the job bears the cost, and the
+      credit records that the labour was **contributed rather than owed**. This account was correct
+      machinery, described as if it were something else.
+      **It is dropped because the treatment it serves was not chosen** (OQ-047, owner 2026-08-16:
+      "stick with gaap"). A contributed owner shift writes **no transfer at all** — no obligation was
+      incurred, so no expense is recognised, and ASC 958-605 (which lets an entity recognise donated
+      services) is not-for-profit only. **With nothing posted there is nothing to offset**, so no
+      credit account is needed.
+      ⚠️ **The rejected alternative is live and this account is what it would have used**: Dr 5800 /
+      Cr owner's capital, which is NetSuite's and Intacct's shape — post the imputed cost, fence the
+      credit. It is refused on GAAP rather than on convenience, and if that trade is ever re-opened
+      **this is the account to un-archive**
+      (`inbox/2026-08-16-survey-an-unpaid-owner-shift-is-not-an-expense-and-every-reference-fences-imputed-labour-out-of-the-statements.md`).
+      ⚠️ **The near-miss is worth keeping.** This entry sat at `drop` on a misreading for as long as
+      it existed; the disposition was right and the reasoning was not, so nothing could have caught
+      it. It took the owner asking a question the account already answered. **A correct conclusion
+      reached by wrong reasoning is not a checked conclusion** — the same lesson as the `transport`
+      pool selecting delivery labour, found the same day.
+      ⚠️ This reason also read "an equity account cannot carry a dimension" until 2026-08-16; no
+      account carries one now (ADR-0036), and the real objection was always the P&L placement.
     source: "api:2026-08-09:db_chart_of_accounts_query"
 
   - code: 3200
@@ -870,7 +851,6 @@ accounts:
     class: equity
     normal_balance: debit
     contra: true
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -880,7 +860,6 @@ accounts:
     name: "Rental Income"
     class: revenue
     normal_balance: credit
-    dimensions: [product_line]
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -895,21 +874,21 @@ accounts:
     name: "Service Income"
     class: revenue
     normal_balance: credit
-    dimensions: [product_line]
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
     note: >-
       A catch-all spanning the Crew, Delivery, Transport and Trash & Cleanup product lines — the
-      account does NOT determine the product line, which is ADR-0018's evidence for carrying the
-      dimension on the posting instead of exploding it into account identity. Under ADR-0021 a
-      `service` item books here, always.
+      account does NOT determine the product line. That was ADR-0018's evidence for carrying the
+      dimension on the posting rather than exploding it into account identity; **under ADR-0036 it
+      is the evidence for carrying it nowhere** — the same fact, read one step further. A 4100 line
+      resolves its category through the product it billed. Under ADR-0021 a `service` item books
+      here, always.
 
   - code: 4110
     name: "Delivery Surcharges"
     class: revenue
     normal_balance: credit
-    dimensions: [product_line]
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -922,20 +901,19 @@ accounts:
     name: "Contract Labor Income"
     class: revenue
     normal_balance: credit
-    dimensions: [product_line]
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
     note: >-
       One of the five `name: "TODO"` accounts. Live description: special contract labor
       arrangements with partner companies. ADR-0020 restates historical Contract Labor lines
-      ($56,570 undimensioned) to the `Crew` product line.
+      ($56,570 with no category) to the `Crew` product line. ⚠️ **Under ADR-0036 that restatement
+      moves no transfer** — it is a master-data classification and the report follows it.
 
   - code: 4130
     name: "PSA Income"
     class: revenue
     normal_balance: credit
-    dimensions: [product_line]
     disposition: adopt
     status_live: Active
     note: >-
@@ -950,23 +928,29 @@ accounts:
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
-    dimensions: [product_line]
     note: >-
-      ✅ **Dimension decided 2026-08-16 (OQ-041): the obligation to DECLARE stands, and the value is
-      normally `null`.** A pass-through is a real sale of a thing that by rule is not in the
-      catalogue, which is exactly the fact `ledger/dimensions.yaml` reserves null for — "this IS a
-      categorised kind of sale, and no tracked product line applies to it". ⚠️ Deliberately DIFFERENT
-      from 4700/5500, which carry no obligation at all: a card fee is not a sale. Two empty-looking
-      answers, two different reasons, and keeping them apart is what that file exists for.
-      Observed rather than only proposed — the one pass-through line in the corpus
+      ⚠️ **OQ-041 IS MOOT AS A LEDGER QUESTION (ADR-0036, 2026-08-16) and is still live as a
+      reporting one.** This note read "Dimension decided 2026-08-16 (OQ-041): the obligation to
+      DECLARE stands, and the value is normally `null`" — there is no obligation to declare, because
+      no posting carries a product line at all. What survives is the underlying fact, and it now
+      answers a REPORT rather than a transfer: a pass-through is a real sale of a thing that by rule
+      is not in the catalogue, so its line resolves to no product master and reports as
+      `unallocated`. Observed rather than only proposed — the one pass-through line in the corpus
       (`1Qr50IQXdPjKC2cB7WyV`) already carries `tracking_category: null`.
+      ⚠️ **The old note drew a distinction from 4700/5500 that no longer exists at this level** — "a
+      pass-through owes a declaration and a card fee owes none". Both now owe nothing. The
+      distinction is real and moves to the report: a pass-through IS a sale and belongs in operating
+      revenue with no resolvable category, while a card fee is a recharge caused by how the customer
+      paid. Two empty-looking answers with two different reasons, and `reporting/product-line-pl.yaml`
+      is where keeping them apart now has to happen.
       One of the five `name: "TODO"` accounts. **CFS buys something for a customer, marks it up and
       bills them for it — usually from a vendor that is unwilling or unable to onboard the customer
       direct** (owner, 2026-08-16). CFS is acting as a purchasing agent.
       ⚠️ **This note previously said "the margin is nil". It is not — the whole point is the
       markup.** It also asserted that "a rebilled cost takes the product line of the thing passed
-      through", which is now OQ-041: a widget bought for a customer may belong to no CFS product
-      line at all, so the dimension is `undecided` rather than assumed.
+      through", which became OQ-041: a widget bought for a customer may belong to no CFS product
+      line at all. Under ADR-0036 that is not the chart's question — the line resolves against the
+      product master or it does not.
       ⚠️ **It has no cost account.** Owner, 2026-08-16: "it should get a matching cogs." Minted below
       as 5150 — the pairing 4150/5300 and 4700/5500 already have, and 4140 lacked.
       **Measured 2026-08-16, and the sweep is now COMPLETE**: **0 of 567 products** carry
@@ -984,7 +968,6 @@ accounts:
     name: "Shipping & Handling Income"
     class: revenue
     normal_balance: credit
-    dimensions: [product_line]
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -997,7 +980,6 @@ accounts:
     name: "Retail Sales Income"
     class: revenue
     normal_balance: credit
-    dimensions: [product_line]
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1009,7 +991,6 @@ accounts:
     name: "Replacement Sales Income"
     class: revenue
     normal_balance: credit
-    dimensions: [product_line]
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1019,7 +1000,6 @@ accounts:
     name: "Discounts Received"
     class: revenue
     normal_balance: credit
-    dimensions: []
     disposition: merge
     merge_into: 5001
     status_live: Active
@@ -1038,15 +1018,17 @@ accounts:
       contra-COGS changes reported gross margin without changing net income, so it is a
       presentation decision for the owner and the CPA, not a mechanical one. Both accounts are
       Active today, which means the treatment is currently whichever the operator picked.
-      OQ-021 settled the dimension rule but not this — a supplier discount has no CUSTOMER product
-      line either way, so the dimension follows the account it ends up on.
+      ⚠️ This read "OQ-021 settled the dimension rule but not this — a supplier discount has no
+      CUSTOMER product line either way, so the dimension follows the account it ends up on."
+      **ADR-0036 removes the dimension from the question entirely**, and what is left is the part
+      that was always the real one: which account a supplier discount lands in is a presentation
+      decision, and it is still open.
     source: "api:2026-08-09:db_chart_of_accounts_query"
 
   - code: 4400
     name: "Markup on Reimbursable Expenses"
     class: revenue
     normal_balance: credit
-    dimensions: [product_line]
     disposition: adopt
     status_live: Active
     note: >-
@@ -1058,20 +1040,21 @@ accounts:
     name: "Cash Discrepancies"
     class: revenue
     normal_balance: credit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
     note: >-
       A till or deposit variance belongs to no product line — it is a control failure, not a sale.
-      `dimensioned: false` here is a case REQ-LED-001's text ("every revenue posting") does not
-      permit; see HOT-011.
+      ⚠️ This note read "`dimensioned: false` here is a case REQ-LED-001's text (\"every revenue
+      posting\") does not permit; see HOT-011." HOT-011 was resolved by ADR-0025 and the whole
+      question was then removed by ADR-0036: no revenue account carries a dimension obligation,
+      because none exists. The account's own fact is unchanged and is now a reporting one — a
+      variance resolves to no product line.
 
   - code: 4700
     name: "Transaction Fee Income"
     class: revenue
     normal_balance: credit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1084,19 +1067,21 @@ accounts:
       was retired the same day. A card fee is caused by HOW the customer paid, not by what was
       supplied or performed, so no product line is true of it; keeping one would have been a bucket
       meaning "not the other ones", which is exactly what got `Other` deleted.
-      ADR-0025 makes the dimension obligation **per account**, so `[]` is a legal shape here rather
-      than an exception — `4800 Other Income` is the precedent. ⚠️ It does **not** make this account
-      non-operating: 4800 is non-operating because of what it holds, while this is an operating
-      recharge that simply has no product line. Two different reasons for the same empty list.
+      ⚠️ The note then read "ADR-0025 makes the dimension obligation **per account**, so `[]` is a
+      legal shape here rather than an exception". **ADR-0036 removed the obligation entirely**, so
+      there is no shape to be legal — the account states nothing about categories at all. It does
+      **not** make this account non-operating: 4800 is non-operating because of what it holds, while
+      this is an operating recharge whose lines resolve to no product line.
       Restatement under ADR-0020: 72 lines / $2,581.98 carry `product_line: Transaction Fees` today
       and will carry none. It alters no amount, which is the only thing ADR-0020 forbids. OQ-032's
-      `Card Fee` move off 4110 lands here as well.
+      `Card Fee` move off 4110 lands here as well. ⚠️ **Under ADR-0036 that restatement is a
+      master-data edit, not a ledger one** — no transfer carries the retired value, so nothing has
+      to be re-posted for it to disappear from a report.
 
   - code: 4800
     name: "Other Income"
     class: revenue
     normal_balance: credit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1114,7 +1099,6 @@ accounts:
     name: "Cashback Income"
     class: revenue
     normal_balance: credit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1123,7 +1107,6 @@ accounts:
     name: "Interest Income"
     class: revenue
     normal_balance: credit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1132,7 +1115,6 @@ accounts:
     name: "Vendor Refunds"
     class: revenue
     normal_balance: credit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1141,7 +1123,6 @@ accounts:
     name: "Sales Tax Discount Income"
     class: revenue
     normal_balance: credit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1152,12 +1133,11 @@ accounts:
     name: "Cost of Goods Sold: Retail Inventory"
     class: expense
     normal_balance: debit
-    dimensions: [product_line]
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
     note: >-
-      Takes the product line of the item sold. `cost_type` has no meaning here — the values are
+      Resolves to the product line of the item sold. A labour classification has no meaning here — its values are
       delivery/counter/warehouse, which describe labour — and that is HOT-011.
 
   - code: 5001
@@ -1165,7 +1145,6 @@ accounts:
     class: expense
     normal_balance: credit
     contra: true
-    dimensions: []
     disposition: adopt
     status_live: Active
     note: >-
@@ -1181,7 +1160,6 @@ accounts:
     name: "Cost of Goods Sold: Subrentals"
     class: expense
     normal_balance: debit
-    dimensions: [product_line]
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1196,7 +1174,6 @@ accounts:
     name: "Cost of Goods Sold: Pass Through"
     class: expense
     normal_balance: debit
-    dimensions: [product_line]
     disposition: new
     status_live: absent
     reason: >-
@@ -1217,7 +1194,6 @@ accounts:
     name: "Cost of Goods Sold: Subcontractors, Sales Commissions"
     class: expense
     normal_balance: debit
-    dimensions: [product_line]
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1230,7 +1206,6 @@ accounts:
     name: "Cost of Goods Sold: Shipping ( Rentals & Sales Only )"
     class: expense
     normal_balance: debit
-    dimensions: [product_line]
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1240,7 +1215,6 @@ accounts:
     name: "Cost of Goods Sold: Job Costs"
     class: expense
     normal_balance: debit
-    dimensions: [product_line]
     disposition: drop
     status_live: Active
     reason: >-
@@ -1256,7 +1230,6 @@ accounts:
     name: "Cost of Goods Sold: Merchant Fees"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1270,7 +1243,6 @@ accounts:
     name: "Cost of Goods Sold: Packaging"
     class: expense
     normal_balance: debit
-    dimensions: [product_line]
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1279,7 +1251,6 @@ accounts:
     name: "Cost of Goods Sold: Inventory Shrink"
     class: expense
     normal_balance: debit
-    dimensions: [product_line]
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1288,13 +1259,16 @@ accounts:
     name: "Cost of Goods Sold: Wages (Absorbed)"
     class: expense
     normal_balance: debit
-    dimensions: [product_line, cost_type]
     disposition: new
     status_live: absent
     reason: >-
       Required by ADR-0019. Hours actually worked on a job, at that person's actual per-contact
-      wage, dimensioned to the job's product line and the work's cost type. **Code chosen, not
-      inherited:** the previous revision put this on 5100, which is live and occupied. The live
+      wage. ⚠️ This reason read "dimensioned to the job's product line and the work's cost type"
+      until 2026-08-16 — **5800 was the only account in the chart naming two dimensions, and under
+      ADR-0036 it names none.** What the posting carries instead is the CAUSAL JOB; both
+      classifications are derived from the shift's own allocation row at report time (OQ-042).
+      **Code chosen, not inherited:** the previous revision put this on 5100, which is live and
+      occupied. The live
       Direct Costs block runs 5000, 5001, 5100, 5200, 5300, 5400, 5500, 5600, 5700, so 5800 is the
       next free hundred and keeps the absorbed/unabsorbed pair adjacent. Named in the live house
       style (`Cost of Goods Sold: <thing>`) rather than the invented `COGS – ` form, and it is the
@@ -1305,15 +1279,17 @@ accounts:
     name: "Cost of Goods Sold: Wages (Unabsorbed)"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: new
     status_live: absent
     reason: >-
       Required by ADR-0019. Guaranteed-but-unworked hours and idle time — a real cost attributable
       to no job, which is what makes the absorbed/unabsorbed gap a measure of UTILISATION rather
-      than rate deviation. **DELIBERATELY UNDIMENSIONED**: this account IS the idle-capacity KPI,
-      and a dimension on it would let idle time be attributed to a product line, which is exactly
-      the lie to avoid. Sub-numbered under 5800 per the live convention (1501 under 1500, 5001
+      than rate deviation. **It carries NO CAUSAL ORDER, and that is the whole account**: idle time
+      is attributable to no job, so its postings declare `causal_orders: null` — an explicit
+      determination rather than a missing key (REQ-LED-001, ADR-0036). ⚠️ This reason read
+      "DELIBERATELY UNDIMENSIONED… a dimension on it would let idle time be attributed to a product
+      line" until 2026-08-16; the lie to avoid is unchanged and the mechanism that prevents it moved
+      from the chart to the key. Sub-numbered under 5800 per the live convention (1501 under 1500, 5001
       under 5000); the previous revision's 5199 sat inside the 51xx Subrentals block, which has
       nothing to do with labour.
     source: ADR-0019
@@ -1323,7 +1299,6 @@ accounts:
     name: "General Operating Expenses"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1332,7 +1307,6 @@ accounts:
     name: "Professional Fees"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1341,7 +1315,6 @@ accounts:
     name: "Business License & Fees"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1350,7 +1323,6 @@ accounts:
     name: "Dues, Subscriptions, Software"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1359,7 +1331,6 @@ accounts:
     name: "Insurance"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1368,7 +1339,6 @@ accounts:
     name: "Meals & Entertainment: Team Meals"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1378,7 +1348,6 @@ accounts:
     name: "Meals & Entertainment: Company Parties"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1387,7 +1356,6 @@ accounts:
     name: "Bank Fees"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1397,7 +1365,6 @@ accounts:
     name: "Shipping"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1406,7 +1373,6 @@ accounts:
     name: "Interest Paid"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1415,7 +1381,6 @@ accounts:
     name: "Travel & Transportation"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1424,7 +1389,6 @@ accounts:
     name: "Political Expenditures & Lobbying"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1433,7 +1397,6 @@ accounts:
     name: "Taxes Paid"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1442,7 +1405,6 @@ accounts:
     name: "Penalties Paid"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1451,7 +1413,6 @@ accounts:
     name: "Advertising"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1460,7 +1421,6 @@ accounts:
     name: "Building: Maintenance & Repairs"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1469,7 +1429,6 @@ accounts:
     name: "Building: Utilities"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1478,7 +1437,6 @@ accounts:
     name: "Building: Property Tax"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1487,7 +1445,6 @@ accounts:
     name: "Building: Fees"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1496,7 +1453,6 @@ accounts:
     name: "Building: Improvements (Less Than 1K)"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1509,7 +1465,6 @@ accounts:
     name: "Tools, Machinery & Equipment (Less Than 1K)"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1518,7 +1473,6 @@ accounts:
     name: "Tools, Machinery & Equipment: Repairs & Maintenance"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1527,7 +1481,6 @@ accounts:
     name: "Rented Tools, Machinery, Equipment"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1539,7 +1492,6 @@ accounts:
     name: "Rented Space"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1548,7 +1500,6 @@ accounts:
     name: "Rented Space: Repairs & Maintenance"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1557,7 +1508,6 @@ accounts:
     name: "Vehicle: Repairs & Maintenance"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1566,7 +1516,6 @@ accounts:
     name: "Vehicle: Registrations & Fees"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1575,7 +1524,6 @@ accounts:
     name: "Vehicle: Fuel"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1585,7 +1533,6 @@ accounts:
     name: "Vehicle: Parking & Tolls"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1594,7 +1541,6 @@ accounts:
     name: "Vehicle: Tickets"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1603,7 +1549,6 @@ accounts:
     name: "Reimbursable Expense"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: drop
     status_live: Archived
     reason: >-
@@ -1616,7 +1561,6 @@ accounts:
     name: "Rental Inventory (less than 1K)"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1625,7 +1569,6 @@ accounts:
     name: "Rental Inventory: Repairs & Maintenance"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1634,14 +1577,13 @@ accounts:
     name: "Wages"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
     note: >-
       **Where own-crew cost sits today, and what ADR-0019 moves it out of** (OQ-011). After the
       move this account retains only wages attributable to no job — administrative and office time
-      — which is why it stays undimensioned. Job labour goes to 5800, idle and guaranteed-unworked
+      — so its postings declare no causal order either. Job labour goes to 5800, idle and guaranteed-unworked
       time to 5801. The account surviving with a narrower meaning is the point; deleting it would
       lose the non-job population.
 
@@ -1649,7 +1591,6 @@ accounts:
     name: "Payroll Tax Expense"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: drop
     status_live: Archived
     reason: >-
@@ -1666,7 +1607,6 @@ accounts:
     name: "Mileage Reimbursement"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: drop
     status_live: Archived
     reason: >-
@@ -1678,7 +1618,6 @@ accounts:
     name: "Bad Debt"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1692,7 +1631,6 @@ accounts:
     name: "Depreciation Expense"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1702,7 +1640,6 @@ accounts:
     name: "Section 179 Depreciation Expense"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: adopt
     status_live: Archived
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1717,7 +1654,6 @@ accounts:
     name: "Miscellaneous"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: drop
     status_live: Archived
     reason: >-
@@ -1730,7 +1666,6 @@ accounts:
     name: "Other Expense"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: drop
     status_live: Archived
     reason: "Archived — see 7050. Two names for the same absence of a decision."
@@ -1740,7 +1675,6 @@ accounts:
     name: "Bank Revaluations"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: drop
     status_live: Archived
     reason: >-
@@ -1752,7 +1686,6 @@ accounts:
     name: "Unrealized Currency Gains"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: drop
     status_live: Archived
     reason: "Archived — multi-currency is a charter non-goal. See 8100."
@@ -1762,7 +1695,6 @@ accounts:
     name: "Realized Currency Gains"
     class: expense
     normal_balance: debit
-    dimensions: []
     disposition: drop
     status_live: Archived
     reason: "Archived — multi-currency is a charter non-goal. See 8100."

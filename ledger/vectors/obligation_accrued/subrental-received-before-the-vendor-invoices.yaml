@@ -19,7 +19,7 @@ given:
     accrual_date: "2026-08-12"
     amount_minor: 185000
     debit_account: 5100
-    product_line: "Power, Lights & Tools"
+    causal_orders: ["ORD-VEC-4471"]
     source_document_ref: "subrental receipt SR-VEC-4471"
 
 derivation: >-
@@ -33,11 +33,15 @@ derivation: >-
   **The debit is the cost account the goods belong to, not a holding account**, and it is dated the
   12th. That is the entire value of the stage: the cost lands in the period the job ran, rather than
   whenever the other house gets round to billing.
-  **`product_line` IS declared here, because 5100 names it** (REQ-LED-001, ADR-0025) — read off the
-  account, never inferred from "is this COGS". A subrental serves the revenue it was rented for, so
-  it carries that revenue's line. Contrast `overhead-accrual-carries-no-product-line`, which is the
-  same rule against a 6xxx account that names none: **both arms are exercised, because an
-  undimensioned arm alone would leave the dimensioned one a claim.**
+  **`causal_orders` names a REAL order here** (REQ-LED-001, ADR-0036) — this subrental was hired for
+  a specific job, which is what a purchase order against a job means. Contrast
+  `overhead-accrual-carries-no-causal-order`, which is the same rule against warehouse rent and
+  declares an explicit null: **both arms are exercised, because a null-only vector set would leave
+  the value arm a claim.**
+  ⚠️ This read "`product_line` IS declared here, because 5100 names it (REQ-LED-001, ADR-0025) — read
+  off the account, never inferred from 'is this COGS'". ADR-0036 removed the dimension and moved the
+  obligation to the rule. **The new subject is better**: what a receipt was FOR is a fact about the
+  receipt, while its category was a fact about a master record that can move under it.
   **July is closed and this is dated August**, so the closed-period fence (ADR-0017) is satisfied
   rather than untested — a closed period in `ledger_state` that the accrual does not touch is the
   quiet half of that guarantee.
@@ -49,6 +53,6 @@ expect:
         credit_account: 2010,
         amount_minor: 185000,
         accounting_date: "2026-08-12",
-        product_line: "Power, Lights & Tools",
+        causal_orders: ["ORD-VEC-4471"],
       }
   rejects: []
