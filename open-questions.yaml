@@ -1974,8 +1974,15 @@ open_questions:
       granularity, not on whether CFS knows its own rates.
       **Owner, 2026-08-17: CFS's own crew is a MIX of W-2 through an EOR and 1099 contractors.** The
       1099 half is settled either way — the contracted rate IS the cost, with no burden behind it.
-      **This question is only about the W-2 half**, where the wage is not the cost: employer taxes,
-      workers' comp and the EOR's fee sit on top, an industry burden of 40-50% over bare wage.
+      **This question is only about the W-2 half**, where the wage is not the cost.
+      ✅ **NARROWED the same day.** Owner: CFS is non-union and **average payroll fringe is 23%,
+      blended across Wrapbook employees** (the EOR; the 1099 half is paid direct by Zelle/ACH and
+      carries none), so
+      the burden MAGNITUDE is no longer part of this question — the cost rate is wage × 1.23 and can
+      be written down today. What remains is only whether that rate is an ACTUAL or an ESTIMATE, and
+      "average" already answers half of it: applying one factor to every W-2 hour is a standard rate,
+      so a small rate variance exists by construction. **The question is now how the true-up works,
+      not whether one is needed.**
       ⚠️ **Both answers are workable and they build differently, which is why it is worth deciding
       before the stage is built rather than after.**
       · **Per-person reconciliation** ⇒ the burdened rate is an actual, ADR-0019's language is

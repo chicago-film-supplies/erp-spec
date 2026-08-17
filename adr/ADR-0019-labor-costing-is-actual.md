@@ -52,7 +52,20 @@ superseded_by:
 - ⚠️ **The crew is TWO POPULATIONS with two true costs.** Owner, 2026-08-17: CFS's own crew is **a
   mix of W-2 through an EOR and 1099 contractors**. A 1099 hour costs the contracted rate; a W-2
   hour costs the wage plus employer taxes, workers' comp and the EOR's fee — an industry burden of
-  **40–50% over bare wage**. A wage is not a cost.
+  **23%** — owner, 2026-08-17, CFS being **non-union**, blended across **Wrapbook** employees (the
+  EOR). ⚠️ **The classification follows the PAYMENT CHANNEL**: paid direct by Zelle/ACH → 1099, wage
+  × hours, no fringe; paid through Wrapbook → W-2, fringe applies. A wage is not a cost:
+
+  |   wage | W-2 cost rate (×1.23) | 1099 cost rate |
+  | -----: | --------------------: | -------------: |
+  | $30.00 |            **$36.90** |         $30.00 |
+  | $36.00 |            **$44.28** |         $36.00 |
+
+  ⚠️ **Sized, and material either way.** If `6600`'s $172,261.35 is loaded, fringe is $32,211.47 —
+  **18.70% of the account**; if it is bare, true labor is $211,881.46 and fringe is $39,620.11.
+  Absorbing at bare wage leaves **$32k–$40k** of real labor cost out of the jobs that caused it,
+  against a $585,593.30 gross profit. Which reading applies is **unmeasured**: the archived payroll
+  accounts are evidence for "loaded", not proof.
 - ⚠️ **A THIRD labor population exists and this ADR never mentions it: PSA.** A production service
   agreement hands CFS a client's budget to produce their project, carrying their **union payroll**
   (owner, 2026-08-17). It is a pass-through, not a CFS cost, and it has five GL accounts and no
@@ -63,8 +76,17 @@ superseded_by:
   ⚠️ **This ADR carried no survey from 2026-08-09 until then**, governing eight times the money
   ADR-0030 does. It was found by checking every proposed ADR after ADR-0030 turned out to be blocked
   the same way — **seven of ten cite none**.
-- A rate variance cannot exist where there is no standard rate, so `labor_variance` as specified in
-  `posting-rules.yaml` would be a posting rule that can never fire (HOT-010).
+- ⚠️ **This bullet used to read "a rate variance cannot exist where there is no standard rate, so
+  `labor_variance` … would be a posting rule that can never fire", and the owner's own number
+  refutes it.** Owner, 2026-08-17: CFS is **non-union** and **average payroll fringe is 23%**. **An
+  average IS a standard rate.** Applying one fringe factor to every W-2 hour is a standard rate over
+  actual hours — normal costing — and the gap between 23% and a given person's actual fringe is
+  exactly a rate variance. The premise is false the moment one factor is used, and it is false for
+  the very reason the ADR exists: nobody wants to compute per-person fringe per shift. ⇒
+  `labor_variance` is a rule that **fires rarely with small amounts**, not one deleted for
+  impossibility. HOT-010 still resolves here, on the corrected reasoning. ⚠️ **The wage is still
+  actual and per-person.** The standard rate is one level down, in the fringe factor — which is
+  where "we have no standard rates" is easiest to say honestly and still be wrong.
 
 ## Decision
 
@@ -79,6 +101,16 @@ but **at what granularity payroll reconciles**.
 two facts: burdened for W-2, contracted for 1099, while the wage still exists for the pay side the
 charter leaves with the EOR. Absorbing both populations at their wage is exact for one half and
 understates the other by its entire burden.
+
+⚠️ **Three populations, three fringe regimes, and only two are CFS's cost** — a single "labor fringe
+rate" constant would be wrong for two of the three, and 23% being a known number makes writing one
+tempting:
+
+| population                     | union   | fringe                               | whose cost                           |
+| ------------------------------ | ------- | ------------------------------------ | ------------------------------------ |
+| CFS crew, W-2 via **Wrapbook** | no      | **23%** blended across its employees | CFS — absorbs at wage × 1.23         |
+| CFS crew, 1099 via Zelle/ACH   | no      | none                                 | CFS — absorbs at the contracted rate |
+| PSA production crew            | **yes** | union schedule                       | **the client's** — never absorbs     |
 
 **PSA labor never absorbs.** It carries no `labor_line`, enters no product-line pool, and reaches no
 COGS account — it is a client's money passing through a liability, not a cost CFS bears
