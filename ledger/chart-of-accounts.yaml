@@ -1388,6 +1388,17 @@ accounts:
       **An earlier revision of ADR-0030 minted `6405 Vehicle: Rented` and pooled this cost instead.**
       That was recommended on the grounds that one mechanism is simpler to specify, which is not the
       criterion the survey established; applying the actual criterion reverses it.
+      ⚠️ **MEASURED 2026-08-17 AND THE POPULATION IS ONE BILL** — `xero:2026-08-17:get-invoices`:
+      Chicagoland Truck Rental, the vendor named as the main source of hired delivery trucks, has
+      **$429.58 across one bill** in FY2025 (a second is DELETED), and Elite Truck Rental has zero.
+      That is **1.1% of 6302**. This account was minted, given a treatment and argued through a
+      reversal without anyone measuring what it holds — _an unexercised branch of a rule is a claim,
+      not a capability_, applied to work done hours earlier.
+      ⚠️ **It is a LOWER BOUND, not the answer**: `get-invoices` returns ACCPAY bills, and a rental
+      paid by card is a bank transaction. What would settle it is 6302's account-transaction detail
+      by source document. **The RULE is unaffected** — a hired truck is direct-at-actual COGS at any
+      size — so no hotspot; only its materiality is open.
+      See `inbox/2026-08-17-the-vehicle-figures-measured-in-xero-21844-77-reproduces-exactly-and-6302-is-larger-than-the-whole-owned-block.md`.
     source: ADR-0030
 
   # ══ OPERATING EXPENSES ═══════════════════════════════════════════════════════════════════════
@@ -1585,7 +1596,11 @@ accounts:
       THREE accounts, not two** — this note named only two until 2026-08-16:
       · **rented for CFS's own use** → HERE. Owner, 2026-08-16: a scissor lift and a forklift were
         hired for the warehouse move, and building-maintenance hire is expected in future. **This
-        account keeps a live population and is NOT emptied by ADR-0030.**
+        account keeps a live population and is NOT emptied by ADR-0030.** ✅ **Measured
+        `xero:2026-08-17:get-report-profit-and-loss`: $38,216.91 in FY2025 — 1.75× the entire
+        6400–6404 owned-vehicle block**, and the bill-side evidence for hired trucks within it is
+        $429.58. So this account is overwhelmingly the own-use branch, which is the opposite of what
+        the ADR's framing implied and the reason the branch had to be preserved.
       · **rented IN to fill a customer order** → 5100 Subrentals. CFS is the SUPPLIER; the gear goes
         to the customer.
       · **rented to PERFORM a delivery or a haul** → 6405 Vehicle: Rented, and from there into
