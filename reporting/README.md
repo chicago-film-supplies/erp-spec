@@ -34,12 +34,24 @@ exactly one pool — `allocated`, `not_allocated` with a reason, or `blocked` on
 Adding a product line without deciding is a build break, and that is deliberate: the silent default
 would be "goods", and a goods line starts absorbing delivery cost the moment it exists.
 
-⚠️ **Since ADR-0036 this is the ONLY thing that executes against `ledger/dimensions.yaml`, and it
-covers `product_line` alone.** That file used to be checked by gate 10 as well, against every golden
-vector's declared dimensions; ADR-0036 removed dimensions from postings, so gate 13's coverage check
-is all that is left. `labor_line` has no equivalent consumer and therefore nothing that can go red
-on it — recorded as **OQ-046**, because a taxonomy nothing exercises is a claim rather than a
-capability.
+⚠️ **Since ADR-0036 this directory is the ONLY thing that executes against
+`ledger/dimensions.yaml`.** That file used to be checked by gate 10 as well, against every golden
+vector's declared dimensions; ADR-0036 removed dimensions from postings, so `reporting/` carries the
+whole of the enforcement now.
+
+**Both taxonomies are covered, and differently, because they do different jobs.** `product_line` is
+the AXIS a pool spreads across — 13c requires every value classified `goods` or `activity`, 13d
+requires every activity line in exactly one pool. `labor_line` is the pool's **COST SELECTOR** —
+**13h** requires every value to be `billable` (selected by exactly one pool's
+`cost_sources.labor_line`) or `bills_nobody` (selected by none, with an `unpooled_labor_lines` entry
+and a live blocker).
+
+⚠️ **13h exists because the selection used to be prose, and prose let a pool select the wrong
+labour.** `transport` said its cost was `labor_line: delivery` — true when the enum had three values
+and trucking labour had nowhere else to point, wrong from the moment it had seven, and invisible to
+every gate. Built as written, a long-haul crew-day would have spread across goods lines while
+Transport reported a near-100% margin. **A report here is (cost selector) → spread over (base) by
+(basis)**, and all three are now declared rather than described.
 
 **The control total is the one property that is not a restatement of the spreading rule.** Every
 vector asserts `Σ shares + unallocated == pool`. Proportionality would be defined in terms of the

@@ -215,16 +215,31 @@ dimensions:
       which is the whole reason this is a separate axis rather than a re-use of `product_line`. A
       warehouse hour is real cost against no revenue line, and collapsing the two taxonomies would
       make it invisible or force it into a category it does not belong to.
-      ⚠️ **NOTHING EXERCISES THIS, and it is a real gap rather than a tidy consequence.** Under
-      ADR-0025 the value was declared on a posting to 5800 and exactly one golden vector supplied it
-      — the vector then called `absorbed-line-missing-cost-type-rejected`, whose own derivation said
-      "this is the only place `cost_type` is exercised in the entire spec". Under
-      ADR-0036 no posting carries it, so that vector was repurposed to refuse a missing causal job
-      (`ledger/vectors/shift_recorded/absorbed-line-missing-causal-job-rejected.yaml`) and the
-      taxonomy lost its last executable statement. **What would exercise it is a labour-line report,
-      and none exists.** Until one does this is a declaration with nothing behind it — a claim rather
-      than a capability by this repo's own standard, and the same shape as the `dimensions:` lists
-      ADR-0036 deleted. Recorded as **OQ-046**, not quietly accepted.
+      ⚠️ **NOTHING IN `ledger/` EXERCISES THIS, AND NOTHING EVER WILL — the consumer is the
+      REPORT.** Owner, 2026-08-16: "the p&l by product line will distribute labor costs with
+      labor_line delivery across product lines, the same mechanism will allow other combos for
+      future reporting." **`labor_line` is an allocation pool's COST SELECTOR**, declared per pool as
+      `cost_sources.labor_line` in `reporting/product-line-pl.yaml` and enforced by gate 13h: every
+      value is `billable` (selected by exactly one pool) or `bills_nobody` (selected by none, with a
+      live blocker). ⚠️ **The selection was PROSE until 2026-08-16, and that is how the `transport`
+      pool came to select `labor_line: delivery`** — correct when the enum had three values, wrong
+      from the moment it had seven, and invisible to every gate.
+      ⚠️ **This is what the 3 → 7 growth was FOR.** With three values exactly one activity pool could
+      name its own labour. Five of the seven now mirror an activity product line and there are
+      exactly five activity lines, so the correspondence is total — which is what makes a coverage
+      gate possible at all. The mapping is **not** derivable from the names: `trucking` ↔ `Transport`
+      is the counter-example, because `Transport` is the incumbent Xero tracking category and
+      `trucking` is what the owner calls the work.
+      ⚠️ **`counter` and `warehouse` bill nobody, and where their cost lands is undecided** — spread
+      like `delivery`, reported unallocated, or attached to the causal order's goods directly. Both
+      are real absorbed labour in 5800. Carried as **OQ-046**.
+      ⚠️ **The vector that used to exercise this is gone and is not coming back.** Under ADR-0025 the
+      value was declared on a posting to 5800 and exactly one golden vector supplied it — the vector
+      then called `absorbed-line-missing-cost-type-rejected`, whose own derivation said "this is the
+      only place `cost_type` is exercised in the entire spec". It was repurposed to refuse a missing
+      causal job (`ledger/vectors/shift_recorded/absorbed-line-missing-causal-job-rejected.yaml`).
+      **That is correct, not a loss**: a `ledger/` vector could only ever have exercised a posted
+      value, and the value is no longer posted.
 
 # ── why cardinality stopped being the question, twice ───────────────────────────────────────────
 # ADR-0008 exploded these dimensions into ACCOUNT identity — 20 product lines x 3 cost types = 60

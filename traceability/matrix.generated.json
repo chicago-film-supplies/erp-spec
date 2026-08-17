@@ -5,7 +5,7 @@
     "adrs": 36,
     "adrs_accepted": 21,
     "events": 37,
-    "inbox": 73,
+    "inbox": 74,
     "inbox_promoted": 19
   },
   "requirements": [
@@ -609,6 +609,7 @@
       "inbox/2026-08-16-adr-0031s-figures-re-measured-two-of-three-predicted-directions-failed.md",
       "inbox/2026-08-16-correction-the-duradeck-retraction-reasoned-from-a-product-name.md",
       "inbox/2026-08-16-correction-two-of-three-unreachable-references-were-a-bad-query-and-sap-models-this-case-exactly.md",
+      "inbox/2026-08-16-labor-line-is-the-pools-cost-selector-and-a-report-is-a-selector-crossed-with-a-base.md",
       "inbox/2026-08-16-owner-rulings-line-identity-is-item-path-ephemeral-reports-are-never-sealed-and-cost-type-becomes-labour-line.md",
       "inbox/2026-08-16-owner-shipping-weight-will-exist-for-many-products-by-the-time-v2-is-in-dev.md",
       "inbox/2026-08-16-survey-a-vendor-side-amount-becomes-revenue-only-where-control-or-a-markup-does.md",

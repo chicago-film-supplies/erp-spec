@@ -2017,6 +2017,8 @@ for (const e of evts) {
     basis_version?: number;
     reason?: string;
     blocked_by?: string[];
+    /** ADR-0036 / owner 2026-08-16 — which labour this pool's cost side selects. */
+    cost_sources?: { labor_line?: string };
   }
 
   const basesY = await readYaml<{ bases?: Basis[] }>(`${ROOT}/reporting/allocation-bases.yaml`);
@@ -2028,6 +2030,8 @@ for (const e of evts) {
       basis_version?: number;
       excludes?: unknown[];
       line_kinds?: Record<string, string>;
+      labor_line_kinds?: Record<string, string>;
+      unpooled_labor_lines?: { labor_line?: string; reason?: string; blocked_by?: string[] }[];
       pools?: Pool[];
       presentation?: Record<string, unknown>;
     };
@@ -2192,6 +2196,144 @@ for (const e of evts) {
             kinds[pl] ?? "(unclassified)"
           }" — only an activity line has a pool`,
         );
+      }
+    }
+
+    /**
+     * ── 13h — every `labor_line` lands somewhere, and it lands in exactly one place ────────────
+     *
+     * ⚠️ **`labor_line` is the pool's COST SELECTOR** (owner, 2026-08-16: "the p&l by product line
+     * will distribute labor costs with labor_line delivery across product lines, the same mechanism
+     * will allow other combos for future reporting"). This is the arm that makes that executable,
+     * and it is the direct answer to OQ-046 — which was opened claiming nothing exercises the
+     * taxonomy. Nothing in `ledger/` does and nothing ever will: ADR-0036 makes it derived, so it
+     * reaches no transfer. **The REPORT is its consumer**, and until now the selection was written
+     * in a pool's prose rather than declared.
+     *
+     * ⚠️ **A prose selector is how the `transport` pool came to select `labor_line: delivery`** —
+     * correct when the enum had three values and trucking labour had nowhere else to point, wrong
+     * from the moment it had seven, and carried through the erp-spec#19 sweep because renaming
+     * `cost_type` → `labor_line` in a sentence does not re-read what the sentence claims. Built as
+     * written, a long-haul crew-day would have spread across goods lines while Transport reported a
+     * near-100% margin.
+     *
+     * Three arms, and the third is the one that catches a silent default:
+     *   (i)   every declared `labor_line` is classified `billable` or `bills_nobody`, exactly once,
+     *         and nothing is classified that `ledger/dimensions.yaml` does not declare;
+     *   (ii)  every `billable` value is selected by exactly ONE pool, and a pool selects a value
+     *         that exists;
+     *   (iii) every `bills_nobody` value is selected by NO pool and carries an `unpooled_labor_lines`
+     *         entry with a live blocker — the same honest-bucket terms `deferred_pools` uses.
+     *
+     * ⚠️ **The silent default this prevents is "vanishes", not "goes to the wrong pool".** An
+     * unclassified `labor_line` is absorbed labour that no report ever reaches, so goods COGS is
+     * understated on every line it should have touched and nothing anywhere disagrees.
+     */
+    {
+      const LABOR_KINDS = ["billable", "bills_nobody"];
+      const llValues = (dimY?.dimensions ?? []).find((d) => d.id === "labor_line")?.values ?? [];
+      const llKinds = report.labor_line_kinds ?? {};
+      const unpooled = report.unpooled_labor_lines ?? [];
+
+      // (i) coverage of the taxonomy, both directions.
+      for (const v of llValues) {
+        const k = llKinds[v];
+        if (!k) {
+          fail(
+            G,
+            `product-line-pl: labor_line "${v}" is not classified in \`labor_line_kinds\` — say billable or bills_nobody`,
+          );
+        } else if (!LABOR_KINDS.includes(k)) {
+          fail(
+            G,
+            `product-line-pl: labor_line_kinds["${v}"] = "${k}" not one of ${
+              LABOR_KINDS.join(" | ")
+            }`,
+          );
+        }
+      }
+      for (const v of Object.keys(llKinds)) {
+        if (!llValues.includes(v)) {
+          fail(
+            G,
+            `product-line-pl: \`labor_line_kinds\` classifies "${v}", which ledger/dimensions.yaml does not declare`,
+          );
+        }
+      }
+
+      // (ii) a pool's selector resolves, and each billable value has exactly one pool.
+      const selectedBy = new Map<string, string[]>();
+      for (const p of pools) {
+        const sel = p.cost_sources?.labor_line;
+        const where = `product-line-pl pool "${p.id ?? "(no id)"}"`;
+        if (sel === undefined) {
+          fail(
+            G,
+            `${where}: no \`cost_sources.labor_line\` — a pool whose cost side is undeclared selects nothing, and its margin reads as pure revenue`,
+          );
+          continue;
+        }
+        if (!llValues.includes(String(sel))) {
+          fail(
+            G,
+            `${where}: selects labor_line "${sel}", which ledger/dimensions.yaml does not declare`,
+          );
+          continue;
+        }
+        selectedBy.set(String(sel), [...(selectedBy.get(String(sel)) ?? []), String(p.id)]);
+      }
+      for (const v of llValues) {
+        const by = selectedBy.get(v) ?? [];
+        if (llKinds[v] === "billable") {
+          if (by.length === 0) {
+            fail(
+              G,
+              `product-line-pl: labor_line "${v}" is \`billable\` and no pool selects it — its cost would reach no report at all`,
+            );
+          } else if (by.length > 1) {
+            fail(
+              G,
+              `product-line-pl: labor_line "${v}" is selected by more than one pool: ${
+                by.join(", ")
+              } — the same cost would be counted twice`,
+            );
+          }
+        } else if (llKinds[v] === "bills_nobody" && by.length > 0) {
+          fail(
+            G,
+            `product-line-pl: labor_line "${v}" is \`bills_nobody\` but pool(s) ${
+              by.join(", ")
+            } select it`,
+          );
+        }
+      }
+
+      // (iii) the honest bucket, cross-checked both ways.
+      const unpooledIds = new Set(unpooled.map((u) => String(u.labor_line)));
+      for (const u of unpooled) {
+        const where = `product-line-pl unpooled_labor_lines "${u.labor_line ?? "(none)"}"`;
+        if (!u.labor_line || !llValues.includes(String(u.labor_line))) {
+          fail(G, `${where}: does not name a declared labor_line`);
+          continue;
+        }
+        if (llKinds[String(u.labor_line)] !== "bills_nobody") {
+          fail(
+            G,
+            `${where}: is listed as unpooled but classified "${
+              llKinds[String(u.labor_line)] ?? "(unclassified)"
+            }"`,
+          );
+        }
+        if (!u.reason) fail(G, `${where}: needs a \`reason\``);
+        checkReportingBlockers(u.blocked_by, where);
+      }
+      for (const v of llValues) {
+        if (llKinds[v] === "bills_nobody" && !unpooledIds.has(v)) {
+          fail(
+            G,
+            `product-line-pl: labor_line "${v}" is \`bills_nobody\` with no \`unpooled_labor_lines\` entry — a deferral nobody holds reads exactly like an omission`,
+          );
+        }
       }
     }
 

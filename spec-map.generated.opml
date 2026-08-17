@@ -186,7 +186,7 @@
         <outline text="OQ-043 — Should the product and organization masters carry an EVENT HISTORY, so that a classification as it…" _note="owner: alex · decide by: 2026-12-15"/>
         <outline text="OQ-044 — Once wages move into COGS, what stays in `6600 Wages` — and can salaried sales/admin staff who neve…" _note="owner: alex · decide by: 2026-12-15"/>
         <outline text="OQ-045 — When a vendor bills LESS than was accrued, what retires the residual left in `2010 Accrued Expenses…" _note="owner: alex · decide by: 2027-02-15"/>
-        <outline text="OQ-046 — What exercises `labor_line`? The taxonomy is declared with seven values and, since ADR-0036, nothin…" _note="owner: alex · decide by: 2027-01-15"/>
+        <outline text="OQ-046 — `counter` and `warehouse` labour bill nobody and name no product line, so no allocation pool select…" _note="owner: alex · decide by: 2027-01-15"/>
       </outline>
       <outline text="Conflicts (0 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labour) or an own long-haul run (labour-bearing)?…" _note="Decides whether a trucked fulfillment absorbs labour cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
@@ -471,7 +471,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (54 unpromoted of 73)" _note="no drops pending">
+      <outline text="Capture (55 unpromoted of 74)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -516,6 +516,7 @@
         <outline text="ADR-0031's allocation figures re-measured on the repaired corpus — pool-exceeds-base ROSE against a…" _note="inbox/2026-08-16-adr-0031s-figures-re-measured-two-of-three-predicted-directions-failed.md"/>
         <outline text="Correction — the 2026-08-10 retraction of the service-only-jobs finding reasoned from a product NAM…" _note="inbox/2026-08-16-correction-the-duradeck-retraction-reasoned-from-a-product-name.md"/>
         <outline text="Correction — two of the three &quot;not reachable&quot; references in the vendor-side survey were a malformed…" _note="inbox/2026-08-16-correction-two-of-three-unreachable-references-were-a-bad-query-and-sap-models-this-case-exactly.md"/>
+        <outline text="`labor_line` is the allocation pool's COST SELECTOR — the product-line P&amp;L distributes `labor_line:…" _note="inbox/2026-08-16-labor-line-is-the-pools-cost-selector-and-a-report-is-a-selector-crossed-with-a-base.md"/>
         <outline text="Seven owner rulings on the keys-not-classifications design — line identity is `item.path`, an align…" _note="inbox/2026-08-16-owner-rulings-line-identity-is-item-path-ephemeral-reports-are-never-sealed-and-cost-type-becomes-labour-line.md"/>
         <outline text="Owner — shipping.weight will exist for MANY products by the time basis v2 is in dev, which makes pa…" _note="inbox/2026-08-16-owner-shipping-weight-will-exist-for-many-products-by-the-time-v2-is-in-dev.md"/>
         <outline text="Combined survey — when does a vendor-side amount become revenue rather than an adjustment to cost?…" _note="inbox/2026-08-16-survey-a-vendor-side-amount-becomes-revenue-only-where-control-or-a-markup-does.md"/>

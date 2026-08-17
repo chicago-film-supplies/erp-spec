@@ -1744,38 +1744,50 @@ open_questions:
       on it.
   - id: OQ-046
     question: >-
-      What exercises `labor_line`? The taxonomy is declared with seven values and, since ADR-0036,
-      nothing in the repo consumes it — no posting carries it and no report reads it.
+      `counter` and `warehouse` labour bill nobody and name no product line, so no allocation pool
+      selects them. Where does their cost land — spread like `delivery`, reported unallocated, or
+      attached to the causal order's goods directly?
     owner: alex
     decide_by: 2027-01-15
     blocks: []
     status: open
     notes: >-
-      Opened 2026-08-16 by erp-spec#19's sweep, as a finding rather than a tidy consequence.
-      **What happened.** Under ADR-0025 `cost_type` was declared on a posting to 5800 and exactly one
-      golden vector supplied it — the vector then called `absorbed-line-missing-cost-type-rejected`,
-      whose own derivation said "this is the only place `cost_type` is exercised in the entire spec.
-      A dimension no vector ever supplies is a dimension the implementation can quietly ignore." ⚠️
-      **That sentence is now true of the whole taxonomy.** ADR-0036 makes the classification derived
-      from the shift's allocation row (OQ-042), so it reaches no transfer, and the vector was
-      repurposed to refuse a missing causal job. The enum simultaneously grew 3 values → 7.
-      **Why this is the repo's own standard and not a nitpick.** CLAUDE.md: "an unexercised branch of
-      a rule is a claim, not a capability… it will look correct in review — the code reads fine, the
-      gates are green, and nothing is stale." Three instances have already been found here, each by
-      being the first to take the untravelled path. `labor_line` is a fourth in waiting: seven values,
-      five of which mirror an activity product line, two of which (`counter`, `warehouse`) bill nobody
-      — and no artifact anywhere states what a report grouping by them should show.
-      ⚠️ **`product_line` is NOT in the same position, and the contrast is the point.** It is consumed
-      by `reporting/product-line-pl.yaml`, which classifies every value as goods or activity, and
-      gate 13 fails when a declared value is unclassified there. **`labor_line` has no such
-      consumer**, so nothing can go red on it.
-      **What would close this**, in increasing order of cost: (1) extend gate 13's coverage check to
-      `labor_line`, which requires deciding what it must be classified INTO and is therefore not
-      free; (2) specify the labour-utilisation report that groups by it — the natural consumer, since
-      5800/5801 already measure utilisation and `labor_line` says what the absorbed half was spent
-      on; (3) decide the taxonomy is premature and shrink it back to the three values that had a
-      consumer. ⚠️ **Option 3 is live and should not be dismissed** — the enum more than doubled on a
-      single owner sentence, and five of the seven duplicate `product_line` values, which is the kind
-      of near-duplication `glossary.yaml`'s own rule 6 exists to catch.
-      Not blocking: no milestone criterion reads `labor_line`, and no posting rule or vector depends
-      on it. That is the problem, not a reassurance.
+      ⚠️ **RESTATED 2026-08-16, the same day it was opened, and the original question was WRONG in
+      its conclusion.** It asked "what exercises `labor_line`? … since ADR-0036 nothing in the repo
+      consumes it — no posting carries it and no report reads it." **The report reads it.** Owner,
+      2026-08-16: *"in whatever reporting mechanism we create, the p&l by product line will
+      distribute labor costs with labor_line delivery across product lines, the same mechanism will
+      allow other combos for future reporting."* `labor_line` is the allocation pool's **cost
+      selector**, and it now says so structurally —
+      `reporting/product-line-pl.yaml`'s `cost_sources.labor_line` per pool, with gate 13h enforcing
+      coverage. The original is kept here rather than deleted because the way it was wrong is the
+      finding: **the evidence was right and the conclusion was not.** Nothing in `ledger/` exercises
+      `labor_line` and nothing ever will — ADR-0036 makes it derived, so it reaches no transfer. The
+      consumer was one directory away, describing the selection in a pool's prose instead of
+      declaring it, which is exactly the state that reads as "no consumer" to a grep and to a gate.
+      **What is genuinely open is narrower and is the question above.** Five of the seven
+      `labor_line` values mirror an activity product line and are claimed by that line's pool; two —
+      `counter` and `warehouse` — bill nobody. Both are real absorbed labour that lands in 5800
+      against a causal job, and no pool selects them, so today their cost reaches no report.
+      **Three shapes, genuinely different, and the owner has ruled on none:**
+      · **SPREAD**, like `delivery`, on the argument that counter and warehouse time is a joint cost
+        of goods revenue and not severable — the same criterion ADR-0029 used for delivery ("we
+        wouldn't do a delivery with no products").
+      · **UNALLOCATED**, reported below the allocated margin. Honest, and it leaves goods COGS
+        understated by whatever the two amount to.
+      · **ATTACHED to the causal order's goods directly**, without spreading — the causal-job rule
+        `crew` and `trash_cleanup` already use. ⚠️ **This is NOT the same thing as spreading**, and
+        the difference is the whole of ADR-0029: attaching puts the cost on the order that caused it,
+        spreading redistributes a pool across the goods of that order by a stated basis.
+      ⚠️ **`warehouse` here is NOT `deferred_pools.warehouse_overhead`, and the two were conflated
+      until today.** That entry is rent and utilities — an operating expense below this report's
+      gross margin until an ADR moves it into COGS (erp-spec#12). This is a warehouse HOUR, already
+      in COGS via 5800 and already absorbed. `warehouse_overhead`'s own reason said `labor_line:
+      warehouse` "is the narrower thing and is not the same claim" without ever saying where the
+      narrower thing goes.
+      ⚠️ **The size is unmeasured and will stay unmeasured until v2 runs.** The current system has
+      never had the absorbed-labour stage, so it measures as zero everywhere (erp-spec#14). **Decide
+      it on the criterion rather than waiting for the number** — `Delivery` spreads because it is not
+      severable, and the same question asked of a warehouse hour has an answer that does not depend
+      on how large it turns out to be.
+      (`inbox/2026-08-16-labor-line-is-the-pools-cost-selector-and-a-report-is-a-selector-crossed-with-a-base.md`)

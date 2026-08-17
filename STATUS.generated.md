@@ -16,7 +16,7 @@ is `deno task validate`'s judgement, not this file's.
 | Decisions (ADR) | 36 | 21 in force · 11 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 21 | 0 without a scenario |
-| Inbox | 73 | 54 unpromoted |
+| Inbox | 74 | 55 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
@@ -34,7 +34,7 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-043` | Should the product and organization masters carry an EVENT HISTORY, so that a classificat… | alex | 2026-12-15 | — |
 | `OQ-044` | Once wages move into COGS, what stays in `6600 Wages` — and can salaried sales/admin staf… | alex | 2026-12-15 | — |
 | `OQ-039` | `organizations.tax_profile` carries two different concepts in one enum — who owes (applie… | alex | 2027-01-15 | — |
-| `OQ-046` | What exercises `labor_line`? The taxonomy is declared with seven values and, since ADR-00… | alex | 2027-01-15 | — |
+| `OQ-046` | `counter` and `warehouse` labour bill nobody and name no product line, so no allocation p… | alex | 2027-01-15 | — |
 | `OQ-045` | When a vendor bills LESS than was accrued, what retires the residual left in `2010 Accrue… | alex | 2027-02-15 | — |
 
 Whether any of these dates has PASSED is `deno task validate`'s judgement — gate 7 fails on an open question past its decide-by. This file reads no clock and so cannot say.
