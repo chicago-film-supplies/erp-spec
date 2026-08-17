@@ -24,7 +24,7 @@
 |               | Issue  | State                                                                      |
 | ------------- | ------ | -------------------------------------------------------------------------- |
 | **startable** | **#6** | the ONLY startable one. Re-measure first — its own numbers                 |
-| blocked       | #32    | the imputed-labour view — needs OQ-048, the imputed rate                   |
+| blocked       | #32    | the imputed-labor view — needs OQ-048, the imputed rate                    |
 | blocked       | #17    | OQ-039 + ADR-0032/0033 acceptance, and an ordering gate                    |
 | blocked       | #12    | ⚠️ **ADR-0030 is RULED ON — accepting it unblocks one of its three pools** |
 | blocked       | #4     | only the m5 formal-methods ADR remains — detection DONE                    |
@@ -141,7 +141,7 @@ ever have caught it. `loadClassification` now reads `line_kinds` and the pools' 
   11 → 12. Nothing became allocable. Fourth base-comparability trap in this corpus in eight days.
 - **The five Netflix Duradeck orders did not move**, and the 2026-08-10 retraction saying they would
   is **withdrawn**: `products/kqzVClx5uJrJ07bEjokX` is `"Delivery"` at the master — the install
-  labour, not the deck. That retraction inferred a category from a product NAME and read neither
+  labor, not the deck. That retraction inferred a category from a product NAME and read neither
   product record. The 2026-08-09 "service-only jobs, not a defect" reading is reinstated.
 - Both golden vectors asked to be re-checked and **both were vindicated**, including invoice 1616's
   worked example (exactly two revenue lines; all five near-identical invoices at exactly 312.5%).
@@ -186,8 +186,8 @@ v2 event produces one.
   the **third** rule whose entry spans source documents — more evidence for #3.
 - **The goods number will mislead whoever measures it first.** Prod holds 74 `type: purchase`
   movements, 15 costed, **$18,117.52** total, 60% of it one pallet buy. The population that makes
-  2010 material is **labour**, which measures as zero everywhere because the current system has
-  never had the stage.
+  2010 material is **labor**, which measures as zero everywhere because the current system has never
+  had the stage.
 - **The migration delta is unmeasurable from this repo's permitted sources**, and that is recorded
   as the finding rather than skipped: vendor bills are Xero ACCPAY documents, none are mirrored into
   Firestore, and this repo does not call the Xero API. What would measure it is named in the survey.
@@ -252,7 +252,7 @@ other combos for future reporting." A report here is **(cost selector) → sprea
 ADR-0029's "exactly ONE official allocation" is what says which number is managed.
 
 ⚠️ **It exposed a defect this very sweep had carried forward.** The `transport` pool selected
-`labor_line: delivery` — correct when the enum had three values and trucking labour had nowhere else
+`labor_line: delivery` — correct when the enum had three values and trucking labor had nowhere else
 to point, wrong from the moment it had seven. Built as written, a long-haul crew-day would have
 spread across goods lines while Transport reported a ~100% margin. **Renaming `cost_type` →
 `labor_line` in a sentence does not re-read what the sentence claims.**
@@ -268,7 +268,7 @@ was **deleted**: a branch with no members is a claim, not a capability.
 **3 + 4. The unpaid owner shift — surveyed, then decided.** "a line in the labor pos or bills that
 allows for an owner shift unpaid or paid, so that unpaid owner shifts dont dilute cogs", then "stick
 with gaap, and your rec". ⚠️ **The six-reference survey did NOT come back unanimous, and the split
-was the useful part**: GAAP, Xero, SAP and Odoo keep uncompensated labour out of the statements;
+was the useful part**: GAAP, Xero, SAP and Odoo keep uncompensated labor out of the statements;
 NetSuite and Intacct post it but fence the offset. **The unanimous part is the credit side — nobody
 credits a payable**, which is exactly the defect (2010 Received Not Invoiced, for a bill that never
 arrives). ⇒ `EVT-FUL-002` gains `compensation: paid | contributed`; a contributed shift writes **no
@@ -281,7 +281,7 @@ correct conclusion reached by wrong reasoning is not a checked conclusion**, and
 instance of the same lesson in one session.
 
 **New gates, all fired red:** 13h (every `labor_line` selected by exactly one pool), 13d's
-`cost_only` arms. **New issue #32** — the imputed-labour view, `required: true, official: false`,
+`cost_only` arms. **New issue #32** — the imputed-labor view, `required: true, official: false`,
 blocked on OQ-048.
 
 ### Unit 8 — #8, the m6 field map (PR #34) — CLOSED, and `m6` is measured for the first time
@@ -567,10 +567,10 @@ third restatement axis beside ADR-0020 and ADR-0032, and the only prospective-on
 **Four accounts minted** — 5900/5901, 6405, and the 6409 contra without which the split cannot be
 computed. Chart header 139 → 143 entries, 5 → 9 minted, every count re-derived from the file.
 
-⚠️ **What does NOT carry over from labour is ADR-0019's headline sentence.** "Absorption measures
-utilisation, not rate variance" holds because labour is costed at ACTUAL. A van has no actual
-per-job cost, so 5901 is utilisation AND rate deviation, and naming the normal-capacity denominator
-is a requirement rather than a footnote.
+⚠️ **What does NOT carry over from labor is ADR-0019's headline sentence.** "Absorption measures
+utilisation, not rate variance" holds because labor is costed at ACTUAL. A van has no actual per-job
+cost, so 5901 is utilisation AND rate deviation, and naming the normal-capacity denominator is a
+requirement rather than a footnote.
 
 **Still not decided in this ADR, on purpose:** vehicle depreciation (SPIKE-005's engine), and
 `trip_travel`'s trip grouping. **ADR-0030 is `proposed` and ready to accept — rule 3 keeps that the
@@ -615,7 +615,7 @@ the threads · OQ-039 + ADR-0032/0033 (#17, heaviest).
   sessions ~thirty arms were fired and ten found real bugs, none surfaced by reading: a rule and its
   vectors disagreeing while every gate stayed green, a double-reported failure, a check matching
   nothing at all, a milestone criterion whose second half was never verified, a pool selecting the
-  wrong labour, a field map naming the wrong object, and a probe reporting doc ids as schema. **A
+  wrong labor, a field map naming the wrong object, and a probe reporting doc ids as schema. **A
   check that reads green while matching nothing is indistinguishable from one that passes.**
 - ⚠️ **An INCOMPLETE fix is invisible in exactly the way a missing one is not.** The path probe's
   header described fixing the dynamic-key defect at large scale and it was still leaking 31 paths,
