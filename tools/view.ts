@@ -33,6 +33,7 @@ import { parse as parseYaml } from "@std/yaml";
 import { walk } from "@std/fs";
 import { basename, relative } from "@std/path";
 import { CONTEXTS } from "./contexts.ts";
+import { ymdUTC } from "./dates.ts";
 
 const ROOT = new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const isTemplate = (p: string) =>
@@ -381,9 +382,16 @@ function dayNum(d: unknown): number | null {
   if (isNaN(dt.getTime())) return null;
   return Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate());
 }
+/**
+ * ⚠️ **This was the sixth copy of the calendar-day reduction, in the file that already held the
+ * fifth copy of the context registry.** That is not a coincidence and CLAUDE.md names the cause:
+ * `view.ts` **runs no gate and so can never go red**, which makes it the one place a stale copy
+ * survives indefinitely. It is now the second documented instance in this same file — worth
+ * remembering the next time something here looks like it could be its own little helper.
+ */
 function fmtDate(d: unknown): string {
   const n = dayNum(d);
-  return n === null ? esc(d) : new Date(n).toISOString().slice(0, 10);
+  return n === null ? esc(d) : ymdUTC(new Date(n));
 }
 function todayNum(): number {
   const env = Deno.env.get("SPEC_TODAY");

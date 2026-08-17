@@ -10,6 +10,8 @@
  * `generate.ts` it may read a clock (its output is gitignored and never gates CI).
  */
 
+import { todayUTC } from "./dates.ts";
+
 const CACHE_DIR = new URL("../.claude/docs/", import.meta.url);
 const MANIFEST = new URL("MANIFEST.txt", CACHE_DIR);
 const MAX_AGE_MS = 24 * 60 * 60 * 1000;
@@ -118,8 +120,7 @@ async function isFresh(path: URL): Promise<boolean> {
   }
 }
 
-/** UTC day, so a manifest written either side of midnight-local still reads sanely. */
-const today = () => new Date().toISOString().slice(0, 10);
+const today = todayUTC;
 
 await assertNetPermissions();
 await Deno.mkdir(CACHE_DIR, { recursive: true });

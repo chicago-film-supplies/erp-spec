@@ -38,8 +38,7 @@ const rel = (p: string) => relative(ROOT, p);
  * since the bug bit there; validate needs it for the same reason on the printing side, even though
  * it writes no files. **Comparing a Date is fine. Printing one is the bug.**
  */
-const ymdUTC = (v: unknown): string =>
-  v instanceof Date ? v.toISOString().slice(0, 10) : String(v ?? "").trim();
+import { ymdUTC } from "./dates.ts";
 
 /**
  * Parsed once per path. Several gates read the same file — without the cache a single unparseable
