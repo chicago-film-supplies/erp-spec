@@ -25,16 +25,36 @@ admin-merged on the owner's instruction after `validate`, `fmt --check` and `gen
 code failure** — check billing before debugging. Distinct from the recorded case where a push
 produces NO run at all, which is an Actions outage.
 
-### The queue: 6 open — 5 blocked, 1 startable
+### ⚠️ ADR-0030 WAS NOT A ONE-OFF — seven of ten proposed ADRs cite no survey
 
-|               | Issue  | State                                                      |
-| ------------- | ------ | ---------------------------------------------------------- |
-| **startable** | **#6** | the ONLY startable one. Re-measure first — its own numbers |
-| blocked       | #32    | the imputed-labor view — needs OQ-048, the imputed rate    |
-| blocked       | #17    | OQ-039 + ADR-0032/0033 acceptance, and an ordering gate    |
-| blocked       | #12    | ✅ ADR-0030 ACCEPTED — **two blockers left, not three**    |
-| blocked       | #4     | only the m5 formal-methods ADR remains — detection DONE    |
-| blocked       | #3     | the spare u16: three contenders, decided on other grounds  |
+Checked systematically after ADR-0030 turned out to be blocked by a missing survey rather than by
+the owner. **Rule 8a is stated in `CLAUDE.md` and nothing executes it**, so the backlog was
+invisible:
+
+| ADR                                               | contexts                     | survey                                                  |
+| ------------------------------------------------- | ---------------------------- | ------------------------------------------------------- |
+| **ADR-0019** labor costing is actual              | ledger, fulfillment          | **none** — surveyed 2026-08-17                          |
+| **ADR-0020** Xero history is restated             | ledger, billing              | **none**                                                |
+| **ADR-0025** dimension obligation per account     | ledger, billing              | **none**                                                |
+| **ADR-0029** the ledger records unallocated facts | ledger, billing, fulfillment | **none**                                                |
+| ADR-0015 reservations as pending transfers        | availability, fulfillment    | none                                                    |
+| ADR-0027 / ADR-0028                               | —                            | none, and **not accounting-shaped** — 8a does not apply |
+| ADR-0031 / ADR-0032 / ADR-0033                    |                              | ✓ 1 / 3 / 2                                             |
+
+⇒ **The systematic fix is a gate**: an accounting-shaped ADR cannot reach `accepted` without citing
+a survey, fired at acceptance so drafting stays free (mirroring gate 14's freeze). Not built yet.
+
+### The queue: 7 open — 5 blocked, 2 startable
+
+|               | Issue   | State                                                          |
+| ------------- | ------- | -------------------------------------------------------------- |
+| **startable** | **#35** | ⚠️ NEW — PSA is a whole service line with no spec at all       |
+| **startable** | **#6**  | re-measure first — its own numbers are stale in its own favour |
+| blocked       | #32     | the imputed-labor view — needs OQ-048, the imputed rate        |
+| blocked       | #17     | OQ-039 + ADR-0032/0033 acceptance, and an ordering gate        |
+| blocked       | #12     | ✅ ADR-0030 ACCEPTED — **two blockers left, not three**        |
+| blocked       | #4      | only the m5 formal-methods ADR remains — detection DONE        |
+| blocked       | #3      | the spare u16: three contenders, decided on other grounds      |
 
 ### What is still the owner's
 
