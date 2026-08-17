@@ -88,6 +88,12 @@ Accepted and not superseded, as of the last `deno task gen`.
 
 > **In the context of** a ledger whose timestamps are posting time and reporting that is periodised by accounting date, **facing** a requirement that reported figures must not drift, **we decided** to split reporting authority by period state, **to achieve** closed-period figures that cannot drift at all, **accepting** that open-period figures come from the document store rather than the ledger.
 
+## [ADR-0019](ADR-0019-labor-costing-is-normal-costing.md) — Labor costing is NORMAL costing — wages actual per person, burden apportioned per run — and absorption measures utilisation together with rate variance
+
+**Contexts:** ledger, fulfillment · **Decided:** 2026-08-09
+
+> **In the context of** bringing crew cost into COGS against the job that caused it, **facing** an employer of record that itemises wages per person and per day but prices employer burden per payroll RUN, **we decided** to cost labor as **normal costing** — wages actual, burden apportioned — **to achieve** a per-shift cost that reconciles to the invoice CFS actually pays, **accepting** a rate variance that is systematic rather than random and owes a period-close true-up. ⚠️ **This summary read "we decided to cost labor at actual and let absorption measure utilisation" until 2026-08-17**, when the Wrapbook exports measured otherwise (OQ-050, HOT-016). The title said the same and both were left behind by an amendment that corrected only the body.
+
 ## [ADR-0021](ADR-0021-charge-product-canonicalization.md) — Item type determines the revenue account; duplicate charge products are canonicalized
 
 **Contexts:** ledger, billing · **Decided:** 2026-08-09
@@ -141,7 +147,6 @@ Accepted and not superseded, as of the last `deno task gen`.
 | ADR | Title | Review by | Supersedes on acceptance | Blocked on |
 |---|---|---|---|---|
 | [ADR-0015](ADR-0015-reservations-as-pending-transfers.md) | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-11-01 | — | SPIKE-002, SPIKE-012 |
-| [ADR-0019](ADR-0019-labor-costing-is-normal-costing.md) | Labor costing is NORMAL costing — wages actual per person, burden apportioned per run — and absorption measures utilisation together with rate variance | 2026-10-01 | — | HOT-003, HOT-004, HOT-010, OQ-005, OQ-006, OQ-008, OQ-011, OQ-017, OQ-018, OQ-019, OQ-050 |
 | [ADR-0020](ADR-0020-xero-history-is-restated.md) | Xero history is restated, not imported as-is | 2026-10-15 | — | HOT-006, OQ-012 |
 | [ADR-0025](ADR-0025-dimension-obligation-is-per-account.md) | The dimension obligation is per account, and what is refused is absence rather than null | 2026-10-01 | — | HOT-011, OQ-021, OQ-022, OQ-025 |
 | [ADR-0027](ADR-0027-retain-mapbox-and-resend-at-the-boundary.md) | Retain Mapbox for geocoding and Resend for transactional email, at the boundary | 2026-10-01 | — | — |

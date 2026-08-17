@@ -1,7 +1,7 @@
 ---
 id: ADR-0019
 title: Labor costing is NORMAL costing — wages actual per person, burden apportioned per run — and absorption measures utilisation together with rate variance
-status: proposed
+status: accepted
 date: 2026-08-09
 review_by: 2026-10-01
 deciders: [repo owner]
@@ -24,6 +24,7 @@ relates_to: [
 ]
 supersedes:
 superseded_by:
+frozen_sha256: b37f2e39a639782a0b8164f64ba4eb941a6b53959cddeadc63a715ea6ea8a9cf
 ---
 
 > **In the context of** bringing crew cost into COGS against the job that caused it, **facing** an
