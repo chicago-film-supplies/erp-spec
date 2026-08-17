@@ -11,17 +11,20 @@
 # 22 Archived**. Every one of the 134 appears below. `code` is a NUMBER in the live collection —
 # a string filter silently returns 0 rows.
 #
-# **139 entries**, because five are minted rather than carried across — each `disposition: new`,
+# **143 entries**, because NINE are minted rather than carried across — each `disposition: new`,
 # `status_live: absent`, with the rule that needs it named in its `reason`: 5800/5801 for
 # absorbed/unabsorbed labour (ADR-0019), **2050 Customer Credit Balances** for `credit_note_issued`,
 # which had no credit-side account at all (erp-spec#5), **2010 Accrued Expenses: Received Not
 # Invoiced** for `obligation_accrued`, which had none either (erp-spec#14), and **5150 Cost of Goods
-# Sold: Pass Through**.
+# Sold: Pass Through**. ⚠️ **Four more were minted 2026-08-16 by ADR-0030's owner rulings**:
+# 5900/5901 for absorbed/unabsorbed vehicle cost, **6405 Vehicle: Rented** (delivery trucks hired in,
+# which 6302's own note already excluded and nobody had read that way) and **6409 Vehicle: Cost
+# Absorbed**, the contra without which the absorbed/unabsorbed split cannot be computed at all.
 # ⚠️ **This paragraph read "138 entries, because four are minted" until 2026-08-16 and was wrong by
 # one in both halves** — 5150 was added without it being updated, and nothing counts these numbers,
-# so the header could disagree with the file indefinitely. Re-counted here: 139 `code`, 139
-# `status_live` (112 Active / 22 Archived / 5 absent), 139 `disposition` (108 adopt / 21 drop /
-# 4 merge / 5 new / 1 undecided).
+# so the header could disagree with the file indefinitely. Re-counted 2026-08-16: **143** `code`,
+# 143 `status_live` (112 Active / 22 Archived / **9** absent), 143 `disposition` (108 adopt /
+# 21 drop / 4 merge / **9** new / 1 undecided).
 #
 # ✅ **AND SOMETHING COUNTS THEM NOW — gate 16** (erp-spec#8). `spikes/harness/live-chart-probe.ts`
 # writes `migration/live-chart.measured.yaml` from CFS's Firestore mirror of the live chart (never
@@ -1304,6 +1307,45 @@ accounts:
       nothing to do with labour.
     source: ADR-0019
 
+  - code: 5900
+    name: "Cost of Goods Sold: Vehicle (Absorbed)"
+    class: expense
+    normal_balance: debit
+    disposition: new
+    status_live: absent
+    reason: >-
+      Required by ADR-0030. Vehicle running cost attributable to a causal job, absorbed against the
+      SHIFT'S OWN ALLOCATION ROWS — same event, same causal job, same `labor_line` as the labour that
+      performed the work (ADR-0011, OQ-010), at a rate applied to computed distance. **Code chosen,
+      not inherited:** measured 2026-08-16 the live Direct Costs block is exactly nine accounts
+      (5000, 5001, 5100, 5200, 5300, 5400, 5500, 5600, 5700), and 5150 and 5800/5801 are already
+      minted here, so 5900 is the next free hundred and keeps the absorbed/unabsorbed pair adjacent.
+      Named in the live house style, as 5800 was.
+      ⚠️ **It carries NO `dimensions` and never did** — the classification is read off the shift's
+      allocation row at report time (ADR-0036, OQ-042), which is the whole reason riding those rows
+      is cheaper than inventing a vehicle-side key.
+    source: ADR-0030
+
+  - code: 5901
+    name: "Cost of Goods Sold: Vehicle (Unabsorbed)"
+    class: expense
+    normal_balance: debit
+    disposition: new
+    status_live: absent
+    reason: >-
+      Required by ADR-0030. The period residual — fleet cost attributable to no job. It carries
+      `causal_orders: null`, an explicit determination rather than a missing key (REQ-LED-001,
+      ADR-0036), exactly as 5801 does. Sub-numbered under 5900 per the live convention.
+      ⚠️ **IT DOES NOT MEAN WHAT 5801 MEANS, and the difference is load-bearing.** ADR-0019 can say
+      "absorption measures utilisation, NOT rate variance" because labour is costed at ACTUAL, from a
+      real per-contact wage on a real bill. A van has no actual per-job cost — the true cost of a
+      van-day is unknowable until a transmission fails — so vehicle absorption applies a
+      **predetermined rate on a stated normal-capacity denominator** (ASC 330-10-30-3) and this
+      balance is utilisation **and** rate deviation together. **Reporting them separately is a
+      requirement**: an unabsorbed account meaning "one of two things, we do not know which" is the
+      plug ADR-0030 warns about.
+    source: ADR-0030
+
   # ══ OPERATING EXPENSES ═══════════════════════════════════════════════════════════════════════
   - code: 6000
     name: "General Operating Expenses"
@@ -1554,6 +1596,49 @@ accounts:
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
+
+  - code: 6405
+    name: "Vehicle: Rented"
+    class: expense
+    normal_balance: debit
+    disposition: new
+    status_live: absent
+    reason: >-
+      Required by ADR-0030. Vehicles hired to perform delivery and trash work — owner, 2026-08-16:
+      "we also rent vehicles for delivery (currently in rented equipment, mostly from chicagoland
+      truck rental)".
+      ⚠️ **6302's own note already excluded them and nobody had read it that way.** It says
+      "Equipment rented for CFS's own use. Equipment rented IN to fill a customer order is a
+      subrental and goes to 5100 — the distinction is whether an order caused it." A truck hired to
+      run a delivery IS caused by an order. **And it is not 5100 either**: a subrental is gear CFS
+      SUPPLIES to the customer, where a rented truck is a means of PERFORMING. Neither existing
+      account fits, which is why this one exists.
+      Placed at 6405 as the next sibling in the vehicle block, so the natural accounts stay together.
+    source: ADR-0030
+
+  - code: 6409
+    name: "Vehicle: Cost Absorbed"
+    class: expense
+    normal_balance: credit
+    contra: true
+    disposition: new
+    status_live: absent
+    reason: >-
+      Required by ADR-0030. The contra that relieves the natural vehicle accounts into COGS each
+      period: `Dr 5900` absorbed + `Dr 5901` residual / `Cr 6409` total, so 6400-6403 and 6405 net to
+      zero while their **gross** activity still answers "how much fuel did we buy, how much was
+      repairs, how much did we hire in".
+      **This account is what makes the absorbed/unabsorbed split possible at all.** ADR-0030's first
+      draft closed 6400-6404 to new postings instead — but a posting made at the pump must choose
+      absorbed or unabsorbed where no causal job is known, so everything would land unabsorbed and
+      5900 would never be debited. The split needs a pool in between, and a pool is a natural
+      account that something has to relieve.
+      ⚠️ **6404 Vehicle: Tickets is NOT relieved by it.** A fine is nondeductible (IRC 162(f)) and
+      therefore a permanent Schedule M-1 difference ADR-0026 keeps out of both books; an account
+      absorbed into a product line is no longer separable for that.
+      Placed at the end of the vehicle block rather than beside 6405, so the contra is visibly not
+      one of the natural accounts.
+    source: ADR-0030
 
   - code: 6499
     name: "Reimbursable Expense"

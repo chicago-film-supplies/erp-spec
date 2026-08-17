@@ -303,7 +303,7 @@
             <outline text="blocked on OQ-006"/>
             <outline text="blocked on OQ-018"/>
           </outline>
-          <outline text="ADR-0030 — Vehicle cost moves from operating expense into COGS, absorbed and unabsorbed" _note="review by: 2026-11-01 · **In the context of** delivery being the largest tracked product line and carrying almost no cost, **facing** vehicle running costs sitting in operating expenses where no product line can see them, **we decided** to move vehicle cost into COGS on the same absorbed/unabsorbed shape ADR-0019 gave labour, **to achieve** a delivery cost that is complete enough to allocate, **accepting** a second utilisation measure to maintain and a mileage-or-hours basis that has to be captured.">
+          <outline text="ADR-0030 — Vehicle cost moves from operating expense into COGS, absorbed and unabsorbed" _note="review by: 2026-11-01 · **In the context of** delivery being the largest tracked product line and carrying almost no cost, **facing** vehicle running costs sitting in operating expenses where no product line can see them, **we decided** to move vehicle cost into COGS on the same absorbed/unabsorbed shape ADR-0019 gave labour, absorbing on the shift's own allocation rows at a rate per computed mile, **to achieve** a delivery cost that is complete enough to allocate, **accepting** a second utilisation measure to maintain and a rate variance that labour does not have.">
             <outline text="blocked on SPIKE-005"/>
           </outline>
           <outline text="ADR-0031 — The official product-line P&amp;L allocates by goods revenue on the causal order, declared as a proxy" _note="review by: 2026-11-01 · **In the context of** ADR-0029 promising exactly one official allocation and not saying what it is, **facing** three candidate bases that reassign up to a third of the largest product line's revenue between them, **we decided** to allocate by goods revenue on the causal order and to record in the report that this is a proxy rather than a cost driver, **to achieve** one reproducible margin per product line, **accepting** that the basis is the weakest tier in the standard criterion and stays that way until the shipping specs are populated.">
@@ -474,7 +474,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (57 unpromoted of 76)" _note="no drops pending">
+      <outline text="Capture (58 unpromoted of 77)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -521,6 +521,7 @@
         <outline text="Correction — two of the three &quot;not reachable&quot; references in the vendor-side survey were a malformed…" _note="inbox/2026-08-16-correction-two-of-three-unreachable-references-were-a-bad-query-and-sap-models-this-case-exactly.md"/>
         <outline text="`labor_line` is the allocation pool's COST SELECTOR — the product-line P&amp;L distributes `labor_line:…" _note="inbox/2026-08-16-labor-line-is-the-pools-cost-selector-and-a-report-is-a-selector-crossed-with-a-base.md"/>
         <outline text="Seven owner rulings on the keys-not-classifications design — line identity is `item.path`, an align…" _note="inbox/2026-08-16-owner-rulings-line-identity-is-item-path-ephemeral-reports-are-never-sealed-and-cost-type-becomes-labour-line.md"/>
+        <outline text="Owner rulings on ADR-0030 — the vans are used EXCLUSIVELY for delivery and trash, rented trucks joi…" _note="inbox/2026-08-16-owner-rulings-vehicles-are-exclusively-revenue-producing-rented-trucks-join-the-pool-and-the-basis-is-computed-distance.md"/>
         <outline text="Owner — shipping.weight will exist for MANY products by the time basis v2 is in dev, which makes pa…" _note="inbox/2026-08-16-owner-shipping-weight-will-exist-for-many-products-by-the-time-v2-is-in-dev.md"/>
         <outline text="Combined survey — when does a vendor-side amount become revenue rather than an adjustment to cost?…" _note="inbox/2026-08-16-survey-a-vendor-side-amount-becomes-revenue-only-where-control-or-a-markup-does.md"/>
         <outline text="Survey — every one of six references keeps the analytical dimension in the same durable store as th…" _note="inbox/2026-08-16-survey-all-six-references-keep-the-dimension-in-the-same-store-as-the-balance-and-only-odoo-splits-the-record.md"/>
