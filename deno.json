@@ -4,6 +4,7 @@
   "exports": {},
   "tasks": {
     "validate": "deno run --allow-read --allow-env=SPEC_TODAY tools/validate.ts",
+    "labels": "deno run --allow-read --allow-run=gh tools/labels.ts",
     "triage": "deno run --allow-read --allow-env=SPEC_TODAY tools/validate.ts --triage-only",
     "gen": "deno run --allow-read --allow-write tools/generate.ts",
     "ingest": "deno run --allow-read --allow-write tools/ingest.ts",
