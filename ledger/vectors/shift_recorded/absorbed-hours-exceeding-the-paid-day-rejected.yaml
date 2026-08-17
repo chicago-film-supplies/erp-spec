@@ -1,0 +1,63 @@
+name: absorbed-hours-exceeding-the-paid-day-rejected
+posting_rule: shift_recorded
+kind: reject
+source: >-
+  The failure that survives but-for causation. ⚠️ **This vector REPLACES
+  `idle-hours-absorbed-into-a-job-rejected`, whose premise the owner reversed on 2026-08-17** — it
+  refused exactly the posting that is now correct. See the derivation; the replacement is not a
+  rename.
+
+differs_from: guaranteed-hours-absorb-into-the-job-that-caused-the-hire
+differs_in: ["shift.absorbed_allocations[0].hours"]
+
+given:
+  ledger_state:
+    closed_periods: []
+    consecutive_days_worked: 2
+  shift:
+    id: SH-VEC-0006
+    person: PER-VEC-0001
+    date: "2026-08-06"
+    wage_minor_per_hour: 3000
+    hours_guaranteed: 8
+    hours_worked: 5
+    hours_idle: 3
+    hours_at_premium: 0
+    premium_minor: 0
+    base_minor: 24000
+    cost_minor: 24000
+    unabsorbed_minor: 0
+    absorbed_allocations:
+      - {
+          id: ALC-VEC-0031,
+          causal_job: ORD-VEC-0001,
+          hours: 10,
+          base_minor: 30000,
+          premium_share_minor: 0,
+          amount_minor: 30000,
+        }
+
+derivation: >-
+  The same eight-hour guaranteed day, absorbing **ten** hours against the job. Refused because
+  **absorbed cost may not exceed the day that was PAID FOR**: `cost_minor` is 24000 and the
+  allocation claims 30000, so the entry would charge a job for capacity nobody bought.
+  ⚠️ **THE GUARD THIS REPLACES WAS INVERTED BY THE OWNER'S RULING, AND IT WAS THE WORST STATE IN THE
+  REPO.** `idle-hours-absorbed-into-a-job-rejected` refused a shift absorbing all 8 guaranteed hours
+  into the causing order on the reasoning that _"absorbed hours may not exceed hours worked, or 5801
+  stops measuring anything"_ — **which is precisely the posting ADR-0019 now requires.** A green
+  reject test forbidding accepted doctrine is worse than a missing one: it would have failed a
+  correct implementation and sent whoever hit it looking for a bug in their own code.
+  **The real invariant was one level out.** The old bound was `hours_worked`; the surviving bound is
+  `cost_minor` — what the day actually cost. But-for moved the idle hours into the job and did not
+  license inventing hours nobody was paid for, so the guard stays and its ceiling changes.
+  ⚠️ **What it can no longer catch is worth stating.** The old vector's real virtue was that its
+  dimensions were perfect and only the relationship to the timesheet was wrong — a guard consulting
+  only the transfer would certify it. That property is lost: under but-for, absorbing the whole paid
+  day IS correct, so there is no longer a "plausible but wrong" split of a paid day to catch. **The
+  KPI it protected is gone by design, not by oversight**, and the account it protected now means
+  something else — see `paid-day-no-order-caused-lands-in-5801`.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "absorbed cost 30000 exceeds the shift's own cost_minor of 24000 — a job may not be charged for capacity that was never paid for (ADR-0019)"

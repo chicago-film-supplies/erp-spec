@@ -11,7 +11,7 @@ source: >-
   was a classification anyone could later revise, while a causal order is a claim that three unworked
   hours were caused by a specific job — and it is frozen into an immutable transfer.
 
-differs_from: guaranteed-hours-unworked-land-in-5801
+differs_from: paid-day-no-order-caused-lands-in-5801
 differs_in: ["shift.unabsorbed_causal_job"]
 
 given:
@@ -24,28 +24,22 @@ given:
     date: "2026-08-06"
     wage_minor_per_hour: 3000
     hours_guaranteed: 8
-    hours_worked: 5
-    hours_idle: 3
+    hours_worked: 0
+    hours_idle: 8
     hours_at_premium: 0
     premium_minor: 0
     base_minor: 24000
     cost_minor: 24000
-    unabsorbed_minor: 9000
+    unabsorbed_minor: 24000
     unabsorbed_causal_job: ORD-VEC-0001
-    absorbed_allocations:
-      - {
-          id: ALC-VEC-0011,
-          causal_job: ORD-VEC-0001,
-          hours: 5,
-          base_minor: 15000,
-          premium_share_minor: 0,
-          amount_minor: 15000,
-        }
+    absorbed_allocations: []
 
 derivation: >-
-  Identical to `guaranteed-hours-unworked-land-in-5801` except that the idle three hours are handed a
-  causal job — `ORD-VEC-0001`, the same one the worked hours carry, which is what makes it plausible
-  rather than obviously wrong. Amounts balance and the control total is satisfied. It is refused on
+  Identical to `paid-day-no-order-caused-lands-in-5801` except that the idle day is handed a causal
+  job — `ORD-VEC-0001` — which is what makes it plausible rather than obviously wrong.
+  ⚠️ **RE-BASED 2026-08-17.** It used to differ from `guaranteed-hours-unworked-land-in-5801`, a
+  vector whose whole premise the owner's but-for ruling reversed. The REFUSAL is unchanged and the
+  case it guards is now the only one where 5801 carries an amount at all. Amounts balance and the control total is satisfied. It is refused on
   the key alone.
   **The unabsorbed posting's rule declares `causal_orders: null`, so a transfer supplying one is
   refused.** Declaring a key the rule does not name is the same class of error as omitting one it

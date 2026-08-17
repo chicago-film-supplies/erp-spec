@@ -1,0 +1,86 @@
+name: idle-hours-split-pro-rata-across-a-multi-order-day
+posting_rule: shift_recorded
+kind: accept
+source: >-
+  Owner, 2026-08-17: _"splitting is correct in the case of multi order days, a multi day job would
+  stack the labor cost on the one job."_ Completes the but-for rule for the case a single-order day
+  leaves undefined. Wage is the live default, $30.00/hr. Hours synthetic and chosen so the pro-rata
+  share does NOT divide evenly.
+
+differs_from: guaranteed-hours-absorb-into-the-job-that-caused-the-hire
+differs_in: ["shift.absorbed_allocations"]
+
+given:
+  ledger_state:
+    closed_periods: []
+    consecutive_days_worked: 2
+  shift:
+    id: SH-VEC-0008
+    person: PER-VEC-0001
+    date: "2026-08-06"
+    wage_minor_per_hour: 3000
+    hours_guaranteed: 8
+    hours_worked: 7
+    hours_idle: 1
+    hours_at_premium: 0
+    premium_minor: 0
+    base_minor: 24000
+    cost_minor: 24000
+    unabsorbed_minor: 0
+    absorbed_allocations:
+      - {
+          id: ALC-VEC-0041,
+          causal_job: ORD-VEC-0001,
+          hours: 5,
+          base_minor: 15000,
+          idle_share_minor: 2143,
+          premium_share_minor: 0,
+          amount_minor: 17143,
+        }
+      - {
+          id: ALC-VEC-0042,
+          causal_job: ORD-VEC-0002,
+          hours: 2,
+          base_minor: 6000,
+          idle_share_minor: 857,
+          premium_share_minor: 0,
+          amount_minor: 6857,
+        }
+
+derivation: >-
+  A guaranteed eight-hour day serving **two** orders — five hours on ORD-VEC-0001, two on
+  ORD-VEC-0002, one hour idle. Both orders caused the hire, so under but-for both bear a share of
+  the guarantee.
+  **The idle hour splits PRO-RATA BY HOURS WORKED, on the basis that already exists.** 3000 over
+  5:2 gives 2142.857 and 857.14; largest remainder settles it at **2143 / 857**, summing to 3000
+  exactly. ⚠️ **This is the same basis and the same rounding the OVERTIME PREMIUM already uses**
+  (`overtime-premium-pro-rata-across-the-days-jobs`, OQ-018 answered) — the owner's multi-order
+  ruling needs **no new machinery**, only a second amount travelling the allocation rows the premium
+  already travels.
+  **The hours are chosen so the share does not divide evenly**, because a basis that is only ever
+  exercised on clean numbers is a basis whose rounding rule is untested. Control total holds at
+  24000 and 5801 receives nothing.
+  ⚠️ **The multi-DAY case needs no vector and that is the point.** A job spanning three days
+  produces three shifts, each posting its own guaranteed day against the same `causal_job` — the
+  cost stacks on the one job by accumulation, with no rule to write. Owner, 2026-08-17. Recorded
+  here because "no vector needed" is a claim someone will otherwise re-derive.
+
+expect:
+  transfers:
+    - {
+        debit_account: 5800,
+        credit_account: 2010,
+        amount_minor: 17143,
+        accounting_date: "2026-08-06",
+        causal_orders: ["ORD-VEC-0001"],
+        line: ALC-VEC-0041,
+      }
+    - {
+        debit_account: 5800,
+        credit_account: 2010,
+        amount_minor: 6857,
+        accounting_date: "2026-08-06",
+        causal_orders: ["ORD-VEC-0002"],
+        line: ALC-VEC-0042,
+      }
+  rejects: []

@@ -626,6 +626,26 @@ rules:
     control_total: shift.cost_minor
     invariants:
       - >-
+          **BUT-FOR CAUSATION BUILDS `absorbed_allocations`** (owner, 2026-08-17): _"if not for the
+          order the person would not be hired"_. A guaranteed day is borne by the order that caused
+          the hire, **including the part the work did not fill**.
+          · **one order** → the whole paid day absorbs to it;
+          · **several orders** → the idle portion splits **pro-rata by hours worked**, on the same
+            basis and the same largest-remainder rounding the overtime premium already uses
+            (OQ-018). No new machinery — a second amount on allocation rows that already exist.
+          · **several days on one job** → each day is its own shift posting against the same
+            `causal_job`; the cost stacks by accumulation and **there is no rule to write**.
+          · **no order at all** → nothing absorbs, and the whole day is `shift.unabsorbed_minor`.
+          ⚠️ **`5801` therefore means "paid time no order caused"** — training, a company meeting,
+          unassigned shop time — **not** "the unworked part of a guaranteed day", which now belongs
+          to the job. ADR-0019's frozen text calls the 5800/5801 gap a utilisation measure; under
+          but-for that gap is small by construction, and "what is the guarantee costing us" is
+          answered from `hours_guaranteed` against `hours_worked` on the shift records rather than
+          from a GL account.
+          ⚠️ **Absorbed cost may never exceed `shift.cost_minor`.** But-for moved idle hours into
+          the job; it did not license charging a job for hours nobody was paid for
+          (`absorbed-hours-exceeding-the-paid-day-rejected`).
+      - >-
           ⚠️ **A `contributed` SHIFT WRITES NO TRANSFER** (OQ-047, owner 2026-08-16; GAAP). An owner
           may work a shift and take no wage for it. **No obligation was incurred, so nothing is
           recognised** — ASC 958-605, which lets an entity recognise donated services, is

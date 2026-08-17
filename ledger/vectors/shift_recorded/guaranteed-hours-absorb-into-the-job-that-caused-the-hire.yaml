@@ -1,0 +1,67 @@
+name: guaranteed-hours-absorb-into-the-job-that-caused-the-hire
+posting_rule: shift_recorded
+kind: accept
+source: >-
+  ADR-0019 and OQ-008 — a scheduled person is **guaranteed 8 hours** whether or not the work fills
+  them. Owner, 2026-08-17: **"if not for the order the person would not be hired"**, so the order
+  bears the whole guaranteed day. Wage is the live default, $30.00/hr. Hours synthetic.
+
+given:
+  ledger_state:
+    closed_periods: []
+    consecutive_days_worked: 2
+  shift:
+    id: SH-VEC-0002
+    person: PER-VEC-0001
+    date: "2026-08-06"
+    wage_minor_per_hour: 3000
+    hours_guaranteed: 8
+    hours_worked: 5
+    hours_idle: 3
+    hours_at_premium: 0
+    premium_minor: 0
+    base_minor: 24000
+    cost_minor: 24000
+    unabsorbed_minor: 0
+    absorbed_allocations:
+      - {
+          id: ALC-VEC-0011,
+          causal_job: ORD-VEC-0001,
+          hours: 8,
+          base_minor: 24000,
+          premium_share_minor: 0,
+          amount_minor: 24000,
+        }
+
+derivation: >-
+  A guaranteed eight-hour day with five hours of causal work in it. **All 8 x 3000 = 24000 absorbs
+  into 5800 against ORD-VEC-0001**, and 5801 receives nothing.
+  ⚠️ **THIS VECTOR ASSERTED THE OPPOSITE UNTIL 2026-08-17** — 15000 absorbed and 9000 to 5801, under
+  the name `guaranteed-hours-unworked-land-in-5801`. It was a green, executable test contradicting
+  ADR-0019 for the hour after that ADR was accepted.
+  **BUT-FOR CAUSATION is the rule.** Owner, 2026-08-17: _"if not for the order the person would not
+  be hired"_. The order caused the hire, so the order bears the guarantee it triggered — including
+  the part the work did not fill. A five-hour job that cost a full day **is** a $240 job, and
+  recording it as $150 would make every short job look cheap while the difference accumulated in an
+  account nobody reads.
+  ⚠️ **The consequence is that 5801 is nearly empty, and that is intended.** It now holds paid time
+  **no order caused at all** — training, a company meeting, unassigned shop time — which is what
+  `guaranteed-day-with-no-causing-order-lands-in-5801` exercises. ADR-0019's frozen text calls the
+  5800/5801 gap a utilisation measure; under but-for that gap is small by construction, and the
+  question "what is the 8-hour guarantee costing us" is answered from `hours_guaranteed` against
+  `hours_worked` on the shift records rather than from a GL account.
+  **No GAAP question arises.** Total COGS is 24000 either way; only the split between two COGS
+  sub-accounts moves, and neither is capitalised into inventory, so ASC 330's normal/abnormal rule —
+  which an earlier revision of this file leaned on — never applied.
+
+expect:
+  transfers:
+    - {
+        debit_account: 5800,
+        credit_account: 2010,
+        amount_minor: 24000,
+        accounting_date: "2026-08-06",
+        causal_orders: ["ORD-VEC-0001"],
+        line: ALC-VEC-0011,
+      }
+  rejects: []
