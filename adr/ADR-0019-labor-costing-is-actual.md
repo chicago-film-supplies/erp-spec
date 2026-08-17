@@ -88,12 +88,23 @@ superseded_by:
   average.
   ⚠️ **And the burden is CAPPED per person per year, so a flat factor is SYSTEMATICALLY wrong rather
   than imprecise.** FUTA (0.60%) stops at ~$7,000 and Illinois SUTA — **7.05%, the largest
-  component** — at ~$13,600, about 233 and 453 hours at $30/hr, leaving a ~4.51% uncapped floor of
-  Medicare plus workers comp. A regular crew member crosses both inside a season, so a flat rate
-  **over-states late-year hours and under-states early-year ones**, biasing early-season job margins
-  against late-season ones with nothing in the numbers looking wrong. ⇒ `labor_variance` **fires**,
-  and the apportionment owes a **period-close true-up** — SAP's confirm-at-plan, revalue-at-actual
-  shape. HOT-010 resolves here on that reasoning, not on impossibility.
+  component** — at ~$13,600, about 233 and 453 hours at $30/hr, leaving a **6.00%** uncapped floor
+  of Medicare, workers comp and the platform fee. A regular crew member crosses both inside a
+  season, so a flat rate **over-states late-year hours and under-states early-year ones**, biasing
+  early-season job margins against late-season ones with nothing in the numbers looking wrong. ⇒
+  `labor_variance` **fires**, and the apportionment owes a **period-close true-up** — SAP's
+  confirm-at-plan, revalue-at-actual shape. HOT-010 resolves here on that reasoning, not on
+  impossibility. ✅ **The absorbed rate is the WHOLE Wrapbook charge — 19.85%, not the 18.36%
+  statutory part.** Owner, 2026-08-17: the platform fee _"absorb[s] into cogs"_, which _"our cost is
+  just the payment to wrapbook"_ had already implied. It is not severable in the source document and
+  it varies one-for-one with labor volume. ⚠️ It is also **uncapped**, so the floor a person's
+  burden decays toward is exactly **6.00%** against **13.85 points that switch off** mid-season. ⚠️
+  **The fee follows the RAIL, not the classification** — the fee summary carries a
+  `Contractor
+  Wages` line, so a 1099 paid through Wrapbook incurs it and one paid direct by
+  Zelle/ACH does not. Two people doing identical work can cost differently because of how they were
+  paid: true under actual costing, and an argument for **one blended rate** rather than per-rail
+  precision.
 
 ## Decision
 
