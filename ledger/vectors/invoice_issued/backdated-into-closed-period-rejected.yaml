@@ -6,7 +6,7 @@ source: >-
   Cross-checked by `formal/period-close.qnt` in m5; a vector and a model-checked spec are two
   independent expressions of the same rule, and if they disagree one of them is wrong.
 
-differs_from: two-lines-two-product-lines-with-tax
+differs_from: two-lines-two-causal-orders-with-tax
 differs_in: [ledger_state.closed_periods]
 
 given:
@@ -19,18 +19,20 @@ given:
     lines:
       - net_minor: 75000
         revenue_account: 4000
-        product_line: "Power, Lights & Tools"
+        causal_orders: ["ORD-VEC-0001"]
+        path: [ORD-VEC-0001, DEST-VEC-0001, GRP-VEC-0001, ITEM-VEC-0001]
       - net_minor: 12500
         revenue_account: 4200
-        product_line: "Expendables"
+        causal_orders: ["ORD-VEC-0002"]
+        path: [ORD-VEC-0002, DEST-VEC-0002, GRP-VEC-0002, ITEM-VEC-0002]
     tax_components:
       - { payable_account: 2200, amount_minor: 11250 }
       - { payable_account: 2200, amount_minor: 1281 }
 
 derivation: >-
-  Byte-identical to the accept vector except that 2026-07 is closed. Every dimension is present and
-  valid and the control total balances — **the posting is refused on period state alone**, which is
-  what makes this a minimal pair rather than a second dimension test.
+  Byte-identical to the accept vector except that 2026-07 is closed. Every key is declared and
+  resolves and the control total balances — **the posting is refused on period state alone**, which is
+  what makes this a minimal pair rather than a second key test.
   **The test is on ACCOUNTING DATE, never on posting timestamp** (ADR-0010). The posting timestamp
   here is 2026-08 and is monotonic and fine; it is the 2026-07-31 accounting date that lands inside
   the sealed period. A rule that checked the timestamp would accept this and silently break the

@@ -409,6 +409,17 @@ open_questions:
       `required_on: [cogs]` to `[labour_cogs]`; and the chart of accounts now states the obligation
       **per account** as an explicit `dimensions:` list rather than leaving it to be inferred from
       class. Resolves HOT-011.
+      ⚠️ **SUPERSEDED IN ITS ENTIRETY BY ADR-0036, accepted 2026-08-16 — the question is MOOT, not
+      re-answered.** "Which postings must carry which dimensions" has no answer because no posting
+      carries a dimension: a posting records KEYS and every classification is derived at report time.
+      The chart carries no `dimensions:` key at all (gate 10a refuses one), `ledger/dimensions.yaml`
+      is a REPORTING taxonomy with no `required_on`, and `cost_type` is renamed `labor_line` and
+      derived from the shift's allocation row (OQ-042).
+      ✅ **The answer above was correct when it was taken, and it is retained rather than rewritten**
+      — it is what resolved HOT-011, and the per-account reading is what made ADR-0025's exemption
+      for 5801 expressible instead of special-cased. **What ADR-0036 changed is the premise, not the
+      reasoning**: ADR-0025 correctly refused to infer an obligation from a class, and ADR-0036
+      refuses the obligation itself.
     notes: >-
       Three statements disagree and all three are load-bearing. REQ-LED-001 says both dimensions on
       every revenue and COGS posting; `ledger/dimensions.yaml` says `product_line` on revenue and
@@ -1374,8 +1385,15 @@ open_questions:
     notes: >-
       Surfaced 2026-08-11 while writing EVT-BIL-007's `no_posting` entry, which could not state where
       each leg's node attribution lives.
-      **The gap is concrete.** `ledger/dimensions.yaml` declares exactly two dimensions —
-      `product_line` and `cost_type` — and neither can express "which department owes this". ADR-0033
+      ⚠️ **REFRAMED 2026-08-16 by ADR-0036, which sharpens this question rather than answering it.**
+      It was posed as "a third declared DIMENSION or a document attribute". There are no dimensions
+      on a posting any more, so the live form is **"is a settlement point a KEY?"** — and ADR-0036's
+      own criterion cuts both ways here, which is exactly why it is still open. A settlement point is
+      a node in a customer tree (ADR-0032/0033): master data, mutable, therefore not a key. But which
+      node a leg was ATTRIBUTED to at the time is an event fact, therefore a key. Nothing below is
+      invalidated; read "dimension" as "key" throughout.
+      **The gap is concrete.** `ledger/dimensions.yaml` declares exactly two classifications —
+      `product_line` and `labor_line` — and neither can express "which department owes this". ADR-0033
       requires that the sum of settlement-point balances be checkable **without traversing the tree**,
       because the tree walk is the thing being checked and a guard that consults its own oracle is not
       a guard. That independent property needs the node to be readable somewhere the ledger can group
@@ -1445,9 +1463,19 @@ open_questions:
     blocks: []
     status: answered
     answer: >-
-      **`product_line: null`, and the obligation to DECLARE stands.** Owner accepted the survey
-      recommendation 2026-08-16. Both `4140 Pass Through Income` and `5150 Cost of Goods Sold: Pass
-      Through` carry `dimensions: [product_line]`, and the value written is normally null.
+      **A pass-through resolves to NO product line.** Owner accepted the survey recommendation
+      2026-08-16.
+      ⚠️ **The LEDGER half of this answer is moot as of the same day (ADR-0036).** It read
+      "`product_line: null`, and the obligation to DECLARE stands. Both `4140 Pass Through Income`
+      and `5150 Cost of Goods Sold: Pass Through` carry `dimensions: [product_line]`, and the value
+      written is normally null." There is no obligation and no `dimensions:` list — the chart states
+      neither. **The underlying fact survives and changes audience**: a pass-through is a real sale
+      of a thing that by rule is not in the catalogue, so its line resolves against no product master
+      and reports as `unallocated` (`reporting/product-line-pl.yaml`).
+      ⚠️ **The distinction from 4700/5500 also survives and can no longer be drawn in the chart.**
+      It was "a pass-through owes a declaration and a card fee owes none"; both now owe nothing at
+      the posting. The real difference — a pass-through IS a sale, a card fee is a recharge caused by
+      how the customer paid — has to be carried by the REPORT.
       `ledger/dimensions.yaml` already defines that exact fact — "this IS a categorised kind of sale,
       and no tracked product line applies to it" — and a pass-through is precisely that: a real sale
       of a thing that by rule is not in the catalogue.
@@ -1714,3 +1742,40 @@ open_questions:
       evidence the write-off is a separate, deliberate act everywhere.
       Not blocking: 2010's residual is visible and reportable either way, and nothing in m3 depends
       on it.
+  - id: OQ-046
+    question: >-
+      What exercises `labor_line`? The taxonomy is declared with seven values and, since ADR-0036,
+      nothing in the repo consumes it — no posting carries it and no report reads it.
+    owner: alex
+    decide_by: 2027-01-15
+    blocks: []
+    status: open
+    notes: >-
+      Opened 2026-08-16 by erp-spec#19's sweep, as a finding rather than a tidy consequence.
+      **What happened.** Under ADR-0025 `cost_type` was declared on a posting to 5800 and exactly one
+      golden vector supplied it — the vector then called `absorbed-line-missing-cost-type-rejected`,
+      whose own derivation said "this is the only place `cost_type` is exercised in the entire spec.
+      A dimension no vector ever supplies is a dimension the implementation can quietly ignore." ⚠️
+      **That sentence is now true of the whole taxonomy.** ADR-0036 makes the classification derived
+      from the shift's allocation row (OQ-042), so it reaches no transfer, and the vector was
+      repurposed to refuse a missing causal job. The enum simultaneously grew 3 values → 7.
+      **Why this is the repo's own standard and not a nitpick.** CLAUDE.md: "an unexercised branch of
+      a rule is a claim, not a capability… it will look correct in review — the code reads fine, the
+      gates are green, and nothing is stale." Three instances have already been found here, each by
+      being the first to take the untravelled path. `labor_line` is a fourth in waiting: seven values,
+      five of which mirror an activity product line, two of which (`counter`, `warehouse`) bill nobody
+      — and no artifact anywhere states what a report grouping by them should show.
+      ⚠️ **`product_line` is NOT in the same position, and the contrast is the point.** It is consumed
+      by `reporting/product-line-pl.yaml`, which classifies every value as goods or activity, and
+      gate 13 fails when a declared value is unclassified there. **`labor_line` has no such
+      consumer**, so nothing can go red on it.
+      **What would close this**, in increasing order of cost: (1) extend gate 13's coverage check to
+      `labor_line`, which requires deciding what it must be classified INTO and is therefore not
+      free; (2) specify the labour-utilisation report that groups by it — the natural consumer, since
+      5800/5801 already measure utilisation and `labor_line` says what the absorbed half was spent
+      on; (3) decide the taxonomy is premature and shrink it back to the three values that had a
+      consumer. ⚠️ **Option 3 is live and should not be dismissed** — the enum more than doubled on a
+      single owner sentence, and five of the seven duplicate `product_line` values, which is the kind
+      of near-duplication `glossary.yaml`'s own rule 6 exists to catch.
+      Not blocking: no milestone criterion reads `labor_line`, and no posting rule or vector depends
+      on it. That is the problem, not a reassurance.

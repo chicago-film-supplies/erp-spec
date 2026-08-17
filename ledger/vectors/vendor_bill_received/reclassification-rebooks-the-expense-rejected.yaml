@@ -31,8 +31,8 @@ given:
       - {
           debit_account: 5800,
           amount_minor: 300000,
-          product_line: "Delivery",
-          cost_type: delivery,
+          causal_orders: ["ORD-VEC-4471"],
+          path: [BILL-VEC-0004, LINE-VEC-0001],
         }
 
 derivation: >-

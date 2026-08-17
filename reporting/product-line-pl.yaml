@@ -155,8 +155,11 @@ report:
         what the un-allocated view can be READ as.
         (OQ-006, and
         `inbox/2026-08-09-4110-is-a-third-distance-charges-and-distance-is-performed.md`.)
-        Cost joins this pool as it arrives: labour COGS carrying `cost_type: delivery` (ADR-0019,
-        5800/5801) is in the ledger now; vehicle COGS is ADR-0030 and its accounts are unchosen.
+        Cost joins this pool as it arrives: labour COGS whose shift allocation resolves to
+        `labor_line: delivery` (ADR-0019, 5800/5801) is in the ledger now; vehicle COGS is ADR-0030
+        and its accounts are unchosen. ⚠️ This read "labour COGS carrying `cost_type: delivery`"
+        until 2026-08-16 — under ADR-0036 the posting carries the causal job and its allocation row,
+        and the classification is read off that row (OQ-042).
 
     - id: shipping
       product_line: Shipping
@@ -198,9 +201,9 @@ report:
         prose. Trucking is CFS-performed and labour-bearing, per ADR-0011's ruling on OQ-010: a
         trucked leg generates a shift and absorbs a person-day.
         ⚠️ **This pool's margin is NOT yet readable, and that is the trap the file header warns about
-        for `Delivery`.** Revenue is on 4100; the cost is labour COGS carrying `cost_type: delivery`
-        (ADR-0019, 5800/5801) plus vehicle, and **ADR-0030 has not chosen the vehicle COGS
-        accounts**. Until it does, a Transport margin read off this pool overstates trucking.
+        for `Delivery`.** Revenue is on 4100; the cost is labour COGS resolving to
+        `labor_line: delivery` (ADR-0019, 5800/5801) plus vehicle, and **ADR-0030 has not chosen the
+        vehicle COGS accounts**. Until it does, a Transport margin read off this pool overstates trucking.
         Measured 2026-08-16: 7 lines, **$34,000.00**, 1.98% of revenue — the amount reproduces OQ-034's
         figure exactly and only the share moved. Derived by account: 4100 under the corpus's single
         `Transport` value. ⚠️ The corpus has NOT been restated into two values; that is an ADR-0020
@@ -286,8 +289,8 @@ report:
       reason: >-
         Still an operating expense, not COGS, so it is below the gross margin this report presents
         and there is no pool to spread. It becomes real only if a decision moves it into COGS, which
-        no ADR has made. `cost_type: warehouse` already exists on 5800 for labour, which is the
-        narrower thing and is not the same claim.
+        no ADR has made. `labor_line: warehouse` already exists as a labour classification, which is
+        the narrower thing and is not the same claim.
 
   # ── presentation ─────────────────────────────────────────────────────────────────────────────
   presentation:
@@ -355,10 +358,18 @@ report:
 
     null_product_line_row_shown: true
     null_product_line_row_reason: >-
-      `product_line: null` is a legal determination, not an absence (ADR-0025, REQ-LED-001), so it
-      is a countable population and gets a row. Goods-account revenue carrying null is part of the
-      allocation BASE and absorbs its share; service and other revenue carrying null is neither pool
-      nor base and reports below the allocated margin.
+      A line that resolves to NO product line is a countable population and gets a row. Goods-account
+      revenue that resolves to none is part of the allocation BASE and absorbs its share; service and
+      other revenue that resolves to none is neither pool nor base and reports below the allocated
+      margin.
+      ⚠️ **REFRAMED 2026-08-16 (ADR-0036).** This read "`product_line: null` is a legal determination,
+      not an absence (ADR-0025, REQ-LED-001), so it is a countable population" — a statement about a
+      DECLARED field on a posting, which no longer exists. The row survives and its meaning is now
+      structural rather than declared: the line either resolves against the product master or it does
+      not, and the two ways it can fail to are stated in `ledger/dimensions.yaml`
+      (`unresolved_cases`) — no product at all, or a product nobody categorised. **The absence-versus-null
+      rule did not disappear from the report; it disappeared from the ledger and became a join
+      outcome**, which is why the population is now measured rather than declared.
       Re-measured 2026-08-16 the untracked share is **14.76% of line revenue** ($253,269.75 of
       $1,715,472.79), and it is exactly the two populations that are not defects: **130 custom lines
       with no product master** ($233,610.63) and **183 lines on genuinely uncategorised products**
@@ -379,14 +390,22 @@ report:
   # ── revenue with no line-level representation ────────────────────────────────────────────────
   revenue_without_line_representation: >-
     **The report is built from POSTINGS, not from invoice lines, and that is what closes this hole.**
-    REQ-LED-001 refuses a posting to a dimensioned account that does not DECLARE its product line,
-    so in the target system there is no revenue invisible to this report: every revenue posting
-    carries a product line or an explicit null, and both have rows here.
+    ⚠️ **The mechanism changed on 2026-08-16 and the guarantee did not weaken — it moved.** This read
+    "REQ-LED-001 refuses a posting to a dimensioned account that does not DECLARE its product line,
+    so every revenue posting carries a product line or an explicit null". Under ADR-0036 a posting
+    carries no product line at all; what REQ-LED-001 now refuses is a posting with no LINE IDENTITY
+    where its rule names one, and the product line is resolved through that key. So there is still no
+    revenue invisible to this report — every revenue posting resolves to a product line or to one of
+    the two unresolved cases, and both have rows here. **The guarantee is arguably stronger**: a
+    declared classification could be wrong and still pass, while a line identity either resolves or
+    is refused.
     ⚠️ The hole is real in HISTORY. The 2023 P&L shows 4120 Contract Labor Income of $156,500 while
     only $31,570 across 3 lines appears in the invoice corpus carrying line-level tracking — the
     rest is not in those 999 invoices at all. That revenue cannot be given a product line by this
     report, because the documents that would say do not exist. It belongs to ADR-0020's restatement,
-    which forbids altering any amount, so the restated postings will carry `product_line: null` and
-    land in the null row. **A pre-cutover period's null row is therefore not comparable to a
+    which forbids altering any amount, so the restated postings will resolve to no product line and
+    land in that row. ⚠️ They will also carry `causal_orders: null` — these are the legacy CRMS
+    imports, 30 invoices referencing no order, and the owner ruled on 2026-08-16 that an explicit
+    null source order is legal precisely so this population stays postable. **A pre-cutover period's null row is therefore not comparable to a
     post-cutover one**, and the report must say which side of the cutover a period falls on rather
     than let a reader compare across it.

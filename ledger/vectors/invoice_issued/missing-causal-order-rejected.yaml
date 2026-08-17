@@ -1,0 +1,59 @@
+name: missing-causal-order-rejected
+posting_rule: invoice_issued
+kind: reject
+source: >-
+  REQ-LED-001 and ADR-0036 — every posting DECLARES its causal order, and what is refused is ABSENCE
+  rather than null.
+  ⚠️ **Renamed from `missing-product-line-rejected` on 2026-08-16.** The vector it replaces refused an
+  absent DIMENSION, and its warrant had already been honestly retracted: the 383 lines / 28.74% of
+  line revenue it cited turned out to be a product-master derivation that never ran (227 lines), custom
+  lines with no master (128), and **35 lines / $688.00 — 0.041% of all line revenue — genuinely
+  undecided** (api-cloudrun#473, repaired). **ADR-0036 removes the defect class entirely**: there is no
+  dimension key to omit, because there is no dimension key. The absence/null rule did not weaken — it
+  moved to a subject where absence is unrecoverable, which is what this vector now refuses.
+
+differs_from: two-lines-two-causal-orders-with-tax
+differs_in: ["invoice.lines[1].causal_orders"]
+
+given:
+  ledger_state:
+    closed_periods: []
+  invoice:
+    id: INV-VEC-0003
+    invoice_date: "2026-07-31"
+    total_minor: 100031
+    lines:
+      - net_minor: 75000
+        revenue_account: 4000
+        causal_orders: ["ORD-VEC-0001"]
+        path: [ORD-VEC-0001, DEST-VEC-0001, GRP-VEC-0001, ITEM-VEC-0001]
+      - net_minor: 12500
+        revenue_account: 4200
+        # causal_orders ABSENT — the only difference from the accept vector
+        path: [ORD-VEC-0002, DEST-VEC-0002, GRP-VEC-0002, ITEM-VEC-0002]
+    tax_components:
+      - { payable_account: 2200, amount_minor: 11250 }
+      - { payable_account: 2200, amount_minor: 1281 }
+
+derivation: >-
+  Identical to `two-lines-two-causal-orders-with-tax` in every field except that line 2's
+  `causal_orders` KEY IS ABSENT. REQ-LED-001 refuses the posting.
+  **This is the case a declared null is NOT.** See `declared-null-causal-order-recorded`, which is
+  accepted: there, the invoice references no order and someone recorded that determination. Here
+  nobody stated anything, and an undeclared key is indistinguishable from an oversight. The boundary
+  the rule draws is absence versus null, not empty versus non-empty.
+  ⚠️ **The line's `path` still names an order divider, and that makes this vector sharper than its
+  predecessor.** A reader can see the causal order the line would have had; what is refused is the
+  posting failing to state it. Under ADR-0036 the two are derivable from one another where the paths
+  align — but 59 of 9,307 comparable invoice lines (0.634%) sit at a path their order line does not
+  share, so the derivation is not yet an invariant and the declaration is not redundant with it
+  (api-cloudrun#538).
+  **The whole entry is refused, not the offending line.** A partial posting would leave AR debited
+  for a total the revenue side does not add up to — the control total is what makes that visible, and
+  it is why rejection has to be all-or-nothing.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "causal_orders is not declared on transfer 2 — every posting declares its causal order, and absence is refused where an explicit null is not (REQ-LED-001, ADR-0036)"
+      line: 1

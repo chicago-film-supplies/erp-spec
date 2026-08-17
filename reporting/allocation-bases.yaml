@@ -78,8 +78,9 @@ bases:
       independent rounding of each share does not, and the residual cent has to land somewhere
       stated. Same discipline as OQ-018's pro-rata premium split, which put the rounding in the
       shift record rather than the posting rule.
-      **A goods line with `product_line: null` is still part of the base.** It is goods that nobody
-      categorised (ADR-0025 makes null a legal determination), and excluding it would concentrate
+      **A goods line resolving to NO product line is still part of the base.** It is goods that
+      nobody categorised (`ledger/dimensions.yaml` enumerates the two ways a line resolves to none),
+      and excluding it would concentrate
       the whole pool onto the tracked lines and overstate their absorbed cost. It reports in the
       null row. Re-measured 2026-08-16: **264 lines, $38,678.20, 2.25% of line revenue** sit on a goods
       account with no product line — 4200 $21,716.14 / 36 lines, 4000 $10,671.16 / 220, 4210 $6,290.90

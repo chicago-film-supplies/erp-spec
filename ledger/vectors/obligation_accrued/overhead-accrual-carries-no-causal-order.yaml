@@ -21,13 +21,18 @@ given:
 derivation: >-
   $9,500.00 of warehouse rent for August, accrued on the last day of the month because the landlord
   invoices in arrears. One transfer: Dr 6303 / Cr 2010, `control_total` = **950000**.
-  ⚠️ **`product_line` is ABSENT here, and its absence is the assertion.** 6303 names no dimension and
-  2010 names none, so declaring one would be refused exactly as firmly as omitting it on 5100 would
-  be — the obligation is read off the accounts (ADR-0025), and this vector is the undimensioned arm
-  of the pair whose other half is `subrental-received-before-the-vendor-invoices`.
-  This is a **third** thing again, and the distinction is the one `ledger/dimensions.yaml` spells
-  out: not a tracked value, and not an explicit `null` meaning "no tracked value applies", but **no
-  obligation at all**. Rent belongs to the business rather than to a kind of sale.
+  ⚠️ **`causal_orders` is an explicit NULL here, and the declaration is the assertion.** Warehouse
+  rent is caused by no job — the business occupies the building whether or not anything ships — so
+  the null is the true statement about it. This vector is the null arm of the pair whose other half
+  is `subrental-received-before-the-vendor-invoices`, where the subrental was hired for a specific
+  order.
+  ⚠️ **RENAMED AND RE-AIMED 2026-08-16 (ADR-0036).** It was `overhead-accrual-carries-no-product-line`
+  and asserted an ABSENT dimension — "6303 names no dimension and 2010 names none, so declaring one
+  would be refused exactly as firmly as omitting it on 5100 would be", a third case beside a tracked
+  value and an explicit null. **That third case is gone**: there is no per-account obligation and no
+  dimension, so absence-as-a-statement is no longer expressible or needed. What replaces it is
+  sharper — a DECLARED null, which is countable. "Share of accrued cost caused by no job" is a number
+  the read side can publish; "the key was not there" never was.
   ⚠️ **Still a MATCHED accrual, not an estimate, and the distinction survives the fact that rent
   looks like a textbook month-end accrual.** The amount comes from the lease, not from a guess, so
   the landlord's invoice will relieve it by reclassification and there is no reversal to forget.
@@ -42,5 +47,6 @@ expect:
         credit_account: 2010,
         amount_minor: 950000,
         accounting_date: "2026-08-31",
+        causal_orders: null,
       }
   rejects: []

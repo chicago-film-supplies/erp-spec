@@ -54,11 +54,13 @@ expect:
         credit_account: 1500,
         amount_minor: 60000,
         accounting_date: "2026-08-07",
+        causal_orders: null,
       }
     - {
         debit_account: 1998,
         credit_account: 1500,
         amount_minor: 40000,
         accounting_date: "2026-08-07",
+        causal_orders: null,
       }
   rejects: []

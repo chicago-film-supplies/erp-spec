@@ -1,23 +1,55 @@
-# Dimensions — axes a balance can be sliced by, carried ON the posting, never derived later.
+# Dimensions — axes a balance is sliced by AT REPORT TIME. **Not carried on any posting.**
 #
-# REQ-LED-001: a posting to an account that names a dimension must DECLARE it. What is refused is
-# ABSENCE, not null.
+# ⚠️ **This file changed KIND on 2026-08-16, and the path did not.** ADR-0036: "`ledger/dimensions.yaml`
+# describes a **reporting** taxonomy, not a ledger one." A posting records the GL account and its
+# KEYS — causal order(s), invoice link, line identity — and every classification is derived by
+# joining those keys to the master data (ADR-0036, superseding ADR-0018). Nothing below is declared
+# on a transfer, checked against a transfer, or frozen at posting time.
 #
-#   product_line: "Crew"   a tracked value
-#   product_line: null     a determination — no tracked product line applies to this line
-#   (key absent)           REFUSED
-#   product_line: ""       REFUSED — it satisfies a naive NOT NULL check and means nothing
+# ⚠️ **The path is deliberately unchanged and that was a measured refusal, not an oversight.**
+# erp-spec#19 proposed moving this file under `reporting/`. Four IMMUTABLE ADRs cite
+# `ledger/dimensions.yaml` in backticks — ADR-0020, ADR-0025, ADR-0035 (rejected, left as written)
+# and ADR-0036 itself — and gate 11 checks that every path cited in prose resolves. Their bodies are
+# frozen by `frozen_sha256` (gate 14), so a move buys four PERMANENT gate-11 exemptions to relocate
+# a file whose kind is stated in its own header anyway. An allowlist that cannot expire is the thing
+# gate 11's exemption rule exists to prevent. **The claim ADR-0036 makes is about this file's
+# CONTENT, and content is what changed.**
 #
-# The distinction is the whole requirement. An explicit null is a decision: it is countable,
-# reportable, and shows up as a number someone can be asked about. Absence is not, and it is
-# indistinguishable from an oversight.
+# ── what the ledger no longer does, and what replaced it ────────────────────────────────────────
+# Until 2026-08-16 every posting to an account whose chart entry named a dimension had to DECLARE
+# that dimension, and the interesting rule was ABSENCE versus NULL: a value or an explicit null is a
+# determination, a missing key is an oversight, and `""` is refused because it passes a naive NOT
+# NULL check while meaning nothing.
 #
-# ⚠️ **The 28.7% was NOT "nobody decided" — that reading is retracted, measured 2026-08-09.**
+# **ADR-0036 dissolves that rule for these dimensions rather than weakening it.** There is no key to
+# omit, because there is no key: the classification is read off the product master through the
+# posting's line identity. A posting cannot fail to declare a product line any more than it can fail
+# to declare the product's name.
+#
+# The absence-versus-null rule did not go away — **it MOVED, to the keys**, where ADR-0036 says it
+# is stronger: a posting whose causal order is ABSENT is unallocatable and is refused; one that
+# declares `causal_orders: null` has recorded a determination someone can be asked about. That is
+# REQ-LED-001 today, and `contexts/ledger/features/posting-keys.feature` is where it is exercised.
+#
+# What replaces the declaration check as the thing that can go wrong is a **coverage measurement**,
+# not a gate: the share of revenue whose line resolves to no product master, or to a product nobody
+# categorised. `reporting/product-line-pl.yaml`'s `unallocated` bucket already carries it, and gate
+# 13 already fails when a value here is unclassified there. The defect class the old rule guarded
+# is now unrepresentable; the defect class that remains is measurable.
+#
+# ⚠️ **THIS IS WHY THE MEASUREMENT HISTORY BELOW IS KEPT.** It is not decoration. Every number in it
+# was produced by reading a DERIVED COPY — the invoice-line denorm — while the authority sat on the
+# product master, and the headline moved by a factor of ~700 when someone finally joined to the
+# master. ADR-0036 removes the copy, so the trap that produced it is gone; the discipline it teaches
+# is not.
+
+# ── measurement history, retained ───────────────────────────────────────────────────────────────
+# **The 28.7% was NOT "nobody decided" — that reading was retracted, measured 2026-08-09.**
 # Joining every untracked line to its product master
 # (`inbox/2026-08-09-untracked-revenue-is-mostly-a-denorm-failure-not-an-undecided-dimension.md`):
-# **51.8% ($252,161.36) is a DENORMALISATION FAILURE** — the product is categorised and the line is
-# not; 48.0% is custom lines with no product record at all; and **0.1% ($688.00, 35 lines) is
-# genuinely undecided**. Exactly one line in the corpus disagrees with its master rather than being
+# **51.8% ($252,161.36) was a DENORMALISATION FAILURE** — the product is categorised and the line is
+# not; 48.0% is custom lines with no product record at all; and **0.1% ($688.00, 35 lines) was
+# genuinely undecided**. Exactly one line in the corpus disagreed with its master rather than being
 # empty.
 # ✅ **The propagation defect is FIXED, measured 2026-08-10** (api-cloudrun#473,
 # `inbox/2026-08-10-the-untracked-revenue-denorm-is-repaired-and-28-7-percent-is-now-15-percent.md`).
@@ -28,33 +60,33 @@
 # across 128 / $233,667.63 and 170 / $19,638.96 on 2026-08-10: the money is flat and the denominator
 # grew). ✅ **`tracking_missing` is still 0 and the denorm now agrees with the master on every one of
 # 9,394 revenue lines** — 0 nulls-against-a-categorised-master, 0 disagreements, 0 lines set against an
-# uncategorised master. The repair is holding.
-# ⚠️ Zero DISAGREEMENTS is not purely good news. An invoice is a point-in-time document and a line that
-# disagrees with a since-renamed master is expected and must never be repaired — so that branch of the
-# rule has never once been exercised, which by this repo's own standard makes it a claim rather than a
-# capability. **And the writer contradicts it**: `productLineDenorms` is the sole author of the field
-# and product wins unconditionally, so any PUT to an issued invoice restamps its lines with the
-# product's CURRENT category. Three artifacts assert point-in-time fidelity and the writer does not
-# implement it; the empty disagreeing population is why nothing can go red on that. Filed as
-# **api-cloudrun#537** — and it matters here because ADR-0020's restatement rule forbids any amount
-# moving, while a rename would silently restate closed-period product-line reports.
+# uncategorised master.
+# ✅ **api-cloudrun#537 is DISSOLVED for v2 by ADR-0036, and stays live for v1.** The defect was that
+# `productLineDenorms` is the sole author of the line's category and product wins unconditionally, so
+# a PUT to an issued invoice restamps its lines with the product's CURRENT category — three artifacts
+# asserted point-in-time fidelity and the writer did not implement it. **v2 has no denorm to restamp.**
+# The historical-classification question does not vanish, it changes owner: a P&L "as classified then"
+# is re-derivable from a categorisation history on the product master, with no ledger field and no
+# invoice-line copy at all (ADR-0036 Consequences). ⚠️ It is still live for v1, where the restamp can
+# silently restate a closed-period product-line report against ADR-0020's no-amount-moves rule.
 # ⚠️ That $19,638.96 is NOT comparable to the $688.00 above — `Other` was retired at the product
 # master in the same sitting, moving 12 products and ~135 lines out of a named category. **$688.00
 # is the number to cite for "how often did an operator decline to classify".**
-#
-# The requirement is unchanged and its target moves: refusing absence is still right, but the defect
-# it guards against is PROPAGATION, not an operator failing to choose. A posting rule that refuses
-# an absent dimension is satisfied by a system that reliably copies the product's category — which
-# is the actual fix, and it is api-cloudrun#473.
-# The same shape the tax context already uses — EVT-TAX-002 carries an exemption REASON, because
-# "no tax" and "no tax BECAUSE" audit differently.
 
 dimensions:
   - id: product_line
-    description: What category of goods or service the line belongs to.
-    required_on: [revenue, cogs]
-    declaration: required # the KEY must be present on every posting to an account naming it
-    null_permitted: true # as an explicit determination that no tracked value applies
+    description: What category of goods or service a line belongs to.
+    kind: reporting
+    derived_from: >-
+      `products.uid_tracking_category` at the product master, reached from a posting's LINE IDENTITY
+      key (ADR-0036). Never stored on a transfer, never snapshotted at posting time.
+    unresolved_cases:
+      - what: the line references no product
+        example: a custom line typed by an operator
+        report_as: unallocated
+      - what: the product exists and carries no category
+        example: a product nobody classified
+        report_as: unallocated
     source: "api:2026-08-08:db_tracking_categories_query (21 values in the current system)"
     values:
       - Crafty
@@ -79,7 +111,7 @@ dimensions:
       - Shipping
     note: >-
       **20 values.** `Other` was deleted by OQ-022 — it read as a category and meant "nobody chose",
-      which is the one thing a non-nullable dimension must not let back in. ✅ **The source system
+      which is the one thing a classification must not let back in. ✅ **The source system
       reached the same conclusion independently on 2026-08-10**: `Other` was retired at the product
       master (12 products) and stripped from the historical CFS lines and the Xero ledger. Its
       revenue is now *unallocated*, which is honest, rather than *allocated to a bucket naming
@@ -107,75 +139,121 @@ dimensions:
       OQ-034's figures exactly — so nothing is unknown. What is outstanding is the historical
       restatement, an ADR-0020 obligation. **A zero row here is not another `Transport` failure; check
       which of the two it is before acting on it.**
-      **This is the value that most nearly proves the whole absence-versus-null rule below**: it was
-      not undecided, it was never written, and for six days the spec omitted a value three source
-      systems were actively recording.
-      Why it was never used is the part worth keeping. **Activity lines and goods lines compete for
-      the same line item, and goods lines win**: shipping a walkie is categorised `Walkies &
+      **This is the value that most nearly proves why a classification must not be frozen onto a
+      posting**: it was not undecided, it was never written, and for six days the spec omitted a value
+      three source systems were actively recording. ⚠️ Under ADR-0018 its restoration would have been
+      a ledger restatement of 23 postings; under ADR-0036 it is a report re-run. **That is the whole
+      argument for this file's change of kind**, and it is measured rather than asserted — the value
+      has moved twice in one month (`Other` retired, `Transport` dropped and restored).
+      Why `Transport` was never used is the part worth keeping. **Activity lines and goods lines compete
+      for the same line item, and goods lines win**: shipping a walkie is categorised `Walkies &
       Hotspots` (706 lines, $178,980.10), by what was shipped rather than by the shipping. `Delivery`
       survives — **537 lines and $236,487.75, 13.79%**, the largest tracked line in the business
       (re-measured 2026-08-16; 534 / $234,987.75 / 13.91% on 2026-08-10) — only because a delivery line
       has no product to be categorised as instead.
-      **Adding a value back is cheap by design**: ADR-0018 took dimensions off account identity
-      precisely so cardinality grows by addition and a new product line stops being a migration.
-      That is what made restoring `Transport` a one-line change rather than a schema event.
+      **Adding a value back is cheap by design**, and ADR-0036 made it cheaper still: ADR-0018 took
+      dimensions off account identity so cardinality grew by addition rather than by migration, and
+      ADR-0036 takes them off the posting as well, so a new product line is now a master-data edit
+      that no historical transfer has to agree with.
       ✅ **ADR-0020's restatement plan referenced this value and now has its target back** — OQ-025's
       notes list "Trucking to `Transport`" among the mechanical mappings, which was left dangling
       while the value was dropped. The restatement is no longer blocked on re-homing those 23 lines.
-      Two mechanisms replace **`Other`**, and they state DIFFERENT facts — that is why there are two:
-        · `product_line: null` on a dimensioned account — "this IS a categorised kind of sale, and
-          no tracked product line applies to it". The line stays where it belongs on the P&L.
-        · **4800 Other Income** — "this was not a categorised sale at all": interest, cashback, a
-          vendor refund, a one-off oddity. The account requires no dimension, so the receipt is
-          visibly non-operating on the face of the statement rather than hiding inside revenue.
-      Neither is a fallback for the other. Coding a real service to 4800 would understate operating
-      revenue; nulling a genuine one-off on 4100 would overstate it.
+      **4800 Other Income is the account-side counterpart, and it is a DIFFERENT statement from an
+      unclassified line** — that is why both exist. An unresolved product line says "this was a
+      categorised kind of sale and no tracked category applies to it"; 4800 says "this was not a
+      categorised sale at all": interest, cashback, a vendor refund, a one-off oddity. Coding a real
+      service to 4800 understates operating revenue; leaving a genuine one-off on 4100 unclassified
+      overstates it. ⚠️ **4800 survived ADR-0036 and the null did not**, because an account is a
+      ledger fact and a category is not.
       ADR-0020's restatement residue — Warehouse Rental, Office Rental, Indoor Parking, Location
-      Scouting, Security, Safety & Security Assessment — takes **`product_line: null`** (OQ-025).
-      They do not map to a tracked product line, so null is the true statement about them; it is
-      not a fallback and not a bucket. They stay on 4100 Service Income, which keeps the
-      restatement to assigning a dimension and moves no money between P&L sections — the thing
-      ADR-0020 forbids.
+      Scouting, Security, Safety & Security Assessment — resolves to **no tracked product line**
+      (OQ-025) and reports as `unallocated`. They stay on 4100 Service Income, which moves no money
+      between P&L sections — the thing ADR-0020 forbids.
 
-  - id: cost_type
-    description: What kind of work a labour posting represents.
-    required_on: [labour_cogs]
-    declaration: required
-    null_permitted: true
-    source: inbox/2026-08-08-two-reporting-dimensions.md
-    values: [delivery, counter, warehouse]
+  - id: labor_line
+    description: What kind of work a labour cost represents.
+    kind: reporting
+    derived_from: >-
+      The **shift's own allocation row**, reached from the posting's causal-order and line-identity
+      keys (OQ-042; owner, 2026-08-16: "labor_line should follow same protocol as products, what's
+      recorded in the immutable ledger is wages… so ledger account rides TigerBeetle, the
+      classification is a Mongo [detail]").
+      ⚠️ **Deriving from a SHIFT RECORD is not the same trade as deriving from a product master, and
+      ADR-0036 says so explicitly**: a shift is a recorded historical fact, not a mutable master
+      attribute, so the criterion "could this be revised without anyone having observed something
+      new?" is satisfied rather than waived. The classification still lives in Mongo; what makes it
+      safe is that its SOURCE does not move.
+    source: >-
+      Owner, 2026-08-16, recorded in ADR-0036's Consequences (accepted, `frozen_sha256`) and in
+      `inbox/2026-08-16-owner-rulings-line-identity-is-item-path-ephemeral-reports-are-never-sealed-and-cost-type-becomes-labour-line.md`.
+      Supersedes `inbox/2026-08-08-two-reporting-dimensions.md`, which named the field `cost_type`
+      with three values.
+    values:
+      - delivery
+      - counter
+      - warehouse
+      - trash_&_cleanup
+      - shipping_&_handling
+      - trucking
+      - crew
     note: >-
-      **Labour only** (OQ-021, resolving HOT-011). `required_on: [labour_cogs]` means the accounts
-      whose `dimensions` list in `ledger/chart-of-accounts.yaml` names `cost_type` — today that is
-      5800 alone. It was previously `[cogs]`, which required a "kind of work" on
-      `5000 Cost of Goods Sold: Retail Inventory`, where none of delivery / counter / warehouse is
-      true, and REQ-LED-001's text required one on every rental revenue posting as well. The chart
-      states the obligation per account precisely so that no rule has to infer it from a class.
+      **Renamed from `cost_type` and grown from 3 values to 7, 2026-08-16** (ADR-0036, owner:
+      "cost_type is too broad, i think it should change to labor_line or _class or _category (same
+      for product, no reason for them not to match)"). `cost_type` was too broad to mean anything —
+      it named a kind-of-cost taxonomy while carrying only kinds of *labour* — and `labor_line`
+      pairs with `product_line` by design.
+      ⚠️ **AMERICAN SPELLING, and the live books decided it rather than taste.** Of 134 live accounts,
+      `4120 Contract **Labor** Income` is the only one naming the concept and **no account contains
+      "Labour"** (`api:2026-08-16:db_chart_of_accounts_query`, 134 accounts). The repo's British
+      prose is spec-side drift from the incumbent chart. The field was never called `labour_line` in
+      any artifact, so the rename went `cost_type` → `labor_line` directly and passed through no
+      intermediate form.
+      ⚠️ **The `&` in two value ids is deliberate and is ADR-0036's spelling**, frozen at acceptance.
+      They mirror the `product_line` values `Trash & Cleanup` and `Shipping` rather than inventing a
+      second orthography for the same concepts.
+      **Five of the seven mirror an activity product line; `counter` and `warehouse` bill nobody** —
+      which is the whole reason this is a separate axis rather than a re-use of `product_line`. A
+      warehouse hour is real cost against no revenue line, and collapsing the two taxonomies would
+      make it invisible or force it into a category it does not belong to.
+      ⚠️ **NOTHING EXERCISES THIS, and it is a real gap rather than a tidy consequence.** Under
+      ADR-0025 the value was declared on a posting to 5800 and exactly one golden vector supplied it
+      — the vector then called `absorbed-line-missing-cost-type-rejected`, whose own derivation said
+      "this is the only place `cost_type` is exercised in the entire spec". Under
+      ADR-0036 no posting carries it, so that vector was repurposed to refuse a missing causal job
+      (`ledger/vectors/shift_recorded/absorbed-line-missing-causal-job-rejected.yaml`) and the
+      taxonomy lost its last executable statement. **What would exercise it is a labour-line report,
+      and none exists.** Until one does this is a declaration with nothing behind it — a claim rather
+      than a capability by this repo's own standard, and the same shape as the `dimensions:` lists
+      ADR-0036 deleted. Recorded as **OQ-046**, not quietly accepted.
 
-# Cardinality is no longer a concern, and the reason is worth keeping. ADR-0008 exploded these
-# dimensions into account identity — 20 product lines x 3 cost types = 60 accounts per dimensioned
-# GL code — so a third dimension would have multiplied again. **ADR-0018 superseded it**: the chart
-# stays plain and dimensions ride on the posting, so cardinality now grows by ADDITION and adding a
-# product line stops being a migration.
+# ── why cardinality stopped being the question, twice ───────────────────────────────────────────
+# ADR-0008 exploded these dimensions into ACCOUNT identity — 20 product lines x 3 cost types = 60
+# accounts per dimensioned GL code — so a third dimension multiplied again. **ADR-0018 superseded
+# it**: the chart stayed plain and dimensions rode on the posting, so cardinality grew by ADDITION.
+# **ADR-0036 superseded THAT**: they ride nowhere. Growing this file is now a master-data edit that
+# no account and no historical transfer has to agree with, which is why `labor_line` could go from
+# three values to seven in one sitting.
 #
-# What that costs: with dimensions off account identity, **nothing structural catches a missing
-# one**. Under ADR-0008 a posting with no product line had no account to land in. Now it has one,
-# and only the declaration rule above stands between REQ-LED-001 and a silent absence. That is why
-# the rejection vectors in `ledger/vectors/` are not optional decoration — they are the entire
-# enforcement of this file.
+# What ADR-0018 cost, and what ADR-0036 does about it. Under ADR-0008 a posting with no product line
+# had no account to land in; under ADR-0018 it had one, and only the declaration rule stood between
+# REQ-LED-001 and a silent absence — which is why the rejection vectors were "the entire enforcement
+# of this file". Under ADR-0036 there is nothing to omit. **The enforcement did not weaken, it moved
+# to the keys**: `ledger/vectors/` still carries the absence-versus-null pair, against
+# `causal_orders` (`invoice_issued/declared-null-causal-order-recorded` beside
+# `invoice_issued/missing-causal-order-rejected`), and gate 10h still fails on both arms.
 #
-# **A null is a reportable population, and should be reported — off the AUTHORITATIVE field.**
-# "Share of revenue with a null product line" is a number the read side can produce at any time; the
-# current system's equivalent was invisible until someone went looking and found 28.7%. ⚠️ **That
-# number was wrong**: it counted the invoice-line denorm, not the product master behind it, and the
-# share that actually meant "nobody decided" was **$688.00 — 0.041% of all line revenue** (0.141% of
-# the untracked population; cite the base). Watch the population, and if it grows,
-# the answer is a new product line or a real decision — never a default value. But a watch pointed
-# at a derived copy measures the derivation, not the decision.
+# **A population with no resolvable classification is a reportable number, and should be reported.**
+# "Share of revenue that resolves to no product line" is a figure the read side produces at any
+# time; the current system's equivalent was invisible until someone went looking and found 28.7% —
+# a number that turned out to be measuring a broken derivation. ⚠️ **The lesson survives the
+# architecture change**: a watch pointed at a derived copy measures the derivation, not the
+# decision. Under ADR-0036 there is only one copy left, which is the master, so the watch has
+# nowhere else to point.
 #
-# HOT-011 is **resolved** (OQ-021). Revenue accounts carry a product line; `cost_type` is labour
-# only; and REQ-LED-001's statement was amended to match rather than left contradicting this file.
-# Two authorities, deliberately split: the per-account `dimensions` list in
-# `ledger/chart-of-accounts.yaml` says WHICH postings owe a dimension, and this file says which
-# VALUES it may take. Gate 10 checks every vector against both — and therefore against neither the
-# rule nor the vector it is checking.
+# HOT-011 is **resolved** (OQ-021) and its subject is now moot: it asked whether the dimension
+# obligation was per class or per account, and ADR-0036 answers "neither — there is no obligation".
+# ⚠️ The split of authority it produced is gone with it. `ledger/chart-of-accounts.yaml` no longer
+# says WHICH postings owe a dimension — it carries no `dimensions:` key at all — and this file no
+# longer says which values a posting may take, because no posting takes one. **What this file now
+# governs is the vocabulary of the REPORT**, and gate 13 is what checks it (every value classified
+# goods or activity in `reporting/product-line-pl.yaml`), not gate 10.

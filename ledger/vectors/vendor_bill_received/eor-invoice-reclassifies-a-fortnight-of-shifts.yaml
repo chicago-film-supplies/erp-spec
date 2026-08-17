@@ -41,11 +41,14 @@ derivation: >-
   belongs to the days it was incurred on and must not move; only the liability belongs to the 14th.
   Back-dating the reclassification would restate periods that are no longer the ledger's to restate,
   and would move nothing that needed moving.
-  **No dimension on any leg, and that is load-bearing rather than incidental.** 2010 and 2000 both
-  name none, so a reclassification **cannot** carry a `product_line` — which means it cannot move a
-  cost between product lines. The dimensions were decided at the accrual (`Delivery`, `Crew`, and a
-  `cost_type` on each) and stay on the accrual's transfers, where a dimensional report can still see
-  them. Without the fence, an AP move would be a silent restatement, which is what ADR-0020 forbids.
+  **Every leg declares `causal_orders: null` and carries no line, and that is load-bearing rather
+  than incidental.** A reclassification moves a LIABILITY between two liability accounts, so it
+  **cannot** re-key a cost to a different job. The keys were declared at the accrual — here at
+  `shift_recorded`, one per absorbed allocation — and stay on those transfers, where the derived
+  report can still see them. Without the fence, an AP move would be a silent restatement, which is
+  what ADR-0020 forbids. ⚠️ This read "2010 and 2000 both name none, so a reclassification cannot
+  carry a `product_line`" until 2026-08-16; the argument came from the chart, which ADR-0036 stopped
+  answering, and the refusal now comes from the rule.
   **One entry, three source documents.** An EOR invoice matches every shift accrued in its period,
   so this is the third rule in the file whose journal entry spans source documents — after
   `settlement_recorded` (one session, several invoices) and `credit_note_allocated` (one session,
@@ -62,17 +65,20 @@ expect:
         credit_account: 2000,
         amount_minor: 120000,
         accounting_date: "2026-08-14",
+        causal_orders: null,
       }
     - {
         debit_account: 2010,
         credit_account: 2000,
         amount_minor: 96000,
         accounting_date: "2026-08-14",
+        causal_orders: null,
       }
     - {
         debit_account: 2010,
         credit_account: 2000,
         amount_minor: 84000,
         accounting_date: "2026-08-14",
+        causal_orders: null,
       }
   rejects: []

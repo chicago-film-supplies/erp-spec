@@ -31,13 +31,12 @@ given:
       reason: "customer wrap moved; no relief driver available"
     absorbed_allocations:
       - {
+          id: ALC-VEC-0021,
           causal_job: ORD-VEC-0004,
           hours: 8,
           base_minor: 24000,
           premium_share_minor: 12000,
           amount_minor: 36000,
-          product_line: "Delivery",
-          cost_type: delivery,
         }
 
 derivation: >-
@@ -69,7 +68,7 @@ expect:
         credit_account: 2010,
         amount_minor: 36000,
         accounting_date: "2026-08-09",
-        product_line: "Delivery",
-        cost_type: delivery,
+        causal_orders: ["ORD-VEC-0004"],
+        line: ALC-VEC-0021,
       }
   rejects: []

@@ -28,13 +28,12 @@ given:
     unabsorbed_minor: 0
     absorbed_allocations:
       - {
+          id: ALC-VEC-0031,
           causal_job: ORD-VEC-0001,
           hours: 8,
           base_minor: 24000,
           premium_share_minor: 0,
           amount_minor: 24000,
-          product_line: "Delivery",
-          cost_type: delivery,
         }
 
 derivation: >-

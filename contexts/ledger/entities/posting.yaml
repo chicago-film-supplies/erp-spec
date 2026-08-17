@@ -3,7 +3,11 @@ entity: Posting
 description: One side of a journal entry. Never exists alone; always part of a balanced entry.
 fields:
   posting_id: { type: uuid, required: true }
-  journal_entry_id: { type: uuid, required: true }
+  journal_entry_id: {
+    type: uuid,
+    required: true,
+    note: "ADR-0036 — NOT derivable from the source document. 3 of 13 specified posting rules span several source documents (`settlement_recorded`, `credit_note_allocated`, `vendor_bill_received`), so grouping and provenance are two facts and neither derives the other.",
+  }
   account_ref: { type: account_id, required: true }
   amount_minor: {
     type: int64,
@@ -21,17 +25,30 @@ fields:
     required: true,
     note: "when recorded. monotonic. never back-dated",
   }
-  product_line: {
-    type: dimension_ref,
-    required: declared_where_account_requires,
+  # ── the keys (ADR-0036, superseding ADR-0018) ────────────────────────────────────────────────
+  # A posting records KEYS, not classifications. `product_line` and `cost_type` were fields here
+  # until 2026-08-16 and are gone: a product line is `products.uid_tracking_category`, a mutable
+  # field on a mutable master, and it has moved twice in one month. Freezing it into an immutable
+  # transfer is the defect regardless of which field holds it. Both are derived at report time.
+  causal_orders: {
+    type: "list<order_ref> | null",
+    required: declared_always,
     nullable: true,
-    note: "REQ-LED-001 / ADR-0025 — the KEY must be declared on a posting to an account naming it; an explicit null records that no tracked value applies. Absence is refused; so is an empty string.",
+    note: "REQ-LED-001 / ADR-0036 — the order or orders that caused this posting. PLURAL by construction: a shared run serves several jobs and a settlement spans several invoices. The KEY is declared on EVERY posting; an explicit null records that no causal order applies (idle labour, a fixed-asset acquisition, an overhead accrual). ABSENCE is refused, and so is an empty list — it satisfies a naive check while meaning nothing, the same trap `\"\"` was for a dimension.",
   }
-  cost_type: {
-    type: dimension_ref,
-    required: declared_where_account_requires,
-    nullable: true,
-    note: "ADR-0025 — a LABOUR dimension. Only 5800 names it, so most postings do not carry it at all. Was `required: true` on every posting, which no rental revenue or retail-COGS posting could satisfy.",
+  invoice_ref: {
+    type: invoice_ref,
+    required: declared_where_the_posting_rule_names_it,
+    note: "ADR-0036 — where the posting arises from billing. Declared by `invoice_issued`, `invoice_voided`, `settlement_recorded`, `credit_note_allocated`; absent from every rule that does not touch an invoice, and declaring it there is refused.",
   }
-  source_document: { type: document_ref, required: true }
+  line_identity: {
+    type: line_identity,
+    required: declared_where_the_posting_rule_names_it,
+    note: "ADR-0036 — the row within the source document, `item.path` and NEVER `item.uid` (`uid` identifies the product and repeats within one document, 18% of prod orders; `path` is authored by one function and is self-inclusive). ⚠️ Stored as a HASH or a minted surrogate, not as a path: invoice paths run to depth 7 and 178 bytes, and 14,410 of 14,410 exceed a u128's 16 — 100%. Collision is not the risk (~1e-11 on 64 bits); OPACITY is, and ADR-0036 takes that trade deliberately.",
+  }
+  source_document: {
+    type: document_ref,
+    required: true,
+    note: "⚠️ At TigerBeetle this field does NOT get its own slot — `line_identity` displaces `source_document_ref` in `user_data_64`, because a path names the document AND the row within it (ADR-0036; `ledger/tigerbeetle-accounts.yaml` owns the field budget). It stays a field of the logical posting: the projection resolves it, and a posting with no line — a tax leg, a period-end accrual — still has a source document.",
+  }
   posting_rule: { type: rule_id, required: true }

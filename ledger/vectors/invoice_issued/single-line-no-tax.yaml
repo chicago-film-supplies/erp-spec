@@ -14,12 +14,21 @@ given:
     invoice_date: "2026-07-15"
     total_minor: 50000
     lines:
-      - { net_minor: 50000, revenue_account: 4100, product_line: "Crew" }
+      - {
+          net_minor: 50000,
+          revenue_account: 4100,
+          causal_orders: ["ORD-VEC-0001"],
+          path: [ORD-VEC-0001, DEST-VEC-0001, GRP-VEC-0001, ITEM-VEC-0001],
+        }
     tax_components: []
 
 derivation: >-
   One service line, $500.00 → 50000 minor. No tax profile applies, so there is no tax component and
   no second transfer. `control_total` = 50000 = the single transfer amount.
+  **The single transfer carries all three keys** (ADR-0036), and `path[0]` is the causal order — the
+  shared-key economy in its simplest form: one stored path names the row, the invoice it sits in, and
+  the order that caused it. ⚠️ This vector carried `product_line: "Crew"` until 2026-08-16; the
+  product line is now derived at report time from the line's own product master.
 
 expect:
   transfers:
@@ -28,6 +37,8 @@ expect:
         credit_account: 4100,
         amount_minor: 50000,
         accounting_date: "2026-07-15",
-        product_line: "Crew",
+        causal_orders: ["ORD-VEC-0001"],
+        invoice: INV-VEC-0001,
+        line: [ORD-VEC-0001, DEST-VEC-0001, GRP-VEC-0001, ITEM-VEC-0001],
       }
   rejects: []

@@ -21,8 +21,13 @@
 #      the same rule) and `differs_in` (the exact paths). A reject vector sharing nothing with an
 #      accept vector proves only that SOMETHING was refused, not that the rule discriminates on the
 #      field it claims to. This is the spec analogue of the workspace's fail-closed companion.
-#   3. **dimension obligation** — checked against `chart-of-accounts.yaml`'s `dimensioned:` flag and
-#      `dimensions.yaml`'s value sets. Two files this vector does not control.
+#   3. **key obligation** — every transfer declares `causal_orders` (a value, or an explicit null;
+#      absence and `[]` are refused), declares every key its POSTING RULE names, and declares no key
+#      it does not. Checked against `ledger/posting-rules.yaml`, a file this vector does not control.
+#      ⚠️ This read "checked against `chart-of-accounts.yaml`'s `dimensioned:` flag and
+#      `dimensions.yaml`'s value sets" until 2026-08-16. ADR-0036 removed dimensions from postings
+#      and the chart; the obligation moved to the rule, because which keys a posting owes is a
+#      property of what happened rather than of where it landed.
 #   4. **integer minor units** — any `*_minor` is a non-negative integer. Never a string, never a
 #      float.
 #
@@ -47,6 +52,6 @@ given:
 
 expect:
   transfers: []
-  # - { debit_account: , credit_account: , amount_minor: , accounting_date: , product_line: , cost_type: }
+  # - { debit_account: , credit_account: , amount_minor: , accounting_date: , causal_orders: , invoice: , line: }
   rejects: []
-  # - reason: "missing product_line dimension"
+  # - reason: "causal_orders is not declared"

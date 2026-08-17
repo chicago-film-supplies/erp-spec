@@ -136,20 +136,38 @@ terms:
       The rule is settled. What is not settled is whether long-haul should absorb a byproduct-loss
       premium on top of the person-day, mirroring what the customer is charged (HOT-004).
 
-  - term: cost type
+  - term: labor line
     definition: >-
-      One of the two mandatory reporting dimensions on a labour posting: `delivery` | `counter` |
-      `warehouse`. Answers "what kind of work was this", independent of what product line it
-      served.
-    aliases: [labour type, activity type]
+      A REPORTING classification of labour cost — `delivery` | `counter` | `warehouse` |
+      `trash_&_cleanup` | `shipping_&_handling` | `trucking` | `crew`. Answers "what kind of work was
+      this", independent of what product line it served. **Derived at report time from the shift's
+      own allocation row; never carried on a posting** (ADR-0036, OQ-042).
+    aliases: [cost type, labour type, activity type, labour line]
     contexts: [ledger, fulfillment]
-    source: inbox/2026-08-08-two-reporting-dimensions.md
-    verified: false
+    source: ledger/dimensions.yaml
+    verified: true
+    notes: >-
+      ⚠️ **Renamed from `cost_type` and grown 3 values → 7 on 2026-08-16** (ADR-0036). `cost_type` was
+      too broad — it named a kind-of-cost taxonomy while carrying only kinds of labour — and
+      `labor_line` pairs with `product_line` by design.
+      ⚠️ **AMERICAN spelling, decided by the live books rather than by taste**: of 134 live accounts,
+      `4120 Contract **Labor** Income` is the only one naming the concept and **no account contains
+      "Labour"** (`api:2026-08-16:db_chart_of_accounts_query`). The repo's British prose is spec-side
+      drift from the incumbent chart. The field was never called `labour_line` in any artifact, so
+      the rename went `cost_type` → `labor_line` directly. ⚠️ **The surrounding prose in this repo is
+      still British and is deliberately NOT swept** — 229 occurrences across ~30 files, six of them
+      in ADRs whose bodies are frozen (ADR-0001, ADR-0011, ADR-0025, ADR-0029), so a spelling sweep
+      could never be complete and a half-converted one reads as an unfinished job. **Identifiers and
+      account names are American; prose is left alone.**
+      This definition read "one of the two mandatory reporting dimensions ON A LABOUR POSTING" until
+      2026-08-16; no posting carries it. `counter` and `warehouse` bill nobody, which is why this is
+      a separate axis rather than a re-use of `product line`.
 
   - term: product line
     definition: >-
-      The revenue/COGS dimension describing what category of goods or service a line belongs to —
-      the second mandatory reporting dimension alongside cost type.
+      The REPORTING dimension describing what category of goods or service a line belongs to.
+      **Derived at report time by joining a posting's line identity to the product master; never
+      carried on a posting** (ADR-0036). Its value is `products.uid_tracking_category`.
     aliases: [tracking category, category]
     contexts: [ledger, billing, ordering]
     source: "verified:2026-08-08:db_tracking_categories_query"
@@ -159,12 +177,14 @@ terms:
       20** — ADR-0025 deletes `Other`, because a non-nullable dimension makes it the new null. The
       escape hatch for an uncategorisable line is the account 4800 Other Income, which requires no
       dimension, not a value that reads as a category and means "nobody chose".
-      ⚠️ **This list has 20 entries and `ledger/dimensions.yaml` declares 19** — it omits
-      `Transport`, dropped 2026-08-09 on a measurement that read the invoice-line denorm instead of
-      the product master. Re-measured 2026-08-10, `Transport` is 23 lines / $39,665.00 / 2.35%, and
-      whether it is restored is **OQ-034**. `ledger/dimensions.yaml` is the authority; this entry is
-      left at 20 because the value is live in the source system and the omission is the thing under
-      review. Nothing validates the two against each other (erp-spec#16).
+      ✅ **`Transport` is RESTORED (OQ-034, 2026-08-16)**, so this list and `ledger/dimensions.yaml`
+      both hold 20. It had been dropped 2026-08-09 on a measurement that read the invoice-line denorm
+      instead of the product master; at the master it is 23 lines / $39,665.00. `ledger/dimensions.yaml`
+      is the authority. ⚠️ **Nothing validates the two against each other**, and that is still true.
+      ⚠️ **Under ADR-0018 restoring a value was a ledger restatement of 23 postings; under ADR-0036 it
+      is a report re-run.** That is the clearest single argument for the change, and it is measured
+      rather than asserted — this taxonomy moved twice in one month (`Other` retired, `Transport`
+      dropped and restored).
       **15.00% of historical line revenue carries none** (re-measured 2026-08-10; read 28.7% until
       then, off the broken denorm — api-cloudrun#473).
 
@@ -200,10 +220,12 @@ terms:
   - term: unabsorbed labour
     definition: >-
       The residual labour cost that no causal job absorbed — guaranteed-but-unworked hours and
-      idle time — posted to `5801 Cost of Goods Sold: Wages (Unabsorbed)`, which is undimensioned
-      by design. This account IS the idle-capacity KPI: it is not a plug or a rounding sink, and a
-      dimension on it would let idle time be attributed to a product line, which is the exact lie
-      to avoid.
+      idle time — posted to `5801 Cost of Goods Sold: Wages (Unabsorbed)`, whose postings declare
+      `causal_orders: null` by design. This account IS the idle-capacity KPI: it is not a plug or a
+      rounding sink, and a causal order on it would let idle time be attributed to a job, which is
+      the exact lie to avoid. ⚠️ The null is DECLARED rather than the key omitted (REQ-LED-001), so
+      "hours attributable to no job" stays a countable population. This read "which is undimensioned
+      by design" until 2026-08-16 (ADR-0036).
     aliases: [idle capacity, unabsorbed]
     contexts: [ledger]
     source: adr/ADR-0019-labour-costing-is-actual.md
@@ -254,17 +276,47 @@ terms:
 
   - term: dimension
     definition: >-
-      An axis a balance can be sliced by, carried on the posting itself rather than derived later.
-      Two are mandatory on every COGS and revenue posting: product line and cost type.
-    aliases: [tracking dimension, analysis code]
+      An axis a balance is sliced by **at report time**, derived by joining a posting's KEYS to the
+      master data. Two exist: product line and labor line. **Neither is carried on a posting**
+      (ADR-0036, superseding ADR-0018).
+    aliases: [tracking dimension, analysis code, reporting dimension]
     contexts: [ledger]
     source: ledger/dimensions.yaml
-    verified: false
+    verified: true
     notes: >-
+      ⚠️ **This read "carried on the posting itself rather than derived later… two are mandatory on
+      every COGS and revenue posting" until 2026-08-16, and the definition inverted.** ADR-0018 took
+      dimensions off ACCOUNT identity and put them on the transfer; ADR-0036 supersedes it and takes
+      them off the transfer too, because a transfer is immutable and a classification is not. What a
+      posting carries instead is KEYS — see that term.
       The current system's equivalent is the Xero tracking option, and **15.00% of line revenue
       carries none** (re-measured 2026-08-10; read 28.7% until then, off an invoice-line denorm that
-      was null on 227 categorised lines — api-cloudrun#473). A dimension that can be null is a
-      dimension that will be null.
+      was null on 227 categorised lines — api-cloudrun#473). ⚠️ **"A dimension that can be null is a
+      dimension that will be null" was the old lesson and it is superseded by a better one**: the
+      28.7% was never operators declining to classify — $688.00 was — it was a DERIVED COPY that had
+      never been populated. ADR-0036 removes the copy, so the failure mode is structural rather than
+      disciplinary.
+
+  - term: key
+    definition: >-
+      A fact about the EVENT a posting records, as opposed to a classification of it. Three:
+      causal order(s), invoice link, and line identity. A posting carries keys and nothing else
+      (ADR-0036).
+    aliases: [posting key, causal order, line identity]
+    contexts: [ledger, billing, fulfillment]
+    source: adr/ADR-0036-the-ledger-carries-keys-not-classifications.md
+    verified: true
+    notes: >-
+      **The criterion is ADR-0036's own: could this value be revised later without anyone having
+      observed something new?** Yes ⇒ a classification, derive it. No ⇒ a fact, store it.
+      `products.uid_tracking_category` moved twice in one month; who a shift was worked for cannot.
+      **What is refused is ABSENCE, not null** (REQ-LED-001). Every posting declares its causal
+      order — a value or an explicit null — and an empty list is refused alongside absence because it
+      satisfies a naive presence check while stating nothing.
+      ⚠️ **Line identity is `item.path`, never `item.uid`** — `uid` identifies the product and repeats
+      within one document (18% of prod orders). And it is STORED as a hash or a minted surrogate:
+      invoice paths run to depth 7 and 178 bytes, and 14,410 of 14,410 exceed a u128's 16. Collision
+      is not the risk (~1e-11 on 64 bits); **opacity is**, and ADR-0036 takes that trade knowingly.
 
   - term: period close
     definition: >-

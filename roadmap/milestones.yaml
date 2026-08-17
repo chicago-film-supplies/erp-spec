@@ -82,7 +82,9 @@ milestones:
     exit_criteria:
       - text: Chart of accounts complete, including the COGS and unabsorbed-labour accounts.
         check: coa_complete
-      - text: Dimensions defined with their full value sets and their declaration rule.
+      - text: >-
+          Reporting dimensions defined with their full value sets, and every specified posting rule
+          declaring its keys.
         check: dimensions_defined
       - text: Posting rules defined for every source document type.
         check: posting_rules_cover_events
@@ -164,9 +166,14 @@ milestones:
         reason: >-
           Becomes checkable once the skeleton document exists and has a shape. It does not yet, and
           inventing a check for a file nobody has written would be a gate over nothing.
-      - text: The skeleton exercises both reporting dimensions and at least one labour absorption.
+      - text: >-
+          The skeleton exercises both reporting dimensions and at least one labour absorption — and,
+          since ADR-0036, shows them DERIVED from the posting's keys rather than read off it.
         prose_only: true
-        reason: Same — depends on a document that does not exist yet.
+        reason: >-
+          Same — depends on a document that does not exist yet. ⚠️ Amended 2026-08-16: a skeleton
+          that showed a posting carrying `product_line` would now demonstrate the superseded design,
+          so the criterion names what it must show instead.
 
   - id: spec-v1
     title: Tag spec-v1

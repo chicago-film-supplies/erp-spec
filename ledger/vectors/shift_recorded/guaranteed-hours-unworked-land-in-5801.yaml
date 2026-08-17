@@ -25,13 +25,12 @@ given:
     unabsorbed_minor: 9000
     absorbed_allocations:
       - {
+          id: ALC-VEC-0011,
           causal_job: ORD-VEC-0001,
           hours: 5,
           base_minor: 15000,
           premium_share_minor: 0,
           amount_minor: 15000,
-          product_line: "Delivery",
-          cost_type: delivery,
         }
 
 derivation: >-
@@ -66,13 +65,14 @@ expect:
         credit_account: 2010,
         amount_minor: 15000,
         accounting_date: "2026-08-06",
-        product_line: "Delivery",
-        cost_type: delivery,
+        causal_orders: ["ORD-VEC-0001"],
+        line: ALC-VEC-0011,
       }
     - {
         debit_account: 5801,
         credit_account: 2010,
         amount_minor: 9000,
         accounting_date: "2026-08-06",
+        causal_orders: null,
       }
   rejects: []

@@ -1,0 +1,57 @@
+name: unresolvable-causal-order-rejected
+posting_rule: invoice_issued
+kind: reject
+source: >-
+  The failure mode ADR-0009 was written for: Xero drops an unresolvable tracking option id and
+  returns success, so the line lands untracked. 254 prod lines held a null CFS denorm while the
+  foreign id survived — `api:2026-08-09:db_invoices_query`.
+  ⚠️ **Renamed from `unknown-product-line-rejected` on 2026-08-16** (ADR-0036). The old vector refused
+  a value outside a declared SET; a key has no value set, so the equivalent third arm is a reference
+  that does not RESOLVE. The anticorruption principle is the same and the check is stronger: a value
+  set is a list someone maintains, while an order either exists or does not.
+
+differs_from: two-lines-two-causal-orders-with-tax
+differs_in: ["invoice.lines[1].causal_orders"]
+
+given:
+  ledger_state:
+    closed_periods: []
+    known_orders: [ORD-VEC-0001, ORD-VEC-0002]
+  invoice:
+    id: INV-VEC-0005
+    invoice_date: "2026-07-31"
+    total_minor: 100031
+    lines:
+      - net_minor: 75000
+        revenue_account: 4000
+        causal_orders: ["ORD-VEC-0001"]
+        path: [ORD-VEC-0001, DEST-VEC-0001, GRP-VEC-0001, ITEM-VEC-0001]
+      - net_minor: 12500
+        revenue_account: 4200
+        causal_orders: ["ORD-VEC-9999"]
+        path: [ORD-VEC-0002, DEST-VEC-0002, GRP-VEC-0002, ITEM-VEC-0002]
+    tax_components:
+      - { payable_account: 2200, amount_minor: 11250 }
+      - { payable_account: 2200, amount_minor: 1281 }
+
+derivation: >-
+  `ORD-VEC-9999` is well-formed and names no order. Present and non-empty is not enough — the key
+  must RESOLVE, or it is free text and every report built by joining on it silently drops the row.
+  ⚠️ **A key that does not resolve is worse than a dimension value that does not**, because the
+  failure is invisible on the ledger's own face. An undeclared dimension value showed up as a bucket
+  nobody recognised; an unresolvable order just fails to join, and the amount disappears from the
+  allocated view while the trial balance stays perfect.
+  ⚠️ **And it is permanent.** A misclassified product line under ADR-0018 could be restated by a
+  correcting journal; under ADR-0036 a wrong key is frozen into an immutable transfer — the same
+  reason ADR-0036 insists the path a posting keys on must be the path the order line holds, and why
+  59 misaligned lines (0.634% of 9,307) are a live concern rather than a rounding error
+  (api-cloudrun#538).
+  This is also the vector that makes the check independent: it can only pass or fail by consulting
+  the order corpus, which neither the rule nor this vector controls. **An unresolvable reference is a
+  hard error, never a null and never a new record** (ADR-0009).
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "causal_orders names ORD-VEC-9999, which resolves to no order — an unresolvable key is a hard error, never a null (ADR-0009, ADR-0036)"
+      line: 1

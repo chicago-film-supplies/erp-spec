@@ -1,0 +1,103 @@
+name: two-lines-two-causal-orders-with-tax
+posting_rule: invoice_issued
+kind: accept
+source: >-
+  Shape from `api:2026-08-09:db_invoices_query` — a two-line invoice with two tax components. Amounts
+  synthetic. ⚠️ **Renamed from `two-lines-two-product-lines-with-tax` on 2026-08-16** (ADR-0036): the
+  transfers no longer carry a product line, and what they DO carry — two different causal orders on
+  one invoice — is both the more interesting case and the reason the rule exists.
+  **The two-orders-on-one-invoice shape is measured, not invented**: `INVOICE_ITEM_LEVELS` is
+  `[order, destination, group]` against `ORDER_ITEM_LEVELS`'s `[destination, group]` precisely because
+  an invoice can bill several orders (`code:2026-08-16:core:src/utils/orders.ts`).
+
+given:
+  ledger_state:
+    closed_periods: []
+  invoice:
+    id: INV-VEC-0002
+    invoice_date: "2026-07-31"
+    total_minor: 100031
+    lines:
+      - net_minor: 75000
+        revenue_account: 4000
+        causal_orders: ["ORD-VEC-0001"]
+        path: [ORD-VEC-0001, DEST-VEC-0001, GRP-VEC-0001, ITEM-VEC-0001]
+        basis: "2 units x $125.00/day x 3 days"
+      - net_minor: 12500
+        revenue_account: 4200
+        causal_orders: ["ORD-VEC-0002"]
+        path: [ORD-VEC-0002, DEST-VEC-0002, GRP-VEC-0002, ITEM-VEC-0002]
+        basis: "10 units x $12.50"
+    tax_components:
+      - {
+          payable_account: 2200,
+          amount_minor: 11250,
+          tax: "Chicago Rental Tax",
+          rate_percent: 15,
+          base_minor: 75000,
+        }
+      - {
+          payable_account: 2200,
+          amount_minor: 1281,
+          tax: "Chicago Sales Tax",
+          rate_percent: 10.25,
+          base_minor: 12500,
+        }
+
+derivation: >-
+  **The accept vector every `invoice_issued` rejection is a minimal pair against**, and it now
+  exercises all three keys at once (ADR-0036).
+  Four transfers, one per revenue line and one per tax component. Each revenue transfer carries the
+  causal order, the invoice and the LINE — and `path[0]` IS the causal order, which is the shared-key
+  economy ADR-0036 turns on: one stored path names the row, the document it sits in, and the order
+  that caused it. The two lines sit on **different orders**, so the invoice spans two.
+  ⚠️ **The tax transfers declare `causal_orders: null`, and that is a determination rather than a
+  gap.** A tax component is computed on the invoice as a whole and is a liability to the state;
+  splitting it across the orders behind the invoice would be an allocation with no basis, and
+  omitting the key would be indistinguishable from an oversight. They carry the invoice and no line —
+  a tax component is not a row of the sale.
+  control_total = 75000 + 12500 + 11250 + 1281 = 100031 = `invoice.total_minor`. The tax legs are
+  what make the control total non-trivial: a rule that dropped them balances and understates AR.
+  ⚠️ **`path` is stored as a HASH or a minted surrogate, never as the list written here** (ADR-0036).
+  Invoice paths run to depth 7 and 178 bytes, and 14,410 of 14,410 exceed a u128's 16 — 100%, with a
+  single 36-char uuid overflowing one on its own. The list form is written in these vectors because
+  it is what the rule READS; what TigerBeetle holds is a fingerprint that verifies against the
+  projection rather than a reference that resolves without it.
+
+expect:
+  transfers:
+    - {
+        debit_account: 1200,
+        credit_account: 4000,
+        amount_minor: 75000,
+        accounting_date: "2026-07-31",
+        causal_orders: ["ORD-VEC-0001"],
+        invoice: INV-VEC-0002,
+        line: [ORD-VEC-0001, DEST-VEC-0001, GRP-VEC-0001, ITEM-VEC-0001],
+      }
+    - {
+        debit_account: 1200,
+        credit_account: 4200,
+        amount_minor: 12500,
+        accounting_date: "2026-07-31",
+        causal_orders: ["ORD-VEC-0002"],
+        invoice: INV-VEC-0002,
+        line: [ORD-VEC-0002, DEST-VEC-0002, GRP-VEC-0002, ITEM-VEC-0002],
+      }
+    - {
+        debit_account: 1200,
+        credit_account: 2200,
+        amount_minor: 11250,
+        accounting_date: "2026-07-31",
+        causal_orders: null,
+        invoice: INV-VEC-0002,
+      }
+    - {
+        debit_account: 1200,
+        credit_account: 2200,
+        amount_minor: 1281,
+        accounting_date: "2026-07-31",
+        causal_orders: null,
+        invoice: INV-VEC-0002,
+      }
+  rejects: []

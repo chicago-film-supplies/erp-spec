@@ -8,26 +8,46 @@
 requirements:
   - id: REQ-LED-001
     statement: >-
-      Every posting to an account whose chart entry names a required dimension shall DECLARE that
-      dimension — either a value drawn from the dimension's declared set, or an explicit null
-      recording that no tracked value applies — and a posting that does not declare it shall be
-      rejected rather than recorded.
+      Every posting shall DECLARE its causal order — either the order or orders that caused it, or
+      an explicit null recording that no causal order applies — and a posting that does not declare
+      it shall be rejected rather than recorded. A posting shall further declare every other key its
+      posting rule names, and shall declare no key its posting rule does not name.
     rationale: >-
-      A dimension that may be absent will be absent, and the current system is the demonstration:
-      the dimension was optional and untracked line revenue reached **28.8%**.
-      **The rule is justified by the absence/null distinction, not by the size of that number** —
-      which is fortunate, because the number turned out to be measuring something else. See the
-      measurement history below; it is kept because the way it went wrong is itself the argument for
-      how this requirement must be verified.
-      Amended 2026-08-09 per ADR-0025. The previous wording — "every revenue and COGS posting
-      shall carry both a product line and a cost type" — named the two dimensions directly and was
-      wrong in both directions: `cost_type` describes labour, so no value of it is true of a rental
-      revenue posting, while several revenue accounts arise from no sale and carry no product line
-      either. Naming the obligation on the ACCOUNT keeps the rule enforceable without weakening it,
-      and the escape hatch for an uncategorisable line is 4800 Other Income.
-      Amended again the same day per OQ-025: what is refused is ABSENCE, not null. An explicit null
-      is a decision, and a countable, reportable one. An empty string is refused alongside absence,
-      because it passes a naive NOT NULL check while meaning nothing.
+      **RESTATED 2026-08-16 per ADR-0036, which supersedes ADR-0018 — the subject changed, the rule
+      did not.** The requirement used to bind a DIMENSION ("every posting to an account whose chart
+      entry names a required dimension shall DECLARE that dimension"). ADR-0036 removes dimensions
+      from postings entirely: a posting records keys — causal order(s), invoice link, line identity
+      — and every classification is derived at report time by joining those keys to the master data.
+      There is no dimension left to declare, so a rule about declaring one would enforce nothing.
+      **What survives, and what ADR-0036 says is stronger, is the ABSENCE-versus-NULL distinction.**
+      An explicit null is a determination: countable, reportable, attributable to whoever made it. A
+      missing key is indistinguishable from an oversight. `""` and the empty list are refused
+      alongside absence, because both satisfy a naive presence check while meaning nothing. That
+      rule is better against a key than against a classification — a category can defensibly be
+      absent from a document that never had one, while **a posting with no causal order is
+      unallocatable**, which is the fact the whole reporting side is built on (ADR-0029, ADR-0031).
+      ⚠️ **"There is no defensible null causal order" was FALSIFIED by the corpus, and the owner
+      chose the amendment rather than the defence.** $87,839.76 across 87 revenue-bearing lines on
+      30 issued invoices carry no causal order at all — 30 of 30 legacy CRMS imports referencing no
+      order, 0 of 30 referencing one. Refusing them outright makes 30 historical invoices unpostable,
+      which ADR-0020's "the restatement must not alter any amount" forbids. Owner, 2026-08-16: **"we
+      can allow source order null."** So an explicit null causal order is legal and recorded, and
+      what is refused is its ABSENCE — the rule this repo already runs on everywhere else. Nothing is
+      fabricated: the rejected alternative was minting a synthetic order per legacy invoice, which
+      would invent a document that never existed.
+      **The second sentence is what erp-spec#20 asked for and could not have.** #20 proposed joining
+      scenarios to the chart's per-account `dimensions:` lists; ADR-0036 deletes those lists, so the
+      applicability question re-homes to the POSTING RULE — which keys a posting owes is a property
+      of what happened, not of where it landed. Both arms are enforced: gate 10h refuses an
+      undeclared key and refuses a key the rule does not name, gate 10p makes the Gherkin agree with
+      the rule, and gate 10q refuses a key no accept vector ever supplies. ⚠️ #20's own text said the
+      presence half was "genuinely undecided" and that was already stale when it was written — gate
+      10h has refused an unowed dimension on every golden vector since it existed, and was fired red
+      against a `vendor_bill_received` vector on 2026-08-16. The requirement now says what the gate
+      does, closing the disagreement-by-silence #20 identified.
+      **The historical rationale is kept below because the way it went wrong is the argument for how
+      this requirement must be verified**, and it survives the change of subject intact: the number
+      that justified the old rule was measuring a derived copy. ADR-0036 removes the copy.
       ⚠️ **MEASUREMENT HISTORY — the headline moved by a factor of ~700 and the cause changed
       category.** Three passes, each superseding the last, all on the same corpus:
       (1) 2026-08-08 — 28.7% of line revenue carries no product line. Read as operators declining to
@@ -44,13 +64,22 @@ requirements:
       The defect was **PROPAGATION, not an undecided operator**, and it is now repaired: untracked
       line revenue is **15.00%** ($253,306.59 of $1,688,980.87), all of it custom lines and
       genuinely uncategorised products.
-      **What this requires of verification, and it is the point:** a rule refusing an absent
+      **What this required of verification, and it is the point:** a rule refusing an absent
       dimension is fully satisfied by a system that reliably copies the product's category — so this
       requirement would not have caught the defect its own headline number described. `analysis`
-      against a derived field measures the derivation. **The verifying measurement must read the
+      against a derived field measures the derivation. **The verifying measurement had to read the
       product master, which is the authority, not the line denorm, which is a copy.**
-    source: inbox/2026-08-10-the-untracked-revenue-denorm-is-repaired-and-28-7-percent-is-now-15-percent.md
+      ✅ **ADR-0036 removes the copy, so that trap is closed by construction rather than by care** —
+      there is one authority and nothing derived from it is stored. ⚠️ **The equivalent trap for the
+      restated rule is different and is stated here so it is not learned twice:** a causal order is a
+      KEY, so it cannot silently disagree with a master; what it can be is WRONG. The path a posting
+      keys on has to be the same path the order line holds, and 59 of 9,307 comparable invoice lines
+      (0.634%) are misaligned today — the same line uid at a different path, six times the count
+      api-cloudrun#485 reported before it was closed `NOT_PLANNED`. A posting keyed on a wrong path
+      is wrong forever in an immutable store. **The verifying measurement is the alignment audit**
+      (api-cloudrun#538, `scripts/audit-item-paths.ts`), not a null count.
+    source: inbox/2026-08-16-owner-rulings-line-identity-is-item-path-ephemeral-reports-are-never-sealed-and-cost-type-becomes-labour-line.md
     priority: must
     verification_method: test
     status: draft
-    relates_to: [ADR-0009, ADR-0018, ADR-0025, HOT-006, HOT-011]
+    relates_to: [ADR-0009, ADR-0018, ADR-0025, ADR-0029, ADR-0036, HOT-006, HOT-011, HOT-014]

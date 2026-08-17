@@ -823,7 +823,7 @@ for (const e of evts) {
     class?: string;
     normal_balance?: string;
     contra?: boolean;
-    dimensions?: unknown;
+    dimensions?: unknown; // ⚠️ read ONLY so 10a can refuse it — see the check below
     disposition?: string;
     status_live?: string;
     class_live?: string;
@@ -875,7 +875,26 @@ for (const e of evts) {
     for (const f of ["code", "name", "class", "normal_balance", "disposition", "source"] as const) {
       if (a[f] === undefined || a[f] === null || a[f] === "") fail(G, `${where}: missing \`${f}\``);
     }
-    if (a.dimensions === undefined) fail(G, `${where}: missing \`dimensions\``);
+    /**
+     * ⚠️ **INVERTED 2026-08-16 (ADR-0036, erp-spec#19). This check demanded `dimensions` on every
+     * account until today; it now REFUSES it.** ADR-0036 supersedes ADR-0018: the chart is plain
+     * and a posting carries keys, not classifications, so a per-account dimension obligation has
+     * nothing left to state. The key was DELETED from all 139 entries rather than emptied to `[]`
+     * — a field that can only hold `[]` carries no information and invites the next author to fill
+     * one in, and this repo prefers making a defect class unrepresentable over policing it.
+     *
+     * ⚠️ ADR-0036's own Consequences say "`5800`'s `dimensions: [product_line, cost_type]` becomes
+     * `dimensions: []`", which reads the other way. That sentence states the effect on the one
+     * account that owed two; the bullet after it says the lists are **obsoleted in their current
+     * form**, and deletion is the stronger reading. This check is what makes it enforced rather
+     * than asserted, and it was fired red against a re-added `dimensions: []` before landing.
+     */
+    if (a.dimensions !== undefined) {
+      fail(
+        G,
+        `${where}: carries \`dimensions\` — the chart states no dimension obligation (ADR-0036, superseding ADR-0018). Which KEYS a posting owes is read off its rule in ledger/posting-rules.yaml`,
+      );
+    }
     if (typeof a.code !== "number" || !Number.isInteger(a.code)) {
       fail(G, `${where}: \`code\` must be an integer`);
     } else if (byCode.has(a.code)) {
@@ -894,12 +913,6 @@ for (const e of evts) {
     if (a.disposition && !DISPOSITIONS.includes(a.disposition)) {
       fail(G, `${where}: disposition "${a.disposition}" not one of ${DISPOSITIONS.join(" | ")}`);
     }
-    if (
-      a.dimensions !== undefined && !Array.isArray(a.dimensions) && a.dimensions !== "undecided"
-    ) {
-      fail(G, `${where}: dimensions must be a list of dimension ids, or \`undecided\``);
-    }
-
     // 10b — normal_balance follows class, inverted by `contra`. Both arms are exercised by the
     // live chart (6 accumulated-depreciation accounts + 5001 + 3200 are contra), so this is not
     // vacuous in either direction.
@@ -924,8 +937,9 @@ for (const e of evts) {
       if (!a.reason) fail(G, `${where}: \`merge\` requires a \`reason\``);
       if (a.merge_into === undefined) fail(G, `${where}: \`merge\` requires \`merge_into\``);
     }
-    // `undecided` may sit on the disposition or on `dimensioned`; either way it owes a live blocker.
-    if (a.disposition === "undecided" || a.dimensions === "undecided") {
+    // An `undecided` disposition owes a live blocker. (It could also sit on `dimensions` until
+    // 2026-08-16; ADR-0036 removed that field, so `disposition` is the only bearer left.)
+    if (a.disposition === "undecided") {
       if (!a.reason) fail(G, `${where}: \`undecided\` requires a \`reason\``);
       checkBlockers(a.blocked_by, where);
     }
@@ -970,7 +984,8 @@ for (const e of evts) {
       debit_account?: unknown;
       credit_account?: unknown;
       amount?: string;
-      dimensions?: unknown;
+      per?: string;
+      keys?: unknown;
     }[];
     no_postings_reason?: string;
     control_total?: string | null;
@@ -1113,86 +1128,243 @@ for (const e of evts) {
     if (y) vectors.push({ ...y, _file: f });
   }
 
-  const dimY = await readYaml<
-    { dimensions?: { id?: string; values?: string[]; required_on?: string[] }[] }
-  >(
-    `${ROOT}/ledger/dimensions.yaml`,
-  );
-  const dimValues = new Map<string, Set<string>>();
-  for (const d of dimY?.dimensions ?? []) {
-    if (d.id) dimValues.set(d.id, new Set(d.values ?? []));
-  }
+  /**
+   * ── the KEY vocabulary, derived from the posting rules (ADR-0036) ──────────────────────────
+   *
+   * ⚠️ **This block read `ledger/dimensions.yaml` and the chart's per-account `dimensions:` lists
+   * until 2026-08-16.** ADR-0036 supersedes ADR-0018: a posting carries KEYS — causal order(s),
+   * invoice link, line identity — and never a classification, so there is no per-account
+   * obligation left to check and `ledger/dimensions.yaml` became a REPORTING taxonomy. It is still
+   * checked, by gate 13 against `reporting/product-line-pl.yaml`; it is no longer checked here,
+   * and that is the whole of what moved.
+   *
+   * Which keys a posting owes is now read off its RULE. `keys:` is a map of key -> dotted path,
+   * the literal `null` where the rule always declares that none applies, or one of the two mirror
+   * markers for a reversal.
+   */
+  const KEY_NAMES = new Set(["causal_orders", "invoice", "line"]);
+  const MIRROR = new Set(["mirrors_original_transfer", "mirrors_retracted_transfer"]);
 
-  // Every dimension an account demands must be a dimension that exists. Without this the chart
-  // could require `cost_typ` forever and no vector would ever be asked for it.
-  for (const a of accounts) {
-    if (!Array.isArray(a.dimensions)) continue;
-    for (const d of a.dimensions) {
-      if (!dimValues.has(String(d))) {
-        fail(
-          G,
-          `chart-of-accounts code ${a.code}: requires dimension "${d}", which ledger/dimensions.yaml does not define`,
-        );
+  /** The `keys:` map of one posting, or null where the posting uses a mirror marker. */
+  const postingKeys = (
+    posting: { keys?: unknown },
+  ): Record<string, unknown> | null =>
+    typeof posting.keys === "string" && MIRROR.has(posting.keys)
+      ? null
+      : (posting.keys && typeof posting.keys === "object" && !Array.isArray(posting.keys))
+      ? posting.keys as Record<string, unknown>
+      : {};
+
+  /** Every key ANY posting of a rule declares — what a transfer of it MAY carry. */
+  const ruleKeys = (id: string): Set<string> => {
+    const out = new Set<string>();
+    for (const p of ruleById.get(id)?.postings ?? []) {
+      const k = postingKeys(p);
+      if (k === null) {
+        // A mirror copies whatever it reverses, so every key is reachable through it.
+        for (const n of KEY_NAMES) out.add(n);
+        continue;
       }
+      for (const n of Object.keys(k)) out.add(n);
     }
-  }
+    return out;
+  };
+
+  /** Keys EVERY posting of a rule declares — what a transfer of it MUST carry. */
+  const ruleMandatoryKeys = (id: string): Set<string> => {
+    const postings = ruleById.get(id)?.postings ?? [];
+    if (postings.length === 0) return new Set<string>();
+    let acc: Set<string> | null = null;
+    for (const p of postings) {
+      const k = postingKeys(p);
+      // A mirror guarantees only the universal arm; it cannot promise a key set.
+      const names: Set<string> = k === null
+        ? new Set<string>(["causal_orders"])
+        : new Set<string>(Object.keys(k));
+      const prev: Set<string> = acc ?? names;
+      acc = new Set<string>([...prev].filter((n: string) => names.has(n)));
+    }
+    return acc ?? new Set<string>();
+  };
 
   /**
-   * 10n — a dimension value named in a `.feature` scenario must be one `dimensions.yaml` declares.
+   * Resolve a vector transfer to the ONE posting that produced it — possible only where exactly one
+   * posting of the rule states BOTH accounts as literal GL codes and both match. That is a strict
+   * condition and it is met by `shift_recorded` (5800/2010 against 5801/2010), by
+   * `vendor_bill_received`'s reclassification leg (2010/2000) and by `credit_note_issued`'s
+   * write-off leg (6900/2050). Everything else falls back to the union/intersection arms above,
+   * and 10h says so rather than pretending otherwise.
+   */
+  const resolvePosting = (
+    id: string,
+    debit: unknown,
+    credit: unknown,
+  ): { keys?: unknown } | null => {
+    const hits = (ruleById.get(id)?.postings ?? []).filter((p) =>
+      typeof p.debit_account === "number" && typeof p.credit_account === "number" &&
+      p.debit_account === Number(debit) && p.credit_account === Number(credit)
+    );
+    return hits.length === 1 ? hits[0] : null;
+  };
+
+  /**
+   * ── 10n + 10p — the `.feature` scenarios are joined to the posting rules ───────────────────
    *
-   * Gate 10 checked every golden vector in `ledger/vectors/` against the declared value sets and
-   * stopped there, so the Gherkin — which gate 3 makes every requirement's ONLY executable
-   * statement — was a hole in a guarantee that reads as complete (erp-spec#16). The hole was real:
-   * `dimensional-postings.feature:25` asserted a posting carrying `"Transport"` is RECORDED for
-   * eleven days while `dimensions.yaml` did not declare the value, which the same requirement says
-   * must be refused. `deno task validate` was green throughout.
+   * ⚠️ **REPLACED 2026-08-16 (ADR-0036, erp-spec#19 + #20).** 10n used to check that a dimension
+   * VALUE named in a scenario step was one `ledger/dimensions.yaml` declared (erp-spec#16). That
+   * hole was real — `dimensional-postings.feature:25` asserted a posting carrying `"Transport"` is
+   * RECORDED for eleven days while the value was undeclared — but the check is now moot: no
+   * posting carries a dimension, and the file it guarded is a reporting taxonomy.
    *
-   * ⚠️ **This lands GREEN**, and that is a fact about the data, not about the gate. `Transport` was
-   * restored on 2026-08-16 (OQ-034), so all three values in use — `Transport`, `delivery`, `Crew` —
-   * now resolve. It was fired deliberately against a mutated scenario before landing.
+   * Its own comment said what it could not do:
    *
-   * Scope is VOCABULARY, not applicability. Whether a `cost_type` belongs on the account a
-   * scenario posts to is HOT-015, and this check cannot see it: the scenarios do not name an
-   * account. Do not read a green 10n as "the scenarios agree with the chart".
+   *   > Scope is VOCABULARY, not applicability. Whether a `cost_type` belongs on the account a
+   *   > scenario posts to is HOT-015, and this check cannot see it: the scenarios do not name an
+   *   > account. Do not read a green 10n as "the scenarios agree with the chart".
    *
-   * A declared null stays legal — "carries no product line" is REQ-LED-001's whole point, and only
-   * a quoted value is matched here.
+   * **erp-spec#20 is that missing half, and this is it.** #20 proposed joining scenarios to the
+   * chart's per-account `dimensions:` lists — the lists ADR-0036 deletes — so building it before
+   * this sweep would have been a guard over machinery the sweep removes. The join target moved to
+   * `ledger/posting-rules.yaml`, which is the better one: which keys a posting owes is a property
+   * of WHAT HAPPENED, not of where it landed.
    *
-   * ⚠️ **STEP LINES ONLY**, and that restriction is load-bearing rather than tidiness. A first cut
-   * matched anywhere in the file and fired on the Feature's own description paragraph, which named
-   * `"Transport"` while explaining that the value had been dropped. That is the repo's correction
-   * convention working — retraction annotations quote the retracted value on purpose, all over
-   * `ledger/` and `adr/` — so a gate that read prose would turn CI red on exactly the notes the
-   * repo asks people to write. A scenario STEP is the executable claim; the paragraph above it is
+   * **10n — resolution.** A rule or account named in a step must exist. This alone catches a
+   * renamed or deleted rule silently drifting out of the Gherkin, which is #20's third arm.
+   * **10p — applicability.** A key a scenario asserts must be one the rule it names carries. A
+   * scenario asserting rejection for a MISSING key must name a rule that carries it — otherwise it
+   * asserts a refusal that could never fire.
+   *
+   * ⚠️ **STEP LINES ONLY**, and the restriction is inherited from 10n because it is load-bearing
+   * rather than tidiness. A first cut of 10n matched anywhere in the file and fired on the
+   * Feature's own description paragraph, which named `"Transport"` while explaining that the value
+   * had been dropped. Retraction annotations quote the retracted thing on purpose, all over
+   * `ledger/` and `adr/` — a gate that read prose would turn CI red on exactly the notes this repo
+   * asks people to write. A scenario STEP is the executable claim; the paragraph above it is
    * documentation.
+   *
+   * ⚠️ **Both land GREEN**, which is a fact about the data and not about the gate. Four arms, each
+   * fired deliberately against a mutated file before landing:
+   *
+   *   · 10n rule      — a step naming `invoice_issed` → "does not define"
+   *   · 10n account   — an Examples row naming 5899 → "not in ledger/chart-of-accounts.yaml"
+   *   · 10p positive  — a `credit_note_issued` scenario carrying an `invoice` key, the exact
+   *                     combination the rule refuses on ADR-0033 grounds
+   *   · 10p negative  — the same scenario re-pointed at `invoice_issued`, which DOES carry it
+   *   · 10p refusal   — "carries no line" under `settlement_recorded`, which has no line key
+   *
+   * ⚠️ **The account arm did nothing until it was fired, and that is why firing is the rule.** It
+   * scanned STEP lines only, and the one scenario that names accounts is a Scenario Outline whose
+   * `Given` says `<account>` — a placeholder. Every real code lives in the Examples table below it.
+   * A check that reads green while matching nothing is indistinguishable from a check that passes.
    */
   {
-    const DIM_OF: Record<string, string> = {
-      "product line": "product_line",
-      "cost type": "cost_type",
-    };
     const STEP = /^\s*(Given|When|Then|And|But|\*)\s/;
+    /** "the causal order", "the invoice", "the line" -> the key a rule declares. */
+    const KEY_OF: Record<string, string> = {
+      "causal order": "causal_orders",
+      invoice: "invoice",
+      line: "line",
+    };
     for (const f of await filesIn("contexts", ".feature")) {
       const text = await Deno.readTextFile(f);
       const lines = text.split("\n");
+      /** The rule a scenario is under, carried forward from its `Given` to its later steps. */
+      let currentRule: string | null = null;
       lines.forEach((line, i) => {
+        if (/^\s*(Scenario|Scenario Outline|Feature):/.test(line)) currentRule = null;
+        const where = `${rel(f)}:${i + 1}`;
+
+        /**
+         * 10n — account codes in an Examples table. ⚠️ **Steps alone are not enough and this was
+         * found by firing the check red**: a Scenario Outline's `Given` names `<account>`, a
+         * placeholder, and the real codes only ever appear in the table below it. Scanning steps
+         * only, the account arm silently matched nothing on the one scenario that names accounts.
+         * A table ROW is as executable as a step — it is the input the outline runs on.
+         */
+        if (/^\s*\|/.test(line)) {
+          for (const am of line.matchAll(/\b(\d{4}) [A-Z]/g)) {
+            if (!byCode.has(Number(am[1]))) {
+              fail(
+                G,
+                `${where}: Examples row names account ${
+                  am[1]
+                }, which is not in ledger/chart-of-accounts.yaml`,
+              );
+            }
+          }
+        }
+
         if (!STEP.test(line)) return;
-        for (const m of line.matchAll(/\bthe (product line|cost type) "([^"]*)"/g)) {
-          const dim = DIM_OF[m[1]];
-          const values = dimValues.get(dim);
-          if (!values) {
+
+        // 10n — a rule named in a step resolves.
+        const rm = line.match(/\bunder the rule ([a-z][a-z0-9_]*)/);
+        if (rm) {
+          if (!ruleById.has(rm[1])) {
             fail(
               G,
-              `${rel(f)}:${i + 1}: dimension "${dim}" is not defined in ledger/dimensions.yaml`,
+              `${where}: names posting rule "${
+                rm[1]
+              }", which ledger/posting-rules.yaml does not define`,
+            );
+            currentRule = null;
+          } else currentRule = rm[1];
+        }
+
+        // 10n — an account code named in a step resolves.
+        for (const am of line.matchAll(/\bto (\d{4}) [A-Z]/g)) {
+          if (!byCode.has(Number(am[1]))) {
+            fail(
+              G,
+              `${where}: names account ${am[1]}, which is not in ledger/chart-of-accounts.yaml`,
+            );
+          }
+        }
+
+        // 10p — a key a scenario asserts must be one its rule carries.
+        for (const km of line.matchAll(/\bthe (causal order|invoice|line) "([^"]*)"/g)) {
+          const key = KEY_OF[km[1]];
+          if (!currentRule) {
+            fail(
+              G,
+              `${where}: asserts the key \`${key}\` but no step above it named a posting rule — a key assertion with no rule to join to cannot be checked`,
             );
             continue;
           }
-          if (!values.has(m[2])) {
+          if (!ruleKeys(currentRule).has(key)) {
             fail(
               G,
-              `${rel(f)}:${i + 1}: ${dim} "${
-                m[2]
-              }" is not a declared value in ledger/dimensions.yaml`,
+              `${where}: asserts \`${key}\`, which no posting of rule "${currentRule}" carries`,
+            );
+          }
+        }
+
+        /**
+         * 10p — the NEGATIVE arm. A scenario that exists to refuse an unowed key writes it as
+         * `the unowed <key> "…"`, and this checks the claim rather than exempting it: the rule
+         * really must not carry that key. ⚠️ **Without the marker the positive arm above would
+         * fire on exactly the scenario written to demonstrate the refusal** — which is how a gate
+         * ends up with an exemption list instead of a check. This is the same shape as gate 11's
+         * self-expiring exemptions: state the negative claim, then verify it.
+         */
+        for (const um of line.matchAll(/\bthe unowed (causal order|invoice|line) "([^"]*)"/g)) {
+          const key = KEY_OF[um[1]];
+          if (!currentRule) continue;
+          if (ruleKeys(currentRule).has(key)) {
+            fail(
+              G,
+              `${where}: calls \`${key}\` unowed, but rule "${currentRule}" does carry it — the scenario demonstrates a refusal that would not happen`,
+            );
+          }
+        }
+
+        // 10p — a scenario refusing a MISSING key must name a rule that carries it.
+        for (const nm of line.matchAll(/\bcarries no (causal order|invoice|line)\b/g)) {
+          const key = KEY_OF[nm[1]];
+          if (!currentRule) continue;
+          if (!ruleKeys(currentRule).has(key)) {
+            fail(
+              G,
+              `${where}: asserts a missing \`${key}\` is refused, but rule "${currentRule}" carries no such key — the refusal could never fire`,
             );
           }
         }
@@ -1271,49 +1443,126 @@ for (const e of evts) {
           fail(G, `${where} transfer[${j}]: ${side} ${c} is not an account in the chart`);
         }
       }
-      // 10h — dimension obligation. The requirement is READ OFF each account's own `dimensions`
-      // list, never inferred from its class: `cost_type` describes labour and applies to 5800
-      // alone, so "is this COGS" is not a rule that can produce the right answer.
-      const sides = [t.debit_account, t.credit_account].map((c) => byCode.get(Number(c))).filter(
-        Boolean,
-      ) as Account[];
-      const undecided = sides.some((a) => a.dimensions === "undecided");
-      if (!undecided) {
-        const required = new Set<string>();
-        for (const a of sides) {
-          for (const d of Array.isArray(a.dimensions) ? a.dimensions : []) required.add(String(d));
+      /**
+       * ── 10h — KEY obligation (ADR-0036, superseding ADR-0018) ──────────────────────────────
+       *
+       * ⚠️ **This check read the CHART until 2026-08-16** — "the requirement is READ OFF each
+       * account's own `dimensions:` list, never inferred from its class" (ADR-0025). ADR-0036
+       * deleted those lists: a posting carries KEYS, not classifications. The obligation is now
+       * read off the POSTING RULE, which is the better authority — which keys a posting owes is a
+       * property of what happened, not of where it landed. The vector and the rule remain two
+       * files neither of which controls the other, so the check stays independent of the thing it
+       * is checking.
+       *
+       * ⚠️ **Fired red on every arm before landing, and two arms were WRONG when first fired.**
+       * (a) a transfer with `causal_orders` removed, and again with `[]`, and again with `""`;
+       * (b) an unowed `invoice` on `credit_note_issued`'s write-off leg; (c) an `invoice_issued`
+       * transfer with the mandatory `invoice` removed; (d) a `line` key added to
+       * `settlement_recorded` that no accept vector supplies; (e) a causal order on 5801's idle leg,
+       * and an explicit null on 5800's absorbed leg.
+       *   · **(a) double-reported.** `String([]) === ""`, so the empty-LIST case also tripped the
+       *     empty-STRING arm — two messages for one defect, which is how a gate teaches the wrong
+       *     lesson at 2am. The empty-string arm is now guarded against arrays.
+       *   · **(c) did not fire at all, and the bug was in the SPEC rather than the gate.**
+       *     `invoice_issued`'s tax posting declared only `causal_orders` while every vector's tax
+       *     transfer carried `invoice: …` — so `invoice` was not in the rule's mandatory set and
+       *     removing it from a transfer was legal. The rule was corrected; a tax component does
+       *     arise from the invoice. **Nothing but firing this arm would have found it**: arm (b)
+       *     checks the UNION, which already contained `invoice`, so the vectors and the rule
+       *     disagreed while every gate stayed green.
+       *
+       * ⚠️ **A STATED LIMIT, so a green 10h is not over-read.** A vector states transfers; a rule
+       * states postings; nothing links a transfer to the posting that produced it except its
+       * accounts. Where BOTH accounts of exactly one posting are literal GL codes, `resolvePosting`
+       * gets an exact answer and arm (e) checks that posting's key set precisely. Where they are
+       * dotted paths — `invoice_issued`'s two legs both debit 1200 and credit a path — it cannot,
+       * and arms (b)/(c) degrade to a union/intersection check. **Arm (d) is what stops that being
+       * vacuous**: a key no accept vector ever supplies is a key the implementation can quietly
+       * ignore, which is this repo's own definition of a claim rather than a capability.
+       */
+      const rk = rid ? ruleKeys(rid) : new Set<string>();
+      const mandatory = rid ? ruleMandatoryKeys(rid) : new Set<string>();
+      const exact = rid ? resolvePosting(rid, t.debit_account, t.credit_account) : null;
+
+      // (a) UNIVERSAL — every posting declares its causal order. ABSENT vs NULL is the whole
+      // distinction and it is not a nicety: an explicit null IS a decision — "no causal order
+      // applies" — and is countable, reportable and auditable, while a missing key is
+      // indistinguishable from an oversight. An empty LIST is neither: it satisfies a naive
+      // presence check while stating nothing, exactly as `""` did for a dimension, so it stays
+      // refused (REQ-LED-001).
+      if (!Object.prototype.hasOwnProperty.call(t, "causal_orders")) {
+        fail(
+          G,
+          `${where} transfer[${j}]: does not declare \`causal_orders\` — every posting declares its causal order; absence is refused, an explicit null is not (REQ-LED-001, ADR-0036)`,
+        );
+      } else if (Array.isArray(t.causal_orders) && t.causal_orders.length === 0) {
+        fail(
+          G,
+          `${where} transfer[${j}]: causal_orders is the empty list — write an explicit null to record that none applies (REQ-LED-001)`,
+        );
+      }
+
+      for (const key of KEY_NAMES) {
+        const declared = Object.prototype.hasOwnProperty.call(t, key);
+        // (b) a key the rule does not name is refused as firmly as a missing one.
+        if (declared && !rk.has(key)) {
+          fail(
+            G,
+            `${where} transfer[${j}]: declares \`${key}\`, which no posting of rule "${rid}" carries`,
+          );
         }
-        for (const dim of dimValues.keys()) {
-          // ABSENT vs NULL is the whole distinction, and it is not a nicety. The 28.7% of untracked
-          // revenue came from postings where nobody decided; an explicit `null` IS a decision —
-          // "no tracked value applies" — and is countable, reportable and auditable. So a missing
-          // KEY is refused and a null VALUE is recorded. An empty string is neither: it satisfies
-          // a naive NOT NULL check while meaning nothing, so it stays refused.
-          const declared = Object.prototype.hasOwnProperty.call(t, dim);
-          if (required.has(dim) && !declared) {
+        // (c) a key EVERY posting of the rule names must be on every transfer.
+        if (!declared && mandatory.has(key)) {
+          fail(
+            G,
+            `${where} transfer[${j}]: does not declare \`${key}\`, which every posting of rule "${rid}" carries`,
+          );
+        }
+        // An empty string is neither a reference nor a determination. ⚠️ **Guarded against arrays
+        // on purpose**: `String([]) === ""`, so an unguarded check fires a second, misleading
+        // "empty string" failure on the empty-LIST case the arm above already names precisely.
+        // Found by firing that arm red — two messages for one defect is how a gate teaches the
+        // wrong lesson at 2am.
+        if (declared && t[key] !== null && !Array.isArray(t[key]) && String(t[key]) === "") {
+          fail(
+            G,
+            `${where} transfer[${j}]: ${key} is the empty string — write an explicit null to record that none applies`,
+          );
+        }
+      }
+
+      // (e) EXACT — where the transfer resolves to one posting, its key set must match that
+      // posting's exactly, and a rule that pins `causal_orders: null` admits no other value. This
+      // is what gives 5800-vs-5801 teeth: an absorbed allocation has no legal null (hours
+      // belonging to no job are unabsorbed by definition), while 5801's posting IS the null arm.
+      const exactKeys = exact ? postingKeys(exact) : null;
+      if (exactKeys) {
+        const want = new Set(Object.keys(exactKeys));
+        for (const key of KEY_NAMES) {
+          const declared = Object.prototype.hasOwnProperty.call(t, key);
+          if (declared !== want.has(key)) {
             fail(
               G,
-              `${where} transfer[${j}]: posts to a dimensioned account but does not declare \`${dim}\` — absence is refused; an explicit null is not (REQ-LED-001)`,
+              `${where} transfer[${j}]: posts ${t.debit_account}/${t.credit_account}, which resolves to one posting of "${rid}" carrying [${
+                [...want].join(", ")
+              }] — it ${declared ? "declares" : "omits"} \`${key}\``,
             );
           }
-          if (!required.has(dim) && declared) {
-            fail(G, `${where} transfer[${j}]: declares \`${dim}\` but neither account requires it`);
-          }
-          if (declared && t[dim] !== null) {
-            if (String(t[dim]) === "") {
-              fail(
-                G,
-                `${where} transfer[${j}]: ${dim} is the empty string — write an explicit null to record that none applies`,
-              );
-            } else if (!dimValues.get(dim)!.has(String(t[dim]))) {
-              fail(
-                G,
-                `${where} transfer[${j}]: ${dim} "${
-                  t[dim]
-                }" is not a declared value in ledger/dimensions.yaml`,
-              );
-            }
-          }
+        }
+        if (exactKeys.causal_orders === null && t.causal_orders !== null) {
+          fail(
+            G,
+            `${where} transfer[${j}]: rule "${rid}" pins \`causal_orders: null\` on the ${t.debit_account}/${t.credit_account} posting, and this transfer declares a value`,
+          );
+        }
+        if (
+          exactKeys.causal_orders !== undefined && exactKeys.causal_orders !== null &&
+          t.causal_orders === null
+        ) {
+          fail(
+            G,
+            `${where} transfer[${j}]: rule "${rid}" reads \`causal_orders\` from \`${exactKeys.causal_orders}\` on the ${t.debit_account}/${t.credit_account} posting, so an explicit null is not one of its outcomes`,
+          );
         }
       }
     }
@@ -1386,6 +1635,46 @@ for (const e of evts) {
       }
     } else if (vs.length > 0) {
       fail(G, `posting-rules "${r.id}": status ${r.status} but has ${vs.length} vector(s)`);
+    }
+
+    /**
+     * ── 10h arm (d) — KEY COVERAGE, and this is the arm that stops the rest being vacuous ──────
+     *
+     * Every key a rule declares must be supplied by at least one transfer across its ACCEPT
+     * vectors. Arms (b) and (c) degrade to a union/intersection check wherever a transfer cannot
+     * be resolved to one posting, and a union check alone would let a rule declare a key that no
+     * vector ever carries — **an unexercised branch of a rule is a claim, not a capability**
+     * (CLAUDE.md), and this repo has been bitten by exactly that three times.
+     *
+     * ⚠️ **It is scoped to ACCEPT vectors deliberately.** A reject vector expects no transfers at
+     * all, so it can supply nothing, and counting it would make the check pass on rules whose only
+     * evidence is a refusal. Mirror rules (`invoice_voided`, `settlement_reversed`) declare every
+     * key by construction and are exempt from the union half; their accept vectors still carry
+     * whatever the entry they reverse carried, which is what makes their coverage real.
+     */
+    if (r.status === "specified" && r.id) {
+      const mirrors = (r.postings ?? []).some((p) =>
+        typeof p.keys === "string" && MIRROR.has(p.keys)
+      );
+      if (!mirrors) {
+        const supplied = new Set<string>();
+        for (const v of vs) {
+          if (v.kind !== "accept") continue;
+          for (const t of v.expect?.transfers ?? []) {
+            for (const key of KEY_NAMES) {
+              if (Object.prototype.hasOwnProperty.call(t, key)) supplied.add(key);
+            }
+          }
+        }
+        for (const key of ruleKeys(r.id)) {
+          if (!supplied.has(key)) {
+            fail(
+              G,
+              `posting-rules "${r.id}": declares the key \`${key}\` and no accept vector supplies it — an unexercised branch of a rule is a claim, not a capability`,
+            );
+          }
+        }
+      }
     }
   }
 
@@ -1487,9 +1776,36 @@ for (const e of evts) {
   const used = new Set<string>();
 
   const SCANNED_DIRS = ["adr", "spikes", "contexts", "ledger", "reporting", "migration", "roadmap"];
+  /**
+   * ⚠️ **Widened again 2026-08-16 (erp-spec#19) to the REPO-ROOT files.** The 2026-08-16 widening
+   * took the gate from `adr/` + `spikes/` to the whole refactorable half — and missed the root,
+   * where `hotspots.yaml`, `open-questions.yaml`, `glossary.yaml`, `charter.md` and `README.md`
+   * between them cite **114 repo paths**. It was found the way these things are: the ADR-0036 sweep
+   * renamed `dimensional-postings.feature` and hotspots.yaml's HOT-015 kept pointing at the old
+   * name, with nothing able to go red on it. Two dead citations existed at the moment of widening,
+   * both created by that rename and both fixed in the same commit.
+   * `CLAUDE.md` is included: it is refactored freely and its instructions are exactly the kind of
+   * thing that outlives the file they point at.
+   */
+  const SCANNED_ROOT_FILES = [
+    "hotspots.yaml",
+    "open-questions.yaml",
+    "glossary.yaml",
+    "charter.md",
+    "README.md",
+    "CLAUDE.md",
+  ];
   const scanned: string[] = [];
   for (const d of SCANNED_DIRS) {
     for (const ext of [".md", ".yaml", ".feature"]) scanned.push(...await filesIn(d, ext));
+  }
+  for (const f of SCANNED_ROOT_FILES) {
+    try {
+      await Deno.stat(`${ROOT}/${f}`);
+      scanned.push(`${ROOT}/${f}`);
+    } catch {
+      fail(G, `gate 11 is configured to scan \`${f}\`, which does not exist — fix the list`);
+    }
   }
   for (const f of scanned) {
     const text = await Deno.readTextFile(f);

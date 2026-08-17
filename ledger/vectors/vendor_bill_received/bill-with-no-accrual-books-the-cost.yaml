@@ -46,5 +46,6 @@ expect:
         credit_account: 2000,
         amount_minor: 120000,
         accounting_date: "2026-08-05",
+        causal_orders: null,
       }
   rejects: []

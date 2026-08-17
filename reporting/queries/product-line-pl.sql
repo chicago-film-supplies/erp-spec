@@ -18,8 +18,13 @@ WITH posting AS (
 ),
 
 -- ── the base: goods revenue per causal order, per product line ────────────────────────────────
--- `product_line IS NULL` stays IN. It is a determination, not an absence (ADR-0025), and dropping
--- it would concentrate the whole pool onto the tracked lines.
+-- ⚠️ **`posting.product_line` is DERIVED, not stored** (ADR-0036, superseding ADR-0018). The
+-- projection resolves it by joining the posting's `line_identity` key to the product master; this
+-- query reads the resolved column. `causal_order_id` is a real posting KEY and is read directly.
+-- `product_line IS NULL` stays IN — it is a line that resolves to no tracked category, which under
+-- ADR-0036 is a join outcome rather than a declared value, and dropping it would concentrate the
+-- whole pool onto the tracked lines. (This comment read "It is a determination, not an absence
+-- (ADR-0025)" until 2026-08-16; the two unresolved cases are enumerated in `ledger/dimensions.yaml`.)
 base AS (
     SELECT causal_order_id,
            product_line,

@@ -1,7 +1,8 @@
 # TigerBeetle representation of the chart of accounts.
 #
-# **This file holds NO account list, deliberately.** ADR-0018 keeps the chart plain — one account
-# per GL code — so the TigerBeetle account tree is a total function of
+# **This file holds NO account list, deliberately.** ADR-0018 kept the chart plain — one account
+# per GL code — and ADR-0036 re-affirmed exactly that half while superseding the rest of it, so the
+# TigerBeetle account tree is a total function of
 # `ledger/chart-of-accounts.yaml`. A second hand-maintained copy of ~110 accounts would be a second
 # thing to keep in agreement, and the workspace rule is to prefer a single source of truth over a
 # parity assertion between two hand-maintained lists. What this file holds is the rules that
@@ -12,6 +13,17 @@
 # model: one TB account per (GL code x product line x cost type). **ADR-0008 is superseded by
 # ADR-0018**, which decided the opposite, so the blocker named a decision that had already been
 # reversed and the file's premise was dead. The blocker is gone; the exploded model is gone.
+#
+# ⚠️ **And the dimensions went one step further on 2026-08-16.** ADR-0018 moved them off account
+# identity and onto the transfer; **ADR-0036 supersedes it and takes them off the transfer too** — a
+# posting carries KEYS (causal order(s), invoice link, line identity) and every classification is
+# derived at report time. The exploded model was raised again as per-product accounts married to a
+# product-line account, and set aside for the same reason a third time (owner: "probably overkill
+# and/or trying to force something into TigerBeetle that doesn't naturally fit"): **the marriage is
+# the mutable half, and TigerBeetle accounts cannot be re-parented.** The one place the shape IS
+# natural already exists — per-item balances that must not go negative are the inventory-custody
+# ledger (ADR-0015). Per-product MONEY balances are a reporting roll-up, and that is the test for
+# what does not belong here.
 
 ledger_id: 1
 currency: USD
@@ -68,14 +80,28 @@ transfer_field_budget:
 
   assignment:
     user_data_128: journal_entry_id
-    user_data_64: source_document_ref
+    user_data_64: line_identity # a hash or minted surrogate — see below
     user_data_32: accounting_date
     code: unclaimed
 
+  # ⚠️ **`user_data_64` held `source_document_ref` until 2026-08-16.** ADR-0036 was ACCEPTED that
+  # day, and its measured economy is that a path SUBSUMES a document ref — it names the document
+  # AND the row within it — so line identity DISPLACES the document ref rather than joining it.
+  # That is the whole saving, and it is one field rather than two: it cannot also absorb
+  # `journal_entry_id`, because 3 of 13 `specified` rules span several source documents.
+  # ⚠️ **What is stored is a HASH or a minted surrogate, never the path** — see
+  # `line_identity_replaces_the_document_ref_rather_than_joining_it` below for the measurement.
+
   unassigned_claimants:
     - actor_ref # owner, 2026-08-16 — see `actor_ref_is_a_fifth_claimant` below
-    - causal_order_ref # ADR-0036 (proposed)
-    - line_identity_item_path # ADR-0036 (proposed)
+    - causal_order_ref # ADR-0036 (ACCEPTED) — needed only where `path[0]` cannot supply it
+  # ⚠️ `product_line` and `cost_type` were claimants here until ADR-0036 was accepted on 2026-08-16.
+  # **They were not evicted for capacity — they were refused on the criterion.** `Transfer.code` is
+  # a fourth discretionary field and the whole dimensional payload measured 84 combinations, 7 bits
+  # of 16, so "there is nowhere to put them" was never the argument and must not become the
+  # remembered one. A product line is `products.uid_tracking_category`, a mutable field on a mutable
+  # master that moved twice in one month; freezing it into an immutable transfer is the defect
+  # whichever field holds it, and a cheap wrong answer is still the wrong answer.
 
   # ⚠️ The fourth field, and the one every count downstream of this file got wrong.
   transfer_code_is_a_fourth_field: >-
@@ -90,16 +116,22 @@ transfer_field_budget:
     **only** per-transfer reference fields, and erp-spec#3's "three fields, four claimants",
     HOT-013's "three slots, six live claimants" and ADR-0026's "fifth claimant" all inherited the
     error. The reference note is corrected.
-    **It is the candidate home for the dimensional payload, and the payload fits with room to
-    spare.** Measured across all 13 `specified` posting rules: **no posting dimensions both legs** —
-    every dimensioned posting pairs one dimensioned account with an undimensioned counterparty. 19 of
-    138 accounts are dimensioned, 18 `[product_line]` and 5800 alone `[product_line, cost_type]`. So
-    the maximum payload on one transfer is 21 `product_line` values (20 + explicit null) × 4
-    `cost_type` values (3 + explicit null) = **84 combinations, 7 bits** in a u16.
-    ⚠️ **Sizing is not deciding, and the cost is real.** That the payload fits answers the
-    REPRESENTATION question; it does not say the ledger should carry dimensions at all — that is
-    HOT-013's choice. And if dimensions land here they displace `code`'s conventional occupant, the
-    transfer's reason, so raw TigerBeetle data would not say which rule produced a transfer.
+    ⚠️ **It WAS the candidate home for the dimensional payload, and that payload no longer exists.**
+    Measured 2026-08-16 across all 13 `specified` posting rules while ADR-0036 was still `proposed`:
+    no posting dimensioned both legs, 19 of 139 accounts were dimensioned (18 `[product_line]`, 5800
+    alone `[product_line, cost_type]`), so the maximum on one transfer was 21 `product_line` values
+    (20 + explicit null) × 4 `cost_type` values (3 + explicit null) = **84 combinations, 7 bits** in
+    a u16.
+    ✅ **The measurement is retained because of what it decided, which is the opposite of what it
+    looks like.** It proved the payload FIT with room to spare — and ADR-0036 refused it anyway, on
+    the criterion rather than on capacity. **"There is nowhere to put them" was never the argument**,
+    and a cheap wrong answer is still the wrong answer. Keeping the number here is what stops the
+    refusal being remembered as a capacity decision, which is how it would be re-argued.
+    ⚠️ **Sizing is not deciding**, and the general form of that is why this entry survives its own
+    subject: a field that fits answers the REPRESENTATION question and never the placement one. The
+    spare u16 now has two live contenders — the actor ref and the causal order on the 2.97% of
+    invoices where `path[0]` cannot supply it — decided on entirely different grounds and therefore
+    not tradeable on capacity (erp-spec#3).
 
   accounting_date_encoding: >-
     Packed `YYYYMMDD` as an integer — 2026-07-31 is `20260731`. **Not epoch seconds**: u32 epoch
@@ -110,10 +142,20 @@ transfer_field_budget:
 
   evicted:
     posting_rule: >-
-      Recoverable from `(source_document_ref, journal_entry_id)` through the MongoDB projection.
+      Recoverable from `(line_identity, journal_entry_id)` through the MongoDB projection.
       The ledger's job is balances; which rule produced an entry is a reporting concern, and
       ADR-0017 already makes MongoDB load-bearing for the accounting record. Evicting it is what
       lets `accounting_date` take `user_data_32` at no cost.
+      (Read `source_document_ref` here until 2026-08-16; ADR-0036 replaced it with line identity in
+      `user_data_64`, and a path resolves the document as well as the row, so the recovery is
+      unchanged.)
+    source_document_ref: >-
+      **Subsumed rather than evicted** (ADR-0036, 2026-08-16). A stored line identity names the
+      document AND the row within it, so the document ref is derivable from the same field and does
+      not need its own. ⚠️ **A posting with no line still has a source document** — a tax leg, a
+      period-end accrual — and resolves it through `journal_entry_id` in the projection. That is the
+      one case the subsumption does not cover, and it is why `source_document` survives as a field
+      of the logical posting in `contexts/ledger/entities/posting.yaml`.
 
   # ── the fifth claimant, raised by the owner 2026-08-16 ────────────────────────────────────────
   actor_ref_is_a_fifth_claimant: >-
@@ -210,9 +252,12 @@ transfer_field_budget:
     order for a divider to name. **A v1 re-path is a real change**: `path` is the row identity and
     13,573 order items would be recomputed by `computeItemPaths`, so it needs its own api-cloudrun
     issue rather than riding along here.
-    ⇒ **The economy saves ONE field, not two**, and the spare u16 now has **three** contenders: the
-    dimensions HOT-013 argues about, the actor ref, and the causal order on the 2.97% of invoices
-    where `path[0]` cannot supply it.
+    ⇒ **The economy saves ONE field, not two**, and it is now ENACTED in `assignment` above:
+    `user_data_64` holds line identity and `source_document_ref` is resolved from it through the
+    projection. ⚠️ The spare u16 had **three** contenders when this was written; **ADR-0036's
+    acceptance on 2026-08-16 removed one of them** — the dimensions HOT-013 argued about are not a
+    claimant at all, and HOT-013 dissolved rather than resolved. Two remain: the actor ref, and the
+    causal order on the 2.97% of invoices where `path[0]` cannot supply it.
 
   # The finding that closed the other escape hatch.
   # ⚠️ Read the two entries together: erp-spec#3 offered `journal_entry_id` and `posting_rule` as
