@@ -3,9 +3,9 @@
 - **Date:** 2026-08-16
 - **Repo:** erp-spec
 - **Status:** ⏳ #16, #18 (PR #21) · #15, #13 (PR #23) · **#14 (PR #25) — `m3` COMPLETE** · PRs
-  #26–#29 · **PR #30 — five ADRs ACCEPTED** · **PR #31 — #19 + #20 + four owner rulings** · **PR #33
-  — ADR-0030 prepared for a decision, four rulings, owner's to take** · **PR #34 — #8, `m6` measured
-  for the first time** · **both PRs CI-green and open; owner merges**
+  #26–#29 · **PR #30 — five ADRs ACCEPTED** · **PR #31 — #19 + #20 + four owner rulings** · **PR #34
+  MERGED — #8 CLOSED, `m6` measured for the first time** · **PR #33 MERGED — ADR-0030 surveyed, ten
+  owner rulings, and ACCEPTED** · main green, nothing open
 - **Origin:** a review of the open issue queue, requested because #18 was on the owner's mind
 - **Related:** open — #3, #4, #6, #12, #17, **#32** · closed by this work: **#8**, #13, #14, #15,
   #16, #18, #19, #20 · HOT-015 resolved · OQ-045 opened; **OQ-046/047 opened AND answered, OQ-048
@@ -16,27 +16,35 @@
 
 ## START HERE
 
-`main` is CI-green. **Units 1–8 done.** Two PRs are open and both are the owner's to merge: **#33**
-(a decision package, nothing accepted) and **#34** (#8, closes on merge).
+`main` is CI-green and **nothing is open**. Units 1–8 done, both PRs merged 2026-08-16.
 
-### The queue: 6 open once #34 merges — 5 blocked, 1 startable
+⚠️ **GitHub Actions went billing-blocked at 04:46Z** — "recent account payments have failed or your
+spending limit needs to be increased", org-wide, four minutes after the last green run. PR #33 was
+admin-merged on the owner's instruction after `validate`, `fmt --check` and `gen` were run locally
+(the exact three things CI runs). **A push producing a FAILED run in 2s is a billing block, not a
+code failure** — check billing before debugging. Distinct from the recorded case where a push
+produces NO run at all, which is an Actions outage.
 
-|               | Issue  | State                                                                      |
-| ------------- | ------ | -------------------------------------------------------------------------- |
-| **startable** | **#6** | the ONLY startable one. Re-measure first — its own numbers                 |
-| blocked       | #32    | the imputed-labor view — needs OQ-048, the imputed rate                    |
-| blocked       | #17    | OQ-039 + ADR-0032/0033 acceptance, and an ordering gate                    |
-| blocked       | #12    | ⚠️ **ADR-0030 is RULED ON — accepting it unblocks one of its three pools** |
-| blocked       | #4     | only the m5 formal-methods ADR remains — detection DONE                    |
-| blocked       | #3     | the spare u16: three contenders, decided on other grounds                  |
+### The queue: 6 open — 5 blocked, 1 startable
+
+|               | Issue  | State                                                      |
+| ------------- | ------ | ---------------------------------------------------------- |
+| **startable** | **#6** | the ONLY startable one. Re-measure first — its own numbers |
+| blocked       | #32    | the imputed-labor view — needs OQ-048, the imputed rate    |
+| blocked       | #17    | OQ-039 + ADR-0032/0033 acceptance, and an ordering gate    |
+| blocked       | #12    | ✅ ADR-0030 ACCEPTED — **two blockers left, not three**    |
+| blocked       | #4     | only the m5 formal-methods ADR remains — detection DONE    |
+| blocked       | #3     | the spare u16: three contenders, decided on other grounds  |
 
 ### What is still the owner's
 
-- ⚠️ **ADR-0030 — ACCEPT IT.** PR #33. Surveyed, ruled on, four accounts minted, nothing left to
-  decide inside it. Rule 3 keeps acceptance the owner's. See the section below.
 - **ADR-0032 + ADR-0033 + OQ-039** → unblocks #17.
-- **A leg-capture decision and a warehouse-overhead ADR** → the other two thirds of #12. ⚠️ ADR-0030
-  is no longer on that list; it is prepared and waiting.
+- **The trip-grouping decision and a warehouse-overhead ADR** → the two blockers left on #12. ⚠️
+  ADR-0030 is off that list — ACCEPTED, `deferred_pools.vehicle_cogs` removed, and `delivery` /
+  `transport` / `trash_cleanup` now declare `vehicle_accounts: [5900, 5901, 5902]`. ⚠️ **The
+  "leg-capture" framing was wrong** and both this doc and #12 carried it: distance is derivable from
+  Mapbox coordinates today. What `trip_travel` actually needs is **which orders shared a run**,
+  which distance cannot supply.
 - **Who gets `Transfer.code`** → #3's live half. Two contenders are fully worked: the actor ref, and
   the causal order on the 2.97% of invoices where `path[0]` cannot supply it.
 - **OQ-048** — what rate to impute for a contributed owner shift. The GAAP decision does not wait on
@@ -487,7 +495,7 @@ in v1"** (api-cloudrun#538).
   hand-authoring 286 rows against a shape two un-accepted ADRs may still change. It stays open as
   the m6 exit criterion it already is.
 
-## ✅ ADR-0030 — SURVEYED AND RULED ON 2026-08-16 (PR #33). Ready to accept; acceptance not taken
+## ✅ ADR-0030 — ACCEPTED 2026-08-16 (PR #33), after the survey it never had
 
 The previous revision of this doc said to "spend ~30 minutes preparing ADR-0030 for a decision".
 That was done, and it took longer than 30 minutes for a reason worth recording.
@@ -573,8 +581,31 @@ cost, so 5901 is utilisation AND rate deviation, and naming the normal-capacity 
 requirement rather than a footnote.
 
 **Still not decided in this ADR, on purpose:** vehicle depreciation (SPIKE-005's engine), and
-`trip_travel`'s trip grouping. **ADR-0030 is `proposed` and ready to accept — rule 3 keeps that the
-owner's.**
+`trip_travel`'s trip grouping.
+
+### ⚠️ Then three MORE rulings arrived, and one reversed a recommendation of mine
+
+- ⚠️ **6302 keeps a live population.** The rented-truck correction was written as though 6405
+  received everything 6302 takes. It does not — a scissor lift hired for the warehouse move is CFS's
+  own use. **One population moving out is not the account becoming empty**, which is the inverse of
+  "a branch with no members is a claim" and is easier to get wrong, because deleting a branch feels
+  like simplification.
+- ⚠️ **Hired trucks post DIRECT to COGS at actual (5902), not pooled — reversing MY
+  recommendation.** Pooling was recommended because "one mechanism is simpler to specify", **which
+  is not the criterion the survey established**. `bill.direct_lines[]` already carries a
+  `debit_account` AND `causal_orders`, so there was no second mechanism to avoid. `6405` was never
+  created.
+- ⚠️ **5200 Subcontractors is NOT a CFS labor account — and its own note said it was**, calling 5800
+  and 5200 "the two labor populations". A subcontractor is a PURCHASE from another company. The
+  replacement axis is stronger: **bought in versus owned**, which is what 5200 and 5902 share.
+- **"labor" has no u** — swept across the refactorable spec, two file renames, and **gate 17**
+  enforces it with three lifecycle exemptions. ⚠️ Gate 11 caught all twelve inbox-path citations the
+  sweep broke, which is how the third exemption was found.
+
+**ACCEPTED, frozen (gate 14), and the follow-on landed in the same PR**:
+`deferred_pools.vehicle_cogs` removed, three pools declaring their vehicle accounts, both
+`cost_sources.pending` blocks gone. ✅ **Gate 16 re-derived `143 = 134 + 9` across the merge without
+being told**, because it counts rather than asserts.
 
 ## Context recommendation
 
