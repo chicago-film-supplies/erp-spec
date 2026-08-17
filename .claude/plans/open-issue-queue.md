@@ -3,41 +3,47 @@
 - **Date:** 2026-08-16
 - **Repo:** erp-spec
 - **Status:** ⏳ #16, #18 (PR #21) · #15, #13 (PR #23) · **#14 (PR #25) — `m3` COMPLETE** · PRs
-  #26–#29 · **PR #30 — five ADRs ACCEPTED, 0 conflicts open** · **PR #31 — #19 + #20 + four owner
-  rulings** · **7 issues open, 5 blocked, 2 startable**
+  #26–#29 · **PR #30 — five ADRs ACCEPTED** · **PR #31 — #19 + #20 + four owner rulings** · **PR #33
+  — ADR-0030 prepared for a decision, four rulings, owner's to take** · **PR #34 — #8, `m6` measured
+  for the first time** · **both PRs CI-green and open; owner merges**
 - **Origin:** a review of the open issue queue, requested because #18 was on the owner's mind
-- **Related:** open — #3, #4, #6, #8, #12, #17, **#32** · closed by this work: #13, #14, #15, #16,
-  #18, #19, #20 · HOT-015 resolved · OQ-045 opened; **OQ-046/047 opened AND answered, OQ-048
-  opened** · api-cloudrun#538 filed · `tools/{validate,dates,labels,milestone-checks}.ts`,
-  `spikes/harness/`, `ledger/{posting-rules,tigerbeetle-accounts,dimensions}.yaml`,
-  `migration/live-paths.measured.yaml`
+- **Related:** open — #3, #4, #6, #12, #17, **#32** · closed by this work: **#8**, #13, #14, #15,
+  #16, #18, #19, #20 · HOT-015 resolved · OQ-045 opened; **OQ-046/047 opened AND answered, OQ-048
+  and OQ-049 opened** · api-cloudrun#538 filed ·
+  `tools/{validate,dates,labels,milestone-checks}.ts`, `spikes/harness/`,
+  `ledger/{posting-rules,tigerbeetle-accounts,dimensions,chart-of-accounts}.yaml`,
+  `migration/{field-map,live-paths.measured,live-chart.measured}.yaml`
 
 ## START HERE
 
-`main` is CI-green. **Units 1–5 done. The largest unit in the repo (#19, with #20 folded in) landed
-2026-08-16.**
+`main` is CI-green. **Units 1–8 done.** Two PRs are open and both are the owner's to merge: **#33**
+(a decision package, nothing accepted) and **#34** (#8, closes on merge).
 
-### The queue: 7 open, 5 blocked, 2 startable
+### The queue: 6 open once #34 merges — 5 blocked, 1 startable
 
-|               | Issue  | State                                                    |
-| ------------- | ------ | -------------------------------------------------------- |
-| **startable** | **#8** | ⏳ in progress — instrument built, authoring left        |
-| **startable** | **#6** | not begun; re-measure first, its own numbers are stale   |
-| blocked       | #32    | the imputed-labour view — needs OQ-048, the imputed rate |
-| blocked       | #17    | OQ-039 + ADR-0032/0033 acceptance, and an ordering gate  |
-| blocked       | #12    | three undecided things, none of them work                |
-| blocked       | #4     | only the m5 formal-methods ADR remains — detection DONE  |
-| blocked       | #3     | the spare u16: **two** contenders, not three             |
+|               | Issue  | State                                                                          |
+| ------------- | ------ | ------------------------------------------------------------------------------ |
+| **startable** | **#6** | the ONLY startable one. Re-measure first — its own numbers                     |
+| blocked       | #32    | the imputed-labour view — needs OQ-048, the imputed rate                       |
+| blocked       | #17    | OQ-039 + ADR-0032/0033 acceptance, and an ordering gate                        |
+| blocked       | #12    | ⚠️ **ADR-0030 is now PREPARED — accepting it unblocks one of its three pools** |
+| blocked       | #4     | only the m5 formal-methods ADR remains — detection DONE                        |
+| blocked       | #3     | the spare u16: three contenders, decided on other grounds                      |
 
 ### What is still the owner's
 
+- ⚠️ **ADR-0030 — PR #33, four yes/no rulings with a recommendation on each.** The largest single
+  thing on this list, and the cheapest to answer. See the section below.
 - **ADR-0032 + ADR-0033 + OQ-039** → unblocks #17.
-- **ADR-0030's accounts**, a leg-capture decision, a warehouse-overhead ADR → unblocks #12.
-- **Who gets `Transfer.code`** → #3's live half. Two contenders: the actor ref, and the causal order
-  on the 2.97% of invoices where `path[0]` cannot supply it.
-- ✅ **OQ-046 and OQ-047 were opened AND answered in the same session** — see Unit 7. **OQ-048 is
-  the one left**: what rate to impute for a contributed owner shift. The GAAP decision does not wait
-  on it; the imputed report (#32) does.
+- **A leg-capture decision and a warehouse-overhead ADR** → the other two thirds of #12. ⚠️ ADR-0030
+  is no longer on that list; it is prepared and waiting.
+- **Who gets `Transfer.code`** → #3's live half. Two contenders are fully worked: the actor ref, and
+  the causal order on the 2.97% of invoices where `path[0]` cannot supply it.
+- **OQ-048** — what rate to impute for a contributed owner shift. The GAAP decision does not wait on
+  it; the imputed report (#32) does.
+- **OQ-049 — NEW.** Does v2 carry the operational board and the comment threads? 5,315 documents
+  across `cards`/`lists`/`threads`/`comments` turn on the charter naming neither them nor their
+  absence. Held as `quarantine` in the field map meanwhile.
 - **11 ADRs remain proposed.** ⚠️ **ADR-0025 is now safe to consider** — #19 has landed, so the
   ground ADR-0036 moved under it has been rewritten. It is still cited 48× and is now a historical
   record of a rule that no longer applies; accepting it would freeze that, which is correct under
@@ -278,6 +284,70 @@ instance of the same lesson in one session.
 `cost_only` arms. **New issue #32** — the imputed-labour view, `required: true, official: false`,
 blocked on OQ-048.
 
+### Unit 8 — #8, the m6 field map (PR #34) — CLOSED, and `m6` is measured for the first time
+
+**`m6` went from `0 met / 0 unmet / 4 prose` to `1 met / 0 unmet / 3 prose`.** It was the only
+milestone about which nothing was being asked at all, and m7 depends on it.
+
+**Step 2 was done FIRST, on purpose.** The criterion was wired before anything was authored, so it
+landed reporting `0 of 1537 live paths dispositioned across 0 of 50 collections` and the authoring
+was measured as it went. Gate 12 fails on a criterion wired to nothing, never on an unmet one.
+
+⚠️ **`met` would have OVERCLAIMED, and catching that is the most transferable thing in the unit.**
+The criterion says a path maps _to a new field_; a collection-level `paths_default: map` says only
+that it maps. Without a named target the criterion would have gone met the moment 50 dispositions
+were typed — **a check reading green while asserting nothing**, the exact defect class this repo
+keeps paying for. Gate 15 now refuses a `map` that names no `paths_default_to`.
+
+**Gate 15 landed RED on the map as it stood, and both failures were real:**
+
+- `invoices.query_by_orders` — the measured path is `query_by_orders[]`.
+- ⚠️ **`destinations[].customer_collecting` named the wrong object.** The top-level `destinations`
+  collection (459 docs) is an ADDRESS BOOK and has no such field; it lives on
+  `orders.destinations[]`. **Two things share a name**, and a migration reading the collection would
+  have found the field missing and concluded it was unpopulated.
+
+**Three findings from reading the corpus rather than the issue:**
+
+- ⚠️ **`customers` (150 docs) is DEAD** — a CRMS-shaped mirror superseded by `contacts` +
+  `organizations`, in no source file, no security rule, no index
+  (`code:2026-08-16:api-cloudrun@2ff1e8c2`). The plan's own "check what it is first" was right.
+- ⚠️ **`config` is the OAuth TOKEN STORE**, not application config — `access_token`,
+  `refresh_token`. It must never be read into a migration artifact.
+- ⚠️ **`settlements` (1,073 docs) is cash application AND is the "credit-note allocations" the map
+  already named as a separate object.** One collection, two names. Also one of the two the
+  `db_schema` enum omits.
+
+⚠️ **The probe's own dynamic-key collapse was defective, and wiring the criterion is what found
+it.** It decided per DOCUMENT while unioning paths per COLLECTION, so a `tracking-categories` record
+whose `products` map held two entries kept its literal uids while one holding three contributed
+`<key>` — both readings of one map in one inventory. **31 of 1,537 "paths" were doc ids.** Fixed
+with a whole-collection pre-pass; re-measured **1,537 → 1,523**. ⚠️ **The probe's header already
+claimed to have fixed this at larger scale** ("1,123 paths across 20 documents") — the fix was
+incomplete and nothing could see it, **because the collapse reported what it collapsed and never
+looked at what it left behind.** It now names the leftovers, and that reporter's first run returned
+four false positives (`recurrence_overrides`, `crms_opportunity_ids`, `crms_stock_level_ids`,
+`last_message_preview` — every one exactly 20 characters), so the accusation was narrowed to what a
+Firestore auto-id actually looks like.
+
+✅ **Step 4's premise was wrong and the correction is better than the task.** The issue says the
+live→target GL correspondence "belongs here and exists nowhere". **It exists — it is
+`ledger/chart-of-accounts.yaml`** — and it is exact: 139 spec entries against 134 live + 5 minted, 0
+live codes missing, 0 `status_live` disagreements, 0 name disagreements. **What was missing is an
+EXECUTION.** Gate 16 + `spikes/harness/live-chart-probe.ts` now check every live code is
+adopted/merged/dropped and never omitted, every `status_live` against the live `status`, every `new`
+genuinely absent and never on an occupied code, and `139 == 134 + 5` as arithmetic — the header that
+read "138 entries, four minted" was wrong in both halves for weeks because nothing counted it.
+
+**Opened OQ-049** — the board and the threads, 5,315 documents, on a charter silence. ⚠️
+`quarantine` IS one of the three dispositions the criterion accepts, so those four count as settled
+for the milestone and remain unsettled for the migration. **Do not read `quarantine` as `mapped`.**
+
+Every arm fired red before landing: gate 15 on a phantom collection, a bad path, a target-less
+`map`, a missing reason and a stale measurement; gate 16 on an omitted live account, a false
+`status_live`, a rename under `adopt`, a mint onto an occupied code; the milestone check on both a
+missing collection and a survivor naming no default.
+
 ### Also landed 2026-08-16, outside the units (PRs #26–#29)
 
 - **Gate 11 widened** to `contexts/`, `ledger/`, `reporting/`, `migration/`, `roadmap/` (it scanned
@@ -321,57 +391,7 @@ historical record (ADR-0034) or dated evidence. Only live, mutable, authority-cl
 
 ## Remaining
 
-### Unit 5 — #8, the m6 field map — ⏳ IN PROGRESS, instrument built, authoring left
-
-**PR #29 landed the instrument. Nothing is authored yet.** Pick up here.
-
-⚠️ **The issue's scope is wrong and it is wrong in the expensive direction.** It says "~10 mappings
-against ~30 Firestore collections". Measured 2026-08-16 (`migration/live-paths.measured.yaml`): **50
-collections, 1,537 paths.** The "~30" came from the MCP `db_schema` enum, which carries 35 and omits
-`credit-notes` and `settlements` — both of which the field map already maps.
-
-✅ **The five-minute fix is already done.** `invoices.query_by_orders` no longer reads
-`disposition: defective` on the strength of OQ-013's non-reproducing 55; it is `map`, with the
-handling rule retained on its own merits.
-
-⚠️ **m6's first exit criterion is MAKEABLE-checkable and is NOT YET CHECKED — an earlier revision of
-this doc overstated it, and the overstatement is corrected here.** It said the criterion "is now
-checkable"; `roadmap/milestones.yaml` still carries `prose_only: true` with its original reason, _"a
-checker would compare the map against itself and always pass"_. **What changed is that the reason
-stopped being true**, not that anything was wired: `spikes/harness/live-path-inventory-probe.ts`
-writes the inventory from `db.listCollections()` + an unprojected scan, so a checker now has an
-independent file to read rather than the map itself. Same shape as `tb-field-budget_test.ts` against
-`tigerbeetle-node`. **Wiring it is step 2 below.** Refresh the inventory with
-`cd spikes/harness && deno task inventory --write`.
-
-⚠️ **MEASURED 2026-08-16 — `m6` reads `0 met / 0 unmet / 4 prose`.** It is the only milestone about
-which **nothing is being asked at all**: no criterion is met, and none can fail either. m7 depends
-on it. That is the strongest single argument for taking #8, and it is a fact about STATUS rather
-than about the issue's own text.
-
-**What is left, in order:**
-
-1. **Per-collection dispositions for the 50.** A path-by-path map of 1,537 rows is neither tractable
-   nor useful; the shape is a collection-level disposition plus per-path exceptions, which is what
-   the file already does for `*.{_cents fields}`. Many are obviously infrastructure and drop as a
-   unit — `sessions` (2,318), `stock-locks`, `mcp-oauth-*`, `migration-state`, `trello-lookup`,
-   `uploadcare-sweep`, `webhooks`, `xero-budget`, `counters`, `typesense`,
-   `current-replacement-lookup`, `cache-geocodes`. ⚠️ `customers` (150 docs) is NOT `contacts` and
-   NOT `organizations` — check what it is before disposing of it.
-2. **Wire m6's criterion to a real check** in `tools/milestone-checks.ts`, reading the inventory and
-   the field map. It will report a low number and that is fine — gate 12 does not fail on an unmet
-   criterion, only on one wired to nothing, so CI stays green while STATUS tells the truth.
-3. **A `validate` gate** for internal consistency: every collection the map names must exist in the
-   inventory, and the inventory's `measured_at_utc` earns a staleness _warning_ (validate reads the
-   clock; generated files may not).
-4. **The live→target GL account correspondence**, which belongs here and exists nowhere —
-   `ledger/chart-of-accounts.yaml` deliberately carries no `xero_id` (ADR-0009). ⚠️ Its **138**
-   entries include **four minted accounts with no live counterpart at all** (5800, 5801, 2050, 2010)
-   — a distinct case the map must state rather than leave blank.
-
-⚠️ Same milestone as **#17**, which is blocked. #8 does not depend on it and must not wait for it.
-
-### Unit 7 — #6, the requirements promotion backlog
+### Unit 9 — #6, the requirements promotion backlog
 
 ⚠️ **The issue's numbers are badly stale and nobody updated them.** It says "2 requirements total"
 and "6 of 8 contexts have `requirements: []`". `STATUS.generated.md` today reports **21
@@ -418,17 +438,17 @@ in v1"** (api-cloudrun#538).
 
 - **#17** — see Decisions.
 - **#12**, the three deferred allocation pools (`vehicle_cogs`, `trip_travel`,
-  `warehouse_overhead`). Three separate blockers, none decided: ADR-0030 chooses no accounts, so
-  there is nothing to pool; `trip_travel` needs an inner allocation with no basis and no data;
-  `warehouse_overhead` needs an ADR moving it into COGS that nobody has written. Worth knowing for
-  Unit 3: **one capture decision answers two questions** — recording what a leg moved and how far
-  gives `trip_travel` its basis _and_ upgrades ADR-0031's official allocation from Horngren tier 4
-  (`ability_to_bear`, an explicit proxy) to tier 1. Measured 2026-08-09: `products.shipping.weight`
-  is present on 540 of 567 products and **non-zero on 0 of them** — re-measured 2026-08-16: 537 hold
-  `null`, 3 hold 0, 27 lack the block. core#51 closed 2026-08-10 and made the four dimensions
-  nullable, so "unmeasured" is now distinguishable from "weighs nothing" — which is what OQ-033's
-  coverage precondition needs, and the owner expects **many** products populated by the time basis
-  v2 is in dev.
+  `warehouse_overhead`). ⚠️ **Two blockers now, not three — ADR-0030 is prepared and names its
+  accounts (PR #33), so `vehicle_cogs` is one acceptance away.** `trip_travel` needs an inner
+  allocation with no basis and no data; `warehouse_overhead` needs an ADR moving it into COGS that
+  nobody has written. Worth knowing for Unit 3: **one capture decision answers two questions** —
+  recording what a leg moved and how far gives `trip_travel` its basis _and_ upgrades ADR-0031's
+  official allocation from Horngren tier 4 (`ability_to_bear`, an explicit proxy) to tier 1.
+  Measured 2026-08-09: `products.shipping.weight` is present on 540 of 567 products and **non-zero
+  on 0 of them** — re-measured 2026-08-16: 537 hold `null`, 3 hold 0, 27 lack the block. core#51
+  closed 2026-08-10 and made the four dimensions nullable, so "unmeasured" is now distinguishable
+  from "weighs nothing" — which is what OQ-033's coverage precondition needs, and the owner expects
+  **many** products populated by the time basis v2 is in dev.
 - **#4** — ADR-0003 cites `formal/two-store-commit.tla`, which no longer exists (Quint, ADR-0016).
   ADR-0003 is `accepted` and immutable, so the fix is not an edit. The issue's own preferred option
   is right: **fold it into the m5 formal-methods ADR**, which has to supersede that clause anyway.
@@ -467,78 +487,123 @@ in v1"** (api-cloudrun#538).
   hand-authoring 286 rows against a shape two un-accepted ADRs may still change. It stays open as
   the m6 exit criterion it already is.
 
+## ✅ ADR-0030 — PREPARED FOR A DECISION 2026-08-16 (PR #33). Four rulings, nothing accepted
+
+The previous revision of this doc said to "spend ~30 minutes preparing ADR-0030 for a decision".
+That was done, and it took longer than 30 minutes for a reason worth recording.
+
+⚠️ **What was blocking it was not the owner's time. It carried NO SURVEY.** CLAUDE.md rule 8a
+requires six references before any accounting-shaped decision, and ADR-0030 — drafted 2026-08-09,
+the same day the standing instruction was given — had none. **That is what made it undecidable
+rather than merely undecided**, and no amount of availability substitutes for it.
+
+**The survey splits 4–2 on the classification and is UNANIMOUS on the mechanism, and the mechanism
+is the half the ADR got wrong.** All five references with an allocation engine keep the NATURAL
+account (what was bought) separate from the FUNCTIONAL classification (why it was consumed) and
+derive the second by allocation — SAP by assessment through a secondary cost element, Intacct off a
+source balance, NetSuite through a substituted contra, Odoo through analytic distribution that never
+touches the account. **The sixth is Xero, which recodes at entry because it has no allocation
+engine** — and ADR-0030's first draft followed Xero's workaround.
+
+⇒ **The criterion is not "is it a vehicle". It is: does the cost arrive already attributed to a
+causal job?** A shift names its job the moment it happens, which is why `shift_recorded` debits 5800
+per `shift.absorbed_allocations` and is finished. **A tank of diesel names none**, and a
+registration fee names none even in principle.
+
+**Three findings, and the first is decisive rather than a preference:**
+
+- ⚠️ **The draft's two halves could not both hold.** It said 6400–6404 "stop taking new postings"
+  _and_ that cost splits absorbed/unabsorbed. A posting made at the pump must choose one, where no
+  causal job is known — so everything lands unabsorbed, 5900 is never debited, and the gap is
+  identically the whole cost. The split needs a pool in between, and a pool is a natural account.
+- ⚠️ **Absorbing at a rate reintroduces the rate variance ADR-0019 dropped.** Vehicle cost cannot be
+  costed at actual — a van-day's real cost is unknowable until a transmission fails. So it is a
+  predetermined rate on a normal-capacity denominator (ASC 330-10-30-3), and the unabsorbed balance
+  is utilisation **and** rate deviation. **ADR-0019's headline sentence is true of 5801 and false
+  here.**
+- ⚠️ **Deferring depreciation has a PRESENTATION consequence** (SAB Topic 11.B): a cost-of-sales
+  line excluding the related depreciation must be labelled and should not carry an unqualified gross
+  margin — which is what the product-line P&L reports.
+
+**Accounts named rather than deferred: `5900` absorbed, `5901` unabsorbed, plus a `6405` contra.**
+Measured — the live `Direct Costs` block is exactly nine accounts, so 5900 is the next free hundred
+on 5800's own recorded reasoning.
+
+⚠️ **Two measurements, and the one that sizes the decision cannot be taken from this repo.** The
+five live accounts are NOT one block (6401 is Xero type `Overhead`, the other four `Expense`), and
+**`$21,844.77` carries no `source:` anywhere** — `chart-of-accounts` mirrors into Firestore without
+balances and this repo does not call Xero. What would measure it is named in the survey.
+
+**The delta is a COMPARABILITY BREAK, not a movement of money.** Net profit unchanged, gross profit
+falls, history deliberately not restated ⇒ gross margin is not comparable across the cutover. A
+third restatement axis beside ADR-0020 and ADR-0032, and the only prospective-only one, so it does
+**not** join m6's ordering obligation.
+
+**Not asked, on purpose:** the absorption basis and vehicle depreciation. Per #12 the same
+leg-capture decision gives `trip_travel` its basis _and_ upgrades ADR-0031 from Horngren tier 4 to
+tier 1 — deciding it inside ADR-0030 decides it twice on less evidence. **Folding those in is what
+kept this ADR undecidable.**
+
 ## Context recommendation
 
-**CLEAR CONTEXT.** The remaining work is authoring and it touches entirely different material — 50
-collections' worth of migration dispositions and a requirements backlog, against posting keys, gate
-arithmetic and golden vectors. Nothing needed is in anyone's head: the inventory, the field map,
-`milestone-checks.ts` and this doc are all on disk.
+**CLEAR CONTEXT.** The remaining work is #6 — a requirements backlog — and it touches entirely
+different material from migration dispositions, gate arithmetic and vehicle costing. Nothing needed
+is in anyone's head: `STATUS.generated.md`, the inbox and this doc are all on disk.
 
-### Take #8, and the reason is a MEASUREMENT rather than this doc's say-so
+### Take #6, and re-measure before planning it
 
-**`m6` reads `0 met / 0 unmet / 4 prose`.** It is the only milestone about which **nothing is being
-asked at all** — no criterion is met, and none can fail either. Every other milestone has at least
-one criterion that can go red. **m7 depends on m6.**
+It is the only startable issue left. ⚠️ **Its own numbers are badly stale and nobody updated them**:
+it says "2 requirements total" and "6 of 8 contexts have `requirements: []`". STATUS today reports
+**21 requirements**, 0 without a scenario, and 4 contexts uncovered (`ordering`, `availability`,
+`banking`, `procurement`). It is roughly half the size the issue claims, and it blocks m7.
 
-⇒ **#8 is the only issue in the queue that converts a milestone from unmeasured into measured**,
-which is this repo's own first doctrine: _a stated guarantee that nothing executes is not a
-guarantee._ Step 1 (dispositions for the 50) is the bulk; **step 2 is the one that moves the
-milestone**, and it is the smaller half.
-
-Then #6 — but **re-measure first**: its own numbers say "2 requirements, 6 of 8 contexts empty" and
-STATUS says 21 requirements, 0 without a scenario, 4 contexts uncovered.
-
-### ⚠️ Before starting, spend ~30 minutes preparing ADR-0030 for a decision
-
-Cheap, because the ADR, its survey and the corpus measurement all already exist. It is `proposed`
-and explicitly declines to choose accounts — "the chart picks the next free pair", on the 5800/5801
-precedent — so accepting it makes the follow-on mechanical.
-
-**Why it earns the detour.** `vehicle_cogs` is, in erp-spec#12's own words, _"the pool that most
-changes this report"_. `Delivery` is the largest tracked product line ($236,487.75, 13.79%) and
-carries almost no cost, **which is exactly why the un-allocated view shows it at a structural loss**
-— and the 2026-08-16 sweep gave it a second consumer: the `delivery` and `transport` pools now carry
-an explicit `cost_sources.pending` naming ADR-0030 as the reason their cost side is incomplete.
-
-⚠️ **It unblocks ONE of #12's three pools, not #12.** `trip_travel` needs a data-capture decision
-that is genuinely hard, and `warehouse_overhead` needs an ADR nobody has written.
+The trap the issue names is still live: **adding a requirement trips gate 3**, which demands a
+tagged Gherkin scenario, and as of 2026-08-16 those scenarios are also checked by gate 10n.
 
 ### ⚠️ The thing that should change how the next session budgets its time
 
-**Five of seven open issues are blocked on owner decisions, and this session took THREE of them** —
-in a few sentences each — because every one arrived with measured evidence, a criterion, and a
-recommendation. **The decision backlog is not blocked on the owner's availability. It is blocked on
-nobody having prepared the decisions.**
+**Five of six remaining issues are blocked on owner decisions.** The 2026-08-16 session took three
+of them in a few sentences each — because every one arrived with measured evidence, a criterion and
+a recommendation. **The decision backlog is not blocked on the owner's availability. It is blocked
+on nobody having prepared the decisions.**
+
+⚠️ **And ADR-0030 shows what "prepared" actually costs.** It sat `proposed` for a week looking like
+it needed a signature; what it needed was a survey rule 8a had required all along, and running that
+survey **reversed one of its stated consequences**. A decision that has not been prepared is not one
+sentence away from being taken — assume the preparation is the work.
 
 ⇒ **One prepared decision per session is probably worth more than the authoring it displaces.**
-Ranked by what they unblock: ADR-0030 (above) · `Transfer.code`, where both contenders are already
-fully worked (#3) · OQ-048, the imputed rate (#32) · OQ-039 + ADR-0032/0033 (#17, heaviest).
+Ranked by what they unblock: **ADR-0030 is now ready (PR #33)** · `Transfer.code`, where both
+contenders are already fully worked (#3) · OQ-048, the imputed rate (#32) · OQ-049, the board and
+the threads · OQ-039 + ADR-0032/0033 (#17, heaviest).
 
-### Six things to carry across the clear, because none is obvious from the issue text
+### Seven things to carry across the clear, because none is obvious from the issue text
 
-- **The `db_schema` enum is not the collection list** — 35 against 50. #8 was scoped from it and is
-  therefore scoped short. Anything else scoped that way is too.
-- **Firing a gate red is not ceremony — it is the only thing that finds the defects.** Twenty-odd
-  arms were fired across this session and six found real bugs, none of which reading had surfaced: a
-  rule and its vectors disagreeing while every gate stayed green, a double-reported failure, a check
-  matching nothing at all, a milestone criterion whose second half was never verified, and a pool
-  selecting the wrong labour. **A check that reads green while matching nothing is indistinguishable
-  from one that passes.**
-- ⚠️ **A correct conclusion reached by wrong reasoning is not a checked conclusion**, and it
-  happened twice in one session. The `transport` pool selected `labor_line: delivery` — right when
-  the enum had three values, wrong from the moment it had seven, and it survived a rename that
-  touched the very sentence. `3130 Owner's Capital: Owner's Billable Time` sat at `drop` on a reason
-  that read it as the debit side when it is the credit side. **Both were found only because the
-  owner asked a question the artifact already claimed to answer**, which is not a repeatable
-  detection method — when a sentence is rewritten, re-read what it CLAIMS, not just the words that
-  changed.
+- **Firing a gate red is not ceremony — it is the only thing that finds the defects.** Across two
+  sessions ~thirty arms were fired and ten found real bugs, none surfaced by reading: a rule and its
+  vectors disagreeing while every gate stayed green, a double-reported failure, a check matching
+  nothing at all, a milestone criterion whose second half was never verified, a pool selecting the
+  wrong labour, a field map naming the wrong object, and a probe reporting doc ids as schema. **A
+  check that reads green while matching nothing is indistinguishable from one that passes.**
+- ⚠️ **An INCOMPLETE fix is invisible in exactly the way a missing one is not.** The path probe's
+  header described fixing the dynamic-key defect at large scale and it was still leaking 31 paths,
+  **because the collapse reported what it collapsed and never looked at what it left behind.** When
+  something reports its successes, ask what reports its failures.
+- ⚠️ **A defect class does not survive its rule being written — it survives in the reporter.** The
+  leak reporter's first run returned four false positives, all real field names that happen to be
+  exactly 20 characters. **A noisy reporter is one nobody reads twice**, which is the same outcome
+  as no reporter.
+- ⚠️ **A correct conclusion reached by wrong reasoning is not a checked conclusion.** The
+  `transport` pool selected `labor_line: delivery` — right at three enum values, wrong from the
+  moment there were seven, and it survived a rename that touched the very sentence. **When a
+  sentence is rewritten, re-read what it CLAIMS, not just the words that changed.**
 - **When a doc states a count, something must count it.** The chart header said "138 entries, four
-  minted" and had been wrong in both halves since 5150 was added. ⚠️ **This section said "four
-  things to carry" over five bullets until 2026-08-16** — the same defect, in the paragraph warning
-  about it, which is roughly how often it happens.
-- ⚠️ **A branch with no members is a claim, not a capability.** The `billable` / `bills_nobody`
-  coverage map lasted hours: the owner's next ruling emptied the second branch, and it was deleted
-  rather than kept against a hypothetical. The one-branch rule that replaced it is stronger.
-- **The queue's real shape is 5 blocked / 2 startable.** Do not re-triage from issue text — several
-  issues carry numbers that are stale in their own favour, and #32 was listed as startable and
-  blocked in the same row until this revision.
+  minted" and was wrong in both halves for weeks; **gate 16 counts it now**. ⚠️ This section said
+  "four things to carry" over five bullets until 2026-08-16 — the same defect, in the paragraph
+  warning about it.
+- ⚠️ **A rule that exists and is not applied blocks work silently.** ADR-0030 looked like it was
+  waiting for the owner and was waiting for rule 8a. Before concluding a decision is blocked on a
+  person, check what the repo's own standing instructions already require of it.
+- **The `db_schema` enum is not the collection list** — 35 against 50, and it omits `credit-notes`
+  and `settlements`, the second of which turned out to be 1,073 documents of cash application.
+  Anything scoped from that enum is scoped short.
