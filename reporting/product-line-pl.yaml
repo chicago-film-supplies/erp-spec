@@ -155,10 +155,12 @@ report:
         labor_line: delivery
         labour_accounts: [5800]
         pending: >-
-          Vehicle COGS. ADR-0030 moves vehicle running cost into COGS on the 5800/5801 pattern and
-          explicitly does not choose the accounts, so there is nothing to name yet
-          (`deferred_pools.vehicle_cogs`, erp-spec#12). **This pool currently carries almost no
-          cost, which is exactly why the un-allocated view shows Delivery at a loss.**
+          Vehicle COGS. ADR-0030 moves vehicle running cost into COGS on the 5800/5801 pattern.
+          ⚠️ **It now NAMES the accounts — 5900 absorbed, 5901 unabsorbed, 6405 the contra that
+          relieves the natural 6400–6404 block — but it is still `proposed`, so nothing may be
+          named here yet** (`deferred_pools.vehicle_cogs`, erp-spec#12). Accepting it makes this
+          entry mechanical. **This pool currently carries almost no cost, which is exactly why the
+          un-allocated view shows Delivery at a loss.**
       note: >-
         **Both accounts, and the delivery line's margin includes both.** 4100 Service Income is the
         delivery / setup / removal charge, a service a person performs and therefore labour-bearing;
@@ -252,7 +254,9 @@ report:
         labour_accounts: [5800]
         pending: >-
           Vehicle COGS, as for `delivery` — a haul is the most vehicle-intensive work CFS does, so
-          this pool's margin is the one most understated while ADR-0030's accounts are unchosen.
+          this pool's margin is the one most understated while ADR-0030 is unaccepted. ⚠️ Its
+          accounts are no longer unchosen: 5900 / 5901 / 6405, named 2026-08-16. What is pending is
+          the ACCEPTANCE, and the absorption basis, which stays with erp-spec#12's leg capture.
       reason: >-
         **Severable — carries its own margin.** OQ-034, owner 2026-08-16: "trucking is our own
         longer or bigger haul that doesn't fit into the standard delivery charge paradigm, it should
@@ -277,9 +281,11 @@ report:
         overstated by the same amount.
         ⚠️ **This pool's margin is still NOT fully readable, and that is the trap the file header
         warns about for `Delivery`.** Revenue is on 4100, labour is now selected correctly, and
-        **ADR-0030 has not chosen the vehicle COGS accounts**. Until it does, a Transport margin read
-        off this pool overstates trucking — and a haul is the most vehicle-intensive work CFS does,
-        so this is the pool that understatement bites hardest.
+        **ADR-0030 is not accepted, so no vehicle COGS account exists**. Until it is, a Transport
+        margin read off this pool overstates trucking — and a haul is the most vehicle-intensive work
+        CFS does, so this is the pool that understatement bites hardest. ⚠️ This read "ADR-0030 has
+        not chosen the accounts" until 2026-08-16; it has now chosen them (5900 / 5901 / 6405) and
+        what is missing is the acceptance, which is a different blocker with a different owner.
         Measured 2026-08-16: 7 lines, **$34,000.00**, 1.98% of revenue — the amount reproduces OQ-034's
         figure exactly and only the share moved. Derived by account: 4100 under the corpus's single
         `Transport` value. ⚠️ The corpus has NOT been restated into two values; that is an ADR-0020
@@ -406,9 +412,14 @@ report:
     - id: vehicle_cogs
       issue: erp-spec#12
       reason: >-
-        ADR-0030 moves vehicle running cost into COGS on the 5800/5801 absorbed/unabsorbed pattern,
-        and explicitly does NOT choose the accounts — "the chart picks the next free pair". With no
-        accounts there is nothing to pool. 2025 actuals across 6400–6404 total $21,844.77.
+        ADR-0030 moves vehicle running cost into COGS on the 5800/5801 absorbed/unabsorbed pattern.
+        ⚠️ **It named the accounts on 2026-08-16 and is still `proposed`** — 5900 absorbed, 5901
+        unabsorbed, plus a 6405 contra relieving the natural 6400–6404 block, which the ADR's first
+        draft would have closed to new postings. Until it is accepted there is nothing to pool.
+        ⚠️ **2025 actuals across 6400–6404 "total $21,844.77" is UNPINNED** — the figure carries no
+        `source:` anywhere in this repo and cannot be re-derived from permitted sources
+        (`chart-of-accounts` mirrors without balances; this repo does not call Xero). It is the
+        number that sizes the pool. See the ADR's survey for what would measure it.
         It is also the pool that most changes this report: `Delivery` currently carries almost no
         cost, which is exactly why the un-allocated view shows it at a loss.
 

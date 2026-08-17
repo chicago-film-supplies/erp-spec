@@ -474,7 +474,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (56 unpromoted of 75)" _note="no drops pending">
+      <outline text="Capture (57 unpromoted of 76)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -527,6 +527,7 @@
         <outline text="Survey — an unpaid owner shift is not an expense under GAAP, and all six references fence imputed l…" _note="inbox/2026-08-16-survey-an-unpaid-owner-shift-is-not-an-expense-and-every-reference-fences-imputed-labour-out-of-the-statements.md"/>
         <outline text="Survey — the accrued-expense account CFS needs is a MATCHED clearing account, not a period-end esti…" _note="inbox/2026-08-16-survey-the-accrued-liability-is-a-matched-clearing-account-and-the-bill-reclassifies-rather-than-reverses.md"/>
         <outline text="Survey — five of six references put the customer on the SUBLEDGER and dimensions on the GL, and Odo…" _note="inbox/2026-08-16-survey-the-party-is-a-subledger-key-and-the-dimension-is-a-gl-slice-and-they-ride-different-legs.md"/>
+        <outline text="Survey — the rental industry puts vehicle cost in cost of rental revenue, and five of six systems k…" _note="inbox/2026-08-16-survey-vehicle-cost-is-cost-of-rental-revenue-and-every-system-absorbs-it-at-a-rate-rather-than-recoding-the-purchase.md"/>
         <outline text="The owner's reason for allocation-as-reporting is RE-RUNNABILITY — multiple bases, and re-allocatin…" _note="inbox/2026-08-16-the-owner-wants-allocation-re-runnable-and-nothing-in-the-spec-carries-the-key-it-would-re-run-on.md"/>
         <outline text="The product-line × revenue-account matrix rebuilt as a re-runnable artifact with the product-master…" _note="inbox/2026-08-16-the-product-line-matrix-rebuilt-with-the-master-join-denorm-and-master-now-agree-on-every-line.md"/>
         <outline text="HOT-013's budget arithmetic is wrong twice over — `Transfer.code` is an uncounted fourth discretion…" _note="inbox/2026-08-16-the-transfer-field-budget-is-four-fields-not-three-and-both-candidate-evictions-are-already-refused.md"/>
