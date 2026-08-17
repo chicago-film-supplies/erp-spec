@@ -3,13 +3,13 @@
 - **Date:** 2026-08-16
 - **Repo:** erp-spec
 - **Status:** ⏳ #16, #18 (PR #21) · #15, #13 (PR #23) · **#14 (PR #25) — `m3` COMPLETE** · PRs
-  #26–#29 · **PR #30 — five ADRs ACCEPTED, 0 conflicts open** · **PR #31 — #19 + #20, the
-  keys-not-classifications sweep** · **6 issues open, 4 blocked**
+  #26–#29 · **PR #30 — five ADRs ACCEPTED, 0 conflicts open** · **PR #31 — #19 + #20 + four owner
+  rulings** · **7 issues open, 4 blocked**
 - **Origin:** a review of the open issue queue, requested because #18 was on the owner's mind
-- **Related:** open — #3, #4, #6, #8, #12, #17 · closed by this work: #13, #14, #15, #16, #18, #19,
-  #20 · HOT-015 resolved · OQ-045, OQ-046 opened · api-cloudrun#538 filed ·
-  `tools/{validate,dates,labels,milestone-checks}.ts`, `spikes/harness/`,
-  `ledger/{posting-rules,tigerbeetle-accounts,dimensions}.yaml`,
+- **Related:** open — #3, #4, #6, #8, #12, #17, **#32** · closed by this work: #13, #14, #15, #16,
+  #18, #19, #20 · HOT-015 resolved · OQ-045 opened; **OQ-046/047 opened AND answered, OQ-048
+  opened** · api-cloudrun#538 filed · `tools/{validate,dates,labels,milestone-checks}.ts`,
+  `spikes/harness/`, `ledger/{posting-rules,tigerbeetle-accounts,dimensions}.yaml`,
   `migration/live-paths.measured.yaml`
 
 ## START HERE
@@ -17,16 +17,17 @@
 `main` is CI-green. **Units 1–5 done. The largest unit in the repo (#19, with #20 folded in) landed
 2026-08-16.**
 
-### The queue: 6 open, 4 blocked
+### The queue: 7 open, 4 blocked
 
-|               | Issue  | State                                                   |
-| ------------- | ------ | ------------------------------------------------------- |
-| **startable** | **#8** | ⏳ in progress — instrument built, authoring left       |
-| **startable** | **#6** | not begun; re-measure first, its own numbers are stale  |
-| blocked       | #17    | OQ-039 + ADR-0032/0033 acceptance, and an ordering gate |
-| blocked       | #12    | three undecided things, none of them work               |
-| blocked       | #4     | only the m5 formal-methods ADR remains — detection DONE |
-| blocked       | #3     | the spare u16: **two** contenders, not three            |
+|               | Issue   | State                                                   |
+| ------------- | ------- | ------------------------------------------------------- |
+| **startable** | **#8**  | ⏳ in progress — instrument built, authoring left       |
+| **startable** | **#6**  | not begun; re-measure first, its own numbers are stale  |
+| **startable** | **#32** | the imputed-labour view — blocked on OQ-048 (the rate)  |
+| blocked       | #17     | OQ-039 + ADR-0032/0033 acceptance, and an ordering gate |
+| blocked       | #12     | three undecided things, none of them work               |
+| blocked       | #4      | only the m5 formal-methods ADR remains — detection DONE |
+| blocked       | #3      | the spare u16: **two** contenders, not three            |
 
 ### What is still the owner's
 
@@ -34,9 +35,9 @@
 - **ADR-0030's accounts**, a leg-capture decision, a warehouse-overhead ADR → unblocks #12.
 - **Who gets `Transfer.code`** → #3's live half. Two contenders: the actor ref, and the causal order
   on the 2.97% of invoices where `path[0]` cannot supply it.
-- **OQ-046, new** — nothing exercises `labor_line`. Option 3 (shrink the enum back) is live and
-  should not be dismissed: it more than doubled on one owner sentence and five of its seven values
-  duplicate a `product_line`.
+- ✅ **OQ-046 and OQ-047 were opened AND answered in the same session** — see Unit 7. **OQ-048 is
+  the one left**: what rate to impute for a contributed owner shift. The GAAP decision does not wait
+  on it; the imputed report (#32) does.
 - **11 ADRs remain proposed.** ⚠️ **ADR-0025 is now safe to consider** — #19 has landed, so the
   ground ADR-0036 moved under it has been rewritten. It is still cited 48× and is now a historical
   record of a rule that no longer applies; accepting it would freeze that, which is correct under
@@ -234,6 +235,49 @@ values now have nothing that can go red on them, which is this repo's own defini
 `product_line` is not in the same position — gate 13 fails when a value is unclassified in
 `reporting/product-line-pl.yaml`.
 
+### Unit 7 — four owner rulings, taken and implemented the same day (PR #31)
+
+Landed on top of the sweep, in the order they were given.
+
+**1. `labor_line` is the allocation pool's COST SELECTOR** — "the p&l by product line will
+distribute labor costs with labor_line delivery across product lines, the same mechanism will allow
+other combos for future reporting." A report here is **(cost selector) → spread over (base) by
+(basis)**; other combos are configuration, not machinery. ⚠️ The generality stays in the machinery:
+ADR-0029's "exactly ONE official allocation" is what says which number is managed.
+
+⚠️ **It exposed a defect this very sweep had carried forward.** The `transport` pool selected
+`labor_line: delivery` — correct when the enum had three values and trucking labour had nowhere else
+to point, wrong from the moment it had seven. Built as written, a long-haul crew-day would have
+spread across goods lines while Transport reported a ~100% margin. **Renaming `cost_type` →
+`labor_line` in a sentence does not re-read what the sentence claims.**
+
+**2. "counter and warehouse can bill goods too (just like delivery does)"** — both absorb against a
+causal job, so both are joint costs of that order's goods and neither is severable.
+`kind: cost_only` is a second pool shape (cost, no revenue), and **it must be `allocated`**: a cost
+pool that does not spread reaches no report at all. ✅ Coverage became TOTAL, and structurally so —
+`labor_line` is read off the ABSORBED allocation row, and unabsorbed hours have no allocation row
+and therefore no value at all. The two-branch `billable`/`bills_nobody` map written hours earlier
+was **deleted**: a branch with no members is a claim, not a capability.
+
+**3 + 4. The unpaid owner shift — surveyed, then decided.** "a line in the labor pos or bills that
+allows for an owner shift unpaid or paid, so that unpaid owner shifts dont dilute cogs", then "stick
+with gaap, and your rec". ⚠️ **The six-reference survey did NOT come back unanimous, and the split
+was the useful part**: GAAP, Xero, SAP and Odoo keep uncompensated labour out of the statements;
+NetSuite and Intacct post it but fence the offset. **The unanimous part is the credit side — nobody
+credits a payable**, which is exactly the defect (2010 Received Not Invoiced, for a bill that never
+arrives). ⇒ `EVT-FUL-002` gains `compensation: paid | contributed`; a contributed shift writes **no
+transfer**, and needs no conditional because a zero-amount posting is already never written.
+
+⚠️ **`3130 Owner's Capital: Owner's Billable Time` sat at `drop` on a reason that read it as the
+DEBIT side when it is the CREDIT side.** The disposition was right and the reasoning was not, so
+nothing could have caught it — it took the owner asking a question the account already answered. **A
+correct conclusion reached by wrong reasoning is not a checked conclusion**, and that is the second
+instance of the same lesson in one session.
+
+**New gates, all fired red:** 13h (every `labor_line` selected by exactly one pool), 13d's
+`cost_only` arms. **New issue #32** — the imputed-labour view, `required: true, official: false`,
+blocked on OQ-048.
+
 ### Also landed 2026-08-16, outside the units (PRs #26–#29)
 
 - **Gate 11 widened** to `contexts/`, `ledger/`, `reporting/`, `migration/`, `roadmap/` (it scanned
@@ -430,11 +474,20 @@ Four things to carry across the clear, because none is obvious from the issue te
 
 - **The `db_schema` enum is not the collection list** — 35 against 50. #8 was scoped from it and is
   therefore scoped short. Anything else scoped that way is too.
-- **Firing a gate red is not ceremony — it is the only thing that finds the defects.** Twelve arms
-  were fired for #19 and four found real bugs, none of which reading had surfaced: a rule and its
-  vectors disagreeing while every gate stayed green, a double-reported failure, a check matching
-  nothing at all, and a milestone criterion whose second half was never verified. **A check that
-  reads green while matching nothing is indistinguishable from one that passes.**
+- **Firing a gate red is not ceremony — it is the only thing that finds the defects.** Twenty-odd
+  arms were fired across this session and six found real bugs, none of which reading had surfaced: a
+  rule and its vectors disagreeing while every gate stayed green, a double-reported failure, a check
+  matching nothing at all, a milestone criterion whose second half was never verified, and a pool
+  selecting the wrong labour. **A check that reads green while matching nothing is indistinguishable
+  from one that passes.**
+- ⚠️ **A correct conclusion reached by wrong reasoning is not a checked conclusion**, and it
+  happened twice in one session. The `transport` pool selected `labor_line: delivery` — right when
+  the enum had three values, wrong from the moment it had seven, and it survived a rename that
+  touched the very sentence. `3130 Owner's Capital: Owner's Billable Time` sat at `drop` on a reason
+  that read it as the debit side when it is the credit side. **Both were only found because the
+  owner asked a question the artifact already claimed to answer**, which is not a repeatable
+  detection method — when a sentence is rewritten, re-read what it CLAIMS, not just the words that
+  changed.
 - **When a doc states a count, something must count it.** The chart header said "138 entries, four
   minted" and had been wrong in both halves since 5150 was added. Same class as the transfer field
   budget and the `dimensions:` lists.
