@@ -20,9 +20,13 @@
  *
  * "READ-ONLY" in a header comment is a promise, and this repo's own rule is that a stated guarantee
  * nothing executes is not a guarantee. So the `Firestore` handle is created inside a closure and
- * never escapes it. The only capability this module exports is `pageAll`, which can issue a
- * projected `.get()` and nothing else — a caller cannot reach a write verb even by accident, because
- * it holds no reference to anything that has one.
+ * never escapes it. The capabilities this module exports are `pageAll` (a projected `.get()`),
+ * `listCollections` and `pathScan` (an unprojected `.get()`) — **all three read and nothing else.**
+ * A caller cannot reach a write verb even by accident, because it holds no reference to anything
+ * that has one.
+ * ⚠️ `listCollections` and `pathScan` were added 2026-08-16 for erp-spec#8, and the guarantee is
+ * unchanged rather than merely re-asserted: the closure still returns functions, never `db`. Adding
+ * a capability here is the moment to check that, which is why it is spelled out.
  *
  * Two more fences, both in the `deno task` flags rather than here:
  *
@@ -57,16 +61,14 @@ export type Doc<T> = T & { __id: string };
  * `db_*` MCP tools' `items[].price.x` syntax. Projecting `items` whole costs bytes and nothing else;
  * the response is assembled locally and there is no 65 KB cap to respect here.
  */
-export const pageAll: <T>(collection: string, fields: string[], pageSize?: number) => Promise<
-  Doc<T>[]
-> = await (() => {
+const _reads = await (() => {
   const app = initializeApp({ projectId: PROJECT });
   const db = getFirestore(app);
   // REST rather than gRPC — required for Deno compatibility, the same setting `api-cloudrun/src/db.ts`
   // applies for the same reason (`code:2026-08-16:api-cloudrun@8ff32c4c:src/db.ts`).
   db.settings({ preferRest: true });
 
-  return async function pageAll<T>(
+  async function pageAll<T>(
     collection: string,
     fields: string[],
     pageSize = 300,
@@ -87,8 +89,53 @@ export const pageAll: <T>(collection: string, fields: string[], pageSize?: numbe
       cursor = snap.docs[snap.docs.length - 1];
     }
     return out;
-  };
+  }
+
+  /**
+   * Every top-level collection, from Firestore itself.
+   *
+   * ⚠️ **The point is that this is not a list anybody typed.** The MCP `db_schema` tool carries an
+   * enum of 35 collections and it is demonstrably incomplete — `credit-notes` and `settlements` are
+   * absent from it while `migration/field-map.yaml` maps both. m6's exit criterion is "every current
+   * Firestore path", and "current" is a fact about the database, so it has to be read from the
+   * database or the checker compares the map against itself and always passes.
+   */
+  const listCollections = async (): Promise<string[]> =>
+    (await db.listCollections()).map((c) => c.id).sort();
+
+  /**
+   * Page a collection UNPROJECTED, to see every field a document actually carries.
+   *
+   * `pageAll` needs a field mask, which is the wrong tool for "what fields exist" — a mask can only
+   * confirm fields you already suspect. `hardCap` bounds the bandwidth on the big collections and
+   * the caller is handed `capped` so a partial sweep can never be reported as exhaustive.
+   */
+  async function pathScan(
+    collection: string,
+    hardCap = 4000,
+    pageSize = 300,
+  ): Promise<{ scanned: number; capped: boolean; docs: Record<string, unknown>[] }> {
+    const docs: Record<string, unknown>[] = [];
+    // deno-lint-ignore no-explicit-any
+    let cursor: any = null;
+    while (docs.length < hardCap) {
+      let q = db.collection(collection).orderBy("__name__").limit(pageSize);
+      if (cursor) q = q.startAfter(cursor);
+      const snap = await q.get();
+      if (snap.empty) break;
+      for (const d of snap.docs) docs.push(d.data() as Record<string, unknown>);
+      if (snap.size < pageSize) break;
+      cursor = snap.docs[snap.docs.length - 1];
+    }
+    return { scanned: docs.length, capped: docs.length >= hardCap, docs };
+  }
+
+  return { pageAll, listCollections, pathScan };
 })();
+
+export const pageAll = _reads.pageAll;
+export const listCollections = _reads.listCollections;
+export const pathScan = _reads.pathScan;
 
 // ── shared shapes ────────────────────────────────────────────────────────────────────────────────
 

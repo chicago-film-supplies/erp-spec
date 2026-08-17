@@ -10,6 +10,7 @@
  *   3. Idempotent. Re-running produces no duplicates, even if `status` is reset by hand.
  */
 import { parse as parseYaml } from "@std/yaml";
+import { ymdUTC } from "./dates.ts";
 
 const ROOT = new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const DROPS = `${ROOT}/research-drop`;
@@ -141,9 +142,8 @@ for (const name of drops) {
   // "Fri Aug 07 2026 19:00:00 GMT-0500 (...)" — and the local-time render can also roll the day
   // backwards off a UTC midnight. Always reduce to a UTC calendar day.
   const dropDate = (() => {
-    const d = parsed.fm.date;
-    if (d instanceof Date) return d.toISOString().slice(0, 10);
-    const s = String(d ?? "").trim();
+    // Fallback to the filename stays here — that is this caller's recovery policy, not a date rule.
+    const s = ymdUTC(parsed.fm.date);
     return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : name.slice(0, 10);
   })();
   const topics = Array.isArray(parsed.fm.topics) ? parsed.fm.topics.map(String) : [];
