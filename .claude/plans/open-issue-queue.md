@@ -21,19 +21,19 @@
 
 ### The queue: 6 open once #34 merges — 5 blocked, 1 startable
 
-|               | Issue  | State                                                                          |
-| ------------- | ------ | ------------------------------------------------------------------------------ |
-| **startable** | **#6** | the ONLY startable one. Re-measure first — its own numbers                     |
-| blocked       | #32    | the imputed-labour view — needs OQ-048, the imputed rate                       |
-| blocked       | #17    | OQ-039 + ADR-0032/0033 acceptance, and an ordering gate                        |
-| blocked       | #12    | ⚠️ **ADR-0030 is now PREPARED — accepting it unblocks one of its three pools** |
-| blocked       | #4     | only the m5 formal-methods ADR remains — detection DONE                        |
-| blocked       | #3     | the spare u16: three contenders, decided on other grounds                      |
+|               | Issue  | State                                                                      |
+| ------------- | ------ | -------------------------------------------------------------------------- |
+| **startable** | **#6** | the ONLY startable one. Re-measure first — its own numbers                 |
+| blocked       | #32    | the imputed-labour view — needs OQ-048, the imputed rate                   |
+| blocked       | #17    | OQ-039 + ADR-0032/0033 acceptance, and an ordering gate                    |
+| blocked       | #12    | ⚠️ **ADR-0030 is RULED ON — accepting it unblocks one of its three pools** |
+| blocked       | #4     | only the m5 formal-methods ADR remains — detection DONE                    |
+| blocked       | #3     | the spare u16: three contenders, decided on other grounds                  |
 
 ### What is still the owner's
 
-- ⚠️ **ADR-0030 — PR #33, four yes/no rulings with a recommendation on each.** The largest single
-  thing on this list, and the cheapest to answer. See the section below.
+- ⚠️ **ADR-0030 — ACCEPT IT.** PR #33. Surveyed, ruled on, four accounts minted, nothing left to
+  decide inside it. Rule 3 keeps acceptance the owner's. See the section below.
 - **ADR-0032 + ADR-0033 + OQ-039** → unblocks #17.
 - **A leg-capture decision and a warehouse-overhead ADR** → the other two thirds of #12. ⚠️ ADR-0030
   is no longer on that list; it is prepared and waiting.
@@ -487,7 +487,7 @@ in v1"** (api-cloudrun#538).
   hand-authoring 286 rows against a shape two un-accepted ADRs may still change. It stays open as
   the m6 exit criterion it already is.
 
-## ✅ ADR-0030 — PREPARED FOR A DECISION 2026-08-16 (PR #33). Four rulings, nothing accepted
+## ✅ ADR-0030 — SURVEYED AND RULED ON 2026-08-16 (PR #33). Ready to accept; acceptance not taken
 
 The previous revision of this doc said to "spend ~30 minutes preparing ADR-0030 for a decision".
 That was done, and it took longer than 30 minutes for a reason worth recording.
@@ -539,10 +539,42 @@ falls, history deliberately not restated ⇒ gross margin is not comparable acro
 third restatement axis beside ADR-0020 and ADR-0032, and the only prospective-only one, so it does
 **not** join m6's ordering obligation.
 
-**Not asked, on purpose:** the absorption basis and vehicle depreciation. Per #12 the same
-leg-capture decision gives `trip_travel` its basis _and_ upgrades ADR-0031 from Horngren tier 4 to
-tier 1 — deciding it inside ADR-0030 decides it twice on less evidence. **Folding those in is what
-kept this ADR undecidable.**
+### ⚠️ Then the owner ruled, and THREE of the seven rulings changed the ADR rather than confirming it
+
+- **The two owned vehicles are used EXCLUSIVELY for delivery and trash removal.** That removes the
+  classification question rather than answering it — and it settles classification and NOT the
+  basis, which is the conflation that produced the broken first draft.
+- ⚠️ **A SIXTH stream of vehicle cost the ADR never saw: RENTED trucks**, in
+  `6302 Rented Tools,
+  Machinery, Equipment`. **6302's own note already excluded them** — "the
+  distinction is whether an order caused it" — and nobody had read it that way. ⇒
+  `6405 Vehicle: Rented`, and `$21,844.77` is **understated**, not merely unpinned.
+- ⚠️ **"Align with the labor strategy", and the alignment is LITERAL.** The recommendation at that
+  point was the simple option, because absorption needs a basis that did not exist. **The ruling
+  sent it back and was right**: a delivery job already generates a shift carrying hours, a causal
+  job and a `labor_line`, so vehicle cost absorbs on THE SAME ALLOCATION ROWS — no new event, no new
+  document, no new key — and the Delivery / Trash split comes for free.
+- ⚠️ **The basis is computed Mapbox distance, which retired a blocker asserted twice and never
+  checked.** This doc AND #12 both recorded vehicle absorption as waiting on leg capture because
+  "mileage is not captured". True, and it is **derivable** —
+  `destinations.address.address_coordinates` already holds it. ⇒ **It does not unblock
+  `trip_travel`**: distance says how far a destination is, not which orders shared a van.
+- ⚠️ **The geocodes are wrong in a way that looks right**, and the discriminator is already stored:
+  every bad one carries `urn:mbxadr-itp:` (Mapbox's INTERPOLATED fallback) where correct rows carry
+  `urn:mbxadr:`. One-way — it screens, it does not decide. Owner: record in the spec, no v1 issue,
+  because destinations move to manager's autofill at cutover. **The gate ships anyway.**
+
+**Four accounts minted** — 5900/5901, 6405, and the 6409 contra without which the split cannot be
+computed. Chart header 139 → 143 entries, 5 → 9 minted, every count re-derived from the file.
+
+⚠️ **What does NOT carry over from labour is ADR-0019's headline sentence.** "Absorption measures
+utilisation, not rate variance" holds because labour is costed at ACTUAL. A van has no actual
+per-job cost, so 5901 is utilisation AND rate deviation, and naming the normal-capacity denominator
+is a requirement rather than a footnote.
+
+**Still not decided in this ADR, on purpose:** vehicle depreciation (SPIKE-005's engine), and
+`trip_travel`'s trip grouping. **ADR-0030 is `proposed` and ready to accept — rule 3 keeps that the
+owner's.**
 
 ## Context recommendation
 
