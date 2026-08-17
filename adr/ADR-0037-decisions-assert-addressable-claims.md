@@ -94,10 +94,27 @@ title: Vehicle cost moves from operating expense into COGS, absorbed and unabsor
 into COGS)` — and bare ids thereafter. First-mention only, because that is
 where a reader needs it and repeating it everywhere is the noise that gets conventions abandoned.
 
+### GL accounts are the third scale, and they need NO new field
+
+Owner, 2026-08-17: the same rule for ledger accounts — `#### - Name`. ⚠️ Another live demonstration:
+the same session wrote `5801`, `5900/5901/5902/6409`, `6302` and `5200` throughout without once
+saying what any of them were.
+
+✅ **Convention only, no schema change** — `ledger/chart-of-accounts.yaml` already carries `name` on
+every entry, which is what `ADR`, `OQ`, `HOT` and `SPIKE` lack. So accounts get the citation rule
+and nothing else. **Cite `5801 - Cost of Goods Sold: Wages (Unabsorbed)` on first mention in a
+file**, bare after.
+
+⚠️ **A trap for whoever writes the gate, measured so it is not re-discovered:** a naive `\b\d{4}\b`
+matcher fires on **616 instances of `2026`** — the year — across `ledger/`, `reporting/` and
+`contexts/`. The pattern must be **the set of codes actually in the chart**, not four digits.
+Current bare-reference counts: `5800` 71, `2010` 79, `2000` 63, `5801` 40, `2050` 37.
+
 ⚠️ **This is the same insight as `asserts:` at a different scale.** `asserts:` makes a claim
-addressable INSIDE a document; `headline:` makes the document meaningful AT the point of citation.
-Both exist because an id that carries no meaning where it is used forces the reader to go and look —
-and the reader usually does not.
+addressable INSIDE a document; `headline:` makes the document meaningful AT the point of citation;
+the account rule does the same for a number that already has a name nobody writes. Both exist
+because an id that carries no meaning where it is used forces the reader to go and look — and the
+reader usually does not.
 
 ## Considered options
 

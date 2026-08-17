@@ -161,6 +161,10 @@ Not every tool has an upstream dump, and the difference is worth knowing before 
 - A bare id is unreadable to everyone who did not write it — including you, next week. ⚠️ `title:`
   is 11–23 words and `question:` / `statement:` are sentences; **none of them is the gloss.** Write
   a short one.
+- **Same for GL accounts: `#### - Name` on first mention** —
+  `5801 - Cost of Goods Sold: Wages
+  (Unabsorbed)`, then bare after. No new field needed;
+  `ledger/chart-of-accounts.yaml` already carries `name`.
 - Cite the ADR that DECIDED it, not the one that mentions it.
 
 **Claims**
