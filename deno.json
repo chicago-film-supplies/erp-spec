@@ -4,6 +4,8 @@
   "exports": {},
   "tasks": {
     "validate": "deno run --allow-read --allow-env=SPEC_TODAY tools/validate.ts",
+    "//ci": "Everything .github/workflows/spec.yml runs, in one command, without short-circuiting. The workflow CALLS this — one owner for the CI contract, so local and CI cannot drift.",
+    "ci": "deno run --allow-read --allow-env=SPEC_TODAY --allow-write --allow-run=deno,git tools/ci.ts",
     "labels": "deno run --allow-read --allow-run=gh tools/labels.ts",
     "triage": "deno run --allow-read --allow-env=SPEC_TODAY tools/validate.ts --triage-only",
     "gen": "deno run --allow-read --allow-write tools/generate.ts",
@@ -18,9 +20,15 @@
   },
   "fmt": {
     "lineWidth": 100,
-    "exclude": ["traceability/", "**/*.generated.*"]
+    "exclude": [
+      "traceability/",
+      "**/*.generated.*"
+    ]
   },
   "lint": {
-    "exclude": ["traceability/", "**/*.generated.*"]
+    "exclude": [
+      "traceability/",
+      "**/*.generated.*"
+    ]
   }
 }

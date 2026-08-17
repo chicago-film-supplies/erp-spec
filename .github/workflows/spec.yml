@@ -15,40 +15,21 @@ jobs:
         with:
           deno-version: v2.x
 
-      # `validate` has been green since 2026-08-09 — a failure here is a real regression, not the
-      # seeded day-one worklist it used to be.
+      # ⚠️ **ONE OWNER FOR THE CI CONTRACT.** These four steps used to live here and nowhere else,
+      # so the only other copy was whoever remembered to type them before pushing — two owners for
+      # one fact, which is the defect class this repo has paid for most often. `tools/ci.ts` is now
+      # the definition and this workflow calls it, so `deno task ci` locally and CI here cannot
+      # drift. The reasoning that used to sit in these comments moved into that file with it:
       #
-      # The steps below keep `if: always()` anyway, and that is deliberate: the moment validate
-      # goes red again, the stale-generated-file gate must still run and still be able to fail on
-      # its own terms. Gating it behind validate's success would make it dead code for exactly as
-      # long as something else was broken — the "a guarantee nothing executes is not a guarantee"
-      # failure this repo exists to avoid.
-      - name: Validate
-        id: validate
-        run: deno task validate
-
-      # `deno.json` declared fmt settings from the seed commit and nothing checked them, so 147
-      # files drifted (reformatted in 0c3c6ef). The cost was never aesthetic: running the formatter
-      # a configured repo obviously invites you to run produces a diff that swamps the actual
-      # change, so every session either reverts the churn or lands it on top of unrelated work.
+      #   - the steps do NOT short-circuit. `if: always()` was load-bearing — gating the
+      #     stale-generated-file gate behind validate's success would make it dead code for exactly
+      #     as long as something else was broken;
+      #   - `deno fmt --check` writes nothing, which is why it runs above `gen`, whose staleness
+      #     check is a diff that an in-place formatter would corrupt.
       #
-      # `--check` writes nothing, which is why it can sit ABOVE the stale-generated-file step —
-      # that step diffs the whole working tree, and a formatter that edited files in place would
-      # make the two gates report each other's failures.
-      - name: Formatting
-        if: always()
-        run: deno fmt --check
-
-      - name: Regenerate
-        if: always()
-        run: deno task gen
-
-      - name: Fail on stale generated files
-        if: always()
-        run: |
-          if ! git diff --quiet; then
-            echo "::error::Generated files are stale. Run 'deno task gen' and commit the result."
-            git --no-pager diff --stat
-            git --no-pager diff
-            exit 1
-          fi
+      # ⚠️ It is NOT a replacement for this workflow. A local run uses one machine's Deno against a
+      # working tree that may hold anything; this runs on a clean checkout. That difference is the
+      # whole point of CI, and it is why `tools/ci.ts` scopes its staleness diff to the generated
+      # files while this job's clean checkout makes the two equivalent.
+      - name: CI
+        run: deno task ci
