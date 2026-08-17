@@ -1,14 +1,14 @@
 ---
 id: ADR-0010
 title: Accounting date vs posting timestamp policy
-status: proposed
+status: accepted
 date: 2026-08-08
-review_by: 2026-11-01
 deciders: [repo owner]
 contexts: [ledger]
 relates_to: [HOT-005, OQ-009, SPIKE-003]
 supersedes:
 superseded_by:
+frozen_sha256: 1bfc4aa03590518195a72e928cfdcacbf1d880fbb87536b933ce6b5e4cc0bb60
 ---
 
 > **In the context of** a ledger whose store assigns its own timestamps, **facing** reporting that

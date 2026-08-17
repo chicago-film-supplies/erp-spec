@@ -12,8 +12,8 @@ is `deno task validate`'s judgement, not this file's.
 | | Count | |
 |---|---:|---|
 | Open questions | 9 open | 36 answered of 45 · **0 with no owner or no decide-by** |
-| Conflicts (HOT) | 15 | 2 open |
-| Decisions (ADR) | 36 | 17 in force · 16 proposed |
+| Conflicts (HOT) | 15 | 0 open |
+| Decisions (ADR) | 36 | 21 in force · 11 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 21 | 0 without a scenario |
 | Inbox | 73 | 54 unpromoted |
@@ -40,14 +40,11 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 
 ## Open conflicts
 
-| HOT | Statement | Blocks |
-|---|---|---|
-| `HOT-013` | `ADR-0018` says dimensions are "carried on the posting, in `user_data` and in the Mongo/Parquet projection".… | `OQ-040` `ADR-0033` `SPIKE-003` |
-| `HOT-014` | ADR-0029 requires that "every posting must carry its causal order, or allocation is impossible and this decis… | `ADR-0029` `ADR-0031` `ADR-0036` |
+None.
 
 ## Decisions
 
-### In force (17)
+### In force (21)
 
 - `ADR-0001` — Replace Xero with an in-house ledger
 - `ADR-0002` — Bank feed sourced from Plaid, single Chase account
@@ -55,25 +52,26 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 - `ADR-0004` — Retain Deno/Hono and TypeScript
 - `ADR-0005` — Retain SolidJS clients
 - `ADR-0007` — Replace asset.accountant; dual GAAP/tax basis in scope
+- `ADR-0009` — Anticorruption layer — foreign identifiers never enter domain models
+- `ADR-0010` — Accounting date vs posting timestamp policy
 - `ADR-0011` — Fulfillment legs are first-class recorded events
 - `ADR-0012` — Valkey-backed queues with in-process workers, replacing Cloud Tasks
+- `ADR-0013` — Self-host on Linode, with Caddy fronting TLS
 - `ADR-0014` — Lifecycle state is derived from the ledger, never assigned
 - `ADR-0016` — Quint replaces TLA+ for the formal specs
 - `ADR-0017` — Reporting authority is split by period state
-- `ADR-0018` — A plain chart of accounts, with dimensions carried on the posting
 - `ADR-0021` — Item type determines the revenue account; duplicate charge products are canonicalized
 - `ADR-0022` — Invoice status decomposes into two derived projections
 - `ADR-0023` — Native Node-API addons load under Deno; the deployment unit is a self-extracting compiled binary
 - `ADR-0024` — DuckDB is reached natively and server-side; client-side reporting is rejected
 - `ADR-0026` — The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time
+- `ADR-0034` — An accepted ADR is a historical record of the decision as taken; corrections live outside it and superseding is reserved for re-deciding
+- `ADR-0036` — The ledger carries keys, not classifications — product line is derived at report time
 
-### Proposed (16)
+### Proposed (11)
 
 | ADR | Title | Review by | Supersedes on acceptance | Blocked on |
 |---|---|---|---|---|
-| `ADR-0009` | Anticorruption layer — foreign identifiers never enter domain models | 2026-09-15 | — | `HOT-006` |
-| `ADR-0010` | Accounting date vs posting timestamp policy | 2026-11-01 | — | `HOT-005` `OQ-009` `SPIKE-003` |
-| `ADR-0013` | Self-host on Linode, with Caddy fronting TLS | 2026-10-01 | — | `SPIKE-011` |
 | `ADR-0015` | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-11-01 | — | `SPIKE-002` `SPIKE-012` |
 | `ADR-0019` | Labour costing is actual; absorption measures utilisation, not rate variance | 2026-10-01 | — | `HOT-003` `HOT-004` `HOT-010` `OQ-005` `OQ-006` `OQ-008` `OQ-011` `OQ-017` `OQ-018` `OQ-019` |
 | `ADR-0020` | Xero history is restated, not imported as-is | 2026-10-15 | — | `HOT-006` `OQ-012` |
@@ -85,8 +83,6 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | `ADR-0031` | The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy | 2026-11-01 | — | `OQ-006` `OQ-018` `OQ-031` `OQ-032` `OQ-033` |
 | `ADR-0032` | The organization tree is a liability tree; projects and settlement points are addressing beneath it | 2026-11-15 | — | `OQ-035` `OQ-036` `OQ-038` `OQ-039` `HOT-006` |
 | `ADR-0033` | A document is addressed to exactly one node by a level-tagged reference, and unallocated credit sits at the settlement point | 2026-11-15 | — | `OQ-030` `OQ-038` `OQ-040` |
-| `ADR-0034` | An accepted ADR is a historical record of the decision as taken; corrections live outside it and superseding is reserved for re-deciding | 2026-11-15 | — | `HOT-012` `HOT-013` |
-| `ADR-0036` | The ledger carries keys, not classifications — product line is derived at report time | 2026-11-15 | `ADR-0018` | `HOT-013` `HOT-014` |
 
 ## Spikes
 
@@ -116,18 +112,17 @@ it is counted separately on purpose, and a milestone is not done because its che
 | `m1` | Big-picture event storm | `m0` | 1 | — | 2 | — |
 | `m2` | Context map and glossary v1 | `m1` | 2 | — | 1 | — |
 | `m3` | Ledger core | `m2` | 4 | — | — | — |
-| `m4` | All spikes closed by ADR | `m3` | 0 | 2 | — | 1 |
+| `m4` | All spikes closed by ADR | `m3` | 1 | 1 | — | 1 |
 | `m5` | Formal specs checking clean | `m4` | 1 | — | 2 | — |
 | `m6` | Migration field map complete | `m2` | 0 | — | 4 | — |
 | `m7` | Walking skeleton defined | `m3` `m5` `m6` | 0 | — | 3 | — |
 | `spec-v1` | Tag spec-v1 | `m0` `m1` `m2` `m3` `m4` `m5` `m6` `m7` | 1 | — | 3 | 1 |
 
-### Machine-checkable criteria not yet met (2)
+### Machine-checkable criteria not yet met (1)
 
 | Milestone | Criterion | Check | Measured |
 |---|---|---|---|
 | `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 12 spikes, 9 open, 0 closed without naming an ADR |
-| `m4` | Every HOT- is resolved or has an ADR that consciously defers it with… | `hotspots_resolved` | 15 hotspots, 2 unresolved |
 
 ## Coverage gaps
 

@@ -40,6 +40,18 @@ Accepted and not superseded, as of the last `deno task gen`.
 
 > **In the context of** building our own ledger, **facing** a separate hosted tool holding the asset register, **we decided** to bring fixed assets in-house with both GAAP and tax basis, **to achieve** depreciation postings that originate in the same ledger as everything else and a reportable deferred difference, **accepting** a genuinely intricate tax-depreciation rules problem.
 
+## [ADR-0009](ADR-0009-anticorruption-layer.md) — Anticorruption layer — foreign identifiers never enter domain models
+
+**Contexts:** ledger, billing, banking, ordering · **Decided:** 2026-08-08
+
+> **In the context of** integrating Plaid and any surviving external system, **facing** silent translation failures at a foreign boundary, **we decided** that foreign identifiers never enter domain models and an unresolvable id is a hard error, **to achieve** failures that are loud at the boundary instead of silent in the data, **accepting** that ingestion will refuse work that the current system would have accepted.
+
+## [ADR-0010](ADR-0010-accounting-date-vs-posting-timestamp.md) — Accounting date vs posting timestamp policy
+
+**Contexts:** ledger · **Decided:** 2026-08-08
+
+> **In the context of** a ledger whose store assigns its own timestamps, **facing** reporting that is periodised by business date, **we decided** to carry accounting date and posting timestamp as distinct fields with distinct rules, **to achieve** periodisation that survives late and back-dated entries, **accepting** that the ledger's native ordering is not the reporting ordering.
+
 ## [ADR-0011](ADR-0011-fulfillment-legs-first-class.md) — Fulfillment legs are first-class recorded events
 
 **Contexts:** fulfillment, ledger · **Decided:** 2026-08-08
@@ -51,6 +63,12 @@ Accepted and not superseded, as of the last `deno task gen`.
 **Contexts:** ordering, billing, fulfillment · **Decided:** 2026-08-09
 
 > **In the context of** leaving Cloud Tasks along with the rest of the GCP platform, **facing** 16 queues whose config largely encodes HTTP-delivery hazards rather than domain requirements, **we decided** to run queues on Valkey with in-process workers and serialize on a per-entity lock, **to achieve** the removal of the duplicate-dispatch lease and its coupled-knobs invariant, **accepting** that durability becomes a configuration decision and worker liveness becomes ours to monitor.
+
+## [ADR-0013](ADR-0013-linode-self-hosted.md) — Self-host on Linode, with Caddy fronting TLS
+
+**Contexts:** ledger, ordering, billing, fulfillment · **Decided:** 2026-08-09
+
+> **In the context of** rebuilding on a stack whose stores are all self-hosted anyway, **facing** a managed-service bill and a set of GCP primitives with no portable equivalent, **we decided** to host on Linode with Caddy terminating TLS, **to achieve** predictable cost and no platform lock-in, **accepting** that eight GCP managed services become ours to replace and operate.
 
 ## [ADR-0014](ADR-0014-lifecycle-state-is-derived.md) — Lifecycle state is derived from the ledger, never assigned
 
@@ -69,12 +87,6 @@ Accepted and not superseded, as of the last `deno task gen`.
 **Contexts:** ledger, banking, billing · **Decided:** 2026-08-09
 
 > **In the context of** a ledger whose timestamps are posting time and reporting that is periodised by accounting date, **facing** a requirement that reported figures must not drift, **we decided** to split reporting authority by period state, **to achieve** closed-period figures that cannot drift at all, **accepting** that open-period figures come from the document store rather than the ledger.
-
-## [ADR-0018](ADR-0018-plain-coa-dimensions-on-the-posting.md) — A plain chart of accounts, with dimensions carried on the posting
-
-**Contexts:** ledger · **Decided:** 2026-08-09
-
-> **In the context of** needing balances sliced by product line and cost type, **facing** a ledger with no dimension fields, **we decided** to keep the chart of accounts plain and carry dimensions on the posting, **to achieve** an account tree an auditor can read and a dimension set that grows by addition, **accepting** that a dimensional balance is answered by the read side rather than by a single account read.
 
 ## [ADR-0021](ADR-0021-charge-product-canonicalization.md) — Item type determines the revenue account; duplicate charge products are canonicalized
 
@@ -106,13 +118,22 @@ Accepted and not superseded, as of the last `deno task gen`.
 
 > **In the context of** a fixed-asset register that must produce a full P&L _and balance sheet_ on both a GAAP and a tax basis across years, **facing** a fleet where a §179 election expenses an asset in year 1 that GAAP carries for 5, 10 or 20, **we decided** that only the GAAP book posts to the general ledger and the tax book is derived at report time from the register's per-book schedules, **to achieve** two complete sets of statements without a second write path, **accepting** that the tax book has no double-entry enforcement of its own and is only as good as its derivation.
 
+## [ADR-0034](ADR-0034-an-accepted-adr-is-a-historical-record.md) — An accepted ADR is a historical record of the decision as taken; corrections live outside it and superseding is reserved for re-deciding
+
+**Contexts:** ledger, billing · **Decided:** 2026-08-16
+
+> **In the context of** two accepted ADRs whose evidence was later corrected, **facing** a lifecycle rule that forbids editing them and a supersede mechanism that would mean re-deciding things nobody disputes, **we decided** that an accepted ADR is a historical record of the decision as taken, **to achieve** an `adr/` directory that can be trusted to say what was actually believed and when, **accepting** that a reader of an ADR cannot tell from the ADR alone that one of its claims has since been retracted.
+
+## [ADR-0036](ADR-0036-the-ledger-carries-keys-not-classifications.md) — The ledger carries keys, not classifications — product line is derived at report time
+
+**Contexts:** ledger, billing, fulfillment · **Decided:** 2026-08-16
+
+> **In the context of** ADR-0029 having made allocation a reporting act, **facing** a chart that also carried the reporting _classification_ on the posting, **we decided** that a posting records keys — causal order(s), invoice, line — and never a product line, **to achieve** a ledger whose facts do not move when a category does, **accepting** that no dimensional balance can be read from the ledger without joining to the product master.
+
 # Proposed, not yet in force
 
 | ADR | Title | Review by | Supersedes on acceptance | Blocked on |
 |---|---|---|---|---|
-| [ADR-0009](ADR-0009-anticorruption-layer.md) | Anticorruption layer — foreign identifiers never enter domain models | 2026-09-15 | — | HOT-006 |
-| [ADR-0010](ADR-0010-accounting-date-vs-posting-timestamp.md) | Accounting date vs posting timestamp policy | 2026-11-01 | — | HOT-005, OQ-009, SPIKE-003 |
-| [ADR-0013](ADR-0013-linode-self-hosted.md) | Self-host on Linode, with Caddy fronting TLS | 2026-10-01 | — | SPIKE-011 |
 | [ADR-0015](ADR-0015-reservations-as-pending-transfers.md) | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-11-01 | — | SPIKE-002, SPIKE-012 |
 | [ADR-0019](ADR-0019-labour-costing-is-actual.md) | Labour costing is actual; absorption measures utilisation, not rate variance | 2026-10-01 | — | HOT-003, HOT-004, HOT-010, OQ-005, OQ-006, OQ-008, OQ-011, OQ-017, OQ-018, OQ-019 |
 | [ADR-0020](ADR-0020-xero-history-is-restated.md) | Xero history is restated, not imported as-is | 2026-10-15 | — | HOT-006, OQ-012 |
@@ -124,5 +145,3 @@ Accepted and not superseded, as of the last `deno task gen`.
 | [ADR-0031](ADR-0031-allocation-basis-is-goods-revenue-on-the-causal-order.md) | The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy | 2026-11-01 | — | OQ-006, OQ-018, OQ-031, OQ-032, OQ-033 |
 | [ADR-0032](ADR-0032-the-customer-tree-is-a-liability-tree.md) | The organization tree is a liability tree; projects and settlement points are addressing beneath it | 2026-11-15 | — | OQ-035, OQ-036, OQ-038, OQ-039, HOT-006 |
 | [ADR-0033](ADR-0033-ar-addressing-is-header-only-and-credit-sits-at-the-settlement-point.md) | A document is addressed to exactly one node by a level-tagged reference, and unallocated credit sits at the settlement point | 2026-11-15 | — | OQ-030, OQ-038, OQ-040 |
-| [ADR-0034](ADR-0034-an-accepted-adr-is-a-historical-record.md) | An accepted ADR is a historical record of the decision as taken; corrections live outside it and superseding is reserved for re-deciding | 2026-11-15 | — | HOT-012, HOT-013 |
-| [ADR-0036](ADR-0036-the-ledger-carries-keys-not-classifications.md) | The ledger carries keys, not classifications — product line is derived at report time | 2026-11-15 | ADR-0018 | HOT-013, HOT-014 |

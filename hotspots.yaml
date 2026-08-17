@@ -352,7 +352,20 @@ hotspots:
       Recorded here rather than in ADR-0026, per ADR-0034: the decision stands, a cited fact was
       wrong, so the correction lives in the hotspot and the ADR is left alone.
     blocks: [OQ-040, ADR-0033, SPIKE-003]
-    status: open
+    status: resolved
+    resolved_by: ADR-0036
+    resolution_note: >-
+      ✅ **ADR-0036 accepted 2026-08-16.** ⚠️ It DISSOLVES this conflict rather than answering it in
+      its own terms, and the difference is worth keeping: the question was "where on a transfer does
+      a product line fit", and the answer is that it does not go on a transfer at all. The claimants
+      were removed, not accommodated. ADR-0018 is superseded.
+      ⚠️ **Not because there was nowhere to put them.** `Transfer.code` is a fourth discretionary
+      field and the payload measures 84 combinations — 7 bits of 16. The slot exists and is
+      declined, on ADR-0036's own criterion: a product line is a mutable field on a mutable master,
+      and freezing it into an immutable transfer is the defect regardless of which field holds it.
+      **`Transfer.code` remains unclaimed, with three contenders** — the actor ref, the causal order
+      where `path[0]` cannot supply it, and nothing else. That is erp-spec#3's live half, not this
+      hotspot's.
     resolution_shape: >-
       **Settled 2026-08-16 by ADR-0034, which decides the FORM this resolution takes and not its
       content.** `ADR-0018` stays exactly as written — its decision (plain COA, dimensions off
@@ -479,7 +492,20 @@ hotspots:
       The only causal order anywhere in the spec is `shift.absorbed_allocations[].causal_job`, inside
       the source document.
     blocks: [ADR-0029, ADR-0031, ADR-0036]
-    status: open
+    status: resolved
+    resolved_by: ADR-0036
+    resolution_note: >-
+      ✅ **ADR-0036 accepted 2026-08-16, and it ABSORBS this rather than dissolving it.** The gap was
+      real — ADR-0029 required every posting to carry its causal order and nothing was built to meet
+      it. ADR-0036 makes that requirement its own decision: a posting records keys, and the causal
+      order is one of them.
+      ⚠️ **Two things the acceptance does NOT settle, both measured 2026-08-16 and both recorded in
+      the ADR itself.** (1) `path[0]` is not reliably the causal order — 30 of 1,010 invoices carry
+      no order divider, holding 87 lines worth $87,839.76, all legacy CRMS imports. The owner's
+      ruling — an explicit null causal order is legal, absence is refused — is what closes that, and
+      v1 will re-base order paths to match invoice paths (api-cloudrun#538). (2) The key does not
+      fit any TigerBeetle field verbatim (178 bytes against 16), so it is stored as a hash or a
+      surrogate; which one is a consequence to work out, not a re-decision.
     resolution_shape: >-
       **Not a re-decision of ADR-0029 — the same shape HOT-013 turned out to have.** ADR-0029's
       decision (the ledger does not allocate) is not in doubt; it stated a requirement and nothing

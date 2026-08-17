@@ -1,9 +1,8 @@
 ---
 id: ADR-0036
 title: The ledger carries keys, not classifications — product line is derived at report time
-status: proposed
+status: accepted
 date: 2026-08-16
-review_by: 2026-11-15
 deciders: [repo owner]
 contexts: [ledger, billing, fulfillment]
 relates_to: [
@@ -17,9 +16,9 @@ relates_to: [
   HOT-014,
   REQ-LED-001,
 ]
-supersedes: # promoted from `supersedes_on_acceptance` AT ACCEPTANCE. Gate 6 fails if it is not.
-supersedes_on_acceptance: ADR-0018
+supersedes: ADR-0018
 superseded_by:
+frozen_sha256: 7b8a7c260f507d7c7893369e218a0fb7c088fdf9ec8bd3e1e6937b6c0858e6b4
 ---
 
 > **In the context of** ADR-0029 having made allocation a reporting act, **facing** a chart that

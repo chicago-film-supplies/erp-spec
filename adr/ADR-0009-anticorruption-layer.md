@@ -1,14 +1,14 @@
 ---
 id: ADR-0009
 title: Anticorruption layer — foreign identifiers never enter domain models
-status: proposed
+status: accepted
 date: 2026-08-08
-review_by: 2026-09-15
 deciders: [repo owner]
 contexts: [ledger, billing, banking, ordering]
 relates_to: [HOT-006]
 supersedes:
 superseded_by:
+frozen_sha256: a2fcff1c5f3ff54c49a36a4a3da5ae70bf3b1e775d7ad95d4b6dda1c0cef61df
 ---
 
 > **In the context of** integrating Plaid and any surviving external system, **facing** silent
