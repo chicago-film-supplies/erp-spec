@@ -23,6 +23,16 @@
 # `status_live` (112 Active / 22 Archived / 5 absent), 139 `disposition` (108 adopt / 21 drop /
 # 4 merge / 5 new / 1 undecided).
 #
+# ✅ **AND SOMETHING COUNTS THEM NOW — gate 16** (erp-spec#8). `spikes/harness/live-chart-probe.ts`
+# writes `migration/live-chart.measured.yaml` from CFS's Firestore mirror of the live chart (never
+# the Xero API), and `validate.ts` checks THIS file against it: every live code adopted, merged or
+# explicitly dropped and never omitted; every `status_live` equal to the live `status`; every
+# `disposition: new` genuinely absent from the live chart and no `new` landing on an occupied code;
+# and `139 == 134 + 5` as arithmetic rather than as a sentence. **This file IS the live→target GL
+# correspondence erp-spec#8 asked for** — what was missing was never an artifact, only an execution.
+# ⚠️ A NAME divergence fails only under `adopt`, which means "keep as is". Under `merge` / `drop` /
+# `undecided` a different name is the decision being recorded.
+#
 # ⚠️ **All five were minted for a rule that could not otherwise be written, and none of them for
 # tidiness.** That is the bar: an account enters this file because a posting rule has no legal
 # account for one of its legs, not because a chart "should have" one.

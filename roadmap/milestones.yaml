@@ -123,10 +123,14 @@ milestones:
     depends_on: [m2]
     exit_criteria:
       - text: Every current Firestore path maps to a new field, an explicit drop, or a quarantine.
-        prose_only: true
-        reason: >-
-          "Every current path" is defined by the LIVE database, which this repo cannot enumerate
-          offline. A checker would compare the map against itself and always pass.
+        check: live_paths_dispositioned
+        # ⚠️ `prose_only` until 2026-08-16, on the reason "a checker would compare the map against
+        # itself and always pass". That was TRUE and stopped being true: the denominator is no
+        # longer the map. `spikes/harness/live-path-inventory-probe.ts` writes
+        # `migration/live-paths.measured.yaml` from `db.listCollections()` + an unprojected scan,
+        # so prod supplies the paths and the spec supplies only the dispositions. The check landed
+        # UNMET, which is the honest state — gate 12 fails on a criterion wired to nothing, never
+        # on an unmet one.
       - text: >-
           The defective paths are mapped as defective — untracked lines, hard-deleted order refs,
           duplicate active products — not silently normalized.

@@ -1,0 +1,685 @@
+# The live chart of accounts — MEASURED, not authored. Do not hand-edit.
+#
+# Refreshed by `cd spikes/harness && deno task chart --write` (read-only, ADC, prod Firestore).
+# ⚠️ NOT a `.generated.` file: CI cannot rebuild it, because it needs prod credentials. Its
+# freshness is a `validate` warning, never a build break.
+#
+# ⚠️ Read from CFS's Firestore MIRROR of Xero's chart, never from the Xero API — single tenant,
+# live, shared daily quota. **No balances are mirrored**, so nothing here can size an account.
+#
+# gate 16 checks `ledger/chart-of-accounts.yaml` against this file: every live code adopted or
+# explicitly disposed, every `status_live` true, every minted account genuinely absent.
+measured_at_utc: "2026-08-17"
+project: "cfs-3100"
+accounts_total: 134
+accounts:
+  - code: 1001
+    name: "Chase Checking"
+    type: "Bank"
+    class: "Asset"
+    status: "Active"
+  - code: 1002
+    name: "Cash In Hand"
+    type: "Bank"
+    class: "Asset"
+    status: "Active"
+  - code: 1200
+    name: "Accounts Receivable"
+    type: "Current Asset"
+    class: "Asset"
+    status: "Active"
+  - code: 1300
+    name: "Prepayments"
+    type: "Current Asset"
+    class: "Asset"
+    status: "Active"
+  - code: 1320
+    name: "Employee Advances"
+    type: "Current Asset"
+    class: "Asset"
+    status: "Active"
+  - code: 1340
+    name: "Loans Receivable"
+    type: "Current Asset"
+    class: "Asset"
+    status: "Active"
+  - code: 1350
+    name: "Vendor Deposits"
+    type: "Current Asset"
+    class: "Asset"
+    status: "Archived"
+  - code: 1400
+    name: "Retail Inventory"
+    type: "Inventory"
+    class: "Asset"
+    status: "Active"
+  - code: 1500
+    name: "Rental Inventory Assets"
+    type: "Fixed Asset"
+    class: "Asset"
+    status: "Active"
+  - code: 1501
+    name: "Less-Accumulated Depreciation: Rental Inventory"
+    type: "Fixed Asset"
+    class: "Asset"
+    status: "Active"
+  - code: 1600
+    name: "Buildings"
+    type: "Fixed Asset"
+    class: "Asset"
+    status: "Active"
+  - code: 1601
+    name: "Less-Accumulated Depreciation: Buildings"
+    type: "Fixed Asset"
+    class: "Asset"
+    status: "Active"
+  - code: 1602
+    name: "Land"
+    type: "Fixed Asset"
+    class: "Asset"
+    status: "Active"
+  - code: 1603
+    name: "Building Improvements"
+    type: "Fixed Asset"
+    class: "Asset"
+    status: "Active"
+  - code: 1604
+    name: "Less-Accumulated Depreciation: Building Improvements"
+    type: "Fixed Asset"
+    class: "Asset"
+    status: "Active"
+  - code: 1610
+    name: "Tools, Machinery & Equipment"
+    type: "Fixed Asset"
+    class: "Asset"
+    status: "Active"
+  - code: 1611
+    name: "Less-Accumulated Depreciation: Tools, Machinery & Equipment"
+    type: "Fixed Asset"
+    class: "Asset"
+    status: "Active"
+  - code: 1620
+    name: "Computer & Office Equipment"
+    type: "Fixed Asset"
+    class: "Asset"
+    status: "Active"
+  - code: 1621
+    name: "Less-Accumulated Depreciation: Computer & Office Equipment"
+    type: "Fixed Asset"
+    class: "Asset"
+    status: "Active"
+  - code: 1700
+    name: "Vehicles"
+    type: "Fixed Asset"
+    class: "Asset"
+    status: "Active"
+  - code: 1701
+    name: "Less-Accumulated Depreciation: Vehicles"
+    type: "Fixed Asset"
+    class: "Asset"
+    status: "Active"
+  - code: 1998
+    name: "Gain/Loss On Asset Disposal"
+    type: "Fixed Asset"
+    class: "Asset"
+    status: "Active"
+  - code: 1999
+    name: "Fixed Asset Clearing"
+    type: "Fixed Asset"
+    class: "Asset"
+    status: "Active"
+  - code: 2000
+    name: "Accounts Payable"
+    type: "Current Liability"
+    class: "Liability"
+    status: "Active"
+  - code: 2060
+    name: "Gift Card Liability"
+    type: "Current Liability"
+    class: "Liability"
+    status: "Archived"
+  - code: 2101
+    name: "K MCGRAIL"
+    type: "Bank"
+    class: "Asset"
+    status: "Active"
+  - code: 2102
+    name: "A. HUGHES"
+    type: "Bank"
+    class: "Asset"
+    status: "Active"
+  - code: 2103
+    name: "R. ROEDIGER"
+    type: "Bank"
+    class: "Asset"
+    status: "Active"
+  - code: 2104
+    name: "T. LOUNSBURY"
+    type: "Bank"
+    class: "Asset"
+    status: "Active"
+  - code: 2105
+    name: "C. PETERSEN 7626"
+    type: "Bank"
+    class: "Asset"
+    status: "Active"
+  - code: 2106
+    name: "T. VOELKER"
+    type: "Bank"
+    class: "Asset"
+    status: "Active"
+  - code: 2107
+    name: "A. CRANDALL"
+    type: "Bank"
+    class: "Asset"
+    status: "Active"
+  - code: 2108
+    name: "P. LOUGHMAN"
+    type: "Bank"
+    class: "Asset"
+    status: "Active"
+  - code: 2109
+    name: "LORENZO ESQUIVEL"
+    type: "Bank"
+    class: "Asset"
+    status: "Active"
+  - code: 2110
+    name: "LUCIA ESQUIVEL"
+    type: "Bank"
+    class: "Asset"
+    status: "Active"
+  - code: 2160
+    name: "Payroll Wages Payable"
+    type: "Current Liability"
+    class: "Liability"
+    status: "Archived"
+  - code: 2170
+    name: "Federal Payroll Liability"
+    type: "Current Liability"
+    class: "Liability"
+    status: "Archived"
+  - code: 2180
+    name: "Other Payroll Liability"
+    type: "Current Liability"
+    class: "Liability"
+    status: "Archived"
+  - code: 2190
+    name: "State Payroll Liability"
+    type: "Current Liability"
+    class: "Liability"
+    status: "Archived"
+  - code: 2195
+    name: "A. HUGHES - OLD"
+    type: "Bank"
+    class: "Asset"
+    status: "Archived"
+  - code: 2196
+    name: "C. PETERSEN - OLD"
+    type: "Bank"
+    class: "Asset"
+    status: "Archived"
+  - code: 2197
+    name: "T. VOELKER - OLD"
+    type: "Bank"
+    class: "Asset"
+    status: "Archived"
+  - code: 2198
+    name: "J. LACHANCE - Inactive"
+    type: "Bank"
+    class: "Asset"
+    status: "Archived"
+  - code: 2199
+    name: "L. PACKARD - Inactive"
+    type: "Bank"
+    class: "Asset"
+    status: "Archived"
+  - code: 2200
+    name: "Sales Tax"
+    type: "Current Liability"
+    class: "Liability"
+    status: "Active"
+  - code: 2210
+    name: "Bottled Water Tax"
+    type: "Current Liability"
+    class: "Liability"
+    status: "Active"
+  - code: 2300
+    name: "Unpaid Expense Claims"
+    type: "Current Liability"
+    class: "Liability"
+    status: "Active"
+  - code: 2400
+    name: "Line of Credit"
+    type: "Current Liability"
+    class: "Liability"
+    status: "Active"
+  - code: 2500
+    name: "Suspense"
+    type: "Current Liability"
+    class: "Liability"
+    status: "Active"
+  - code: 2510
+    name: "Inventory Adjustment Clearing"
+    type: "Current Liability"
+    class: "Liability"
+    status: "Active"
+  - code: 2550
+    name: "Historical Adjustment"
+    type: "Current Liability"
+    class: "Liability"
+    status: "Active"
+  - code: 2600
+    name: "Rounding"
+    type: "Current Liability"
+    class: "Liability"
+    status: "Active"
+  - code: 2650
+    name: "Tracking Transfers"
+    type: "Current Liability"
+    class: "Liability"
+    status: "Active"
+  - code: 2700
+    name: "Non-Current Liabilities"
+    type: "Non-current Liability"
+    class: "Liability"
+    status: "Active"
+  - code: 2800
+    name: "PSA Liability Clearing"
+    type: "Current Liability"
+    class: "Liability"
+    status: "Active"
+  - code: 2801
+    name: "PSA: DePaul"
+    type: "Current Liability"
+    class: "Liability"
+    status: "Active"
+  - code: 2802
+    name: "PSA: Yellow Flower"
+    type: "Current Liability"
+    class: "Liability"
+    status: "Active"
+  - code: 2803
+    name: "PSA: TPS - Beauty In Black S1"
+    type: "Current Liability"
+    class: "Liability"
+    status: "Active"
+  - code: 3000
+    name: "Member Equity / Opening Balance"
+    type: "Equity"
+    class: "Equity"
+    status: "Active"
+  - code: 3100
+    name: "Member Equity / Retained Earnings"
+    type: "Equity"
+    class: "Equity"
+    status: "Active"
+  - code: 3110
+    name: "Owner's Capital: Owner's Investment"
+    type: "Equity"
+    class: "Equity"
+    status: "Archived"
+  - code: 3130
+    name: "Owner's Capital: Owner's Billable Time"
+    type: "Equity"
+    class: "Equity"
+    status: "Archived"
+  - code: 3200
+    name: "Member Distributions"
+    type: "Equity"
+    class: "Equity"
+    status: "Active"
+  - code: 4000
+    name: "Rental Income"
+    type: "Sales"
+    class: "Revenue"
+    status: "Active"
+  - code: 4100
+    name: "Service Income"
+    type: "Sales"
+    class: "Revenue"
+    status: "Active"
+  - code: 4110
+    name: "Delivery Surcharges"
+    type: "Sales"
+    class: "Revenue"
+    status: "Active"
+  - code: 4120
+    name: "Contract Labor Income"
+    type: "Sales"
+    class: "Revenue"
+    status: "Active"
+  - code: 4130
+    name: "PSA Income"
+    type: "Revenue"
+    class: "Revenue"
+    status: "Active"
+  - code: 4140
+    name: "Pass Through Income"
+    type: "Revenue"
+    class: "Revenue"
+    status: "Active"
+  - code: 4150
+    name: "Shipping & Handling Income"
+    type: "Revenue"
+    class: "Revenue"
+    status: "Active"
+  - code: 4200
+    name: "Retail Sales Income"
+    type: "Sales"
+    class: "Revenue"
+    status: "Active"
+  - code: 4210
+    name: "Replacement Sales Income"
+    type: "Sales"
+    class: "Revenue"
+    status: "Active"
+  - code: 4300
+    name: "Discounts Received"
+    type: "Revenue"
+    class: "Revenue"
+    status: "Active"
+  - code: 4400
+    name: "Markup on Reimbursable Expenses"
+    type: "Revenue"
+    class: "Revenue"
+    status: "Active"
+  - code: 4600
+    name: "Cash Discrepancies"
+    type: "Revenue"
+    class: "Revenue"
+    status: "Active"
+  - code: 4700
+    name: "Transaction Fee Income"
+    type: "Revenue"
+    class: "Revenue"
+    status: "Active"
+  - code: 4800
+    name: "Other Income"
+    type: "Other Income"
+    class: "Revenue"
+    status: "Active"
+  - code: 4810
+    name: "Cashback Income"
+    type: "Other Income"
+    class: "Revenue"
+    status: "Active"
+  - code: 4820
+    name: "Interest Income"
+    type: "Other Income"
+    class: "Revenue"
+    status: "Active"
+  - code: 4830
+    name: "Vendor Refunds"
+    type: "Other Income"
+    class: "Revenue"
+    status: "Active"
+  - code: 4840
+    name: "Sales Tax Discount Income"
+    type: "Other Income"
+    class: "Revenue"
+    status: "Active"
+  - code: 5000
+    name: "Cost of Goods Sold: Retail Inventory"
+    type: "Direct Costs"
+    class: "Expense"
+    status: "Active"
+  - code: 5001
+    name: "Cost of Goods Sold: Purchase Discounts"
+    type: "Direct Costs"
+    class: "Expense"
+    status: "Active"
+  - code: 5100
+    name: "Cost of Goods Sold: Subrentals"
+    type: "Direct Costs"
+    class: "Expense"
+    status: "Active"
+  - code: 5200
+    name: "Cost of Goods Sold: Subcontractors, Sales Commissions"
+    type: "Direct Costs"
+    class: "Expense"
+    status: "Active"
+  - code: 5300
+    name: "Cost of Goods Sold: Shipping ( Rentals & Sales Only )"
+    type: "Direct Costs"
+    class: "Expense"
+    status: "Active"
+  - code: 5400
+    name: "Cost of Goods Sold: Job Costs"
+    type: "Direct Costs"
+    class: "Expense"
+    status: "Active"
+  - code: 5500
+    name: "Cost of Goods Sold: Merchant Fees"
+    type: "Direct Costs"
+    class: "Expense"
+    status: "Active"
+  - code: 5600
+    name: "Cost of Goods Sold: Packaging"
+    type: "Direct Costs"
+    class: "Expense"
+    status: "Active"
+  - code: 5700
+    name: "Cost of Goods Sold: Inventory Shrink"
+    type: "Direct Costs"
+    class: "Expense"
+    status: "Active"
+  - code: 6000
+    name: "General Operating Expenses"
+    type: "Expense"
+    class: "Expense"
+    status: "Active"
+  - code: 6001
+    name: "Professional Fees"
+    type: "Overhead"
+    class: "Expense"
+    status: "Active"
+  - code: 6002
+    name: "Business License & Fees"
+    type: "Overhead"
+    class: "Expense"
+    status: "Active"
+  - code: 6003
+    name: "Dues, Subscriptions, Software"
+    type: "Overhead"
+    class: "Expense"
+    status: "Active"
+  - code: 6004
+    name: "Insurance"
+    type: "Overhead"
+    class: "Expense"
+    status: "Active"
+  - code: 6005
+    name: "Meals & Entertainment: Team Meals"
+    type: "Expense"
+    class: "Expense"
+    status: "Active"
+  - code: 6006
+    name: "Meals & Entertainment: Company Parties"
+    type: "Expense"
+    class: "Expense"
+    status: "Active"
+  - code: 6007
+    name: "Bank Fees"
+    type: "Expense"
+    class: "Expense"
+    status: "Active"
+  - code: 6008
+    name: "Shipping"
+    type: "Expense"
+    class: "Expense"
+    status: "Active"
+  - code: 6009
+    name: "Interest Paid"
+    type: "Overhead"
+    class: "Expense"
+    status: "Active"
+  - code: 6010
+    name: "Travel & Transportation"
+    type: "Expense"
+    class: "Expense"
+    status: "Active"
+  - code: 6011
+    name: "Political Expenditures & Lobbying"
+    type: "Overhead"
+    class: "Expense"
+    status: "Active"
+  - code: 6012
+    name: "Taxes Paid"
+    type: "Overhead"
+    class: "Expense"
+    status: "Active"
+  - code: 6013
+    name: "Penalties Paid"
+    type: "Expense"
+    class: "Expense"
+    status: "Active"
+  - code: 6100
+    name: "Advertising"
+    type: "Expense"
+    class: "Expense"
+    status: "Active"
+  - code: 6200
+    name: "Building: Maintenance & Repairs"
+    type: "Overhead"
+    class: "Expense"
+    status: "Active"
+  - code: 6201
+    name: "Building: Utilities"
+    type: "Overhead"
+    class: "Expense"
+    status: "Active"
+  - code: 6202
+    name: "Building: Property Tax"
+    type: "Overhead"
+    class: "Expense"
+    status: "Active"
+  - code: 6203
+    name: "Building: Fees"
+    type: "Overhead"
+    class: "Expense"
+    status: "Active"
+  - code: 6204
+    name: "Building: Improvements (Less Than 1K)"
+    type: "Overhead"
+    class: "Expense"
+    status: "Active"
+  - code: 6300
+    name: "Tools, Machinery & Equipment (Less Than 1K)"
+    type: "Overhead"
+    class: "Expense"
+    status: "Active"
+  - code: 6301
+    name: "Tools, Machinery & Equipment: Repairs & Maintenance"
+    type: "Overhead"
+    class: "Expense"
+    status: "Active"
+  - code: 6302
+    name: "Rented Tools, Machinery, Equipment"
+    type: "Expense"
+    class: "Expense"
+    status: "Active"
+  - code: 6303
+    name: "Rented Space"
+    type: "Overhead"
+    class: "Expense"
+    status: "Active"
+  - code: 6304
+    name: "Rented Space: Repairs & Maintenance"
+    type: "Overhead"
+    class: "Expense"
+    status: "Active"
+  - code: 6400
+    name: "Vehicle: Repairs & Maintenance"
+    type: "Expense"
+    class: "Expense"
+    status: "Active"
+  - code: 6401
+    name: "Vehicle: Registrations & Fees"
+    type: "Overhead"
+    class: "Expense"
+    status: "Active"
+  - code: 6402
+    name: "Vehicle: Fuel"
+    type: "Expense"
+    class: "Expense"
+    status: "Active"
+  - code: 6403
+    name: "Vehicle: Parking & Tolls"
+    type: "Expense"
+    class: "Expense"
+    status: "Active"
+  - code: 6404
+    name: "Vehicle: Tickets"
+    type: "Expense"
+    class: "Expense"
+    status: "Active"
+  - code: 6499
+    name: "Reimbursable Expense"
+    type: "Expense"
+    class: "Expense"
+    status: "Archived"
+  - code: 6500
+    name: "Rental Inventory (less than 1K)"
+    type: "Expense"
+    class: "Expense"
+    status: "Active"
+  - code: 6501
+    name: "Rental Inventory: Repairs & Maintenance"
+    type: "Expense"
+    class: "Expense"
+    status: "Active"
+  - code: 6600
+    name: "Wages"
+    type: "Expense"
+    class: "Expense"
+    status: "Active"
+  - code: 6720
+    name: "Payroll Tax Expense"
+    type: "Expense"
+    class: "Expense"
+    status: "Archived"
+  - code: 6722
+    name: "Mileage Reimbursement"
+    type: "Expense"
+    class: "Expense"
+    status: "Archived"
+  - code: 6900
+    name: "Bad Debt"
+    type: "Expense"
+    class: "Expense"
+    status: "Active"
+  - code: 7000
+    name: "Depreciation Expense"
+    type: "Expense"
+    class: "Expense"
+    status: "Active"
+  - code: 7001
+    name: "Section 179 Depreciation Expense"
+    type: "Expense"
+    class: "Expense"
+    status: "Archived"
+  - code: 7050
+    name: "Miscellaneous"
+    type: "Expense"
+    class: "Expense"
+    status: "Archived"
+  - code: 7150
+    name: "Other Expense"
+    type: "Expense"
+    class: "Expense"
+    status: "Archived"
+  - code: 8100
+    name: "Bank Revaluations"
+    type: "Expense"
+    class: "Expense"
+    status: "Archived"
+  - code: 8150
+    name: "Unrealized Currency Gains"
+    type: "Expense"
+    class: "Expense"
+    status: "Archived"
+  - code: 8200
+    name: "Realized Currency Gains"
+    type: "Expense"
+    class: "Expense"
+    status: "Archived"

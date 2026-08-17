@@ -9,7 +9,7 @@
 measured_at_utc: "2026-08-17"
 project: "cfs-3100"
 collections: 50
-total_paths: 1537
+total_paths: 1523
 inventory:
   - collection: "bookings"
     documents: 8291
@@ -1133,9 +1133,7 @@ inventory:
       - "crms_linked_replacement_rate_id"
       - "crms_rate_id"
       - "crms_stock_level_ids"
-      - "crms_stock_level_ids.1"
-      - "crms_stock_level_ids.2"
-      - "crms_stock_level_ids.ABKEdXBOZc6VwgXLJ2lL"
+      - "crms_stock_level_ids.<key>"
       - "description"
       - "eligible_delivery"
       - "eligible_in_store_pickup"
@@ -1211,7 +1209,7 @@ inventory:
       - "updated_at._nanoseconds"
       - "updated_at._seconds"
   - collection: "sessions"
-    documents: 2318
+    documents: 2324
     paths:
       - "anonymous"
       - "created_at"
@@ -1464,20 +1462,8 @@ inventory:
       - "crms_product_group_name"
       - "crms_service_group_id"
       - "name"
-      - "products.5Th06HpzTLHyLaheS5Mk.name"
-      - "products.5Th06HpzTLHyLaheS5Mk.uid"
-      - "products.77LKBYcC09u1PZFhxmDJ.name"
-      - "products.77LKBYcC09u1PZFhxmDJ.uid"
       - "products.<key>.name"
       - "products.<key>.uid"
-      - "products.KEjzPt7pI1hNgKtiZC8n.name"
-      - "products.KEjzPt7pI1hNgKtiZC8n.uid"
-      - "products.gdzGdE8t3eR8MjXZKtPo.name"
-      - "products.gdzGdE8t3eR8MjXZKtPo.uid"
-      - "products.l2EIcckkHfP8xjzIGXV9.name"
-      - "products.l2EIcckkHfP8xjzIGXV9.uid"
-      - "products.rXADfyGGnqrnMNwv3fGY.name"
-      - "products.rXADfyGGnqrnMNwv3fGY.uid"
       - "uid"
       - "updated_at._nanoseconds"
       - "updated_at._seconds"

@@ -11,7 +11,7 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 10 open | 38 answered of 48 · **0 with no owner or no decide-by** |
+| Open questions | 11 open | 38 answered of 49 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 15 | 0 open |
 | Decisions (ADR) | 36 | 21 in force · 11 proposed |
 | Spikes | 12 | 9 open |
@@ -22,7 +22,7 @@ is `deno task validate`'s judgement, not this file's.
 
 ## The bottleneck: undecided questions
 
-**10 of 48 still open**, soonest decide-by first.
+**11 of 49 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
@@ -34,6 +34,7 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-043` | Should the product and organization masters carry an EVENT HISTORY, so that a classificat… | alex | 2026-12-15 | — |
 | `OQ-044` | Once wages move into COGS, what stays in `6600 Wages` — and can salaried sales/admin staf… | alex | 2026-12-15 | — |
 | `OQ-039` | `organizations.tax_profile` carries two different concepts in one enum — who owes (applie… | alex | 2027-01-15 | — |
+| `OQ-049` | Does v2 carry the operational collaboration surface — the board (`cards`, `lists`) and th… | alex | 2027-01-31 | — |
 | `OQ-045` | When a vendor bills LESS than was accrued, what retires the residual left in `2010 Accrue… | alex | 2027-02-15 | — |
 | `OQ-048` | At what rate is a contributed (unpaid owner) shift costed in the IMPUTED labour view — th… | alex | 2027-03-15 | — |
 
@@ -115,7 +116,7 @@ it is counted separately on purpose, and a milestone is not done because its che
 | `m3` | Ledger core | `m2` | 4 | — | — | — |
 | `m4` | All spikes closed by ADR | `m3` | 1 | 1 | — | 1 |
 | `m5` | Formal specs checking clean | `m4` | 1 | — | 2 | — |
-| `m6` | Migration field map complete | `m2` | 0 | — | 4 | — |
+| `m6` | Migration field map complete | `m2` | 1 | — | 3 | — |
 | `m7` | Walking skeleton defined | `m3` `m5` `m6` | 0 | — | 3 | — |
 | `spec-v1` | Tag spec-v1 | `m0` `m1` `m2` `m3` `m4` `m5` `m6` `m7` | 1 | — | 3 | 1 |
 

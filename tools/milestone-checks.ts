@@ -86,7 +86,26 @@ interface World {
   milestones: RawMilestone[];
   /** Posting rules that are in scope, unblocked and simply not written yet (erp-spec#5). */
   unwrittenRules: number;
+  /** `migration/live-paths.measured.yaml` — MEASURED against prod, not authored here. */
+  liveInventory: LiveCollection[];
+  /** `migration/field-map.yaml` → `collections:` — the collection-level disposition layer. */
+  mappedCollections: MappedCollection[];
 }
+
+export interface LiveCollection {
+  collection: string;
+  documents?: number;
+  paths: string[];
+}
+export interface MappedCollection {
+  collection?: string;
+  disposition?: string;
+  paths_default?: string;
+  paths?: { path?: string; disposition?: string }[];
+}
+
+/** The dispositions that settle a whole collection at once — nothing of it survives to v2. */
+export const TERMINAL_DISPOSITIONS = new Set(["drop", "quarantine"]);
 
 import { CONTEXTS } from "./contexts.ts";
 
@@ -195,6 +214,13 @@ async function loadWorld(root: string): Promise<World> {
     (await readYaml<{ milestones?: RawMilestone[] }>(`${root}/roadmap/milestones.yaml`))
       ?.milestones ?? [];
 
+  const liveInventory =
+    (await readYaml<{ inventory?: LiveCollection[] }>(`${root}/migration/live-paths.measured.yaml`))
+      ?.inventory ?? [];
+  const mappedCollections =
+    (await readYaml<{ collections?: MappedCollection[] }>(`${root}/migration/field-map.yaml`))
+      ?.collections ?? [];
+
   return {
     root,
     events,
@@ -214,6 +240,8 @@ async function loadWorld(root: string): Promise<World> {
     formalReadme,
     milestones,
     unwrittenRules: (pr?.unwritten ?? []).length,
+    liveInventory,
+    mappedCollections,
   };
 }
 
@@ -344,6 +372,88 @@ export const CHECKS: Record<string, Check> = {
       ok: specified.length > 0 && short.length === 0 && w.unwrittenRules === 0,
       detail:
         `${total} vectors over ${specified.length} specified rules; ${short.length} lack an accept or a reject; ${w.unwrittenRules} rules unwritten`,
+    };
+  },
+
+  // ── m6 ──
+  /**
+   * m6: "Every current Firestore path maps to a new field, an explicit drop, or a quarantine."
+   *
+   * ⚠️ **This criterion was `prose_only` until 2026-08-16, and its stated reason was
+   * _"a checker would compare the map against itself and always pass"_ — which was TRUE and stopped
+   * being true.** `spikes/harness/live-path-inventory-probe.ts` now writes
+   * `migration/live-paths.measured.yaml` from `db.listCollections()` plus an unprojected scan, so
+   * the denominator is MEASURED against prod and the map cannot supply it. Same shape as
+   * `tb-field-budget_test.ts` against `tigerbeetle-node`: the check is only worth anything because
+   * one side of it is produced by something the spec does not control.
+   *
+   * ⚠️ **The measurement is what found the issue's scope wrong.** erp-spec#8 says "~30 collections",
+   * taken from the MCP `db_schema` enum, which carries 35 and omits `credit-notes` and
+   * `settlements` — both of which the field map already maps. Prod holds **50 collections and 1,537
+   * paths**. Anything scoped from that enum is scoped short.
+   *
+   * **What counts as dispositioned**, and the second clause is the one that makes the shape
+   * tractable without making the check vacuous:
+   *
+   * - a collection whose disposition is TERMINAL (`drop` / `quarantine`) settles every path it
+   *   holds at once — nothing of it reaches v2, so there is nothing left to say path by path;
+   * - a collection that survives (`map` / `defective`) settles a path only if the path is NAMED, or
+   *   if the collection declares an explicit `paths_default:`. A `paths_default` is a deliberate
+   *   act that has to carry its own reason — it is not a silent blanket, and gate 15 refuses one
+   *   without a reason.
+   *
+   * ⇒ **A collection carrying `disposition: map` and nothing else covers ZERO of its paths**, which
+   * is the point: "we will map this collection" is an intention, not a disposition. 1,537 rows
+   * hand-authored one by one is neither tractable nor useful; a survivor that names no default and
+   * no exceptions is not a decision at all. The check separates those two claims.
+   *
+   * Reports three numbers, none of them "ok" — paths, collections, and the collections still
+   * carrying no entry — because which of the three moved is the whole signal.
+   */
+  live_paths_dispositioned: (w) => {
+    const byName = new Map(w.mappedCollections.map((c) => [String(c.collection), c]));
+    let dispositioned = 0;
+    const undecided: string[] = [];
+    const unmapped: string[] = [];
+    for (const live of w.liveInventory) {
+      const entry = byName.get(live.collection);
+      if (!entry?.disposition) {
+        unmapped.push(live.collection);
+        continue;
+      }
+      if (TERMINAL_DISPOSITIONS.has(String(entry.disposition))) {
+        dispositioned += live.paths.length;
+        continue;
+      }
+      if (entry.paths_default) {
+        dispositioned += live.paths.length;
+        continue;
+      }
+      const named = new Set((entry.paths ?? []).map((p) => String(p.path)));
+      const hit = live.paths.filter((p) => named.has(p)).length;
+      dispositioned += hit;
+      if (hit < live.paths.length) {
+        undecided.push(`${live.collection} (${live.paths.length - hit})`);
+      }
+    }
+    const totalPaths = w.liveInventory.reduce((n, c) => n + c.paths.length, 0);
+    // Named, never silently truncated: this detail lands in a STATUS table cell, and a list of 50
+    // collections makes the row unreadable. The COUNT is always stated, so an elision can never be
+    // mistaken for coverage.
+    const some = (xs: string[], n = 6) =>
+      xs.length <= n ? xs.join(", ") : `${xs.slice(0, n).join(", ")} +${xs.length - n} more`;
+    return {
+      ok: w.liveInventory.length > 0 && unmapped.length === 0 && undecided.length === 0 &&
+        dispositioned === totalPaths,
+      detail: `${dispositioned} of ${totalPaths} live paths dispositioned across ${
+        w.liveInventory.length - unmapped.length
+      } of ${w.liveInventory.length} collections; ${unmapped.length} with no entry${
+        unmapped.length ? ` (${some(unmapped)})` : ""
+      }${
+        undecided.length
+          ? `; ${undecided.length} survivor(s) with paths undecided (${some(undecided)})`
+          : ""
+      }`,
     };
   },
 

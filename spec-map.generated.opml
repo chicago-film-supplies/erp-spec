@@ -57,7 +57,7 @@
           <outline text="[object Object]"/>
         </outline>
       </outline>
-      <outline text="Open questions (10 of 48 still open)" _note="The bottleneck. Each blocks what is listed under it.">
+      <outline text="Open questions (11 of 49 still open)" _note="The bottleneck. Each blocks what is listed under it.">
         <outline text="OQ-001 — Are fulfillment legs first-class recorded events with their own identity, or derived from the order…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-007"/>
           <outline text="blocks ADR-0011"/>
@@ -189,6 +189,7 @@
         <outline text="OQ-046 — `counter` and `warehouse` labour bill nobody and name no product line, so no allocation pool select…" _note="owner: alex · decide by: 2027-01-15"/>
         <outline text="OQ-047 — An owner works a shift and is not paid for it. Does the ledger post the cost — and if so, what does…" _note="owner: alex · decide by: 2027-01-15"/>
         <outline text="OQ-048 — At what rate is a contributed (unpaid owner) shift costed in the IMPUTED labour view — the person's…" _note="owner: alex · decide by: 2027-03-15"/>
+        <outline text="OQ-049 — Does v2 carry the operational collaboration surface — the board (`cards`, `lists`) and the comment…" _note="owner: alex · decide by: 2027-01-31"/>
       </outline>
       <outline text="Conflicts (0 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labour) or an own long-haul run (labour-bearing)?…" _note="Decides whether a trucked fulfillment absorbs labour cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">

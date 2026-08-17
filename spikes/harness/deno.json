@@ -35,6 +35,8 @@
     "allocation": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal allocation-basis-probe.ts",
     "//inventory": "Live Firestore collection+path inventory for m6 / erp-spec#8. Writes migration/live-paths.measured.yaml, which validate.ts checks the field map against.",
     "inventory": "deno run --allow-read --allow-write=../../migration --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal live-path-inventory-probe.ts",
+    "//chart": "The LIVE chart of accounts for erp-spec#8 step 4. Writes migration/live-chart.measured.yaml, which gate 16 checks ledger/chart-of-accounts.yaml against. Firestore mirror only — never the Xero API.",
+    "chart": "deno run --allow-read --allow-write=../../migration --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal live-chart-probe.ts",
     "matrix-lines": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal product-line-matrix-probe.ts",
     "posting-keys": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal posting-key-width-probe.ts"
   },

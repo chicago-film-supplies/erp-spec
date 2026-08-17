@@ -1,10 +1,589 @@
 # Every current Firestore path -> a new field, an explicit drop, or a quarantine.
 #
-# m6 work. Seeded only with the paths the verification pass touched. The rule that matters:
-# **defective paths are mapped as defective**, not silently normalized. A migration that cleans
-# data on the way through destroys the evidence that it was ever dirty.
+# m6 work. The rule that matters: **defective paths are mapped as defective**, not silently
+# normalized. A migration that cleans data on the way through destroys the evidence that it was
+# ever dirty.
 #
 # disposition: map | drop | quarantine | defective
+#
+# ── TWO LAYERS, and they answer different questions ──────────────────────────────────────────────
+#
+# `collections:` is the COMPLETE layer. Every collection prod holds carries exactly one disposition,
+# checked against `live-paths.measured.yaml` by gate 15 and counted by m6's first exit criterion
+# (`live_paths_dispositioned`). It is what makes "every current Firestore path" a number rather than
+# a claim.
+#
+# `mappings:` is the PER-PATH layer — the individually interesting paths, with the evidence and the
+# defect history behind each. It predates `collections:` and its `from:` is deliberately expressive
+# (`*.{_cents fields}`, `invoices.status == "void"`). Gate 15 resolves the concrete ones against the
+# measurement and leaves the patterns alone.
+#
+# ⚠️ **A collection-level `disposition: map` with no `paths_default:` covers ZERO paths, on purpose.**
+# "We will map this collection" is an intention. `paths_default:` is how a survivor states the
+# disposition of everything it does not name individually, and it has to carry its own reason.
+#
+# ⚠️ **And `paths_default: map` requires `paths_default_to:`, for the same reason one step further
+# down.** The criterion this file answers says a path maps *to a new field*; a bare `map` says only
+# that it maps. Without the target the criterion would have gone MET the moment 50 dispositions were
+# typed, which is the shape of a check that reads green while asserting nothing. Gate 15 refuses it.
+#
+# ⚠️ **What `met` on m6's first criterion does and does not mean.** It means every measured path has
+# a decided outcome, COLLECTION-grained for survivors with per-path exceptions named. It does NOT
+# mean every path has an individually authored target — 1,523 hand-written rows is neither tractable
+# nor useful, and `mappings:` below is deliberately not exhaustive. The criterion's live arm is
+# DRIFT: it goes red the moment prod grows a collection this file has not decided, which is exactly
+# the defect that made erp-spec#8's own scope wrong.
+#
+# ⚠️ **14 of the 1,523 measured paths are DYNAMIC MAP KEYS recorded as literals**, all of them
+# `uploadcare-sweep.ref_counts.<project>/<collection>`. They are not schema and cannot be enumerated
+# exhaustively — the next measurement produces different ones. Only `paths_default:` (or, as here, a
+# terminal disposition) can settle a collection that holds them.
+#
+# ⚠️ **It was 31 across three collections until 2026-08-16, and wiring m6's criterion is what found
+# the other 17.** The probe decided a map was dynamic INSIDE ONE DOCUMENT while unioning paths ACROSS
+# the collection — so a `tracking-categories` record whose `products` map held two entries kept its
+# literal uids while a record holding three contributed the `<key>` form, and the inventory carried
+# both readings of one map. Fixed in `spikes/harness/live-path-inventory-probe.ts` (the threshold is
+# a pre-pass over the whole collection now) and re-measured: **1,537 → 1,523 paths**,
+# `tracking-categories` 29 → 17. ⚠️ **The probe's header already described fixing this defect at a
+# larger scale** ("1,123 paths across 20 documents") — the fix was incomplete and nothing could see
+# it, because the collapse reported what it collapsed and never looked at what it left behind. It
+# now also reports the leftovers by name.
+#
+# ⚠️ **The scope in erp-spec#8 — "~10 mappings against ~30 collections" — is wrong in the expensive
+# direction.** The "~30" came from the MCP `db_schema` enum, which carries 35 and omits `credit-notes`
+# and `settlements`, both already mapped here. Measured 2026-08-17: **50 collections, 1,523 paths.**
+
+collections:
+  # ══ INFRASTRUCTURE — machinery of the v1 deployment, not a domain fact anywhere ═══════════════
+  # These drop as a unit. Each is either rebuildable, credential material, or a cursor into a
+  # process that ends at cutover. A terminal disposition settles every path the collection holds,
+  # which is why none of them needs a `paths_default:`.
+  - collection: sessions
+    disposition: drop
+    reason: >-
+      Web session records with an `expiresAt`. 2,318 documents, all of them expiring. v2 mints its
+      own sessions; carrying these forward would import logged-in state across a rebuild.
+
+  - collection: config
+    disposition: drop
+    reason: >-
+      ⚠️ **This is the OAuth TOKEN STORE, not application configuration, and the paths say so** —
+      `access_token`, `refresh_token`, `expires_at_fs`, `scope`, `token_type`. Verified
+      `code:2026-08-16:api-cloudrun@2ff1e8c2:src/lib/devReplicaRules.ts`: four documents — the CRMS
+      auth doc, `gmail-dmarc-auth`, the legacy holiday config singleton (superseded by the top-level
+      holiday collections in 2026-06) and `bulkUC`, which is referenced nowhere.
+      **It must never be read into a migration artifact.** These are live credentials for a live
+      single-tenant system; an export of this collection is a credential leak, and a refresh token
+      is single-use, so even reading and replaying one breaks prod auth. v2 re-authenticates.
+
+  - collection: mcp-oauth-clients
+    disposition: drop
+    reason: "MCP OAuth client registrations (2 docs). Deployment machinery; v2 registers its own."
+
+  - collection: mcp-oauth-tokens
+    disposition: drop
+    reason: "MCP OAuth bearer tokens with an `expiresAt` (4 docs). Credential material — see `config`."
+
+  - collection: migration-state
+    disposition: drop
+    reason: >-
+      Backfill cursors (`last_doc_id`) for v1's own one-shot migrations, 8 docs. A record of scripts
+      that have already run against a database being replaced.
+
+  - collection: counters
+    disposition: drop
+    reason: >-
+      Sequence counters — one `count` per counter, 6 docs. ⚠️ **The DOCUMENTS drop and the HIGH-WATER
+      MARK does not.** Document numbers are the one thing in this collection that outlives it: an
+      invoice number is known to Xero, to CRMS and to customers, and a v2 that starts its sequence at
+      1 mints a number that already means something else. So the migration carries each counter's
+      final value forward as the v2 sequence's starting point. That is a migration OBLIGATION rather
+      than a field mapping, which is why it is stated here rather than left to `mappings:`.
+      This is also the one collection the workspace's "generated uids everywhere" rule exempts.
+
+  - collection: stock-locks
+    disposition: drop
+    reason: >-
+      Per-product optimistic-lock rows (`seq`, `uid_product`), 278 — one per product, which is the
+      tell. Concurrency machinery for v1's Firestore writes; v2's store and its locking are different
+      (ADR-0003), so a lock row means nothing there.
+
+  - collection: typesense
+    disposition: drop
+    reason: >-
+      Search-index state — `schema_hash`, `intended_hash`, `current_collection`, `reindex_attempts`,
+      `last_reindex_stats`. The serialized version-stamped reindex queue. A search index is a
+      projection of the documents; v2 rebuilds it from them and this collection has nothing to say
+      about the domain.
+
+  - collection: cache-geocodes
+    disposition: drop
+    reason: >-
+      Mapbox geocode cache keyed by query string, 260 docs. Rebuildable by asking Mapbox again, which
+      ADR-0027 retains at the boundary. A cache is never migrated; it is warmed.
+
+  - collection: trello-lookup
+    disposition: drop
+    reason: >-
+      Trello card ↔ order sync state (`start_card`, `end_card`, `order_number`, an update lock), 385
+      docs. Board integration machinery for a board v2 does not inherit.
+
+  - collection: current-replacement-lookup
+    disposition: drop
+    reason: >-
+      CRMS rental ↔ replacement id correspondence (`crms_rental_id`, `crms_replacement_id`,
+      `crms_replacement_rate_id`), 191 docs. Pure anticorruption-layer plumbing for a system the
+      charter retires at cutover. ADR-0009 forbids foreign identifiers entering the domain model, so
+      there is nothing here that could be mapped even if CRMS survived.
+
+  - collection: uploadcare-sweep
+    disposition: drop
+    reason: >-
+      Attachment ref-count telemetry, 3 docs, keyed `ref_counts.<project>/<collection>`. Operational
+      housekeeping. ⚠️ Two things worth noticing on the way past: its keys span **both** projects
+      (`cfs-3100` and `cfs-dev-3100`) from prod, and they name a `documents` collection that is **not
+      in the measured inventory** — either emptied or removed, and either way a live counter is
+      counting something that no longer exists.
+
+  - collection: xero-budget
+    disposition: drop
+    reason: >-
+      The Xero daily-quota tracker (`day_remaining`, `resets_at`), 1 doc. ADR-0001 replaces Xero, so
+      the quota it rations stops existing.
+
+  - collection: webhooks
+    disposition: drop
+    reason: >-
+      One document carrying one field, `id`. A vestige rather than a mechanism — nothing in the
+      measured shape can be a domain fact.
+
+  - collection: webshop-config
+    disposition: drop
+    reason: "One document carrying one field, `name`. A stub."
+
+  - collection: customers
+    disposition: drop
+    reason: >-
+      ⚠️ **DEAD DATA — 150 documents nothing reads.** Verified `code:2026-08-16:api-cloudrun@2ff1e8c2`
+      repo-wide: `customers` appears in api-cloudrun only inside an unrelated comment in
+      `src/lib/stockGate.ts`, in no Firestore security rule, in no composite index, and nowhere in
+      manager's source at all.
+      Its shape says what it was: a CRMS customer mirror, carrying `crms_id`, `current_rms_id` and a
+      fully CRMS-shaped `billing_address` down to `country.eu_member` and `country.has_state_tax`.
+      **It is NOT `contacts` and NOT `organizations`** — those are the live collections that
+      superseded it, and this one was left behind rather than removed.
+      It is dropped as dead rather than as CRMS-derived, because the second reason would imply that
+      re-deriving it is possible; there is nothing to re-derive it FOR.
+
+  # ══ REBUILDABLE PROJECTIONS — the authority lives elsewhere and survives on its own ═══════════
+
+  - collection: templates
+    disposition: drop
+    reason: >-
+      Template CONTENT is canonical in the `templates/` git repo; Firestore holds a rebuildable
+      projection (families + status-discriminated versions). Publishing is a merge, so git is the
+      record and this is the cache of it. v2 rebuilds the projection from the same source.
+
+  - collection: template-components
+    disposition: drop
+    reason: "Same projection as `templates` — components are families of the same git-canonical content."
+
+  - collection: templates-versions
+    disposition: drop
+    reason: >-
+      Same projection. ⚠️ Worth stating because 44 measured paths look like domain data and are not —
+      a draft/committed/released version row is a rendering of a git ref, and the ref is what
+      migrates.
+
+  - collection: holiday-snapshot
+    disposition: drop
+    reason: >-
+      A materialization cache — `materialized_at`, `materialized_count`, `materialized_dates[]`,
+      `materialized_year_range`. Derived wholly from `holiday-definitions` + `holiday-dates`, which
+      both migrate. Carrying it would migrate a derivation alongside its inputs and invite the two to
+      disagree.
+
+  - collection: tracking-categories
+    disposition: drop
+    reason: >-
+      ⚠️ **Under ADR-0036 this collection stopped being data and became a TAXONOMY the spec owns.**
+      The product-line values live in `ledger/dimensions.yaml` and their reporting treatment in
+      `reporting/product-line-pl.yaml`; a posting carries keys and the classification is derived at
+      report time. So the category RECORDS have a home outside the database, and what actually
+      migrates is the ASSIGNMENT — `products.uid_tracking_category` → the spec-declared value.
+      The rest of the record is foreign identity and denorm: `xero_tracking_option_id`,
+      `crms_product_group_id`, `crms_service_group_id` (ADR-0009 forbids all three), a `count`, and a
+      `products.<key>.{name,uid}` reverse map that is the mirror of the assignment it duplicates.
+      ⚠️ **This collection measured 29 paths until 2026-08-16 and measures 17 now** — 14 of them were
+      one product-uid map reported twice, once collapsed and once literal, and the probe defect that
+      produced them is described in this file's header. Nothing about the disposition changed; the
+      denominator did.
+
+  - collection: chart-of-accounts
+    disposition: drop
+    reason: >-
+      ⚠️ **The chart is SPEC-OWNED in v2** — `ledger/chart-of-accounts.yaml`, 139 entries, five of
+      them minted with no live counterpart. This collection is Xero's chart synced into Firestore,
+      and ADR-0009 deliberately keeps `xero_id` out of the domain model, so it cannot map field for
+      field.
+      **What it is needed for is the CORRESPONDENCE, not the migration** — which live account each
+      spec account continues, and which spec accounts continue nothing. That is a different artifact
+      from a field map: it maps VALUES, not paths.
+      ✅ **And it already existed** — erp-spec#8 says the correspondence "belongs here and exists
+      nowhere", and it is `ledger/chart-of-accounts.yaml` itself, whose every entry carries
+      `disposition:` and `status_live:`. Measured 2026-08-16 it is exact: 139 spec entries against
+      134 live plus 5 minted, 0 live codes missing, 0 `status_live` disagreements, 0 name
+      disagreements. **What was missing was an EXECUTION**, and that is now gate 16 against
+      `migration/live-chart.measured.yaml`.
+
+  # ══ SURVIVORS ════════════════════════════════════════════════════════════════════════════════
+  # A `paths_default:` states what happens to every path the collection does not name individually.
+  # It is the only honest way to cover a document with 158 measured paths, and it is deliberate
+  # rather than silent: gate 15 refuses one without a reason.
+  #
+  # ⚠️ The default is `map`, and every one of these carries the same two standing exclusions, stated
+  # once here rather than repeated 20 times:
+  #   - **foreign identifiers drop** — `crms_*`, `xero_*`, `current_rms_id`, `mapbox_id` — ADR-0009;
+  #   - **`query_by_*` denorms drop** — they exist because Firestore cannot join, and ADR-0003
+  #     replaces it with a store that can. Carrying a query denorm forward migrates a workaround.
+  #   - **`*_fs` / `._seconds` / `._nanoseconds` twins drop** — a Firestore Timestamp mirror of a
+  #     canonical Chicago-offset string. One field survives, not two.
+
+  - collection: orders
+    disposition: map
+    paths_default: map
+    paths_default_to: "order (ordering context aggregate root)"
+    paths_default_reason: >-
+      The order document is the ordering context's aggregate root (`contexts/ordering/entities/order.yaml`)
+      and migrates whole, subject to the three standing exclusions above. 151 measured paths, most of
+      them the `items[]` tree, whose invariants the workspace already enforces and v2 inherits.
+    paths:
+      - path: destinations[].customer_collecting
+        disposition: defective
+        reason: >-
+          Per-destination today, not per-leg — see the `mappings:` entry, which carries the evidence
+          and the notation correction. Named here so the collection's default does not quietly claim
+          a clean mapping for it.
+
+  - collection: invoices
+    disposition: map
+    paths_default: map
+    paths_default_to: "invoice (billing context document)"
+    paths_default_reason: >-
+      The billing context's document, 158 measured paths — the widest in the corpus. Migrates whole
+      subject to the standing exclusions; the individually decided paths are named below and in
+      `mappings:`.
+    paths:
+      - path: items[].tracking_category
+        disposition: drop
+        reason: "A denorm of the product master. See `mappings:` — the full history is there."
+      - path: items[].xero_tracking_option_id
+        disposition: drop
+        reason: "Foreign identifier (ADR-0009). Used at migration time to correlate, then discarded."
+      - path: query_by_orders[]
+        disposition: map
+        to: invoice.order_refs
+        reason: >-
+          The exception to the standing `query_by_*` exclusion: this one is the order↔invoice
+          relation itself, not a search denorm of it. See `mappings:`.
+
+  - collection: bookings
+    disposition: map
+    paths_default: map
+    paths_default_to: "booking (availability context)"
+    paths_default_reason: >-
+      The availability context's Booking (`contexts/availability/entities/booking.yaml`) and the flat
+      fact table the whole reporting layer reads — one row per (order, product, destination) carrying
+      the money and the charge window. 8,291 documents, the largest domain collection. Migrates whole.
+
+  - collection: fulfillments
+    disposition: map
+    paths_default: map
+    paths_default_to: "fulfillment + its legs (fulfillment context; ADR-0011)"
+    paths_default_reason: >-
+      The fulfillment context's document. ⚠️ v2 makes LEGS first class (ADR-0011,
+      `contexts/fulfillment/entities/leg.yaml`) and v1 has no leg — so this maps to the fulfillment
+      shell and **leg history starts at cutover**, which is the same finding
+      `orders.destinations[].customer_collecting` records. The paths migrate; the model gains a level
+      they cannot populate.
+
+  - collection: quotes
+    disposition: map
+    paths_default: map
+    paths_default_to: "quote (ordering context)"
+    paths_default_reason: "The ordering context's pre-order document, 12 measured paths. Migrates whole."
+
+  - collection: credit-notes
+    disposition: map
+    paths_default: map
+    paths_default_to: "credit_note (billing context; ADR-0033)"
+    paths_default_reason: >-
+      Billing. 13 documents against 76 measured paths — a wide document with a tiny population, so
+      every path is cheap to inspect by hand when the mapping is authored. ADR-0033 puts unallocated
+      credit at the settlement point; the re-pointing is in `mappings:`.
+      ⚠️ Absent from the MCP `db_schema` enum, which is why erp-spec#8 scoped it out.
+
+  - collection: settlements
+    disposition: map
+    paths_default: map
+    paths_default_to: "settlement postings (ledger; ADR-0001)"
+    paths_default_reason: >-
+      ⚠️ **This is CASH APPLICATION, and it is the collection erp-spec#8's scope missed that matters
+      most** — 1,073 documents of money movement: `amount_cents`, `uid_invoice`, `uid_credit_note`,
+      `uid_organization`, `type`, `reverses`, `legacy_payment_uid`.
+      **It is also the "credit-note allocations" the `mappings:` block names**, which reads there as
+      if it were a separate object. One collection, two names, and this is where they are joined.
+      Under ADR-0001 a settlement stops being a record and becomes a POSTING, so the migration is a
+      re-expression rather than a copy — which is exactly why it needs stating rather than defaulting.
+      Also absent from the `db_schema` enum.
+    paths:
+      - path: xero_payment_id
+        disposition: drop
+        reason: "Foreign identifier (ADR-0009) — correlation key at migration time, then discarded."
+      - path: xero_credit_note_id
+        disposition: drop
+        reason: "Foreign identifier (ADR-0009)."
+
+  - collection: transactions
+    disposition: map
+    paths_default: map
+    paths_default_to: "stock_movement + its procurement postings"
+    paths_default_reason: >-
+      Stock movements — purchase, sale, transfer, adjustment — 922 documents. The procurement and
+      inventory cost trail, and the source of the 74 `type: purchase` movements the procurement
+      posting rules measured. ⚠️ `cost.unit_cost` is a 4dp RATE and not an amount; the workspace money
+      rule is that a rate never takes a minor-unit suffix, and a sweep that converts every money field
+      is how the `beta.117` regression happened.
+
+  - collection: inventory-ledgers
+    disposition: map
+    paths_default: map
+    paths_default_to: "inventory_ledger (per-product cost and quantity state)"
+    paths_default_reason: >-
+      Per-product cost and quantity state — `average_unit_cost`, `total_cost_basis_cents`,
+      `quantity_held`, `store_breakdown[]`. ⚠️ Same rate-versus-amount trap as `transactions`:
+      `average_unit_cost` stays 4dp dollars, `total_cost_basis_cents` is integer minor units.
+    paths:
+      - path: store_breakdown[].crms_stock_level_id
+        disposition: drop
+        reason: "Foreign identifier (ADR-0009), nested inside a surviving structure."
+
+  - collection: stock
+    disposition: map
+    paths_default: map
+    paths_default_to: "stock_level (per product)"
+    paths_default_reason: "Per-product stock levels, 278 docs — one per product. Migrates whole."
+
+  - collection: out-of-service
+    disposition: map
+    paths_default: map
+    paths_default_to: "out_of_service_record (availability context)"
+    paths_default_reason: >-
+      Availability. ⚠️ **2 documents against 45 measured paths** — the widest shape-to-population ratio
+      in the corpus, so the measurement says almost nothing about what the field is used for. Treat
+      every path here as unexercised until the mapping is authored: an unexercised branch is a claim,
+      not a capability.
+
+  - collection: products
+    disposition: map
+    paths_default: map
+    paths_default_to: "product (the master; ADR-0021 canonicalization applies)"
+    paths_default_reason: >-
+      The product master, 567 documents and 105 paths. It is the authority the invoice line's
+      tracking denorm is dropped in favour of, so it migrates whole.
+    paths:
+      - path: shipping.weight
+        disposition: drop
+        reason: "0 of 567 non-zero. See `mappings:` — OQ-033's coverage precondition depends on it."
+      - path: shipping.height
+        disposition: drop
+        reason: "0 of 549 non-zero, verified 2026-08-08."
+      - path: shipping.width
+        disposition: drop
+        reason: "0 of 549 non-zero, verified 2026-08-08."
+      - path: shipping.length
+        disposition: drop
+        reason: "0 of 549 non-zero, verified 2026-08-08."
+
+  - collection: webshop-products
+    disposition: map
+    paths_default: drop
+    paths_default_reason: >-
+      ⚠️ **75 of its 77 paths are a COPY of the product master's pricing tree** — `price.base_cents`,
+      `price.taxes[]`, `components[]`, `alternates[]`, `shipping.*`, `tags[]` — measured 2026-08-16
+      against `products`. A stored duplicate of another collection's fields is a projection, and v2
+      derives it rather than storing it. **Only the overlay is original data**, and it is named below.
+      This is the one survivor whose default is `drop`: defaulting it to `map` would migrate the same
+      product twice and invent a reconciliation between the copies.
+    paths:
+      - path: webshop.available
+        disposition: map
+        to: product.catalogue.available
+        reason: "Original data — whether the catalogue offers this product. Not derivable from `products`."
+      - path: webshop.description
+        disposition: map
+        to: product.catalogue.description
+        reason: "Original data — the customer-facing copy, distinct from the internal `description`."
+
+  - collection: organizations
+    disposition: defective
+    paths_default: defective
+    paths_default_reason: >-
+      ADR-0032 splits one flat record into organization / project / settlement point, and ADR-0033
+      re-addresses AR onto the leaf. **The defect is FLATNESS, not duplication** — every path inherits
+      it, because the record's identity is what changes. The evidence, the four delimiter conventions,
+      the nine duplicate pairs and the authored-not-parsed rule are all in `mappings:`.
+      A `defective` default rather than `map` is the point: nothing here maps cleanly, and a default
+      of `map` would say the opposite.
+    paths:
+      - path: tax_profile
+        disposition: quarantine
+        reason: >-
+          OQ-039. Two of five enum values describe the party and three describe an Illinois
+          municipality, so the attachment point is undecided. Carries forward whole and unsplit.
+
+  - collection: contacts
+    disposition: map
+    paths_default: map
+    paths_default_to: "contact (the person) + membership edges (ADR-0032 §4)"
+    paths_default_reason: >-
+      The person is already global — `contacts` is top-level and each contact carries
+      `organizations[]`, an explicit many-to-many. The person maps 1:1 and the EDGE lands on a
+      settlement point (ADR-0032 §4). 26 of 165 belong to two or more organizations, so a per-node
+      contact record would have fragmented all 26. ≥8 duplicated humans are resolved in the authored
+      mapping, not by a merge tool.
+
+  - collection: destinations
+    disposition: map
+    paths_default: map
+    paths_default_to: "organization.destinations[] (ADR-0032 §5)"
+    paths_default_reason: >-
+      One address book per legal entity (ADR-0032 §5), already a separate many-to-many collection —
+      so this is a re-pointing rather than a restructure. ⚠️ **NOT the same object as
+      `orders.destinations[]`**, which is the per-order destination block and carries
+      `customer_collecting`. Two things share a name and gate 15 caught the map conflating them.
+
+  - collection: locations
+    disposition: map
+    paths_default: map
+    paths_default_to: "location (warehouse)"
+    paths_default_reason: "Warehouse locations, 209 docs. Migrates whole."
+
+  - collection: stores
+    disposition: map
+    paths_default: map
+    paths_default_to: "store (warehouse / branch)"
+    paths_default_reason: >-
+      Two documents — the store / branch a location belongs to. ⚠️ The charter is single-entity, so
+      two stores are two warehouses and not two companies; nothing here implies consolidation.
+    paths:
+      - path: crms_store_id
+        disposition: drop
+        reason: "Foreign identifier (ADR-0009)."
+
+  - collection: tags
+    disposition: map
+    paths_default: map
+    paths_default_to: "tag"
+    paths_default_reason: "Product tags, 46 docs. Migrates whole."
+
+  - collection: taxes
+    disposition: map
+    paths_default: map
+    paths_default_to: "tax_rate (tax context)"
+    paths_default_reason: >-
+      The tax context's rate records, 9 docs — including the historical Chicago Rental Lease
+      Transaction Tax rates. ⚠️ `rate` is 4dp dollars and never takes a minor-unit suffix.
+      The invoice-line `uid` re-keying is a separate live migration and is not this file's business.
+
+  - collection: holiday-definitions
+    disposition: map
+    paths_default: map
+    paths_default_to: "holiday_definition (business calendar)"
+    paths_default_reason: >-
+      The business calendar's rules, 11 docs. Top-level since the 2026-06 migration; the legacy
+      singleton that preceded it is the `config` doc dropped above.
+
+  - collection: holiday-dates
+    disposition: map
+    paths_default: map
+    paths_default_to: "holiday_date (business calendar)"
+    paths_default_reason: >-
+      Materialized holiday dates, 275 docs over a rolling three-year horizon. Migrates as data rather
+      than being recomputed, because a past date's observance is a historical fact and recomputing it
+      from today's rules would silently restate it.
+
+  - collection: users
+    disposition: map
+    paths_default: map
+    paths_default_to: "user (operator account)"
+    paths_default_reason: "Operator accounts. One document today."
+    paths:
+      - path: password_hash
+        disposition: quarantine
+        reason: >-
+          ⚠️ **Credential material, and carrying it forward is a decision nobody has taken.** A hash
+          migrates only if v2 uses the same algorithm and parameters; otherwise the correct migration
+          is a forced reset, which is an operational choice rather than a field mapping. Quarantined
+          rather than mapped so it cannot be swept along with the profile.
+      - path: token_version
+        disposition: drop
+        reason: >-
+          A revocation counter for v1's Firestore security rules, which read `user.tv`. v2's
+          authorization is not rules-based, so the counter has no reader.
+
+  - collection: roles
+    disposition: map
+    paths_default: map
+    paths_default_to: "role + its permission set"
+    paths_default_reason: >-
+      RBAC roles and their permission lists, 6 docs. ⚠️ The permission VERBS are named after v1's
+      enforcement mechanism (`.search` for Typesense), so the names migrate as data and will not all
+      still describe how v2 enforces them.
+
+  # ══ QUARANTINED — a real decision, and it is not this file's to take ══════════════════════════
+
+  - collection: cards
+    disposition: quarantine
+    reason: >-
+      ⚠️ **The charter names neither the operational board nor its absence, and 1,114 documents turn
+      on that silence.** A card is a scheduled unit of work on a board — subject, body, dates, a
+      destination, `uid_list`, `uid_thread`, `sources[].{collection,uid}` pointing back at the order
+      or booking that caused it, plus recurrence. It is the surface the dashboard is built on, and it
+      is downstream of the Trello integration this migration drops.
+      The charter's in-scope list runs order → fulfillment → invoice → posting → report and does not
+      reach it; the out-of-scope list does not exclude it either. **Deciding it as a side effect of a
+      field map is the wrong order**, so it is quarantined with the question named — OQ-049.
+      ⚠️ Note what quarantine costs and does not cost: it is one of the three dispositions m6's
+      criterion accepts, so this collection counts as settled for the milestone while remaining
+      unsettled for the migration. That is the correct reading — "hold it aside" IS a migration
+      behaviour — but it must not be mistaken for "mapped".
+    blocked_by: [OQ-049]
+
+  - collection: lists
+    disposition: quarantine
+    reason: "The board's columns, 4 docs. Follows `cards` exactly — same surface, same question, OQ-049."
+    blocked_by: [OQ-049]
+
+  - collection: threads
+    disposition: quarantine
+    reason: >-
+      ⚠️ **4,153 documents against 44 comments, and the ratio is the finding.** A thread is the
+      comment container that attaches to a domain object — `cards`, `roles` and the template
+      projection all carry a `uid_thread` — so threads are BROADER than the board and cannot simply
+      follow it. The population says most of them are empty: the known cause is event-card
+      delete/recreate churn leaving orphaned threads behind, symptom-fixed in v1 on 2026-06-24 with
+      the deeper root deferred.
+      ⇒ Two questions, not one: does v2 carry the collaboration surface at all (OQ-049), and if it
+      does, is a corpus that is ~99% empty containers migrated or rebuilt? A migration that carries
+      4,153 empty threads forward imports the defect rather than the data.
+    blocked_by: [OQ-049]
+
+  - collection: comments
+    disposition: quarantine
+    reason: "The thread contents, 44 docs. Follows `threads` — OQ-049."
+    blocked_by: [OQ-049]
 
 mappings:
   - from: products.shipping.weight
@@ -61,7 +640,7 @@ mappings:
       Foreign identifier — ADR-0009 forbids it entering the domain model. Used at migration time
       to recover the 254 lines above, then discarded.
 
-  - from: invoices.query_by_orders
+  - from: invoices.query_by_orders[]
     to: invoice.order_refs
     disposition: map
     reason: >-
@@ -81,13 +660,19 @@ mappings:
     disposition: map
     reason: "41 of 999. Maps directly, but REQ-BIL-001 changes the DEFAULT — void excluded unless opted in."
 
-  - from: destinations[].customer_collecting
+  - from: orders.destinations[].customer_collecting
     to: leg.direction
     disposition: defective
     reason: >-
       Per-destination today, not per-leg (verified 2026-08-08). Legs cannot be backfilled from it
       with an actor or a shift. Migration produces destination-level facts only; leg history
       starts at cutover.
+      ⚠️ **This entry read `destinations[].customer_collecting` until 2026-08-16, and the notation
+      named the wrong object.** Gate 15 caught it on the measured inventory: the top-level
+      `destinations` collection (459 docs) is an ADDRESS BOOK and carries no `customer_collecting`
+      at all. The field lives on `orders.destinations[]` — the per-order destination block embedded
+      in the order document. Two things share a name, and a migration that read the collection
+      would have found the field missing and concluded it was unpopulated.
     blocked_by: [HOT-002, HOT-007]
 
   - from: products (duplicate active charge products)
