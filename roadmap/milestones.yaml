@@ -80,7 +80,7 @@ milestones:
     title: Ledger core
     depends_on: [m2]
     exit_criteria:
-      - text: Chart of accounts complete, including the COGS and unabsorbed-labour accounts.
+      - text: Chart of accounts complete, including the COGS and unabsorbed-labor accounts.
         check: coa_complete
       - text: >-
           Reporting dimensions defined with their full value sets, and every specified posting rule
@@ -171,7 +171,7 @@ milestones:
           Becomes checkable once the skeleton document exists and has a shape. It does not yet, and
           inventing a check for a file nobody has written would be a gate over nothing.
       - text: >-
-          The skeleton exercises both reporting dimensions and at least one labour absorption — and,
+          The skeleton exercises both reporting dimensions and at least one labor absorption — and,
           since ADR-0036, shows them DERIVED from the posting's keys rather than read off it.
         prose_only: true
         reason: >-

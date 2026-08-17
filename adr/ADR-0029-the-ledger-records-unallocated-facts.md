@@ -11,7 +11,7 @@ supersedes:
 superseded_by:
 ---
 
-> **In the context of** labour and vehicle costs arriving in the ledger for the first time,
+> **In the context of** labor and vehicle costs arriving in the ledger for the first time,
 > **facing** a choice about whether a delivery's cost is posted to the goods it delivered or to
 > delivery itself, **we decided** that the ledger records costs and revenues at the grain they
 > occurred and never allocates, and that allocation happens once, in a specified report, **to
@@ -38,7 +38,7 @@ superseded_by:
   of revenue** (re-measured 2026-08-16,
   `inbox/2026-08-16-the-product-line-matrix-rebuilt-with-the-master-join-denorm-and-master-now-agree-on-every-line.md`;
   534 / $234,987.75 / 13.91% on 2026-08-10). It currently has almost no cost against it, because
-  labour and vehicle costs are not in the ledger yet. ⚠️ The figures first written here — 473 lines,
+  labor and vehicle costs are not in the ledger yet. ⚠️ The figures first written here — 473 lines,
   $216,050, 12.8% — came from `inbox/2026-08-09-product-line-by-revenue-account-matrix.md`, which
   counted `tracking_category` on the invoice line. That denorm was null on 227 lines whose product
   master **was** categorised (api-cloudrun#473, repaired 2026-08-10). The rank is unchanged and the
@@ -93,7 +93,7 @@ Both views are legitimate and they answer different questions:
   _permitted_.
 - **Delivery revenue spans two accounts and BOTH are the Delivery product line.** Owner, 2026-08-09:
   4100 Service Income is the delivery/setup/removal charge — a service performed by a person, and
-  labour-bearing; 4110 Delivery Surcharges is off-hours, rush, weekend or distance. ⚠️ **This bullet
+  labor-bearing; 4110 Delivery Surcharges is off-hours, rush, weekend or distance. ⚠️ **This bullet
   said 4110 "is off-hours, rush or weekend, WHICH NOBODY PERFORMS", and that gloss is retracted
   (OQ-032, owner 2026-08-16).** It was wrong about a third of the account — distance is 33.3% of it
   and somebody drives those miles — and wrong about the question. Owner: "the performance is the
@@ -112,11 +112,11 @@ Both views are legitimate and they answer different questions:
   2026-08-16). It rests on "the surcharge adds revenue and no cost". The extra cost of a distant
   delivery is "the opportunity cost of the team being gone longer (and thus unavailable for a second
   delivery), and additional gas" — three components, and only one of them is an entry: **wage** is
-  unchanged, so OQ-006's "the premium is margin, not cost" holds for labour; **fuel** is a real
+  unchanged, so OQ-006's "the premium is margin, not cost" holds for labor; **fuel** is a real
   incremental cost and lands in vehicle COGS (ADR-0030); **opportunity cost** is real and
   deliberately NOT booked — ADR-0019's absorption model already expresses it, because the long haul
   absorbs its person-day into 5800 while no second job absorbs the rest of the day, and the
-  shortfall surfaces as 5801 Unabsorbed Labour. That is HOT-010's "absorption measures UTILISATION",
+  shortfall surfaces as 5801 Unabsorbed Labor. That is HOT-010's "absorption measures UTILISATION",
   and it answers HOT-004 without loading a premium onto the job. ⇒ a model predicting delivery cost
   from 4100 volume alone **under-predicts** in a long-haul period, and distance-surcharge revenue is
   the best available proxy for a driver nothing else records. Out-of-hours and weekend stay

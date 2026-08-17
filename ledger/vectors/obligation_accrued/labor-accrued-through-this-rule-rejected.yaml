@@ -1,4 +1,4 @@
-name: labour-accrued-through-this-rule-rejected
+name: labor-accrued-through-this-rule-rejected
 posting_rule: obligation_accrued
 kind: reject
 source: >-
@@ -27,7 +27,7 @@ given:
 
 derivation: >-
   An attempt to accrue a crew day straight to 5800 through the generic procurement rule, because the
-  EOR has not invoiced and the cost is real. **Refused.** Labour accrues through `shift_recorded`,
+  EOR has not invoiced and the cost is real. **Refused.** Labor accrues through `shift_recorded`,
   which credits the same 2010 and reaches it by a different road.
   **Two independent reasons, and the second is the one a reviewer would miss.**
   1. **It would double-count with `shift_recorded`.** Both rules debit 5800 and credit 2010 for the
@@ -53,5 +53,5 @@ derivation: >-
 expect:
   transfers: []
   rejects:
-    - reason: "obligation.debit_account 5800 is a labour account — labour accrues through shift_recorded, which already debits 5800 and credits 2010; accruing it here books the crew day twice in a way that still balances (ADR-0019, OQ-005)"
+    - reason: "obligation.debit_account 5800 is a labor account — labor accrues through shift_recorded, which already debits 5800 and credits 2010; accruing it here books the crew day twice in a way that still balances (ADR-0019, OQ-005)"
     - reason: "EVT-PRO-002 carries no allocation row, so a transfer of this rule can supply no line identity — but 5800's postings are one per absorbed allocation (HOT-014), and an entry that debits it with a single undifferentiated amount cannot be reconciled to any shift (ADR-0019, ADR-0036)"

@@ -5,7 +5,7 @@ with its own accounting layer. **No implementation code lives here.** The output
 tag.
 
 Replaces the Firestore-backed CFS API, **Xero**, and **asset.accountant**. Keeps an external
-employer of record for payroll — labour _scheduling_ moves in-house, which is what makes COGS labour
+employer of record for payroll — labor _scheduling_ moves in-house, which is what makes COGS labor
 allocation possible.
 
 Target stack: Deno/Hono API · MongoDB (documents) · TigerBeetle (ledger) · DuckDB over Parquet (read

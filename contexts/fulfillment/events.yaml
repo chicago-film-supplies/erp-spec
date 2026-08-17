@@ -57,7 +57,7 @@ events:
       whose entire purpose is "received not invoiced". The entry balances, the control total
       matches, and 2010's balance silently stops meaning anything.
       **Surveyed before deciding** (CLAUDE.md → _Accounting decisions_): GAAP, Xero, SAP and Odoo
-      keep an uncompensated labour cost out of the financial statements; NetSuite and Intacct post
+      keep an uncompensated labor cost out of the financial statements; NetSuite and Intacct post
       it but fence the offset; **all six agree that nothing credits a payable**
       (`inbox/2026-08-16-survey-an-unpaid-owner-shift-is-not-an-expense-and-every-reference-fences-imputed-labour-out-of-the-statements.md`).
 

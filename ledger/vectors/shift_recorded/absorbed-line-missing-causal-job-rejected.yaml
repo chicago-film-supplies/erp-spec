@@ -2,7 +2,7 @@ name: absorbed-line-missing-causal-job-rejected
 posting_rule: shift_recorded
 kind: reject
 source: >-
-  REQ-LED-001 and ADR-0036 — every posting DECLARES its causal order, and an ABSORBED labour
+  REQ-LED-001 and ADR-0036 — every posting DECLARES its causal order, and an ABSORBED labor
   allocation is by definition absorbed INTO a job. This is the arm where an explicit null is not
   available: 5801 exists precisely so that hours belonging to no job have somewhere to go, so a 5800
   posting with no causal job is not a determination, it is a misfiled cost.

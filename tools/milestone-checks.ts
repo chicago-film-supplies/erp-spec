@@ -288,14 +288,14 @@ export const CHECKS: Record<string, Check> = {
     const todo = w.accounts.filter((a) => /^TODO$/i.test(String(a.name ?? "").trim()));
     const codes = new Set(w.accounts.map((a) => Number(a.code)));
     // ADR-0019 requires the absorbed/unabsorbed pair to exist; the chart mints them at 5800/5801.
-    const labour = w.accounts.filter((a) =>
+    const labor = w.accounts.filter((a) =>
       /Wages \((Absorbed|Unabsorbed)\)/.test(String(a.name ?? ""))
     );
-    const ok = todo.length === 0 && labour.length === 2 && codes.size === w.accounts.length;
+    const ok = todo.length === 0 && labor.length === 2 && codes.size === w.accounts.length;
     return {
       ok,
       detail:
-        `${w.accounts.length} accounts, ${todo.length} named TODO, ${labour.length} of 2 labour accounts present`,
+        `${w.accounts.length} accounts, ${todo.length} named TODO, ${labor.length} of 2 labor accounts present`,
     };
   },
   /**

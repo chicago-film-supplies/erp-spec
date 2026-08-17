@@ -62,7 +62,7 @@ like a subcontractor — one mechanism is simpler to specify, and the invoice de
 erp-spec#8's "~30 collections": a scope taken from the obvious list, short by whatever the
 unexamined source holds.
 
-## 3. Align with the labour strategy — and the alignment is literal, not analogical
+## 3. Align with the labor strategy — and the alignment is literal, not analogical
 
 > _"i want to align with the labor strategy"_
 
@@ -81,11 +81,10 @@ its own margin ($144,975, the third-largest line) — so one undifferentiated ve
 have served both. The shift's `labor_line` already says which.
 
 ⚠️ **What does NOT carry over is ADR-0019's headline sentence.** "Absorption measures utilisation,
-not rate variance" is true because labour is costed at ACTUAL, from a real wage on a real bill. A
-van has no actual per-job cost, so vehicle absorption is a predetermined rate and 5901 is
-utilisation **and** rate deviation. The structure aligns; the costing basis cannot. That is the
-price of the alignment and it is stated in the ADR as a requirement to name the normal-capacity
-denominator.
+not rate variance" is true because labor is costed at ACTUAL, from a real wage on a real bill. A van
+has no actual per-job cost, so vehicle absorption is a predetermined rate and 5901 is utilisation
+**and** rate deviation. The structure aligns; the costing basis cannot. That is the price of the
+alignment and it is stated in the ADR as a requirement to name the normal-capacity denominator.
 
 ## 4. The basis is computed Mapbox distance, not captured mileage
 
@@ -159,6 +158,79 @@ standing rule is that _a branch with no members is a claim, not a capability_; t
 is easier to get wrong, because deleting a branch feels like simplification. **The scissor lift is
 the member that says otherwise**, and it is recorded on 6302's chart entry so the branch is
 evidenced rather than asserted.
+
+## 9. Hired trucks go STRAIGHT to a COGS account — and the machinery already existed
+
+> _"should hired to perform delivery go straight to a cogs account?"_ … _"when a chicagoland invoice
+> hits our app, chicagoland the vendor can default to cogs: vehicles: rented account but i can
+> change in the less likely event it's for internal use"_
+
+**Yes, and ruling 2's "pool them with the rest" is reversed.** ⚠️ **The reversal is on ME, not on
+the ruling**: pooling was recommended on the grounds that "one mechanism is simpler to specify",
+which is **not the criterion the survey established**. The criterion is _does the cost arrive
+already attributed to a causal job?_ — and a rental invoice does.
+
+**There was no second mechanism to avoid.** `bill_received` already carries it:
+
+```yaml
+- debit_account: line.debit_account
+  per: bill.direct_lines
+  amount: line.amount_minor
+  keys:
+    causal_orders: line.causal_orders
+```
+
+`bill.direct_lines[]` already holds an arbitrary `debit_account` AND its own `causal_orders`. A
+truck-hire line is an existing rule with a different account in it.
+
+⇒ **Mint `5902 COGS: Vehicle (Hired)`; do NOT mint `6405 Vehicle: Rented`.** An attributable cost
+needs no natural operating-expense account. ✅ Three things improve: 5900/5901 stay readable as
+owned-fleet utilisation and rate deviation rather than mixing an actual into a rate-absorbed pool;
+the rate-denominator double-count hazard **disappears** rather than needing management; and the job
+attribution the invoice already supplies is used instead of discarded.
+
+**The vendor carries a DEFAULT account, overridable per line.** This is what makes the three-way
+6302 / 5100 / 5902 split operable rather than aspirational. Three cautions, all recorded in the ADR:
+
+- ⚠️ a default is a claim about a vendor and **will be silently wrong** in exactly the 6302 case — a
+  scissor lift coded by reflex to COGS overstates delivery cost with nothing to flag it, so the
+  default must be **visible on the line**, not applied invisibly;
+- ⚠️ it supplies the ACCOUNT and never the **causal job**. REQ-LED-001 refuses an absent key and
+  permits an explicit null, and **a null arrived at by defaulting is an absence wearing a
+  determination's clothes**;
+- ⚠️ it is consumed at WRITE time and **never re-read**. Nothing may re-derive a posting's coding
+  from the vendor master later — that is ADR-0036's rule and the exact trap
+  `invoices.items[].tracking_category` was.
+
+## 10. 5200 Subcontractors is NOT a CFS labor account — and its own note said it was
+
+> _"our wages are not subcontractors, a subcontractor is we hired another company to perform work
+> for a customer, dont conflate the 2 labor related accounts, subcontractors is not a cfs labor
+> account. labor does not have a u, adopt this"_
+
+⚠️ **The conflation was inherited, not invented.** 5200's chart note read: _"Subcontractor labor is
+already in COGS here … ADR-0019's absorption model puts own-crew cost beside it in 5800 … **the two
+labor populations become comparable for the first time**."_ A subcontractor's cost is a PURCHASE
+from another company; 5800/5801 are CFS's own wages. They are labor-related and they are **not one
+population**, so "comparable for the first time" asserted a comparison that does not hold. Corrected
+on the account.
+
+✅ **The corrected axis is stronger than the one it replaces.** What 5200 shares with 5902 is the
+PROCUREMENT SHAPE — a vendor bill naming the job it served — so the table is **bought in versus
+owned**, not labor versus not-labor:
+
+|                     | bought in — the bill names the job | CFS-owned — no per-job actual |
+| ------------------- | ---------------------------------- | ----------------------------- |
+| capacity to perform | 5200 Subcontractors                | 5800 / 5801 own crew          |
+| vehicles            | **5902 Vehicle (Hired)**           | **5900 / 5901** owned fleet   |
+
+**And "labor" has no u — adopted as the house spelling.** Swept across the refactorable spec and
+enforced by **gate 17**, because a convention nothing executes is the class of claim this repo has
+paid for most often. ⚠️ Three exemptions, all on lifecycle grounds: `inbox/` and `research-drop/`
+are append-only; an accepted ADR is immutable and ADR-0001, ADR-0011 and ADR-0036 keep "labor"
+permanently (ADR-0034 — a historical record of the decision as taken, spelling included); and a
+citation of an append-only filename keeps that filename's spelling. **Gate 11 caught all twelve
+citations the sweep broke**, which is how the third exemption was found.
 
 ## 6 and 7 — confirmed as recommended
 

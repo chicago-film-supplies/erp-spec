@@ -24,9 +24,9 @@ superseded_by:
 > **In the context of** delivery being the largest tracked product line and carrying almost no cost,
 > **facing** vehicle running costs sitting in operating expenses where no product line can see them,
 > **we decided** to move vehicle cost into COGS on the same absorbed/unabsorbed shape ADR-0019 gave
-> labour, absorbing on the shift's own allocation rows at a rate per computed mile, **to achieve** a
+> labor, absorbing on the shift's own allocation rows at a rate per computed mile, **to achieve** a
 > delivery cost that is complete enough to allocate, **accepting** a second utilisation measure to
-> maintain and a rate variance that labour does not have.
+> maintain and a rate variance that labor does not have.
 
 ## Context
 
@@ -84,13 +84,14 @@ spread across the goods delivered — and the official product-line P&L performs
 
 **Every vehicle dollar is in scope, whether the vehicle is owned or rented.** A truck hired to run a
 delivery is the same economic activity as a van driven to run one, so it takes the same
-classification, and it moves out of `6302 Rented Tools, Machinery, Equipment` into the vehicle
-block.
+classification. ⚠️ **But it does NOT take the same TREATMENT** — a hire arrives already attributed
+to a causal job, so it posts **direct to COGS at actual** (5902) and never enters the rate-absorbed
+pool. See _Bought in versus owned_ below.
 
 ⚠️ **6302 SURVIVES with a live population, and this ADR nearly wrote it out.** The criterion its
 note states — "whether an order caused it" — sorts equipment hire into **three** accounts, not the
 two the note named: gear rented for CFS's **own use** stays here, gear **supplied to a customer** is
-a subrental (5100), and gear hired to **perform** a job is vehicle cost (6405). Owner, 2026-08-16: a
+a subrental (5100), and gear hired to **perform** a job is vehicle COGS (5902). Owner, 2026-08-16: a
 scissor lift and a forklift were hired for the warehouse move, and building-maintenance hire is
 expected in future. **One population moving out is not the account becoming empty** — the same
 mistake as reading a renamed sentence without re-reading what it claims.
@@ -109,11 +110,30 @@ balance, NetSuite through a substituted contra account, Odoo through analytic di
 never touches the account at all. **The sixth is Xero, which recodes at entry because it has no
 allocation engine** — a workaround of the incumbent, not a design to inherit.
 
+**Bought in versus owned — the criterion sorts into TWO TREATMENTS, not two mechanisms.** The
+survey's criterion is _does the cost arrive already attributed to a causal job?_, and vehicle cost
+answers it both ways:
+
+|                         | bought in — the bill names the job                  | CFS-owned — no per-job actual exists             |
+| ----------------------- | --------------------------------------------------- | ------------------------------------------------ |
+| **capacity to perform** | 5200 Subcontractors — another company does the work | 5800 / 5801 own crew — absorbed at a rate        |
+| **vehicles**            | **5902 Vehicle (Hired)** — direct, at actual        | **5900 / 5901** owned fleet — absorbed at a rate |
+
+⚠️ **The axis is PROVENANCE, not labor.** 5200 is not a CFS labor account: a subcontractor is
+another company hired to perform work for a customer, and its cost is a purchase, where 5800/5801
+are CFS's own wages. Reading them as "two labor populations" conflates a bought-in service with an
+internal cost — see 5200's chart entry, whose note carried exactly that conflation and is corrected.
+What 5200 and 5902 share is the PROCUREMENT SHAPE: a vendor bill that names the job it served.
+
+**It needs nothing new.** `bill_received`'s `bill.direct_lines[]` already carries both a
+`debit_account` and its own `causal_orders`, so a truck-hire line is an existing rule with a
+different account in it — no new event, no new field, no second machinery.
+
 **Absorption rides the SHIFT'S OWN ALLOCATION ROWS.** A delivery, trucking or trash-removal job
 generates a shift (ADR-0011, OQ-010), and that shift already carries hours, a causal job and a
-`labor_line`. Vehicle cost absorbs against the same rows labour does — same source event, same
-causal job, same `labor_line` — at a rate applied to a different quantity. Two consequences, and the
-second is what makes the design cheap:
+`labor_line`. Vehicle cost absorbs against the same rows labor does — same source event, same causal
+job, same `labor_line` — at a rate applied to a different quantity. Two consequences, and the second
+is what makes the design cheap:
 
 - **the Delivery / Trash & Cleanup split comes for free.** The two are different product lines with
   different treatments — `Delivery` spreads onto the goods it delivered, `Trash & Cleanup` is
@@ -135,32 +155,32 @@ would silently bill a Chicago delivery as though the van had driven to Phoenix.
 
 **Natural — what was bought. These KEEP taking postings.**
 
-| code     |                                |                                                           |
-| -------- | ------------------------------ | --------------------------------------------------------- |
-| 6400     | Vehicle: Repairs & Maintenance | live, unchanged                                           |
-| 6401     | Vehicle: Registrations & Fees  | live, unchanged                                           |
-| 6402     | Vehicle: Fuel                  | live, unchanged                                           |
-| 6403     | Vehicle: Parking & Tolls       | live, unchanged                                           |
-| 6404     | Vehicle: Tickets               | live, unchanged — **never absorbs**, see below            |
-| **6405** | **Vehicle: Rented**            | **minted**; receives the DELIVERY-VEHICLE portion of 6302 |
-| **6409** | **Vehicle: Cost Absorbed**     | **minted**, credit-normal contra                          |
+| code     |                                |                                                |
+| -------- | ------------------------------ | ---------------------------------------------- |
+| 6400     | Vehicle: Repairs & Maintenance | live, unchanged                                |
+| 6401     | Vehicle: Registrations & Fees  | live, unchanged                                |
+| 6402     | Vehicle: Fuel                  | live, unchanged                                |
+| 6403     | Vehicle: Parking & Tolls       | live, unchanged                                |
+| 6404     | Vehicle: Tickets               | live, unchanged — **never absorbs**, see below |
+| **6409** | **Vehicle: Cost Absorbed**     | **minted**, credit-normal contra               |
 
 **COGS — why it was consumed. Minted, on the 5800/5801 precedent.**
 
-| code     |                                          |
-| -------- | ---------------------------------------- |
-| **5900** | Cost of Goods Sold: Vehicle (Absorbed)   |
-| **5901** | Cost of Goods Sold: Vehicle (Unabsorbed) |
+| code     |                                                                     |
+| -------- | ------------------------------------------------------------------- |
+| **5900** | Cost of Goods Sold: Vehicle (Absorbed) — owned fleet, rate-absorbed |
+| **5901** | Cost of Goods Sold: Vehicle (Unabsorbed) — owned fleet residual     |
+| **5902** | Cost of Goods Sold: Vehicle (Hired) — direct at actual, no rate     |
 
 Each period: `Dr 5900` for the portion absorbed against causal jobs, `Dr 5901` for the residual,
-`Cr 6409` for the total — so 6400–6403 and 6405 net to zero while their **gross** activity still
-answers "how much fuel did we buy, how much was repairs, how much did we hire in". The alternative
-is crediting the natural accounts directly; it is one account cheaper and destroys precisely that
-figure. **5900 is the next free hundred** — measured 2026-08-16, the live `Direct Costs` block is
-exactly nine accounts (5000, 5001, 5100, 5200, 5300, 5400, 5500, 5600, 5700), with 5150 and
-5800/5801 already minted.
+`Cr 6409` for the total — so 6400–6403 net to zero while their **gross** activity still answers "how
+much fuel did we buy, how much was repairs, how much did we hire in". The alternative is crediting
+the natural accounts directly; it is one account cheaper and destroys precisely that figure. **5900
+is the next free hundred** — measured 2026-08-16, the live `Direct Costs` block is exactly nine
+accounts (5000, 5001, 5100, 5200, 5300, 5400, 5500, 5600, 5700), with 5150 and 5800/5801 already
+minted.
 
-- ⚠️ **6400–6405 KEEP TAKING POSTINGS. This reverses a consequence of the first draft, which said
+- ⚠️ **6400–6403 KEEP TAKING POSTINGS. This reverses a consequence of the first draft, which said
   they "stop taking new postings" — and the two halves of that draft could not both hold.** If the
   purchase posts straight into the COGS pair, the posting must choose absorbed or unabsorbed **at
   the pump**, where no causal job is known; everything would land unabsorbed, 5900 would never be
@@ -169,18 +189,46 @@ exactly nine accounts (5000, 5001, 5100, 5200, 5300, 5400, 5500, 5600, 5700), wi
   shift names its job at the moment it happens, which is why `shift_recorded` debits 5800 per
   `shift.absorbed_allocations` and is finished. A tank of diesel names no job, and a registration
   fee names none even in principle.
-- **Rented vehicles are POOLED, not absorbed at actual.** A rental invoice for a specific job names
-  that job, which is better information than the pool needs — the shape 5200 Subcontractors already
-  handles. It is deliberately not used: one mechanism for all vehicle cost is simpler to specify and
-  to explain, and the per-job detail on the invoice remains available if a later ADR wants it. ⚠️ It
-  follows that the rate's denominator must include rented mileage, or rented spend is absorbed
-  twice.
+- ⚠️ **Hired vehicles post DIRECT at actual and never enter the pool. This reverses a recommendation
+  made hours earlier in the same session, and the reversal is the instructive part.** Pooling was
+  recommended on the grounds that "one mechanism is simpler to specify" — **which is not the
+  criterion this survey established**. Applying the actual criterion, a rental invoice arrives
+  already attributed to a causal job, so it belongs in COGS directly. There was no second mechanism
+  to avoid: `bill.direct_lines[]` already carries the account and the job. ✅ **Three things get
+  better rather than worse.** 5900/5901 stay interpretable as owned-fleet utilisation and rate
+  deviation instead of mixing an actual cost into a rate-absorbed pool; the hazard that the rate's
+  denominator must include rented mileage or double-count **disappears entirely** rather than
+  needing management; and the job attribution the invoice already supplies is used instead of
+  discarded. ⚠️ **An attributable cost needs no natural operating-expense account**, so the
+  `6405 Vehicle:
+  Rented` an earlier revision minted is **not** created. 5200 has never had an opex
+  twin either. A hire that genuinely cannot be attributed posts to 5902 with `causal_orders: null` —
+  an explicit determination under REQ-LED-001 — rather than earning a fourth account for a
+  population that may have no members.
 
-### The rate, and the variance labour does not have
+- **The vendor carries a DEFAULT expense account, overridable per line.** Owner, 2026-08-16: _"when
+  a chicagoland invoice hits our app, chicagoland the vendor can default to cogs: vehicles: rented
+  account but i can change in the less likely event it's for internal use."_ This is what makes the
+  three-way split operable rather than aspirational — the criterion is correct on paper, and a
+  default that is right most of the time is what makes it right at 2am. ⚠️ **A default is a claim
+  about a vendor and it will be silently wrong sometimes**, in exactly the case 6302 exists for: a
+  scissor lift hired for the warehouse move, coded by reflex to COGS, overstates delivery cost with
+  nothing to flag it. The override is the control, so **the default must be visible on the line
+  rather than applied invisibly**. ⚠️ **The default supplies the ACCOUNT and never the CAUSAL JOB.**
+  REQ-LED-001 refuses an absent key and permits an explicit null — and a null arrived at by
+  defaulting is an absence wearing a determination's clothes. Where the hire is raised as a purchase
+  order against a job (the flow ADR-0019 already describes for scheduling), the job comes with the
+  PO; where a bill arrives cold, it must be supplied. ⚠️ **The default is consumed at WRITE time and
+  never re-read.** Once posted, the line carries its own `debit_account`; nothing may re-derive a
+  posting's coding from the vendor master later. That is ADR-0036's rule and the trap it was written
+  for — `invoices.items[].tracking_category` was a copy of a mutable master that a writer restamped,
+  and the same temptation applies here.
+
+### The rate, and the variance labor does not have
 
 - ⚠️ **Absorbing at a rate reintroduces the rate variance ADR-0019 dropped, and 5901 therefore means
   something different from 5801.** ADR-0019 could say "absorption measures utilisation, **not** rate
-  variance" because labour is costed at actual, from a real per-contact wage on a real bill.
+  variance" because labor is costed at actual, from a real per-contact wage on a real bill.
   **Vehicle cost cannot be**: the real cost of a van-day is unknowable until a transmission fails
   three years later, and registration and insurance have no per-job actual at all. So vehicle
   absorption is a **predetermined rate on a stated normal-capacity denominator** (ASC 330-10-30-3),

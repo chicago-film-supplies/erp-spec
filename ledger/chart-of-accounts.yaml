@@ -13,13 +13,17 @@
 #
 # **143 entries**, because NINE are minted rather than carried across — each `disposition: new`,
 # `status_live: absent`, with the rule that needs it named in its `reason`: 5800/5801 for
-# absorbed/unabsorbed labour (ADR-0019), **2050 Customer Credit Balances** for `credit_note_issued`,
+# absorbed/unabsorbed labor (ADR-0019), **2050 Customer Credit Balances** for `credit_note_issued`,
 # which had no credit-side account at all (erp-spec#5), **2010 Accrued Expenses: Received Not
 # Invoiced** for `obligation_accrued`, which had none either (erp-spec#14), and **5150 Cost of Goods
 # Sold: Pass Through**. ⚠️ **Four more were minted 2026-08-16 by ADR-0030's owner rulings**:
-# 5900/5901 for absorbed/unabsorbed vehicle cost, **6405 Vehicle: Rented** (delivery trucks hired in,
-# which 6302's own note already excluded and nobody had read that way) and **6409 Vehicle: Cost
-# Absorbed**, the contra without which the absorbed/unabsorbed split cannot be computed at all.
+# **5900/5901** absorbed/unabsorbed vehicle cost for the OWNED fleet, **5902 Vehicle (Hired)** for
+# trucks hired to perform a job — direct at actual, mirroring 5200 exactly — and **6409 Vehicle:
+# Cost Absorbed**, the contra without which the absorbed/unabsorbed split cannot be computed at all.
+# ⚠️ A revision of that ruling minted `6405 Vehicle: Rented` in the operating-expense block and
+# pooled hired trucks with owned ones. **Reversed the same day**: a hire arrives already attributed
+# to a causal job, so by the criterion the whole ADR turns on it belongs in COGS directly, and an
+# attributable cost needs no natural opex account — 5200 has never had one either.
 # ⚠️ **This paragraph read "138 entries, because four are minted" until 2026-08-16 and was wrong by
 # one in both halves** — 5150 was added without it being updated, and nothing counts these numbers,
 # so the header could disagree with the file indefinitely. Re-counted 2026-08-16: **143** `code`,
@@ -64,12 +68,12 @@
 # live→target correspondence belongs in `migration/field-map.yaml`, not in the chart.
 #
 # ── two corrections this revision makes ─────────────────────────────────────────────────────────
-# 1. **The previous revision invented `5100 = "COGS – Labour Absorbed"`.** Live `5100` is
+# 1. **The previous revision invented `5100 = "COGS – Labor Absorbed"`.** Live `5100` is
 #    `Cost of Goods Sold: Subrentals`, Active. The whole live 5x00 block is occupied (5000, 5001,
 #    5100, 5200, 5300, 5400, 5500, 5600, 5700), so the absorbed/unabsorbed pair moves to the next
 #    free hundred — 5800/5801 — and sits adjacent, per the live sub-numbering convention
 #    (1501 under 1500, 5001 under 5000, 6001 under 6000).
-# 2. **`5190 COGS – Labour Variance` is gone**, and 5100's "standard cost applied to causal jobs"
+# 2. **`5190 COGS – Labor Variance` is gone**, and 5100's "standard cost applied to causal jobs"
 #    note with it. HOT-010 and ADR-0019 killed the rate variance — with no standard rate it could
 #    never fire — but only `posting-rules.yaml`'s comment followed; the accounts did not.
 #
@@ -458,7 +462,7 @@ accounts:
       analysis makes explicit. A credit balance is received-not-invoiced, which is the ordinary state
       between a shift and the EOR's invoice. A residual that never clears is a bill that never
       arrived or an accrual nobody corrected, and it is visible rather than absorbed.
-      ⚠️ **The population that makes this account material is LABOUR, not goods, and the goods number
+      ⚠️ **The population that makes this account material is LABOR, not goods, and the goods number
       will mislead anyone who measures it first.** Prod holds **74** `type: purchase` stock
       movements, only **15** with a non-zero cost, totalling **$18,117.52** — 60% of it one pallet
       buy (`api:2026-08-16:db_transactions_query`). The EOR invoice against shifts already worked is
@@ -838,7 +842,7 @@ accounts:
       at length.** It read: "booking it to equity would put the cost outside COGS entirely and leave
       it out of every margin." **That reads this account as the DEBIT side. It is the CREDIT side.**
       Debit 5800 and credit owner's capital and the opposite happens: the job bears the cost, and the
-      credit records that the labour was **contributed rather than owed**. This account was correct
+      credit records that the labor was **contributed rather than owed**. This account was correct
       machinery, described as if it were something else.
       **It is dropped because the treatment it serves was not chosen** (OQ-047, owner 2026-08-16:
       "stick with gaap"). A contributed owner shift writes **no transfer at all** — no obligation was
@@ -854,7 +858,7 @@ accounts:
       it existed; the disposition was right and the reasoning was not, so nothing could have caught
       it. It took the owner asking a question the account already answered. **A correct conclusion
       reached by wrong reasoning is not a checked conclusion** — the same lesson as the `transport`
-      pool selecting delivery labour, found the same day.
+      pool selecting delivery labor, found the same day.
       ⚠️ This reason also read "an equity account cannot carry a dimension" until 2026-08-16; no
       account carries one now (ADR-0036), and the real objection was always the P&L placement.
     source: "api:2026-08-09:db_chart_of_accounts_query"
@@ -1150,8 +1154,8 @@ accounts:
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
     note: >-
-      Resolves to the product line of the item sold. A labour classification has no meaning here — its values are
-      delivery/counter/warehouse, which describe labour — and that is HOT-011.
+      Resolves to the product line of the item sold. A labor classification has no meaning here — its values are
+      delivery/counter/warehouse, which describe labor — and that is HOT-011.
 
   - code: 5001
     name: "Cost of Goods Sold: Purchase Discounts"
@@ -1178,8 +1182,8 @@ accounts:
     source: "api:2026-08-09:db_chart_of_accounts_query"
     note: >-
       ⚠️ **This code was in collision.** The previous revision of this file invented `5100 = "COGS –
-      Labour Absorbed"` with the note "Standard cost applied to causal jobs". Live 5100 is
-      Subrentals and is Active; the labour account moved to 5800; and ADR-0019 replaced standard
+      Labor Absorbed"` with the note "Standard cost applied to causal jobs". Live 5100 is
+      Subrentals and is Active; the labor account moved to 5800; and ADR-0019 replaced standard
       cost with actual, so the note went with it. Equipment rented in to fill an order takes the
       product line of what it substitutes for.
 
@@ -1211,9 +1215,19 @@ accounts:
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
     note: >-
-      **Subcontractor labour is already in COGS here** (OQ-011). ADR-0019's absorption model puts
-      own-crew cost beside it in 5800 — a move out of 6600, not an invention. The two labour
-      populations become comparable for the first time.
+      **Bought-in capacity: another company hired to perform work for a customer.** Already in COGS
+      here (OQ-011), and it stays.
+      ⚠️ **THIS IS NOT A CFS LABOR ACCOUNT, and this note said otherwise until 2026-08-16.** It read
+      "Subcontractor labor is already in COGS here … the two labor populations become comparable
+      for the first time". Owner: _"our wages are not subcontractors … dont conflate the 2 labor
+      related accounts, subcontractors is not a cfs labor account."_ A subcontractor's cost is a
+      PURCHASE from another company; 5800/5801 are CFS's own wages. They are labor-related and they
+      are not one population, so "comparable for the first time" asserted a comparison that does not
+      hold.
+      **What 5200 shares with 5902 Vehicle (Hired) is the PROCUREMENT SHAPE** — a vendor bill that
+      names the job it served, posting direct to COGS at actual — which is the axis ADR-0030 sorts
+      on: bought in versus owned, not labor versus not-labor.
+      ⚠️ It is the second place today where a sentence was read for its words rather than its claim.
 
   - code: 5300
     name: "Cost of Goods Sold: Shipping ( Rentals & Sales Only )"
@@ -1304,7 +1318,7 @@ accounts:
       line" until 2026-08-16; the lie to avoid is unchanged and the mechanism that prevents it moved
       from the chart to the key. Sub-numbered under 5800 per the live convention (1501 under 1500, 5001
       under 5000); the previous revision's 5199 sat inside the 51xx Subrentals block, which has
-      nothing to do with labour.
+      nothing to do with labor.
     source: ADR-0019
 
   - code: 5900
@@ -1315,7 +1329,7 @@ accounts:
     status_live: absent
     reason: >-
       Required by ADR-0030. Vehicle running cost attributable to a causal job, absorbed against the
-      SHIFT'S OWN ALLOCATION ROWS — same event, same causal job, same `labor_line` as the labour that
+      SHIFT'S OWN ALLOCATION ROWS — same event, same causal job, same `labor_line` as the labor that
       performed the work (ADR-0011, OQ-010), at a rate applied to computed distance. **Code chosen,
       not inherited:** measured 2026-08-16 the live Direct Costs block is exactly nine accounts
       (5000, 5001, 5100, 5200, 5300, 5400, 5500, 5600, 5700), and 5150 and 5800/5801 are already
@@ -1337,13 +1351,43 @@ accounts:
       `causal_orders: null`, an explicit determination rather than a missing key (REQ-LED-001,
       ADR-0036), exactly as 5801 does. Sub-numbered under 5900 per the live convention.
       ⚠️ **IT DOES NOT MEAN WHAT 5801 MEANS, and the difference is load-bearing.** ADR-0019 can say
-      "absorption measures utilisation, NOT rate variance" because labour is costed at ACTUAL, from a
+      "absorption measures utilisation, NOT rate variance" because labor is costed at ACTUAL, from a
       real per-contact wage on a real bill. A van has no actual per-job cost — the true cost of a
       van-day is unknowable until a transmission fails — so vehicle absorption applies a
       **predetermined rate on a stated normal-capacity denominator** (ASC 330-10-30-3) and this
       balance is utilisation **and** rate deviation together. **Reporting them separately is a
       requirement**: an unabsorbed account meaning "one of two things, we do not know which" is the
       plug ADR-0030 warns about.
+    source: ADR-0030
+
+  - code: 5902
+    name: "Cost of Goods Sold: Vehicle (Hired)"
+    class: expense
+    normal_balance: debit
+    disposition: new
+    status_live: absent
+    reason: >-
+      Required by ADR-0030. Vehicles hired to PERFORM a delivery or a haul — owner, 2026-08-16:
+      "we also rent vehicles for delivery … mostly from chicagoland truck rental". Posted **direct
+      at actual**, carrying `causal_orders` from the bill line, and **not** through the 5900 pool.
+      ⚠️ **This is 5200's shape, and the pairing is the point.** 5200's own note says "subcontractor
+      labor is already in COGS here … ADR-0019's absorption model puts own-crew cost beside it in
+      5800". Vehicles now mirror labor exactly: **bought in and job-named goes direct at actual;
+      own and unattributable absorbs at a rate.** One criterion — *does the cost arrive already
+      attributed to a causal job?* — sorting into two treatments, not two mechanisms.
+      **It needs nothing new.** `bill_received`'s `bill.direct_lines[]` already carries both a
+      `debit_account` and its own `causal_orders`, so a truck-hire line is an existing rule with a
+      different account in it.
+      ⚠️ **It is deliberately NOT 5900.** Mixing an actual cost into the rate-absorbed pool would
+      destroy the one thing the 5900/5901 gap means — owned-fleet utilisation and rate deviation —
+      and would force rented mileage into the rate's denominator or double-count it. Keeping them
+      apart removes that hazard rather than managing it.
+      ⚠️ **A hire that genuinely cannot be attributed posts here with `causal_orders: null`** — an
+      explicit determination, legal under REQ-LED-001 — rather than earning a fourth account for a
+      population that may have no members.
+      **An earlier revision of ADR-0030 minted `6405 Vehicle: Rented` and pooled this cost instead.**
+      That was recommended on the grounds that one mechanism is simpler to specify, which is not the
+      criterion the survey established; applying the actual criterion reverses it.
     source: ADR-0030
 
   # ══ OPERATING EXPENSES ═══════════════════════════════════════════════════════════════════════
@@ -1611,25 +1655,6 @@ accounts:
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
 
-  - code: 6405
-    name: "Vehicle: Rented"
-    class: expense
-    normal_balance: debit
-    disposition: new
-    status_live: absent
-    reason: >-
-      Required by ADR-0030. Vehicles hired to perform delivery and trash work — owner, 2026-08-16:
-      "we also rent vehicles for delivery (currently in rented equipment, mostly from chicagoland
-      truck rental)".
-      ⚠️ **6302's own note already excluded them and nobody had read it that way.** It says
-      "Equipment rented for CFS's own use. Equipment rented IN to fill a customer order is a
-      subrental and goes to 5100 — the distinction is whether an order caused it." A truck hired to
-      run a delivery IS caused by an order. **And it is not 5100 either**: a subrental is gear CFS
-      SUPPLIES to the customer, where a rented truck is a means of PERFORMING. Neither existing
-      account fits, which is why this one exists.
-      Placed at 6405 as the next sibling in the vehicle block, so the natural accounts stay together.
-    source: ADR-0030
-
   - code: 6409
     name: "Vehicle: Cost Absorbed"
     class: expense
@@ -1692,7 +1717,7 @@ accounts:
     note: >-
       **Where own-crew cost sits today, and what ADR-0019 moves it out of** (OQ-011). After the
       move this account retains only wages attributable to no job — administrative and office time
-      — so its postings declare no causal order either. Job labour goes to 5800, idle and guaranteed-unworked
+      — so its postings declare no causal order either. Job labor goes to 5800, idle and guaranteed-unworked
       time to 5801. The account surviving with a narrower meaning is the point; deleting it would
       lose the non-job population.
 
@@ -1705,8 +1730,8 @@ accounts:
     reason: >-
       Archived, and payroll processing is an explicit charter non-goal. Employer payroll tax is
       real cost, but CFS incurs it through the external employer of record's invoice — a purchase
-      document, costed with the labour it accompanies under ADR-0019, not a payroll tax CFS
-      calculates or files. ⚠️ OQ-011 cites this account as evidence that labour cost is recorded
+      document, costed with the labor it accompanies under ADR-0019, not a payroll tax CFS
+      calculates or files. ⚠️ OQ-011 cites this account as evidence that labor cost is recorded
       today; that is a statement about what exists, not a requirement that it survive. If the EOR
       invoice turns out to itemise employer tax separately and it needs its own line, this is the
       code to revive.

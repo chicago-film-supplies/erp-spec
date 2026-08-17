@@ -62,7 +62,7 @@ decision.** The unanimous part is elsewhere:
 ⇒ **The criterion is not "is it a vehicle". It is: does the cost arrive already attributed to a
 causal job?**
 
-- **Labour does.** A shift names its job at the moment it happens, which is why `shift_recorded` can
+- **Labor does.** A shift names its job at the moment it happens, which is why `shift_recorded` can
   debit 5800 per `shift.absorbed_allocations` and be done. Actual cost, no rate, no variance.
 - **A tank of diesel does not.** Nothing at the pump names a job. A registration fee names no job
   even in principle.
@@ -79,7 +79,7 @@ and a pool is a natural account.** This is not a preference between two workable
 them does not work.
 
 **F2 — absorbing at a rate reintroduces the rate variance ADR-0019 dropped, and nothing says so.**
-ADR-0019's headline is "absorption measures utilisation, **not** rate variance", true because labour
+ADR-0019's headline is "absorption measures utilisation, **not** rate variance", true because labor
 is costed at actual. **Vehicle cost cannot be costed at actual**: the real cost of a specific
 van-day is unknowable until a transmission fails three years later, and registration and insurance
 have no per-job actual even in principle. So vehicle absorption is necessarily a **predetermined

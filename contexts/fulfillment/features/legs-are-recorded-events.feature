@@ -29,11 +29,11 @@ Feature: A fulfillment leg is a recorded event, and an unrecorded one is visible
     And no leg is synthesised from the destination's flags
 
   @REQ-FUL-001
-  Scenario: A leg records the crew member even when the leg carries no labour cost
+  Scenario: A leg records the crew member even when the leg carries no labor cost
     Given a leg performed by a crew member on an unpaid shift
     When the leg is recorded
     Then it still names the crew member who performed it
-    And the absence of labour cost is a property of the shift, not of the leg
+    And the absence of labor cost is a property of the shift, not of the leg
 
   @REQ-FUL-002
   Scenario: A leg that did not occur is distinguishable from one that was not recorded
@@ -51,7 +51,7 @@ Feature: A fulfillment leg is a recorded event, and an unrecorded one is visible
     face of the report, not discoverable by going looking.
 
     Given a period in which some performed legs were never recorded
-    When labour costing is run for that period
+    When labor costing is run for that period
     Then the result states how many expected legs have no record
     And that count is reported alongside the absorbed and unabsorbed totals
     And the costing is not presented as complete

@@ -2874,6 +2874,101 @@ for (const e of evts) {
   }
 }
 
+// ── gate 17: house spelling in the refactorable spec ────────────────────────
+/**
+ * Owner, 2026-08-16: _"labor does not have a u, adopt this."_
+ *
+ * ⚠️ **A spelling convention with nothing executing it is the class of claim this repo has paid for
+ * most often.** The identifiers already used `labor` (`labor_line`, `labor_line_kinds`) while the
+ * prose said "labour", and nothing could see the split. Written down and unenforced it drifts back
+ * the first time somebody types the other one.
+ *
+ * ── THREE exemptions, each on a LIFECYCLE ground rather than a taste one ────────────────────────
+ *
+ * - **`inbox/` and `research-drop/`** are append-only. A dated capture note records what was written
+ *   when it was written; rewriting one to match a later convention is what the append-only rule
+ *   exists to prevent.
+ * - **An `accepted` or `superseded` ADR** is immutable and gate 14 hashes its body. ADR-0001,
+ *   ADR-0011 and ADR-0036 carry "labour" permanently, and that is CORRECT — an accepted ADR is a
+ *   historical record of the decision as taken (ADR-0034), spelling included.
+ * - **A CITATION of an append-only filename.** Three inbox files carry "labour" in their names and
+ *   are never renamed, so prose citing one must keep it. ⚠️ Not hypothetical: the sweep rewrote
+ *   twelve such citations and **gate 11 caught every one**. The two gates compose rather than
+ *   overlap — 11 says the path resolves, 17 says the prose spells it the house way — and this
+ *   exemption is what stops them contradicting each other.
+ */
+{
+  const G = "17";
+  /** House spelling. One entry today; it has a member, which is the bar. */
+  const SPELLINGS: [RegExp, string][] = [[/labour/gi, "labor"]];
+  const immutableAdrFiles = new Set(
+    adrs.filter((a) => a.status === "accepted" || a.status === "superseded").map((a) => a._file),
+  );
+  /** A path into an append-only directory keeps that directory's spelling. */
+  const APPEND_ONLY_CITATION = /(?:inbox|research-drop)\/[^\s`"'),\]]+/g;
+
+  const dirs = [
+    "adr",
+    "spikes",
+    "contexts",
+    "ledger",
+    "reporting",
+    "migration",
+    "roadmap",
+    "tools",
+  ];
+  const targets: string[] = [];
+  for (const d of dirs) {
+    for (const ext of [".md", ".yaml", ".feature", ".ts"]) targets.push(...await filesIn(d, ext));
+  }
+  for (
+    const f of [
+      "charter.md",
+      "README.md",
+      "CLAUDE.md",
+      "glossary.yaml",
+      "hotspots.yaml",
+      "open-questions.yaml",
+    ]
+  ) {
+    targets.push(`${ROOT}/${f}`);
+  }
+
+  // ⚠️ **The file that DEFINES the table is exempt, and it has to be.** A check that bans a word
+  // cannot name the word it bans — gate 17's first run failed on its own doc comment, four times.
+  // The exemption is by identity and covers this file only, so the convention still holds across
+  // the rest of `tools/`. The alternative was writing the rule without ever spelling out what it
+  // replaces, which makes the one place a reader goes to understand it the one place that cannot
+  // say it.
+  const SELF = `${ROOT}/tools/validate.ts`;
+
+  for (const f of targets) {
+    if (immutableAdrFiles.has(f) || f === SELF) continue;
+    let text: string;
+    try {
+      text = await Deno.readTextFile(f);
+    } catch {
+      continue;
+    }
+    // Blank the citations before looking, so an append-only filename cannot be accused of a
+    // spelling it is not allowed to change.
+    text = text.replace(APPEND_ONLY_CITATION, (m) => " ".repeat(m.length));
+    for (const [bad, good] of SPELLINGS) {
+      const hits = [...text.matchAll(bad)];
+      if (hits.length === 0) continue;
+      const line = text.slice(0, hits[0].index).split("\n").length;
+      fail(
+        G,
+        `${rel(f)}:${line}: "${
+          hits[0][0]
+        }" — house spelling is "${good}" (${hits.length} occurrence${
+          hits.length === 1 ? "" : "s"
+        })`,
+      );
+    }
+  }
+}
+
 // ── report ──────────────────────────────────────────────────────────────────
 const GATE_NAMES: Record<string, string> = {
   "1": "ids unique and well-formed",
@@ -2892,6 +2987,7 @@ const GATE_NAMES: Record<string, string> = {
   "14": "accepted ADR bodies are frozen",
   "15": "the migration field map against the measured live inventory",
   "16": "the spec chart of accounts against the measured live chart",
+  "17": "house spelling in the refactorable spec",
   xref: "cross-references resolve",
   parse: "files parse",
 };

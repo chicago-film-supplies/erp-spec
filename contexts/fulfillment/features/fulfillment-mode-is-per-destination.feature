@@ -40,6 +40,6 @@ Feature: Fulfillment mode is per destination and the collecting flags are per le
   @REQ-FUL-003
   Scenario: An asymmetric destination is costed on the CFS leg alone
     Given a destination CFS delivers to and the customer returns from
-    When labour cost is attributed for that destination
+    When labor cost is attributed for that destination
     Then only the outbound leg contributes a person-day
     And the customer-performed return contributes none

@@ -8,17 +8,17 @@
 hotspots:
   - id: HOT-001
     statement: >-
-      Does `Trucking` mean third-party freight (no wage labour) or an own long-haul run
-      (labour-bearing)? The costing model treats these oppositely — one is a passthrough with no
+      Does `Trucking` mean third-party freight (no wage labor) or an own long-haul run
+      (labor-bearing)? The costing model treats these oppositely — one is a passthrough with no
       person-day, the other absorbs a full crew-day.
     contexts: [fulfillment, ledger, ordering]
     why_it_matters: >-
-      Decides whether a trucked fulfillment absorbs labour cost at all, and therefore whether
+      Decides whether a trucked fulfillment absorbs labor cost at all, and therefore whether
       `trucked` is a fulfillment mode that generates a shift.
     evidence: >-
       Verified 2026-08-08: `Trucking` and `Shipping` are both active service products in the
       `Transport` product line. `Trucking` books to COA 4100 — the same revenue account as Crew
-      labour services and Delivery/Setup/Removal — while `Shipping` books to its own COA 4150.
+      labor services and Delivery/Setup/Removal — while `Shipping` books to its own COA 4150.
       Suggestive of own-run vs freight, but not decisive.
     blocks: [OQ-010, ADR-0011]
     status: resolved
@@ -48,16 +48,16 @@ hotspots:
     resolved_by: ADR-0011
 
   - id: HOT-003
-    statement: Does the `Crew` product line already carry labour today?
+    statement: Does the `Crew` product line already carry labor today?
     contexts: [ledger, fulfillment]
     why_it_matters: >-
-      If Crew already carries labour, the new cost-type dimension partly duplicates it and the
+      If Crew already carries labor, the new cost-type dimension partly duplicates it and the
       migration has to decide which one survives.
     evidence: >-
       Verified 2026-08-08, and the answer splits. The `Crew` product line contains exactly three
       products — Surface Protection Install/Tear Out, Truck Pack/Load Out, Layout Install/Tear Out
-      — all `type: service`, all booking to COA 4100. So Crew carries billable labour REVENUE.
-      Whether any labour COST is recorded anywhere today is a separate question and is not
+      — all `type: service`, all booking to COA 4100. So Crew carries billable labor REVENUE.
+      Whether any labor COST is recorded anywhere today is a separate question and is not
       answered by this evidence.
     blocks: [OQ-011]
     status: resolved
@@ -119,8 +119,8 @@ hotspots:
       derives them, which is why actor and shift are unrecoverable.
     contexts: [fulfillment]
     why_it_matters: >-
-      This is the single decision the whole labour-costing design rests on. Derived legs cannot
-      carry an actor, a clock-in, or a shift id, so COGS labour allocation is impossible without
+      This is the single decision the whole labor-costing design rests on. Derived legs cannot
+      carry an actor, a clock-in, or a shift id, so COGS labor allocation is impossible without
       first-class legs.
     blocks: [OQ-001, ADR-0011]
     status: resolved
@@ -171,22 +171,22 @@ hotspots:
   - id: HOT-010
     statement: >-
       The charter and `posting-rules.yaml` specify standard-cost absorption with a
-      `labour_variance` posting rule, but CFS does not use standard labour rates — costing is
+      `labor_variance` posting rule, but CFS does not use standard labor rates — costing is
       actual, from a per-contact wage and a deterministic overtime rule.
     contexts: [ledger, fulfillment]
     why_it_matters: >-
-      A rate variance cannot exist where there is no standard rate, so `labour_variance` as
+      A rate variance cannot exist where there is no standard rate, so `labor_variance` as
       specified has no input and would be a posting rule that can never fire. Absorption itself
       survives and must not be discarded with it: a guaranteed 8 hours means paid-but-unworked
-      time is a real cost attributable to no job, so `COGS-Labour Absorbed` and
-      `COGS-Unabsorbed Labour` both stand. What they measure is UTILISATION, not rate deviation,
+      time is a real cost attributable to no job, so `COGS-Labor Absorbed` and
+      `COGS-Unabsorbed Labor` both stand. What they measure is UTILISATION, not rate deviation,
       and the posting rules must say which.
     evidence: >-
       Repo owner, 2026-08-09 (OQ-008): default wage $30/hr with a guaranteed 8 hours, 1.5x after 8
       in a day, 1.5x all day on a 6th and/or 7th consecutive day; one person at $36/hr. The wage
       is carried per contact and overridable, and cost flows from the purchase order / bill that
-      labour scheduling generates. Against `charter.md` ("standard-cost absorption into COGS") and
-      `ledger/posting-rules.yaml` (`labour_variance <- period : Dr/Cr COGS-Labour Variance`).
+      labor scheduling generates. Against `charter.md` ("standard-cost absorption into COGS") and
+      `ledger/posting-rules.yaml` (`labor_variance <- period : Dr/Cr COGS-Labor Variance`).
     blocks: [OQ-018, OQ-019]
     status: resolved
     resolved_by: ADR-0019
@@ -206,7 +206,7 @@ hotspots:
       cannot be set correctly until one of them wins, and 8 accounts currently carry
       `dimensioned: undecided` waiting on it.
     evidence: >-
-      `cost_type`'s own description in `ledger/dimensions.yaml` is "What kind of work a LABOUR
+      `cost_type`'s own description in `ledger/dimensions.yaml` is "What kind of work a LABOR
       posting represents", with values `[delivery, counter, warehouse]` and `required_on: [cogs]` —
       there is no member of that set for a rental revenue posting or for `5000 Cost of Goods Sold:
       Retail Inventory`. Against REQ-LED-001, "Every revenue and COGS posting shall carry both a
@@ -474,7 +474,7 @@ hotspots:
       source document is the invoice, and 0 of 1,010 prod invoices bill more than one order
       (ADR-0031), so the causal order is currently one deterministic hop away. ADR-0031 chose order
       scope precisely because that coincidence will not hold, and when a multi-order invoice appears
-      the revenue side acquires the same defect the labour side already has.
+      the revenue side acquires the same defect the labor side already has.
       ⚠️ **`Transfer.code` cannot absorb it.** ADR-0035 leaves 9 spare bits — 512 values against
       ~1,000 orders today and growing. This needs a field, not a corner of one, and there is no
       unclaimed field left.
@@ -566,7 +566,7 @@ hotspots:
       invoice item's path is the order item's path prefixed by an order divider — **`path[0]` IS the
       causal order.** One stored key carries line identity, invoice link and causal order together.
       ⚠️ Precondition: **api-cloudrun#485** (10 invoice lines at a different path than their order
-      line) must close first, and it does not cover labour, whose postings key to a causal job with
+      line) must close first, and it does not cover labor, whose postings key to a causal job with
       no invoice line.
       **Stays `open` until ADR-0036 is accepted.**
 
@@ -576,7 +576,7 @@ hotspots:
       still states the reading ADR-0025 REFUTED. Its Feature title is "Revenue and COGS postings carry both mandatory dimensions";
       scenario 1 has a *revenue* posting carry a `cost_type` and be recorded; scenario 3 asserts "A
       COGS posting missing the cost type is rejected" against a generic dimensioned COGS account.
-      `ledger/dimensions.yaml` scopes `cost_type` to `required_on: [labour_cogs]`, and exactly one
+      `ledger/dimensions.yaml` scopes `cost_type` to `required_on: [labor_cogs]`, and exactly one
       account in `ledger/chart-of-accounts.yaml` names it.
     contexts: [ledger]
     why_it_matters: >-
@@ -599,8 +599,8 @@ hotspots:
       · `contexts/ledger/features/posting-keys.feature:1` (Feature title, then
         "Revenue and COGS postings carry both mandatory dimensions"), `:22-28`
         (scenario 1), `:40-47` (scenario 3).
-      · `ledger/dimensions.yaml` `cost_type`: `required_on: [labour_cogs]`, values
-        `[delivery, counter, warehouse]`, note "**Labour only** (OQ-021, resolving HOT-011)".
+      · `ledger/dimensions.yaml` `cost_type`: `required_on: [labor_cogs]`, values
+        `[delivery, counter, warehouse]`, note "**Labor only** (OQ-021, resolving HOT-011)".
       · `ledger/chart-of-accounts.yaml:1231` — **1 of 134 accounts** names `cost_type`:
         `5800 Cost of Goods Sold: Wages (Absorbed)`, `dimensions: [product_line, cost_type]`.
         No revenue account names it; `5000` does not name it.
@@ -608,7 +608,7 @@ hotspots:
         "the previous wording — 'every revenue and COGS posting shall carry both a product line and
         a cost type' — named the two dimensions directly and was **wrong in both directions**".
       · `deno task validate` is green with the contradiction in place — 0 failures, 0 warnings.
-      ⚠️ **The file contradicted ITSELF.** Its last scenario — `Scenario Outline: Unabsorbed labour
+      ⚠️ **The file contradicted ITSELF.** Its last scenario — `Scenario Outline: Unabsorbed labor
       is the one posting exempt from the cost-type rule` — already stated the post-ADR-0025 reading
       correctly, in its own prose: "the obligation is read off each account's own `dimensions` list
       in ledger/chart-of-accounts.yaml, and 5801's is empty. **5800 is the only account in the chart

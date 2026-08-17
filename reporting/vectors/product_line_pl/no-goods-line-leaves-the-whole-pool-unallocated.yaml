@@ -9,7 +9,7 @@
 # it named did not move.** The five Netflix Duradeck orders were said to carry `Surface Protection` at
 # the product master and therefore to gain a denominator after api-cloudrun#473. Measured:
 # `products/kqzVClx5uJrJ07bEjokX.tracking_category_name` is **`"Delivery"`** — it is the install /
-# tear-out / relocate LABOUR, not the deck — and all 15 lines across the five invoices are `Delivery`
+# tear-out / relocate LABOR, not the deck — and all 15 lines across the five invoices are `Delivery`
 # at both the line and the master, with no goods line anywhere. They are still 85.5% of the bucket.
 # (`inbox/2026-08-16-correction-the-duradeck-retraction-reasoned-from-a-product-name.md`)
 # The VECTOR was retained regardless, and correctly: a zero base must produce a row rather than a NaN,

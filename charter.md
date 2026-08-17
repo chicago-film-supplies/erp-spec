@@ -5,7 +5,7 @@
 ## Purpose
 
 Rebuild the CFS inventory/order/invoice system as a full ERP with its own double-entry accounting
-layer, retiring Xero and asset.accountant. Bring labour scheduling in-house so that crew cost can be
+layer, retiring Xero and asset.accountant. Bring labor scheduling in-house so that crew cost can be
 allocated to COGS against the job that caused it.
 
 ## In scope
@@ -13,9 +13,9 @@ allocated to COGS against the job that caused it.
 - Order → fulfillment → invoice → posting → report, end to end.
 - A double-entry general ledger owned by CFS, with period close and lock.
 - Fixed asset register with **dual GAAP and tax basis** and a reportable deferred difference.
-- Labour scheduling, shift recording, and **actual**-cost absorption into COGS, where the
+- Labor scheduling, shift recording, and **actual**-cost absorption into COGS, where the
   absorbed/unabsorbed split measures **utilisation** rather than rate variance (`ADR-0019`).
-- **Purchase orders**, in two roles: the document labour scheduling generates and costs flow from,
+- **Purchase orders**, in two roles: the document labor scheduling generates and costs flow from,
   and inventory acquisition — retail stock, and fixed assets bought for rental or internal ops.
 - Sales and Chicago Personal Property Lease Transaction Tax determination.
 - Bank feed ingestion and reconciliation.
@@ -26,7 +26,7 @@ allocated to COGS against the job that caused it.
 
 Each of these is a deliberate decision, not an oversight. Reversing one is an ADR.
 
-- **Payroll processing.** An external employer of record stays. CFS schedules labour and records
+- **Payroll processing.** An external employer of record stays. CFS schedules labor and records
   shifts; it does not calculate withholding, file payroll tax, or move payroll money.
 - **A general-purpose accounting product.** This ledger serves CFS's chart of accounts and CFS's
   posting rules. It is not built to be configurable for another business.

@@ -9,9 +9,9 @@ fields:
   vendor_ref: { type: contact_id, required: true }
   kind: {
     type: enum,
-    values: [labour, inventory, fixed_asset, recurring],
+    values: [labor, inventory, fixed_asset, recurring],
     required: true,
-    note: "OQ-008 gave POs two use cases and OQ-020 added recurring bills. `labour` is the document labour scheduling generates and EOR cost flows from; an EOR is a vendor, not payroll (OQ-024).",
+    note: "OQ-008 gave POs two use cases and OQ-020 added recurring bills. `labor` is the document labor scheduling generates and EOR cost flows from; an EOR is a vendor, not payroll (OQ-024).",
   }
   committed_amount_minor: {
     type: int64,

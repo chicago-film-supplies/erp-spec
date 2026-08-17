@@ -116,7 +116,7 @@ revenue on the causal order**.
    that did not cause it. `Transport` and `Shipping` are severable on the same criterion (OQ-034).
    **So five product lines are `activity` and exactly one spreads**, and `activity` therefore does
    not imply `spreads` — the two were the same question only while `Delivery` was the only one
-   decided. ⚠️ Not allocated is not the same as not costed: each keeps its own labour cost via the
+   decided. ⚠️ Not allocated is not the same as not costed: each keeps its own labor cost via the
    causal-job rule, or a severable line with revenue and no cost against it reports a margin near
    100%.
 
@@ -150,7 +150,7 @@ revenue on the causal order**.
 >   allocable.** Quoting the share alone reports this as the predicted improvement.
 > - ⚠️ **The five Netflix Duradeck orders did NOT stop qualifying, and the reasoning that they would
 >   is refuted.** `products/kqzVClx5uJrJ07bEjokX.tracking_category_name` is **`"Delivery"`** — the
->   install / tear-out / relocate labour, not the deck — and all 15 lines across the five invoices
+>   install / tear-out / relocate labor, not the deck — and all 15 lines across the five invoices
 >   are `Delivery` at both the line and the master, with no goods line anywhere. The retraction
 >   inferred a category from a product NAME and never read either product record
 >   (`inbox/2026-08-16-correction-the-duradeck-retraction-reasoned-from-a-product-name.md`). **The

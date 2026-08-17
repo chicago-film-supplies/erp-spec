@@ -34,7 +34,7 @@ fields:
     type: "list<order_ref> | null",
     required: declared_always,
     nullable: true,
-    note: "REQ-LED-001 / ADR-0036 — the order or orders that caused this posting. PLURAL by construction: a shared run serves several jobs and a settlement spans several invoices. The KEY is declared on EVERY posting; an explicit null records that no causal order applies (idle labour, a fixed-asset acquisition, an overhead accrual). ABSENCE is refused, and so is an empty list — it satisfies a naive check while meaning nothing, the same trap `\"\"` was for a dimension.",
+    note: "REQ-LED-001 / ADR-0036 — the order or orders that caused this posting. PLURAL by construction: a shared run serves several jobs and a settlement spans several invoices. The KEY is declared on EVERY posting; an explicit null records that no causal order applies (idle labor, a fixed-asset acquisition, an overhead accrual). ABSENCE is refused, and so is an empty list — it satisfies a naive check while meaning nothing, the same trap `\"\"` was for a dimension.",
   }
   invoice_ref: {
     type: invoice_ref,

@@ -96,7 +96,7 @@ Feature: A posting declares every key its rule names, and no other
     And the rejection names the key the rule does not carry
 
   @REQ-LED-001
-  Scenario Outline: Idle labour is the one posting whose causal order is always null
+  Scenario Outline: Idle labor is the one posting whose causal order is always null
     ADR-0019: guaranteed-but-unworked hours are a real cost attributable to no job, so
     5801 Cost of Goods Sold: Wages (Unabsorbed) IS the idle-capacity KPI. Its posting declares
     `causal_orders: null` — DECLARED, not omitted, so "hours attributable to no job" stays a
