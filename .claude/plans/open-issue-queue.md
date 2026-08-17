@@ -474,11 +474,47 @@ collections' worth of migration dispositions and a requirements backlog, against
 arithmetic and golden vectors. Nothing needed is in anyone's head: the inventory, the field map,
 `milestone-checks.ts` and this doc are all on disk.
 
-**Take #8.** It is one of two unblocked issues, the instrument is built, and step 1 is the bulk.
+### Take #8, and the reason is a MEASUREMENT rather than this doc's say-so
+
+**`m6` reads `0 met / 0 unmet / 4 prose`.** It is the only milestone about which **nothing is being
+asked at all** — no criterion is met, and none can fail either. Every other milestone has at least
+one criterion that can go red. **m7 depends on m6.**
+
+⇒ **#8 is the only issue in the queue that converts a milestone from unmeasured into measured**,
+which is this repo's own first doctrine: _a stated guarantee that nothing executes is not a
+guarantee._ Step 1 (dispositions for the 50) is the bulk; **step 2 is the one that moves the
+milestone**, and it is the smaller half.
+
 Then #6 — but **re-measure first**: its own numbers say "2 requirements, 6 of 8 contexts empty" and
 STATUS says 21 requirements, 0 without a scenario, 4 contexts uncovered.
 
-Four things to carry across the clear, because none is obvious from the issue text:
+### ⚠️ Before starting, spend ~30 minutes preparing ADR-0030 for a decision
+
+Cheap, because the ADR, its survey and the corpus measurement all already exist. It is `proposed`
+and explicitly declines to choose accounts — "the chart picks the next free pair", on the 5800/5801
+precedent — so accepting it makes the follow-on mechanical.
+
+**Why it earns the detour.** `vehicle_cogs` is, in erp-spec#12's own words, _"the pool that most
+changes this report"_. `Delivery` is the largest tracked product line ($236,487.75, 13.79%) and
+carries almost no cost, **which is exactly why the un-allocated view shows it at a structural loss**
+— and the 2026-08-16 sweep gave it a second consumer: the `delivery` and `transport` pools now carry
+an explicit `cost_sources.pending` naming ADR-0030 as the reason their cost side is incomplete.
+
+⚠️ **It unblocks ONE of #12's three pools, not #12.** `trip_travel` needs a data-capture decision
+that is genuinely hard, and `warehouse_overhead` needs an ADR nobody has written.
+
+### ⚠️ The thing that should change how the next session budgets its time
+
+**Five of seven open issues are blocked on owner decisions, and this session took THREE of them** —
+in a few sentences each — because every one arrived with measured evidence, a criterion, and a
+recommendation. **The decision backlog is not blocked on the owner's availability. It is blocked on
+nobody having prepared the decisions.**
+
+⇒ **One prepared decision per session is probably worth more than the authoring it displaces.**
+Ranked by what they unblock: ADR-0030 (above) · `Transfer.code`, where both contenders are already
+fully worked (#3) · OQ-048, the imputed rate (#32) · OQ-039 + ADR-0032/0033 (#17, heaviest).
+
+### Six things to carry across the clear, because none is obvious from the issue text
 
 - **The `db_schema` enum is not the collection list** — 35 against 50. #8 was scoped from it and is
   therefore scoped short. Anything else scoped that way is too.
@@ -492,12 +528,17 @@ Four things to carry across the clear, because none is obvious from the issue te
   happened twice in one session. The `transport` pool selected `labor_line: delivery` — right when
   the enum had three values, wrong from the moment it had seven, and it survived a rename that
   touched the very sentence. `3130 Owner's Capital: Owner's Billable Time` sat at `drop` on a reason
-  that read it as the debit side when it is the credit side. **Both were only found because the
+  that read it as the debit side when it is the credit side. **Both were found only because the
   owner asked a question the artifact already claimed to answer**, which is not a repeatable
   detection method — when a sentence is rewritten, re-read what it CLAIMS, not just the words that
   changed.
 - **When a doc states a count, something must count it.** The chart header said "138 entries, four
-  minted" and had been wrong in both halves since 5150 was added. Same class as the transfer field
-  budget and the `dimensions:` lists.
-- **The queue's real shape is 4 blocked / 2 startable.** Do not re-triage from issue text — several
-  issues carry numbers that are stale in their own favour.
+  minted" and had been wrong in both halves since 5150 was added. ⚠️ **This section said "four
+  things to carry" over five bullets until 2026-08-16** — the same defect, in the paragraph warning
+  about it, which is roughly how often it happens.
+- ⚠️ **A branch with no members is a claim, not a capability.** The `billable` / `bills_nobody`
+  coverage map lasted hours: the owner's next ruling emptied the second branch, and it was deleted
+  rather than kept against a hypothetical. The one-branch rule that replaced it is stronger.
+- **The queue's real shape is 5 blocked / 2 startable.** Do not re-triage from issue text — several
+  issues carry numbers that are stale in their own favour, and #32 was listed as startable and
+  blocked in the same row until this revision.
