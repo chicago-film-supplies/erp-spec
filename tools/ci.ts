@@ -71,11 +71,28 @@ for (const step of steps) {
 // set. ⚠️ The residual risk is real and worth naming: if `generate.ts` ever wrote a file WITHOUT
 // `.generated.` in its name, this would not see it and CI would. That is a second reason the naming
 // convention is load-bearing, not just a readability habit.
+//
+// ⚠️ **AND THAT SCOPING ALONE WAS NOT ENOUGH — the first fix was incomplete in the same way the
+// path probe's was.** Restricting to generated files stopped unrelated edits tripping it, and then
+// editing a SOURCE file tripped it anyway, because `gen` correctly rewrites the generated files and
+// the diff against HEAD is then non-empty. That is not staleness; it is work in progress.
+//
+// **Staleness is: the generated output moved while nothing that feeds it did.** So the source tree
+// is checked too, and the two cases are reported differently. In CI both are clean, so the meaning
+// is unchanged there — the extra condition only ever fires locally, which is exactly where the
+// distinction exists.
 console.log(`\n── Stale generated files ${"─".repeat(43)}`);
-const diff = await new Deno.Command("git", {
+const generatedMoved = (await new Deno.Command("git", {
   args: ["diff", "--quiet", "--", ":(glob)**/*.generated.*"],
-}).output();
-if (diff.code !== 0) {
+}).output()).code !== 0;
+// Are any SOURCE files dirty? `:(exclude)` is git pathspec magic for "everything but".
+const sourceDirty = (await new Deno.Command("git", {
+  args: ["diff", "--quiet", "--", ".", ":(exclude,glob)**/*.generated.*"],
+}).output()).code !== 0;
+
+if (generatedMoved && !sourceDirty) {
+  // Generated output moved while nothing that feeds it did — the committed generated files did not
+  // match the committed sources. This is the real defect, and it is what CI sees.
   failures.push("Stale generated files");
   console.error("Generated files are stale. Run `deno task gen` and commit the result.\n");
   await new Deno.Command("git", {
@@ -83,6 +100,8 @@ if (diff.code !== 0) {
     stdout: "inherit",
     stderr: "inherit",
   }).output();
+} else if (generatedMoved) {
+  console.log("regenerated alongside your source edits — commit them together (not stale)");
 } else {
   console.log("clean");
 }

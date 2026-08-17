@@ -11,18 +11,18 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 11 open | 38 answered of 49 · **0 with no owner or no decide-by** |
+| Open questions | 12 open | 38 answered of 50 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 15 | 0 open |
 | Decisions (ADR) | 36 | 22 in force · 10 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 21 | 0 without a scenario |
-| Inbox | 79 | 60 unpromoted |
+| Inbox | 80 | 61 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
 ## The bottleneck: undecided questions
 
-**11 of 49 still open**, soonest decide-by first.
+**12 of 50 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
@@ -36,6 +36,7 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-039` | `organizations.tax_profile` carries two different concepts in one enum — who owes (applie… | alex | 2027-01-15 | — |
 | `OQ-049` | Does v2 carry the operational collaboration surface — the board (`cards`, `lists`) and th… | alex | 2027-01-31 | — |
 | `OQ-045` | When a vendor bills LESS than was accrued, what retires the residual left in `2010 Accrue… | alex | 2027-02-15 | — |
+| `OQ-050` | Does the EOR's charge for a W-2 crew member reconcile PER PERSON and PER SHIFT, or only i… | alex | 2027-02-28 | `ADR-0019` |
 | `OQ-048` | At what rate is a contributed (unpaid owner) shift costed in the IMPUTED labor view — the… | alex | 2027-03-15 | — |
 
 Whether any of these dates has PASSED is `deno task validate`'s judgement — gate 7 fails on an open question past its decide-by. This file reads no clock and so cannot say.
@@ -76,7 +77,7 @@ None.
 | ADR | Title | Review by | Supersedes on acceptance | Blocked on |
 |---|---|---|---|---|
 | `ADR-0015` | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-11-01 | — | `SPIKE-002` `SPIKE-012` |
-| `ADR-0019` | Labor costing is actual; absorption measures utilisation, not rate variance | 2026-10-01 | — | `HOT-003` `HOT-004` `HOT-010` `OQ-005` `OQ-006` `OQ-008` `OQ-011` `OQ-017` `OQ-018` `OQ-019` |
+| `ADR-0019` | Labor costing is actual; absorption measures utilisation, not rate variance | 2026-10-01 | — | `HOT-003` `HOT-004` `HOT-010` `OQ-005` `OQ-006` `OQ-008` `OQ-011` `OQ-017` `OQ-018` `OQ-019` `OQ-050` |
 | `ADR-0020` | Xero history is restated, not imported as-is | 2026-10-15 | — | `HOT-006` `OQ-012` |
 | `ADR-0025` | The dimension obligation is per account, and what is refused is absence rather than null | 2026-10-01 | — | `HOT-011` `OQ-021` `OQ-022` `OQ-025` |
 | `ADR-0027` | Retain Mapbox for geocoding and Resend for transactional email, at the boundary | 2026-10-01 | — | — |

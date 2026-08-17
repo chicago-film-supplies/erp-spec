@@ -1954,3 +1954,39 @@ open_questions:
       unsettled for the migration. ⚠️ That is the correct reading, because "hold it aside" IS a
       migration behaviour, and it is also exactly the reading that would let a milestone look
       finished. Do not read `quarantine` as `mapped`.
+  - id: OQ-050
+    question: >-
+      Does the EOR's charge for a W-2 crew member reconcile PER PERSON and PER SHIFT, or only in
+      aggregate — and therefore is the burdened cost rate an ACTUAL cost or an estimate that must be
+      trued up at period close?
+    owner: alex
+    decide_by: 2027-02-28
+    blocks: [ADR-0019]
+    status: open
+    notes: >-
+      Opened 2026-08-17 by the ADR-0019 survey
+      (`inbox/2026-08-17-survey-labor-costing-is-normal-costing-not-actual-the-crew-is-two-populations-with-two-true-costs-and-idle-time-splits-normal-from-abnormal.md`).
+      ⚠️ **Sage Intacct states the criterion and it is not about rate policy**: _"If payroll captures
+      labor cost by employee, project and task, you may be able to post ACTUAL labor cost against
+      projects… For many customers where payroll is posted at a SUMMARY level, labor costing
+      multiplies hours by a COST RATE. These are ESTIMATED labor costs; actual labor cost comes from
+      Payroll."_ So whether ADR-0019 can honestly say "actual" turns on the EOR's reporting
+      granularity, not on whether CFS knows its own rates.
+      **Owner, 2026-08-17: CFS's own crew is a MIX of W-2 through an EOR and 1099 contractors.** The
+      1099 half is settled either way — the contracted rate IS the cost, with no burden behind it.
+      **This question is only about the W-2 half**, where the wage is not the cost: employer taxes,
+      workers' comp and the EOR's fee sit on top, an industry burden of 40-50% over bare wage.
+      ⚠️ **Both answers are workable and they build differently, which is why it is worth deciding
+      before the stage is built rather than after.**
+      · **Per-person reconciliation** ⇒ the burdened rate is an actual, ADR-0019's language is
+        literally true, and 5801 is utilisation alone.
+      · **Aggregate only** ⇒ the burdened rate is an ESTIMATE, and a period-close true-up is
+        required — which is exactly SAP's shape (confirm at plan price, revalue at actual at close)
+        and would give this repo a second, legitimate variance it has so far assumed away.
+      ⚠️ **Unmeasurable from the books and from this repo.** `6600 Wages` is one undimensioned line
+      ($172,261.35 FY2025, `xero:2026-08-17`), every payroll-liability account is Archived, and the
+      current system has no shift stage to compare against. **It is a question for the EOR**, not for
+      the ledger — what their remittance report contains.
+      ⚠️ It also sets the floor on the post-cutover gross margin, which is currently only bounded
+      between 61% and 90.5% because nothing splits 6600 into crew and administrative wages. Same
+      measurement, two uses.

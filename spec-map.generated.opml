@@ -57,7 +57,7 @@
           <outline text="[object Object]"/>
         </outline>
       </outline>
-      <outline text="Open questions (11 of 49 still open)" _note="The bottleneck. Each blocks what is listed under it.">
+      <outline text="Open questions (12 of 50 still open)" _note="The bottleneck. Each blocks what is listed under it.">
         <outline text="OQ-001 — Are fulfillment legs first-class recorded events with their own identity, or derived from the order…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-007"/>
           <outline text="blocks ADR-0011"/>
@@ -190,6 +190,9 @@
         <outline text="OQ-047 — An owner works a shift and is not paid for it. Does the ledger post the cost — and if so, what does…" _note="owner: alex · decide by: 2027-01-15"/>
         <outline text="OQ-048 — At what rate is a contributed (unpaid owner) shift costed in the IMPUTED labor view — the person's…" _note="owner: alex · decide by: 2027-03-15"/>
         <outline text="OQ-049 — Does v2 carry the operational collaboration surface — the board (`cards`, `lists`) and the comment…" _note="owner: alex · decide by: 2027-01-31"/>
+        <outline text="OQ-050 — Does the EOR's charge for a W-2 crew member reconcile PER PERSON and PER SHIFT, or only in aggregat…" _note="owner: alex · decide by: 2027-02-28">
+          <outline text="blocks ADR-0019"/>
+        </outline>
       </outline>
       <outline text="Conflicts (0 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labor) or an own long-haul run (labor-bearing)? T…" _note="Decides whether a trucked fulfillment absorbs labor cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
@@ -287,6 +290,7 @@
             <outline text="blocked on OQ-017"/>
             <outline text="blocked on OQ-018"/>
             <outline text="blocked on OQ-019"/>
+            <outline text="blocked on OQ-050"/>
           </outline>
           <outline text="ADR-0020 — Xero history is restated, not imported as-is" _note="review by: 2026-10-15 · **In the context of** migrating invoice history whose product-line dimension is missing on a material share of revenue, **facing** a new ledger where that dimension is not nullable, **we decided** to restate the history rather than import it as-is, **to achieve** a corpus that can be reported dimensionally without a permanent unknown bucket, **accepting** that restatement assigns dimensions to lines inside closed periods.">
             <outline text="blocked on HOT-006"/>
@@ -472,7 +476,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (60 unpromoted of 79)" _note="no drops pending">
+      <outline text="Capture (61 unpromoted of 80)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -531,6 +535,7 @@
         <outline text="The product-line × revenue-account matrix rebuilt as a re-runnable artifact with the product-master…" _note="inbox/2026-08-16-the-product-line-matrix-rebuilt-with-the-master-join-denorm-and-master-now-agree-on-every-line.md"/>
         <outline text="HOT-013's budget arithmetic is wrong twice over — `Transfer.code` is an uncounted fourth discretion…" _note="inbox/2026-08-16-the-transfer-field-budget-is-four-fields-not-three-and-both-candidate-evictions-are-already-refused.md"/>
         <outline text="`journal_entry_id` and `source_document_ref` are not redundant — they answer grouping and provenanc…" _note="inbox/2026-08-16-the-two-reference-fields-answer-different-questions-and-a-path-fits-neither.md"/>
+        <outline text="Survey — ADR-0019's &quot;actual vs standard&quot; is a false binary and the answer is NORMAL costing; the cr…" _note="inbox/2026-08-17-survey-labor-costing-is-normal-costing-not-actual-the-crew-is-two-populations-with-two-true-costs-and-idle-time-splits-normal-from-abnormal.md"/>
         <outline text="ADR-0003 replaces Firestore, which retires the prod→dev eventarc mirror as a mechanism — but the sp…" _note="inbox/2026-08-17-the-v2-rebuild-retires-the-prod-to-dev-mirror-and-the-spec-never-states-what-replaces-it.md"/>
         <outline text="The vehicle figures measured in Xero — $21,844.77 reproduces EXACTLY, 6302 is 1.75× the whole owned…" _note="inbox/2026-08-17-the-vehicle-figures-measured-in-xero-21844-77-reproduces-exactly-and-6302-is-larger-than-the-whole-owned-block.md"/>
       </outline>
