@@ -3,75 +3,50 @@
 - **Date:** 2026-08-16
 - **Repo:** erp-spec
 - **Status:** ⏳ #16, #18 (PR #21) · #15, #13 (PR #23) · **#14 (PR #25) — `m3` COMPLETE** · PRs
-  #26–#29 (gate 11, transfer field budget, labels, m6 inventory) · **PR #30 — five ADRs ACCEPTED,
-  ADR-0018 superseded, 0 conflicts open, m4 half met** · **8 issues open, 4 blocked**
+  #26–#29 · **PR #30 — five ADRs ACCEPTED, 0 conflicts open** · **PR #31 — #19 + #20, the
+  keys-not-classifications sweep** · **6 issues open, 4 blocked**
 - **Origin:** a review of the open issue queue, requested because #18 was on the owner's mind
-- **Related:** open — #3, #4, #6, #8, #12, #17, #19, #20 · closed by this work: #13, #14, #15, #16,
-  #18 · HOT-015 resolved · OQ-045 opened · api-cloudrun#538 filed ·
-  `tools/{validate,dates,labels}.ts`, `spikes/harness/`,
-  `ledger/{posting-rules,tigerbeetle-accounts}.yaml`, `migration/live-paths.measured.yaml`
+- **Related:** open — #3, #4, #6, #8, #12, #17 · closed by this work: #13, #14, #15, #16, #18, #19,
+  #20 · HOT-015 resolved · OQ-045, OQ-046 opened · api-cloudrun#538 filed ·
+  `tools/{validate,dates,labels,milestone-checks}.ts`, `spikes/harness/`,
+  `ledger/{posting-rules,tigerbeetle-accounts,dimensions}.yaml`,
+  `migration/live-paths.measured.yaml`
 
 ## START HERE
 
-`main` is CI-green at `84c9d01`. **Units 1–4 done, #8 started, and five ADRs accepted 2026-08-16.**
+`main` is CI-green. **Units 1–5 done. The largest unit in the repo (#19, with #20 folded in) landed
+2026-08-16.**
 
-**⚠️ The biggest lever of the last session has been PULLED.** ADR-0036 is accepted, ADR-0018 is
-superseded, and **both hotspots are resolved — `0 conflicts open`**. In force **17 → 21**, proposed
-**16 → 11**. `m4` moved from 0 met / 2 unmet to **1 met / 1 unmet**; what remains there is
-`spikes_closed_with_adr` (9 of 12 spikes open), which is **work, not a decision**.
+### The queue: 6 open, 4 blocked
 
-Accepted: **ADR-0009** (anticorruption), **ADR-0010** (accounting date vs posting timestamp),
-**ADR-0013** (Linode), **ADR-0034** (an accepted ADR is a historical record), **ADR-0036** (the
-ledger carries keys, not classifications).
-
-### The queue: 8 open, 4 blocked
-
-|               | Issue   | State                                                             |
-| ------------- | ------- | ----------------------------------------------------------------- |
-| **startable** | **#19** | ⭐ **largest unit in the repo, just unblocked.** Fold #20 into it |
-| **startable** | **#8**  | ⏳ in progress — instrument built, authoring left                 |
-| **startable** | **#20** | do NOT do standalone — see below                                  |
-| **startable** | **#6**  | not begun; re-measure first, its own numbers are stale            |
-| blocked       | #17     | OQ-039 + ADR-0032/0033 acceptance, and an ordering gate           |
-| blocked       | #12     | three undecided things, none of them work                         |
-| blocked       | #4      | only the m5 formal-methods ADR remains — detection half DONE      |
-| blocked       | #3      | the spare u16: **two** contenders now, not three                  |
-
-### ⭐ Take #19, and take #20 with it
-
-⚠️ **#20 must not be built first.** It guards the chart's `dimensions:` lists, and **#19's sweep
-empties them** — same files, one pass. Building it standalone means writing a guard for machinery
-the sweep deletes.
-
-Three things that post-date #19's own text and change what it does:
-
-- **The spelling is `labor_line`, American, and the live books decided it** — of 134 accounts,
-  `4120 Contract **Labor** Income` is the only one naming the concept and none contains "Labour".
-  The issue title says `labour_line`; that is superseded.
-- **`labor_line` is not a posting field at all** (OQ-042) — it is derived in Mongo off the shift's
-  allocation row. So `5800`'s `dimensions: [product_line, cost_type]` becomes `[]`.
-- **Blast radius**: every account's `dimensions:` list (19 of 138 non-empty), gates 10h and 10n
-  (10n's `DIM_OF` hardcodes `"cost type" → cost_type`), `ledger/dimensions.yaml` (becomes a
-  _reporting_ taxonomy), every vector — rejections move from "missing dimension" to **"missing
-  key"**, plus a new accept vector for a **declared-null causal order**.
+|               | Issue  | State                                                   |
+| ------------- | ------ | ------------------------------------------------------- |
+| **startable** | **#8** | ⏳ in progress — instrument built, authoring left       |
+| **startable** | **#6** | not begun; re-measure first, its own numbers are stale  |
+| blocked       | #17    | OQ-039 + ADR-0032/0033 acceptance, and an ordering gate |
+| blocked       | #12    | three undecided things, none of them work               |
+| blocked       | #4     | only the m5 formal-methods ADR remains — detection DONE |
+| blocked       | #3     | the spare u16: **two** contenders, not three            |
 
 ### What is still the owner's
 
 - **ADR-0032 + ADR-0033 + OQ-039** → unblocks #17.
 - **ADR-0030's accounts**, a leg-capture decision, a warehouse-overhead ADR → unblocks #12.
 - **Who gets `Transfer.code`** → #3's live half. Two contenders: the actor ref, and the causal order
-  where `path[0]` cannot supply it. ⚠️ The second may need nothing — the owner ruled an explicit
-  null causal order is legal.
-- **11 ADRs remain proposed**, and the spec still cites some heavily as settled: **ADR-0025 48×**,
-  **ADR-0019 34×**, **ADR-0020 30×**. ⚠️ **ADR-0025 should not be accepted before #19 lands** —
-  ADR-0036 obsoleted its mechanism, so #19 is what rewrites the ground under it.
+  on the 2.97% of invoices where `path[0]` cannot supply it.
+- **OQ-046, new** — nothing exercises `labor_line`. Option 3 (shrink the enum back) is live and
+  should not be dismissed: it more than doubled on one owner sentence and five of its seven values
+  duplicate a `product_line`.
+- **11 ADRs remain proposed.** ⚠️ **ADR-0025 is now safe to consider** — #19 has landed, so the
+  ground ADR-0036 moved under it has been rewritten. It is still cited 48× and is now a historical
+  record of a rule that no longer applies; accepting it would freeze that, which is correct under
+  ADR-0034 but worth doing deliberately.
 
 ### Two capabilities every remaining unit should use
 
 - `spikes/harness/corpus.ts` reads prod Firestore read-only under ADC — project hardcoded to
   `cfs-3100`, `--allow-net` narrowed so it cannot reach Xero or CRMS, write verbs unreachable by
-  construction. Also `listCollections` and `pathScan`. **This retires "a full sweep needs a script
-  rather than MCP paging".**
+  construction. **This retires "a full sweep needs a script rather than MCP paging".**
 - ⚠️ **The MCP `db_schema` enum is not a list of the collections.** It carries 35; there are **50**.
   Anything scoped from it is scoped short — #8 was.
 
@@ -213,6 +188,52 @@ v2 event produces one.
   MORE is decided (the excess is an ordinary direct line, and **no variance account was minted** —
   2600 Rounding was dropped on the same reasoning), and a partial bill is normal, not an error.
 
+### Unit 6 — #19 with #20 folded in, the keys-not-classifications sweep (PR #31) — BOTH CLOSED
+
+ADR-0036's mechanical follow-up. **61 files, 12 gate arms fired red, 0 failures at land.**
+
+**The authority moved rather than disappearing, and that is the whole shape of it.** The chart's
+per-account `dimensions:` lists said WHICH postings owed a dimension; `ledger/posting-rules.yaml`
+now says which KEYS a posting owes, because that is a property of what happened rather than of where
+it landed. `ledger/dimensions.yaml` became a reporting taxonomy.
+
+- **`dimensions:` was DELETED from all 139 chart entries, not emptied to `[]`**, and gate 10a is
+  inverted to fail on one. ⚠️ ADR-0036's own text says `[]`; its next bullet says "obsoleted in
+  their current form", and a key that can only hold `[]` is a key someone refills. Stated in the
+  chart header so the reading is auditable.
+- **`ledger/dimensions.yaml` did NOT move to `reporting/`**, which #19 proposed. Four IMMUTABLE ADRs
+  cite the path in backticks (0020, 0025, 0035, 0036) and gate 11 checks citations resolve, so a
+  move buys four PERMANENT exemptions. **Refused on measured cost.**
+- **REQ-LED-001 restated, not deleted.** Absence-versus-null moved to `causal_orders`; `[]` is
+  refused as `""` was; an explicit null is legal (30 legacy CRMS invoices, 87 lines, $87,839.76).
+- **#20 delivered in its surviving form** — the applicability check joins scenarios to the posting
+  RULE, not to the chart's deleted lists. Its "genuinely undecided" blocker was already stale.
+
+⚠️ **Four things were found by FIRING the gates, none by reading**, and that is the transferable
+part:
+
+- **`invoice_issued`'s tax posting declared no `invoice` key while every vector's tax transfer
+  carried one.** The union arm could not see it, so rule and vectors disagreed with every gate
+  green. Only removing the key from a transfer — expecting a failure that did not come — exposed it.
+- **The empty-string arm double-reported the empty-LIST case** (`String([]) === ""`). Two messages
+  for one defect is how a gate teaches the wrong lesson at 2am.
+- **10n's account arm matched nothing.** The only scenario naming accounts is a Scenario Outline
+  whose `Given` says `<account>`; every real code lives in the Examples table, which is not a step.
+  **A check that reads green while matching nothing is indistinguishable from one that passes.**
+- **m3's "Dimensions defined … and their DECLARATION RULE" was never checked on the second half.**
+  The check counted value sets and stopped. It now also verifies every specified rule declares
+  `causal_orders`; m3 stays 4 met.
+
+Also: **gate 11 widened to the repo-root files** — 114 citations there, 2 dead, both created by this
+sweep's own rename. And the chart header said "138 entries, four minted"; it is **139 and five**,
+wrong since 5150 was added, because nothing counts those numbers.
+
+**Opened OQ-046 — nothing exercises `labor_line`.** Under ADR-0025 `cost_type` had exactly one
+consumer, a golden vector whose own derivation said so; this sweep repurposed it. Seven declared
+values now have nothing that can go red on them, which is this repo's own definition of a claim. ⚠️
+`product_line` is not in the same position — gate 13 fails when a value is unclassified in
+`reporting/product-line-pl.yaml`.
+
 ### Also landed 2026-08-16, outside the units (PRs #26–#29)
 
 - **Gate 11 widened** to `contexts/`, `ledger/`, `reporting/`, `migration/`, `roadmap/` (it scanned
@@ -298,7 +319,7 @@ written file. The same shape as `tb-field-budget_test.ts` against `tigerbeetle-n
 
 ⚠️ Same milestone as **#17**, which is blocked. #8 does not depend on it and must not wait for it.
 
-### Unit 6 — #6, the requirements promotion backlog
+### Unit 7 — #6, the requirements promotion backlog
 
 ⚠️ **The issue's numbers are badly stale and nobody updated them.** It says "2 requirements total"
 and "6 of 8 contexts have `requirements: []`". `STATUS.generated.md` today reports **21
@@ -356,7 +377,6 @@ in v1"** (api-cloudrun#538).
   nullable, so "unmeasured" is now distinguishable from "weighs nothing" — which is what OQ-033's
   coverage precondition needs, and the owner expects **many** products populated by the time basis
   v2 is in dev.
-- **#20** — needs the presence-vs-absence decision first; see Decisions.
 - **#4** — ADR-0003 cites `formal/two-store-commit.tla`, which no longer exists (Quint, ADR-0016).
   ADR-0003 is `accepted` and immutable, so the fix is not an edit. The issue's own preferred option
   is right: **fold it into the m5 formal-methods ADR**, which has to supersede that clause anyway.
@@ -382,7 +402,11 @@ in v1"** (api-cloudrun#538).
 - **Gate 10n was deliberately NOT widened to check applicability.** Every value in the refuted
   scenarios was legally declared, so 10n could never have caught HOT-015. The stronger check needs
   scenarios to name accounts (3 of 6 now do, after the amendment) **and** needs a decision 10n must
-  not invent: REQ-LED-001 refuses ABSENCE and says nothing about PRESENCE. Filed as **#20**.
+  not invent: REQ-LED-001 refuses ABSENCE and says nothing about PRESENCE. Filed as **#20**. ⚠️
+  **Both halves are now settled and neither the way #20 expected.** The presence question was never
+  open — gate 10h had refused an unowed dimension all along. And the check #20 designed could not be
+  built as designed, because ADR-0036 deleted its join target; it landed as gate 10p against the
+  posting RULE, and REQ-LED-001's text now says what the gate does.
 - **#17 is deferred, and it is not a judgement call.** OQ-039 is open with `decide_by: 2027-01-15`
   and `tax_profile` sits in `quarantine` in the field map; neither ADR-0032 nor ADR-0033 is
   `accepted`; and the issue records its own ordering gate — ADR-0020's dimension restatement must
@@ -393,21 +417,26 @@ in v1"** (api-cloudrun#538).
 
 ## Context recommendation
 
-**CLEAR CONTEXT.** The remaining work is authoring, and it touches entirely different material from
-what the last session held — 50 collections' worth of migration dispositions and a requirements
-backlog, against TigerBeetle field budgets, path widths and date helpers. Nothing needed is in
-anyone's head: the inventory, the field map, `milestone-checks.ts` and this doc are all on disk.
+**CLEAR CONTEXT.** The remaining work is authoring and it touches entirely different material — 50
+collections' worth of migration dispositions and a requirements backlog, against posting keys, gate
+arithmetic and golden vectors. Nothing needed is in anyone's head: the inventory, the field map,
+`milestone-checks.ts` and this doc are all on disk.
 
 **Take #8.** It is one of two unblocked issues, the instrument is built, and step 1 is the bulk.
 Then #6 — but **re-measure first**: its own numbers say "2 requirements, 6 of 8 contexts empty" and
 STATUS says 21 requirements, 0 without a scenario, 4 contexts uncovered.
 
-Three things to carry across the clear, because none is obvious from the issue text:
+Four things to carry across the clear, because none is obvious from the issue text:
 
 - **The `db_schema` enum is not the collection list** — 35 against 50. #8 was scoped from it and is
   therefore scoped short. Anything else scoped that way is too.
-- **A gate that lands green is still worth landing, but fire it red first.** Every check added this
-  week landed green on real data and was fired red deliberately before landing; that is the only
-  evidence a green gate is a gate.
-- **The queue's real shape is 6 blocked / 2 startable**, and the labels say so now. Do not re-triage
-  from issue text — several issues carry numbers that are stale in their own favour.
+- **Firing a gate red is not ceremony — it is the only thing that finds the defects.** Twelve arms
+  were fired for #19 and four found real bugs, none of which reading had surfaced: a rule and its
+  vectors disagreeing while every gate stayed green, a double-reported failure, a check matching
+  nothing at all, and a milestone criterion whose second half was never verified. **A check that
+  reads green while matching nothing is indistinguishable from one that passes.**
+- **When a doc states a count, something must count it.** The chart header said "138 entries, four
+  minted" and had been wrong in both halves since 5150 was added. Same class as the transfer field
+  budget and the `dimensions:` lists.
+- **The queue's real shape is 4 blocked / 2 startable.** Do not re-triage from issue text — several
+  issues carry numbers that are stale in their own favour.
