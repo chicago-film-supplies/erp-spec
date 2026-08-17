@@ -114,7 +114,15 @@ Two bugs have already come from the second half of that rule: YAML parses an unq
    **Survey before deciding anything accounting-shaped** — see _Accounting decisions_ below. Not
    optional, and not only for the hard ones.
 9. Prose style: bulleted, terse, no hedging, no filler preamble. Empty sections get a bare `TODO`,
-   not placeholder prose.
+   not placeholder prose. 9a. **House spelling is US — `labor`, never the British `-our` form**
+   (owner, 2026-08-16). ⚠️ The banned spelling is deliberately not written out here, because gate 17
+   would fail on this file for naming it; **`SPELLINGS` in `tools/validate.ts` is the definition**
+   and this is the pointer. Enforced there rather than left to memory — the identifiers already used
+   `labor` (`labor_line`) while the prose said otherwise, and nothing could see the split. ⚠️
+   **Three exemptions, all on lifecycle grounds**: `inbox/` and `research-drop/` are append-only; an
+   `accepted` ADR is immutable and ADR-0001, ADR-0011 and ADR-0036 keep the old spelling permanently
+   (ADR-0034 — a historical record of the decision as taken); and a citation of an append-only
+   filename keeps that filename's spelling, because those files are never renamed.
 10. **Before writing spec that touches a stack tool, read its note in `research-drop/reference/`**,
     then the cached upstream dump in `.claude/docs/` if you need the mechanics. Curated,
     Claude-facing references for the target stack (Deno, Hono, Zod, MongoDB, TigerBeetle, DuckDB,

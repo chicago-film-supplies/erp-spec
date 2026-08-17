@@ -28,9 +28,9 @@ requirements:
       acting crew member, the clock-in and clock-out times, and the shift it belongs to. A leg shall
       never be inferred from an order's or destination's flags.
     rationale: >-
-      This is the decision ADR-0011 exists to make, and the whole labour-costing model rests on it.
+      This is the decision ADR-0011 exists to make, and the whole labor-costing model rests on it.
       A derived leg cannot carry an actor, a clock-in or a shift id, so there is no basis for
-      attributing a crew-day to the job that caused it and labour allocation is not possible at all
+      attributing a crew-day to the job that caused it and labor allocation is not possible at all
       (HOT-007).
       Verified 2026-08-08: the current system derives legs from
       `destinations[].customer_collecting` / `.customer_returning`, which are stored per

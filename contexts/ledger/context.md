@@ -29,4 +29,4 @@ amounts.
 
 - HOT-005 / OQ-009 — whether TigerBeetle or DuckDB is the reporting source of truth.
 - ADR-0008 — dimension-exploded accounts, blocked on the above.
-- OQ-008 — who sets standard labour rates.
+- OQ-008 — who sets standard labor rates.

@@ -629,7 +629,7 @@ rules:
           ⚠️ **A `contributed` SHIFT WRITES NO TRANSFER** (OQ-047, owner 2026-08-16; GAAP). An owner
           may work a shift and take no wage for it. **No obligation was incurred, so nothing is
           recognised** — ASC 958-605, which lets an entity recognise donated services, is
-          not-for-profit ONLY, and a for-profit entity records no expense for owner labour it did
+          not-for-profit ONLY, and a for-profit entity records no expense for owner labor it did
           not pay for. `shift.compensation` is the discriminator (`paid | contributed`) and it
           arrives on `EVT-FUL-002`.
           ⚠️ **Posting one anyway is the failure this refuses, and it is a SILENT one.** The credit
@@ -642,11 +642,11 @@ rules:
           `labor_line` all survive, because they are what the costing layer needs. **The imputed
           cost is a REPORT, not a posting** (ADR-0036's two layers: TigerBeetle holds the GL, Mongo
           holds the projection). ⚠️ **The GAAP gross margin is therefore flattered by contributed
-          labour, and that is what GAAP requires** — which is why the imputed view has to EXIST
+          labor, and that is what GAAP requires** — which is why the imputed view has to EXIST
           rather than be optional. A margin that is honest only in a report nobody runs is not
           honest.
           **Surveyed before deciding** (CLAUDE.md → _Accounting decisions_). GAAP, Xero, SAP and
-          Odoo keep an uncompensated labour cost out of the financial statements; NetSuite posts it
+          Odoo keep an uncompensated labor cost out of the financial statements; NetSuite posts it
           against a cost-variance account and Intacct into a 9xxx range excluded from all standard
           reports. **All six agree on the credit side: nothing credits a payable.** The rejected
           alternative — Dr 5800 / Cr an owner-contribution account, which is what live `3130 Owner's
@@ -701,17 +701,17 @@ rules:
           accounts are exactly what ADR-0036 keeps.
       - >-
           **The overtime hour splits in two** (OQ-018). The BASE rate for every hour, overtime
-          included, is direct labour charged to the causal job worked. The **PREMIUM** is allocated
+          included, is direct labor charged to the causal job worked. The **PREMIUM** is allocated
           **pro-rata by hours across that day's causal jobs** — the standard cost-accounting
           convention, because the premium is caused by the day's volume in aggregate rather than by
           whichever job was on the clock after hour eight. Chronological attribution would make the
           same two jobs in the opposite order produce different COGS.
       - >-
-          **A labour posting is keyed to the CAUSAL JOB, and its product line is read off the shift's
-          allocation row at report time** (ADR-0036, OQ-042). ⚠️ This invariant read "A labour posting
+          **A labor posting is keyed to the CAUSAL JOB, and its product line is read off the shift's
+          allocation row at report time** (ADR-0036, OQ-042). ⚠️ This invariant read "A labor posting
           takes the product line of the REVENUE it serves… which is the entire reason `product_line`
           sits on revenue and COGS alike" until 2026-08-16. **The economics are unchanged and the
-          mechanism is not**: delivery labour serving a delivery charge still lands in `Delivery` and
+          mechanism is not**: delivery labor serving a delivery charge still lands in `Delivery` and
           crew prepping a table rental in `Tables & Chairs` — the report derives it, the transfer does
           not carry it. Gross margin by product line stays computable because both the revenue and
           the cost resolve through their own keys to the same master data.
@@ -903,16 +903,16 @@ rules:
           invoices (OQ-024).
       - >-
           **This is not the only rule that accrues, and that is the point.** Three rules credit 2010:
-          this one, `shift_recorded` (labour, through the shift record) and `asset_acquired` (fixed
+          this one, `shift_recorded` (labor, through the shift record) and `asset_acquired` (fixed
           assets, through the acquisition). Procurement owns the accrual STAGE, not every document
           that reaches it — `contexts/procurement/context.md` already fences the asset register and
           stock levels out. What lands here is what procurement itself receives and no other context
           already posts: goods, subrentals, and services received under a purchase order.
       - >-
-          ⚠️ **Labour never accrues through this rule.** A shift is one person's paid span for one
+          ⚠️ **Labor never accrues through this rule.** A shift is one person's paid span for one
           day (OQ-005) costed at their actual wage (ADR-0019), and `shift_recorded` already performs
           the absorbed/unabsorbed split and the overtime pro-rata that no generic accrual could. So
-          an obligation never debits 5800 and never carries a labour classification. (This invariant
+          an obligation never debits 5800 and never carries a labor classification. (This invariant
           argued the point through `cost_type`, "which 5800 alone names"; ADR-0036 removed the field
           from every posting, so the fence is now simply that this rule does not touch 5800.)
       - >-
@@ -1063,8 +1063,8 @@ no_posting:
       destination are what let `shift_recorded` name a causal job at all. Recorded, first-class
       (ADR-0011), and not a posting.
       ⚠️ Resolved out of the `unwritten` bucket by erp-spec#5. The alternative reading — that a leg
-      posts labour on its own — would have made this rule `blocked` on OQ-024 rather than absent,
-      because the credit leg of any labour posting still has no account.
+      posts labor on its own — would have made this rule `blocked` on OQ-024 rather than absent,
+      because the credit leg of any labor posting still has no account.
 
   - event: EVT-FUL-003
     reason: >-

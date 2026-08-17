@@ -21,9 +21,9 @@ open_questions:
     answer: >-
       First-class recorded events, each with its own identity, able to carry an actor, a clock-in
       and a shift id. A derived leg can carry none of those, which would defeat the charter's
-      labour-costing purpose.
+      labor-costing purpose.
     notes: >-
-      Everything in the labour-costing design depends on this. Resolves HOT-007 and unblocks
+      Everything in the labor-costing design depends on this. Resolves HOT-007 and unblocks
       ADR-0011.
 
   - id: OQ-002
@@ -102,23 +102,23 @@ open_questions:
       starts empty at cutover and accumulates forward. Resolves HOT-002.
 
   - id: OQ-008
-    question: Who sets standard labour rates, how often are they revised, and what happens to
+    question: Who sets standard labor rates, how often are they revised, and what happens to
       in-flight jobs when a rate changes?
     owner: alex
     decide_by: 2026-08-09
     blocks: [REQ-LED]
     status: answered
     answer: >-
-      The question's premise does not hold — CFS does not use standard labour rates. Costing is
-      ACTUAL, from a labour scheduling module: scheduling a contact adds them to the labour
+      The question's premise does not hold — CFS does not use standard labor rates. Costing is
+      ACTUAL, from a labor scheduling module: scheduling a contact adds them to the labor
       calendar, the contact carries a wage (default $30/hr, overridable per contact — one person
       is $36/hr), and cost flows from the purchase order / bill that scheduling generates. Rules:
       guaranteed 8 hours; 1.5x after 8 in a day; 1.5x all day on a 6th and/or 7th consecutive day.
     notes: >-
-      Two consequences. (1) There is no rate variance, so a `labour_variance` posting rule as
+      Two consequences. (1) There is no rate variance, so a `labor_variance` posting rule as
       RATE variance is wrong — HOT-010. Absorption survives, because guaranteed-but-unworked hours
-      are a real cost attributable to no job, so `COGS-Labour Absorbed` and `COGS-Unabsorbed
-      Labour` both stand; the gap they measure is UTILISATION. (2) Purchase orders are new in v2
+      are a real cost attributable to no job, so `COGS-Labor Absorbed` and `COGS-Unabsorbed
+      Labor` both stand; the gap they measure is UTILISATION. (2) Purchase orders are new in v2
       and are not in the charter's in-scope list — second use case is inventory acquisition
       (retail, and fixed assets for rental or internal ops). Residual questions: OQ-018, OQ-019.
 
@@ -144,21 +144,21 @@ open_questions:
 
   - id: OQ-010
     question: >-
-      Does `Trucking` mean third-party freight (no wage labour) or an own long-haul run
-      (labour-bearing)?
+      Does `Trucking` mean third-party freight (no wage labor) or an own long-haul run
+      (labor-bearing)?
     owner: alex
     decide_by: 2026-08-09
     blocks: [HOT-001, ADR-0011]
     status: answered
-    answer: An own long-haul run. Labour-bearing — it absorbs a crew-day into COGS.
+    answer: An own long-haul run. Labor-bearing — it absorbs a crew-day into COGS.
     notes: >-
-      Consistent with the evidence that `Trucking` books to COA 4100 alongside Crew labour while
+      Consistent with the evidence that `Trucking` books to COA 4100 alongside Crew labor while
       `Shipping` has its own COA 4150. Resolves HOT-001 and clears the last `definition: TODO` in
       the glossary, which was m2's remaining exit criterion.
 
   - id: OQ-011
     question: >-
-      Is any labour COST recorded anywhere in the current system today, or only billable labour
+      Is any labor COST recorded anywhere in the current system today, or only billable labor
       revenue?
     owner: alex
     decide_by: 2026-08-09
@@ -170,7 +170,7 @@ open_questions:
       2180/2190 payroll liabilities, 4120 Contract Labor Income, and — already on the COGS side —
       5200 "Cost of Goods Sold: Subcontractors, Sales Commissions".
     notes: >-
-      So two labour cost treatments already coexist: own wages in opex (6600), subcontractors in
+      So two labor cost treatments already coexist: own wages in opex (6600), subcontractors in
       COGS (5200). The charter's absorption model is therefore a MOVE of own-crew cost from 6600
       into a dimensioned COGS account beside the existing 5200 — not a from-scratch invention.
       There is cost history to carry, but it is undimensioned and unallocated to jobs.
@@ -292,7 +292,7 @@ open_questions:
     status: answered
     answer: >-
       **The overtime hour splits in two, and the halves are treated differently.** The BASE rate for
-      every hour — overtime hours included — is direct labour, charged to the causal job actually
+      every hour — overtime hours included — is direct labor, charged to the causal job actually
       worked. The **PREMIUM** is allocated **pro-rata by hours across the causal jobs of that day**.
       Owner, 2026-08-09, and it is the standard cost-accounting convention rather than a house rule:
       the premium is caused by the day's volume in aggregate, not by whichever job happened to be on
@@ -364,7 +364,7 @@ open_questions:
     status: answered
     answer: >-
       **Procurement is the ninth bounded context.** Owner, 2026-08-09. It owns the inbound document
-      in all its forms — labour purchase orders, inventory purchase orders, and recurring bills —
+      in all its forms — labor purchase orders, inventory purchase orders, and recurring bills —
       and the payables lifecycle those documents drive.
       **What made it worth the cost is the forecasting surface, which no existing context owns.** The
       procure-to-pay cycle has three stages and each answers a different question: a **PO** is
@@ -373,7 +373,7 @@ open_questions:
       current system holds only the third, which is why "AP is underutilized today" — there is
       nowhere to record a commitment and nowhere to record work done but not yet billed.
       This also refines OQ-024's answer. `shift_recorded` credits Accounts Payable, but the EOR has
-      not invoiced on the shift date — so the accurate credit leg is an **accrued labour liability**
+      not invoiced on the shift date — so the accurate credit leg is an **accrued labor liability**
       that the EOR's invoice later reclassifies into 2000. That is procurement's lifecycle, and it is
       why a wages liability has a purpose in v2 even though CFS has never had one.
       ⚠️ **This reopens m2.** Its exit criterion reads "All eight contexts have a context.md",
@@ -386,7 +386,7 @@ open_questions:
       rather than decision, and is tracked as a GitHub issue.
     notes: >-
       Raised by OQ-008, which made purchase orders first-class in v2 with two use cases: the
-      document labour scheduling generates and costs flow from, and inventory acquisition (retail
+      document labor scheduling generates and costs flow from, and inventory acquisition (retail
       stock, and fixed assets bought for rental or internal ops). None of the eight existing
       contexts owns procurement — ledger records the consequence, fixed-assets receives the asset,
       availability receives the stock, but nothing owns the inbound document. Placing PO events in
@@ -395,18 +395,18 @@ open_questions:
 
   - id: OQ-021
     question: >-
-      Which postings must carry which dimensions — is `cost_type` a labour-only dimension, and may
+      Which postings must carry which dimensions — is `cost_type` a labor-only dimension, and may
       a revenue or COGS account be undimensioned at all?
     owner: alex
     decide_by: 2026-09-15
     blocks: [REQ-LED, HOT-011]
     status: answered
     answer: >-
-      Revenue accounts carry a **product line**. `cost_type` is a **labour** dimension — its values
+      Revenue accounts carry a **product line**. `cost_type` is a **labor** dimension — its values
       are delivery / counter / warehouse — so it applies to 5800 Cost of Goods Sold: Wages
-      (Absorbed) alone, and to no revenue account and no non-labour COGS account.
+      (Absorbed) alone, and to no revenue account and no non-labor COGS account.
       REQ-LED-001's statement is amended to match; `ledger/dimensions.yaml` moves `cost_type` from
-      `required_on: [cogs]` to `[labour_cogs]`; and the chart of accounts now states the obligation
+      `required_on: [cogs]` to `[labor_cogs]`; and the chart of accounts now states the obligation
       **per account** as an explicit `dimensions:` list rather than leaving it to be inferred from
       class. Resolves HOT-011.
       ⚠️ **SUPERSEDED IN ITS ENTIRETY BY ADR-0036, accepted 2026-08-16 — the question is MOOT, not
@@ -470,7 +470,7 @@ open_questions:
       ⚠️ It leaves ADR-0020's restatement residue without a target — see OQ-025.
   - id: OQ-023
     question: >-
-      What posts to `5400 Cost of Goods Sold: Job Costs` today, and does own-crew labour cost belong
+      What posts to `5400 Cost of Goods Sold: Job Costs` today, and does own-crew labor cost belong
       there rather than in a new 5800?
     owner: alex
     decide_by: 2026-09-15
@@ -488,7 +488,7 @@ open_questions:
       ADR-0019 moves own-crew cost out of 6600 Wages into "a dimensioned COGS account beside the
       existing 5200", and `ledger/chart-of-accounts.yaml` mints 5800 for it. But 5400 already exists,
       is Active, and its live description reads "costs related to the completion of a job that are
-      NOT assets and NOT general expenses" — which is a description of job labour among other things.
+      NOT assets and NOT general expenses" — which is a description of job labor among other things.
       If crew cost already lands there, 5800 duplicates it and the migration has two accounts
       competing for the same money. **Not answerable from the CFS API**: the GL line detail is in
       Xero, and this repo may not reach Xero (single-tenant, live, shared daily quota). It needs
@@ -501,7 +501,7 @@ open_questions:
       A catchall sitting beside specific COGS accounts is where cost goes to avoid being
       classified, which is the failure the dimensioned COGS block exists to prevent.
   - id: OQ-024
-    question: What is the CREDIT leg of a labour cost posting?
+    question: What is the CREDIT leg of a labor cost posting?
     owner: alex
     decide_by: 2026-09-15
     blocks: [REQ-LED, EVT-FUL-002]
@@ -516,9 +516,9 @@ open_questions:
       in the live chart.
       That follows from the charter, which makes payroll processing a **non-goal**: an external
       **employer of record** stays, and CFS "does not calculate withholding, file payroll tax, or
-      move payroll money". **An EOR is not payroll — it is a vendor that invoices.** So a labour
+      move payroll money". **An EOR is not payroll — it is a vendor that invoices.** So a labor
       cost posting is an ordinary vendor bill: Dr 5800 / 5801, Cr 2000.
-      ADR-0019 already pointed here — "cost flows from the purchase order / bill that labour
+      ADR-0019 already pointed here — "cost flows from the purchase order / bill that labor
       scheduling generates" — but called it an inference from account status. It is no longer an
       inference: a company that owed wages would show the liability, and this one shows none across
       four years of statements.
@@ -534,7 +534,7 @@ open_questions:
       liability (2160 Payroll Wages Payable, 2170, 2180, 2190) is **Archived** and proposed for drop
       as a charter non-goal, and 6600 Wages is an expense, not a liability
       (`api:2026-08-09:db_chart_of_accounts_query`). ADR-0019 says cost flows from the purchase
-      order / bill that labour scheduling generates, which points at 2000 Accounts Payable — but
+      order / bill that labor scheduling generates, which points at 2000 Accounts Payable — but
       that is an inference from account status, not a decision, and it interacts with OQ-020 since
       nothing yet owns purchase orders.
 
@@ -870,7 +870,7 @@ open_questions:
       "shipping is a pass through, trucking is our own longer or bigger haul." So `Shipping`
       (16 lines, $5,665.00, on its own account **4150 Shipping & Handling Income**) is third-party
       freight bought and re-billed — no CFS crew-day, no vehicle. `Trucking` (7 lines, $34,000.00, on
-      4100) is CFS-performed and labour-bearing, which is consistent with ADR-0011's ruling on OQ-010
+      4100) is CFS-performed and labor-bearing, which is consistent with ADR-0011's ruling on OQ-010
       that a trucked leg generates a shift and absorbs a person-day.
       **Both keep their own margin, so one pool can hold both** — the allocation answer is the same
       for a passthrough and for a severable own-haul. What differs is the COST side: freight invoice
@@ -881,7 +881,7 @@ open_questions:
       Owner, 2026-08-16: **`5300 Cost of Goods Sold: Shipping (Rentals & Sales Only)` pairs with
       `4150`**. So `Shipping` is complete — bought-in cost and re-billed revenue on the same line,
       and its margin is the markup, which is what a passthrough should look like. `Trucking` is not:
-      its revenue is on 4100 and its cost is labour (ADR-0019, 5800/5801) plus vehicle, and
+      its revenue is on 4100 and its cost is labor (ADR-0019, 5800/5801) plus vehicle, and
       **ADR-0030 has not chosen the vehicle COGS accounts**. Until it does, this pool's margin
       overstates trucking — the same trap the product-line P&L header warns about for `Delivery`.
       Consequences: `ledger/dimensions.yaml` restores the value; `reporting/product-line-pl.yaml`
@@ -955,7 +955,7 @@ open_questions:
         additional gas."
         **Wage — unchanged, so OQ-006 stands.** The same crew-day is consumed whether the delivery
         is near or far, so no extra wage is caused and "the premium the customer pays is margin, not
-        cost" is correct about the labour component.
+        cost" is correct about the labor component.
         **Fuel — a REAL incremental cost, and it already has a home.** It is vehicle cost, ADR-0030,
         which moves vehicle expense into COGS. So distance-surcharge revenue does correlate with a
         bookable cost, and ADR-0029's flat "the surcharge adds revenue and no cost" is wrong to that
@@ -964,7 +964,7 @@ open_questions:
         haul cannot take a second delivery. That is not an entry — GAAP books no opportunity cost —
         and it **needs no new mechanism, because ADR-0019's absorption model already expresses it**:
         the long haul absorbs its person-day into 5800, the rest of the day has no second job to
-        absorb it, and the shortfall surfaces as **5801 Unabsorbed Labour**. HOT-010 settled that
+        absorb it, and the shortfall surfaces as **5801 Unabsorbed Labor**. HOT-010 settled that
         absorption measures UTILISATION rather than rate deviation, which is exactly the signal
         being described. This also answers HOT-004's question — a long haul does not need a
         byproduct-loss premium loaded onto the job, because the cost of the foregone second job
@@ -1437,7 +1437,7 @@ open_questions:
       **RECOMMENDATION (owner's call): a settlement point is a SUBLEDGER KEY on the
       receivable-bearing leg, NOT a third declared dimension.** `ledger/dimensions.yaml` stays at
       two. Three supports: (1) the repo already has this shape — `product_line` is
-      `required_on: [revenue, cogs]` and `cost_type` on `[labour_cogs]`, so **neither is required on
+      `required_on: [revenue, cogs]` and `cost_type` on `[labor_cogs]`, so **neither is required on
       1200 or 2050**, and the survey names why; (2) it is what makes ADR-0033's independent check
       genuinely independent — "group open invoices by `billed_to.id`" is a subledger query, whereas a
       dimensional GL read would be the same machinery as the roll-up it must not agree with by
@@ -1587,7 +1587,7 @@ open_questions:
 
   - id: OQ-042
     question: >-
-      Does `labour_line` (formerly `cost_type`) stay a POSTING field, or is it derived from the
+      Does `labor_line` (formerly `cost_type`) stay a POSTING field, or is it derived from the
       shift's allocation row the same way `product_line` is derived from the product master?
     owner: alex
     decide_by: 2026-11-15
@@ -1613,22 +1613,22 @@ open_questions:
     notes: >-
       Surfaced 2026-08-16 by ADR-0036's own criterion, applied to the one dimension ADR-0036
       deliberately did not sweep along. The owner's ruling addressed **product lines**; `cost_type`
-      was renamed `labour_line` and its enum grown to seven in the same breath, but its *location*
+      was renamed `labor_line` and its enum grown to seven in the same breath, but its *location*
       was not decided.
       **THE CRITERION, and it is ADR-0036's own rather than a new one: could this value be revised
       later without anyone having observed something new?** Yes ⇒ it is a classification and must be
       derived. No ⇒ it is a fact and may be stored.
-      **The case for STORING it.** `labour_line` records an observation made at the time — this
+      **The case for STORING it.** `labor_line` records an observation made at the time — this
       person did delivery work on this job. Nobody re-decides it later from a master record, which is
       exactly what separates it from `product_line`, whose value is
       `products.uid_tracking_category` and has moved twice in one month.
       **The case for DERIVING it.** `shift_recorded` fans `per: shift.absorbed_allocations`, and each
       row already carries `product_line`, `cost_type` and `causal_job`. If the posting carries the
       ROW's identity — which HOT-014 showed it must anyway, since one shift becomes several transfers
-      and `source_document` resolves only to the shift — then `labour_line` is reachable without
+      and `source_document` resolves only to the shift — then `labor_line` is reachable without
       storing it, and the ledger holds keys uniformly rather than keys plus one exception.
       ⚠️ **The two are not symmetric, and that is what makes this a real question rather than a
-      preference.** Deriving `product_line` crosses into a **mutable master**; deriving `labour_line`
+      preference.** Deriving `product_line` crosses into a **mutable master**; deriving `labor_line`
       crosses only into the **shift record**, which is itself a recorded historical fact. So the
       derivation is safe in a way the product-master one is not — which weakens the strongest argument
       for storing it.
@@ -1698,7 +1698,7 @@ open_questions:
       today while salaried selling cost would not be. Whether that asymmetry is deliberate or
       inherited is worth asking before extending it.
       **Survey obligation applies** (CLAUDE.md → _Accounting decisions_) — "what an account means" —
-      but scope it to the residue: what do the six references put in COGS-labour versus SG&A-labour,
+      but scope it to the residue: what do the six references put in COGS-labor versus SG&A-labor,
       and what is their criterion for splitting one person's time across the two.
       ⚠️ **Utilisation is the trap to avoid.** ADR-0019's 5800/5801 split measures utilisation, so a
       salaried person who does deliveries **some** of the time is not an all-or-nothing case — they
@@ -1744,7 +1744,7 @@ open_questions:
       on it.
   - id: OQ-046
     question: >-
-      `counter` and `warehouse` labour bill nobody and name no product line, so no allocation pool
+      `counter` and `warehouse` labor bill nobody and name no product line, so no allocation pool
       selects them. Where does their cost land — spread like `delivery`, reported unallocated, or
       attached to the causal order's goods directly?
     owner: alex
@@ -1788,7 +1788,7 @@ open_questions:
       spread from. This is a warehouse HOUR, already in COGS via 5800 and already absorbed against a
       job. Two facts that share a word.
       ⚠️ **The size of either pool is unmeasured and will stay unmeasured until v2 runs** — the
-      current system has never had the absorbed-labour stage, so both measure as zero everywhere
+      current system has never had the absorbed-labor stage, so both measure as zero everywhere
       (erp-spec#14). **Decided on the criterion rather than on the number**, which is the right way
       round: severability does not depend on magnitude.
       (`inbox/2026-08-16-labor-line-is-the-pools-cost-selector-and-a-report-is-a-selector-crossed-with-a-base.md`)
@@ -1815,14 +1815,14 @@ open_questions:
       **THE SHIFT AND ITS ALLOCATIONS ARE STILL RECORDED**, and that is the whole design: hours,
       causal job, allocation-row identity and `labor_line` all survive, so the costing layer keeps
       everything it needs. **Suppressing the EVENT would have been the wrong fix** — it would lose
-      the hours, and with them any chance of measuring how much contributed labour the business runs
+      the hours, and with them any chance of measuring how much contributed labor the business runs
       on. Under ADR-0036 the ledger holds keys and the projection holds everything derived; an
-      imputed labour cost is a projection fact by exactly that argument.
+      imputed labor cost is a projection fact by exactly that argument.
       ⇒ **`3130 Owner's Capital: Owner's Billable Time` returns to `disposition: drop`**, and this
       time for the right reason: the GAAP answer needs no fenced offset at all, because nothing is
       posted to offset. The account was correct machinery for the treatment that was NOT chosen.
       ⚠️ **What this does NOT fix, and it is a consequence rather than an oversight:** the GAAP gross
-      margin stays flattered by contributed labour. **That is what GAAP requires**, and it is why the
+      margin stays flattered by contributed labor. **That is what GAAP requires**, and it is why the
       imputed view has to EXIST rather than be optional — a margin that is honest only in a report
       nobody runs is not honest. The imputed view is one of the "other combos" the owner's
       `labor_line` ruling makes cheap, and **what rate to impute is not decided** — see OQ-048.
@@ -1842,7 +1842,7 @@ open_questions:
       the absorbed/unabsorbed utilisation number silently omits owner hours — **the "dilute COGS"
       the owner names**.
       ⚠️ **THE SURVEY DOES NOT COME BACK UNANIMOUS, and the split is the useful part.** GAAP, Xero,
-      SAP and Odoo keep an uncompensated labour cost out of the financial statements entirely
+      SAP and Odoo keep an uncompensated labor cost out of the financial statements entirely
       (ASC 958-605 is not-for-profit ONLY; "Xero Projects isn't integrated into the P&L"; SAP's
       secondary cost elements "do not cause any change in any values in Financial Accounting";
       Odoo's timesheet cost is analytic with "no exact counterparts in the general accounts").
@@ -1865,7 +1865,7 @@ open_questions:
       this repo's existing architecture agree, which is the strongest form the recommendation can
       take. It is also one of the "other combos" the owner's `labor_line` ruling makes cheap.
       ⚠️ **What the recommendation does NOT fix, stated so it is not discovered later:** the GAAP
-      gross margin stays flattered by contributed labour. That is what GAAP requires, and it is why
+      gross margin stays flattered by contributed labor. That is what GAAP requires, and it is why
       the imputed report has to EXIST rather than be optional — **a margin that is honest only in a
       report nobody runs is not honest.**
       ⚠️ **The rejected alternative is live and is NetSuite's**: Dr 5800 / Cr an owner-contribution
@@ -1881,12 +1881,12 @@ open_questions:
       contributed rather than owed. Its disposition moves to `undecided`, blocked here.
       ⚠️ **The migration delta cannot be measured before v2 runs**, and that is the finding rather
       than a gap: how many owner shifts have ever been worked is recorded nowhere, because the
-      current system has no absorbed-labour stage at all (erp-spec#14). **What would measure it is
+      current system has no absorbed-labor stage at all (erp-spec#14). **What would measure it is
       the discriminator itself**, present from day one so the population is countable the moment the
       stage exists.
   - id: OQ-048
     question: >-
-      At what rate is a contributed (unpaid owner) shift costed in the IMPUTED labour view — the
+      At what rate is a contributed (unpaid owner) shift costed in the IMPUTED labor view — the
       person's own wage had they been paid, a replacement-hire rate, or a single notional owner
       rate?
     owner: alex
@@ -1897,7 +1897,7 @@ open_questions:
       Opened 2026-08-16 by OQ-047's answer. **The GAAP decision does not depend on this and is not
       waiting for it** — a contributed shift posts nothing whatever rate is chosen. What waits is
       the imputed view, which OQ-047 makes required rather than optional.
-      **Why it is a real decision and not a lookup.** ADR-0019 costs labour at "that person's actual
+      **Why it is a real decision and not a lookup.** ADR-0019 costs labor at "that person's actual
       per-contact wage", and **an owner who is never paid has no actual wage** — the field may be
       empty, or may hold a number nobody has ever honoured. So the imputed view needs a rate the
       shift record does not supply. Three candidates, and they answer different questions:
@@ -1907,7 +1907,7 @@ open_questions:
         the number that matters for "can this business run without the owner working for free";
       · **a single notional owner rate** — simplest to administer and the least defensible per-hour,
         because an owner delivering and an owner doing books are not the same cost.
-      ⚠️ **The agricultural-extension literature calls this an imputed owner labour and management
+      ⚠️ **The agricultural-extension literature calls this an imputed owner labor and management
       charge and treats the SECOND as the correct one** — owner-operator compensation "should be
       equivalent to hired compensation for accurate profitability measurement". That is a
       recommendation from a field that has thought about owner-operated businesses for decades, and
@@ -1918,7 +1918,7 @@ open_questions:
       imputed view must be explicitly NON-OFFICIAL: ADR-0029 permits exactly one official
       allocation, and this is a second number for the same thing.
       ⚠️ **Unmeasurable until v2 runs.** How many owner shifts exist is recorded nowhere — the
-      current system has no absorbed-labour stage at all (erp-spec#14) — so there is no corpus figure
+      current system has no absorbed-labor stage at all (erp-spec#14) — so there is no corpus figure
       to size this from. `compensation` being present from day one is what makes the population
       countable the moment the stage exists.
   - id: OQ-049

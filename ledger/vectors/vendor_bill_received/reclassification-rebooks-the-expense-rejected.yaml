@@ -52,7 +52,7 @@ derivation: >-
     arrived, so the one report that would have caught this — the received-not-invoiced balance,
     whose sign SAP's GR/IR analysis reads as the finding — is the thing the error corrupts.
   - **The dimensional damage is separate and permanent.** The re-booked line re-declares `Delivery`
-    and `delivery` on the 14th, so a product-line P&L shows delivery labour twice and in the wrong
+    and `delivery` on the 14th, so a product-line P&L shows delivery labor twice and in the wrong
     period. A legitimate reclassification cannot do this: 2010 and 2000 name no dimension, so the
     leg is structurally incapable of carrying one.
   ⚠️ **The refusal is on STATE, not on shape.** A direct line to 5800 is not illegal in itself —

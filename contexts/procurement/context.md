@@ -2,7 +2,7 @@
 
 ## Responsibility
 
-The **inbound document, in all its forms**, and the payables lifecycle those documents drive: labour
+The **inbound document, in all its forms**, and the payables lifecycle those documents drive: labor
 purchase orders, inventory purchase orders, and recurring bills. Owns the procure-to-pay cycle from
 commitment through accrual to a dated vendor invoice, and the state transitions between them.
 
@@ -39,8 +39,8 @@ billed. The first two stages are the whole reason this context was worth a ninth
 
 ## Upstream / downstream
 
-- **Consumes:** labour scheduling (FUL) — scheduling a contact generates the labour PO that cost
-  flows from (OQ-008); inventory replenishment (AVL); asset purchase decisions (FA).
+- **Consumes:** labor scheduling (FUL) — scheduling a contact generates the labor PO that cost flows
+  from (OQ-008); inventory replenishment (AVL); asset purchase decisions (FA).
 - **Produces:** purchase order issued, obligation accrued, vendor bill received — all consumed by
   Ledger.
 
@@ -69,7 +69,7 @@ model and the textbook one. **Every accrual v2 produces carries an amount from a
 so all of them are the first kind: one account, and the bill **reclassifies** rather than reverses.
 
 ⚠️ **Three rules credit 2010, not one, and procurement does not own all three.** `shift_recorded`
-accrues labour, `asset_acquired` accrues fixed assets, and `obligation_accrued` accrues what
+accrues labor, `asset_acquired` accrues fixed assets, and `obligation_accrued` accrues what
 procurement itself receives. Procurement owns the accrual STAGE; the boundaries above still hold.
 
 ## Open

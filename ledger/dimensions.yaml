@@ -130,7 +130,7 @@ dimensions:
       ledger while the CFS line was null), and — since the repair — the CFS lines themselves.
       ⚠️ **The line holds two economically different things**, and OQ-034 records the owner's split:
       `Shipping` is a **passthrough** (third-party freight, its own account 4150, no CFS crew-day),
-      `Trucking` is **CFS's own longer or bigger haul** and is labour-bearing per ADR-0011/OQ-010.
+      `Trucking` is **CFS's own longer or bigger haul** and is labor-bearing per ADR-0011/OQ-010.
       Both are severable and neither spreads.
       ⚠️ **The two values ARE now declared separately here, and the corpus has not been restated.**
       Measured 2026-08-16: `Shipping` reads **0 lines** when the dimension is read directly, because
@@ -171,7 +171,7 @@ dimensions:
       between P&L sections — the thing ADR-0020 forbids.
 
   - id: labor_line
-    description: What kind of work a labour cost represents.
+    description: What kind of work a labor cost represents.
     kind: reporting
     derived_from: >-
       The **shift's own allocation row**, reached from the posting's causal-order and line-identity
@@ -200,12 +200,12 @@ dimensions:
       **Renamed from `cost_type` and grown from 3 values to 7, 2026-08-16** (ADR-0036, owner:
       "cost_type is too broad, i think it should change to labor_line or _class or _category (same
       for product, no reason for them not to match)"). `cost_type` was too broad to mean anything —
-      it named a kind-of-cost taxonomy while carrying only kinds of *labour* — and `labor_line`
+      it named a kind-of-cost taxonomy while carrying only kinds of *labor* — and `labor_line`
       pairs with `product_line` by design.
       ⚠️ **AMERICAN SPELLING, and the live books decided it rather than taste.** Of 134 live accounts,
       `4120 Contract **Labor** Income` is the only one naming the concept and **no account contains
-      "Labour"** (`api:2026-08-16:db_chart_of_accounts_query`, 134 accounts). The repo's British
-      prose is spec-side drift from the incumbent chart. The field was never called `labour_line` in
+      "Labor"** (`api:2026-08-16:db_chart_of_accounts_query`, 134 accounts). The repo's British
+      prose is spec-side drift from the incumbent chart. The field was never called `labor_line` in
       any artifact, so the rename went `cost_type` → `labor_line` directly and passed through no
       intermediate form.
       ⚠️ **The `&` in two value ids is deliberate and is ADR-0036's spelling**, frozen at acceptance.
@@ -225,14 +225,14 @@ dimensions:
       pool came to select `labor_line: delivery`** — correct when the enum had three values, wrong
       from the moment it had seven, and invisible to every gate.
       ⚠️ **This is what the 3 → 7 growth was FOR.** With three values exactly one activity pool could
-      name its own labour. Five of the seven now mirror an activity product line and there are
+      name its own labor. Five of the seven now mirror an activity product line and there are
       exactly five activity lines, so the correspondence is total — which is what makes a coverage
       gate possible at all. The mapping is **not** derivable from the names: `trucking` ↔ `Transport`
       is the counter-example, because `Transport` is the incumbent Xero tracking category and
       `trucking` is what the owner calls the work.
       ⚠️ **`counter` and `warehouse` bill nobody, and where their cost lands is undecided** — spread
       like `delivery`, reported unallocated, or attached to the causal order's goods directly. Both
-      are real absorbed labour in 5800. Carried as **OQ-046**.
+      are real absorbed labor in 5800. Carried as **OQ-046**.
       ⚠️ **The vector that used to exercise this is gone and is not coming back.** Under ADR-0025 the
       value was declared on a posting to 5800 and exactly one golden vector supplied it — the vector
       then called `absorbed-line-missing-cost-type-rejected`, whose own derivation said "this is the

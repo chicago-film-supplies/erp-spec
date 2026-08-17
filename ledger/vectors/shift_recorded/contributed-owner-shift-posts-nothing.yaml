@@ -49,7 +49,7 @@ derivation: >-
   posting whose amount is zero is not written does the whole job, so the rule needs no conditional.
   **The reason is GAAP and it is not a preference.** No obligation was incurred, so no expense was
   incurred. ASC 958-605 — the standard that lets an entity recognise donated services — is
-  **not-for-profit only**; a for-profit entity records nothing for owner labour it did not pay for.
+  **not-for-profit only**; a for-profit entity records nothing for owner labor it did not pay for.
   Four of the six surveyed references agree (GAAP, Xero, SAP, Odoo) and the two that do post an
   imputed cost fence the offset (NetSuite a cost-variance account, Intacct a 9xxx range excluded
   from standard reports). ⚠️ **All six agree on the credit side: nothing credits a payable**, which
@@ -58,8 +58,8 @@ derivation: >-
   hours, two causal jobs, two allocation rows with their own identities — everything the costing
   layer needs to impute a cost at report time survives. **Suppressing the EVENT would have been the
   wrong fix**: it would lose the hours, and with them any chance of ever measuring how much
-  contributed labour the business runs on. Under ADR-0036 the ledger holds keys and the projection
-  holds everything derived; an imputed labour cost is a projection fact by exactly that argument.
+  contributed labor the business runs on. Under ADR-0036 the ledger holds keys and the projection
+  holds everything derived; an imputed labor cost is a projection fact by exactly that argument.
   ⚠️ **`amount_minor: 0` on the allocation rows is deliberate and is NOT the same as the rows being
   absent.** The allocation still happened — six hours split four and two — and the money attaching
   to it is zero. A reader who deletes these rows because they carry no money loses the hours, which

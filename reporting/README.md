@@ -47,8 +47,8 @@ requires every activity line in exactly one pool. `labor_line` is the pool's **C
 and a live blocker).
 
 ⚠️ **13h exists because the selection used to be prose, and prose let a pool select the wrong
-labour.** `transport` said its cost was `labor_line: delivery` — true when the enum had three values
-and trucking labour had nowhere else to point, wrong from the moment it had seven, and invisible to
+labor.** `transport` said its cost was `labor_line: delivery` — true when the enum had three values
+and trucking labor had nowhere else to point, wrong from the moment it had seven, and invisible to
 every gate. Built as written, a long-haul crew-day would have spread across goods lines while
 Transport reported a near-100% margin. **A report here is (cost selector) → spread over (base) by
 (basis)**, and all three are now declared rather than described.

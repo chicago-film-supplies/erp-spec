@@ -81,7 +81,7 @@
           <outline text="blocks HOT-002"/>
           <outline text="blocks ADR-0011"/>
         </outline>
-        <outline text="OQ-008 — Who sets standard labour rates, how often are they revised, and what happens to in-flight jobs when…" _note="owner: alex · decide by: 2026-08-09">
+        <outline text="OQ-008 — Who sets standard labor rates, how often are they revised, and what happens to in-flight jobs when…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks REQ-LED"/>
         </outline>
         <outline text="OQ-009 — Is TigerBeetle or DuckDB the reporting source of truth, given TB timestamps are posting time and re…" _note="owner: alex · decide by: 2026-08-09">
@@ -89,11 +89,11 @@
           <outline text="blocks ADR-0008"/>
           <outline text="blocks ADR-0010"/>
         </outline>
-        <outline text="OQ-010 — Does `Trucking` mean third-party freight (no wage labour) or an own long-haul run (labour-bearing)?" _note="owner: alex · decide by: 2026-08-09">
+        <outline text="OQ-010 — Does `Trucking` mean third-party freight (no wage labor) or an own long-haul run (labor-bearing)?" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-001"/>
           <outline text="blocks ADR-0011"/>
         </outline>
-        <outline text="OQ-011 — Is any labour COST recorded anywhere in the current system today, or only billable labour revenue?" _note="owner: alex · decide by: 2026-08-09">
+        <outline text="OQ-011 — Is any labor COST recorded anywhere in the current system today, or only billable labor revenue?" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-003"/>
           <outline text="blocks REQ-LED"/>
         </outline>
@@ -124,17 +124,17 @@
         <outline text="OQ-020 — Which context owns purchase orders — or is procurement a ninth bounded context?" _note="owner: alex · decide by: 2026-09-15">
           <outline text="blocks EVT-FA-001"/>
         </outline>
-        <outline text="OQ-021 — Which postings must carry which dimensions — is `cost_type` a labour-only dimension, and may a reve…" _note="owner: alex · decide by: 2026-09-15">
+        <outline text="OQ-021 — Which postings must carry which dimensions — is `cost_type` a labor-only dimension, and may a reven…" _note="owner: alex · decide by: 2026-09-15">
           <outline text="blocks REQ-LED"/>
           <outline text="blocks HOT-011"/>
         </outline>
         <outline text="OQ-022 — Does `Other` survive as a `product_line` value, and what value do facility and professional service…" _note="owner: alex · decide by: 2026-09-15">
           <outline text="blocks REQ-LED"/>
         </outline>
-        <outline text="OQ-023 — What posts to `5400 Cost of Goods Sold: Job Costs` today, and does own-crew labour cost belong ther…" _note="owner: alex · decide by: 2026-09-15">
+        <outline text="OQ-023 — What posts to `5400 Cost of Goods Sold: Job Costs` today, and does own-crew labor cost belong there…" _note="owner: alex · decide by: 2026-09-15">
           <outline text="blocks REQ-LED"/>
         </outline>
-        <outline text="OQ-024 — What is the CREDIT leg of a labour cost posting?" _note="owner: alex · decide by: 2026-09-15">
+        <outline text="OQ-024 — What is the CREDIT leg of a labor cost posting?" _note="owner: alex · decide by: 2026-09-15">
           <outline text="blocks REQ-LED"/>
           <outline text="blocks EVT-FUL-002"/>
         </outline>
@@ -180,19 +180,19 @@
           <outline text="blocks ADR-0033"/>
         </outline>
         <outline text="OQ-041 — Does a pass-through purchase carry a product line — and if so, which one: the line of the thing bou…" _note="owner: alex · decide by: 2026-11-15"/>
-        <outline text="OQ-042 — Does `labour_line` (formerly `cost_type`) stay a POSTING field, or is it derived from the shift's a…" _note="owner: alex · decide by: 2026-11-15">
+        <outline text="OQ-042 — Does `labor_line` (formerly `cost_type`) stay a POSTING field, or is it derived from the shift's al…" _note="owner: alex · decide by: 2026-11-15">
           <outline text="blocks ADR-0036"/>
         </outline>
         <outline text="OQ-043 — Should the product and organization masters carry an EVENT HISTORY, so that a classification as it…" _note="owner: alex · decide by: 2026-12-15"/>
         <outline text="OQ-044 — Once wages move into COGS, what stays in `6600 Wages` — and can salaried sales/admin staff who neve…" _note="owner: alex · decide by: 2026-12-15"/>
         <outline text="OQ-045 — When a vendor bills LESS than was accrued, what retires the residual left in `2010 Accrued Expenses…" _note="owner: alex · decide by: 2027-02-15"/>
-        <outline text="OQ-046 — `counter` and `warehouse` labour bill nobody and name no product line, so no allocation pool select…" _note="owner: alex · decide by: 2027-01-15"/>
+        <outline text="OQ-046 — `counter` and `warehouse` labor bill nobody and name no product line, so no allocation pool selects…" _note="owner: alex · decide by: 2027-01-15"/>
         <outline text="OQ-047 — An owner works a shift and is not paid for it. Does the ledger post the cost — and if so, what does…" _note="owner: alex · decide by: 2027-01-15"/>
-        <outline text="OQ-048 — At what rate is a contributed (unpaid owner) shift costed in the IMPUTED labour view — the person's…" _note="owner: alex · decide by: 2027-03-15"/>
+        <outline text="OQ-048 — At what rate is a contributed (unpaid owner) shift costed in the IMPUTED labor view — the person's…" _note="owner: alex · decide by: 2027-03-15"/>
         <outline text="OQ-049 — Does v2 carry the operational collaboration surface — the board (`cards`, `lists`) and the comment…" _note="owner: alex · decide by: 2027-01-31"/>
       </outline>
       <outline text="Conflicts (0 open)">
-        <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labour) or an own long-haul run (labour-bearing)?…" _note="Decides whether a trucked fulfillment absorbs labour cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
+        <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labor) or an own long-haul run (labor-bearing)? T…" _note="Decides whether a trucked fulfillment absorbs labor cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
           <outline text="blocks OQ-010"/>
           <outline text="blocks ADR-0011"/>
         </outline>
@@ -200,7 +200,7 @@
           <outline text="blocks OQ-007"/>
           <outline text="blocks ADR-0011"/>
         </outline>
-        <outline text="HOT-003 — Does the `Crew` product line already carry labour today?" _note="If Crew already carries labour, the new cost-type dimension partly duplicates it and the migration has to decide which one survives.">
+        <outline text="HOT-003 — Does the `Crew` product line already carry labor today?" _note="If Crew already carries labor, the new cost-type dimension partly duplicates it and the migration has to decide which one survives.">
           <outline text="blocks OQ-011"/>
         </outline>
         <outline text="HOT-004 — Should long-haul absorb a byproduct-loss premium on top of the person-day, mirroring what the custo…" _note="A long-haul run consumes a crew-day that cannot pick up byproducts, so its true opportunity cost exceeds its wage cost. Charging only the person-day understates long-haul COGS and makes long-haul look more profitable than it is.">
@@ -214,7 +214,7 @@
         <outline text="HOT-006 — Xero history migration: import known-defective lines, or restate? Roughly 90% of historical Xero li…" _note="Importing defective lines makes the new ledger's history agree with the filed tax position but carries the tracking defect forward permanently. Restating makes the new ledger correct but disagrees with what was filed.">
           <outline text="blocks OQ-012"/>
         </outline>
-        <outline text="HOT-007 — Are fulfillment legs first-class recorded events, or derived from orders? The current system derive…" _note="This is the single decision the whole labour-costing design rests on. Derived legs cannot carry an actor, a clock-in, or a shift id, so COGS labour allocation is impossible without first-class legs.">
+        <outline text="HOT-007 — Are fulfillment legs first-class recorded events, or derived from orders? The current system derive…" _note="This is the single decision the whole labor-costing design rests on. Derived legs cannot carry an actor, a clock-in, or a shift id, so COGS labor allocation is impossible without first-class legs.">
           <outline text="blocks OQ-001"/>
           <outline text="blocks ADR-0011"/>
         </outline>
@@ -224,7 +224,7 @@
         <outline text="HOT-009 — `invoice.status` carries two different semantics in one field — an assigned lifecycle fact (draft /…" _note="ADR-0014 makes derived state a rebuildable projection and assigned state a recorded fact. A field that is both cannot be either, and the two live defect populations are one of each: the derived half going stale, and the lifecycle half disagreeing with the balance. Decomposing the field is a precondition for applying ADR-0014 to invoices at all.">
           <outline text="blocks ADR-0014"/>
         </outline>
-        <outline text="HOT-010 — The charter and `posting-rules.yaml` specify standard-cost absorption with a `labour_variance` post…" _note="A rate variance cannot exist where there is no standard rate, so `labour_variance` as specified has no input and would be a posting rule that can never fire. Absorption itself survives and must not be discarded with it: a guaranteed 8 hours means paid-but-unworked time is a real cost attributable to no job, so `COGS-Labour Absorbed` and `COGS-Unabsorbed Labour` both stand. What they measure is UTILISATION, not rate deviation, and the posting rules must say which.">
+        <outline text="HOT-010 — The charter and `posting-rules.yaml` specify standard-cost absorption with a `labor_variance` posti…" _note="A rate variance cannot exist where there is no standard rate, so `labor_variance` as specified has no input and would be a posting rule that can never fire. Absorption itself survives and must not be discarded with it: a guaranteed 8 hours means paid-but-unworked time is a real cost attributable to no job, so `COGS-Labor Absorbed` and `COGS-Unabsorbed Labor` both stand. What they measure is UTILISATION, not rate deviation, and the posting rules must say which.">
           <outline text="blocks OQ-018"/>
           <outline text="blocks OQ-019"/>
         </outline>
@@ -246,8 +246,8 @@
           <outline text="blocks REQ-LED-001"/>
         </outline>
       </outline>
-      <outline text="Decisions (21 in force, 11 proposed)">
-        <outline text="In force (21)">
+      <outline text="Decisions (22 in force, 10 proposed)">
+        <outline text="In force (22)">
           <outline text="ADR-0001 — Replace Xero with an in-house ledger" _note="**In the context of** owning the order-to-invoice path but renting the ledger, **facing** a tracking-dimension defect that Xero silently absorbs and a costing model Xero cannot express, **we decided** to build the general ledger in-house, **to achieve** dimensional postings that cannot be null and a labour-absorption model we control, **accepting** that a large amount of unglamorous accounting surface area becomes ours to build and keep correct."/>
           <outline text="ADR-0002 — Bank feed sourced from Plaid, single Chase account" _note="**In the context of** needing bank transactions now that Xero's feed goes away, **facing** one bank and one account, **we decided** to source the feed from Plaid, **to achieve** a working feed without a bank-specific integration, **accepting** that Plaid's transaction model is a consumer-fintech model, not an accounting bank feed."/>
           <outline text="ADR-0003 — MongoDB for documents and masterfiles; TigerBeetle for the ledger" _note="**In the context of** replacing Firestore, **facing** two genuinely different storage problems — nested mutable business documents and an immutable balance-bearing ledger — **we decided** to use MongoDB for documents and TigerBeetle for the ledger, **to achieve** a ledger with enforced double-entry and real throughput alongside a document store that fits the order shape, **accepting** a two-store commit problem that has to be specified formally."/>
@@ -267,15 +267,16 @@
           <outline text="ADR-0023 — Native Node-API addons load under Deno; the deployment unit is a self-extracting compiled binary" _note="**In the context of** a Deno API that must load three npm packages with native or native-adjacent dependencies, **facing** a `deno compile` deployment unit whose Node-API support was entirely unmeasured, **we decided** to ship a `deno compile --self-extracting` binary and forbid `--bundle`, **to achieve** a single deployable artifact on plain VMs, **accepting** a ~364 MB binary, a first-run extraction step, and a flag whose necessity nothing type-checks."/>
           <outline text="ADR-0024 — DuckDB is reached natively and server-side; client-side reporting is rejected" _note="**In the context of** sealed-period Parquet as the closed-period reporting authority (ADR-0017), **facing** a choice between the native DuckDB addon, WASM in the API process, and WASM in the browser, **we decided** to reach DuckDB natively and server-side and to reject client-side reporting, **to achieve** exact integer reporting over an artifact the server controls, **accepting** that reporting stays an API surface we have to build."/>
           <outline text="ADR-0026 — The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time" _note="**In the context of** a fixed-asset register that must produce a full P&amp;L _and balance sheet_ on both a GAAP and a tax basis across years, **facing** a fleet where a §179 election expenses an asset in year 1 that GAAP carries for 5, 10 or 20, **we decided** that only the GAAP book posts to the general ledger and the tax book is derived at report time from the register's per-book schedules, **to achieve** two complete sets of statements without a second write path, **accepting** that the tax book has no double-entry enforcement of its own and is only as good as its derivation."/>
+          <outline text="ADR-0030 — Vehicle cost moves from operating expense into COGS, absorbed and unabsorbed" _note="**In the context of** delivery being the largest tracked product line and carrying almost no cost, **facing** vehicle running costs sitting in operating expenses where no product line can see them, **we decided** to move vehicle cost into COGS on the same absorbed/unabsorbed shape ADR-0019 gave labor, absorbing on the shift's own allocation rows at a rate per computed mile, **to achieve** a delivery cost that is complete enough to allocate, **accepting** a second utilisation measure to maintain and a rate variance that labor does not have."/>
           <outline text="ADR-0034 — An accepted ADR is a historical record of the decision as taken; corrections live outside it and superseding is reserved for re-deciding" _note="**In the context of** two accepted ADRs whose evidence was later corrected, **facing** a lifecycle rule that forbids editing them and a supersede mechanism that would mean re-deciding things nobody disputes, **we decided** that an accepted ADR is a historical record of the decision as taken, **to achieve** an `adr/` directory that can be trusted to say what was actually believed and when, **accepting** that a reader of an ADR cannot tell from the ADR alone that one of its claims has since been retracted."/>
           <outline text="ADR-0036 — The ledger carries keys, not classifications — product line is derived at report time" _note="**In the context of** ADR-0029 having made allocation a reporting act, **facing** a chart that also carried the reporting _classification_ on the posting, **we decided** that a posting records keys — causal order(s), invoice, line — and never a product line, **to achieve** a ledger whose facts do not move when a category does, **accepting** that no dimensional balance can be read from the ledger without joining to the product master."/>
         </outline>
-        <outline text="Proposed (11)">
+        <outline text="Proposed (10)">
           <outline text="ADR-0015 — Inventory reservations are TigerBeetle pending transfers, over the operational window only" _note="review by: 2026-11-01 · **In the context of** wanting order state derivable and oversell prevented in the database, **facing** a balance model with no time dimension and an availability question that is entirely about time, **we decided** to model reservations as two-phase transfers over the operational window only, **to achieve** custody oversell that is unrepresentable and a fulfillment state that is derived, **accepting** that future-dated booking conflicts stay with the interval engine.">
             <outline text="blocked on SPIKE-002"/>
             <outline text="blocked on SPIKE-012"/>
           </outline>
-          <outline text="ADR-0019 — Labour costing is actual; absorption measures utilisation, not rate variance" _note="review by: 2026-10-01 · **In the context of** bringing crew cost into COGS against the job that caused it, **facing** a business that pays actual per-person wages rather than standard rates, **we decided** to cost labour at actual and let absorption measure utilisation, **to achieve** a variance that reflects something real, **accepting** that the charter's &quot;standard-cost absorption&quot; wording no longer describes the model.">
+          <outline text="ADR-0019 — Labor costing is actual; absorption measures utilisation, not rate variance" _note="review by: 2026-10-01 · **In the context of** bringing crew cost into COGS against the job that caused it, **facing** a business that pays actual per-person wages rather than standard rates, **we decided** to cost labor at actual and let absorption measure utilisation, **to achieve** a variance that reflects something real, **accepting** that the charter's &quot;standard-cost absorption&quot; wording no longer describes the model.">
             <outline text="blocked on HOT-003"/>
             <outline text="blocked on HOT-004"/>
             <outline text="blocked on HOT-010"/>
@@ -299,12 +300,9 @@
           </outline>
           <outline text="ADR-0027 — Retain Mapbox for geocoding and Resend for transactional email, at the boundary" _note="review by: 2026-10-01 · **In the context of** a rebuild that replaces the ledger, the datastore and the host, **facing** two external services that already work and are not the reason for the rebuild, **we decided** to retain Mapbox for geocoding and Resend for transactional email as boundary services with no domain footprint, **to achieve** a smaller cutover surface, **accepting** two live third-party dependencies that every test must be prevented from reaching."/>
           <outline text="ADR-0028 — The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability" _note="review by: 2026-10-01 · **In the context of** ADR-0013 moving the system onto a host CFS operates, **facing** two service groups already running as containers, **we decided** to retain Gotenberg for document rendering and the full VictoriaMetrics stack for observability on that same host, **to achieve** one deployment unit and no new vendors, **accepting** that CFS is on the hook when either is down and that both fail quiet rather than loud."/>
-          <outline text="ADR-0029 — The ledger records un-allocated facts; allocation is a specified reporting act" _note="review by: 2026-10-01 · **In the context of** labour and vehicle costs arriving in the ledger for the first time, **facing** a choice about whether a delivery's cost is posted to the goods it delivered or to delivery itself, **we decided** that the ledger records costs and revenues at the grain they occurred and never allocates, and that allocation happens once, in a specified report, **to achieve** a record that can answer questions nobody has asked yet, **accepting** that the un-allocated view shows the largest tracked product line running at a structural loss and must never be read as a managed P&amp;L.">
+          <outline text="ADR-0029 — The ledger records un-allocated facts; allocation is a specified reporting act" _note="review by: 2026-10-01 · **In the context of** labor and vehicle costs arriving in the ledger for the first time, **facing** a choice about whether a delivery's cost is posted to the goods it delivered or to delivery itself, **we decided** that the ledger records costs and revenues at the grain they occurred and never allocates, and that allocation happens once, in a specified report, **to achieve** a record that can answer questions nobody has asked yet, **accepting** that the un-allocated view shows the largest tracked product line running at a structural loss and must never be read as a managed P&amp;L.">
             <outline text="blocked on OQ-006"/>
             <outline text="blocked on OQ-018"/>
-          </outline>
-          <outline text="ADR-0030 — Vehicle cost moves from operating expense into COGS, absorbed and unabsorbed" _note="review by: 2026-11-01 · **In the context of** delivery being the largest tracked product line and carrying almost no cost, **facing** vehicle running costs sitting in operating expenses where no product line can see them, **we decided** to move vehicle cost into COGS on the same absorbed/unabsorbed shape ADR-0019 gave labour, **to achieve** a delivery cost that is complete enough to allocate, **accepting** a second utilisation measure to maintain and a mileage-or-hours basis that has to be captured.">
-            <outline text="blocked on SPIKE-005"/>
           </outline>
           <outline text="ADR-0031 — The official product-line P&amp;L allocates by goods revenue on the causal order, declared as a proxy" _note="review by: 2026-11-01 · **In the context of** ADR-0029 promising exactly one official allocation and not saying what it is, **facing** three candidate bases that reassign up to a third of the largest product line's revenue between them, **we decided** to allocate by goods revenue on the causal order and to record in the report that this is a proxy rather than a cost driver, **to achieve** one reproducible margin per product line, **accepting** that the basis is the weakest tier in the standard criterion and stays that way until the shipping specs are populated.">
             <outline text="blocked on OQ-006"/>
@@ -474,7 +472,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (56 unpromoted of 75)" _note="no drops pending">
+      <outline text="Capture (58 unpromoted of 77)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -521,12 +519,14 @@
         <outline text="Correction — two of the three &quot;not reachable&quot; references in the vendor-side survey were a malformed…" _note="inbox/2026-08-16-correction-two-of-three-unreachable-references-were-a-bad-query-and-sap-models-this-case-exactly.md"/>
         <outline text="`labor_line` is the allocation pool's COST SELECTOR — the product-line P&amp;L distributes `labor_line:…" _note="inbox/2026-08-16-labor-line-is-the-pools-cost-selector-and-a-report-is-a-selector-crossed-with-a-base.md"/>
         <outline text="Seven owner rulings on the keys-not-classifications design — line identity is `item.path`, an align…" _note="inbox/2026-08-16-owner-rulings-line-identity-is-item-path-ephemeral-reports-are-never-sealed-and-cost-type-becomes-labour-line.md"/>
+        <outline text="Owner rulings on ADR-0030 — the vans are used EXCLUSIVELY for delivery and trash, rented trucks joi…" _note="inbox/2026-08-16-owner-rulings-vehicles-are-exclusively-revenue-producing-rented-trucks-join-the-pool-and-the-basis-is-computed-distance.md"/>
         <outline text="Owner — shipping.weight will exist for MANY products by the time basis v2 is in dev, which makes pa…" _note="inbox/2026-08-16-owner-shipping-weight-will-exist-for-many-products-by-the-time-v2-is-in-dev.md"/>
         <outline text="Combined survey — when does a vendor-side amount become revenue rather than an adjustment to cost?…" _note="inbox/2026-08-16-survey-a-vendor-side-amount-becomes-revenue-only-where-control-or-a-markup-does.md"/>
         <outline text="Survey — every one of six references keeps the analytical dimension in the same durable store as th…" _note="inbox/2026-08-16-survey-all-six-references-keep-the-dimension-in-the-same-store-as-the-balance-and-only-odoo-splits-the-record.md"/>
         <outline text="Survey — an unpaid owner shift is not an expense under GAAP, and all six references fence imputed l…" _note="inbox/2026-08-16-survey-an-unpaid-owner-shift-is-not-an-expense-and-every-reference-fences-imputed-labour-out-of-the-statements.md"/>
         <outline text="Survey — the accrued-expense account CFS needs is a MATCHED clearing account, not a period-end esti…" _note="inbox/2026-08-16-survey-the-accrued-liability-is-a-matched-clearing-account-and-the-bill-reclassifies-rather-than-reverses.md"/>
         <outline text="Survey — five of six references put the customer on the SUBLEDGER and dimensions on the GL, and Odo…" _note="inbox/2026-08-16-survey-the-party-is-a-subledger-key-and-the-dimension-is-a-gl-slice-and-they-ride-different-legs.md"/>
+        <outline text="Survey — the rental industry puts vehicle cost in cost of rental revenue, and five of six systems k…" _note="inbox/2026-08-16-survey-vehicle-cost-is-cost-of-rental-revenue-and-every-system-absorbs-it-at-a-rate-rather-than-recoding-the-purchase.md"/>
         <outline text="The owner's reason for allocation-as-reporting is RE-RUNNABILITY — multiple bases, and re-allocatin…" _note="inbox/2026-08-16-the-owner-wants-allocation-re-runnable-and-nothing-in-the-spec-carries-the-key-it-would-re-run-on.md"/>
         <outline text="The product-line × revenue-account matrix rebuilt as a re-runnable artifact with the product-master…" _note="inbox/2026-08-16-the-product-line-matrix-rebuilt-with-the-master-join-denorm-and-master-now-agree-on-every-line.md"/>
         <outline text="HOT-013's budget arithmetic is wrong twice over — `Transfer.code` is an uncounted fourth discretion…" _note="inbox/2026-08-16-the-transfer-field-budget-is-four-fields-not-three-and-both-candidate-evictions-are-already-refused.md"/>

@@ -26,7 +26,7 @@ Three statements disagreed, and all three were load-bearing (HOT-011):
 - **`ledger/dimensions.yaml`** — `product_line` on revenue and COGS, `cost_type` on COGS only.
 - **The chart itself** — accounts where even `product_line` has no defensible value.
 
-`cost_type`'s own description is _"what kind of work a **labour** posting represents"_, with values
+`cost_type`'s own description is _"what kind of work a **labor** posting represents"_, with values
 `delivery / counter / warehouse`. None of them is true of a camera rental, or of
 `5000 Cost of Goods Sold: Retail Inventory`. Separately, `4820 Interest Income` and five siblings
 are `type: Other Income` live and arise from no sale at all
@@ -58,7 +58,7 @@ posting that does not declare it is **rejected**, and so is one declaring `""`.
 
 ## Considered options
 
-- **Widen the requirement** — require `cost_type` everywhere and mint a "not labour" value for it.
+- **Widen the requirement** — require `cost_type` everywhere and mint a "not labor" value for it.
   Rejected: that value is a null with a name, and it would be the majority value.
 - **Permit an absent `product_line` on revenue.** Rejected: it re-permits the exact population
   REQ-LED-001 was written to stop — **15.00% of line revenue, re-measured 2026-08-10** — and on
@@ -78,7 +78,7 @@ posting that does not declare it is **rejected**, and so is one declaring `""`.
 
 - **Nothing infers a dimension requirement from a class.** The previous gate derived "needs
   `cost_type`" from `class == expense`, which was wrong for six COGS accounts the moment `cost_type`
-  became labour-only. A per-account list cannot be wrong by inference — only by being written wrong,
+  became labor-only. A per-account list cannot be wrong by inference — only by being written wrong,
   which is visible in review.
 - **`dimensions.yaml` and the chart become two authorities that check each other.** The chart says
   which postings owe a dimension; `dimensions.yaml` says which values it may take. Gate 10 checks
@@ -105,6 +105,6 @@ posting that does not declare it is **rejected**, and so is one declaring `""`.
   moves no money between P&L sections, which is what ADR-0020 requires ("the restatement must not
   alter any amount"). Reassigning them to 4800 would have.
 - **`cost_type` has exactly one account today.** A dimension with one consumer is worth re-examining
-  when the labour rules land: if `shift_recorded` (blocked on OQ-018, OQ-019, OQ-024) ends up
+  when the labor rules land: if `shift_recorded` (blocked on OQ-018, OQ-019, OQ-024) ends up
   splitting across more accounts, the set grows; if it does not, `cost_type` may be a property of
   the shift rather than a ledger dimension at all.

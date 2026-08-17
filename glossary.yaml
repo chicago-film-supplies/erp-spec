@@ -12,7 +12,7 @@ terms:
     definition: >-
       One directed movement of equipment between CFS and a destination — outbound (CFS delivers)
       or inbound (CFS collects). A leg is the unit that consumes crew time and vehicle capacity,
-      and therefore the unit labour cost attaches to.
+      and therefore the unit labor cost attaches to.
     aliases: [field leg, run]
     contexts: [fulfillment]
     source: inbox/2026-08-08-shift-id-on-every-leg.md
@@ -99,7 +99,7 @@ terms:
       are zero — verified. The handling bucket exists because the dimensional data never got
       captured and probably never will.
 
-  # ── Labour and costing ──────────────────────────────────────────────────────
+  # ── Labor and costing ──────────────────────────────────────────────────────
 
   - term: shift
     definition: >-
@@ -127,7 +127,7 @@ terms:
   - term: byproduct
     definition: >-
       Work performed during a shift that is not the causal job. A byproduct absorbs zero
-      incremental labour cost — it rode along on a crew-day that was already being paid for.
+      incremental labor cost — it rode along on a crew-day that was already being paid for.
     aliases: [piggyback, ride-along]
     contexts: [fulfillment, ledger]
     source: inbox/2026-08-08-byproduct-causal-job-rule.md
@@ -138,28 +138,28 @@ terms:
 
   - term: labor line
     definition: >-
-      A REPORTING classification of labour cost — `delivery` | `counter` | `warehouse` |
+      A REPORTING classification of labor cost — `delivery` | `counter` | `warehouse` |
       `trash_&_cleanup` | `shipping_&_handling` | `trucking` | `crew`. Answers "what kind of work was
       this", independent of what product line it served. **Derived at report time from the shift's
       own allocation row; never carried on a posting** (ADR-0036, OQ-042).
-    aliases: [cost type, labour type, activity type, labour line]
+    aliases: [cost type, labor type, activity type, labor line]
     contexts: [ledger, fulfillment]
     source: ledger/dimensions.yaml
     verified: true
     notes: >-
       ⚠️ **Renamed from `cost_type` and grown 3 values → 7 on 2026-08-16** (ADR-0036). `cost_type` was
-      too broad — it named a kind-of-cost taxonomy while carrying only kinds of labour — and
+      too broad — it named a kind-of-cost taxonomy while carrying only kinds of labor — and
       `labor_line` pairs with `product_line` by design.
       ⚠️ **AMERICAN spelling, decided by the live books rather than by taste**: of 134 live accounts,
       `4120 Contract **Labor** Income` is the only one naming the concept and **no account contains
-      "Labour"** (`api:2026-08-16:db_chart_of_accounts_query`). The repo's British prose is spec-side
-      drift from the incumbent chart. The field was never called `labour_line` in any artifact, so
+      "Labor"** (`api:2026-08-16:db_chart_of_accounts_query`). The repo's British prose is spec-side
+      drift from the incumbent chart. The field was never called `labor_line` in any artifact, so
       the rename went `cost_type` → `labor_line` directly. ⚠️ **The surrounding prose in this repo is
       still British and is deliberately NOT swept** — 229 occurrences across ~30 files, six of them
       in ADRs whose bodies are frozen (ADR-0001, ADR-0011, ADR-0025, ADR-0029), so a spelling sweep
       could never be complete and a half-converted one reads as an unfinished job. **Identifiers and
       account names are American; prose is left alone.**
-      This definition read "one of the two mandatory reporting dimensions ON A LABOUR POSTING" until
+      This definition read "one of the two mandatory reporting dimensions ON A LABOR POSTING" until
       2026-08-16; no posting carries it. `counter` and `warehouse` bill nobody, which is why this is
       a separate axis rather than a re-use of `product line`.
 
@@ -190,9 +190,9 @@ terms:
 
   - term: standard cost
     definition: >-
-      A predetermined per-unit labour cost applied to a job when it is performed, rather than the
-      actual cost of the crew-day. **CFS does not use standard labour rates and the target system
-      does not implement this** — ADR-0019 costs labour at actual, from a per-contact wage. The
+      A predetermined per-unit labor cost applied to a job when it is performed, rather than the
+      actual cost of the crew-day. **CFS does not use standard labor rates and the target system
+      does not implement this** — ADR-0019 costs labor at actual, from a per-contact wage. The
       term is kept because it is needed to read the charter's earlier wording and the inbox note
       that introduced it, not because it describes anything CFS does.
     aliases: [applied cost]
@@ -206,20 +206,20 @@ terms:
 
   - term: variance
     definition: >-
-      Actual labour cost incurred minus standard cost absorbed. **No such quantity exists in the
+      Actual labor cost incurred minus standard cost absorbed. **No such quantity exists in the
       target system** — a rate variance cannot exist where there is no standard rate (ADR-0019,
-      HOT-010), and the `labour_variance` posting rule that would have computed it was removed
+      HOT-010), and the `labor_variance` posting rule that would have computed it was removed
       because it could never fire. What survives is UTILISATION: the split between absorbed and
-      unabsorbed labour, which measures how much paid time reached a job, not how far a rate
+      unabsorbed labor, which measures how much paid time reached a job, not how far a rate
       deviated.
-    aliases: [labour variance, absorption variance]
+    aliases: [labor variance, absorption variance]
     contexts: [ledger]
     source: inbox/2026-08-08-standard-cost-with-variance.md
     verified: true
 
-  - term: unabsorbed labour
+  - term: unabsorbed labor
     definition: >-
-      The residual labour cost that no causal job absorbed — guaranteed-but-unworked hours and
+      The residual labor cost that no causal job absorbed — guaranteed-but-unworked hours and
       idle time — posted to `5801 Cost of Goods Sold: Wages (Unabsorbed)`, whose postings declare
       `causal_orders: null` by design. This account IS the idle-capacity KPI: it is not a plug or a
       rounding sink, and a causal order on it would let idle time be attributed to a job, which is
@@ -228,7 +228,7 @@ terms:
       by design" until 2026-08-16 (ADR-0036).
     aliases: [idle capacity, unabsorbed]
     contexts: [ledger]
-    source: adr/ADR-0019-labour-costing-is-actual.md
+    source: adr/ADR-0019-labor-costing-is-actual.md
     verified: true
 
   # ── Accounting core ─────────────────────────────────────────────────────────
@@ -345,9 +345,9 @@ terms:
 
   - term: trucking
     definition: >-
-      An own long-haul run, crewed by CFS. Labour-bearing — it absorbs a person-day into COGS and
+      An own long-haul run, crewed by CFS. Labor-bearing — it absorbs a person-day into COGS and
       generates a shift, unlike `shipping`, which is third-party freight and carries no wage
-      labour.
+      labor.
     aliases: [long haul]
     contexts: [fulfillment, ordering]
     source: "OQ-010 (repo owner, 2026-08-09); api:2026-08-08:db_products_query tracking_category_name=Transport"
@@ -356,7 +356,7 @@ terms:
     notes: >-
       Resolved OQ-010 / HOT-001 on 2026-08-09. The supporting evidence: `Trucking` and `Shipping`
       are both products in the `Transport` product line, but `Trucking` books to COA 4100 — the
-      same revenue account as Crew labour and Delivery services — while `Shipping` books to its
+      same revenue account as Crew labor and Delivery services — while `Shipping` books to its
       own COA 4150. Per OQ-006 the person-day it absorbs is the ACTUAL cost; the premium the
       customer pays for a long haul is margin, not cost.
 
