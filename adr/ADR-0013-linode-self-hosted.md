@@ -1,14 +1,14 @@
 ---
 id: ADR-0013
 title: Self-host on Linode, with Caddy fronting TLS
-status: proposed
+status: accepted
 date: 2026-08-09
-review_by: 2026-10-01
 deciders: [repo owner]
 contexts: [ledger, ordering, billing, fulfillment]
 relates_to: [ADR-0003, ADR-0004, ADR-0012, SPIKE-011]
 supersedes:
 superseded_by:
+frozen_sha256: 6de21e416f135d818778e952dc020693eb169514d28882fe2d6e76e1e695b523
 ---
 
 > **In the context of** rebuilding on a stack whose stores are all self-hosted anyway, **facing** a

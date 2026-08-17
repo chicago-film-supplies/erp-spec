@@ -1,13 +1,13 @@
 ---
 id: ADR-0018
 title: A plain chart of accounts, with dimensions carried on the posting
-status: accepted
+status: superseded
 date: 2026-08-09
 deciders: [repo owner]
 contexts: [ledger]
 relates_to: [HOT-005, OQ-009, ADR-0017, ADR-0003, HOT-013]
 supersedes: ADR-0008
-superseded_by:
+superseded_by: ADR-0036
 frozen_sha256: 7072fbe846707330be28f2eed811c1494ffa56bcc3aaf4f4b996cba28eb3cec6
 ---
 

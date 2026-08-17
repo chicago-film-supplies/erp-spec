@@ -1,14 +1,14 @@
 ---
 id: ADR-0034
 title: An accepted ADR is a historical record of the decision as taken; corrections live outside it and superseding is reserved for re-deciding
-status: proposed
+status: accepted
 date: 2026-08-16
-review_by: 2026-11-15
 deciders: [repo owner]
 contexts: [ledger, billing]
 relates_to: [HOT-012, HOT-013, ADR-0001, ADR-0018, ADR-0025]
 supersedes:
 superseded_by:
+frozen_sha256: 5af782864db53611011a1514a5221804baed40d79ab0f222314e7797dc02da8b
 ---
 
 > **In the context of** two accepted ADRs whose evidence was later corrected, **facing** a lifecycle
