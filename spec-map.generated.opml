@@ -318,7 +318,7 @@
             <outline text="blocked on OQ-038"/>
             <outline text="blocked on OQ-040"/>
           </outline>
-          <outline text="ADR-0037 — A decision asserts addressable CLAIMS, and a premise is typed apart from a decision" _note="review by: 2026-12-01 · **In the context of** a spec whose authority is prose, **facing** a measured 22:1 mismatch between what is cited (a document) and what is claimed (about twenty statements inside it), **we decided** that an ADR additionally asserts individually addressable claims, typed as decision or premise, **to achieve** corrections that can be swept and premises that can go stale without touching a frozen decision, **accepting** a second surface on every ADR and a convention that only pays off as it is adopted.">
+          <outline text="ADR-0037 — An id carries meaning where it is used — a headline on every id, and addressable claims inside a decision" _note="review by: 2026-12-01 · **In the context of** a spec whose authority is prose, **facing** a measured 22:1 mismatch between what is cited (a document) and what is claimed (about twenty statements inside it), **we decided** that an ADR additionally asserts individually addressable claims, typed as decision or premise, **to achieve** corrections that can be swept and premises that can go stale without touching a frozen decision, **accepting** a second surface on every ADR and a convention that only pays off as it is adopted.">
             <outline text="blocked on HOT-016"/>
           </outline>
         </outline>

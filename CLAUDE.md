@@ -152,6 +152,17 @@ Not every tool has an upstream dump, and the difference is worth knowing before 
 
 ## Footguns — check these, they have all bitten
 
+**Citing**
+
+- **Gloss an id on FIRST mention in a file**: `ADR-0030 (vehicle cost into COGS)`,
+  `OQ-050 (does the
+  EOR reconcile per person)`. **≤12 words, ideally under 5.** Bare ids
+  thereafter.
+- A bare id is unreadable to everyone who did not write it — including you, next week. ⚠️ `title:`
+  is 11–23 words and `question:` / `statement:` are sentences; **none of them is the gloss.** Write
+  a short one.
+- Cite the ADR that DECIDED it, not the one that mentions it.
+
 **Claims**
 
 - Amending a body is not amending a decision. Sweep the **title, the summary blockquote**, the chart

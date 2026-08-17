@@ -1,6 +1,7 @@
 ---
 id: ADR-0037
-title: A decision asserts addressable CLAIMS, and a premise is typed apart from a decision
+title: An id carries meaning where it is used — a headline on every id, and addressable claims inside a decision
+headline: ids carry meaning where used
 status: proposed
 date: 2026-08-17
 review_by: 2026-12-01
@@ -68,6 +69,36 @@ claim; citing the bare ADR remains legal and means "this decision as a whole".
 **`asserts:` is adopted going forward, not back-migrated.** New and amended ADRs carry it; the
 existing 36 gain it only when they are next touched for another reason.
 
+### And every id-bearing entity carries a `headline:`
+
+**Amended 2026-08-17, on the owner's observation, and the observation was a live demonstration:**
+the session recommending next steps wrote "ADR-0037" three times without saying what it was, in the
+message asking which work to do — and the owner had to ask.
+
+⚠️ **Measured: none of the four id-bearing kinds has a short form.** `ADR.title` runs **11 to 23
+words** (ADR-0019's is 23); `OQ.question` and `SPIKE.question` are full sentences; `HOT.statement`
+is a paragraph. Nothing is inlineable, so every citation in prose is a bare id.
+
+⇒ **`headline:` — at most 12 words, ideally under 5** — on `ADR`, `OQ`, `HOT` and `SPIKE`. It is
+**distinct from** `title` / `question` / `statement`, which are unchanged: those say what the thing
+IS, and a headline is what it is CALLED when referred to elsewhere.
+
+```yaml
+id: ADR-0030
+headline: vehicle cost into COGS
+title: Vehicle cost moves from operating expense into COGS, absorbed and unabsorbed
+```
+
+**Prose citing an id carries the headline on FIRST mention in a file** —
+`ADR-0030 (vehicle cost
+into COGS)` — and bare ids thereafter. First-mention only, because that is
+where a reader needs it and repeating it everywhere is the noise that gets conventions abandoned.
+
+⚠️ **This is the same insight as `asserts:` at a different scale.** `asserts:` makes a claim
+addressable INSIDE a document; `headline:` makes the document meaningful AT the point of citation.
+Both exist because an id that carries no meaning where it is used forces the reader to go and look —
+and the reader usually does not.
+
 ## Considered options
 
 - **A separate facts registry** — one file owning every measured fact, with prose citing ids.
@@ -102,5 +133,13 @@ existing 36 gain it only when they are next touched for another reason.
   that carry `asserts:`. ⚠️ That is a check whose silence means "not adopted here" rather than
   "nothing wrong here", and it must say so in its own output or it will be misread exactly the way
   `m3` is misread today.
+- **`headline:` is cheap to add and cheap to check**, and unlike `asserts:` it CAN be back-migrated
+  in one pass — 36 ADRs, ~50 OQs, 16 hotspots, 12 spikes. ⚠️ Its gate is the harder half: detecting
+  a bare id that owes a gloss means detecting the ABSENCE of a phrase, so the workable form is "the
+  first mention of an id in a file is followed by a parenthetical", which is crude and will need an
+  exemption list. **State it as crude rather than selling it as precise.**
+- ⚠️ **A headline is a claim too, and it will rot.** `ADR-0019`'s own title asserted something false
+  for a day before anyone noticed. A short form is easier to leave stale than a long one, precisely
+  because it is glanced at rather than read.
 - **Nothing about the three lifecycles changes.** `inbox/` stays append-only, `adr/` bodies stay
   immutable at acceptance, and `contexts/` stays refactorable.

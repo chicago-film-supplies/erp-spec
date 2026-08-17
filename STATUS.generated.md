@@ -85,7 +85,7 @@ None.
 | `ADR-0031` | The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy | 2026-11-01 | — | `OQ-006` `OQ-018` `OQ-031` `OQ-032` `OQ-033` |
 | `ADR-0032` | The organization tree is a liability tree; projects and settlement points are addressing beneath it | 2026-11-15 | — | `OQ-035` `OQ-036` `OQ-038` `OQ-039` `HOT-006` |
 | `ADR-0033` | A document is addressed to exactly one node by a level-tagged reference, and unallocated credit sits at the settlement point | 2026-11-15 | — | `OQ-030` `OQ-038` `OQ-040` |
-| `ADR-0037` | A decision asserts addressable CLAIMS, and a premise is typed apart from a decision | 2026-12-01 | — | `HOT-016` |
+| `ADR-0037` | An id carries meaning where it is used — a headline on every id, and addressable claims inside a decision | 2026-12-01 | — | `HOT-016` |
 
 ## Spikes
 
