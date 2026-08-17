@@ -154,15 +154,18 @@ report:
       cost_sources:
         labor_line: delivery
         labor_accounts: [5800]
-        pending: >-
-          Vehicle COGS — **5900 absorbed / 5901 unabsorbed**, minted in the chart 2026-08-16 under
-          ADR-0030 with **6405 Vehicle: Rented** and the **6409** contra beside them. ⚠️ **ADR-0030 is
-          still `proposed`, so nothing may be named in `cost_sources` yet**
-          (`deferred_pools.vehicle_cogs`, erp-spec#12); accepting it makes this entry mechanical.
-          ✅ **It will absorb onto THIS POOL'''s own rows** — owner ruling 2026-08-16: vehicle cost
-          rides the shift'''s allocation rows, so a delivery shift'''s `labor_line` carries the vehicle
-          cost with it and no vehicle-side selector is needed. **This pool currently carries almost
-          no cost, which is exactly why the un-allocated view shows Delivery at a loss.**
+        vehicle_accounts: [5900, 5901, 5902]
+        vehicle_basis: computed_distance
+        note: >-
+          ✅ **Vehicle COGS is DECLARED, not pending — ADR-0030 accepted 2026-08-16.** 5900 absorbed
+          and 5901 unabsorbed for the owned fleet, 5902 for trucks hired to perform the work, which
+          post direct at actual and never enter the pool.
+          **It needs no selector of its own.** Vehicle cost absorbs onto the SHIFT'S allocation rows,
+          so a delivery shift's `labor_line` carries the vehicle cost with it — the same row, a
+          different amount. That is why this pool names accounts and not a second `labor_line`.
+          ⚠️ **This pool carried `cost_sources.pending` naming ADR-0030 from 2026-08-16 until the ADR
+          was accepted the same day.** The un-allocated view showed `Delivery` at a structural loss
+          for exactly as long as that was true.
       note: >-
         **Both accounts, and the delivery line's margin includes both.** 4100 Service Income is the
         delivery / setup / removal charge, a service a person performs and therefore labor-bearing;
@@ -254,14 +257,16 @@ report:
       cost_sources:
         labor_line: trucking
         labor_accounts: [5800]
-        pending: >-
-          Vehicle COGS, as for `delivery` — a haul is the most vehicle-intensive work CFS does, so
-          this pool'''s margin is the one most understated while ADR-0030 is unaccepted. ⚠️ Its
-          accounts are no longer unchosen (5900 / 5901, with 6405 and 6409 beside them) **and neither
-          is the basis**: owner, 2026-08-16, it is **computed Mapbox distance**, plausibility-gated,
-          derived from coordinates `destinations` already holds. ⚠️ That retired a blocker this file
-          and erp-spec#12 both asserted — "mileage is not captured" is true and "mileage is not
-          available" was not. What is pending is the ACCEPTANCE.
+        vehicle_accounts: [5900, 5901, 5902]
+        vehicle_basis: computed_distance
+        note: >-
+          ✅ **Declared rather than pending — ADR-0030 accepted 2026-08-16.** A haul is the most
+          vehicle-intensive work CFS does, so this is the pool whose margin the old understatement
+          bit hardest. Same mechanism as `delivery`: the cost arrives on the shift's allocation rows
+          and this pool's `labor_line: trucking` carries it.
+          ⚠️ **5902 matters most HERE.** A long haul is the likeliest job to be run on a hired truck,
+          and a hired truck posts direct at actual — so this pool's cost side is part measured
+          invoice and part rate-absorbed, and the two must not be read as one number.
       reason: >-
         **Severable — carries its own margin.** OQ-034, owner 2026-08-16: "trucking is our own
         longer or bigger haul that doesn't fit into the standard delivery charge paradigm, it should
@@ -331,6 +336,14 @@ report:
       cost_sources:
         labor_line: trash_&_cleanup
         labor_accounts: [5800]
+        vehicle_accounts: [5900, 5901, 5902]
+        vehicle_basis: computed_distance
+        note: >-
+          ✅ **The vans serve THIS line too.** Owner, 2026-08-16: the two owned vehicles are used
+          exclusively for delivery **and trash removal**. ⚠️ That is why the vehicle pool could never
+          have been one undifferentiated number — `Delivery` spreads onto goods and `Trash & Cleanup`
+          is severable and keeps its own margin, so something had to say which. The shift's
+          `labor_line` does, which is the whole reason absorption rides those rows.
       reason: >-
         **Severable**, on the same criterion as `crew`: a wrap cleanup is a service contracted on its
         own terms, not a joint cost of the rental. Spreading $144,975 onto goods that did not cause
@@ -414,23 +427,6 @@ report:
   # every entry owes a tracked issue, and gate 13 fails on one that does not carry it. A deferral
   # that nobody is holding is indistinguishable from an omission.
   deferred_pools:
-    - id: vehicle_cogs
-      issue: erp-spec#12
-      reason: >-
-        ADR-0030 moves vehicle running cost into COGS on the 5800/5801 absorbed/unabsorbed pattern.
-        ⚠️ **The chart minted its four accounts on 2026-08-16 and the ADR is still `proposed`** —
-        5900 absorbed, 5901 unabsorbed, **6405 Vehicle: Rented** (delivery trucks hired in, which the
-        ADR had never seen) and the **6409** contra relieving the natural block, which the ADR'''s
-        first draft would have closed to new postings. Until it is accepted there is nothing to pool.
-        ✅ **The basis is settled and is NOT the leg-capture decision**: computed Mapbox distance,
-        plausibility-gated on the `urn:mbxadr-itp:` interpolation marker plus a service radius.
-        ⚠️ **2025 actuals across 6400–6404 "total $21,844.77" is UNPINNED** — the figure carries no
-        `source:` anywhere in this repo and cannot be re-derived from permitted sources
-        (`chart-of-accounts` mirrors without balances; this repo does not call Xero). It is the
-        number that sizes the pool. See the ADR's survey for what would measure it.
-        It is also the pool that most changes this report: `Delivery` currently carries almost no
-        cost, which is exactly why the un-allocated view shows it at a loss.
-
     - id: trip_travel
       issue: erp-spec#12
       reason: >-

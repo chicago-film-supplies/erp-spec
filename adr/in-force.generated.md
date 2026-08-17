@@ -118,6 +118,12 @@ Accepted and not superseded, as of the last `deno task gen`.
 
 > **In the context of** a fixed-asset register that must produce a full P&L _and balance sheet_ on both a GAAP and a tax basis across years, **facing** a fleet where a §179 election expenses an asset in year 1 that GAAP carries for 5, 10 or 20, **we decided** that only the GAAP book posts to the general ledger and the tax book is derived at report time from the register's per-book schedules, **to achieve** two complete sets of statements without a second write path, **accepting** that the tax book has no double-entry enforcement of its own and is only as good as its derivation.
 
+## [ADR-0030](ADR-0030-vehicle-cost-moves-into-cogs.md) — Vehicle cost moves from operating expense into COGS, absorbed and unabsorbed
+
+**Contexts:** ledger, fulfillment · **Decided:** 2026-08-09
+
+> **In the context of** delivery being the largest tracked product line and carrying almost no cost, **facing** vehicle running costs sitting in operating expenses where no product line can see them, **we decided** to move vehicle cost into COGS on the same absorbed/unabsorbed shape ADR-0019 gave labor, absorbing on the shift's own allocation rows at a rate per computed mile, **to achieve** a delivery cost that is complete enough to allocate, **accepting** a second utilisation measure to maintain and a rate variance that labor does not have.
+
 ## [ADR-0034](ADR-0034-an-accepted-adr-is-a-historical-record.md) — An accepted ADR is a historical record of the decision as taken; corrections live outside it and superseding is reserved for re-deciding
 
 **Contexts:** ledger, billing · **Decided:** 2026-08-16
@@ -141,7 +147,6 @@ Accepted and not superseded, as of the last `deno task gen`.
 | [ADR-0027](ADR-0027-retain-mapbox-and-resend-at-the-boundary.md) | Retain Mapbox for geocoding and Resend for transactional email, at the boundary | 2026-10-01 | — | — |
 | [ADR-0028](ADR-0028-self-hosted-tier-gotenberg-and-victoria.md) | The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability | 2026-10-01 | — | — |
 | [ADR-0029](ADR-0029-the-ledger-records-unallocated-facts.md) | The ledger records un-allocated facts; allocation is a specified reporting act | 2026-10-01 | — | OQ-006, OQ-018 |
-| [ADR-0030](ADR-0030-vehicle-cost-moves-into-cogs.md) | Vehicle cost moves from operating expense into COGS, absorbed and unabsorbed | 2026-11-01 | — | SPIKE-005 |
 | [ADR-0031](ADR-0031-allocation-basis-is-goods-revenue-on-the-causal-order.md) | The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy | 2026-11-01 | — | OQ-006, OQ-018, OQ-031, OQ-032, OQ-033 |
 | [ADR-0032](ADR-0032-the-customer-tree-is-a-liability-tree.md) | The organization tree is a liability tree; projects and settlement points are addressing beneath it | 2026-11-15 | — | OQ-035, OQ-036, OQ-038, OQ-039, HOT-006 |
 | [ADR-0033](ADR-0033-ar-addressing-is-header-only-and-credit-sits-at-the-settlement-point.md) | A document is addressed to exactly one node by a level-tagged reference, and unallocated credit sits at the settlement point | 2026-11-15 | — | OQ-030, OQ-038, OQ-040 |

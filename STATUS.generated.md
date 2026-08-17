@@ -13,7 +13,7 @@ is `deno task validate`'s judgement, not this file's.
 |---|---:|---|
 | Open questions | 11 open | 38 answered of 49 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 15 | 0 open |
-| Decisions (ADR) | 36 | 21 in force · 11 proposed |
+| Decisions (ADR) | 36 | 22 in force · 10 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 21 | 0 without a scenario |
 | Inbox | 77 | 58 unpromoted |
@@ -46,7 +46,7 @@ None.
 
 ## Decisions
 
-### In force (21)
+### In force (22)
 
 - `ADR-0001` — Replace Xero with an in-house ledger
 - `ADR-0002` — Bank feed sourced from Plaid, single Chase account
@@ -67,10 +67,11 @@ None.
 - `ADR-0023` — Native Node-API addons load under Deno; the deployment unit is a self-extracting compiled binary
 - `ADR-0024` — DuckDB is reached natively and server-side; client-side reporting is rejected
 - `ADR-0026` — The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time
+- `ADR-0030` — Vehicle cost moves from operating expense into COGS, absorbed and unabsorbed
 - `ADR-0034` — An accepted ADR is a historical record of the decision as taken; corrections live outside it and superseding is reserved for re-deciding
 - `ADR-0036` — The ledger carries keys, not classifications — product line is derived at report time
 
-### Proposed (11)
+### Proposed (10)
 
 | ADR | Title | Review by | Supersedes on acceptance | Blocked on |
 |---|---|---|---|---|
@@ -81,7 +82,6 @@ None.
 | `ADR-0027` | Retain Mapbox for geocoding and Resend for transactional email, at the boundary | 2026-10-01 | — | — |
 | `ADR-0028` | The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability | 2026-10-01 | — | — |
 | `ADR-0029` | The ledger records un-allocated facts; allocation is a specified reporting act | 2026-10-01 | — | `OQ-006` `OQ-018` |
-| `ADR-0030` | Vehicle cost moves from operating expense into COGS, absorbed and unabsorbed | 2026-11-01 | — | `SPIKE-005` |
 | `ADR-0031` | The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy | 2026-11-01 | — | `OQ-006` `OQ-018` `OQ-031` `OQ-032` `OQ-033` |
 | `ADR-0032` | The organization tree is a liability tree; projects and settlement points are addressing beneath it | 2026-11-15 | — | `OQ-035` `OQ-036` `OQ-038` `OQ-039` `HOT-006` |
 | `ADR-0033` | A document is addressed to exactly one node by a level-tagged reference, and unallocated credit sits at the settlement point | 2026-11-15 | — | `OQ-030` `OQ-038` `OQ-040` |

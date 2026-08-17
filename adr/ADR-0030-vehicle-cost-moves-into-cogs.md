@@ -1,7 +1,7 @@
 ---
 id: ADR-0030
 title: Vehicle cost moves from operating expense into COGS, absorbed and unabsorbed
-status: proposed
+status: accepted
 date: 2026-08-09
 review_by: 2026-11-01
 deciders: [repo owner]
@@ -19,6 +19,7 @@ relates_to: [
 ]
 supersedes:
 superseded_by:
+frozen_sha256: faea4b61a4a83841daefedf58adbad2583a8fb271dab4943c3ee3d35808ac580
 ---
 
 > **In the context of** delivery being the largest tracked product line and carrying almost no cost,
