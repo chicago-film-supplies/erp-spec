@@ -476,7 +476,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (62 unpromoted of 81)" _note="no drops pending">
+      <outline text="Capture (63 unpromoted of 82)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -535,6 +535,7 @@
         <outline text="The product-line × revenue-account matrix rebuilt as a re-runnable artifact with the product-master…" _note="inbox/2026-08-16-the-product-line-matrix-rebuilt-with-the-master-join-denorm-and-master-now-agree-on-every-line.md"/>
         <outline text="HOT-013's budget arithmetic is wrong twice over — `Transfer.code` is an uncounted fourth discretion…" _note="inbox/2026-08-16-the-transfer-field-budget-is-four-fields-not-three-and-both-candidate-evictions-are-already-refused.md"/>
         <outline text="`journal_entry_id` and `source_document_ref` are not redundant — they answer grouping and provenanc…" _note="inbox/2026-08-16-the-two-reference-fields-answer-different-questions-and-a-path-fits-neither.md"/>
+        <outline text="Correction — Wrapbook is a TRUE EOR, so CFS's cost is the invoice and the 23% is Wrapbook's pricing…" _note="inbox/2026-08-17-correction-wrapbook-is-a-true-eor-so-cfs-cost-is-the-invoice-and-the-refutation-of-adr-0019-was-overstated.md"/>
         <outline text="Owner — CFS is NON-UNION and average payroll fringe is 23%, which makes the labor cost rate computa…" _note="inbox/2026-08-17-owner-cfs-is-non-union-and-average-payroll-fringe-is-23-percent-which-refutes-adr-0019s-central-claim.md"/>
         <outline text="Survey — ADR-0019's &quot;actual vs standard&quot; is a false binary and the answer is NORMAL costing; the cr…" _note="inbox/2026-08-17-survey-labor-costing-is-normal-costing-not-actual-the-crew-is-two-populations-with-two-true-costs-and-idle-time-splits-normal-from-abnormal.md"/>
         <outline text="ADR-0003 replaces Firestore, which retires the prod→dev eventarc mirror as a mechanism — but the sp…" _note="inbox/2026-08-17-the-v2-rebuild-retires-the-prod-to-dev-mirror-and-the-spec-never-states-what-replaces-it.md"/>

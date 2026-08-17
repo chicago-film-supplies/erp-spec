@@ -97,6 +97,13 @@ hours. ⚠️ "Actual vs standard" was a false binary: nobody costs a job fully-
 plan price and **revalues to actual at close**, and Intacct's criterion is not rate policy at all
 but **at what granularity payroll reconciles**.
 
+⚠️ **The costing input is the EOR's CHARGE, not CFS's wage table — and this ADR reasons from the
+wrong source.** It costs a shift at _"that person's actual rate"_ from a wage _"carried per contact
+and overridable"_. Under a true EOR the **wage** is what CFS agreed the worker receives (a
+scheduling fact) and the **cost** is what Wrapbook charges (an invoice fact). Those can diverge, and
+only the second belongs in COGS — structurally the same defect as leaning on `5200`: reasoning from
+a source that is not the authority for the number needed.
+
 **The per-contact figure is a COST rate, and it is NOT the wage rate.** Two fields, because they are
 two facts: burdened for W-2, contracted for 1099, while the wage still exists for the pay side the
 charter leaves with the EOR. Absorbing both populations at their wage is exact for one half and
