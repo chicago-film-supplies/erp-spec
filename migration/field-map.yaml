@@ -463,6 +463,48 @@ collections:
       so this is a re-pointing rather than a restructure. ⚠️ **NOT the same object as
       `orders.destinations[]`**, which is the per-order destination block and carries
       `customer_collecting`. Two things share a name and gate 15 caught the map conflating them.
+    paths:
+      - path: address.address_coordinates.latitude
+        disposition: defective
+        reason: >-
+          ⚠️ **PRESENT BUT WRONG on part of the corpus, which is worse than absent because it passes
+          every existence check.** Measured 2026-08-16 across the first 200 of 459
+          (`api:2026-08-16:db_destinations_query`): roughly half carry no coordinates at all, and
+          among those that do, several resolve hundreds of miles from the real address —
+          `TBD, Chicago, IL` near Bloomington; `60098 Mill Hill Road, Woodstock` in **New York
+          state**, the ZIP parsed as a street number; a Louisville PO box in **Kansas**;
+          `2258 West 16th Street` in **Davenport, Iowa**.
+          ✅ **The discriminator is already stored and it is not a distance heuristic.** Every wrong
+          geocode found carries an `address.mapbox_id` beginning `urn:mbxadr-itp:` — Mapbox's
+          INTERPOLATED result, its fallback when it cannot match a real address — where correctly
+          resolved rows carry `urn:mbxadr:`. ⚠️ **The implication is ONE-WAY**: every bad one is
+          interpolated and not every interpolated one is bad (`825 E Erie` is `-itp` and correct), so
+          it screens rather than decides and pairs with a service-radius bound.
+          **Migrated as defective rather than repaired or dropped.** ADR-0030 makes this an
+          allocation input — computed warehouse-to-destination distance is the vehicle-cost basis —
+          so a bad coordinate stops being cosmetic and starts moving money. A migration that
+          silently re-geocoded would destroy the evidence that it was ever wrong.
+          ✅ **Bounded and shrinking.** Owner, 2026-08-16: destinations are authored through CRMS
+          today and move to manager's Mapbox autofill at cutover, which returns a matched feature
+          rather than free text geocoded afterwards — so the defect stops being produced and what
+          remains is a fixed backfill of 459 records at migration time.
+      - path: address.address_coordinates.longitude
+        disposition: defective
+        reason: "Same coordinate, same defect — see `address.address_coordinates.latitude`."
+      - path: address.mapbox_id
+        disposition: map
+        to: destination.address.geocode_provenance
+        reason: >-
+          ⚠️ **The ONE foreign identifier in this file that is NOT dropped, and the exception is
+          deliberate.** ADR-0009 forbids foreign ids entering the domain model, and this is a Mapbox
+          URN. It survives because its PREFIX is the only stored evidence of how a coordinate was
+          obtained — `urn:mbxadr:` matched, `urn:mbxadr-itp:` interpolated, `urn:mbxadr-str:` street
+          level, `urn:mbxadr-osm:` OSM-sourced, `""` never resolved. Dropping it would leave the
+          coordinates with no provenance and make the plausibility gate ADR-0030 requires
+          unbuildable.
+          **What migrates is the PROVENANCE, not the identifier** — the classification above, not the
+          opaque id — so ADR-0009 is honoured rather than excepted. The raw URN is used at migration
+          time to derive it, then discarded like any other foreign id.
 
   - collection: locations
     disposition: map
