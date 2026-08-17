@@ -1537,8 +1537,22 @@ accounts:
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
     note: >-
-      Equipment rented for CFS's own use. Equipment rented IN to fill a customer order is a
-      subrental and goes to 5100 — the distinction is whether an order caused it.
+      Equipment rented for CFS's own use. **The criterion is WHY it was hired, and it sorts into
+      THREE accounts, not two** — this note named only two until 2026-08-16:
+      · **rented for CFS's own use** → HERE. Owner, 2026-08-16: a scissor lift and a forklift were
+        hired for the warehouse move, and building-maintenance hire is expected in future. **This
+        account keeps a live population and is NOT emptied by ADR-0030.**
+      · **rented IN to fill a customer order** → 5100 Subrentals. CFS is the SUPPLIER; the gear goes
+        to the customer.
+      · **rented to PERFORM a delivery or a haul** → 6405 Vehicle: Rented, and from there into
+        vehicle COGS (ADR-0030). An order caused it, but CFS is not supplying the truck to anyone —
+        it is the means of performing.
+      ⚠️ **The third branch is what ADR-0030 found, and this note's own first clause is what should
+      have found it years earlier** — "whether an order caused it" already excluded a delivery truck
+      from this account, and nobody had read it that way. ⚠️ **The correction then over-reached in
+      the other direction**: a draft of ADR-0030 read as though 6405 received everything 6302 takes,
+      which would have emptied a branch that has actual members. **One population moving out is not
+      the account becoming empty**, and the owner's scissor lift is the member that says so.
 
   - code: 6303
     name: "Rented Space"

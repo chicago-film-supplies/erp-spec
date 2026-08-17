@@ -84,8 +84,16 @@ spread across the goods delivered — and the official product-line P&L performs
 
 **Every vehicle dollar is in scope, whether the vehicle is owned or rented.** A truck hired to run a
 delivery is the same economic activity as a van driven to run one, so it takes the same
-classification. It moves out of `6302 Rented Tools, Machinery, Equipment` and into the vehicle
+classification, and it moves out of `6302 Rented Tools, Machinery, Equipment` into the vehicle
 block.
+
+⚠️ **6302 SURVIVES with a live population, and this ADR nearly wrote it out.** The criterion its
+note states — "whether an order caused it" — sorts equipment hire into **three** accounts, not the
+two the note named: gear rented for CFS's **own use** stays here, gear **supplied to a customer** is
+a subrental (5100), and gear hired to **perform** a job is vehicle cost (6405). Owner, 2026-08-16: a
+scissor lift and a forklift were hired for the warehouse move, and building-maintenance hire is
+expected in future. **One population moving out is not the account becoming empty** — the same
+mistake as reading a renamed sentence without re-reading what it claims.
 
 **No mixed-use allocation is performed, and that is a stated policy rather than an omission.** The
 owned vehicles are used exclusively in revenue-producing delivery and trash-removal activity;
@@ -127,15 +135,15 @@ would silently bill a Chicago delivery as though the van had driven to Phoenix.
 
 **Natural — what was bought. These KEEP taking postings.**
 
-| code     |                                |                                                |
-| -------- | ------------------------------ | ---------------------------------------------- |
-| 6400     | Vehicle: Repairs & Maintenance | live, unchanged                                |
-| 6401     | Vehicle: Registrations & Fees  | live, unchanged                                |
-| 6402     | Vehicle: Fuel                  | live, unchanged                                |
-| 6403     | Vehicle: Parking & Tolls       | live, unchanged                                |
-| 6404     | Vehicle: Tickets               | live, unchanged — **never absorbs**, see below |
-| **6405** | **Vehicle: Rented**            | **minted**; receives what 6302 takes today     |
-| **6409** | **Vehicle: Cost Absorbed**     | **minted**, credit-normal contra               |
+| code     |                                |                                                           |
+| -------- | ------------------------------ | --------------------------------------------------------- |
+| 6400     | Vehicle: Repairs & Maintenance | live, unchanged                                           |
+| 6401     | Vehicle: Registrations & Fees  | live, unchanged                                           |
+| 6402     | Vehicle: Fuel                  | live, unchanged                                           |
+| 6403     | Vehicle: Parking & Tolls       | live, unchanged                                           |
+| 6404     | Vehicle: Tickets               | live, unchanged — **never absorbs**, see below            |
+| **6405** | **Vehicle: Rented**            | **minted**; receives the DELIVERY-VEHICLE portion of 6302 |
+| **6409** | **Vehicle: Cost Absorbed**     | **minted**, credit-normal contra                          |
 
 **COGS — why it was consumed. Minted, on the 5800/5801 precedent.**
 

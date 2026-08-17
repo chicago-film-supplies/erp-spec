@@ -133,6 +133,33 @@ the fact, and autofill returns a matched feature instead. ⚠️ **The gate ship
 geocode can recur, and a check justified only by dirty data is a check that gets removed the week
 before it is needed.
 
+## 8. ⚠️ 6302 KEEPS a live population — the correction over-reached before the ink dried
+
+> _"we did rent a scissor lift and fork lift for internal use when we moved, that likely is sitting
+> in the rented equipment account, we should keep the opex account in case i rent equipment for
+> building maintenance in future"_
+
+**Ruling 2 above was written as though 6405 received everything 6302 takes.** It does not. The
+criterion 6302's own note states — _"whether an order caused it"_ — sorts equipment hire into
+**three** accounts, and the note named two:
+
+| what was hired, and why                                                                                   | account                            |
+| --------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| for CFS's **own use** — the scissor lift and forklift for the warehouse move, future building maintenance | **6302**, unchanged                |
+| **supplied to a customer** to fill their order                                                            | 5100 Subrentals                    |
+| to **perform** a delivery or a haul                                                                       | **6405** → vehicle COGS (ADR-0030) |
+
+⚠️ **The two errors are opposite and both came from reading one clause and not the rest.** The
+original defect was that a delivery truck sat in 6302 even though "whether an order caused it"
+already excluded it. The correction then emptied the account on the strength of the same clause,
+even though "CFS's own use" — the branch that clause preserves — has actual members.
+
+⇒ **One population moving out of an account is not the account becoming empty.** This repo's
+standing rule is that _a branch with no members is a claim, not a capability_; the inverse holds and
+is easier to get wrong, because deleting a branch feels like simplification. **The scissor lift is
+the member that says otherwise**, and it is recorded on 6302's chart entry so the branch is
+evidenced rather than asserted.
+
 ## 6 and 7 — confirmed as recommended
 
 - **Tickets (6404) never absorb and stay in operating expenses.** Nondeductible under IRC §162(f),
