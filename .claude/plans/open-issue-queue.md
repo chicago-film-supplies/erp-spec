@@ -2,28 +2,39 @@
 
 - **Date:** 2026-08-16
 - **Repo:** erp-spec
-- **Status:** ⏳ #16, #18 (PR #21) · #15, #13 (PR #23) · **#14 (PR #25) — `m3` COMPLETE** · PRs
-  #26–#29 · **PR #30 — five ADRs ACCEPTED** · **PR #31 — #19 + #20 + four owner rulings** · **PR #34
-  MERGED — #8 CLOSED, `m6` measured for the first time** · **PR #33 MERGED — ADR-0030 surveyed, ten
-  owner rulings, and ACCEPTED** · main green, nothing open
+- **Status:** 2026-08-16 → #8, #13–#16, #18–#20 closed; `m3` and `m6` measured; ADR-0030 (vehicle
+  cost into COGS) ACCEPTED. **2026-08-17 → ADR-0019 (labor costing is normal costing) SURVEYED and
+  ACCEPTED**, HOT-016 opened+resolved, but-for causation ruled and the golden vectors rebuilt,
+  ADR-0037 and ADR-0038 PROPOSED, `tools/` got its first tests. main green, nothing open.
 - **Origin:** a review of the open issue queue, requested because #18 was on the owner's mind
-- **Related:** open — #3, #4, #6, #12, #17, **#32** · closed by this work: **#8**, #13, #14, #15,
-  #16, #18, #19, #20 · HOT-015 resolved · OQ-045 opened; **OQ-046/047 opened AND answered, OQ-048
-  and OQ-049 opened** · api-cloudrun#538 filed ·
-  `tools/{validate,dates,labels,milestone-checks}.ts`, `spikes/harness/`,
-  `ledger/{posting-rules,tigerbeetle-accounts,dimensions,chart-of-accounts}.yaml`,
-  `migration/{field-map,live-paths.measured,live-chart.measured}.yaml`
+- **Related:** open — #3, #4, #6, #12, #17, #32, **#35 (PSA has no spec)**, **#36 (but-for hides
+  what the slack produced)** · closed: #8, #13, #14, #15, #16, #18, #19, #20 · HOT-015, **HOT-016**
+  resolved · OQ-045/046/047 answered; OQ-048, **OQ-049** open; **OQ-050 ANSWERED from the Wrapbook
+  exports** · **`.claude/plans/addressable-claims.md`** is the companion plan for ADR-0037
 
 ## START HERE
 
-`main` is CI-green and **nothing is open**. Units 1–8 done, both PRs merged 2026-08-16.
+`main` is CI-green and **nothing is open**. Two ADRs were accepted 2026-08-17 and **their ledger
+implementation does not exist** — that is where the next session starts. See _Context
+recommendation_.
 
-⚠️ **GitHub Actions went billing-blocked at 04:46Z** — "recent account payments have failed or your
-spending limit needs to be increased", org-wide, four minutes after the last green run. PR #33 was
-admin-merged on the owner's instruction after `validate`, `fmt --check` and `gen` were run locally
-(the exact three things CI runs). **A push producing a FAILED run in 2s is a billing block, not a
-code failure** — check billing before debugging. Distinct from the recorded case where a push
-produces NO run at all, which is an Actions outage.
+⚠️ **GitHub Actions is BILLING-BLOCKED, org-wide**, since 2026-08-17 04:46Z — "recent account
+payments have failed or your spending limit needs to be increased". **A push producing a FAILED run
+in ~2s is a billing block, not a code failure**; a push producing NO run is an Actions outage. The
+repo is unaffected in practice: **`deno task ci` runs the whole CI contract locally** (validate, fmt
+check, gen, staleness, tool tests) and the workflow calls the same file.
+
+### ⚠️ Two ACCEPTED ADRs have no posting rules, and `m3` reads complete anyway
+
+|                                              |                                                                |
+| -------------------------------------------- | -------------------------------------------------------------- |
+| `5900` / `5901` / `5902` / `6409` (ADR-0030) | **zero** posting rules, **zero** golden vectors                |
+| `labor_variance` (ADR-0019 says it fires)    | no rule, and `unwritten: []` is empty so it is not even parked |
+| **`m3` Ledger core**                         | reads **4 met / 0 unmet** through all of it                    |
+
+**Why m3 misses it:** its checks ask "is every EVENT covered" and "does every RULE have vectors".
+**Nothing asks "is every ACCOUNT reachable."** `coa_complete` verifies accounts EXIST; nothing
+verifies anything posts to them.
 
 ### ⚠️ ADR-0030 WAS NOT A ONE-OFF — seven of ten proposed ADRs cite no survey
 
@@ -44,11 +55,12 @@ invisible:
 ⇒ **The systematic fix is a gate**: an accounting-shaped ADR cannot reach `accepted` without citing
 a survey, fired at acceptance so drafting stays free (mirroring gate 14's freeze). Not built yet.
 
-### The queue: 7 open — 5 blocked, 2 startable
+### The queue: 8 open — 5 blocked, 3 startable
 
 |               | Issue   | State                                                          |
 | ------------- | ------- | -------------------------------------------------------------- |
-| **startable** | **#35** | ⚠️ NEW — PSA is a whole service line with no spec at all       |
+| **startable** | **#35** | PSA is a whole service line with no spec at all                |
+| **startable** | **#36** | ⚠️ NEW — but-for hides what the paid-for slack PRODUCED        |
 | **startable** | **#6**  | re-measure first — its own numbers are stale in its own favour |
 | blocked       | #32     | the imputed-labor view — needs OQ-048, the imputed rate        |
 | blocked       | #17     | OQ-039 + ADR-0032/0033 acceptance, and an ordering gate        |
@@ -629,19 +641,50 @@ being told**, because it counts rather than asserts.
 
 ## Context recommendation
 
-**CLEAR CONTEXT.** The remaining work is #6 — a requirements backlog — and it touches entirely
-different material from migration dispositions, gate arithmetic and vehicle costing. Nothing needed
-is in anyone's head: `STATUS.generated.md`, the inbox and this doc are all on disk.
+**CLEAR CONTEXT.** Nothing needed is in anyone's head — `STATUS.generated.md`, the inbox, ADR-0019,
+ADR-0030 and this doc are all on disk.
 
-### Take #6, and re-measure before planning it
+### Next session: MAKE THE TWO ACCEPTED ADRs EXECUTABLE — and land the gate FIRST
 
-It is the only startable issue left. ⚠️ **Its own numbers are badly stale and nobody updated them**:
-it says "2 requirements total" and "6 of 8 contexts have `requirements: []`". STATUS today reports
-**21 requirements**, 0 without a scenario, and 4 contexts uncovered (`ordering`, `availability`,
-`banking`, `procurement`). It is roughly half the size the issue claims, and it blocks m7.
+Two ADRs were accepted 2026-08-17 and neither has a posting rule. **Order matters inside the
+session:**
 
-The trap the issue names is still live: **adding a requirement trips gate 3**, which demands a
-tagged Gherkin scenario, and as of 2026-08-16 those scenarios are also checked by gate 10n.
+1. **Build the account-reachability check and LAND IT RED.** `coa_complete` verifies accounts EXIST;
+   nothing verifies anything posts to them. Landing it first turns a defect found by audit into a
+   red number naming `5900`, `5901`, `5902`, `6409` — then fix what it names. That is the repo's own
+   doctrine, and this is the case that proves the gate was missing. ⚠️ **This is the class of
+   failure unit tests do NOT catch** — the check's SCOPE is wrong, not its logic. See
+   `.claude/plans/addressable-claims.md` class C.
+2. **`shift_recorded` and the vehicle rules.** Or **honestly park them in `unwritten:`** with issues
+   — a legitimate outcome and better than pretending. `unwritten: []` is empty today, which is why
+   nothing reports them as missing.
+3. **`labor_variance`.** ADR-0019 says it fires (OQ-050 measured why). No rule exists.
+
+⚠️ **Do this BEFORE ADR-0037.** Building a better way to record decisions while two accepted
+decisions have no implementation is polishing the process while the output is broken.
+
+### Then, in order
+
+|                         |                                                                                                                                                                       |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **rule 8a gate**        | an accounting-shaped ADR cannot be accepted without citing a survey. Lands red on ADR-0020, ADR-0025, ADR-0029 — the honest state                                     |
+| **ADR-0037 + ADR-0038** | red-team ADR-0037 first (`refine-plan`); ⚠️ **ADR-0038's sweep must land in the SAME change as its acceptance** — 28 files, and nothing is wrong until it is accepted |
+| **#35**                 | PSA — a service line with five GL accounts and no spec; includes a charter contradiction that owes a `HOT-`                                                           |
+| **#36**                 | the shift records `hours_idle` where the truth may be "worked on something else"                                                                                      |
+| **#6**                  | requirements backlog, blocks m7 — re-measure first, it is roughly half the size its own text claims                                                                   |
+
+### Owner-only, not startable by a session
+
+- **Accept or reject ADR-0037** (ids carry meaning where used) and **ADR-0038** (no causal order
+  means not COGS).
+- **The Actions billing block** — org-wide. `deno task ci` covers this repo meanwhile.
+- **OQ-049** — do the board and comment threads survive into v2? 5,315 documents on a charter
+  silence.
+- **Team meals in COGS** — owner asked 2026-08-17. ⚠️ Rule 8a applies (it is a where-does-it-post
+  question) so it needs a survey first. `6005` is **$17,777.88** FY2025 — material, comparable to
+  the whole vehicle block — and its chart note already names deductibility as the deciding axis,
+  which makes it the `6404 - Vehicle: Tickets` shape. **The pivotal fact is a CPA question**, not a
+  spec one.
 
 ### ⚠️ The thing that should change how the next session budgets its time
 
