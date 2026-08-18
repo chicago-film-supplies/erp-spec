@@ -1453,7 +1453,19 @@ accounts:
     disposition: adopt
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
-    note: "Split from 6006 because the two carry different deductibility, not because they differ operationally."
+    note: >-
+      Split from 6006 because the two carry different **deductibility**, not because they differ
+      operationally.
+      ✅ **DECIDED 2026-08-17: stays in operating expense. It does not absorb into COGS and enters no
+      product-line pool.** Owner: _"im fine with keeping meals where they are (like tickets) thats
+      decided"_. **$17,777.88** FY2025 (`xero:2026-08-17`) — material, comparable to the whole
+      6400-6404 vehicle block, so this is a real decision rather than a rounding one.
+      **It is the `6404 - Vehicle: Tickets` shape and this note already named the axis.** A cost
+      whose DEDUCTIBILITY is the reason it has its own account must stay separable for ADR-0026's
+      dual-basis book, and an account absorbed into a product line is no longer separable.
+      ⚠️ **No ADR and no survey, and both are right**: rule 8a prepares a CHANGE and this decision is
+      to change nothing. **If it is ever revisited as "should meals absorb", that IS a change and 8a
+      applies in full.**
 
   - code: 6006
     name: "Meals & Entertainment: Company Parties"

@@ -589,320 +589,44 @@ collections:
   - collection: cards
     disposition: quarantine
     reason: >-
-      ⚠️ **The charter names neither the operational board nor its absence, and 1,114 documents turn
-      on that silence.** A card is a scheduled unit of work on a board — subject, body, dates, a
-      destination, `uid_list`, `uid_thread`, `sources[].{collection,uid}` pointing back at the order
-      or booking that caused it, plus recurrence. It is the surface the dashboard is built on, and it
-      is downstream of the Trello integration this migration drops.
-      The charter's in-scope list runs order → fulfillment → invoice → posting → report and does not
-      reach it; the out-of-scope list does not exclude it either. **Deciding it as a side effect of a
-      field map is the wrong order**, so it is quarantined with the question named — OQ-049.
-      ⚠️ Note what quarantine costs and does not cost: it is one of the three dispositions m6's
-      criterion accepts, so this collection counts as settled for the milestone while remaining
-      unsettled for the migration. That is the correct reading — "hold it aside" IS a migration
-      behaviour — but it must not be mistaken for "mapped".
-    blocked_by: [OQ-049]
+      ✅ **IN SCOPE — owner, 2026-08-17**: _"a version of the current board/calendar/list def
+      survives into v2, its current form is a very rough draft"_ (OQ-049 answered). The charter's
+      silence did not mean out of scope.
+      ⚠️ **Still `quarantine`, and the REASON changed rather than the disposition.** It was "might
+      not survive"; it is now **"survives, target shape undesigned"**. **"The concept survives" and
+      "the data migrates" are different claims and only the first is settled** — the v2 board is a
+      redesign, so there is nothing yet to map 1,114 documents ONTO.
+      A card today carries `sources[].{collection,uid}` back to the order or booking that caused it,
+      a destination, a recurrence and an `action`, and is downstream of the Trello integration this
+      migration drops. How much of that survives the redesign is the open part.
 
   - collection: lists
     disposition: quarantine
-    reason: "The board's columns, 4 docs. Follows `cards` exactly — same surface, same question, OQ-049."
-    blocked_by: [OQ-049]
+    reason: >-
+      ✅ **IN SCOPE** — the board's columns, 4 docs. Follows `cards` exactly: survives, shape
+      undesigned (owner 2026-08-17, OQ-049 answered).
 
   - collection: threads
     disposition: quarantine
     reason: >-
-      ⚠️ **4,153 documents against 44 comments, and the ratio is the finding.** A thread is the
-      comment container that attaches to a domain object — `cards`, `roles` and the template
-      projection all carry a `uid_thread` — so threads are BROADER than the board and cannot simply
-      follow it. The population says most of them are empty: the known cause is event-card
-      delete/recreate churn leaving orphaned threads behind, symptom-fixed in v1 on 2026-06-24 with
-      the deeper root deferred.
-      ⇒ Two questions, not one: does v2 carry the collaboration surface at all (OQ-049), and if it
-      does, is a corpus that is ~99% empty containers migrated or rebuilt? A migration that carries
-      4,153 empty threads forward imports the defect rather than the data.
-    blocked_by: [OQ-049]
+      ✅ **IN SCOPE — owner, 2026-08-17**: _"a version of comments/threads also survives"_
+      (OQ-049 answered). ⚠️ **But the SEAM is undecided and it decides the migration** — OQ-051.
+      Either CFS implements threads as today, or chat lives in **Matrix** (or a comparable
+      open-source company-chat system) and CFS holds only the link, with the owner's own candidate
+      being **user and/or domain tagging**: a message carrying a person and/or a domain object,
+      conversation outside.
+      ⇒ **If chat moves out, these 4,153 records are a link table at most; if it stays in, they are
+      the substance.** Nothing can be dispositioned until that is settled.
+      ⚠️ **And ~99% are empty containers regardless** — 4,153 threads against 44 comments, from
+      event-card delete/recreate churn (api-cloudrun#227). **Whether the CONCEPT survives and whether
+      THIS DATA should be carried are separate questions**, and OQ-049 answered only the first.
+      ⚠️ Threads are also broader than the board: `cards`, `roles` and the template projection all
+      carry a `uid_thread`.
+    blocked_by: [OQ-051]
 
   - collection: comments
     disposition: quarantine
-    reason: "The thread contents, 44 docs. Follows `threads` — OQ-049."
-    blocked_by: [OQ-049]
-
-mappings:
-  - from: products.shipping.weight
-    to: null
-    disposition: drop
     reason: >-
-      0 of 567 products have a non-zero value — re-verified 2026-08-16 (537 hold `null`, 3 hold 0, 27
-      lack the block; core#51 made them nullable on 2026-08-10, so "unmeasured" is now representable
-      and distinguished in the data). Superseded by
-      handling_bucket. Dropping a field that was never populated costs nothing; carrying it
-      forward implies data that does not exist.
-
-  - from: products.shipping.{height,width,length}
-    to: null
-    disposition: drop
-    reason: "Same — 0 of 549 non-zero, verified 2026-08-08."
-
-  - from: invoices.items[].tracking_category
-    to: null
-    disposition: drop
-    reason: >-
-      **Repaired at source 2026-08-10** (api-cloudrun#473): the native invoice writer never derived
-      this field from the product, leaving 227 lines null whose product master WAS categorised.
-      `tracking_missing` 227 → 0, and a dry re-run of the repair touches 0 invoices. What remains
-      null is 15.00% of line revenue and is not a defect — 128 custom lines with no product master
-      ($233,667.63) and 170 lines on genuinely uncategorised products ($19,638.96).
-      ⚠️ **DISPOSITION CHANGED `map` → `drop` on 2026-08-16 (ADR-0036), and the repair is still what
-      makes the drop safe.** This field is a DENORM of `products.uid_tracking_category`, and v2
-      carries no such copy: a posting records the line's identity and the product line is derived at
-      report time. So there is nothing to map it TO. **The line-level copy is exactly the defect this
-      entry documents** — it was null on 227 lines whose master was categorised, and api-cloudrun#537
-      records that the writer restamps issued invoices with the product's CURRENT category anyway. ⇒
-      Migrating the copy forward would carry the defect into v2 and freeze it in an immutable store.
-      What migrates instead is the product master, which is already the authority.
-      ⚠️ **The migration does NOT read original values, and that is a restatement fact ADR-0020
-      owns.** The repair back-filled historical lines, including inside the 2025-12-31 lock, so a
-      line's category today may not be what the document carried when it was issued. It moves no
-      money — a dimension is a reporting attribute — but "the restatement must not alter any amount"
-      has to be asserted against the repaired corpus, not the original one.
-      ✅ **`Transport` is restored (OQ-034, 2026-08-16)** and is declared again in
-      `ledger/dimensions.yaml`, so the 23 lines / $39,665.00 that carry it have a home. ⚠️ Under
-      ADR-0036 that stopped being a migration question at all: the value lives on the product master
-      and no posting freezes a copy of it.
-      This entry read `disposition: defective`, "Null on 28.7% of line revenue. Two separable
-      classes — 254 lines recoverable from xero_tracking_option_id, 129 lines not recoverable at
-      all", until 2026-08-10. Both the share and the two-class split were artifacts of counting the
-      denorm rather than joining to the master.
-    blocked_by: [OQ-012, OQ-034]
-
-  - from: invoices.items[].xero_tracking_option_id
-    to: null
-    disposition: drop
-    reason: >-
-      Foreign identifier — ADR-0009 forbids it entering the domain model. Used at migration time
-      to recover the 254 lines above, then discarded.
-
-  - from: invoices.query_by_orders[]
-    to: invoice.order_refs
-    disposition: map
-    reason: >-
-      **OQ-013 answered: the count is ZERO, not 55.** Measured 2026-08-09 against prod across all
-      five order↔invoice reference paths; every reference resolves
-      (`inbox/2026-08-09-hard-deleted-order-uids-do-not-reproduce.md`). This entry read
-      `disposition: defective` on the strength of "55 referenced order uids reportedly do not
-      exist", which was never verified and measures 0.
-      **The handling rule is retained on its own merits** — an unresolvable ref quarantines and is
-      never nulled (ADR-0009) — by the same reasoning `charter.md` applies to the no-hard-deletes
-      fence, whose cited evidence is this same non-reproducing 55. A migration needs a defined
-      behaviour for a broken ref whether or not the corpus currently contains one; what is retracted
-      is the claim that it does.
-
-  - from: invoices.status == "void"
-    to: invoice.status
-    disposition: map
-    reason: "41 of 999. Maps directly, but REQ-BIL-001 changes the DEFAULT — void excluded unless opted in."
-
-  - from: orders.destinations[].customer_collecting
-    to: leg.direction
-    disposition: defective
-    reason: >-
-      Per-destination today, not per-leg (verified 2026-08-08). Legs cannot be backfilled from it
-      with an actor or a shift. Migration produces destination-level facts only; leg history
-      starts at cutover.
-      ⚠️ **This entry read `destinations[].customer_collecting` until 2026-08-16, and the notation
-      named the wrong object.** Gate 15 caught it on the measured inventory: the top-level
-      `destinations` collection (459 docs) is an ADDRESS BOOK and carries no `customer_collecting`
-      at all. The field lives on `orders.destinations[]` — the per-order destination block embedded
-      in the order document. Two things share a name, and a migration that read the collection
-      would have found the field missing and concluded it was unpopulated.
-    blocked_by: [HOT-002, HOT-007]
-
-  - from: products (duplicate active charge products)
-    to: product
-    disposition: quarantine
-    reason: >-
-      HOT-008 — duplicate ACTIVE products book identical events to different accounts. Cannot map
-      until OQ-014 names the canonical member of each pair.
-
-  - from: "*.{_cents fields}"
-    to: "*.{_minor fields}"
-    disposition: map
-    reason: "Already integer cents in the current system. Direct map — the hard part was already done."
-
-  - from: "*.{rate fields}"
-    to: "*.rate"
-    disposition: map
-    reason: >-
-      Rates stay 4dp decimals and do NOT get a _minor suffix. They sit adjacent to amounts in four
-      schemas and a sweep that converts every money field is how the beta.117 regression happened.
-
-  # ── organizations → the organization tree (ADR-0032, ADR-0033) ───────────────
-  # The largest delta found so far, and a different KIND from the rest of this file: a re-keying
-  # rather than a re-dimensioning. ADR-0020 restates dimensions on lines; this changes identity.
-  #
-  # ⚠️ ORDER MATTERS. Owner, 2026-08-10: ADR-0020's restatement runs FIRST and proves no amount
-  # moved, against the familiar flat identity; this re-keying runs SECOND and proves no AR balance
-  # moved, against settled dimensions. Both cross the same closed periods and each promises
-  # "nothing moved" on a different axis, so run together neither proof names a culprit when it
-  # goes red. Carried by roadmap/milestones.yaml → m6.
-
-  - from: organizations (the record)
-    to: organization | project | settlement_point
-    disposition: defective
-    reason: >-
-      One flat record carries all three levels of ADR-0032's tree. Measured 2026-08-10
-      (`api:2026-08-10:db_organizations_query`, all 286): 31 are department clones across 11 parent
-      companies, and `Netflix Productions, LLC` is **10 records with no un-suffixed parent** — the
-      entity does not exist, so total exposure to it needs a string match.
-      ⚠️ **The defect is FLATNESS, not duplication.** The clones are not copies; each is a genuinely
-      distinct settling unit with its own receivable and coordinator, and they are close to the
-      correct LEAVES already. The migration adds a root and a middle — record count barely falls, so
-      "10 become 1" is the wrong target and a migration measured by record reduction is measuring the
-      wrong thing.
-      ⚠️ **The target collection keeps the name `organizations` and NARROWS its meaning** — from the
-      flat conflated record to the legal-entity root alone (ADR-0032 §2). A field that keeps its name
-      and changes its semantics is invisible in a diff, so nothing about this mapping is caught
-      automatically. Treat every surviving reader of `organizations` as unverified until read.
-      **All three levels are mandatory in the target**, and the API mints what it is not given
-      (ADR-0032 §3) — so the mapping never has to emit a two-level path. Netflix's 5 bare department
-      records with no production are resolved by hand: the owner supplies the project names.
-
-  - from: organizations.name
-    to: organization.name + project.name + settlement_point.name
-    disposition: defective
-    reason: >-
-      Three concepts in one string, with **four delimiter conventions** in use — space-hyphen-space,
-      colon-space, space-slash-space, space-double-slash-space — all four inside `Netflix
-      Productions, LLC` alone. `20th Television - Deli Boys - S2: Locations` is company + production
-      + department at once.
-      **The split must be AUTHORED and committed, not parsed.** A parse is unreliable on four
-      delimiters, and it cannot fix `Transportation` / `Transpo` (one department spelled two ways) or
-      `20th Television` / `Twentieth Television` (one legal entity spelled two ways).
-      ⚠️ **Match-on-name is not a viable migration key** independently of the split: 5 exact-duplicate
-      name pairs exist (`Enlace Chicago`, `Free Spirit Media`, `Full Spectrum Features`, `Omnicom`,
-      `Sound Off Films`) plus 3 records suffixed with a literal `(copy)`, so `Sound Off Films` occurs
-      three times.
-      **Duplicates are resolved HERE rather than by merging in v1** (owner, 2026-08-10). Two source
-      rows pointing at one target node is what an authored mapping is for; it needs no v1 merge tool
-      and takes no exposure to the `api-cloudrun#423` org/contact cascade deadlock.
-      ⚠️ **Four further duplicate pairs found 2026-08-10 by reading contact→organization edges**
-      (`api:2026-08-10:db_contacts_query`), by uid rather than by name:
-      `Omnicom` (`ny7yRgfTh5tFBT7nouzu`, `YOgvPOYnUN4J18XgRilT`);
-      `Enlace Chicago` (`K85dVseZECgedhFa75ln`, `hCdYsTi9NDWxq4ufvHhV`);
-      `Free Spirit Media` (`CTFP195QqkTtEl4kyfc2`, `AxDwNH8IFZEKJJrMqjQc`);
-      `Sound Off Films` (`MCh8UuepH05BGR3FDCEf`, `04KRDdsiQO6yXI6GXX7N`).
-      The `Free Spirit Media` pair is not cosmetic — a credit note issued against one settled an
-      invoice belonging to the other (ADR-0033).
-
-  - from: contacts (the collection) + contacts.organizations[]
-    to: contact (the person) + membership edges
-    disposition: map
-    reason: >-
-      ⚠️ **CORRECTS an earlier entry that described a model v1 does not have.** This file previously
-      mapped `organizations.contacts[]` to `settlement_point.contacts[]` on the reasoning that
-      contacts are embedded per organization. **They are not.** `contacts` is a TOP-LEVEL collection
-      and each contact carries `organizations[]` — an explicit many-to-many
-      (`api:2026-08-10:db_schema:contacts`). The person is already global.
-      **The person maps 1:1; the EDGE is what lands on a settlement point** (ADR-0032 §4). One human
-      is one record with N memberships, each naming a node and a role.
-      **Measured 2026-08-10, all 165 contacts** (`api:2026-08-10:db_contacts_query`): **26 (15.8%)
-      belong to 2 or more organizations**; 5 belong to none; `Nick Rafferty` is on five — two future
-      Netflix settlement points, `Enemies Movie, LLC`, and two unrelated entities. A per-node contact
-      record would have fragmented all 26, so the correction is load-bearing rather than cosmetic.
-      ⚠️ **≥8 duplicated humans to resolve in the authored mapping**, several being a fully-populated
-      record beside an empty twin: Katie Kincaid ×3; Kristi Gescheidler, Erik Goserud, Kevin McGrail,
-      Iman Sharabash, Rob Roediger, Kyle Behling, Angie Gaffney ×2 each. Erik Goserud
-      `GSEaRYjBAfW5NZf8ICPd` holds 6 memberships and `wXBHopjodDc4qBxMXqlW` holds 0.
-
-  - from: organizations.contacts[] + query_by_contacts
-    to: null
-    disposition: drop
-    reason: >-
-      The reverse denorm of `contacts.organizations[]`, not the authority — see the entry above.
-      Dropped because the edge is migrated from the authoritative side; carrying the denorm forward
-      would mean migrating the same relation twice and inventing a reconciliation between them.
-      ⚠️ Do NOT read this as "contacts move up to the organization". The edge lands on the settlement
-      point. Pooling edges onto the root reproduces the failure Xero users report of the
-      contact-group workaround — reminders going to every address on the record rather than the one
-      the invoice went to, so a statement for `Saturn Return: Locations` would dun the Big Red office
-      coordinator.
-
-  - from: organizations.{xero_id,crms_id}
-    to: null
-    disposition: drop
-    reason: >-
-      Foreign identifiers — ADR-0009 forbids them entering the domain model. Usable at migration time
-      to correlate records, then discarded. ⚠️ They are NOT a shortcut around the authored mapping
-      above: a shared `xero_id` proves two CFS records point at one Xero contact, which is the
-      duplicate-contact workaround Xero itself warns double-counts the receivable — it does not
-      establish which of ADR-0032's three levels either record belongs to.
-
-  - from: organizations.tax_profile
-    to: undecided
-    disposition: quarantine
-    reason: >-
-      ⚠️ **Previously mapped UP to the legal entity** on the reasoning that "tax status is a property
-      of the party that owes". That reasoning holds for two of the five enum values and not for the
-      other three. Measured 2026-08-11 (`api:2026-08-11:db_organizations_count`, all 286): **273
-      `tax_applied`, 11 `tax_exempt`, 1 `tax_rantoul`, 1 `tax_frankfort`, 0 `tax_paxton`**.
-      `tax_applied` / `tax_exempt` describe the **party**. `tax_rantoul` / `tax_frankfort` /
-      `tax_paxton` are Illinois **municipalities** — they describe where the goods went, which is a
-      property of the destination.
-      **Deliberately left undecided — OQ-039.** Owner, 2026-08-11: "dont close any tax adrs we have a
-      lot to figure out with that." Settling an attachment point as a side effect of a
-      customer-structure migration is the wrong order while ADR-0026's dual-basis book, the `tax`
-      context and two live v1 defects (`api-cloudrun#486`, `manager#248`) are all still open. The
-      field carries forward whole and unsplit until OQ-039 answers.
-      ⚠️ Whatever the answer, collapsing clones still requires asserting the value is identical across
-      every clone of one organization first; a disagreement is a finding, not a merge conflict to
-      resolve arbitrarily.
-    blocked_by: [OQ-039]
-
-  - from: destinations.organizations[]
-    to: organization.destinations[]
-    disposition: map
-    reason: >-
-      One address book per legal entity, usable by every project and settlement point beneath
-      (ADR-0032 §5). `destinations` is already a separate many-to-many collection keyed to
-      organizations, so this is a re-pointing rather than a restructure — the edge follows whichever
-      target node its organization collapses into.
-      ⚠️ `destinations.contacts[]` is the same shape as `organizations.contacts[]` and follows the
-      same correction: the person is global, the edge is what moves.
-
-  - from: "invoices.organization / orders.organization_ref"
-    to: "*.billed_to { level, id }"
-    disposition: defective
-    reason: >-
-      A single flat reference to the pre-tree `organizations` record. Under ADR-0032 a document is
-      addressed to a **settlement point**, and its organization is derived by walking up — so this
-      reference changes meaning as well as target.
-      **The target is level-tagged** (ADR-0033 §1): `{ level, id }`, where the migration writes only
-      `level: settlement_point`. The tag exists so that project-level ordering and SAP-style
-      item-level override are later additive value changes rather than a second re-keying of every
-      order and invoice.
-      ⚠️ **AR balances must not move.** The consolidated organization balance must be proven equal to
-      the sum of its settlement points, per invoice and per settlement — ADR-0020's amount assertion
-      on a different axis. Xero's own warning about the duplicate-contact route is that it
-      double-counts, so this is a measured hazard rather than a theoretical one.
-      **The proof must not walk the tree**, or it agrees with itself: check the sum of open invoice
-      amounts grouped by `billed_to.id` against the roll-up, computed by different code.
-
-  - from: credit-notes.organization + credit-note allocations.uid_organization
-    to: "*.billed_to { level: settlement_point }"
-    disposition: defective
-    reason: >-
-      Unallocated credit sits at the settlement point under ADR-0033 §3, so both the note and its
-      allocation rows re-point with the documents they settle.
-      **Measured 2026-08-11** (`api:2026-08-11:search_credit_notes` + `get_credit_notes_uid_allocations`,
-      all 13 notes): 10 `applied`, 3 `void`, 9 allocation rows. **8 of 9 allocations name the same
-      organization as their credit note.** The one that crosses — CN-1024 — crosses the duplicate
-      `Free Spirit Media` pair, which this mapping collapses into one organization, so the crossing
-      disappears rather than needing ADR-0033's transfer event. **Historical population for cross-node
-      transfer: zero.**
-      ⚠️ **Two `applied` notes have no allocation row at all** and must not be imported as settled:
-      `MKeNqa5Xc9yfQj5jqqbT` (CN-1016, `Yellow Film LLC`) and `zFXSXP1jLdtfyO9nVpYl` (CN-1013,
-      `Juniper Productions`). This is the population in `api-cloudrun#469`, which the issue leaves
-      unnamed.
-      ⚠️ Read from the Typesense projection only — there is no `db_credit_notes_*` tool and
-      `credit-notes` is absent from `db_schema`'s enum. Inspect the authoritative documents when the
-      mapping is authored.
+      ✅ **IN SCOPE** — the thread contents, 44 docs. Follows `threads`: survives, seam undecided
+      (OQ-051).
+    blocked_by: [OQ-051]

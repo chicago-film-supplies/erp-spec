@@ -1929,7 +1929,19 @@ open_questions:
     owner: alex
     decide_by: 2027-01-31
     blocks: []
-    status: open
+    status: answered
+    answer: >-
+      **BOTH survive.** Owner, 2026-08-17: _"a version of the current board/calendar/list def
+      survives into v2, its current form is a very rough draft"_ and _"a version of
+      comments/threads also survives"_. The charter's silence did not mean out of scope.
+      ⚠️ **"The concept survives" and "the data migrates" are DIFFERENT CLAIMS and only the first
+      is settled.** The board's v2 shape is a redesign, so nothing can be mapped to it yet; and the
+      thread corpus is ~99% empty containers (4,153 threads against 44 comments, from event-card
+      churn), so whether THAT DATA is carried is a separate question this does not answer. All four
+      collections stay `quarantine` in the field map with their REASONS rewritten.
+      ⇒ **OQ-051 takes the part that is still open** — where the chat seam sits.
+      ⚠️ **The charter still names neither surface**, in scope or out, which is the gap this question
+      actually exposed. A ruling in a session is not a charter amendment.
     notes: >-
       Opened 2026-08-16 while authoring the m6 collection dispositions (erp-spec#8). **5,315
       documents across four collections turn on a silence**: the charter's in-scope list runs order →
@@ -2037,3 +2049,31 @@ open_questions:
       ⚠️ It also sets the floor on the post-cutover gross margin, which is currently only bounded
       between 61% and 90.5% because nothing splits 6600 into crew and administrative wages. Same
       measurement, two uses.
+  - id: OQ-051
+    question: >-
+      Where is the seam between CFS and a chat system for comments and threads — CFS implements
+      them, or they live in Matrix (or a comparable open-source company-chat system) and CFS holds
+      only the link?
+    owner: alex
+    decide_by: 2027-03-31
+    blocks: []
+    status: open
+    notes: >-
+      Opened 2026-08-17 by OQ-049's answer. Owner: _"potentially integrating with matrix (or other
+      open source slack type of company chat system) or thats separate hard to say where the best
+      seam is"_ · _"probably user and/or domain tagging"_.
+      **Three shapes, and the owner's own candidate is the third:**
+      · **CFS implements threads**, as today — `threads` + `comments` are the thing itself;
+      · **chat lives outside** and CFS stores a reference;
+      · **tagging** — a message carries a person and/or a domain object (an order, a card) and the
+        conversation lives outside entirely. This is the candidate the owner named.
+      ⚠️ **The seam decides the migration, not the other way round.** If chat moves out, the 4,153
+      thread records are a link table at most; if it stays in, they are the substance. `threads` and
+      `comments` are `quarantine` in `migration/field-map.yaml` pending this.
+      ⚠️ **Do not let the migration force the seam.** The tempting reasoning is "we have 4,153
+      threads so we must implement threads" — but 44 comments across them says the corpus is almost
+      entirely empty containers from event-card churn (api-cloudrun#227), which is an argument about
+      data hygiene and not about architecture.
+      ⚠️ **A tagging seam has a consequence worth pricing before choosing it**: a comment that lives
+      outside cannot be part of a sealed period artifact (ADR-0017), so anything that needs an
+      audit-durable narrative — a dispute, a credit note reason — cannot rely on it.

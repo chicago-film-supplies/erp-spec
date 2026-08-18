@@ -5,7 +5,7 @@
     "adrs": 38,
     "adrs_accepted": 23,
     "events": 37,
-    "inbox": 85,
+    "inbox": 86,
     "inbox_promoted": 20
   },
   "requirements": [
@@ -626,6 +626,7 @@
       "inbox/2026-08-17-correction-wrapbook-is-a-true-eor-so-cfs-cost-is-the-invoice-and-the-refutation-of-adr-0019-was-overstated.md",
       "inbox/2026-08-17-oq-050-answered-wrapbook-itemises-wages-per-person-per-day-but-prices-burden-per-RUN-so-the-cost-rate-is-an-estimate.md",
       "inbox/2026-08-17-owner-cfs-is-non-union-and-average-payroll-fringe-is-23-percent-which-refutes-adr-0019s-central-claim.md",
+      "inbox/2026-08-17-owner-meals-stay-in-opex-and-the-board-and-threads-both-survive-v2-with-the-chat-seam-undecided.md",
       "inbox/2026-08-17-owner-the-platform-fee-absorbs-into-cogs-so-the-absorbed-rate-is-the-whole-wrapbook-charge.md",
       "inbox/2026-08-17-survey-labor-costing-is-normal-costing-not-actual-the-crew-is-two-populations-with-two-true-costs-and-idle-time-splits-normal-from-abnormal.md",
       "inbox/2026-08-17-the-v2-rebuild-retires-the-prod-to-dev-mirror-and-the-spec-never-states-what-replaces-it.md",

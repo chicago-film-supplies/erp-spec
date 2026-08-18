@@ -11,18 +11,18 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 11 open | 39 answered of 50 · **0 with no owner or no decide-by** |
+| Open questions | 11 open | 40 answered of 51 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 16 | 0 open |
 | Decisions (ADR) | 38 | 23 in force · 11 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 21 | 0 without a scenario |
-| Inbox | 85 | 65 unpromoted |
+| Inbox | 86 | 66 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
 ## The bottleneck: undecided questions
 
-**11 of 50 still open**, soonest decide-by first.
+**11 of 51 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
@@ -34,9 +34,9 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-043` | Should the product and organization masters carry an EVENT HISTORY, so that a classificat… | alex | 2026-12-15 | — |
 | `OQ-044` | Once wages move into COGS, what stays in `6600 Wages` — and can salaried sales/admin staf… | alex | 2026-12-15 | — |
 | `OQ-039` | `organizations.tax_profile` carries two different concepts in one enum — who owes (applie… | alex | 2027-01-15 | — |
-| `OQ-049` | Does v2 carry the operational collaboration surface — the board (`cards`, `lists`) and th… | alex | 2027-01-31 | — |
 | `OQ-045` | When a vendor bills LESS than was accrued, what retires the residual left in `2010 Accrue… | alex | 2027-02-15 | — |
 | `OQ-048` | At what rate is a contributed (unpaid owner) shift costed in the IMPUTED labor view — the… | alex | 2027-03-15 | — |
+| `OQ-051` | Where is the seam between CFS and a chat system for comments and threads — CFS implements… | alex | 2027-03-31 | — |
 
 Whether any of these dates has PASSED is `deno task validate`'s judgement — gate 7 fails on an open question past its decide-by. This file reads no clock and so cannot say.
 
