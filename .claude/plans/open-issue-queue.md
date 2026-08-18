@@ -5,9 +5,9 @@
 - **Status:** `main` is CI-green. **ADR-0030 and ADR-0019 are EXECUTABLE** (gate 18 +
   `vehicle_cost_absorbed`), **rule 8a executes as gate 19**, and **ADR-0038 is ACCEPTED and swept**
   — owner's ruling 2026-08-17, `5801` deleted, 34 files moved with it, both counting gates
-  re-derived themselves. ADR-0037 is red-teamed into **four questions the owner has been asked**,
-  and PSA is measured for the first time. Ten issues open, two opened by this session's own
-  measurements.
+  re-derived themselves. **ADR-0037 is ACCEPTED on four rulings** — ruling 4 landed (120 artifacts
+  carry a `headline:`, gate 20 enforces it), and PSA is measured for the first time. Ten issues
+  open, two opened by this session's own measurements.
 - **Origin:** a review of the open issue queue, requested because #18 was on the owner's mind
 - **Related:** open — #3, #4, #6, #12, #17, #32, #35, #36, **#37 (the other 104 accounts)**, **#38
   (labor_variance)** · closed: #8, #13, #14, #15, #16, #18, #19, #20 · HOT-015, HOT-016 resolved ·
@@ -173,8 +173,9 @@ which matched nothing.
   facts settle it and none is in the books: who signs the crew's engagement, whose insurance answers
   for them, who bears the loss if the client's money does not arrive. ⚠️ **The ASC 606 indicators
   point at PRINCIPAL** — the opposite of what the charter and #35 assume.
-- **Accept or reject ADR-0037** — ✅ now asks **four separable rulings** rather than one, after the
-  red team — and **ADR-0038** (no causal order means not COGS), ✅ surveyed and gate-19 clean.
+- ✅ **ADR-0037 — RULED 2026-08-17** on all four: yes to both, build the gate, backfill, yes and
+  yes. Was asked as **four separable rulings** rather than one, after the red team — and
+  **ADR-0038** (no causal order means not COGS), ✅ surveyed and gate-19 clean.
 - **Team meals in COGS** — answered 2026-08-17: meals stay in opex.
 - **11 ADRs remain proposed.** ⚠️ Four of them cannot be accepted as they stand (gate 19).
 
@@ -188,14 +189,14 @@ which matched nothing.
 
 ## Then, in order
 
-|              |                                                                                                                                                                                                                        |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **ADR-0037** | ✅ Red-teamed, and the four questions are now stated as questions and put to the owner. Nothing to do until they answer. ✅ **ADR-0038 is DONE** — accepted and swept 2026-08-17                                       |
-| **#35**      | PSA — a service line with five GL accounts and no spec; includes a charter contradiction that owes a `HOT-`. ✅ Gate 18 measured the same gap from the other side: `2800`–`2803` and `4130` are reachable from nothing |
-| **#38**      | `labor_variance` — the survey IS the work; the account was deleted on a refuted premise                                                                                                                                |
-| **#37**      | the other 104 accounts — an inclusive `resolves_to:` per path, land it red, and ⚠️ **rule 8a applies to the domains**, so it is not a bulk typing job                                                                  |
-| **#36**      | the shift records `hours_idle` where the truth may be "worked on something else"                                                                                                                                       |
-| **#6**       | requirements backlog, blocks m7 — 21 requirements, 4 of 9 contexts uncovered (measured 2026-08-17)                                                                                                                     |
+|                          |                                                                                                                                                                                                                                                                                                                                            |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **ADR-0037 rulings 1–3** | ✅ ACCEPTED 2026-08-17, ruling 4 (headlines) landed. What remains is ONE unit: the `asserts:` schema, the exact-restatement gate, and ⚠️ **the backfill of all 23 in-force ADRs** — whose cost is JUDGEMENT, not typing, because a claim added to a frozen ADR is a reading of it. ✅ **ADR-0038 is DONE** — accepted and swept 2026-08-17 |
+| **#35**                  | PSA — a service line with five GL accounts and no spec; includes a charter contradiction that owes a `HOT-`. ✅ Gate 18 measured the same gap from the other side: `2800`–`2803` and `4130` are reachable from nothing                                                                                                                     |
+| **#38**                  | `labor_variance` — the survey IS the work; the account was deleted on a refuted premise                                                                                                                                                                                                                                                    |
+| **#37**                  | the other 104 accounts — an inclusive `resolves_to:` per path, land it red, and ⚠️ **rule 8a applies to the domains**, so it is not a bulk typing job                                                                                                                                                                                      |
+| **#36**                  | the shift records `hours_idle` where the truth may be "worked on something else"                                                                                                                                                                                                                                                           |
+| **#6**                   | requirements backlog, blocks m7 — 21 requirements, 4 of 9 contexts uncovered (measured 2026-08-17)                                                                                                                                                                                                                                         |
 
 ⚠️ **Six of ten issues are blocked on owner decisions, and the decision backlog is not blocked on
 the owner's availability — it is blocked on nobody having prepared the decisions.** ✅ **Three were
