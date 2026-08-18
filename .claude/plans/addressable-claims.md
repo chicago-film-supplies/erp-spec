@@ -252,6 +252,67 @@ include the second point. Both belong in front of them before any of it is writt
 `source:` (no judgement about what was load-bearing — the field already says so); the same but only
 for the most-cited few; or the full 23. **Nothing is written until this is re-answered.**
 
+## ✅ Built 2026-08-17, and what each piece is NOT
+
+The owner accepted the recommendations. What landed:
+
+|             |                                                                                                          |
+| ----------- | -------------------------------------------------------------------------------------------------------- |
+| **gate 20** | `headline:` on 120 id-bearing artifacts. Checks the FIELD, never the prose citing it                     |
+| **gate 21** | `measurements:` + `asserts:`, frozen under their own hash. **Fails on malformed, only REPORTS coverage** |
+| **gate 22** | a measured figure is cited by id, not restated. **EXACT match only, and it says so**                     |
+
+**Gate 21's first backfill was chosen to prove the instrument, not to be representative.**
+ADR-0019's capped-burden premise now reads `status: refuted, refuted_by: HOT-018`, and ADR-0030's
+"labor is costed at actual" contrast reads `refuted_by: HOT-016`. Both ADRs are frozen; both were
+right as decisions; **until now neither had any legal way to say a fact it cited had measured
+false.** ⚠️ And firing the freeze caught the obvious mistake: an attempt to _correct_ the refuted
+claim to the right number was refused. **A refuted premise is marked, never edited.**
+
+**Gate 22 landed red on twelve restatements from four owned figures** — `$172,261.35` across the
+chart, a golden vector and open-questions; `$236,487.75` across dimensions, posting-rules,
+product-line-pl and a README. That is the class-A defect, visible for the first time and now a work
+list rather than a grep.
+
+### What is still not done, deliberately
+
+- **23 of 25 in-force ADRs carry neither block**, and gate 21's own note says so on every run. The
+  remaining sourced Context claims are thin — 6 of the 12 measured are already in.
+- ⚠️ **Nine of the twelve figure-bearing Context bullets in accepted ADRs carry no dated source at
+  all**, and their bodies are frozen. A `measurements:` entry for one would have to invent a
+  provenance nobody recorded. **Left out rather than fabricated** — that is the class-B defect this
+  plan names, and the honest response to it is not to backfill a guess.
+
+## The conditions for going further — checkable, not remembered
+
+The full typed-claim corpus is a **v3/v4** idea. These are what would have to become true, and each
+is something a session can measure rather than argue:
+
+1. **Paraphrase drift must out-rate what counting and enum gates catch.** Instrument the next 20
+   defects and record which mechanism would have caught each. **Current score: cheap gates 4–5,
+   claim corpus 0.**
+2. **The vocabulary must be stable — under one revision per quarter across `ledger/` and
+   `reporting/`.** Measured base rate over ~9 days: **≥6 revisions** (`cost_type` → `labor_line` 3→7
+   values; ADR-0008 → ADR-0018 → ADR-0036; `Transport` dropped then restored; `labor_line_kinds`
+   written then collapsed; `5801` minted then deleted). **Unmet by two orders of magnitude**, and
+   this is the condition to watch first because it is the cheapest to check.
+3. **A claim-to-body agreement check must be demonstrated RED on a real paraphrase before a single
+   claim is written for it.** The fixture exists and is free: `charter.md`'s "actual-cost
+   absorption" against ADR-0019's "costed at actual". If a presence test cannot fail on that pair,
+   the condition is unmet by construction.
+4. **Coverage silence must stay distinguishable from coverage.** ✅ Already satisfied — gates 21 and
+   22 both report their complement, which is gate 18's lesson applied.
+5. **Something must execute on the claims.** ✅ Partly satisfied by gate 22, which goes red when a
+   figure and its owner drift apart. **Not** satisfied for prose claims, and no design for that
+   exists that survives the paraphrase problem.
+6. **There must be more than one reader.** `deciders: [repo owner]` on all 38 ADRs. Every claim
+   corpus that paid off historically had a regulator, a second team, or a downstream generator
+   consuming it. ⚠️ **This is the condition least in anyone's control and the most decisive** — if
+   the implementation repo ever reads `asserts:` to generate tests, it flips.
+
+⇒ **Revisit when 2 flips.** Until then the cheap gates are outperforming the corpus 5 to 0 on this
+repo's own defects, and that is the number to keep score against.
+
 ## Open work this plan does NOT cover, carried so it is not lost
 
 - ✅ **A golden vector asserting the opposite of an accepted ADR — FIXED 2026-08-17.**
