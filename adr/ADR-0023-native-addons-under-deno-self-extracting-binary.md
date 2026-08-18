@@ -6,6 +6,7 @@ date: 2026-08-09
 deciders: [repo owner]
 contexts: [ledger, billing, ordering]
 relates_to: [SPIKE-001, SPIKE-007, SPIKE-010, ADR-0003, ADR-0004, ADR-0012, ADR-0013]
+accounting_shaped: false
 supersedes:
 superseded_by:
 frozen_sha256: 1fce221a5e315ce646001ea9894cb942b2a1572a052837747f17d74252b36fdf

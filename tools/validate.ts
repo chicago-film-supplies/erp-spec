@@ -170,6 +170,18 @@ interface Adr {
   superseded_by: string | null;
   relates_to: string[];
   frozen_sha256?: string;
+  /**
+   * CLAUDE.md rule 8a. `true` where the decision changes what the BOOKS SAY — where an amount
+   * posts, what an account means, how two books relate, how a statement is presented. `false` where
+   * it changes how the system is BUILT, even when the subject is the ledger. Gate 19.
+   */
+  accounting_shaped?: boolean;
+  /** `inbox/` files holding the six-reference survey. Front matter, so an accepted ADR can gain one. */
+  survey: string[];
+  /** Why an accepted, accounting-shaped ADR carries no survey. Named by identity, never a date cutoff. */
+  survey_exemption?: string;
+  /** Why an ADR naming GL account codes is nonetheless not accounting-shaped. */
+  not_accounting_reason?: string;
   _file: string;
   /** Everything after the front matter. Gate 14 hashes this and nothing else. */
   _body: string;
@@ -191,6 +203,10 @@ function toAdr(fm: unknown, file: string, body: string): Adr | null {
     superseded_by: str(fm.superseded_by) ?? null,
     relates_to: strList(fm.relates_to),
     frozen_sha256: str(fm.frozen_sha256),
+    accounting_shaped: typeof fm.accounting_shaped === "boolean" ? fm.accounting_shaped : undefined,
+    survey: typeof fm.survey === "string" ? [fm.survey] : strList(fm.survey),
+    survey_exemption: str(fm.survey_exemption),
+    not_accounting_reason: str(fm.not_accounting_reason),
     _file: file,
     _body: body,
   };
@@ -3191,6 +3207,151 @@ for (const e of evts) {
   );
 }
 
+// ── gate 19: rule 8a — an accounting-shaped ADR is not ACCEPTED without a survey ────────────
+/**
+ * ⚠️ **CLAUDE.md rule 8a has been a standing owner instruction since 2026-08-09 and nothing executed
+ * it, so the backlog it created was invisible.** ADR-0030 sat `proposed` for a week looking as
+ * though it needed a signature; what it needed was the survey rule 8a had required all along — and
+ * running that survey **reversed one of its stated consequences**. Checking the rest found **seven
+ * of ten proposed ADRs citing none**. A rule that exists and is not applied blocks work silently.
+ *
+ * ── it fires at ACCEPTANCE, and warns before it ─────────────────────────────────────────────────
+ *
+ * Acceptance is the irreversible act (gate 14 freezes the body at exactly that point), so that is
+ * where the hard failure belongs and drafting stays free. A `proposed` ADR that is accounting-shaped
+ * and cites no survey is a **warning** instead: the backlog stays visible without turning CI red on
+ * work in progress. ⚠️ Rule 8a's own text is stricter — six references "before a recommendation is
+ * made", and a proposed ADR usually carries one — so a green run here does NOT mean every
+ * recommendation in `adr/` is surveyed. The warnings are that list.
+ *
+ * ── why the flag is DECLARED and not derived ────────────────────────────────────────────────────
+ *
+ * The obvious derivation is `contexts:`, and it does not work: **31 of 38 ADRs name `ledger`**,
+ * including "self-host on Linode" and "retain Deno/Hono". A gate keyed on that would demand a
+ * six-reference accounting survey for a hosting decision, and a gate that cries wolf is one people
+ * route around. So each ADR states it, with a criterion that is written down rather than felt:
+ *
+ *   **`true` iff the decision changes what the BOOKS SAY** — where an amount posts, what an account
+ *   means, how two books relate, how a statement is presented (rule 8a's own four).
+ *   **`false` where it changes how the system is BUILT**, even when the subject is the ledger.
+ *
+ * ⚠️ **A self-declared flag is only as good as what can falsify it, hence the tripwire.** An ADR
+ * that declares `false` while its body names a **GL account code that resolves in the chart** owes a
+ * `not_accounting_reason:` — silence becomes a written claim someone can challenge. It is a REASON
+ * that is demanded rather than a `true`, because the false positive is real: ADR-0037 quotes six
+ * account codes purely as examples of the `#### - Name` citation rule and decides nothing about
+ * where anything posts.
+ *
+ * ── the exemptions are by identity and each says why ────────────────────────────────────────────
+ *
+ * Six accepted ADRs are accounting-shaped and cite no survey. They cannot gain one in their bodies —
+ * an accepted ADR is immutable (ADR-0034) — but **front matter is not hashed**, which is what lets
+ * `survey:` be added to an old ADR that gets one and `survey_exemption:` to one that never will.
+ * **No date cutoff**: a cutoff exempts silently and forever, where a named list can only shrink and
+ * makes each case arguable. ⚠️ **One of the six is not legacy at all** — ADR-0036 was accepted on
+ * 2026-08-16, seven days after the instruction, and its exemption says so.
+ */
+{
+  const G = "19";
+  const chartCodes = new Set<number>();
+  {
+    const coa = await readYaml<{ accounts?: { code?: unknown }[] }>(
+      `${ROOT}/ledger/chart-of-accounts.yaml`,
+    );
+    for (const a of coa?.accounts ?? []) if (typeof a.code === "number") chartCodes.add(a.code);
+  }
+
+  let shaped = 0;
+  let unsurveyedProposed = 0;
+  for (const a of adrs) {
+    const where = a.id;
+    if (a.accounting_shaped === undefined) {
+      fail(
+        G,
+        `${where}: no \`accounting_shaped\` — rule 8a needs every ADR to say whether it decides what the BOOKS SAY (\`true\`) or how the system is BUILT (\`false\`). Absence is not an answer`,
+      );
+      continue;
+    }
+    if (a.accounting_shaped) shaped++;
+
+    // The tripwire: a `false` that quotes GL codes owes a reason.
+    if (!a.accounting_shaped) {
+      const named = new Set<number>();
+      for (const m of a._body.matchAll(/\b([1-7]\d{3})\b/g)) {
+        const n = Number(m[1]);
+        if (chartCodes.has(n)) named.add(n);
+      }
+      if (named.size > 0 && !a.not_accounting_reason) {
+        fail(
+          G,
+          `${where}: declares \`accounting_shaped: false\` while naming ${named.size} GL account code(s) (${
+            [...named].sort((x, y) => x - y).slice(0, 5).join(", ")
+          }${named.size > 5 ? ", …" : ""}) — say why in \`not_accounting_reason\``,
+        );
+      }
+      if (a.not_accounting_reason && named.size === 0) {
+        fail(
+          G,
+          `${where}: carries \`not_accounting_reason\` but names no GL account code — drop it, it answers a question nothing asked`,
+        );
+      }
+      if (a.survey.length > 0 || a.survey_exemption) {
+        fail(
+          G,
+          `${where}: is \`accounting_shaped: false\` and carries a survey or an exemption — one of the two is wrong`,
+        );
+      }
+      continue;
+    }
+
+    for (const s of a.survey) {
+      if (!s.startsWith("inbox/")) {
+        fail(
+          G,
+          `${where}: survey "${s}" is not under \`inbox/\` — a survey is dated evidence and evidence is append-only`,
+        );
+      } else {
+        try {
+          await Deno.stat(`${ROOT}/${s}`);
+        } catch {
+          fail(G, `${where}: survey "${s}" does not resolve`);
+        }
+      }
+    }
+
+    if (a.status === "accepted") {
+      if (a.survey.length === 0 && !a.survey_exemption) {
+        fail(
+          G,
+          `${where}: is ACCEPTED and accounting-shaped with no \`survey\` — rule 8a requires six references before the decision. Cite the inbox file, or record why this one never will in \`survey_exemption\``,
+        );
+      }
+      if (a.survey.length > 0 && a.survey_exemption) {
+        fail(
+          G,
+          `${where}: carries both a \`survey\` and a \`survey_exemption\` — the exemption is for an ADR that has none`,
+        );
+      }
+    } else if (a.status === "proposed" && a.survey.length === 0) {
+      unsurveyedProposed++;
+      warn(
+        G,
+        `${where}: accounting-shaped, \`proposed\`, and cites no survey — rule 8a wants six references BEFORE the recommendation, and acceptance will fail on it`,
+      );
+    }
+    if (a.status !== "accepted" && a.survey_exemption) {
+      fail(
+        G,
+        `${where}: carries \`survey_exemption\` at status "${a.status}" — the exemption exists for decisions already frozen; a ${a.status} ADR can still be surveyed`,
+      );
+    }
+  }
+  notes.push(
+    `gate 19: ${shaped} of ${adrs.length} ADRs are accounting-shaped; ` +
+      `${unsurveyedProposed} proposed and unsurveyed`,
+  );
+}
+
 // ── report ──────────────────────────────────────────────────────────────────
 const GATE_NAMES: Record<string, string> = {
   "1": "ids unique and well-formed",
@@ -3211,6 +3372,7 @@ const GATE_NAMES: Record<string, string> = {
   "16": "the spec chart of accounts against the measured live chart",
   "17": "house spelling in the refactorable spec",
   "18": "every minted account is reachable from a posting rule",
+  "19": "rule 8a — an accounting-shaped ADR is not accepted without a survey",
   xref: "cross-references resolve",
   parse: "files parse",
 };

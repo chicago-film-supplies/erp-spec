@@ -6,6 +6,7 @@ date: 2026-08-08
 deciders: [repo owner]
 contexts: [ledger, ordering, billing]
 relates_to: [SPIKE-001, SPIKE-002, SPIKE-006, HOT-005]
+accounting_shaped: false
 supersedes:
 superseded_by:
 frozen_sha256: 962ceb0221d52a51b8d539c5bc20ece409a7802ae624e40e9597703ff77cedd4

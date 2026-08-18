@@ -7,6 +7,7 @@ review_by: 2026-10-15
 deciders: [repo owner]
 contexts: [ledger, billing]
 relates_to: [HOT-006, OQ-012, ADR-0018]
+accounting_shaped: true
 supersedes:
 superseded_by:
 ---

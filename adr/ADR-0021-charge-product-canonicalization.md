@@ -6,6 +6,13 @@ date: 2026-08-09
 deciders: [repo owner]
 contexts: [ledger, billing]
 relates_to: [HOT-008, OQ-014]
+accounting_shaped: true
+survey_exemption: >-
+  Accepted 2026-08-08, before rule 8a existed (owner, 2026-08-09). It is genuinely
+  where-does-it-post — item type determines the revenue account (4100, 4110) — and it was taken from
+  CFS's own live data rather than from references. The unsurveyed part is narrow: whether a delivery
+  surcharge is revenue of its own or a component of service income. **That question is live again
+  under ADR-0031's `Delivery` pool**, and the survey belongs to whichever ADR re-decides it.
 supersedes:
 superseded_by:
 frozen_sha256: 1b3db617ee73a2d7f636b59b533dcc9b8261f2b48042dc832418a9105a2c8057

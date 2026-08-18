@@ -6,6 +6,15 @@ date: 2026-08-09
 deciders: [repo owner]
 contexts: [fixed-assets, ledger, tax]
 relates_to: [ADR-0007, ADR-0017, ADR-0018, SPIKE-005, OQ-027, OQ-029, HOT-013]
+accounting_shaped: true
+survey_exemption: >-
+  ⚠️ **The clearest of the six, and the least comfortable.** Accepted 2026-08-09 — the same day the
+  standing instruction was given — and it decides how two books relate, which is rule 8a's own third
+  case. Its `inbox/2026-08-09-tax-and-gaap-statements-are-both-required.md` IS a six-reference
+  survey by content and was written to settle whether the tax book posts; it is not named as one
+  here because this front matter did not exist. ⇒ **The exemption is a pointer, not an excuse**:
+  cite that file as the survey when this ADR is next superseded, and until then the decision rests
+  on evidence that was taken but never labelled.
 supersedes:
 superseded_by:
 frozen_sha256: 01d5ebf968d1a8b62253ef93c8b9a71f198b888a0fe4639dae907767bd789df5

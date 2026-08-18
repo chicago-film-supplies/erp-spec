@@ -8,6 +8,7 @@ review_by: 2026-12-01
 deciders: [repo owner]
 contexts: [ledger, fulfillment]
 relates_to: [ADR-0019, ADR-0025, ADR-0029, ADR-0030]
+accounting_shaped: true
 supersedes:
 supersedes_on_acceptance:
 superseded_by:

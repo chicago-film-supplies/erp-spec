@@ -19,6 +19,9 @@ relates_to: [
   OQ-032,
   OQ-033,
 ]
+accounting_shaped: true
+survey:
+  - inbox/2026-08-09-allocation-basis-survey-six-references.md
 supersedes:
 superseded_by:
 ---

@@ -17,6 +17,9 @@ relates_to: [
   ADR-0031,
   SPIKE-005,
 ]
+accounting_shaped: true
+survey:
+  - inbox/2026-08-16-survey-vehicle-cost-is-cost-of-rental-revenue-and-every-system-absorbs-it-at-a-rate-rather-than-recoding-the-purchase.md
 supersedes:
 superseded_by:
 frozen_sha256: faea4b61a4a83841daefedf58adbad2583a8fb271dab4943c3ee3d35808ac580

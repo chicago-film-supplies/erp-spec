@@ -8,6 +8,13 @@ review_by: 2026-12-01
 deciders: [repo owner]
 contexts: [ledger]
 relates_to: [ADR-0019, ADR-0030, ADR-0034, HOT-016]
+accounting_shaped: false
+not_accounting_reason: >-
+  It names `5801`, `5900`, `5901`, `5902`, `6409` and `6302` **only as examples of the citation rule
+  it is proposing** (`#### - Name` on first mention). It decides how a decision is WRITTEN — ids
+  carrying meaning where used, premises typed apart from decisions — and nothing about where an
+  amount posts. The tripwire is doing its job: the flag is now a claim someone can argue with
+  instead of a silence.
 supersedes:
 supersedes_on_acceptance:
 superseded_by:

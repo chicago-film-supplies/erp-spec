@@ -312,6 +312,25 @@ Three things the survey is for, and only the first is obvious:
 Practitioner material counts and is sometimes the best evidence: a consultancy publishing _how to
 work around_ a product's default is a measurement of what that default costs. Cite it.
 
+✅ **Enforced by `validate` gate 19 as of 2026-08-17, and it was worth executing.** Every ADR
+declares `accounting_shaped: true | false` in its front matter — absence is not an answer — and an
+`accepted` one that is `true` must cite a `survey:` under `inbox/`. **The declaration cannot be
+derived from `contexts:`**: 31 of 38 ADRs name `ledger`, including "self-host on Linode", so a gate
+keyed on that would demand a six-reference survey for a hosting decision.
+
+- **It fires at ACCEPTANCE and warns before it.** Acceptance is the irreversible act (gate 14
+  freezes the body there), so drafting stays free — but a `proposed` accounting-shaped ADR citing no
+  survey is a warning, because rule 8a's own text wants the six references _before the
+  recommendation_. Four stand today: ADR-0020, ADR-0025, ADR-0029, ADR-0038.
+- **A self-declared flag needs something that can falsify it.** An ADR declaring `false` while its
+  body names a GL account code that resolves in the chart owes a `not_accounting_reason:`. A REASON
+  rather than a forced `true`, because ADR-0037 quotes six codes purely as citation-style examples.
+- **Six accepted ADRs carry a `survey_exemption:`** — 0007, 0010, 0017, 0021, 0026 and **0036, which
+  is not legacy**: it was accepted 2026-08-16, seven days after this instruction, with no survey.
+  Front matter is not hashed, which is what lets a frozen ADR gain the field at all. Exempt by
+  identity with a reason each, never by a date cutoff — a cutoff exempts silently and forever, where
+  a named list can only shrink.
+
 Record the survey in `inbox/` with the links, dated, before it is cited by an ADR — the survey is
 evidence and evidence is append-only. Worked examples:
 `inbox/2026-08-09-tax-and-gaap-statements-are-both-required.md` and

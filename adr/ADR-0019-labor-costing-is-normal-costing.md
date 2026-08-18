@@ -22,6 +22,9 @@ relates_to: [
   OQ-019,
   OQ-050,
 ]
+accounting_shaped: true
+survey:
+  - inbox/2026-08-17-survey-labor-costing-is-normal-costing-not-actual-the-crew-is-two-populations-with-two-true-costs-and-idle-time-splits-normal-from-abnormal.md
 supersedes:
 superseded_by:
 frozen_sha256: b37f2e39a639782a0b8164f64ba4eb941a6b53959cddeadc63a715ea6ea8a9cf

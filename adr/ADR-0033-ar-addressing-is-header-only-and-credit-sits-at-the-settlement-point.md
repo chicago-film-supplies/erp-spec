@@ -7,6 +7,9 @@ review_by: 2026-11-15
 deciders: [repo owner]
 contexts: [billing, ledger]
 relates_to: [ADR-0014, ADR-0022, ADR-0029, ADR-0032, OQ-030, OQ-038, OQ-040]
+accounting_shaped: true
+survey:
+  - inbox/2026-08-11-survey-unallocated-credit-sits-with-the-legal-party-and-crossing-departments-is-a-management-control.md
 supersedes:
 superseded_by:
 ---

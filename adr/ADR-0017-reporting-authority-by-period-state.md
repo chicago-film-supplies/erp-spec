@@ -6,6 +6,14 @@ date: 2026-08-09
 deciders: [repo owner]
 contexts: [ledger, banking, billing]
 relates_to: [HOT-005, OQ-009, ADR-0003, ADR-0010, ADR-0014, ADR-0018]
+accounting_shaped: true
+survey_exemption: >-
+  Accepted 2026-08-08, before rule 8a existed (owner, 2026-08-09). It decides how two REPORTING
+  authorities relate (sealed period versus live query), which is rule 8a's third case, and its
+  central premise has since been RETRACTED in part: `reporting/allocation-bases.yaml` records the
+  owner's 2026-08-16 ruling that a product-line P&L is business intelligence and is never sealed.
+  ⇒ **A survey here is not owed retrospectively; it is owed by whatever supersedes it**, because the
+  premise that would be surveyed is the one already known to be wrong.
 supersedes: ADR-0006
 superseded_by:
 frozen_sha256: 74529acd9e7afd521f690b2450eabbeb3ccc98923a504e2a2091c3e4570d38ee

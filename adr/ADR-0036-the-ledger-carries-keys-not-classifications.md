@@ -16,6 +16,15 @@ relates_to: [
   HOT-014,
   REQ-LED-001,
 ]
+accounting_shaped: true
+survey_exemption: >-
+  ⚠️ **NOT legacy. Accepted 2026-08-16, seven days after rule 8a became a standing instruction, with
+  no survey**, and that is the honest record. It decides what a transfer carries and deletes the
+  chart's per-account dimension lists — what an account means, rule 8a's second case. What it was
+  reasoned from instead was MEASUREMENT of this corpus (`products.uid_tracking_category` moving
+  twice in one month, 14,410 lines re-read, the path-width probe), which is stronger evidence than a
+  survey for the specific claim it turns on and no substitute for knowing how five other systems
+  model a posting's classification. ⇒ Recorded so the gap is countable rather than invisible.
 supersedes: ADR-0018
 superseded_by:
 frozen_sha256: 7b8a7c260f507d7c7893369e218a0fb7c088fdf9ec8bd3e1e6937b6c0858e6b4

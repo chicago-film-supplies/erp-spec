@@ -7,6 +7,7 @@ review_by: 2026-10-15
 deciders: [repo owner]
 contexts: [ledger]
 relates_to: [HOT-005, OQ-009]
+accounting_shaped: true
 supersedes:
 superseded_by: ADR-0018
 frozen_sha256: c7265fd3aed93ea3bb25f256740cb3b4b3e385b2242c423edc451fc24f0c3b21

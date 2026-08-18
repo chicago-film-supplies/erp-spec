@@ -7,6 +7,7 @@ review_by: 2026-11-15
 deciders: [repo owner]
 contexts: [ledger]
 relates_to: [ADR-0018, ADR-0025, ADR-0017, ADR-0034, ADR-0036, HOT-013, SPIKE-003]
+accounting_shaped: true
 supersedes:
 superseded_by:
 ---

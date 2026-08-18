@@ -6,6 +6,13 @@ date: 2026-08-08
 deciders: [repo owner]
 contexts: [fixed-assets, tax, ledger]
 relates_to: [SPIKE-005]
+accounting_shaped: true
+survey_exemption: >-
+  Accepted 2026-08-08, before rule 8a existed as a standing instruction (owner, 2026-08-09). The
+  half that is accounting-shaped is "dual GAAP/tax basis in scope", and **ADR-0026 re-decided
+  exactly that question and is itself unsurveyed** — so the survey that matters attaches there, and
+  running one here would research a scope statement rather than a decision. The engine that produces
+  the amounts is still SPIKE-005, unchosen.
 supersedes:
 superseded_by:
 frozen_sha256: 4830f6f6c9fa468edd5e6da0d026f8dd378d367e722262c885136725e35d434c

@@ -7,6 +7,7 @@ review_by: 2026-10-01
 deciders: [repo owner]
 contexts: [billing, ledger]
 relates_to: [ADR-0013, ADR-0017, ADR-0023]
+accounting_shaped: false
 supersedes:
 superseded_by:
 ---

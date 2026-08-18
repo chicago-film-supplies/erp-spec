@@ -6,6 +6,14 @@ date: 2026-08-08
 deciders: [repo owner]
 contexts: [ledger]
 relates_to: [HOT-005, OQ-009, SPIKE-003]
+accounting_shaped: true
+survey_exemption: >-
+  Accepted 2026-08-08, before rule 8a existed (owner, 2026-08-09). It is accounting POLICY — which
+  date an amount belongs to — and every reference agrees on it: a posting carries a business
+  accounting date distinct from the immutable timestamp of when it was recorded. A survey would
+  record unanimity on a point no reference disputes. ⚠️ Recorded as an exemption rather than left
+  silent so that a later decision which DOES turn on the distinction cannot inherit this one's
+  free pass.
 supersedes:
 superseded_by:
 frozen_sha256: 1bfc4aa03590518195a72e928cfdcacbf1d880fbb87536b933ce6b5e4cc0bb60

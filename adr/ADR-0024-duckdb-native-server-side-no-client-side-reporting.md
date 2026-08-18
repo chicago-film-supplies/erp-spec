@@ -6,6 +6,7 @@ date: 2026-08-09
 deciders: [repo owner]
 contexts: [ledger, billing, banking]
 relates_to: [SPIKE-007, ADR-0017, ADR-0008, ADR-0010, ADR-0023]
+accounting_shaped: false
 supersedes:
 superseded_by:
 frozen_sha256: 99435526f651c28c5ef9815d9a0dfe7aebfbe41f8c7d1a733a38a192f80acc05

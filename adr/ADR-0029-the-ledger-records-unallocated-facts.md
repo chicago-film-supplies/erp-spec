@@ -7,6 +7,7 @@ review_by: 2026-10-01
 deciders: [repo owner]
 contexts: [ledger, billing, fulfillment]
 relates_to: [ADR-0014, ADR-0017, ADR-0018, ADR-0019, ADR-0025, OQ-006, OQ-018]
+accounting_shaped: true
 supersedes:
 superseded_by:
 ---

@@ -6,6 +6,7 @@ date: 2026-08-08
 deciders: [repo owner]
 contexts: [ordering, fulfillment]
 relates_to: [SPIKE-009]
+accounting_shaped: false
 supersedes:
 superseded_by:
 frozen_sha256: 808a2ebb5036953014654ce5d97deba8a67d8386d9365c85c57a0b27d7d06d88

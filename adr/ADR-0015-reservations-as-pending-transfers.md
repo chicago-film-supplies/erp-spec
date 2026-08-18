@@ -7,6 +7,7 @@ review_by: 2026-11-01
 deciders: [repo owner]
 contexts: [availability, fulfillment, ordering]
 relates_to: [ADR-0003, ADR-0014, SPIKE-002, SPIKE-012]
+accounting_shaped: false
 supersedes:
 superseded_by:
 ---

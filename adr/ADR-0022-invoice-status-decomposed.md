@@ -6,6 +6,7 @@ date: 2026-08-09
 deciders: [repo owner]
 contexts: [billing, ledger]
 relates_to: [HOT-009, ADR-0014, ADR-0017]
+accounting_shaped: false
 supersedes:
 superseded_by:
 frozen_sha256: 1f852269335e84fc0ad2ef5d18c9127d05902d90ea81b1922fbf0cceabdf42bf

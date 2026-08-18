@@ -6,6 +6,7 @@ date: 2026-08-08
 deciders: [repo owner]
 contexts: [ledger, billing, banking, ordering]
 relates_to: [HOT-006]
+accounting_shaped: false
 supersedes:
 superseded_by:
 frozen_sha256: a2fcff1c5f3ff54c49a36a4a3da5ae70bf3b1e775d7ad95d4b6dda1c0cef61df

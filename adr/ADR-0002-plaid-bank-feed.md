@@ -6,6 +6,7 @@ date: 2026-08-08
 deciders: [repo owner]
 contexts: [banking, ledger]
 relates_to: [SPIKE-004]
+accounting_shaped: false
 supersedes:
 superseded_by:
 frozen_sha256: aeaac105708d1a74417802b908d1fa15c72da219744e1afe59e1407e6c381208
