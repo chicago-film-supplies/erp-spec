@@ -47,7 +47,7 @@ report:
 
   # ── which product lines are goods, and which are activity ────────────────────────────────────
   # The taxonomy mixes categories of GOODS with categories of ACTIVITY, and the mix is not stable:
-  # of the FIVE activity lines TWO are material — `Delivery` 13.79% and `Trash & Cleanup` 8.45%,
+  # of the FIVE activity lines TWO are material — `Delivery` 13.79% (ADR-0030/M2) and `Trash & Cleanup` 8.45%,
   # together 22.2% of revenue — `Transport` (trucking) is 1.98%, and two are small (`Shipping` 0.33%,
   # `Crew` 0.21%). ⚠️ Re-measured 2026-08-16: every DOLLAR figure OQ-031 and OQ-034 recorded reproduces
   # exactly — $144,975.00, $39,665.00, $34,000.00, $5,665.00, $3,550.00 — and only the SHARES moved,

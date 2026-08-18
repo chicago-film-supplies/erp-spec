@@ -758,7 +758,7 @@ rules:
           order is keyed to the delivery job whole, because allocation is destructive and the
           official product-line P&L can spread it afterwards — where posting it spread cannot be
           undone.
-          Measured: `Delivery` is the largest tracked line in the business at **$236,487.75 and
+          Measured: `Delivery` is the largest tracked line in the business at **$236,487.75 (ADR-0030/M2) and
           13.91% of revenue**, so this rule decides where a large number lands
           (re-measured 2026-08-10,
           `inbox/2026-08-10-the-untracked-revenue-denorm-is-repaired-and-28-7-percent-is-now-15-percent.md`;

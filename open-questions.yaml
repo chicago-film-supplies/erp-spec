@@ -2048,7 +2048,7 @@ open_questions:
       ⇒ **A per-shift labor cost is part actual and part apportioned, and pro-rata apportionment IS
       a standard rate applied to actual hours.** ADR-0019's "a rate variance cannot exist where
       there is no standard rate" fails on measurement, not on argument.
-      **Run 759715: wages $2,323.50 + fees $461.23 = CFS cost $2,784.73, an effective 19.85%** —
+      **Run 759715: wages $2,323.50 + fees $461.23 = CFS cost $2,784.73, an effective 19.85% (ADR-0019/M2)** —
       statutory 18.36% plus a 1.49% platform fee. ⚠️ **3.15 points BELOW the 23% blended average**,
       so the dispersion between runs is real.
       ⚠️ **AND THE BURDEN IS CAPPED PER PERSON PER YEAR, so a flat factor is SYSTEMATICALLY wrong
@@ -2112,7 +2112,7 @@ open_questions:
         required — which is exactly SAP's shape (confirm at plan price, revalue at actual at close)
         and would give this repo a second, legitimate variance it has so far assumed away.
       ⚠️ **Unmeasurable from the books and from this repo.** `6600 Wages` is one undimensioned line
-      ($172,261.35 FY2025, `xero:2026-08-17`), every payroll-liability account is Archived, and the
+      ($172,261.35 (ADR-0019/M1) FY2025, `xero:2026-08-17`), every payroll-liability account is Archived, and the
       current system has no shift stage to compare against. **It is a question for the EOR**, not for
       the ledger — what their remittance report contains.
       ⚠️ It also sets the floor on the post-cutover gross margin, which is currently only bounded
@@ -2163,7 +2163,7 @@ open_questions:
       OQ-018's overtime premium is applied in the shift record. What waits is the number.
       **Three parts, and the third is the accounting-shaped one.**
       · **The rate.** Cost per computed mile. ADR-0030 puts the 2025 pool at
-        **$21,844.77 across 6400-6403** and says that figure is UNPINNED and **understated** — it
+        **$21,844.77 (ADR-0030/M1) across 6400-6403** and says that figure is UNPINNED and **understated** — it
         omitted rented trucks, which now post direct to 5902 instead. It cannot be re-derived from
         this repo: `chart-of-accounts` mirrors into Firestore without balances and this repo does not
         call the Xero API.

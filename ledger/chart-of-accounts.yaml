@@ -1293,7 +1293,7 @@ accounts:
     reason: >-
       Required by ADR-0019. Hours actually worked on a job, costed from **what the EOR charges** for
       that person — wages itemised per person and per day, employer burden apportioned from the
-      payroll run's own rate (OQ-050, measured 19.85% on run 759715). ⚠️ **This read "at that
+      payroll run's own rate (OQ-050, measured 19.85% (ADR-0019/M2) on run 759715). ⚠️ **This read "at that
       person's actual per-contact wage" until 2026-08-17**, which was the refuted claim HOT-016
       records: a per-contact WAGE is what CFS agreed the worker receives, and the COST is the
       invoice. ⚠️ This reason read "dimensioned to the job's product line and the work's cost type"
@@ -1753,7 +1753,7 @@ accounts:
       created (ADR-0038), and under but-for the guaranteed-unworked part belongs to the order that
       caused the hire rather than to any residual account.
       ✅ **Migration delta: zero.** The live books already hold this population here —
-      **$172,261.35** for FY2025 across all own-crew wages (`xero:2026-08-17`), of which only the
+      **$172,261.35 (ADR-0019/M1)** for FY2025 across all own-crew wages (`xero:2026-08-17`), of which only the
       causal part moves. No other decision in this spec can say that.
 
   - code: 6720

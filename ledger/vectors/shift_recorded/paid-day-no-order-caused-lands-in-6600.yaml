@@ -40,7 +40,7 @@ derivation: >-
   unchanged; one account code moved, from a cost-of-sales account to an operating expense.
   ✅ **The incumbent already does this**, which is why the migration delta is zero: measured
   2026-08-17, the live COGS block is Xero type `Direct Costs` and `6600` is type `Expense`, holding
-  **$172,261.35** of FY2025 wages below gross profit. ADR-0019 moves the causal part up into 5800;
+  **$172,261.35 (ADR-0019/M1)** of FY2025 wages below gross profit. ADR-0019 moves the causal part up into 5800;
   this vector is what stays.
   ⚠️ **A file named after its own premise is the trap this rename records.** The old name read as a
   description and was an assertion — and it is the second time in two days a `shift_recorded` vector

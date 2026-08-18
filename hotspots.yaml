@@ -711,7 +711,7 @@ hotspots:
         edited: an accepted ADR is a historical record of the decision AS TAKEN.
       · Wrapbook payroll 759715 Invoice Fee Summary — burden priced on one applicable-wages base per
         RUN (FICA 6.20 / Medicare 1.45 / FUTA 0.60 / IL SUTA 7.05 / comp 3.06 / platform 1.49 =
-        19.85%), not per person. Payroll Register — wages itemised per person per day.
+        19.85% (ADR-0019/M2)), not per person. Payroll Register — wages itemised per person per day.
       · `inbox/2026-08-17-oq-050-answered-wrapbook-itemises-wages-per-person-per-day-but-prices-burden-per-RUN-so-the-cost-rate-is-an-estimate.md`
       · The three mutable repetitions: `adr/ADR-0019-labor-costing-is-normal-costing.md` title and summary
         blockquote, and `ledger/chart-of-accounts.yaml` 5800's `reason`.

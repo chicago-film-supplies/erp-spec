@@ -3452,6 +3452,88 @@ for (const e of evts) {
   );
 }
 
+// ── gate 22: a measured figure is cited, not restated ──────────────────────
+/**
+ * ADR-0037 ruling 2 (owner, 2026-08-17: _"build it"_) — "an assertion's content may not be restated
+ * outside its owner; cite it."
+ *
+ * ⚠️ **It ships as an EXACT check and its own message says so**, because the defect that motivates
+ * it is a PARAPHRASE and no presence test reaches one. HOT-016's sweep missed `charter.md` for a
+ * reason recorded at the time: the pattern was "costed at actual" and the charter said "actual-cost
+ * absorption". A gate sold as the answer to the restatement defect class, while silent on paraphrase,
+ * would be the failure mode `m3` demonstrated this week.
+ *
+ * ── so it checks the one thing that IS exact: the figure ────────────────────────────────────────
+ *
+ * A measurement owns a number. A number restated elsewhere is character-for-character identical or
+ * it is a different number — there is no paraphrase of `$172,261.35`. And the figure is the
+ * population that demonstrably goes stale here: HOT-016 and HOT-018 are both refuted FIGURES, and
+ * HOT-016's own record is that **five mutable artifacts repeated one refuted claim**.
+ *
+ * The rule: if a mutable spec file states a figure some ADR has measured, it must also cite that
+ * measurement by id (`ADR-0019/M1`). Citing the bare ADR is not enough — the whole point is that a
+ * document-grained citation cannot say WHICH claim was depended on.
+ *
+ * ── what it does NOT check, stated so a green run is not over-read ──────────────────────────────
+ *
+ * - **Paraphrase.** "roughly $172k" and "the FY2025 wage total" pass silently. That is the
+ *   acknowledged hole and the reason ruling 2 was taken with the label attached.
+ * - **`adr/` and `inbox/`.** An accepted ADR cannot gain a citation — its body is frozen — and an
+ *   inbox note is dated evidence. Neither is a defect and neither can be fixed, so neither is
+ *   scanned. ⚠️ That means a figure restated between two frozen ADRs is invisible here, permanently.
+ */
+{
+  const G = "22";
+  /** Atomic figures inside a measurement's `value`: money, percentages, thousands-separated ints. */
+  const FIGURES = /\$[\d,]+(?:\.\d{2})?|\b\d+(?:\.\d{1,2})?%|\b\d{1,3}(?:,\d{3})+\b/g;
+  const owned = new Map<string, { adr: string; mid: string; of: string }>();
+  for (const a of adrs) {
+    if (!Array.isArray(a.measurements)) continue;
+    for (const m of a.measurements as Record<string, unknown>[]) {
+      const mid = String(m.id ?? "");
+      for (const f of String(m.value ?? "").matchAll(FIGURES)) {
+        // A figure short enough to collide by accident is not worth owning.
+        if (f[0].replace(/[^\d]/g, "").length < 3) continue;
+        owned.set(f[0], { adr: a.id, mid, of: String(m.of ?? "") });
+      }
+    }
+  }
+
+  const scan: string[] = [];
+  for (const d of ["ledger", "reporting", "contexts", "migration", "roadmap", "spikes"]) {
+    for (const ext of [".yaml", ".md", ".feature"]) scan.push(...await filesIn(d, ext));
+  }
+  for (const f of ["charter.md", "glossary.yaml", "hotspots.yaml", "open-questions.yaml"]) {
+    scan.push(`${ROOT}/${f}`);
+  }
+
+  let hits = 0;
+  for (const f of scan) {
+    if (isTemplate(f)) continue;
+    let text: string;
+    try {
+      text = await Deno.readTextFile(f);
+    } catch {
+      continue;
+    }
+    for (const [figure, owner] of owned) {
+      if (!text.includes(figure)) continue;
+      hits++;
+      if (text.includes(`${owner.adr}/${owner.mid}`)) continue;
+      fail(
+        G,
+        `${rel(f)}: states ${figure}, which ${owner.adr}/${owner.mid} owns (${
+          owner.of.replace(/\s+/g, " ").slice(0, 70)
+        }…) — cite \`${owner.adr}/${owner.mid}\` in this file, or the two go stale apart. ` +
+          `EXACT match only: this gate cannot see a paraphrase of the same figure`,
+      );
+    }
+  }
+  notes.push(
+    `gate 22: ${owned.size} owned figures checked against ${scan.length} mutable files, ${hits} occurrence(s) found`,
+  );
+}
+
 // ── gate 20: every id-bearing artifact carries a short headline ────────────
 /**
  * ADR-0037, ruling 4 (owner, 2026-08-17: _"yes and yes"_).
@@ -3709,6 +3791,7 @@ const GATE_NAMES: Record<string, string> = {
   "19": "rule 8a — an accounting-shaped ADR is not accepted without a survey",
   "20": "every id-bearing artifact carries a short headline",
   "21": "addressable claims and measurements are well-formed and frozen",
+  "22": "a measured figure is cited by id, not restated (exact match only)",
   xref: "cross-references resolve",
   parse: "files parse",
 };

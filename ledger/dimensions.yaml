@@ -148,7 +148,7 @@ dimensions:
       Why `Transport` was never used is the part worth keeping. **Activity lines and goods lines compete
       for the same line item, and goods lines win**: shipping a walkie is categorised `Walkies &
       Hotspots` (706 lines, $178,980.10), by what was shipped rather than by the shipping. `Delivery`
-      survives — **537 lines and $236,487.75, 13.79%**, the largest tracked line in the business
+      survives — **537 lines and $236,487.75, 13.79% (ADR-0030/M2)**, the largest tracked line in the business
       (re-measured 2026-08-16; 534 / $234,987.75 / 13.91% on 2026-08-10) — only because a delivery line
       has no product to be categorised as instead.
       **Adding a value back is cheap by design**, and ADR-0036 made it cheaper still: ADR-0018 took

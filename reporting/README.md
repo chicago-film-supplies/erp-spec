@@ -67,8 +67,8 @@ Pair every fixed-point check with a property that holds independently of it.
 | **allocated** (this report)                  | postings + the stated basis | what does a product line really earn, delivered      |
 
 ⚠️ The un-allocated view shows `Delivery` — the largest tracked product line, **$236,487.75 and
-13.79% of revenue** (re-measured 2026-08-16; read $216,050 / 12.8% until 2026-08-10, off a line
-denorm that was null on 227 categorised lines — api-cloudrun#473) — at a large loss **by
+13.79% (ADR-0030/M2) of revenue** (re-measured 2026-08-16; read $216,050 / 12.8% until 2026-08-10,
+off a line denorm that was null on 227 categorised lines — api-cloudrun#473) — at a large loss **by
 construction**, because delivery revenue is a surcharge and delivery cost is crew plus vehicle and
 the two were never meant to cover each other. Anyone reading it as a managed P&L concludes delivery
 should be cut, which would cut product revenue. ADR-0029 calls this the single most likely
