@@ -106,6 +106,19 @@ unzip -o .data/tb.zip -d .data
 .data/tigerbeetle start --addresses=3000 --development .data/0_0.tigerbeetle
 ```
 
+⚠️ **`--development` changes a documented constant by 32×, and nothing here said so until
+2026-08-18.** `createTransfers` caps at **253** events on a `--development` cluster, against the
+**8189** the docs state for the default configuration — measured both ways by SPIKE-003, which
+stands up a second cluster on production defaults precisely so the number is not reported as a
+TigerBeetle fact. The ceiling throws **client-side** as `ERR_TOO_MUCH_DATA` rather than returning a
+per-event status, so a batcher that catches per-event statuses sees an exception instead of a
+rejection.
+
+⇒ **Every TigerBeetle measurement in this repo before that date was taken on `--development`.**
+SPIKE-001's checks all sit well under 253, so none is invalidated — but treat any throughput or
+batch-size number from this harness as a dev-config number, and re-confirm on the deployment target
+(SPIKE-011). `deno task tb-import` formats its own clusters and does not use the one above.
+
 Valkey (`brew install valkey`):
 
 ```
