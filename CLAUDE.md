@@ -203,8 +203,11 @@ Not every tool has an upstream dump, and the difference is worth knowing before 
 
 - Payroll, contact and customer exports carry PII. **Record structure and aggregates, never rows.**
 - Xero: read from the Firestore mirror; the API is single-tenant, live, and quota is shared.
-- A failed Actions run in ~2s is a **billing block**, not a code failure. No run at all is an
-  outage.
+- ⚠️ **A platform's own error message is not a diagnosis, especially during an outage.** GitHub
+  Actions failed in ~2s on 2026-08-17 saying "recent account payments have failed **or** your
+  spending limit needs to be increased" — **billing was fine; it was a GitHub outage.** Check
+  githubstatus.com before believing a stated cause: a generic message names the path it fell into,
+  not the reason.
 
 ## Four rules that exist because something here broke on them
 

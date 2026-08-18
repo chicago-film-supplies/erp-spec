@@ -18,11 +18,15 @@
 implementation does not exist** — that is where the next session starts. See _Context
 recommendation_.
 
-⚠️ **GitHub Actions is BILLING-BLOCKED, org-wide**, since 2026-08-17 04:46Z — "recent account
-payments have failed or your spending limit needs to be increased". **A push producing a FAILED run
-in ~2s is a billing block, not a code failure**; a push producing NO run is an Actions outage. The
-repo is unaffected in practice: **`deno task ci` runs the whole CI contract locally** (validate, fmt
-check, gen, staleness, tool tests) and the workflow calls the same file.
+⚠️ **A GitHub OUTAGE on 2026-08-17 was misdiagnosed as a billing block, in this doc and in
+`CLAUDE.md`.** Actions failed in ~2s saying _"recent account payments have failed or your spending
+limit needs to be increased"_. **Billing was fine.** Owner, 2026-08-17: the budget was increased and
+there was a GitHub outage. ⇒ **A platform's own error message names the path it fell into, not the
+cause** — check githubstatus.com before believing one. Recorded because the wrong version was
+written down as a footgun and would have sent the next session to the billing page.
+
+✅ Unaffected either way: **`deno task ci` runs the whole CI contract locally** — validate, fmt
+check, gen, staleness, tool tests — and the workflow calls the same file.
 
 ### ⚠️ Two ACCEPTED ADRs have no posting rules, and `m3` reads complete anyway
 
