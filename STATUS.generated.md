@@ -13,7 +13,7 @@ is `deno task validate`'s judgement, not this file's.
 |---|---:|---|
 | Open questions | 11 open | 39 answered of 50 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 16 | 0 open |
-| Decisions (ADR) | 37 | 23 in force · 10 proposed |
+| Decisions (ADR) | 38 | 23 in force · 11 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 21 | 0 without a scenario |
 | Inbox | 85 | 65 unpromoted |
@@ -72,7 +72,7 @@ None.
 - `ADR-0034` — An accepted ADR is a historical record of the decision as taken; corrections live outside it and superseding is reserved for re-deciding
 - `ADR-0036` — The ledger carries keys, not classifications — product line is derived at report time
 
-### Proposed (10)
+### Proposed (11)
 
 | ADR | Title | Review by | Supersedes on acceptance | Blocked on |
 |---|---|---|---|---|
@@ -86,6 +86,7 @@ None.
 | `ADR-0032` | The organization tree is a liability tree; projects and settlement points are addressing beneath it | 2026-11-15 | — | `OQ-035` `OQ-036` `OQ-038` `OQ-039` `HOT-006` |
 | `ADR-0033` | A document is addressed to exactly one node by a level-tagged reference, and unallocated credit sits at the settlement point | 2026-11-15 | — | `OQ-030` `OQ-038` `OQ-040` |
 | `ADR-0037` | An id carries meaning where it is used — a headline on every id, and addressable claims inside a decision | 2026-12-01 | — | `HOT-016` |
+| `ADR-0038` | Labor with no causal order is not COGS — 5801 is not created and 6600 Wages narrows instead | 2026-12-01 | — | — |
 
 ## Spikes
 

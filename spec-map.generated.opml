@@ -252,7 +252,7 @@
           <outline text="blocks ADR-0019"/>
         </outline>
       </outline>
-      <outline text="Decisions (23 in force, 10 proposed)">
+      <outline text="Decisions (23 in force, 11 proposed)">
         <outline text="In force (23)">
           <outline text="ADR-0001 — Replace Xero with an in-house ledger" _note="**In the context of** owning the order-to-invoice path but renting the ledger, **facing** a tracking-dimension defect that Xero silently absorbs and a costing model Xero cannot express, **we decided** to build the general ledger in-house, **to achieve** dimensional postings that cannot be null and a labour-absorption model we control, **accepting** that a large amount of unglamorous accounting surface area becomes ours to build and keep correct."/>
           <outline text="ADR-0002 — Bank feed sourced from Plaid, single Chase account" _note="**In the context of** needing bank transactions now that Xero's feed goes away, **facing** one bank and one account, **we decided** to source the feed from Plaid, **to achieve** a working feed without a bank-specific integration, **accepting** that Plaid's transaction model is a consumer-fintech model, not an accounting bank feed."/>
@@ -278,7 +278,7 @@
           <outline text="ADR-0034 — An accepted ADR is a historical record of the decision as taken; corrections live outside it and superseding is reserved for re-deciding" _note="**In the context of** two accepted ADRs whose evidence was later corrected, **facing** a lifecycle rule that forbids editing them and a supersede mechanism that would mean re-deciding things nobody disputes, **we decided** that an accepted ADR is a historical record of the decision as taken, **to achieve** an `adr/` directory that can be trusted to say what was actually believed and when, **accepting** that a reader of an ADR cannot tell from the ADR alone that one of its claims has since been retracted."/>
           <outline text="ADR-0036 — The ledger carries keys, not classifications — product line is derived at report time" _note="**In the context of** ADR-0029 having made allocation a reporting act, **facing** a chart that also carried the reporting _classification_ on the posting, **we decided** that a posting records keys — causal order(s), invoice, line — and never a product line, **to achieve** a ledger whose facts do not move when a category does, **accepting** that no dimensional balance can be read from the ledger without joining to the product master."/>
         </outline>
-        <outline text="Proposed (10)">
+        <outline text="Proposed (11)">
           <outline text="ADR-0015 — Inventory reservations are TigerBeetle pending transfers, over the operational window only" _note="review by: 2026-11-01 · **In the context of** wanting order state derivable and oversell prevented in the database, **facing** a balance model with no time dimension and an availability question that is entirely about time, **we decided** to model reservations as two-phase transfers over the operational window only, **to achieve** custody oversell that is unrepresentable and a fulfillment state that is derived, **accepting** that future-dated booking conflicts stay with the interval engine.">
             <outline text="blocked on SPIKE-002"/>
             <outline text="blocked on SPIKE-012"/>
@@ -321,6 +321,7 @@
           <outline text="ADR-0037 — An id carries meaning where it is used — a headline on every id, and addressable claims inside a decision" _note="review by: 2026-12-01 · **In the context of** a spec whose authority is prose, **facing** a measured 22:1 mismatch between what is cited (a document) and what is claimed (about twenty statements inside it), **we decided** that an ADR additionally asserts individually addressable claims, typed as decision or premise, **to achieve** corrections that can be swept and premises that can go stale without touching a frozen decision, **accepting** a second surface on every ADR and a convention that only pays off as it is adopted.">
             <outline text="blocked on HOT-016"/>
           </outline>
+          <outline text="ADR-0038 — Labor with no causal order is not COGS — 5801 is not created and 6600 Wages narrows instead" _note="review by: 2026-12-01 · **In the context of** but-for attribution putting a guaranteed day onto the order that caused the hire, **facing** the consequence that labor no order caused has no revenue it is applicable to, **we decided** that such labor is operating expense and stays in `6600 - Wages` rather than reaching a COGS account, **to achieve** a cost-of-revenue line that contains only costs of revenue, **accepting** that ADR-0019's `5801` is not created and that a superficially identical vehicle account deliberately does not follow."/>
         </outline>
       </outline>
       <outline text="Spikes (9 open)">
