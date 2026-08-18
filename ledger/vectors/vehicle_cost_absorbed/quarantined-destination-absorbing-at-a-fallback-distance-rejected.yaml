@@ -37,7 +37,7 @@ given:
       - {
           id: ALC-VEC-0012,
           causal_job: ORD-VEC-0002,
-          labor_line: trash_cleanup,
+          labor_line: trash_&_cleanup,
           distance_source: service_radius_average,
           mapbox_id: "urn:mbxadr-itp:0f8a",
           miles: 510,

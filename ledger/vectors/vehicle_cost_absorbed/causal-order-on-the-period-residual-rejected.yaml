@@ -35,7 +35,7 @@ given:
       - {
           id: ALC-VEC-0012,
           causal_job: ORD-VEC-0002,
-          labor_line: trash_cleanup,
+          labor_line: trash_&_cleanup,
           distance_source: computed,
           miles: 510,
           amount_minor: 30600,

@@ -33,7 +33,7 @@ given:
       - {
           id: ALC-VEC-0012,
           causal_job: ORD-VEC-0002,
-          labor_line: trash_cleanup,
+          labor_line: trash_&_cleanup,
           distance_source: computed,
           miles: 510,
           amount_minor: 30600,
@@ -46,7 +46,7 @@ derivation: >-
   books, which an absorbed account could not do.
   Two shifts served causal jobs and carry the allocation rows `shift_recorded` already wrote: this
   run adds a second amount to rows that exist rather than creating any document of its own. Their
-  `labor_line` values differ — `delivery` and `trash_cleanup` — which is the split ADR-0030 says
+  `labor_line` values differ — `delivery` and `trash_&_cleanup` — which is the split ADR-0030 says
   comes for free: the vehicle cost inherits the product line from the shift instead of needing an
   allocation of its own.
   **14400 + 30600 = 45000 absorbs into 5900**, each row keyed to its own causal job and its own

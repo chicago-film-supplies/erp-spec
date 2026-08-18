@@ -1814,6 +1814,54 @@ for (const e of evts) {
       if (y) walkValue(y, "$", rel(f));
     }
   }
+
+  /**
+   * ── 10r — a `labor_line` named under `ledger/` resolves ─────────────────────────────────────
+   *
+   * ⚠️ **Written because a golden vector authored on 2026-08-17 carried `labor_line: trash_cleanup`,
+   * which is not a value.** The declared id is `trash_&_cleanup`; `trash_cleanup` is the POOL id in
+   * `reporting/product-line-pl.yaml`. Two things one letter apart in two files, and **nothing could
+   * see it**: gate 13h checks the reporting side, and a `labor_line` inside a vector's `given` is
+   * read by no gate at all. "Present but wrong" beats "absent" at passing every existence check.
+   *
+   * This is the ledger half of what OQ-046 asked for — the seven declared values now have something
+   * that can go red on them from BOTH sides. It is not the whole of it: nothing yet requires a value
+   * to be USED, only to exist.
+   */
+  {
+    const dimsY = await readYaml<{ dimensions?: { id?: string; values?: unknown[] }[] }>(
+      `${ROOT}/ledger/dimensions.yaml`,
+    );
+    const laborLines = new Set(
+      (dimsY?.dimensions ?? []).find((d) => d.id === "labor_line")?.values?.map(String) ?? [],
+    );
+    if (laborLines.size === 0) {
+      fail(G, "ledger/dimensions.yaml declares no `labor_line` values — 10r would check nothing");
+    } else {
+      const walkLabor = (node: unknown, path: string, where: string) => {
+        if (Array.isArray(node)) {
+          node.forEach((v, i) => walkLabor(v, `${path}[${i}]`, where));
+          return;
+        }
+        if (!node || typeof node !== "object") return;
+        for (const [k, v] of Object.entries(node as Record<string, unknown>)) {
+          if (k === "labor_line" && typeof v === "string" && !laborLines.has(v)) {
+            fail(
+              G,
+              `${where}: ${path}.labor_line = "${v}" is not a declared value — ledger/dimensions.yaml has ${
+                [...laborLines].join(", ")
+              }`,
+            );
+          }
+          walkLabor(v, `${path}.${k}`, where);
+        }
+      };
+      for (const f of await filesIn("ledger", ".yaml")) {
+        const y = await readYaml(f);
+        if (y) walkLabor(y, "$", rel(f));
+      }
+    }
+  }
 }
 
 // ── gate 11: repo paths cited in prose resolve ──────────────────────────────
