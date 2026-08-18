@@ -27,6 +27,12 @@ allocated to COGS against the job that caused it.
 - **The operational board and the comment threads attached to domain objects.** A version of each
   survives (`OQ-049`); the board's current form is a rough draft, and where the chat seam sits is
   open (`OQ-051`).
+- **A public client app** (owner, 2026-08-18) — the second SolidJS client `ADR-0005` already names
+  but never gave a purpose. Three capabilities: **real-time stock availability**, **quote request**,
+  and **checkout for in-store orders**. It replaces the third-party webshop, which is itself out of
+  scope and migrates nothing. ⚠️ Real-time to a _public_ audience is not the operator-UI problem
+  `SPIKE-009` is scoped to, and checkout is a money path — both are named in
+  `inbox/2026-08-18-owner-the-public-client-app-is-in-scope-real-time-availability-quote-request-and-in-store-checkout.md`.
 - Year-end close, retained earnings roll, and CPA read access.
 
 ## Out of scope — non-goals
