@@ -86,9 +86,23 @@ const generatedMoved = (await new Deno.Command("git", {
   args: ["diff", "--quiet", "--", ":(glob)**/*.generated.*"],
 }).output()).code !== 0;
 // Are any SOURCE files dirty? `:(exclude)` is git pathspec magic for "everything but".
-const sourceDirty = (await new Deno.Command("git", {
+//
+// ⚠️ **`git diff` DOES NOT SEE UNTRACKED FILES, and that was the third wrong version of this
+// check.** Adding a brand-new source file — a new ADR, say — left `sourceDirty` false, so the
+// regeneration it legitimately caused was reported as staleness. The first version diffed the whole
+// tree and fired on any work in progress; the second scoped to generated files and fired on source
+// edits; this one missed untracked. **Each fix was incomplete in a way the previous test did not
+// cover**, which is the defect class this repo keeps paying for, in the tool written to catch it.
+const modified = (await new Deno.Command("git", {
   args: ["diff", "--quiet", "--", ".", ":(exclude,glob)**/*.generated.*"],
 }).output()).code !== 0;
+const untracked = (await new Deno.Command("git", {
+  args: ["ls-files", "--others", "--exclude-standard"],
+}).output()).stdout;
+const sourceDirty = modified ||
+  new TextDecoder().decode(untracked).split("\n").some((f) =>
+    f.trim() !== "" && !f.includes(".generated.")
+  );
 
 if (generatedMoved && !sourceDirty) {
   // Generated output moved while nothing that feeds it did — the committed generated files did not

@@ -196,6 +196,8 @@ Not every tool has an upstream dump, and the difference is worth knowing before 
 - A check that bans a word cannot name it; a check that diffs a tree fails on work in progress.
   Exempt by identity, and say why.
 - Minting an account creates no posting rule. Nothing currently notices.
+- ⚠️ **Piping a check into `tail`/`head` masks its exit code** —
+  `deno task ci | tail -3 && git push` pushes on failure. Run the check, read it, then act.
 
 **Data**
 
