@@ -14,7 +14,14 @@
     "bullmq": "npm:bullmq@6.0.9",
     "ioredis": "npm:ioredis@6.0.0",
     "msgpackr": "npm:msgpackr@2.0.5",
-    "msgpackr-extract": "npm:msgpackr-extract@3.0.4"
+    "msgpackr-extract": "npm:msgpackr-extract@3.0.4",
+
+    "//core-pins": "SPIKE-006 imports the real @cfs/core schemas. These three MUST track core/deno.json — a version skew resolves a second Zod instance and every instanceof check silently fails.",
+    "mongodb": "npm:mongodb@6.20.0",
+    "bson": "npm:bson@6.10.4",
+    "zod": "npm:zod@4.3.6",
+    "date-fns": "npm:date-fns@4.1.0",
+    "@date-fns/tz": "npm:@date-fns/tz@1.4.1"
   },
 
   "//nodeModulesDir": "Node-API addons need a real node_modules tree on disk; Deno's default global npm cache does not give the dlopen'ing addon a sibling directory to resolve against.",
@@ -28,6 +35,10 @@
     "tb-budget": "deno test --allow-read tb-field-budget_test.ts",
     "tb": "deno run --allow-read --allow-env --allow-ffi --allow-net tb-probe.ts",
     "tb-test": "deno test --allow-read --allow-env --allow-ffi --allow-net tb-probe_test.ts",
+    "//tb-import": "SPIKE-003 — the `imported` flag's timestamp and monotonicity semantics (ADR-0039). Formats, starts and deletes its OWN clusters, so it needs --allow-run and does NOT use `deno task tb`'s cluster: `imported` is defined against the cluster's last committed timestamp, so a shared cluster measures that cluster's history rather than the flag. Two clusters — one --development, one on production defaults, because --development caps createTransfers at 253 against 8189. Writes only to .data/, which is gitignored.",
+    "tb-import": "deno run --allow-read --allow-write=.data --allow-env --allow-ffi --allow-net --allow-run tb-import-probe.ts",
+    "//mongo-schema": "SPIKE-006 — JSON Schema 2020-12 into MongoDB's $jsonSchema (ADR-0040). Needs a mongod on 127.0.0.1:27077; there is no container runtime on the dev machines, so fetch the official macOS tarball and run mongod directly (--fork works on 8.0.x and is refused by 8.3.x on macOS). Imports the REAL @cfs/core schemas, so the zod/date-fns pins below must track core/deno.json or a second Zod instance resolves.",
+    "mongo-schema": "deno run --allow-read --allow-env --allow-net --allow-sys --allow-write mongo-schema-probe.ts",
     "duckdb": "deno run --allow-read --allow-write --allow-env --allow-ffi duckdb-probe.ts",
     "duckdb-wasm": "deno run --allow-read --allow-env --allow-net --allow-sys --allow-ffi duckdb-wasm-probe.ts",
     "valkey": "deno run --allow-read --allow-env --allow-net --allow-sys valkey-queue-probe.ts",
