@@ -139,7 +139,7 @@ which matched nothing.
 |               | Issue   | State                                                                       |
 | ------------- | ------- | --------------------------------------------------------------------------- |
 | blocked       | **#35** | ⚠️ MOVED — measured, surveyed; now waits on **OQ-053** (principal or agent) |
-| **startable** | **#36** | but-for hides what the paid-for slack PRODUCED                              |
+| **startable** | **#36** | ✅ the flagged double count is DISPROVED; what is left is an unstated rule  |
 | **startable** | **#37** | ⚠️ NEW — the 104 adopted accounts no rule names                             |
 | **startable** | **#38** | ⚠️ NEW — `labor_variance`; the survey is the work, and it is rule-8a-shaped |
 | **startable** | **#6**  | re-measured 2026-08-17 and commented — half the size its own text claims    |
