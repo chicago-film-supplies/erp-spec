@@ -26,8 +26,44 @@ relates_to: [
 accounting_shaped: true
 survey:
   - inbox/2026-08-17-survey-labor-costing-is-normal-costing-not-actual-the-crew-is-two-populations-with-two-true-costs-and-idle-time-splits-normal-from-abnormal.md
+measurements:
+  - id: M1
+    value: "$172,261.35"
+    of: >-
+      6600 Wages for FY2025 — ALL own-crew wages, undimensioned and with no job attribution. It is
+      not the crew-only figure: nothing splits 6600 into crew and administrative wages, which is why
+      the post-cutover gross margin is bounded rather than known.
+    source: "xero:2026-08-17:get-report-profit-and-loss"
+  - id: M2
+    value: "19.85%"
+    of: >-
+      The EFFECTIVE employer burden on one Wrapbook payroll run (759715) — wages $2,323.50 plus fees
+      $461.23 against CFS's total cost $2,784.73. One run, not a rate CFS sets or computes.
+    source: "wrapbook:2026-08-17:payroll-register-and-invoice-fee-summary-759715"
+asserts:
+  - id: P1
+    kind: premise
+    claim: >-
+      Employer burden is capped per person per year, so a flat factor is systematically wrong rather
+      than imprecise — 13.85 points switch off mid-season, leaving a 6.00% uncapped floor.
+    source: "wrapbook:2026-08-17:payroll-register-and-invoice-fee-summary-759715"
+    status: refuted
+    refuted_by: HOT-018
+  - id: P2
+    kind: premise
+    claim: >-
+      CFS's crew is two populations with two true costs — W-2 through an employer of record, and 1099
+      contractors — so one absorption rate cannot be exact for both.
+    source: "inbox/2026-08-17-owner-cfs-is-non-union-and-average-payroll-fringe-is-23-percent-which-refutes-adr-0019s-central-claim.md"
+  - id: P3
+    kind: premise
+    claim: >-
+      The employer of record itemises WAGES per person per day, and prices BURDEN per payroll run —
+      so reaching a per-shift cost requires apportionment, and apportionment is a standard rate.
+    source: "inbox/2026-08-17-oq-050-answered-wrapbook-itemises-wages-per-person-per-day-but-prices-burden-per-RUN-so-the-cost-rate-is-an-estimate.md"
 supersedes:
 superseded_by:
+frozen_asserts_sha256: 5c612d1a8eb7232acda9388865d8f582ba15658fbb17ad01c325eedaef93e475
 frozen_sha256: b37f2e39a639782a0b8164f64ba4eb941a6b53959cddeadc63a715ea6ea8a9cf
 ---
 

@@ -180,6 +180,12 @@ interface Adr {
   accounting_shaped?: boolean;
   /** `inbox/` files holding the six-reference survey. Front matter, so an accepted ADR can gain one. */
   survey: string[];
+  /** ADR-0037 ruling 1 — addressable claims. Backfill is premises only (owner, 2026-08-17). */
+  asserts?: unknown;
+  /** The figures this ADR asserts, each with the population it is a figure OF and its source. */
+  measurements?: unknown;
+  /** Freeze over the two blocks above. Separate from `frozen_sha256`, which covers the body. */
+  frozen_asserts_sha256?: string;
   /** Why an accepted, accounting-shaped ADR carries no survey. Named by identity, never a date cutoff. */
   survey_exemption?: string;
   /** Why an ADR naming GL account codes is nonetheless not accounting-shaped. */
@@ -208,6 +214,9 @@ function toAdr(fm: unknown, file: string, body: string): Adr | null {
     frozen_sha256: str(fm.frozen_sha256),
     accounting_shaped: typeof fm.accounting_shaped === "boolean" ? fm.accounting_shaped : undefined,
     survey: typeof fm.survey === "string" ? [fm.survey] : strList(fm.survey),
+    asserts: fm.asserts,
+    measurements: fm.measurements,
+    frozen_asserts_sha256: str(fm.frozen_asserts_sha256),
     survey_exemption: str(fm.survey_exemption),
     not_accounting_reason: str(fm.not_accounting_reason),
     _file: file,
@@ -3277,6 +3286,172 @@ for (const e of evts) {
   );
 }
 
+// ── gate 21: addressable claims and measurements ───────────────────────────
+/**
+ * ADR-0037 ruling 1 (owner, 2026-08-17: _"yes to both"_), scoped by the evidence gathered
+ * afterwards — three independent investigations, recorded in
+ * `inbox/2026-08-17-survey-typed-claims-the-vocabulary-emerges-from-the-statements-and-every-tradition-that-typed-the-REASON-died.md`.
+ *
+ * ── what is typed, and what deliberately is not ─────────────────────────────────────────────────
+ *
+ * **The claim, never the reason.** Every tradition surveyed that typed a decision's RATIONALE
+ * produced a standard nobody implemented — SBVR (334 pages, 515 meta-terms, no ecosystem in 23
+ * years), Kruchten's ontology (checker never built), OASIS Test Assertions (13 files in all of
+ * GitHub). The ones that typed the claim and left the argument in prose survived. Measured on this
+ * repo: of 202 load-bearing claims across ten artifacts, 40% decompose cleanly and **~83% of the
+ * WORDS are the connective reasoning between propositions**.
+ *
+ * So two blocks, both optional, both narrow:
+ *
+ *   `measurements[]` — the figures an ADR asserts. **~95% clean in the decomposition trial**, and
+ *     the population that actually goes stale: HOT-016 and HOT-018 are both refuted FIGURES. Each
+ *     carries what it is a figure **OF**, which is CLAUDE.md's own footgun made structural.
+ *   `asserts[]` — claims with ids, `kind: decision | premise`. **The backfill is premises only**
+ *     (owner, 2026-08-17), because writing "what a frozen ADR rested on" today is a reconstruction
+ *     by someone who was not there, and ADR-0034 exists to keep an accepted ADR the decision AS
+ *     TAKEN.
+ *
+ * ── the freeze is SEPARATE from the body's, and that is deliberate ──────────────────────────────
+ *
+ * `frozen_asserts_sha256` covers these two blocks only. Folding them into gate 14's body hash would
+ * force all 28 frozen ADRs to be rehashed, and would conflate "the body as accepted" with "the
+ * claims as later extracted". Once written, a claim freezes exactly as the body does — only
+ * `status:` and `refuted_by:` may be added afterwards, which is what lets a frozen ADR finally say
+ * that a fact it cited turned out wrong.
+ *
+ * ⚠️ **This gate FAILS on malformed claims and only REPORTS coverage.** Requiring the blocks
+ * everywhere would demand exactly the mass reconstruction the owner scoped out. The note below
+ * measures the silence so it is a number rather than an assumption — the lesson gate 18 paid for.
+ */
+{
+  const G = "21";
+  const KINDS = ["decision", "premise"];
+  /** The same provenance forms `source:` takes everywhere else in this repo (gate 10d, rule 1). */
+  const SOURCE_FORM =
+    /^((api|code|xero|wrapbook):\d{4}-\d{2}-\d{2}:|ADR-\d{4}|inbox\/\d{4}-\d{2}-\d{2}|OQ-\d{3}|HOT-\d{3}|SPIKE-\d{3})/;
+  let withBlocks = 0, claims = 0, measures = 0;
+
+  const encoder = new TextEncoder();
+  const sha = async (t: string) =>
+    Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", encoder.encode(t))))
+      .map((b) => b.toString(16).padStart(2, "0")).join("");
+
+  for (const a of adrs) {
+    const asserts = Array.isArray(a.asserts) ? a.asserts as Record<string, unknown>[] : null;
+    const measurements = Array.isArray(a.measurements)
+      ? a.measurements as Record<string, unknown>[]
+      : null;
+    if (a.asserts !== undefined && !asserts) {
+      fail(G, `${a.id}: \`asserts\` is not a list`);
+    }
+    if (a.measurements !== undefined && !measurements) {
+      fail(G, `${a.id}: \`measurements\` is not a list`);
+    }
+    if (!asserts && !measurements) {
+      if (a.frozen_asserts_sha256) {
+        fail(G, `${a.id}: carries \`frozen_asserts_sha256\` with nothing to freeze`);
+      }
+      continue;
+    }
+    withBlocks++;
+    const ids = new Set<string>();
+
+    for (const [i, m] of (measurements ?? []).entries()) {
+      const where = `${a.id} measurements[${i}]`;
+      const id = String(m.id ?? "");
+      if (!/^M\d+$/.test(id)) fail(G, `${where}: id "${id}" must look like \`M1\``);
+      else if (ids.has(id)) fail(G, `${where}: id "${id}" is duplicated`);
+      else ids.add(id);
+      if (m.value === undefined || String(m.value).trim() === "") {
+        fail(G, `${where}: no \`value\``);
+      }
+      // The footgun made structural: a figure without its population is unusable and this repo has
+      // paid for it three times ("before using a number, ask what it is a figure OF").
+      if (!m.of || String(m.of).trim() === "") {
+        fail(G, `${where}: no \`of\` — a figure with no population is a number nobody can check`);
+      }
+      const src = String(m.source ?? "");
+      if (!src) fail(G, `${where}: a measurement needs a \`source\``);
+      else if (!SOURCE_FORM.test(src)) {
+        fail(
+          G,
+          `${where}: source "${src}" is not a dated, pinned form (\`api:<date>:…\`, \`code:<date>:…\`, \`xero:<date>:…\`, an id, or an inbox path)`,
+        );
+      }
+      measures++;
+    }
+
+    for (const [i, c] of (asserts ?? []).entries()) {
+      const where = `${a.id} asserts[${i}]`;
+      const id = String(c.id ?? "");
+      if (!/^[DP]\d+$/.test(id)) fail(G, `${where}: id "${id}" must look like \`D1\` or \`P1\``);
+      else if (ids.has(id)) fail(G, `${where}: id "${id}" is duplicated`);
+      else ids.add(id);
+      const kind = String(c.kind ?? "");
+      if (!KINDS.includes(kind)) fail(G, `${where}: kind "${kind}" not ${KINDS.join(" | ")}`);
+      if (!c.claim || String(c.claim).trim() === "") fail(G, `${where}: no \`claim\``);
+      if (kind === "premise") {
+        const src = String(c.source ?? "");
+        if (!src) {
+          fail(G, `${where}: a premise is a fact the decision RESTED ON, so it needs a \`source\``);
+        } else if (!SOURCE_FORM.test(src)) {
+          fail(G, `${where}: source "${src}" is not a dated, pinned form`);
+        }
+      }
+      if (c.status !== undefined && String(c.status) !== "refuted") {
+        fail(G, `${where}: \`status\` may only be \`refuted\` — a claim in force says nothing`);
+      }
+      if (String(c.status ?? "") === "refuted" && !c.refuted_by) {
+        fail(G, `${where}: refuted with no \`refuted_by\` — name what refuted it`);
+      }
+      if (c.refuted_by !== undefined) {
+        const r = String(c.refuted_by);
+        if (!/^(ADR-\d{4}|OQ-\d{3}|HOT-\d{3}|SPIKE-\d{3})$/.test(r)) {
+          fail(G, `${where}: refuted_by "${r}" is not an id`);
+        } else if (
+          !adrs.some((x) => x.id === r) && !oqs.some((x) => x.id === r) &&
+          !hots.some((x) => x.id === r) && !spikes.some((x) => x.id === r)
+        ) {
+          fail(G, `${where}: refuted_by "${r}" does not resolve`);
+        }
+        if (String(c.status ?? "") !== "refuted") {
+          fail(
+            G,
+            `${where}: names \`refuted_by\` without \`status: refuted\` — the pair moves together`,
+          );
+        }
+      }
+      claims++;
+    }
+
+    // ── the freeze over the blocks, separate from the body's ────────────────────────────────────
+    if (a.status === "accepted" || a.status === "superseded") {
+      const frozen = JSON.stringify({
+        measurements: (measurements ?? []).map((m) => [m.id, m.value, m.of, m.source]),
+        asserts: (asserts ?? []).map((c) => [c.id, c.kind, c.claim, c.source]),
+      });
+      const want = await sha(frozen);
+      if (!a.frozen_asserts_sha256) {
+        fail(
+          G,
+          `${a.id}: accepted with claims but no \`frozen_asserts_sha256\`. If they are correct, add:  frozen_asserts_sha256: ${want}`,
+        );
+      } else if (a.frozen_asserts_sha256 !== want) {
+        fail(
+          G,
+          `${a.id}: a claim or measurement changed since it was frozen. Only \`status\` and \`refuted_by\` may be added afterwards — a claim on an accepted ADR is frozen exactly as its body is (ADR-0034, ADR-0037)`,
+        );
+      }
+    }
+  }
+
+  const inForce = adrs.filter((a) => a.status === "accepted" && !a.superseded_by).length;
+  notes.push(
+    `gate 21: ${claims} claims + ${measures} measurements across ${withBlocks} ADRs; ` +
+      `NOT CHECKED — ${inForce - withBlocks} of ${inForce} in-force ADRs carry neither block`,
+  );
+}
+
 // ── gate 20: every id-bearing artifact carries a short headline ────────────
 /**
  * ADR-0037, ruling 4 (owner, 2026-08-17: _"yes and yes"_).
@@ -3533,6 +3708,7 @@ const GATE_NAMES: Record<string, string> = {
   "18": "every minted account is reachable from a posting rule",
   "19": "rule 8a — an accounting-shaped ADR is not accepted without a survey",
   "20": "every id-bearing artifact carries a short headline",
+  "21": "addressable claims and measurements are well-formed and frozen",
   xref: "cross-references resolve",
   parse: "files parse",
 };

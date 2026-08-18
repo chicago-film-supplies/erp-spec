@@ -21,8 +21,47 @@ relates_to: [
 accounting_shaped: true
 survey:
   - inbox/2026-08-16-survey-vehicle-cost-is-cost-of-rental-revenue-and-every-system-absorbs-it-at-a-rate-rather-than-recoding-the-purchase.md
+measurements:
+  - id: M1
+    value: "$21,844.77"
+    of: >-
+      2025 actuals across 6400-6404, the five vehicle operating-expense accounts. ⚠️ UNPINNED and
+      UNDERSTATED — it cannot be re-derived from this repo (the chart mirrors without balances and
+      this repo does not call the Xero API), and it omits rented vehicles, which were being charged
+      to 6302. The ADR says so in its own body; this entry keeps the caveat attached to the figure.
+    source: "ADR-0030"
+  - id: M2
+    value: "13.79% of revenue, $236,487.75"
+    of: >-
+      The Delivery product line's revenue, after the line-denorm repair — the largest tracked line in
+      the business, and the one carrying almost no cost before this decision.
+    source: "inbox/2026-08-10-the-untracked-revenue-denorm-is-repaired-and-28-7-percent-is-now-15-percent.md"
+asserts:
+  - id: P1
+    kind: premise
+    claim: >-
+      Labor is costed at ACTUAL, from a real per-contact wage on a real bill — which is why ADR-0019
+      can say absorption measures utilisation and not rate variance, and why vehicles differ.
+    source: "ADR-0019"
+    status: refuted
+    refuted_by: HOT-016
+  - id: P2
+    kind: premise
+    claim: >-
+      The five vehicle accounts are not one block in the incumbent — 6401 is Xero type Overhead and
+      the other four are Expense, so a migration keyed on account TYPE rather than code range splits
+      them.
+    source: "api:2026-08-16:db_chart_of_accounts_query"
+  - id: P3
+    kind: premise
+    claim: >-
+      Destination coordinates already exist, so warehouse-to-destination distance is derivable today
+      without capturing anything new — but roughly half of destinations carry no coordinates and
+      several that do are badly wrong, every bad one marked interpolated.
+    source: "api:2026-08-16:db_destinations_query"
 supersedes:
 superseded_by:
+frozen_asserts_sha256: 6a31766f1c172049dff88c3bb34daf8e8d6ea597b391b5778aa02d9f6f10eb7c
 frozen_sha256: faea4b61a4a83841daefedf58adbad2583a8fb271dab4943c3ee3d35808ac580
 ---
 
