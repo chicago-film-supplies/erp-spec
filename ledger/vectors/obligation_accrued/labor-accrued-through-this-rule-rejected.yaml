@@ -46,7 +46,8 @@ derivation: >-
      dimensions from every posting; the boundary survived the change of subject, which is some
      evidence it was a real boundary rather than an artefact of the dimension scheme.
   ⚠️ **What is refused is the ROUTE, not the accrual.** The cost is real, it belongs on 2026-08-12,
-  and `shift_recorded` posts it — with the absorbed/unabsorbed split (5800/5801) and the overtime
+  and `shift_recorded` posts it — with the absorbed/unabsorbed split (5800 and, since ADR-0038,
+  `6600 - Wages` for what no order caused) and the overtime
   pro-rata that no generic accrual could perform, because `amount:` is a path with no arithmetic and
   the allocation must therefore happen upstream in the shift record.
 

@@ -284,18 +284,34 @@ export const CHECKS: Record<string, Check> = {
   },
 
   // ── m3 ──
+  /**
+   * ⚠️ **This check asserted the absorbed/unabsorbed PAIR until 2026-08-17, and ADR-0038 retired
+   * half of it.** It required two accounts matching `Wages (Absorbed|Unabsorbed)` because ADR-0019
+   * minted 5800/5801 — and when the sweep deleted 5801, m3 went from 5 met to 4 met / 1 unmet on a
+   * criterion whose data was now CORRECT. **The check was encoding a decision, not a completeness
+   * property**, which is why it had to move with the decision.
+   *
+   * What it requires now is the absorbed account alone: labor a causal job absorbed is cost of
+   * goods sold (ADR-0019), and labor no job caused is operating expense in `6600 - Wages`
+   * (ADR-0038), which is an ADOPTED live account and needs no minting. The unabsorbed COGS account
+   * is asserted ABSENT rather than merely unrequired — a check that stopped caring would let it be
+   * re-minted silently.
+   */
   coa_complete: (w) => {
     const todo = w.accounts.filter((a) => /^TODO$/i.test(String(a.name ?? "").trim()));
     const codes = new Set(w.accounts.map((a) => Number(a.code)));
-    // ADR-0019 requires the absorbed/unabsorbed pair to exist; the chart mints them at 5800/5801.
-    const labor = w.accounts.filter((a) =>
-      /Wages \((Absorbed|Unabsorbed)\)/.test(String(a.name ?? ""))
-    );
-    const ok = todo.length === 0 && labor.length === 2 && codes.size === w.accounts.length;
+    const absorbed = w.accounts.filter((a) => /Wages \(Absorbed\)/.test(String(a.name ?? "")));
+    const unabsorbed = w.accounts.filter((a) => /Wages \(Unabsorbed\)/.test(String(a.name ?? "")));
+    const wages = w.accounts.filter((a) => Number(a.code) === 6600);
+    const ok = todo.length === 0 && absorbed.length === 1 && unabsorbed.length === 0 &&
+      wages.length === 1 && codes.size === w.accounts.length;
     return {
       ok,
-      detail:
-        `${w.accounts.length} accounts, ${todo.length} named TODO, ${labor.length} of 2 labor accounts present`,
+      detail: `${w.accounts.length} accounts, ${todo.length} named TODO; ` +
+        `${absorbed.length} of 1 absorbed-labor account, ${wages.length} of 1 \`6600 Wages\`, ` +
+        `${unabsorbed.length} unabsorbed-labor COGS account${
+          unabsorbed.length === 1 ? "" : "s"
+        } (ADR-0038 requires none)`,
     };
   },
   /**

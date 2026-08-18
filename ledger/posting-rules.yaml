@@ -621,7 +621,7 @@ rules:
         keys:
           causal_orders: allocation.causal_job
           line: allocation.id
-      - debit_account: 5801
+      - debit_account: 6600
         credit_account: 2010
         amount: shift.unabsorbed_minor
         keys:
@@ -639,12 +639,17 @@ rules:
           · **several days on one job** → each day is its own shift posting against the same
             `causal_job`; the cost stacks by accumulation and **there is no rule to write**.
           · **no order at all** → nothing absorbs, and the whole day is `shift.unabsorbed_minor`.
-          ⚠️ **`5801` therefore means "paid time no order caused"** — training, a company meeting,
-          unassigned shop time — **not** "the unworked part of a guaranteed day", which now belongs
-          to the job. ADR-0019's frozen text calls the 5800/5801 gap a utilisation measure; under
-          but-for that gap is small by construction, and "what is the guarantee costing us" is
-          answered from `hours_guaranteed` against `hours_worked` on the shift records rather than
-          from a GL account.
+          ⚠️ **The unabsorbed leg therefore means "paid time no order caused"** — training, a company
+          meeting, warehouse cleanup, unassigned shop time — **not** "the unworked part of a
+          guaranteed day", which now belongs to the job. ADR-0019's frozen text calls the
+          absorbed/unabsorbed gap a utilisation measure; under but-for that gap is small by
+          construction, and "what is the guarantee costing us" is answered from `hours_guaranteed`
+          against `hours_worked` on the shift records rather than from a GL account.
+          ⚠️ **AND THAT LEG IS NOT COGS — it debits `6600 - Wages`, an operating expense** (ADR-0038,
+          accepted 2026-08-17). `5801` was minted for it and is **deleted**: where no order caused
+          the hire there is no revenue the cost is applicable to. Measured: the live COGS block is
+          Xero type `Direct Costs` and 6600 is type `Expense`, so this leg lands below gross profit
+          exactly where the incumbent already puts it.
           ⚠️ **Absorbed cost may never exceed `shift.cost_minor`.** But-for moved idle hours into
           the job; it did not license charging a job for hours nobody was paid for
           (`absorbed-hours-exceeding-the-paid-day-rejected`).
@@ -703,18 +708,25 @@ rules:
           the issue's own "nothing is blocked" framing understated it — until 2010 existed, every
           shift in the ledger overstated trade payables by its own cost.
       - >-
-          **5800 absorbed / 5801 unabsorbed measures UTILISATION, not rate deviation** (ADR-0019).
-          Costing is ACTUAL at that person's per-contact wage, so there is no standard rate and no
-          rate variance to compute — HOT-010. Hours worked on a causal job absorb into 5800; the
-          guaranteed-but-unworked balance of the day lands in 5801, and the gap between the two IS the
-          idle-capacity number.
+          ⚠️ **THE UTILISATION GAP NO LONGER EXISTS IN THE GL, and that is deliberate.** This
+          invariant read "5800 absorbed / 5801 unabsorbed measures UTILISATION, not rate deviation"
+          (ADR-0019), with the guaranteed-but-unworked balance landing in 5801 and the gap between
+          the two as the idle-capacity number. **Two accepted decisions removed both halves**:
+          but-for causation (ADR-0019, owner 2026-08-17) moved the unworked balance onto the order
+          that caused the hire, and ADR-0038 removed `5801` outright. Utilisation is now a report
+          over `hours_guaranteed` against `hours_worked` on the shift records — erp-spec#36 — and
+          **not a subtraction between two GL accounts**. ⚠️ HOT-010's rate-variance half was refuted
+          separately: OQ-050 measured that the EOR prices burden per RUN, so an apportioned rate IS
+          a standard rate and a variance can fire (erp-spec#38).
       - >-
-          **5801 declares `causal_orders: null` BY DESIGN and that is load-bearing.** Idle time
-          belongs to no job, and an unabsorbed posting that named one would make 5801 a plug
-          absorbing whatever the allocation could not place — the account IS the idle-capacity KPI,
-          so a wrong key there is a wrong KPI. The null is DECLARED rather than the key omitted,
-          which is the whole of REQ-LED-001: a determination someone can be asked about, not an
-          oversight.
+          **The unabsorbed leg declares `causal_orders: null` BY DESIGN and that is load-bearing** —
+          now against `6600 - Wages` rather than a COGS account (ADR-0038). Paid time no order caused
+          belongs to no job, and a leg that named one would make 6600 a plug absorbing whatever the
+          allocation could not place. The null is DECLARED rather than the key omitted, which is the
+          whole of REQ-LED-001: a determination someone can be asked about, not an oversight.
+          ⚠️ **The refusal is unchanged by the account moving.** A causal order on this leg is
+          refused because the rule does not name one, which is gate 10h's test — not because of
+          anything the chart says, and not because of which account it debits.
           ⚠️ This invariant read "5801 is undimensioned BY DESIGN. Its chart entry names no dimension,
           so a posting to it may not declare one… 5800 names **both** `product_line` and `cost_type`;
           it is the only account in the chart that names `cost_type` at all (ADR-0025)." **Both
@@ -776,7 +788,7 @@ rules:
           work performed is cost incurred, and refusing to post it would understate COGS and hide the
           breach in the one system that noticed it. The control belongs where the action is taken, not
           where the fact is recorded, which is the same reasoning OQ-028 applied to an overpayment.
-    relates_to: [ADR-0019, ADR-0025, ADR-0036, REQ-LED-001]
+    relates_to: [ADR-0019, ADR-0025, ADR-0036, ADR-0038, REQ-LED-001]
     vectors_dir: ledger/vectors/shift_recorded/
 
   # ══════════════════════════════════════════════════════════════════════════════════════════════
@@ -834,10 +846,14 @@ rules:
           ⚠️ **`allocation.id` is a key in its own right, for HOT-014's reason**: one run posts many
           rows against the same causal job, so the order alone does not identify a transfer.
       - >-
-          **5901 declares `causal_orders: null` BY DESIGN**, exactly as 5801 does. The residual
+          **5901 declares `causal_orders: null` BY DESIGN**, exactly as `shift_recorded`'s
+          unabsorbed leg does. The residual
           belongs to no job; a residual that could name one would make 5901 a plug absorbing whatever
           the allocation failed to place, and the account IS the fleet-utilisation number.
-          ⚠️ **IT DOES NOT MEAN WHAT 5801 MEANS.** ADR-0019 can say "absorption measures utilisation,
+          ⚠️ **AND IT IS WHY 5901 SURVIVED WHILE `5801` DID NOT** (ADR-0038): a rate residual on a
+          fleet that DOES serve revenue is a costing imprecision, where a day no order caused is an
+          absence of causation and reaches no revenue at all. ADR-0019 can say "absorption measures
+          utilisation,
           NOT rate variance" because labor is costed at actual, from a real per-contact wage on a
           real bill. A van has no actual per-job cost — the true cost of a van-day is unknowable
           until a transmission fails — so this is a **predetermined rate on a stated normal-capacity

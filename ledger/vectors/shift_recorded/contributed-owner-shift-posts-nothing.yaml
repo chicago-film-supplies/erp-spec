@@ -64,9 +64,9 @@ derivation: >-
   absent.** The allocation still happened — six hours split four and two — and the money attaching
   to it is zero. A reader who deletes these rows because they carry no money loses the hours, which
   are the only thing worth keeping here.
-  ⚠️ **5801 is untouched, and that follows rather than being an exception.** The unabsorbed leg
+  ⚠️ **The unabsorbed leg is untouched, and that follows rather than being an exception.** The unabsorbed leg
   measures idle capacity that was PAID FOR; there is no idle-capacity cost for capacity nobody paid
-  for. `unabsorbed_minor` is 0 and no 5801 leg is written.
+  for. `unabsorbed_minor` is 0 and no unabsorbed leg is written.
   ⚠️ **What this vector does NOT fix, recorded so it is not discovered later:** the GAAP gross margin
   on ORD-VEC-0001 and ORD-VEC-0002 is flattered — real work was performed and no cost lands on
   either job. **That is what GAAP requires**, and it is why the imputed view has to exist rather than

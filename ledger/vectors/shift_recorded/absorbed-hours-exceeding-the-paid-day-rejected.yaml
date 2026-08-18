@@ -43,7 +43,7 @@ derivation: >-
   allocation claims 30000, so the entry would charge a job for capacity nobody bought.
   ⚠️ **THE GUARD THIS REPLACES WAS INVERTED BY THE OWNER'S RULING, AND IT WAS THE WORST STATE IN THE
   REPO.** `idle-hours-absorbed-into-a-job-rejected` refused a shift absorbing all 8 guaranteed hours
-  into the causing order on the reasoning that _"absorbed hours may not exceed hours worked, or 5801
+  into the causing order on the reasoning that _"absorbed hours may not exceed hours worked, or the unabsorbed leg
   stops measuring anything"_ — **which is precisely the posting ADR-0019 now requires.** A green
   reject test forbidding accepted doctrine is worse than a missing one: it would have failed a
   correct implementation and sent whoever hit it looking for a bug in their own code.
@@ -55,7 +55,7 @@ derivation: >-
   only the transfer would certify it. That property is lost: under but-for, absorbing the whole paid
   day IS correct, so there is no longer a "plausible but wrong" split of a paid day to catch. **The
   KPI it protected is gone by design, not by oversight**, and the account it protected now means
-  something else — see `paid-day-no-order-caused-lands-in-5801`.
+  something else — see `paid-day-no-order-caused-lands-in-6600`.
 
 expect:
   transfers: []

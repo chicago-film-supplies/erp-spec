@@ -80,7 +80,9 @@ milestones:
     title: Ledger core
     depends_on: [m2]
     exit_criteria:
-      - text: Chart of accounts complete, including the COGS and unabsorbed-labor accounts.
+      - text: >-
+          Chart of accounts complete, including the absorbed-labor COGS account and `6600 Wages`
+          for labor no order caused — and NO unabsorbed-labor COGS account (ADR-0038).
         check: coa_complete
       - text: >-
           Every account this spec mints is posted to by a rule — existence is not reachability.

@@ -50,8 +50,9 @@ derivation: >-
   asserts that a van's standing cost was consumed by an order that never used it. **5901 is the one
   vehicle account whose value comes from being un-attributable** — once it can carry a causal order
   it becomes a plug, a place to put whatever the rate failed to place, dressed as an allocation.
-  ⚠️ **The failure mode is worse here than it is for 5801, and the difference is why this vector is
-  not a copy of the labor one.** 5801 is utilisation alone, so a stray key there corrupts one number.
+  ⚠️ **The failure mode is worse here than on the labor side, and the difference is why this vector
+  is not a copy of the labor one.** The labor residual is utilisation alone — and under ADR-0038 it
+  is not even in COGS, so a stray key there corrupts one operating-expense number.
   5901 is utilisation **and** rate deviation together (ADR-0030: a van has no actual per-job cost),
   so a residual that can be pushed onto a job hides a mis-set rate inside a product line's margin —
   and a mis-set rate is the thing periodic odometer sampling exists to find.

@@ -11,9 +11,9 @@
 # 22 Archived**. Every one of the 134 appears below. `code` is a NUMBER in the live collection —
 # a string filter silently returns 0 rows.
 #
-# **143 entries**, because NINE are minted rather than carried across — each `disposition: new`,
-# `status_live: absent`, with the rule that needs it named in its `reason`: 5800/5801 for
-# absorbed/unabsorbed labor (ADR-0019), **2050 Customer Credit Balances** for `credit_note_issued`,
+# **142 entries**, because EIGHT are minted rather than carried across — each `disposition: new`,
+# `status_live: absent`, with the rule that needs it named in its `reason`: **5800** for absorbed
+# labor (ADR-0019), **2050 Customer Credit Balances** for `credit_note_issued`,
 # which had no credit-side account at all (erp-spec#5), **2010 Accrued Expenses: Received Not
 # Invoiced** for `obligation_accrued`, which had none either (erp-spec#14), and **5150 Cost of Goods
 # Sold: Pass Through**. ⚠️ **Four more were minted 2026-08-16 by ADR-0030's owner rulings**:
@@ -71,8 +71,10 @@
 # 1. **The previous revision invented `5100 = "COGS – Labor Absorbed"`.** Live `5100` is
 #    `Cost of Goods Sold: Subrentals`, Active. The whole live 5x00 block is occupied (5000, 5001,
 #    5100, 5200, 5300, 5400, 5500, 5600, 5700), so the absorbed/unabsorbed pair moves to the next
-#    free hundred — 5800/5801 — and sits adjacent, per the live sub-numbering convention
-#    (1501 under 1500, 5001 under 5000, 6001 under 6000).
+#    free hundred — 5800 — per the live sub-numbering convention (1501 under 1500, 5001 under 5000,
+#    6001 under 6000). ⚠️ This read "the absorbed/unabsorbed pair moves to 5800/5801" until
+#    2026-08-17; ADR-0038 removed the unabsorbed half, so 5800 stands alone and the 58xx block has
+#    no second member.
 # 2. **`5190 COGS – Labor Variance` is gone**, and 5100's "standard cost applied to causal jobs"
 #    note with it. HOT-010 and ADR-0019 killed the rate variance — with no standard rate it could
 #    never fire — but only `posting-rules.yaml`'s comment followed; the accounts did not.
@@ -1221,7 +1223,7 @@ accounts:
       "Subcontractor labor is already in COGS here … the two labor populations become comparable
       for the first time". Owner: _"our wages are not subcontractors … dont conflate the 2 labor
       related accounts, subcontractors is not a cfs labor account."_ A subcontractor's cost is a
-      PURCHASE from another company; 5800/5801 are CFS's own wages. They are labor-related and they
+      PURCHASE from another company; 5800 is CFS's own wages. They are labor-related and they
       are not one population, so "comparable for the first time" asserted a comparison that does not
       hold.
       **What 5200 shares with 5902 Vehicle (Hired) is the PROCUREMENT SHAPE** — a vendor bill that
@@ -1246,7 +1248,7 @@ accounts:
     status_live: Active
     reason: >-
       **A dead account** (OQ-023). It was a catchall for one-off project job costs, and in v2 that
-      population is captured by the specific COGS accounts instead — wages to 5800/5801,
+      population is captured by the specific COGS accounts instead — wages to 5800,
       subcontractors to 5200, equipment rental to 5100. A catchall beside those accounts is where
       cost goes to avoid being classified, which is the whole failure the dimensioned COGS block
       exists to prevent. Active rather than Archived, so its history still imports under ADR-0020;
@@ -1306,25 +1308,6 @@ accounts:
       "cogs: wages" of the taxonomy that retires 5400.
     source: ADR-0019
 
-  - code: 5801
-    name: "Cost of Goods Sold: Wages (Unabsorbed)"
-    class: expense
-    normal_balance: debit
-    disposition: new
-    status_live: absent
-    reason: >-
-      Required by ADR-0019. Guaranteed-but-unworked hours and idle time — a real cost attributable
-      to no job, which is what makes the absorbed/unabsorbed gap a measure of UTILISATION rather
-      than rate deviation. **It carries NO CAUSAL ORDER, and that is the whole account**: idle time
-      is attributable to no job, so its postings declare `causal_orders: null` — an explicit
-      determination rather than a missing key (REQ-LED-001, ADR-0036). ⚠️ This reason read
-      "DELIBERATELY UNDIMENSIONED… a dimension on it would let idle time be attributed to a product
-      line" until 2026-08-16; the lie to avoid is unchanged and the mechanism that prevents it moved
-      from the chart to the key. Sub-numbered under 5800 per the live convention (1501 under 1500, 5001
-      under 5000); the previous revision's 5199 sat inside the 51xx Subrentals block, which has
-      nothing to do with labor.
-    source: ADR-0019
-
   - code: 5900
     name: "Cost of Goods Sold: Vehicle (Absorbed)"
     class: expense
@@ -1336,8 +1319,8 @@ accounts:
       SHIFT'S OWN ALLOCATION ROWS — same event, same causal job, same `labor_line` as the labor that
       performed the work (ADR-0011, OQ-010), at a rate applied to computed distance. **Code chosen,
       not inherited:** measured 2026-08-16 the live Direct Costs block is exactly nine accounts
-      (5000, 5001, 5100, 5200, 5300, 5400, 5500, 5600, 5700), and 5150 and 5800/5801 are already
-      minted here, so 5900 is the next free hundred and keeps the absorbed/unabsorbed pair adjacent.
+      (5000, 5001, 5100, 5200, 5300, 5400, 5500, 5600, 5700), and 5150 and 5800 are already minted
+      here, so 5900 is the next free hundred and keeps the absorbed/unabsorbed pair adjacent.
       Named in the live house style, as 5800 was.
       ⚠️ **It carries NO `dimensions` and never did** — the classification is read off the shift's
       allocation row at report time (ADR-0036, OQ-042), which is the whole reason riding those rows
@@ -1353,8 +1336,10 @@ accounts:
     reason: >-
       Required by ADR-0030. The period residual — fleet cost attributable to no job. It carries
       `causal_orders: null`, an explicit determination rather than a missing key (REQ-LED-001,
-      ADR-0036), exactly as 5801 does. Sub-numbered under 5900 per the live convention.
-      ⚠️ **IT DOES NOT MEAN WHAT 5801 MEANS, and the difference is load-bearing.** ADR-0019 can say
+      ADR-0036), exactly as `5800`'s absorbed rows do NOT. Sub-numbered under 5900 per the live
+      convention.
+      ⚠️ **IT DOES NOT MEAN WHAT `5801` WOULD HAVE MEANT, and the difference is why 5801 is gone
+      while this account stays** (ADR-0038). ADR-0019 can say
       "absorption measures utilisation, NOT rate variance" because labor is costed at ACTUAL, from a
       real per-contact wage on a real bill. A van has no actual per-job cost — the true cost of a
       van-day is unknowable until a transmission fails — so vehicle absorption applies a
@@ -1746,11 +1731,30 @@ accounts:
     status_live: Active
     source: "api:2026-08-09:db_chart_of_accounts_query"
     note: >-
-      **Where own-crew cost sits today, and what ADR-0019 moves it out of** (OQ-011). After the
-      move this account retains only wages attributable to no job — administrative and office time
-      — so its postings declare no causal order either. Job labor goes to 5800, idle and guaranteed-unworked
-      time to 5801. The account surviving with a narrower meaning is the point; deleting it would
-      lose the non-job population.
+      **Where own-crew cost sits today, and what ADR-0019 moves PART of out of** (OQ-011). Job labor
+      goes to `5800 - Cost of Goods Sold: Wages (Absorbed)`; **everything else stays here**, and
+      this account's postings declare `causal_orders: null`.
+      ⚠️ **NARROWED, NOT EMPTIED — and the meaning changed on 2026-08-17 without the name changing**
+      (ADR-0038, accepted on the owner's ruling: _"we will pay people for training days, or warehouse
+      cleanup or maintenance projects etc… those should be opex though"_). It used to mean "all
+      own-crew wages". It now means **wages no order caused**. A live account whose meaning changes
+      while its name does not is invisible in a diff, which is why it is stated here rather than
+      left to the ADR.
+      **The surviving population is TWO things and they are here for different reasons:**
+      · training, meetings, administrative and office time — work that serves nothing in particular,
+        so no cost object exists or could;
+      · **warehouse cleanup and fleet maintenance projects** — capacity-sustaining work on the very
+        assets rental revenue is drawn from. Every reference in the survey would call that an
+        indirect cost of revenue **if it had a cost object to attach to**. It has none, because
+        `labor_line` is read off an absorbed allocation row and no order caused these hours, so it
+        can reach no product-line pool at all.
+      ⚠️ **This note read "only wages attributable to no job — administrative and office time… idle
+      and guaranteed-unworked time to 5801" until 2026-08-17.** Both halves are gone: `5801` is not
+      created (ADR-0038), and under but-for the guaranteed-unworked part belongs to the order that
+      caused the hire rather than to any residual account.
+      ✅ **Migration delta: zero.** The live books already hold this population here —
+      **$172,261.35** for FY2025 across all own-crew wages (`xero:2026-08-17`), of which only the
+      causal part moves. No other decision in this spec can say that.
 
   - code: 6720
     name: "Payroll Tax Expense"

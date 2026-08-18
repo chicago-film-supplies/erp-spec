@@ -4,7 +4,7 @@ kind: reject
 source: >-
   REQ-LED-001 and ADR-0036 — every posting DECLARES its causal order, and an ABSORBED labor
   allocation is by definition absorbed INTO a job. This is the arm where an explicit null is not
-  available: 5801 exists precisely so that hours belonging to no job have somewhere to go, so a 5800
+  available: the unabsorbed leg exists precisely so that hours belonging to no job have somewhere to go, so a 5800
   posting with no causal job is not a determination, it is a misfiled cost.
   ⚠️ **Renamed from `absorbed-line-missing-cost-type-rejected` on 2026-08-16** (ADR-0036, OQ-042).
   The old vector was the ONLY place `cost_type` was exercised in the entire spec; the field is now
@@ -65,7 +65,7 @@ derivation: >-
   in the way they are on an invoice. An invoice can legitimately reference no order (30 of 1,010 do,
   all legacy CRMS imports), so `causal_orders: null` is a real determination there. **An ABSORBED
   allocation cannot be**: absorbed means "into a job", and hours belonging to no job are unabsorbed
-  and post to 5801 instead. So this rule's null arm lives on its other posting, not on this one, and
+  and post to `6600 - Wages` instead. So this rule's null arm lives on its other posting, not on this one, and
   that asymmetry is the shape of the rule rather than an inconsistency in it.
   ⚠️ **`allocation.id` is a second key and it is not decoration** (HOT-014). One shift produces three
   transfers here because it served three jobs; the causal order alone does not identify a row, and

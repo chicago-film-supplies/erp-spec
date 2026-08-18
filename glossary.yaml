@@ -224,13 +224,20 @@ terms:
 
   - term: unabsorbed labor
     definition: >-
-      The residual labor cost that no causal job absorbed — guaranteed-but-unworked hours and
-      idle time — posted to `5801 Cost of Goods Sold: Wages (Unabsorbed)`, whose postings declare
-      `causal_orders: null` by design. This account IS the idle-capacity KPI: it is not a plug or a
-      rounding sink, and a causal order on it would let idle time be attributed to a job, which is
-      the exact lie to avoid. ⚠️ The null is DECLARED rather than the key omitted (REQ-LED-001), so
-      "hours attributable to no job" stays a countable population. This read "which is undimensioned
-      by design" until 2026-08-16 (ADR-0036).
+      Paid labor that no causal job absorbed — training, a company meeting, warehouse cleanup,
+      unassigned shop time — posted to `6600 - Wages`, an OPERATING EXPENSE, whose postings declare
+      `causal_orders: null` by design. ⚠️ **It is not cost of goods sold** (ADR-0038, 2026-08-17):
+      COGS is costs applicable to revenues, and where no order caused the hire there is no revenue
+      the cost is applicable to. The null is DECLARED rather than the key omitted (REQ-LED-001), so
+      "hours attributable to no job" stays a countable population, and a causal order on that leg
+      would let it be attributed to a job — the exact lie to avoid.
+      ⚠️ **This term read "the residual… posted to `5801 Cost of Goods Sold: Wages (Unabsorbed)`,
+      which IS the idle-capacity KPI" until 2026-08-17, and BOTH halves are gone.** 5801 is not
+      created, and under but-for causation (ADR-0019) guaranteed-but-unworked hours belong to the
+      order that caused the hire rather than to any residual — so there is no absorbed/unabsorbed gap
+      to read utilisation from. Utilisation is a report over `hours_guaranteed` against
+      `hours_worked` (erp-spec#36). It also read "which is undimensioned by design" until 2026-08-16
+      (ADR-0036).
     aliases: [idle capacity, unabsorbed]
     contexts: [ledger]
     source: adr/ADR-0019-labor-costing-is-normal-costing.md

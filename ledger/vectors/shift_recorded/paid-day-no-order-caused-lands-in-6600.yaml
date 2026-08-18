@@ -1,0 +1,64 @@
+name: paid-day-no-order-caused-lands-in-6600
+posting_rule: shift_recorded
+kind: accept
+source: >-
+  ADR-0038, accepted 2026-08-17 on the owner's ruling — _"we will pay people for training days, or
+  warehouse cleanup or maintenance projects etc… those should be opex though … labor without a causal
+  order in this paradigm is not cogs"_. Owner, 2026-08-17 on but-for: _"if not for the order the
+  person would not be hired"_, so a day an order DID cause absorbs entirely into that order. This
+  vector is the complement: a paid day **no order caused**. Wage is the live default, $30.00/hr.
+  Hours synthetic.
+
+given:
+  ledger_state:
+    closed_periods: []
+    consecutive_days_worked: 2
+  shift:
+    id: SH-VEC-0007
+    person: PER-VEC-0001
+    date: "2026-08-06"
+    wage_minor_per_hour: 3000
+    hours_guaranteed: 8
+    hours_worked: 0
+    hours_idle: 8
+    hours_at_premium: 0
+    premium_minor: 0
+    base_minor: 24000
+    cost_minor: 24000
+    unabsorbed_minor: 24000
+    absorbed_allocations: []
+
+derivation: >-
+  A full paid day with **no causing order** — training, a company meeting, a warehouse cleanup. No
+  order triggered the hire, so but-for attributes it to nothing and the whole 24000 lands in
+  `6600 - Wages` with `causal_orders: null`. `absorbed_allocations` is empty, and `per:` over an
+  empty collection produces no transfer, so 5800 is untouched.
+  ⚠️ **RENAMED AND RE-POINTED 2026-08-17. It was `paid-day-no-order-caused-lands-in-5801`, and its
+  name was the claim** — `5801 Cost of Goods Sold: Wages (Unabsorbed)` is not created (ADR-0038) and
+  is deleted from the chart. **COGS is costs applicable to revenues, and where no order caused the
+  hire there is no revenue the cost is applicable to.** The amount, the dates and the key are
+  unchanged; one account code moved, from a cost-of-sales account to an operating expense.
+  ✅ **The incumbent already does this**, which is why the migration delta is zero: measured
+  2026-08-17, the live COGS block is Xero type `Direct Costs` and `6600` is type `Expense`, holding
+  **$172,261.35** of FY2025 wages below gross profit. ADR-0019 moves the causal part up into 5800;
+  this vector is what stays.
+  ⚠️ **A file named after its own premise is the trap this rename records.** The old name read as a
+  description and was an assertion — and it is the second time in two days a `shift_recorded` vector
+  had to be renamed because the rule under it moved (`guaranteed-hours-unworked-land-in-5801` went
+  the same way on 2026-08-17). **When a vector's name states where something lands, the name is part
+  of the assertion and has to be swept with it.**
+  **The utilisation question is not answered from a GL account any more.** Under but-for the
+  absorbed/unabsorbed gap is small by construction, and with no `5801` there is no gap at all —
+  "what is the 8-hour guarantee costing us" is `hours_guaranteed` against `hours_worked` on the
+  shift records (erp-spec#36).
+
+expect:
+  transfers:
+    - {
+        debit_account: 6600,
+        credit_account: 2010,
+        amount_minor: 24000,
+        accounting_date: "2026-08-06",
+        causal_orders: null,
+      }
+  rejects: []

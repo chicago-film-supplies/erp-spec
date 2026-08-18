@@ -59,7 +59,7 @@ derivation: >-
   already travels.
   **The hours are chosen so the share does not divide evenly**, because a basis that is only ever
   exercised on clean numbers is a basis whose rounding rule is untested. Control total holds at
-  24000 and 5801 receives nothing.
+  24000 and the unabsorbed leg receives nothing.
   ⚠️ **The multi-DAY case needs no vector and that is the point.** A job spanning three days
   produces three shifts, each posting its own guaranteed day against the same `causal_job` — the
   cost stacks on the one job by accumulation, with no rule to write. Owner, 2026-08-17. Recorded

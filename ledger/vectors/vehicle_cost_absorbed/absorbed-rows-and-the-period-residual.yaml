@@ -56,8 +56,10 @@ derivation: >-
   `entry_total_minor` is 45000 + 27500 = 72500, which equals `pool_minor` here because the period
   under-absorbed. The two fields coincide in this direction and separate in the other, which is what
   `a-period-that-over-absorbs-credits-5901` exists to show.
-  ⚠️ **The residual is NOT the same measure 5801 carries.** Labor is costed at actual, so ADR-0019
-  can call the 5800/5801 gap utilisation alone. A van has no actual per-job cost, so this residual is
+  ⚠️ **The residual is NOT the labor measure, and since 2026-08-17 it has no labor counterpart at
+  all.** ADR-0019 could call the absorbed/unabsorbed labor gap utilisation alone because labor is
+  costed at actual — and ADR-0038 then removed the unabsorbed COGS account entirely, sending labor
+  no order caused to `6600 - Wages`. A van has no actual per-job cost, so this residual is
   utilisation **and** rate deviation together, and reporting them apart needs the odometer-and-fuel
   sampling ADR-0030 names — not a second GL account.
 

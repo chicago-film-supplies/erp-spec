@@ -96,14 +96,19 @@ Feature: A posting declares every key its rule names, and no other
     And the rejection names the key the rule does not carry
 
   @REQ-LED-001
-  Scenario Outline: Idle labor is the one posting whose causal order is always null
-    ADR-0019: guaranteed-but-unworked hours are a real cost attributable to no job, so
-    5801 Cost of Goods Sold: Wages (Unabsorbed) IS the idle-capacity KPI. Its posting declares
-    `causal_orders: null` — DECLARED, not omitted, so "hours attributable to no job" stays a
+  Scenario Outline: Labor no order caused is the one posting whose causal order is always null
+    ADR-0019 and ADR-0038: a paid day no order caused is a real cost attributable to no job, and it
+    is an OPERATING EXPENSE rather than cost of sales — it debits 6600 Wages, and its posting
+    declares `causal_orders: null` — DECLARED, not omitted, so "hours attributable to no job" stays a
     countable population. If the rule had no null arm the unabsorbed posting could not be written at
     all, and the pressure would be to attach it to a job, which is the failure this scenario exists
     to forbid. The absorbed leg has no null arm for the mirror-image reason: absorbed means "into a
     job", so hours belonging to none are unabsorbed by definition.
+
+    This outline named 5801 Cost of Goods Sold: Wages (Unabsorbed) until 2026-08-17. ADR-0038
+    removed that account — where no order caused the hire there is no revenue the cost is applicable
+    to — and the rule now debits 6600. The key obligation is unchanged, which is the point: it was
+    never a property of the account.
 
     Given a posting under the rule shift_recorded to <account>
     When the posting declares its causal order as <declaration>
@@ -114,6 +119,6 @@ Feature: A posting declares every key its rule names, and no other
       | 5800 Cost of Goods Sold: Wages (Absorbed)   | a causal job  | recorded |
       | 5800 Cost of Goods Sold: Wages (Absorbed)   | null          | rejected |
       | 5800 Cost of Goods Sold: Wages (Absorbed)   | nothing at all| rejected |
-      | 5801 Cost of Goods Sold: Wages (Unabsorbed) | null          | recorded |
-      | 5801 Cost of Goods Sold: Wages (Unabsorbed) | a causal job  | rejected |
-      | 5801 Cost of Goods Sold: Wages (Unabsorbed) | nothing at all| rejected |
+      | 6600 Wages                                  | null          | recorded |
+      | 6600 Wages                                  | a causal job  | rejected |
+      | 6600 Wages                                  | nothing at all| rejected |

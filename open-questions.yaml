@@ -1680,14 +1680,26 @@ open_questions:
       i guess they could all be cogs, not sure**)." The first half is decided; the parenthesis is
       this question.
       ✅ **The STRUCTURAL half is settled 2026-08-16: "we'll keep both labor accounts."** `6600 Wages`
-      is retained alongside the new `5800`/`5801`, so "could they all be COGS" is answered **no** at
-      the level of the chart — an operating-expense wages account continues to exist and to hold
+      is retained alongside the new `5800`, so "could they all be COGS" is answered **no** at the
+      level of the chart — an operating-expense wages account continues to exist and to hold
       somebody. What remains open is only WHO, and the sales/admin asymmetry below is the live part
       of it.
+      ⚠️ **HALF OF THIS QUESTION WAS ANSWERED ELSEWHERE ON 2026-08-17, and it is worth knowing before
+      you answer the rest.** ADR-0038 (accepted, owner's ruling) decides that **labor no causal order
+      produced is operating expense and stays in `6600`** — so the residue this question asks about
+      now has a stated rule rather than an open shape, and it explicitly includes training days,
+      warehouse cleanup and maintenance projects. It also **deleted `5801`**: there is no unabsorbed
+      COGS account, so nothing can land between the two answers.
+      ⇒ **What is genuinely left is narrower than the text above suggests**: not "what stays in
+      6600", which ADR-0038 answers, but whether a salaried person who NEVER works a causal job can
+      nonetheless be COGS. On ADR-0038's own criterion the answer follows — no causal order, no
+      revenue the cost is applicable to, so no — and what the ruling would add is whether CFS wants
+      to say so for a population that has no shifts at all.
       ✅ **The move itself is ALREADY SPECIFIED and needs no new decision.** `ledger/chart-of-accounts.yaml`
-      carries `5800 Cost of Goods Sold: Wages (Absorbed)` and `5801 Cost of Goods Sold: Wages
-      (Unabsorbed)`, both `disposition: new`, `status_live: absent`, against `6600 Wages`
-      (`status_live: Active`, `type: Expense`). ADR-0019 is the decision behind them.
+      carries `5800 Cost of Goods Sold: Wages (Absorbed)`, `disposition: new`, `status_live: absent`,
+      against `6600 Wages` (`status_live: Active`, `type: Expense`). ADR-0019 is the decision behind
+      it. ⚠️ This bullet named `5801 Cost of Goods Sold: Wages (Unabsorbed)` alongside it until
+      2026-08-17; ADR-0038 removed that account.
       **What is open is only the RESIDUE — what 6600 keeps.**
       ⚠️ **Do not survey this as an open question. GAAP is narrow here and the answer is probably
       no.** COGS is direct cost of revenue; general and administrative salaries are period costs and

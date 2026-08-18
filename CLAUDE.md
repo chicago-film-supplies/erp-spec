@@ -162,9 +162,11 @@ Not every tool has an upstream dump, and the difference is worth knowing before 
   is 11–23 words and `question:` / `statement:` are sentences; **none of them is the gloss.** Write
   a short one.
 - **Same for GL accounts: `#### - Name` on first mention** —
-  `5801 - Cost of Goods Sold: Wages
-  (Unabsorbed)`, then bare after. No new field needed;
-  `ledger/chart-of-accounts.yaml` already carries `name`.
+  `5800 - Cost of Goods Sold: Wages
+  (Absorbed)`, then bare after. No new field needed;
+  `ledger/chart-of-accounts.yaml` already carries `name`. ⚠️ The example here cited `5801` until
+  2026-08-17, when ADR-0038 deleted that account — **a citation example is a citation**, and it went
+  stale the same way any other does.
 - Cite the ADR that DECIDED it, not the one that mentions it.
 
 **Claims**

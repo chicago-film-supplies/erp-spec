@@ -130,7 +130,8 @@ report:
   # kept empty against a hypothetical.
   # ✅ **And the collapse is structural, not a coincidence.** `labor_line` is read off the shift's
   # ABSORBED ALLOCATION row, and an absorbed allocation names a causal job by definition — hours
-  # belonging to no job are UNABSORBED, post to 5801, and have no allocation row and therefore no
+  # belonging to no job are UNABSORBED, post to `6600 - Wages` (ADR-0038 — not COGS at all), and
+  # have no allocation row and therefore no
   # `labor_line` at all. So every value this taxonomy can hold is, by construction, attributable to
   # a job whose goods can bear it. **Total coverage is a property of the design, not an assumption.**
   #
@@ -201,7 +202,9 @@ report:
         crew-day near or far, so OQ-006 stands for labor), **fuel** is a real cost and lands in
         vehicle COGS (ADR-0030), and **opportunity cost** is deliberately not booked — it surfaces
         through ADR-0019's absorption model, as the long haul absorbing its person-day into 5800
-        while no second job absorbs the rest of the day, leaving 5801 Unabsorbed Labor. That is
+        while no second job absorbs the rest of the day. ⚠️ Under but-for that remainder now belongs
+        to the causing order rather than to any residual account, and ADR-0038 removed the residual
+        COGS account outright. That is
         HOT-010's "absorption measures UTILISATION", and it answers HOT-004 without loading a
         premium onto the job.
         ⇒ predicting delivery cost from 4100 volume alone **under-predicts** in a long-haul period.
@@ -215,7 +218,7 @@ report:
         (OQ-006, and
         `inbox/2026-08-09-4110-is-a-third-distance-charges-and-distance-is-performed.md`.)
         **The cost side is now DECLARED rather than described** — see `cost_sources` above. Labor
-        COGS whose shift allocation resolves to `labor_line: delivery` (ADR-0019, 5800/5801) is in
+        COGS whose shift allocation resolves to `labor_line: delivery` (ADR-0019, 5800) is in
         the ledger now; vehicle COGS is ADR-0030 and its accounts are unchosen. ⚠️ This read "labor
         COGS carrying `cost_type: delivery`" until 2026-08-16 — under ADR-0036 the posting carries
         the causal job and its allocation row, and the classification is read off that row (OQ-042).

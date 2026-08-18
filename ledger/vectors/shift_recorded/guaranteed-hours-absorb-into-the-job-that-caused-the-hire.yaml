@@ -44,15 +44,22 @@ derivation: >-
   the part the work did not fill. A five-hour job that cost a full day **is** a $240 job, and
   recording it as $150 would make every short job look cheap while the difference accumulated in an
   account nobody reads.
-  ⚠️ **The consequence is that 5801 is nearly empty, and that is intended.** It now holds paid time
-  **no order caused at all** — training, a company meeting, unassigned shop time — which is what
-  `guaranteed-day-with-no-causing-order-lands-in-5801` exercises. ADR-0019's frozen text calls the
-  5800/5801 gap a utilisation measure; under but-for that gap is small by construction, and the
+  ⚠️ **The consequence is that the unabsorbed leg is nearly empty, and that is intended.** It now holds paid time
+  **no order caused at all** — training, a company meeting, a warehouse cleanup — which is what
+  `paid-day-no-order-caused-lands-in-6600` exercises. ADR-0019's frozen text calls the
+  absorbed/unabsorbed gap a utilisation measure; under but-for that gap is small by construction, and the
   question "what is the 8-hour guarantee costing us" is answered from `hours_guaranteed` against
   `hours_worked` on the shift records rather than from a GL account.
-  **No GAAP question arises.** Total COGS is 24000 either way; only the split between two COGS
-  sub-accounts moves, and neither is capitalised into inventory, so ASC 330's normal/abnormal rule —
-  which an earlier revision of this file leaned on — never applied.
+  ⚠️ **A GAAP QUESTION DOES ARISE NOW, AND THIS PARAGRAPH SAID IT DID NOT.** It read "total COGS is
+  24000 either way; only the split between two COGS sub-accounts moves" — true while the unabsorbed
+  half was `5801`, a cost-of-sales account. **ADR-0038 (2026-08-17) put that half in `6600 - Wages`,
+  an operating expense**, so the two readings no longer differ by a sub-account: under but-for this
+  day is 24000 of COGS, and under the refuted reading it would have been 15000 of COGS and 9000 of
+  opex. **The choice now moves money across the gross-profit line**, which makes this vector's
+  assertion more consequential rather than less.
+  What still does not apply is ASC 330's normal/abnormal idle rule: nothing here is capitalised into
+  inventory, so the question is presentation rather than measurement — and net income is identical
+  either way.
 
 expect:
   transfers:

@@ -2,7 +2,7 @@
 id: ADR-0038
 headline: no causal order means not COGS
 title: Labor with no causal order is not COGS — 5801 is not created and 6600 Wages narrows instead
-status: proposed
+status: accepted
 date: 2026-08-17
 review_by: 2026-12-01
 deciders: [repo owner]
@@ -14,6 +14,7 @@ survey:
 supersedes:
 supersedes_on_acceptance:
 superseded_by:
+frozen_sha256: e4e3765f58aa5029ab305c359ea7b956cec5642f280c892e106a96ac0cf934b5
 ---
 
 > **In the context of** but-for attribution putting a guaranteed day onto the order that caused the
