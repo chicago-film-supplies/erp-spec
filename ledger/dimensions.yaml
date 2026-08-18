@@ -183,6 +183,19 @@ dimensions:
       attribute, so the criterion "could this be revised without anyone having observed something
       new?" is satisfied rather than waived. The classification still lives in Mongo; what makes it
       safe is that its SOURCE does not move.
+      ⚠️ **WHAT THE ROW CARRIES WHEN THE WORK INSIDE IT IS MIXED IS NOT STATED ANYWHERE, and this
+      sentence reads as though it were.** Under but-for (ADR-0019) a guaranteed day is borne by the
+      order that caused the hire, so five hours of delivery and three of warehouse produce **ONE**
+      allocation row against one causal job — and nothing says whether its `labor_line` is the causal
+      job's activity or the work actually performed. Both readings give the same GL (a warehouse hour
+      with no causal job of its own produces no row and therefore no amount, so nothing can
+      double-count); they give **different product-line reports**. Tracked as **erp-spec#36**, with
+      the recommendation recorded there: the causal job's activity, keeping money and classification
+      together, and the value-recovered question answered from the shift's activity blocks — which
+      carry no money and so cannot collide with the ledger.
+      ⚠️ **And on the labor side this is still a taxonomy nothing exercises** (OQ-046): as of
+      2026-08-17 **no `shift_recorded` golden vector carries a `labor_line` on an allocation row**.
+      The only rows that do are `vehicle_cost_absorbed`'s, written the same day.
     source: >-
       Owner, 2026-08-16, recorded in ADR-0036's Consequences (accepted, `frozen_sha256`) and in
       `inbox/2026-08-16-owner-rulings-line-identity-is-item-path-ephemeral-reports-are-never-sealed-and-cost-type-becomes-labour-line.md`.
