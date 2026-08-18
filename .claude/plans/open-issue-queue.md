@@ -2,11 +2,12 @@
 
 - **Date:** 2026-08-17 (rewritten; supersedes the 2026-08-16 revision)
 - **Repo:** erp-spec
-- **Status:** `main` is CI-green. **The two ADRs accepted 2026-08-17 are now EXECUTABLE** (gate 18 +
-  `vehicle_cost_absorbed`), **rule 8a executes as gate 19**, and **three decisions are now PREPARED
-  for the owner rather than merely proposed**: ADR-0038 has the survey it owed, ADR-0037 has been
-  red-teamed into four separable rulings, and PSA is measured for the first time. Ten issues open,
-  two opened by this session's own measurements.
+- **Status:** `main` is CI-green. **ADR-0030 and ADR-0019 are EXECUTABLE** (gate 18 +
+  `vehicle_cost_absorbed`), **rule 8a executes as gate 19**, and **ADR-0038 is ACCEPTED and swept**
+  — owner's ruling 2026-08-17, `5801` deleted, 34 files moved with it, both counting gates
+  re-derived themselves. ADR-0037 is red-teamed into **four questions the owner has been asked**,
+  and PSA is measured for the first time. Ten issues open, two opened by this session's own
+  measurements.
 - **Origin:** a review of the open issue queue, requested because #18 was on the owner's mind
 - **Related:** open — #3, #4, #6, #12, #17, #32, #35, #36, **#37 (the other 104 accounts)**, **#38
   (labor_variance)** · closed: #8, #13, #14, #15, #16, #18, #19, #20 · HOT-015, HOT-016 resolved ·
@@ -96,12 +97,19 @@ been storm-ed has nowhere to sit, and `unwritten: []` does NOT mean every known 
 
 ### Then, later the same evening — the three decisions got PREPARED
 
-**7. ADR-0038 has the survey gate 19 demands, and the survey CONFIRMS it** — the unusual outcome
-here. ⚠️ **The labor survey taken earlier the same day does NOT cover the question**, though it
-looks as though it might: its D3 asked what belongs INSIDE `5801` and assumed the account exists.
-Four of six references leave labor with no cost object in the natural expense account; **GAAP
-abstains** and asks for a stated presentation policy. Three things the survey added that the ADR did
-not have:
+**7. ADR-0038 — surveyed, then ACCEPTED and swept the same evening on the owner's ruling.** ⚠️ **The
+sweep turned `coa_complete` RED on data that had just become correct**: the check required two
+accounts matching `Wages (Absorbed|Unabsorbed)`, so it was encoding ADR-0019's decision as a
+completeness property. It now requires the absorbed account, requires `6600`, and asserts the
+unabsorbed COGS account is ABSENT — so it cannot be re-minted silently. ⚠️ **And one vector's GAAP
+paragraph became wrong the moment it landed** — "only the split between two COGS sub-accounts moves"
+was true while both were COGS; one is now opex, so the choice moves money across the gross-profit
+line. Nothing but reading it would have caught that. The survey behind it CONFIRMS the ADR — the
+unusual outcome here. ⚠️ **The labor survey taken earlier the same day does NOT cover the
+question**, though it looks as though it might: its D3 asked what belongs INSIDE `5801` and assumed
+the account exists. Four of six references leave labor with no cost object in the natural expense
+account; **GAAP abstains** and asks for a stated presentation policy. Three things the survey added
+that the ADR did not have:
 
 - **The reporting machinery cannot carry a no-causal-order cost into a product line at all** —
   `labor_line` is read off the absorbed allocation row, which exists only where a causal job does.
@@ -180,14 +188,14 @@ which matched nothing.
 
 ## Then, in order
 
-|                         |                                                                                                                                                                                                                                                                    |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **ADR-0037 + ADR-0038** | ✅ BOTH PREPARED. ADR-0037 red-teamed into four separable rulings; ADR-0038 surveyed and gate-19 clean. ⚠️ **ADR-0038's sweep must still land in the SAME change as its acceptance** — **34 files, eight vectors**, one of them NAMED after the premise it refutes |
-| **#35**                 | PSA — a service line with five GL accounts and no spec; includes a charter contradiction that owes a `HOT-`. ✅ Gate 18 measured the same gap from the other side: `2800`–`2803` and `4130` are reachable from nothing                                             |
-| **#38**                 | `labor_variance` — the survey IS the work; the account was deleted on a refuted premise                                                                                                                                                                            |
-| **#37**                 | the other 104 accounts — an inclusive `resolves_to:` per path, land it red, and ⚠️ **rule 8a applies to the domains**, so it is not a bulk typing job                                                                                                              |
-| **#36**                 | the shift records `hours_idle` where the truth may be "worked on something else"                                                                                                                                                                                   |
-| **#6**                  | requirements backlog, blocks m7 — 21 requirements, 4 of 9 contexts uncovered (measured 2026-08-17)                                                                                                                                                                 |
+|              |                                                                                                                                                                                                                        |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ADR-0037** | ✅ Red-teamed, and the four questions are now stated as questions and put to the owner. Nothing to do until they answer. ✅ **ADR-0038 is DONE** — accepted and swept 2026-08-17                                       |
+| **#35**      | PSA — a service line with five GL accounts and no spec; includes a charter contradiction that owes a `HOT-`. ✅ Gate 18 measured the same gap from the other side: `2800`–`2803` and `4130` are reachable from nothing |
+| **#38**      | `labor_variance` — the survey IS the work; the account was deleted on a refuted premise                                                                                                                                |
+| **#37**      | the other 104 accounts — an inclusive `resolves_to:` per path, land it red, and ⚠️ **rule 8a applies to the domains**, so it is not a bulk typing job                                                                  |
+| **#36**      | the shift records `hours_idle` where the truth may be "worked on something else"                                                                                                                                       |
+| **#6**       | requirements backlog, blocks m7 — 21 requirements, 4 of 9 contexts uncovered (measured 2026-08-17)                                                                                                                     |
 
 ⚠️ **Six of ten issues are blocked on owner decisions, and the decision backlog is not blocked on
 the owner's availability — it is blocked on nobody having prepared the decisions.** ✅ **Three were
