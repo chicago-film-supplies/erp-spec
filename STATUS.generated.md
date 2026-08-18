@@ -12,11 +12,11 @@ is `deno task validate`'s judgement, not this file's.
 | | Count | |
 |---|---:|---|
 | Open questions | 13 open | 40 answered of 53 · **0 with no owner or no decide-by** |
-| Conflicts (HOT) | 17 | 1 open |
+| Conflicts (HOT) | 18 | 2 open |
 | Decisions (ADR) | 38 | 25 in force · 9 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 21 | 0 without a scenario |
-| Inbox | 88 | 68 unpromoted |
+| Inbox | 89 | 69 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
@@ -47,6 +47,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | HOT | Statement | Blocks |
 |---|---|---|
 | `HOT-017` | `charter.md` states that a production service agreement's money moves through `2800 - PSA Liability Clearing`… | — |
+| `HOT-018` | `adr/ADR-0019` — ACCEPTED and FROZEN 2026-08-17 — states that the capped components of employer burden leave… | — |
 
 ## Decisions
 
@@ -131,7 +132,7 @@ it is counted separately on purpose, and a milestone is not done because its che
 | Milestone | Criterion | Check | Measured |
 |---|---|---|---|
 | `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 12 spikes, 9 open, 0 closed without naming an ADR |
-| `m4` | Every HOT- is resolved or has an ADR that consciously defers it with… | `hotspots_resolved` | 17 hotspots, 1 unresolved |
+| `m4` | Every HOT- is resolved or has an ADR that consciously defers it with… | `hotspots_resolved` | 18 hotspots, 2 unresolved |
 
 ## Coverage gaps
 

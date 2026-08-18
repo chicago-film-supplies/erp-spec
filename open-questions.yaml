@@ -2053,8 +2053,15 @@ open_questions:
       so the dispersion between runs is real.
       ⚠️ **AND THE BURDEN IS CAPPED PER PERSON PER YEAR, so a flat factor is SYSTEMATICALLY wrong
       rather than imprecise.** FUTA (0.60%) stops at ~$7,000 and Illinois SUTA (7.05%, the largest
-      component) at ~$13,600 — about 233 and 453 hours at $30/hr — leaving a ~4.51% uncapped floor
-      of Medicare plus workers comp. A regular crew member crosses both inside a season, so a flat
+      component) at ~$13,600 — about 233 and 453 hours at $30/hr. ⚠️ **CORRECTED 2026-08-17: this
+      read "leaving a ~4.51% uncapped floor of Medicare plus workers comp", and the floor is
+      12.20%.** `4.51` is `1.45 + 3.06` — it omits the 1.49% platform fee (which ADR-0019 later
+      established is uncapped) **and Social Security's 6.20%, which caps at the SSA wage base —
+      thousands of hours at $30/hr, against the 233 and 453 above.** Only FUTA and SUTA switch off
+      within a season: **7.65 points, not 13.85**. ADR-0019 carries the same defect at 6.00% / 13.85
+      and is frozen, so it is HOT-018
+      (`inbox/2026-08-17-adr-0019s-burden-cap-arithmetic-treats-social-security-as-capping-mid-season-and-it-does-not.md`).
+      The direction is unchanged and the SIZE is roughly halved. A regular crew member crosses both inside a season, so a flat
       rate over-states late-year hours and under-states early-year ones, biasing early-season job
       margins against late-season ones with nothing in the numbers looking wrong.
       ⇒ **The apportionment needs a period-close true-up** — exactly SAP's confirm-at-plan,

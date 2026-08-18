@@ -781,3 +781,50 @@ hotspots:
       agency reading and 7% with the principal one, so the cutover carries a comparability break of
       a kind neither ADR-0020 nor ADR-0030 has: an inconsistent past rather than a consistent one
       presented differently.
+
+  - id: HOT-018
+    headline: "Social Security treated as capping mid-season"
+    statement: >-
+      `adr/ADR-0019` — ACCEPTED and FROZEN 2026-08-17 — states that the capped components of
+      employer burden leave "a **6.00%** uncapped floor of Medicare, workers comp and the platform
+      fee" against "**13.85 points that switch off** mid-season". **Both figures require Social
+      Security (6.20%) to cap within a season, and it does not**: FUTA caps at ~$7,000 and Illinois
+      SUTA at ~$13,600 — the ADR itself computes these as 233 and 453 hours at $30/hr — while Social
+      Security caps at the SSA wage base, thousands of hours at the same wage. The only components
+      that switch off in a season are FUTA and SUTA: **7.65 points, not 13.85**, leaving a
+      **12.20%** floor rather than 6.00%. ⚠️ `open-questions.yaml`'s OQ-050 states a THIRD figure for
+      the same quantity — "~4.51% uncapped floor of Medicare plus workers comp" — which omits both
+      Social Security and the platform fee.
+    contexts: [ledger, fulfillment]
+    why_it_matters: >-
+      ⚠️ **The DECISION is unaffected, which is what makes this a hotspot rather than a
+      supersession** (ADR-0034 row 3, the same path HOT-016 took). Burden is still capped per person
+      per year, a flat factor is still systematically wrong rather than imprecise, `labor_variance`
+      still fires and the apportionment still owes a period-close true-up.
+      ⚠️ **What is wrong is the SIZE, and it is wrong by about half.** The seasonal bias between
+      early-year and late-year hours is 7.65 points of wage, not 13.85 — and sizing that bias is the
+      number's entire job in ADR-0019. A true-up built to the stated figure would be scaled to
+      roughly twice the real dispersion.
+      ⚠️ **Every individual number in the sentence is correct and the sentence is internally
+      consistent** — `1.45 + 3.06 + 1.49 = 6.00` and `19.85 − 6.00 = 13.85` both tie. That is why it
+      survived acceptance, a six-reference survey, HOT-016's correction of the very same bullet, and
+      twenty gates. **What it never states is which components the 13.85 is made of**, and the
+      missing 6.20 is Social Security.
+      ⇒ **It was found by attempting to TYPE the components** — writing them as a table with a
+      cap-base column per row forces "caps at what" for every component, and Social Security is the
+      row whose answer contradicts the prose. **A missing column in a typed record is visible in a
+      way a missing clause in a sentence is not.**
+    evidence: >-
+      `inbox/2026-08-17-adr-0019s-burden-cap-arithmetic-treats-social-security-as-capping-mid-season-and-it-does-not.md`
+      — the component table, the arithmetic both ways, and the stated limit that the SSA wage base is
+      deliberately not pinned because the finding does not depend on it.
+    blocks: []
+    status: open
+    resolution_shape: >-
+      **Not resolvable by editing ADR-0019** — it is frozen, and ADR-0034 makes it a historical
+      record of the decision as taken, wrong premise included. The resolution is: correct OQ-050
+      (mutable, done 2026-08-17), and carry the corrected figures wherever the true-up is
+      eventually specified — erp-spec#38, which holds the `labor_variance` posting rule and the
+      rule-8a survey it owes. ⚠️ **The true-up's SIZING must come from this hotspot, not from
+      ADR-0019's body**, and whoever writes that rule should pin the SSA wage base to a year rather
+      than inheriting "~".

@@ -5,7 +5,7 @@
     "adrs": 38,
     "adrs_accepted": 25,
     "events": 38,
-    "inbox": 88,
+    "inbox": 89,
     "inbox_promoted": 20
   },
   "requirements": [
@@ -628,6 +628,7 @@
       "inbox/2026-08-16-the-product-line-matrix-rebuilt-with-the-master-join-denorm-and-master-now-agree-on-every-line.md",
       "inbox/2026-08-16-the-transfer-field-budget-is-four-fields-not-three-and-both-candidate-evictions-are-already-refused.md",
       "inbox/2026-08-16-the-two-reference-fields-answer-different-questions-and-a-path-fits-neither.md",
+      "inbox/2026-08-17-adr-0019s-burden-cap-arithmetic-treats-social-security-as-capping-mid-season-and-it-does-not.md",
       "inbox/2026-08-17-correction-wrapbook-is-a-true-eor-so-cfs-cost-is-the-invoice-and-the-refutation-of-adr-0019-was-overstated.md",
       "inbox/2026-08-17-oq-050-answered-wrapbook-itemises-wages-per-person-per-day-but-prices-burden-per-RUN-so-the-cost-rate-is-an-estimate.md",
       "inbox/2026-08-17-owner-cfs-is-non-union-and-average-payroll-fringe-is-23-percent-which-refutes-adr-0019s-central-claim.md",
