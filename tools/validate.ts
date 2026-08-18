@@ -2969,6 +2969,185 @@ for (const e of evts) {
   }
 }
 
+// ── gate 18: a minted account is reachable from a posting rule ──────────────
+/**
+ * ⚠️ **Minting an account creates no posting rule, and nothing noticed until 2026-08-17.** ADR-0030
+ * (vehicle cost into COGS) was ACCEPTED with `5900`, `5901`, `5902` and `6409` named in its
+ * Consequences, and not one of them appeared anywhere in `ledger/posting-rules.yaml`. `m3 Ledger
+ * core` read **4 met / 0 unmet** through all of it: its criteria ask whether every EVENT is covered
+ * and whether every RULE has vectors, and **nothing asked whether every ACCOUNT is reachable**.
+ * `coa_complete` verifies accounts EXIST; existence is not reachability.
+ *
+ * ── the scope is MINTED accounts, and the bar is the chart's own ────────────────────────────────
+ *
+ * `ledger/chart-of-accounts.yaml` states it: _"an account enters this file because a posting rule
+ * has no legal account for one of its legs, not because a chart 'should have' one."_ That is a
+ * claim about every `disposition: new` entry, and nothing executed it.
+ *
+ * ⚠️ **An ADOPTED account is a different question and this gate does NOT answer it.** It exists in
+ * the live chart whatever this spec decides, and settling what may post to each of the 108 is a
+ * where-does-it-post decision under CLAUDE.md rule 8a — six references at a time, not a bulk
+ * classification typed in one sitting. The note this gate pushes COUNTS them so the silence is a
+ * measured number rather than an assumption, and **erp-spec#37** holds the work. Do not read a
+ * green gate 18 as "every account has a home".
+ *
+ * ── a path-typed side reaches accounts this gate cannot see, so the reach is DECLARED ───────────
+ *
+ * Fourteen of the account references in the posting rules are dotted paths — `line.debit_account`,
+ * `session.deposit_account` — whose value is chosen per document. Treating a path as reaching
+ * EVERYTHING would make this gate green on any mint whatsoever, which is the defect class this repo
+ * keeps paying for; treating it as reaching NOTHING would fail on `5902`, which ADR-0030 routes
+ * through `vendor_bill_received`'s direct line deliberately ("it needs nothing new"). So a posting
+ * declares which minted accounts its path may resolve to, one reason per account, and the
+ * declaration is refused wherever it would not be doing work:
+ *
+ *   · on a posting whose two sides are both literal codes — a literal already names its account;
+ *   · naming a code that is not `disposition: new` — this gate does not check adopted accounts, so
+ *     a claim about one would read as coverage it does not have.
+ *
+ * **It is an INCLUSIVE declaration and that is deliberate.** An exclusion list ("any expense
+ * account except these") fails OPEN: the next minted COGS account silently falls inside the domain
+ * and is reported reachable by a rule that must never touch it. An inclusive one fails CLOSED — a
+ * new mint is unreachable until somebody writes down what reaches it.
+ */
+{
+  const G = "18";
+  interface ChartEntry {
+    code?: unknown;
+    name?: unknown;
+    disposition?: unknown;
+    source?: unknown;
+  }
+  interface RulePosting {
+    debit_account?: unknown;
+    credit_account?: unknown;
+    reaches_minted_accounts?: unknown;
+  }
+  const coaY = await readYaml<{ accounts?: ChartEntry[] }>(
+    `${ROOT}/ledger/chart-of-accounts.yaml`,
+  );
+  const prY = await readYaml<
+    { rules?: { id?: string; status?: string; postings?: RulePosting[] }[] }
+  >(
+    `${ROOT}/ledger/posting-rules.yaml`,
+  );
+  const chart = new Map<number, ChartEntry>();
+  for (const a of coaY?.accounts ?? []) {
+    if (typeof a.code === "number") chart.set(a.code, a);
+  }
+
+  /** account code -> every place a specified rule can put a posting into it. */
+  const reachedBy = new Map<number, string[]>();
+  const mark = (code: number, how: string) =>
+    reachedBy.set(code, [...(reachedBy.get(code) ?? []), how]);
+  /**
+   * Codes whose only claim to a reach is a MALFORMED declaration. They are not reachable — a claim
+   * with no reason grants no coverage, and the note below must not count one — but they are already
+   * named by their own failure, so 18a stays quiet about them. ⚠️ **Two messages for one defect is
+   * how a gate teaches the wrong lesson at 2am**: the empty-string arm of gate 10h double-reported
+   * the empty-LIST case for exactly this reason, and this arm was written the same way until it was
+   * fired with a blank reason and reported the account twice.
+   */
+  const claimedButMalformed = new Set<number>();
+
+  for (const r of prY?.rules ?? []) {
+    if (r.status !== "specified") continue;
+    for (const [j, p] of (r.postings ?? []).entries()) {
+      const where = `posting-rules "${r.id}" posting[${j}]`;
+      const sides = [p.debit_account, p.credit_account];
+      for (const v of sides) if (typeof v === "number") mark(v, `${r.id}[${j}]`);
+
+      const decl = p.reaches_minted_accounts;
+      if (decl === undefined) continue;
+      if (!decl || typeof decl !== "object" || Array.isArray(decl)) {
+        fail(
+          G,
+          `${where}: \`reaches_minted_accounts\` must be a map of account code -> the reason that path can resolve to it`,
+        );
+        continue;
+      }
+      if (sides.every((v) => typeof v === "number")) {
+        fail(
+          G,
+          `${where}: declares \`reaches_minted_accounts\` while both sides are literal codes — a literal already names its account, so the declaration claims a reach nothing needs`,
+        );
+      }
+      for (const [k, reason] of Object.entries(decl as Record<string, unknown>)) {
+        const code = Number(k);
+        if (!Number.isInteger(code)) {
+          fail(G, `${where}: \`reaches_minted_accounts\` key "${k}" is not an account code`);
+          continue;
+        }
+        const a = chart.get(code);
+        if (!a) {
+          fail(
+            G,
+            `${where}: \`reaches_minted_accounts\` names ${code}, which is not an account in ledger/chart-of-accounts.yaml`,
+          );
+          continue;
+        }
+        if (a.disposition !== "new") {
+          fail(
+            G,
+            `${where}: \`reaches_minted_accounts\` names ${code} "${a.name}", whose disposition is \`${a.disposition}\` — this gate checks minted accounts only, so a claim about an adopted one reads as coverage it does not have`,
+          );
+          continue;
+        }
+        if (typeof reason !== "string" || reason.trim().length === 0) {
+          fail(
+            G,
+            `${where}: \`reaches_minted_accounts\`[${code}] needs a reason — which field of the source document supplies that account, and what decided it`,
+          );
+          claimedButMalformed.add(code);
+          continue;
+        }
+        mark(code, `${r.id}[${j}] (declared)`);
+      }
+    }
+  }
+
+  // 18a — the reachability check itself. A mint with nothing posting to it is an account that
+  // exists for a rule nobody wrote.
+  const minted = [...chart.values()].filter((a) => a.disposition === "new");
+  const mintedUnreached = minted.filter((a) =>
+    !reachedBy.has(Number(a.code)) && !claimedButMalformed.has(Number(a.code))
+  );
+  for (const a of mintedUnreached) {
+    fail(
+      G,
+      `${a.code} "${a.name}" is minted (\`disposition: new\`, source ${a.source}) and NO specified posting rule posts to it. ` +
+        `Write the rule, park its event in \`unwritten:\` with an issue, or — where a path already reaches it — declare that path's \`reaches_minted_accounts\``,
+    );
+  }
+
+  // 18b — a rule may not post into an account the migration removes. Nothing does today; the arm
+  // was fired by flipping 5800 to `drop` and watching `shift_recorded` name it.
+  for (const [code, hows] of reachedBy) {
+    const a = chart.get(code);
+    if (!a) continue; // gate 10e already fails on a literal that is not in the chart
+    if (a.disposition === "drop" || a.disposition === "merge") {
+      fail(
+        G,
+        `${code} "${a.name}" is \`disposition: ${a.disposition}\` and ${
+          hows.join(", ")
+        } posts to it — a posting rule cannot target an account the migration removes`,
+      );
+    }
+  }
+
+  const adopted = [...chart.values()].filter((a) => a.disposition === "adopt");
+  const adoptedUnreached = adopted.filter((a) => !reachedBy.has(Number(a.code)));
+  // ⚠️ Counted off `reachedBy`, NOT off `minted.length - mintedUnreached.length`. The second form
+  // counts a malformed claim as coverage — it reported "5 of 9" with a blank reason, which is the
+  // number a reader would have taken away from a run whose only real reach was four.
+  const mintedReachable = minted.filter((a) => reachedBy.has(Number(a.code))).length;
+  notes.push(
+    `gate 18: ${mintedReachable} of ${minted.length} minted accounts are ` +
+      `reachable from a specified posting rule; NOT CHECKED — ${adoptedUnreached.length} of ` +
+      `${adopted.length} adopted accounts are named by no rule (erp-spec#37)`,
+  );
+}
+
 // ── report ──────────────────────────────────────────────────────────────────
 const GATE_NAMES: Record<string, string> = {
   "1": "ids unique and well-formed",
@@ -2988,6 +3167,7 @@ const GATE_NAMES: Record<string, string> = {
   "15": "the migration field map against the measured live inventory",
   "16": "the spec chart of accounts against the measured live chart",
   "17": "house spelling in the refactorable spec",
+  "18": "every minted account is reachable from a posting rule",
   xref: "cross-references resolve",
   parse: "files parse",
 };
