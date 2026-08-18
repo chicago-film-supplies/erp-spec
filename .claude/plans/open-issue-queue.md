@@ -2,10 +2,11 @@
 
 - **Date:** 2026-08-17 (rewritten; supersedes the 2026-08-16 revision)
 - **Repo:** erp-spec
-- **Status:** `main` is CI-green. **The two ADRs accepted 2026-08-17 are now EXECUTABLE**: gate 18
-  fails on a minted account nothing posts to, `vehicle_cost_absorbed` is written with four golden
-  vectors, and gate 19 makes CLAUDE.md rule 8a fire at acceptance. Ten issues open, two of them
-  opened by this session's own measurements.
+- **Status:** `main` is CI-green. **The two ADRs accepted 2026-08-17 are now EXECUTABLE** (gate 18 +
+  `vehicle_cost_absorbed`), **rule 8a executes as gate 19**, and **three decisions are now PREPARED
+  for the owner rather than merely proposed**: ADR-0038 has the survey it owed, ADR-0037 has been
+  red-teamed into four separable rulings, and PSA is measured for the first time. Ten issues open,
+  two opened by this session's own measurements.
 - **Origin:** a review of the open issue queue, requested because #18 was on the owner's mind
 - **Related:** open — #3, #4, #6, #12, #17, #32, #35, #36, **#37 (the other 104 accounts)**, **#38
   (labor_variance)** · closed: #8, #13, #14, #15, #16, #18, #19, #20 · HOT-015, HOT-016 resolved ·
@@ -93,11 +94,51 @@ rate variance on a premise measurement has since refuted — and no event. ⚠�
 `unwritten:` either: all four coverage buckets are keyed by EVENT**, so a rule whose trigger has not
 been storm-ed has nowhere to sit, and `unwritten: []` does NOT mean every known gap is covered.
 
-### The queue: 10 open — 5 blocked on the owner, 5 startable
+### Then, later the same evening — the three decisions got PREPARED
+
+**7. ADR-0038 has the survey gate 19 demands, and the survey CONFIRMS it** — the unusual outcome
+here. ⚠️ **The labor survey taken earlier the same day does NOT cover the question**, though it
+looks as though it might: its D3 asked what belongs INSIDE `5801` and assumed the account exists.
+Four of six references leave labor with no cost object in the natural expense account; **GAAP
+abstains** and asks for a stated presentation policy. Three things the survey added that the ADR did
+not have:
+
+- **The reporting machinery cannot carry a no-causal-order cost into a product line at all** —
+  `labor_line` is read off the absorbed allocation row, which exists only where a causal job does.
+  **The decision is forced by machinery already accepted**, not only by preference.
+- **The population is TWO things and the ADR gave one reason for both** — training and admin time
+  serves nothing in particular; warehouse cleanup and fleet maintenance are capacity-sustaining work
+  on the assets rental revenue comes from.
+- ⚠️ **The blast radius was already stale hours after being measured**: 28 files and six vectors is
+  **34 and eight**, and one vector is NAMED after the premise the ADR refutes.
+
+**8. ADR-0037 red-teamed — two of three load-bearing claims needed correcting.** ⚠️ **"HOT-016 would
+not have needed to exist" does not survive**: premise typing removes one instance of seven, and the
+step-2 gate would not have caught the sixth either, because HOT-016's sweep missed `charter.md` on a
+PARAPHRASE ("costed at actual" versus "actual-cost absorption") and the proposed mechanism is exact
+presence. ⚠️ **"Forward-only adoption" does not survive either** — an accepted ADR's body is
+immutable, so it is never "next touched", and the 23 in-force ADRs hold the citations. ✅ And the
+citation counts re-measured BY LOCUS: 84% of ADR-0036's are sweepable against **44%** of ADR-0019's.
+
+**9. PSA measured for the first time (#35), and it moves both halves of that issue.**
+`deno task psa` over 1,013 invoices / 14,425 lines: **$101,720.00** of PSA-shaped billing across
+**three** accounts — and **`4130 PSA Income` is named by ZERO invoice lines** while carrying
+$13,202.34 in Xero. ⇒ PSA income is recorded in Xero DIRECTLY; ADR-0001 retires Xero, so it needs a
+path in or it becomes unrecordable. ⚠️ **The ASC 606 control test points at PRINCIPAL**, the
+opposite of the "pass-through" framing the charter and #35 both use — a PSA exists because the
+client will not stand up a US entity. **OQ-053** holds the three facts that settle it; **HOT-017**
+records the charter against the measurement. ✅ Two halves need no ruling: the held money is a
+liability (2800 is right), and PSA labor never enters the rental pools under either answer.
+
+⚠️ **The probe found its own defect twice** — its first pattern read `labor contract` and missed
+`Contract Labor` ($56,570, two more accounts), and gate 17 refused its British-spelling alternative,
+which matched nothing.
+
+### The queue: 10 open — 6 blocked on the owner, 4 startable
 
 |               | Issue   | State                                                                       |
 | ------------- | ------- | --------------------------------------------------------------------------- |
-| **startable** | **#35** | PSA is a whole service line with no spec at all                             |
+| blocked       | **#35** | ⚠️ MOVED — measured, surveyed; now waits on **OQ-053** (principal or agent) |
 | **startable** | **#36** | but-for hides what the paid-for slack PRODUCED                              |
 | **startable** | **#37** | ⚠️ NEW — the 104 adopted accounts no rule names                             |
 | **startable** | **#38** | ⚠️ NEW — `labor_variance`; the survey is the work, and it is rule-8a-shaped |
@@ -120,9 +161,12 @@ been storm-ed has nowhere to sit, and `unwritten: []` does NOT mean every known 
 - **OQ-051** — where the seam sits between CFS and a chat system for comments/threads.
 - **OQ-052 — NEW.** The vehicle rate, its normal-capacity denominator, and where an over-absorbed
   balance rests. The third part is rule-8a-shaped.
-- **Accept or reject ADR-0037** (ids carry meaning where used) and **ADR-0038** (no causal order
-  means not COGS). ⚠️ ADR-0038 now carries a gate-19 warning — it is accounting-shaped and cites no
-  survey, so **acceptance will fail until one exists**.
+- **OQ-053 — NEW, and it blocks a whole service line.** Is CFS principal or agent on a PSA? Three
+  facts settle it and none is in the books: who signs the crew's engagement, whose insurance answers
+  for them, who bears the loss if the client's money does not arrive. ⚠️ **The ASC 606 indicators
+  point at PRINCIPAL** — the opposite of what the charter and #35 assume.
+- **Accept or reject ADR-0037** — ✅ now asks **four separable rulings** rather than one, after the
+  red team — and **ADR-0038** (no causal order means not COGS), ✅ surveyed and gate-19 clean.
 - **Team meals in COGS** — answered 2026-08-17: meals stay in opex.
 - **11 ADRs remain proposed.** ⚠️ Four of them cannot be accepted as they stand (gate 19).
 
@@ -136,22 +180,25 @@ been storm-ed has nowhere to sit, and `unwritten: []` does NOT mean every known 
 
 ## Then, in order
 
-|                         |                                                                                                                                                                                                                          |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **ADR-0037 + ADR-0038** | red-team ADR-0037 first (`refine-plan`); ⚠️ **ADR-0038's sweep must land in the SAME change as its acceptance** — 28 files, and nothing is wrong until it is accepted; ⚠️ **and ADR-0038 owes a survey first (gate 19)** |
-| **#35**                 | PSA — a service line with five GL accounts and no spec; includes a charter contradiction that owes a `HOT-`. ✅ Gate 18 measured the same gap from the other side: `2800`–`2803` and `4130` are reachable from nothing   |
-| **#38**                 | `labor_variance` — the survey IS the work; the account was deleted on a refuted premise                                                                                                                                  |
-| **#37**                 | the other 104 accounts — an inclusive `resolves_to:` per path, land it red, and ⚠️ **rule 8a applies to the domains**, so it is not a bulk typing job                                                                    |
-| **#36**                 | the shift records `hours_idle` where the truth may be "worked on something else"                                                                                                                                         |
-| **#6**                  | requirements backlog, blocks m7 — 21 requirements, 4 of 9 contexts uncovered (measured 2026-08-17)                                                                                                                       |
+|                         |                                                                                                                                                                                                                                                                    |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **ADR-0037 + ADR-0038** | ✅ BOTH PREPARED. ADR-0037 red-teamed into four separable rulings; ADR-0038 surveyed and gate-19 clean. ⚠️ **ADR-0038's sweep must still land in the SAME change as its acceptance** — **34 files, eight vectors**, one of them NAMED after the premise it refutes |
+| **#35**                 | PSA — a service line with five GL accounts and no spec; includes a charter contradiction that owes a `HOT-`. ✅ Gate 18 measured the same gap from the other side: `2800`–`2803` and `4130` are reachable from nothing                                             |
+| **#38**                 | `labor_variance` — the survey IS the work; the account was deleted on a refuted premise                                                                                                                                                                            |
+| **#37**                 | the other 104 accounts — an inclusive `resolves_to:` per path, land it red, and ⚠️ **rule 8a applies to the domains**, so it is not a bulk typing job                                                                                                              |
+| **#36**                 | the shift records `hours_idle` where the truth may be "worked on something else"                                                                                                                                                                                   |
+| **#6**                  | requirements backlog, blocks m7 — 21 requirements, 4 of 9 contexts uncovered (measured 2026-08-17)                                                                                                                                                                 |
 
-⚠️ **Five of ten issues are blocked on owner decisions, and the decision backlog is not blocked on
-the owner's availability — it is blocked on nobody having prepared the decisions.** The 2026-08-16
-session took three in a few sentences each, because every one arrived with measured evidence, a
-criterion and a recommendation. **ADR-0030 shows what "prepared" costs**: it sat `proposed` for a
-week looking like it needed a signature; what it needed was a survey rule 8a had required all along,
-and running that survey reversed one of its stated consequences. ⇒ **One prepared decision per
-session is probably worth more than the authoring it displaces.**
+⚠️ **Six of ten issues are blocked on owner decisions, and the decision backlog is not blocked on
+the owner's availability — it is blocked on nobody having prepared the decisions.** ✅ **Three were
+prepared on 2026-08-17 and the preparation changed all three**: ADR-0038's survey added an argument
+the ADR did not have, ADR-0037's red team refuted two of its own claims, and PSA's measurement moved
+its size by 7.7× and pointed its criterion the other way. The 2026-08-16 session took three in a few
+sentences each, because every one arrived with measured evidence, a criterion and a recommendation.
+**ADR-0030 shows what "prepared" costs**: it sat `proposed` for a week looking like it needed a
+signature; what it needed was a survey rule 8a had required all along, and running that survey
+reversed one of its stated consequences. ⇒ **One prepared decision per session is probably worth
+more than the authoring it displaces.**
 
 ## Done — the units, compressed
 
