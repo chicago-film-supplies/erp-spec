@@ -663,11 +663,18 @@ hotspots:
       to work until taken.
       ⚠️ **And FIVE MUTABLE artifacts repeated the refuted claim, two of them left behind by the
       very amendment that found the defect.** ⚠️ **This entry said THREE until the sweep ran** — the
-      count came from a single grep pattern, and two more surfaced under different phrasing: the
+      count came from a single grep pattern, and it was wrong TWICE. Two surfaced under different
+      phrasing on the day: the
       golden vector `guaranteed-hours-unworked-land-in-5801.yaml` ("costing is actual at that
       person's own wage, so no standard rate exists to deviate from") and `glossary.yaml`'s
-      `standard cost` term ("the target system does not implement this"). **A count stated from one
-      search is a count of that search.** ADR-0019's body was corrected to the measurement while
+      `standard cost` term ("the target system does not implement this").
+      ⚠️ **And a SIXTH was found on 2026-08-17 while proposing a charter edit: `charter.md`'s
+      in-scope bullet said "**actual**-cost absorption into COGS, where the absorbed/unabsorbed split
+      measures **utilisation** rather than rate variance" — both halves refuted, in the repo's
+      TOP-LEVEL document.** The sweep missed it because the pattern was "costed at actual" and the
+      charter says "actual-cost absorption".
+      ⇒ **A count stated from one search is a count of that search** — recorded as a footgun in
+      `CLAUDE.md` the same afternoon, and violated twice more before the day ended, including here. ADR-0019's body was corrected to the measurement while
       its TITLE and its SUMMARY BLOCKQUOTE were not — and ADR-0019 has **121 citations** across the
       spec, so a title is what most readers take away. `5800`'s chart reason repeated it too.
       ⚠️ **AND IT HAPPENED A FOURTH TIME, INSIDE THIS HOTSPOT.** The file was renamed

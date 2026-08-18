@@ -13,21 +13,30 @@ allocated to COGS against the job that caused it.
 - Order → fulfillment → invoice → posting → report, end to end.
 - A double-entry general ledger owned by CFS, with period close and lock.
 - Fixed asset register with **dual GAAP and tax basis** and a reportable deferred difference.
-- Labor scheduling, shift recording, and **actual**-cost absorption into COGS, where the
-  absorbed/unabsorbed split measures **utilisation** rather than rate variance (`ADR-0019`).
+- Labor scheduling, shift recording, and **normal-cost** absorption into COGS — wages actual per
+  person, employer burden apportioned from the payroll run — borne by the order that caused the hire
+  (`ADR-0019`, but-for causation).
 - **Purchase orders**, in two roles: the document labor scheduling generates and costs flow from,
   and inventory acquisition — retail stock, and fixed assets bought for rental or internal ops.
 - Sales and Chicago Personal Property Lease Transaction Tax determination.
 - Bank feed ingestion and reconciliation.
 - 1099 / W-9 tracking for contractors.
+- **Production service agreements.** Producing a client's project on their budget, including
+  carrying their union payroll. A service CFS sells (`4130 - PSA Income`), not an accounting
+  convenience — `erp-spec#35`.
+- **The operational board and the comment threads attached to domain objects.** A version of each
+  survives (`OQ-049`); the board's current form is a rough draft, and where the chat seam sits is
+  open (`OQ-051`).
 - Year-end close, retained earnings roll, and CPA read access.
 
 ## Out of scope — non-goals
 
 Each of these is a deliberate decision, not an oversight. Reversing one is an ADR.
 
-- **Payroll processing.** An external employer of record stays. CFS schedules labor and records
-  shifts; it does not calculate withholding, file payroll tax, or move payroll money.
+- **Payroll processing for CFS's OWN crew.** An external employer of record (Wrapbook) stays. CFS
+  schedules labor and records shifts; it does not calculate withholding, file payroll tax, or move
+  its own payroll money. ⚠️ **This does not extend to PSA**, where moving a client's payroll through
+  `2800 - PSA Liability Clearing` is the service being sold — see In scope.
 - **A general-purpose accounting product.** This ledger serves CFS's chart of accounts and CFS's
   posting rules. It is not built to be configurable for another business.
 - **Multi-currency.** USD only. No FX translation, no revaluation.
