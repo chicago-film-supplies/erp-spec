@@ -6,6 +6,8 @@
     "validate": "deno run --allow-read --allow-env=SPEC_TODAY tools/validate.ts",
     "//ci": "Everything .github/workflows/spec.yml runs, in one command, without short-circuiting. The workflow CALLS this — one owner for the CI contract, so local and CI cannot drift.",
     "ci": "deno run --allow-read --allow-env=SPEC_TODAY --allow-write --allow-run=deno,git tools/ci.ts",
+    "//test": "Unit tests for tools/. NO permission flags, and that is the design constraint rather than an omission: a predicate that needs a permission is not a predicate, it is IO wearing one.",
+    "test": "deno test tools/",
     "labels": "deno run --allow-read --allow-run=gh tools/labels.ts",
     "triage": "deno run --allow-read --allow-env=SPEC_TODAY tools/validate.ts --triage-only",
     "gen": "deno run --allow-read --allow-write tools/generate.ts",

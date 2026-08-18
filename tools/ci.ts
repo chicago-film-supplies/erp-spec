@@ -38,10 +38,15 @@
  *   deno task ci
  */
 
+import { classifyGenerated } from "./ci-predicates.ts";
+
 const steps: { name: string; cmd: string[] }[] = [
   { name: "Validate", cmd: ["deno", "task", "validate"] },
   { name: "Formatting", cmd: ["deno", "fmt", "--check"] },
   { name: "Regenerate", cmd: ["deno", "task", "gen"] },
+  // ⚠️ `tools/` had ZERO tests until 2026-08-17, which is why the staleness predicate below was
+  // wrong three times. See `tools/ci-predicates_test.ts`.
+  { name: "Tool tests", cmd: ["deno", "test", "tools/"] },
 ];
 
 const failures: string[] = [];
@@ -104,7 +109,8 @@ const sourceDirty = modified ||
     f.trim() !== "" && !f.includes(".generated.")
   );
 
-if (generatedMoved && !sourceDirty) {
+const verdict = classifyGenerated(generatedMoved, modified, sourceDirty && !modified);
+if (verdict === "stale") {
   // Generated output moved while nothing that feeds it did — the committed generated files did not
   // match the committed sources. This is the real defect, and it is what CI sees.
   failures.push("Stale generated files");
@@ -114,7 +120,7 @@ if (generatedMoved && !sourceDirty) {
     stdout: "inherit",
     stderr: "inherit",
   }).output();
-} else if (generatedMoved) {
+} else if (verdict === "regenerated") {
   console.log("regenerated alongside your source edits — commit them together (not stale)");
 } else {
   console.log("clean");
@@ -122,10 +128,12 @@ if (generatedMoved && !sourceDirty) {
 
 console.log("\n" + "=".repeat(72));
 if (failures.length === 0) {
-  console.log("  ci: all four steps pass");
+  console.log(`  ci: all ${steps.length + 1} steps pass`);
   console.log("=".repeat(72));
 } else {
-  console.log(`  ci: ${failures.length} of 4 steps FAILED — ${failures.join(", ")}`);
+  console.log(
+    `  ci: ${failures.length} of ${steps.length + 1} steps FAILED — ${failures.join(", ")}`,
+  );
   console.log("=".repeat(72));
   Deno.exit(1);
 }
