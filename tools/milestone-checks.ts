@@ -299,6 +299,43 @@ export const CHECKS: Record<string, Check> = {
     };
   },
   /**
+   * m3: "Every account this spec mints is posted to by a rule."
+   *
+   * ⚠️ **Added 2026-08-17, because m3 read 4 met / 0 unmet while FIVE minted accounts had nothing
+   * posting to them** — `5150` and ADR-0030's `5900`/`5901`/`5902`/`6409`. The other four criteria
+   * ask whether every EVENT is covered and whether every RULE has vectors; a minted account with no
+   * rule is invisible to both, and `coa_complete` checks that accounts EXIST.
+   *
+   * **One enforcer plus one reporter, not two oracles** — the same arrangement `adr_review_by_current`
+   * has with gate 6. **Gate 18 is what fails**; this reports the same number so the milestone stops
+   * reading complete while it is not. It deliberately re-derives the count here rather than
+   * importing gate 18's internals: the two disagreeing would itself be a finding.
+   */
+  minted_accounts_reachable: (w) => {
+    const minted = w.accounts.filter((a) => a.disposition === "new");
+    const reached = new Set<number>();
+    for (const r of w.rules) {
+      if (r.status !== "specified") continue;
+      for (const p of (r.postings ?? []) as Record<string, unknown>[]) {
+        for (const side of ["debit_account", "credit_account"]) {
+          if (typeof p[side] === "number") reached.add(p[side] as number);
+        }
+        const decl = p.reaches_minted_accounts;
+        if (decl && typeof decl === "object" && !Array.isArray(decl)) {
+          for (const [k, reason] of Object.entries(decl as Record<string, unknown>)) {
+            if (typeof reason === "string" && reason.trim().length > 0) reached.add(Number(k));
+          }
+        }
+      }
+    }
+    const unreached = minted.filter((a) => !reached.has(Number(a.code)));
+    return {
+      ok: minted.length > 0 && unreached.length === 0,
+      detail: `${minted.length - unreached.length} of ${minted.length} minted accounts reachable` +
+        (unreached.length ? ` — ${unreached.map((a) => a.code).join(", ")} unreachable` : ""),
+    };
+  },
+  /**
    * m3: "Reporting dimensions defined with their full value sets, and every posting rule declaring
    * its keys."
    *

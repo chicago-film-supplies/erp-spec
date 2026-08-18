@@ -2077,3 +2077,47 @@ open_questions:
       ⚠️ **A tagging seam has a consequence worth pricing before choosing it**: a comment that lives
       outside cannot be part of a sealed period artifact (ADR-0017), so anything that needs an
       audit-durable narrative — a dispute, a credit note reason — cannot rely on it.
+  - id: OQ-052
+    question: >-
+      What vehicle rate absorbs into 5900, over what normal-capacity denominator — and where does an
+      OVER-absorbed balance rest?
+    owner: alex
+    decide_by: 2027-01-31
+    blocks: []
+    status: open
+    notes: >-
+      Opened 2026-08-17 with `vehicle_cost_absorbed`, the posting rule ADR-0030 (vehicle cost into
+      COGS) has needed since it was accepted. **The rule does not wait on this** — `amount:` is a
+      dotted path, so the rate is applied in the run document upstream of the ledger, exactly as
+      OQ-018's overtime premium is applied in the shift record. What waits is the number.
+      **Three parts, and the third is the accounting-shaped one.**
+      · **The rate.** Cost per computed mile. ADR-0030 puts the 2025 pool at
+        **$21,844.77 across 6400-6403** and says that figure is UNPINNED and **understated** — it
+        omitted rented trucks, which now post direct to 5902 instead. It cannot be re-derived from
+        this repo: `chart-of-accounts` mirrors into Firestore without balances and this repo does not
+        call the Xero API.
+      · **The normal-capacity denominator.** ADR-0030: _"a predetermined rate on a stated
+        normal-capacity denominator (ASC 330-10-30-3)"_, and _"the denominator is a requirement, not
+        a footnote"_ — because 5901 is utilisation **and** rate deviation together, and an
+        unabsorbed account meaning "one of two things, we do not know which" is the plug the ADR
+        warns about. Nothing states it anywhere today.
+      · ⚠️ **The over-absorbed direction, which ADR-0030 does not address at all.** A predetermined
+        rate applied to actual distance can exceed the pool. `vehicle_cost_absorbed` posts it
+        `Dr 6409 / Cr 5901` — one under/over-applied account, which is what every reference uses and
+        which mints nothing. **Prorating it across the jobs that absorbed it is the alternative**,
+        and choosing between them is a where-does-it-post question, so **CLAUDE.md rule 8a applies:
+        six references before a recommendation.** The rule carries the conventional treatment as the
+        interim so the branch exists and is exercised
+        (`a-period-that-over-absorbs-credits-5901`) rather than being a claim nobody took.
+      ⚠️ **Two variances, calibrated differently, and the answer must keep them apart** (ADR-0030,
+      owner 2026-08-16: _"we should record actuals from time to time if appropriate, there will be
+      some variance"_). The BASE variance is computed distance against miles actually driven — a
+      round trip is twice a one-way distance, a multi-stop run is LESS than the sum of its legs, and
+      a van idling on set covers none. The RATE variance is assumed cost per mile against actual.
+      **Periodic odometer and fuel sampling calibrates the RATE, not the base.**
+      ⚠️ **The rate is VERSIONED, so a later answer supersedes rather than mutates** — two periods
+      computed at different rates would disagree about the same job's margin, which is the failure
+      ADR-0029 exists to prevent. It is deliberately NOT registered in
+      `reporting/allocation-bases.yaml`: every field there (`base`, `zero_base`, `rounding`)
+      describes spreading a pool proportionally over a base, and a rate applied to a quantity has
+      none of them. ADR-0030 cites that file's discipline, not its registry.

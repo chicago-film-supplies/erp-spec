@@ -114,3 +114,35 @@ events:
     consumers: [availability, ledger]
     terminal: false
     carries: [fulfillment_ref, product_ref, quantity, voided_transfer_ref, reason]
+
+  - id: EVT-FUL-008
+    name: VehicleCostAbsorbed
+    description: >-
+      A period's OWNED-fleet vehicle cost was absorbed against the causal jobs its vans served
+      (ADR-0030). The run reads the shift allocation rows that already exist — same causal job, same
+      `labor_line` — applies the vehicle rate to each row's computed distance, and states the
+      residual that no job absorbed.
+      ⚠️ **It carries amounts, never a rate.** The rate and its normal-capacity denominator are
+      applied here, upstream of the ledger, because `amount:` in a posting rule is a dotted path with
+      no arithmetic — the same fence that keeps OQ-018's overtime premium inside the shift record.
+      ⚠️ **Hired trucks are NOT in this run.** A hire arrives already attributed to a causal job, so
+      it posts direct at actual through the vendor bill (5902) and never enters the rate-absorbed
+      pool (ADR-0030, reversing a recommendation made hours earlier in the same session).
+    producer: fulfillment
+    consumers: [ledger]
+    terminal: false
+    carries: [run_id, period, absorbed_allocations, unabsorbed_minor, total_minor, rate_version]
+    note: >-
+      **Produced by fulfillment rather than by the ledger, on the `EVT-FA-002 DepreciationRun`
+      precedent**: the context that owns the facts computes the schedule, and the ledger posts it.
+      Fulfillment owns shifts, legs and destinations, which is everything the absorption reads —
+      allocation rows for the causal job, and `destinations.address.address_coordinates` for the
+      distance. A ledger-produced event would also sit oddly beside `EVT-LED-001`, which
+      `ledger/posting-rules.yaml` puts in `no_posting` precisely because a rule triggered by the
+      ledger's own output recurses.
+      ⚠️ **A destination whose coordinates fail the plausibility gate is QUARANTINED and does not
+      enter the run** (ADR-0030). Not zero distance, which silently under-absorbs, and not an
+      average, which silently invents one. The discriminator is already stored: a bad geocode carries
+      `urn:mbxadr-itp:` (Mapbox's interpolated fallback) where a matched address carries
+      `urn:mbxadr:` — one-way, so it screens rather than decides, and it pairs with a service-radius
+      bound.

@@ -4,7 +4,7 @@
     "requirements": 21,
     "adrs": 38,
     "adrs_accepted": 23,
-    "events": 37,
+    "events": 38,
     "inbox": 86,
     "inbox_promoted": 20
   },
@@ -283,7 +283,8 @@
         "EVT-FUL-004",
         "EVT-FUL-005",
         "EVT-FUL-006",
-        "EVT-FUL-007"
+        "EVT-FUL-007",
+        "EVT-FUL-008"
       ],
       "scenarios": [
         "contexts/fulfillment/features/legs-are-recorded-events.feature",
@@ -311,7 +312,8 @@
         "EVT-FUL-004",
         "EVT-FUL-005",
         "EVT-FUL-006",
-        "EVT-FUL-007"
+        "EVT-FUL-007",
+        "EVT-FUL-008"
       ],
       "scenarios": [
         "contexts/fulfillment/features/legs-are-recorded-events.feature",
@@ -338,7 +340,8 @@
         "EVT-FUL-004",
         "EVT-FUL-005",
         "EVT-FUL-006",
-        "EVT-FUL-007"
+        "EVT-FUL-007",
+        "EVT-FUL-008"
       ],
       "scenarios": [
         "contexts/fulfillment/features/fulfillment-mode-is-per-destination.feature",
@@ -366,7 +369,8 @@
         "EVT-FUL-004",
         "EVT-FUL-005",
         "EVT-FUL-006",
-        "EVT-FUL-007"
+        "EVT-FUL-007",
+        "EVT-FUL-008"
       ],
       "scenarios": [
         "contexts/fulfillment/features/fulfillment-item-parity.feature",
@@ -395,7 +399,8 @@
         "EVT-FUL-004",
         "EVT-FUL-005",
         "EVT-FUL-006",
-        "EVT-FUL-007"
+        "EVT-FUL-007",
+        "EVT-FUL-008"
       ],
       "scenarios": [
         "contexts/fulfillment/features/trips-span-orders.feature",

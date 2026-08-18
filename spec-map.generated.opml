@@ -22,7 +22,8 @@
           <outline text="[object Object]"/>
           <outline text="[object Object]"/>
         </outline>
-        <outline text="m3 — Ledger core" _note="depends on: m2 · 4 exit criteria">
+        <outline text="m3 — Ledger core" _note="depends on: m2 · 5 exit criteria">
+          <outline text="[object Object]"/>
           <outline text="[object Object]"/>
           <outline text="[object Object]"/>
           <outline text="[object Object]"/>
@@ -57,7 +58,7 @@
           <outline text="[object Object]"/>
         </outline>
       </outline>
-      <outline text="Open questions (11 of 51 still open)" _note="The bottleneck. Each blocks what is listed under it.">
+      <outline text="Open questions (12 of 52 still open)" _note="The bottleneck. Each blocks what is listed under it.">
         <outline text="OQ-001 — Are fulfillment legs first-class recorded events with their own identity, or derived from the order…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-007"/>
           <outline text="blocks ADR-0011"/>
@@ -194,6 +195,7 @@
           <outline text="blocks ADR-0019"/>
         </outline>
         <outline text="OQ-051 — Where is the seam between CFS and a chat system for comments and threads — CFS implements them, or…" _note="owner: alex · decide by: 2027-03-31"/>
+        <outline text="OQ-052 — What vehicle rate absorbs into 5900, over what normal-capacity denominator — and where does an OVER…" _note="owner: alex · decide by: 2027-01-31"/>
       </outline>
       <outline text="Conflicts (0 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labor) or an own long-haul run (labor-bearing)? T…" _note="Decides whether a trucked fulfillment absorbs labor cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
@@ -400,7 +402,7 @@
           <outline text="EVT-LED-001 — JournalEntryPosted" _note="ledger → banking"/>
           <outline text="EVT-LED-002 — PeriodClosed" _note="ledger → fixed-assets, billing, tax"/>
         </outline>
-        <outline text="fulfillment (FUL)" _note="5 requirement(s) · 7 event(s)">
+        <outline text="fulfillment (FUL)" _note="5 requirement(s) · 8 event(s)">
           <outline text="REQ-FUL-001 — Every fulfillment leg shall be a recorded event with its own identity, and shall record the acting…"/>
           <outline text="REQ-FUL-002 — A leg that did not occur and a leg that occurred but was not recorded shall be distinguishable, and…"/>
           <outline text="REQ-FUL-003 — Fulfillment mode shall be recorded per destination and the collecting and returning flags per leg;…"/>
@@ -413,6 +415,7 @@
           <outline text="EVT-FUL-005 — UnitsCheckedOut" _note="fulfillment → availability, billing, ledger"/>
           <outline text="EVT-FUL-006 — UnitsReturned" _note="fulfillment → availability, billing, ledger"/>
           <outline text="EVT-FUL-007 — CommitmentVoided" _note="fulfillment → availability, ledger"/>
+          <outline text="EVT-FUL-008 — VehicleCostAbsorbed" _note="fulfillment → ledger"/>
         </outline>
         <outline text="billing (BIL)" _note="5 requirement(s) · 7 event(s)">
           <outline text="REQ-BIL-001 — A voided source document shall be excluded from every default aggregate, and its inclusion shall re…"/>

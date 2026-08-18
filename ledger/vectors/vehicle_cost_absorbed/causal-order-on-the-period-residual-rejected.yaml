@@ -1,0 +1,64 @@
+name: causal-order-on-the-period-residual-rejected
+posting_rule: vehicle_cost_absorbed
+kind: reject
+source: >-
+  ADR-0030 — 5901 is the fleet-utilisation number. ADR-0036 puts the key obligation on the posting
+  rule, and this rule's residual leg declares `causal_orders: null`; a rule that names no key refuses
+  one as firmly as a rule that names one refuses its absence (gate 10h).
+
+differs_from: absorbed-rows-and-the-period-residual
+differs_in: ["run.unabsorbed_causal_job"]
+
+given:
+  ledger_state:
+    closed_periods: []
+  run:
+    id: VAR-VEC-0003
+    period: "2026-07"
+    period_last_day: "2026-07-31"
+    rate_version: 1
+    pool_minor: 72500
+    absorbed_minor: 45000
+    unabsorbed_minor: 27500
+    unabsorbed_causal_job: ORD-VEC-0001
+    over_absorbed_minor: 0
+    entry_total_minor: 72500
+    absorbed_allocations:
+      - {
+          id: ALC-VEC-0011,
+          causal_job: ORD-VEC-0001,
+          labor_line: delivery,
+          distance_source: computed,
+          miles: 240,
+          amount_minor: 14400,
+        }
+      - {
+          id: ALC-VEC-0012,
+          causal_job: ORD-VEC-0002,
+          labor_line: trash_cleanup,
+          distance_source: computed,
+          miles: 510,
+          amount_minor: 30600,
+        }
+
+derivation: >-
+  Identical to `absorbed-rows-and-the-period-residual` except that the residual is handed a causal
+  job — `ORD-VEC-0001`, one of the two the period genuinely served, which is what makes it plausible
+  rather than obviously wrong. **The amounts balance and the control total is satisfied. It is
+  refused on the key alone.**
+  The residual is the part of the fleet's cost that NO job caused; attaching a causal order to it
+  asserts that a van's standing cost was consumed by an order that never used it. **5901 is the one
+  vehicle account whose value comes from being un-attributable** — once it can carry a causal order
+  it becomes a plug, a place to put whatever the rate failed to place, dressed as an allocation.
+  ⚠️ **The failure mode is worse here than it is for 5801, and the difference is why this vector is
+  not a copy of the labor one.** 5801 is utilisation alone, so a stray key there corrupts one number.
+  5901 is utilisation **and** rate deviation together (ADR-0030: a van has no actual per-job cost),
+  so a residual that can be pushed onto a job hides a mis-set rate inside a product line's margin —
+  and a mis-set rate is the thing periodic odometer sampling exists to find.
+  The right way to say those miles were caused by that order is for the row to carry them: they
+  absorb into 5900 against the causal job, which is exactly what the two allocation rows above do.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "the residual leg declares a causal order, and `vehicle_cost_absorbed`'s 5901 posting declares `causal_orders: null` — a key the rule does not name is refused, and 5901 is the fleet-utilisation number that must not become a plug (ADR-0030, ADR-0036)"

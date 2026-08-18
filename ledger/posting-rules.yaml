@@ -6,17 +6,25 @@
 # ── coverage is measured against the event storm, not against a list someone typed ──────────────
 # The previous revision of this file carried a trailing comment naming **six** rules that "must
 # exist". Counting events with `ledger` as producer or consumer across `contexts/*/events.yaml`
-# gives **24** (measured 2026-08-09, `code:2026-08-09:erp-spec:contexts/*/events.yaml`). The comment
-# predated the m1 event storm and was never revisited, so m3's exit criterion — "posting rules
-# defined for every source document type" — was not merely unmet, it was unmeasurable.
+# gives **29** (re-measured 2026-08-17, `code:2026-08-17:erp-spec:contexts/*/events.yaml`). The
+# comment predated the m1 event storm and was never revisited, so m3's exit criterion — "posting
+# rules defined for every source document type" — was not merely unmet, it was unmeasurable.
 #
-# Every one of the 24 now appears below in exactly one of four buckets, and gate 10e fails if any
-# event is missing from all of them or present in more than one:
+# Every one of the 29 appears below in exactly one of four buckets, and gate 10f fails if any event
+# is missing from all of them or present in more than one:
 #
-#   rules[] status: specified  13   fully written, with golden vectors
+#   rules[] status: specified  14   fully written, with golden vectors
 #   rules[] status: blocked     2   named blocker that is genuinely still open; NO postings written
-#   no_posting[]               11   produces no GL posting at all, with the reason
+#   no_posting[]               13   produces no GL posting at all, with the reason
 #   unwritten[]                 0   in scope, no blocker, not yet specified — each names an issue
+#
+# ✅ **AND SOMETHING COUNTS THEM NOW — gate 10q.** ⚠️ Both numbers above were WRONG when it landed:
+# the table said `no_posting[] 11` against **13** entries, stale since `EVT-PRO-001` arrived with
+# the procurement context and `EVT-BIL-007` with ADR-0033, and the paragraph said **24** because
+# that was the 2026-08-09 measurement and nothing re-took it (24 + 3 procurement + `EVT-BIL-007` +
+# `EVT-FUL-008` = 29, which is what makes the old number recognisable rather than merely wrong).
+# **When a doc states a count, something must count it** — the chart header carried "138 entries,
+# four minted" for weeks on the same footing, until gate 16.
 #
 # **`unwritten` is empty as of 2026-08-16, and this time nothing is parked anywhere.** It held seven
 # rules after this file's first pass; six were specified on 2026-08-09 and `EVT-FUL-001` moved to
@@ -596,11 +604,6 @@ rules:
     vectors_dir: ledger/vectors/asset_basis_adjusted/
 
   # ══════════════════════════════════════════════════════════════════════════════════════════════
-  # BLOCKED — the blocker is named, is genuinely open, and NO postings are invented.
-  # Gate 10h requires `postings: []` and zero vectors on these: a blocked rule cannot dodge the
-  # vector requirement by half-specifying itself, and a plausible guess in a golden vector is worse
-  # than a blank because it will be believed.
-  # ══════════════════════════════════════════════════════════════════════════════════════════════
   - id: shift_recorded
     status: specified
     trigger:
@@ -776,6 +779,148 @@ rules:
     relates_to: [ADR-0019, ADR-0025, ADR-0036, REQ-LED-001]
     vectors_dir: ledger/vectors/shift_recorded/
 
+  # ══════════════════════════════════════════════════════════════════════════════════════════════
+  - id: vehicle_cost_absorbed
+    status: specified
+    trigger:
+      event: EVT-FUL-008
+      source_document: vehicle_absorption_run
+    accounting_date: run.period_last_day
+    posting_timestamp: assigned_by_ledger
+    journal_entry:
+      spans_multiple_source_documents: false
+    postings:
+      - debit_account: 5900
+        credit_account: 6409
+        per: run.absorbed_allocations
+        amount: allocation.amount_minor
+        keys:
+          causal_orders: allocation.causal_job
+          line: allocation.id
+      - debit_account: 5901
+        credit_account: 6409
+        amount: run.unabsorbed_minor
+        keys:
+          causal_orders: null
+      - debit_account: 6409
+        credit_account: 5901
+        amount: run.over_absorbed_minor
+        keys:
+          causal_orders: null
+    control_total: run.entry_total_minor
+    invariants:
+      - >-
+          **The credit is 6409, never the natural accounts** (ADR-0030). 6400–6403 keep taking
+          postings — a tank of diesel names no causal job, so the purchase records WHAT WAS BOUGHT
+          and this run records WHY IT WAS CONSUMED. Crediting 6400–6403 directly is one account
+          cheaper and destroys the gross figure that answers "how much fuel did we buy, how much was
+          repairs"; with the contra in place the natural accounts net to zero while their gross
+          activity survives.
+          ⚠️ **The first draft of ADR-0030 said 6400–6403 "stop taking new postings", and its two
+          halves could not both hold**: a posting made at the pump must choose absorbed or
+          unabsorbed where no causal job is known, so everything lands unabsorbed, 5900 is never
+          debited, and the gap is identically the whole cost. The split needs a pool in between, and
+          a pool is a natural account.
+      - >-
+          **Absorption rides the SHIFT'S OWN ALLOCATION ROWS — no new event, no new document, no new
+          key** (ADR-0030). A delivery, trucking or trash-removal job generates a shift (ADR-0011,
+          OQ-010) carrying hours, a causal job and a `labor_line`; this run applies the vehicle rate
+          to the same rows, so `allocation.causal_job` and `allocation.id` are the keys
+          `shift_recorded` already writes. ✅ **The Delivery / Trash & Cleanup split comes for free**
+          — the shift's `labor_line` already says which product line the row belongs to, so vehicle
+          cost inherits the answer instead of needing an allocation of its own, and a single
+          undifferentiated vehicle pool could not have served both (`Delivery` spreads onto the goods
+          it delivered; `Trash & Cleanup` is severable and keeps its own margin).
+          ⚠️ **`allocation.id` is a key in its own right, for HOT-014's reason**: one run posts many
+          rows against the same causal job, so the order alone does not identify a transfer.
+      - >-
+          **5901 declares `causal_orders: null` BY DESIGN**, exactly as 5801 does. The residual
+          belongs to no job; a residual that could name one would make 5901 a plug absorbing whatever
+          the allocation failed to place, and the account IS the fleet-utilisation number.
+          ⚠️ **IT DOES NOT MEAN WHAT 5801 MEANS.** ADR-0019 can say "absorption measures utilisation,
+          NOT rate variance" because labor is costed at actual, from a real per-contact wage on a
+          real bill. A van has no actual per-job cost — the true cost of a van-day is unknowable
+          until a transmission fails — so this is a **predetermined rate on a stated normal-capacity
+          denominator** (ASC 330-10-30-3) and 5901 is utilisation **and** rate deviation together.
+          ADR-0030 calls naming the denominator a requirement rather than a footnote, and **it is
+          not named anywhere yet: OQ-052.**
+      - >-
+          ⚠️ **A period may OVER-absorb, and the third posting is the conventional treatment rather
+          than a decision ADR-0030 took.** A predetermined rate applied to actual distance can exceed
+          the pool, and money is a non-negative integer here, so the direction is a separate leg
+          (Dr 6409 / Cr 5901) rather than a negative amount. Exactly one of `unabsorbed_minor` /
+          `over_absorbed_minor` is non-zero and the other writes no transfer at all, because a
+          posting whose amount is zero is not written.
+          ⚠️ **ADR-0030 does not address the over-absorbed direction** — it reasons only about "the
+          standing cost of having a fleet at all". Resting it in 5901 as a credit is the single
+          under/over-applied account every reference uses, and it mints nothing; **prorating it
+          across the jobs instead is the alternative, and choosing between them is accounting-shaped
+          (CLAUDE.md rule 8a). OQ-052 holds it.** Written rather than parked because a rule that only
+          works when the numbers go one way is a hole, not a simplification — and
+          `a-period-that-over-absorbs-credits-5901` is what stops that branch being a claim nobody
+          exercised.
+      - >-
+          **`control_total: run.entry_total_minor` is the sum the entry posts, and the run states the
+          pool separately so the two can disagree.** Under-absorbed:
+          `entry_total = absorbed + unabsorbed = pool`. Over-absorbed:
+          `entry_total = absorbed + over_absorbed`, which is `pool` plus twice the over-absorption.
+          The run also carries `pool_minor`, and `pool = absorbed + unabsorbed - over_absorbed` is
+          what a reader checks the document against. Using `pool_minor` as the control total would
+          have made the over-absorbed case unrepresentable — the arithmetic would simply not close.
+      - >-
+          **6404 Vehicle: Tickets never absorbs and is not in the pool** (ADR-0030). A parking fine
+          is not a cost of serving a job but a cost of how one was served, and absorbing it would
+          make a product line look expensive because somebody parked badly. The survey supplies the
+          harder reason: a fine is nondeductible (IRC §162(f)) and therefore a permanent Schedule M-1
+          difference ADR-0026 keeps out of both books, and an account absorbed into a product line is
+          no longer separable for that purpose. **6403 Parking & Tolls is the opposite case and IS in
+          the pool** — a toll is deductible and is incurred by a specific run.
+      - >-
+          ⚠️ **A HIRED truck never enters this run** (ADR-0030). A hire arrives already attributed to
+          a causal job, so it posts direct at actual to `5902 - Cost of Goods Sold: Vehicle (Hired)`
+          through `vendor_bill_received`'s `bill.direct_lines[]`, which already carries both a
+          `debit_account` and its own `causal_orders`. Pooling it was recommended earlier the same
+          session on the grounds that "one mechanism is simpler to specify", **which is not the
+          criterion the survey established**, and the reversal removed the hazard that this rate's
+          denominator would have to include rented mileage or double-count it.
+      - >-
+          **The quantity is COMPUTED DISTANCE, and a destination that fails the plausibility gate is
+          QUARANTINED rather than defaulted** (ADR-0030). Not zero distance, which silently
+          under-absorbs, and not an average, which silently invents one. ⚠️ **A wrong coordinate is a
+          valid-looking number and this corpus contains them** — `TBD, Chicago, IL` resolved near
+          Bloomington, a Woodstock address resolved to New York state because the ZIP was read as a
+          street number. The discriminator is stored, not heuristic: a bad geocode carries
+          `urn:mbxadr-itp:` where a matched address carries `urn:mbxadr:`. It is **one-way** — every
+          bad one is interpolated and not every interpolated one is bad — so it screens rather than
+          decides, and pairs with a service-radius bound.
+      - >-
+          **The rate is applied UPSTREAM, in the run document, and `amount:` stays a dotted path.**
+          Same fence as OQ-018's overtime premium: every rounding decision stays where the money
+          rules already apply, so a posting rule can never become the place a rate gets quantized.
+          **The rate is versioned** with the discipline `reporting/allocation-bases.yaml` states — a
+          later composite of distance and time SUPERSEDES rather than mutates, because two periods
+          computed at different rates would disagree about the same job's margin.
+          ⚠️ **It is not REGISTERED in that file, and that is deliberate**: every field there
+          (`base`, `zero_base`, `rounding`) describes spreading a pool proportionally over a base,
+          and a rate applied to a quantity has none of them. ADR-0030 cites the discipline, not the
+          registry.
+      - >-
+          ⚠️ **The presentation consequence is not optional** (SAB Topic 11.B / ASC 220-10-S99-8).
+          Vehicle depreciation is deliberately deferred to SPIKE-005, so this cost-of-sales line
+          excludes the depreciation related to the same activity — which means the line must be
+          labelled to say so and **must not carry an unqualified gross margin**. That is exactly what
+          the product-line P&L reports, so the label belongs there.
+    relates_to: [ADR-0011, ADR-0019, ADR-0029, ADR-0030, ADR-0036, OQ-052, REQ-LED-001]
+    vectors_dir: ledger/vectors/vehicle_cost_absorbed/
+
+  # ══════════════════════════════════════════════════════════════════════════════════════════════
+  # BLOCKED — the blocker is named, is genuinely open, and NO postings are invented.
+  # Gate 10h requires `postings: []` and zero vectors on these: a blocked rule cannot dodge the
+  # vector requirement by half-specifying itself, and a plausible guess in a golden vector is worse
+  # than a blank because it will be believed.
+  # ⚠️ **This banner sat above `shift_recorded` — a `specified` rule — until 2026-08-17**, which read
+  # as though the labor rule were blocked. It was left behind when that rule was unblocked.
+  # ══════════════════════════════════════════════════════════════════════════════════════════════
   - id: depreciation_run
     status: blocked
     blocked_by: [SPIKE-005]
@@ -904,6 +1049,16 @@ rules:
         amount: obligation.amount_minor
         keys:
           causal_orders: obligation.causal_orders
+        reaches_minted_accounts:
+          5150: >-
+            The accrual stage takes whatever account the bill would have taken — it is the same cost,
+            recognised on the day it was received rather than the day it was invoiced — so a
+            pass-through received before its vendor invoice arrives accrues into 5150 and the bill
+            then reclassifies the LIABILITY alone (2010 -> 2000), never re-booking the expense.
+          5902: >-
+            Same reasoning for a hired truck: a hire used in one period and invoiced in the next
+            accrues to 5902 with its causal job attached, which is what makes ADR-0030's "direct at
+            actual" hold on the date of the job rather than on the date of the invoice.
     control_total: obligation.amount_minor
     invariants:
       - >-
@@ -980,6 +1135,19 @@ rules:
         keys:
           causal_orders: line.causal_orders
           line: line.path
+        reaches_minted_accounts:
+          5150: >-
+            A pass-through is CFS buying as the customer's PURCHASING AGENT and re-billing it, so the
+            cost arrives as an ordinary vendor bill line coded to 5150 while the recharge lands on
+            4140 Pass Through Income (owner, 2026-08-16: "it should get a matching cogs"). The
+            vendor's default account supplies the code and the line may override it (ADR-0030).
+          5902: >-
+            ADR-0030 — a truck hired to perform a job arrives ALREADY ATTRIBUTED to a causal job, so
+            it posts direct at actual instead of entering the rate-absorbed 5900/5901 pool, and
+            `bill.direct_lines[]` already carries both a `debit_account` and its own `causal_orders`.
+            "It needs nothing new." ⚠️ A hire that genuinely cannot be attributed still posts here,
+            with `causal_orders: null` as an explicit determination (REQ-LED-001) rather than earning
+            a fourth account for a population that may have no members.
     control_total: bill.amount_minor
     invariants:
       - >-

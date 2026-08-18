@@ -1113,6 +1113,49 @@ for (const e of evts) {
         fail(G, `unwritten "${u.event}": needs an \`issue\` like \`erp-spec#5\``);
       }
     }
+
+    /**
+     * ── 10q — the header's own bucket counts ────────────────────────────────────────────────────
+     *
+     * **When a doc states a count, something must count it.** `posting-rules.yaml` opens with a
+     * four-row table of how many rules sit in each bucket, and nothing checked it: on 2026-08-17 it
+     * read `no_posting[] 11` against **13** entries, and it had been wrong for as long as two
+     * entries had been there. It is the same defect the chart header carried ("138 entries, four
+     * minted", wrong in both halves for weeks) until gate 16 counted it.
+     *
+     * The rows are matched by shape rather than by position, and a MISSING row fails: a header that
+     * drops the number is a header nothing can check, which is how the count went stale in the
+     * first place.
+     */
+    const headerText = await Deno.readTextFile(`${ROOT}/ledger/posting-rules.yaml`);
+    const stated: [RegExp, number, string][] = [
+      [
+        /^#\s+rules\[\] status: specified\s+(\d+)/m,
+        rules.filter((r) => r.status === "specified").length,
+        "rules[] status: specified",
+      ],
+      [
+        /^#\s+rules\[\] status: blocked\s+(\d+)/m,
+        rules.filter((r) => r.status === "blocked").length,
+        "rules[] status: blocked",
+      ],
+      [/^#\s+no_posting\[\]\s+(\d+)/m, noPosting.length, "no_posting[]"],
+      [/^#\s+unwritten\[\]\s+(\d+)/m, unwritten.length, "unwritten[]"],
+    ];
+    for (const [re, actual, label] of stated) {
+      const m = headerText.match(re);
+      if (!m) {
+        fail(
+          G,
+          `posting-rules header: no line stating the \`${label}\` count — a count nothing states is a count nothing can check`,
+        );
+      } else if (Number(m[1]) !== actual) {
+        fail(
+          G,
+          `posting-rules header: says \`${label}\` is ${m[1]}, the file holds ${actual}`,
+        );
+      }
+    }
   }
 
   // ── golden vectors ────────────────────────────────────────────────────────

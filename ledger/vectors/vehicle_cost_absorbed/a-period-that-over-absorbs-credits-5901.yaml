@@ -1,0 +1,89 @@
+name: a-period-that-over-absorbs-credits-5901
+posting_rule: vehicle_cost_absorbed
+kind: accept
+source: >-
+  ADR-0030 states the under-absorbed direction only — "the standing cost of having a fleet at all is
+  unabsorbed". A predetermined rate applied to actual distance can exceed the pool, so the other
+  direction exists whether or not it was written down, and **an unexercised branch of a rule is a
+  claim, not a capability** (CLAUDE.md). Shape from the ADR's rate mechanism; **amounts synthetic**,
+  same illustrative $0.60/mile.
+
+derivation: >-
+  A heavy delivery month against a fleet that spent little: 92000 absorbed against a 72500 pool, so
+  the fleet was applied **19500 more than it cost**. That is over-absorption, and it is an ordinary
+  outcome of a predetermined rate rather than an error — which is why the run has to be able to
+  express it.
+  **Money here is a non-negative integer** (gate 10l), so the direction cannot be a negative
+  `unabsorbed_minor`; it is the opposite leg, `Dr 6409 / Cr 5901`. Exactly one of
+  `unabsorbed_minor` / `over_absorbed_minor` is non-zero and the other writes no transfer at all,
+  because this file's own rule is that a posting whose amount is zero is not written — so no
+  conditional is needed inside the rule.
+  `entry_total_minor` is 92000 + 19500 = **111500, and `pool_minor` is 72500**. The two fields
+  separate exactly here, and the identity a reader checks the document against is
+  `pool = absorbed + unabsorbed - over_absorbed` → 92000 + 0 - 19500 = 72500. ✅ **This is why the
+  control total is `entry_total_minor` and not `pool_minor`**: with the pool as the control total the
+  arithmetic simply would not close in this direction, and the rule would silently only work when the
+  numbers went one way.
+  ⚠️ **Resting the over-absorption in 5901 is the conventional treatment, not a decision ADR-0030
+  took.** One under/over-applied account is what every reference uses and it mints nothing; prorating
+  the balance across the jobs that absorbed it is the alternative, and choosing is accounting-shaped
+  under CLAUDE.md rule 8a. **OQ-052 holds it.** If the ruling goes the other way this vector changes
+  and the accounts do not.
+
+given:
+  ledger_state:
+    closed_periods: []
+  run:
+    id: VAR-VEC-0002
+    period: "2026-08"
+    period_last_day: "2026-08-31"
+    rate_version: 1
+    pool_minor: 72500
+    absorbed_minor: 92000
+    unabsorbed_minor: 0
+    over_absorbed_minor: 19500
+    entry_total_minor: 111500
+    absorbed_allocations:
+      - {
+          id: ALC-VEC-0021,
+          causal_job: ORD-VEC-0003,
+          labor_line: delivery,
+          distance_source: computed,
+          miles: 900,
+          amount_minor: 54000,
+        }
+      - {
+          id: ALC-VEC-0022,
+          causal_job: ORD-VEC-0004,
+          labor_line: delivery,
+          distance_source: computed,
+          miles: 633,
+          amount_minor: 38000,
+        }
+
+expect:
+  transfers:
+    - {
+        debit_account: 5900,
+        credit_account: 6409,
+        amount_minor: 54000,
+        accounting_date: "2026-08-31",
+        causal_orders: [ORD-VEC-0003],
+        line: ALC-VEC-0021,
+      }
+    - {
+        debit_account: 5900,
+        credit_account: 6409,
+        amount_minor: 38000,
+        accounting_date: "2026-08-31",
+        causal_orders: [ORD-VEC-0004],
+        line: ALC-VEC-0022,
+      }
+    - {
+        debit_account: 6409,
+        credit_account: 5901,
+        amount_minor: 19500,
+        accounting_date: "2026-08-31",
+        causal_orders: null,
+      }
+  rejects: []

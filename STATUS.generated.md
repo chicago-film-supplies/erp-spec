@@ -11,7 +11,7 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 11 open | 40 answered of 51 · **0 with no owner or no decide-by** |
+| Open questions | 12 open | 40 answered of 52 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 16 | 0 open |
 | Decisions (ADR) | 38 | 23 in force · 11 proposed |
 | Spikes | 12 | 9 open |
@@ -22,7 +22,7 @@ is `deno task validate`'s judgement, not this file's.
 
 ## The bottleneck: undecided questions
 
-**11 of 51 still open**, soonest decide-by first.
+**12 of 52 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
@@ -34,6 +34,7 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-043` | Should the product and organization masters carry an EVENT HISTORY, so that a classificat… | alex | 2026-12-15 | — |
 | `OQ-044` | Once wages move into COGS, what stays in `6600 Wages` — and can salaried sales/admin staf… | alex | 2026-12-15 | — |
 | `OQ-039` | `organizations.tax_profile` carries two different concepts in one enum — who owes (applie… | alex | 2027-01-15 | — |
+| `OQ-052` | What vehicle rate absorbs into 5900, over what normal-capacity denominator — and where do… | alex | 2027-01-31 | — |
 | `OQ-045` | When a vendor bills LESS than was accrued, what retires the residual left in `2010 Accrue… | alex | 2027-02-15 | — |
 | `OQ-048` | At what rate is a contributed (unpaid owner) shift costed in the IMPUTED labor view — the… | alex | 2027-03-15 | — |
 | `OQ-051` | Where is the seam between CFS and a chat system for comments and threads — CFS implements… | alex | 2027-03-31 | — |
@@ -115,7 +116,7 @@ it is counted separately on purpose, and a milestone is not done because its che
 | `m0` | Charter and non-goals | — | 0 | — | 3 | — |
 | `m1` | Big-picture event storm | `m0` | 1 | — | 2 | — |
 | `m2` | Context map and glossary v1 | `m1` | 2 | — | 1 | — |
-| `m3` | Ledger core | `m2` | 4 | — | — | — |
+| `m3` | Ledger core | `m2` | 5 | — | — | — |
 | `m4` | All spikes closed by ADR | `m3` | 1 | 1 | — | 1 |
 | `m5` | Formal specs checking clean | `m4` | 1 | — | 2 | — |
 | `m6` | Migration field map complete | `m2` | 1 | — | 3 | — |

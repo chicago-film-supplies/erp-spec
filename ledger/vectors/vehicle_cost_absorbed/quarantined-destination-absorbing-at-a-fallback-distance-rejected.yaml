@@ -1,0 +1,73 @@
+name: quarantined-destination-absorbing-at-a-fallback-distance-rejected
+posting_rule: vehicle_cost_absorbed
+kind: reject
+source: >-
+  ADR-0030's plausibility gate — "a destination whose coordinates fail the gate is QUARANTINED and
+  does not enter the allocation. It must not fall back to zero distance, which would silently
+  under-absorb, nor to an average, which would silently invent one." Measured 2026-08-16 across the
+  first 200 of 459 live destinations (`api:2026-08-16:db_destinations_query`): roughly half carry no
+  coordinates at all, and several that do are badly wrong.
+
+differs_from: absorbed-rows-and-the-period-residual
+differs_in:
+  ["run.absorbed_allocations[1].distance_source", "run.absorbed_allocations[1].mapbox_id"]
+
+given:
+  ledger_state:
+    closed_periods: []
+  run:
+    id: VAR-VEC-0004
+    period: "2026-07"
+    period_last_day: "2026-07-31"
+    rate_version: 1
+    pool_minor: 72500
+    absorbed_minor: 45000
+    unabsorbed_minor: 27500
+    over_absorbed_minor: 0
+    entry_total_minor: 72500
+    absorbed_allocations:
+      - {
+          id: ALC-VEC-0011,
+          causal_job: ORD-VEC-0001,
+          labor_line: delivery,
+          distance_source: computed,
+          miles: 240,
+          amount_minor: 14400,
+        }
+      - {
+          id: ALC-VEC-0012,
+          causal_job: ORD-VEC-0002,
+          labor_line: trash_cleanup,
+          distance_source: service_radius_average,
+          mapbox_id: "urn:mbxadr-itp:0f8a",
+          miles: 510,
+          amount_minor: 30600,
+        }
+
+derivation: >-
+  Identical to `absorbed-rows-and-the-period-residual` except that the second row's destination
+  failed the plausibility gate — its `mapbox_id` carries `urn:mbxadr-itp:`, Mapbox's INTERPOLATED
+  fallback — and the run substituted the service-radius average rather than dropping the row.
+  ⚠️ **Every number in this document is valid and the entry balances**: 14400 + 30600 + 27500 =
+  72500 = `entry_total_minor`, the keys are correct, and no gate that reads amounts could see
+  anything wrong. That is the whole point — **"present but wrong" beats "absent" at passing every
+  existence check** (CLAUDE.md). The defect is a coordinate, four steps upstream.
+  **A substituted average silently invents a distance**, and a zero-distance fallback silently
+  under-absorbs; both put a number into a product line's COGS that no measurement produced. The
+  quarantined row belongs OUT of `absorbed_allocations`, and the cost it would have absorbed stays in
+  the residual, where it is visible as unabsorbed rather than invisible as absorbed.
+  ⚠️ **The screen is one-way and this vector must not be read as more than it is.** Every bad geocode
+  found carries `-itp`; not every `-itp` is bad (`825 E Erie` is interpolated and correct). So the
+  marker screens rather than decides, and it pairs with a service-radius bound. What is refused here
+  is the FALLBACK — a row that reached the ledger with a distance nobody measured — not the
+  interpolated marker itself.
+  ✅ **The population is bounded and shrinking, and the gate still ships.** Destinations are authored
+  through CRMS today and move to manager's Mapbox autofill at cutover, which returns a matched
+  feature rather than free text to geocode afterwards, so what remains is a fixed backfill of 459
+  records at migration time. **A check that exists only until the data is clean is a check that gets
+  removed the week before it is needed.**
+
+expect:
+  transfers: []
+  rejects:
+    - reason: "an allocation row whose destination failed the coordinate plausibility gate absorbed at a substituted service-radius distance — a quarantined destination does not enter the run at all, and neither a zero nor an average may stand in for a distance nobody measured (ADR-0030)"

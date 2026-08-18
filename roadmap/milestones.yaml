@@ -83,6 +83,9 @@ milestones:
       - text: Chart of accounts complete, including the COGS and unabsorbed-labor accounts.
         check: coa_complete
       - text: >-
+          Every account this spec mints is posted to by a rule — existence is not reachability.
+        check: minted_accounts_reachable
+      - text: >-
           Reporting dimensions defined with their full value sets, and every specified posting rule
           declaring its keys.
         check: dimensions_defined
