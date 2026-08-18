@@ -80,7 +80,14 @@ ADR-0033, and on "24 ledger events" that had never been re-measured. It is **29*
 - **Front matter is not hashed** (gate 14), which is the only reason a frozen ADR can gain these
   fields at all.
 
-**5. `labor_variance` is parked in #38, and the park itself is a finding.** ADR-0019 is accepted and
+**5. Gate 10r — a `labor_line` named under `ledger/` resolves.** ⚠️ **Written because this session's
+own golden vectors carried `labor_line: trash_cleanup`, which is not a value** — the declared id is
+`trash_&_cleanup` and `trash_cleanup` is the POOL id in `reporting/product-line-pl.yaml`. Two things
+one letter apart in two files, invisible to every gate: 13h checks the reporting side, and a
+`labor_line` inside a vector's `given` was read by nothing. It is the ledger half of what OQ-046
+asked for.
+
+**6. `labor_variance` is parked in #38, and the park itself is a finding.** ADR-0019 is accepted and
 says it fires (OQ-050 measured why). It has no account — `5190` was deleted when HOT-010 killed the
 rate variance on a premise measurement has since refuted — and no event. ⚠️ **It cannot go in
 `unwritten:` either: all four coverage buckets are keyed by EVENT**, so a rule whose trigger has not
@@ -222,7 +229,7 @@ Each landed with its gates fired red first; the commits carry the detail.
 **CLEAR CONTEXT.** Nothing needed is in anyone's head — `STATUS.generated.md`, the inbox, the ADRs
 and this doc are all on disk, and `deno task ci` reproduces the whole CI contract locally.
 
-### Nine things to carry across the clear, because none is obvious from the issue text
+### Ten things to carry across the clear, because none is obvious from the issue text
 
 - **Firing a gate red is not ceremony — it is the only thing that finds the defects.** Across three
   sessions ~forty arms were fired and twelve found real bugs, none surfaced by reading: a rule and
@@ -237,6 +244,11 @@ and this doc are all on disk, and `deno task ci` reproduces the whole CI contrac
   reachability check could have failed on 109 accounts and been ignored; scoped to the 9 it mints it
   named five real defects, and the 104 it skips are a NUMBER in its own note plus an issue. **A
   noisy reporter is one nobody reads twice, which is the same outcome as no reporter.**
+- ⚠️ **A value one letter from a legal one, in a file no gate reads, is the cheapest way to be
+  wrong.** `trash_cleanup` (a POOL id) for `trash_&_cleanup` (a `labor_line` value) survived
+  authoring, review and a green CI run — written by the same session that wrote the gates. **Ask
+  which file the value you just typed is checked AGAINST**; if the answer is none, that is the next
+  gate (10r).
 - ⚠️ **Two messages for one defect is how a gate teaches the wrong lesson at 2am.** Gate 18's
   malformed-claim arm was written to report both the bad claim and the resulting unreachable
   account, until it was fired with a blank reason.
