@@ -1344,5 +1344,14 @@ no_posting:
 #
 # The list stays here rather than being deleted: it is where the next uncovered event goes, and an
 # empty bucket is a claim gate 10f can check. Nothing may be parked here without a GitHub issue.
+#
+# ⚠️ **A MISSING RULE IS ONLY PARKABLE HERE IF ITS TRIGGER ALREADY EXISTS**, and there is now a real
+# instance. All four buckets are keyed by EVENT — that is what makes coverage measurable against the
+# event storm rather than against a list someone typed — so a rule whose event has not been storm-ed
+# yet has nowhere to sit, and an empty `unwritten:` does NOT mean every known gap is covered.
+# **`labor_variance` is the first**: ADR-0019 is accepted and says it fires (OQ-050 measured why),
+# the account for it was deleted from the chart on a premise that measurement has since refuted, and
+# no event triggers a period-close true-up. It is parked in **erp-spec#38** instead, which is the
+# only park available to it.
 # ══════════════════════════════════════════════════════════════════════════════════════════════════
 unwritten: []

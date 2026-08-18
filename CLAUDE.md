@@ -195,7 +195,10 @@ Not every tool has an upstream dump, and the difference is worth knowing before 
   successes, ask what reports its failures.
 - A check that bans a word cannot name it; a check that diffs a tree fails on work in progress.
   Exempt by identity, and say why.
-- Minting an account creates no posting rule. Nothing currently notices.
+- Minting an account creates no posting rule. **Gate 18 notices now** — but only for
+  `disposition: new`. **104 of 108 ADOPTED accounts are named by no rule at all** and nothing fails
+  on that (erp-spec#37), so a green gate 18 means "every account this spec minted has a home", never
+  "every account has one".
 - ⚠️ **Piping a check into `tail`/`head` masks its exit code** —
   `deno task ci | tail -3 && git push` pushes on failure. Run the check, read it, then act.
 
