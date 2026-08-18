@@ -3,7 +3,10 @@
 - **Date:** 2026-08-17
 - **Repo:** erp-spec
 - **Status:** 📋 PROPOSED, nothing built. **ADR-0037 is `proposed`** — acceptance is the owner's
-  (rule 3), and this plan is the implementation behind it.
+  (rule 3), and this plan is the implementation behind it. ✅ **RED-TEAMED 2026-08-17**: two of its
+  three load-bearing claims needed correcting and one hole was found that neither document had seen.
+  The findings are folded into ADR-0037, which now asks for **four separable rulings** instead of
+  one. See _Red team_.
 - **Origin:** owner asked whether a broader architecture change would stop the recurring defects,
   and explicitly put a hard fork and a greenfield on the table
 - **Related:** ADR-0037 · ADR-0034 (an accepted ADR is a historical record) · HOT-011, HOT-015,
@@ -25,6 +28,11 @@ conservative one. See _Why not a rewrite_. What is worth doing is narrower and a
 
 ⇒ **A 22:1 mismatch between what is CITED (a document) and what is CLAIMED (a statement).** Refute
 one claim and all 132 citations become ambiguous, with nothing able to say which depended on it.
+
+⚠️ **The citation counts above are occurrences, not SWEEPABLE occurrences, and the difference is
+large** — re-measured by locus in _Red team_ RT1: 84% of ADR-0036's are in mutable spec against
+**44%** of ADR-0019's. A citation inside an `inbox/` note or a frozen ADR means "as it stood then"
+and is correct where it is.
 
 ### The defects sort into three classes, not one
 
@@ -65,11 +73,18 @@ supporting premise that measured false a day later; a premise is not frozen, so 
 marked refuted **without touching the decision and without HOT-016 existing at all.**
 
 **Adopted forward-only.** New and amended ADRs carry it; the existing 36 gain it when next touched.
+⚠️ **RT3 refutes this as stated**: an accepted ADR's body is immutable, so it is never "next
+touched", and the 23 in-force ADRs — where the citations point — would never gain it. Back-migration
+of front matter is legal and measured at one afternoon (gate 19's sweep did exactly that).
 
 ### 2. The gate ADR-0037 makes possible
 
 **An assertion's content may not be restated outside its owner — cite it.** This is the only
-structural attack on class A, and it cannot be written until claims have identity.
+structural attack on class A, and it cannot be written until claims have identity. ⚠️ **RT2: it does
+not reach the defect that motivates it.** HOT-016's sweep missed `charter.md` because the pattern
+was "costed at actual" and the charter said "actual-cost absorption" — a PARAPHRASE, which no
+presence test detects. Either the gate is stated as exact-only, or the editorial rule becomes "cite
+the claim, never re-say it".
 
 ⚠️ **Two things it must get right or it will be worse than nothing:**
 
@@ -101,6 +116,69 @@ RULE have vectors", and nothing asks **"is every ACCOUNT reachable"**.
 **The immediate instance is worth doing on its own**: an account-reachability check. `coa_complete`
 verifies accounts EXIST; nothing verifies anything posts to them.
 
+✅ **BUILT 2026-08-17 as gate 18, and class C's own lesson was in how it had to be scoped.**
+Checking all 143 accounts would have failed on 109 and been ignored; scoped to the 9 the spec MINTS
+it named five real defects, and **the 104 it does not check are a measured number in its own note
+plus erp-spec#37**. ⇒ the class-C fix is not "declare scope" alone — it is **declare the scope AND
+measure the complement**, because a scope statement nobody quantifies reads as coverage.
+
+## ✅ Red team — done 2026-08-17, and it changed three of the claims
+
+The plan asked for three claims to be attacked. **Two survived with corrections and one did not
+survive as stated.** All findings are folded into ADR-0037's body (it is `proposed`, so it is
+mutable) — this section is the audit trail, not a second copy of the decision.
+
+**RT1 — "22:1 mismatch, 132 citations become ambiguous" — the argument survives, one number does
+not.** Re-measured by LOCUS rather than by count (`code:2026-08-17:erp-spec`, every occurrence,
+classified by the file it sits in):
+
+| ADR      | occurrences | in MUTABLE spec | elsewhere (append-only, frozen ADR, generated) |
+| -------- | ----------: | --------------: | ---------------------------------------------: |
+| ADR-0036 |         275 |   **231 (84%)** |                                             44 |
+| ADR-0019 |         178 |    **78 (44%)** |                                            100 |
+
+For ADR-0036 the citations really are live and sweepable. **For ADR-0019 fewer than half are** — the
+rest are dated evidence and frozen ADRs, where a citation meaning "as it stood then" is correct and
+must never be rewritten. ⚠️ **The repo already recorded this exact lesson** ("only live, mutable,
+authority-claiming copies count — there were three, not the 17 a grep suggests") and the ADR's own
+evidence had not applied it.
+
+**RT2 — "HOT-016 would not have needed to exist" — DOES NOT SURVIVE.** Premise typing removes ONE
+instance: ADR-0030's own frozen assertion. HOT-016's actual work was the other **six** — a golden
+vector, `glossary.yaml`, `charter.md`, and ADR-0019's own title and summary. ⚠️ **And the step-2
+gate would not have caught the sixth either, for a reason HOT-016 itself records**: the sweep missed
+the charter because _"the pattern was 'costed at actual' and the charter says 'actual-cost
+absorption'"_. **The defect class is PARAPHRASE and the proposed mechanism is exact presence.** ⇒
+either the gate is stated as "catches exact restatement only", or the editorial rule becomes the
+strong form (cite `ADR-0019/A1`, never re-say it) — which is a convention with a crude gate, exactly
+like `headline:`. Not fatal. Selling the strong version unexamined would have been.
+
+**RT3 — "forward-only adoption produces a useful gate" — DOES NOT SURVIVE AS STATED.** "The existing
+36 gain it when next touched for another reason" cannot happen to an `accepted` ADR: its body is
+immutable, so it is never touched. ⇒ the **23 in-force ADRs would never carry `asserts:`**, and they
+hold the citations (ADR-0036 is accepted, 231 live). ✅ **Back-migration is legal and now
+measured**: front matter is not hashed, and gate 19's sweep put a new field on all 38 ADRs in one
+pass on 2026-08-17. An afternoon, not a project.
+
+**RT4 — a hole neither the plan nor the ADR had seen: "a premise is not frozen" leaks the historical
+record.** Gate 14 hashes the body, not the front matter, so a mutable `asserts:` block on an
+accepted ADR could be edited to claim it rested on something it never did — and ADR-0034's whole
+point is that an accepted ADR records the decision **as taken**. ⇒ a premise's `claim:` text must be
+frozen exactly as the body is, with only `status:` and `refuted_by:` appendable, and **a gate can
+enforce it** by hashing `asserts[].claim` alongside the body.
+
+**RT5 — class A and class C overlap more than the table admits, and today's session is the
+evidence.** Three class-A defects (a stale count restated: `no_posting[] 11`, "24 ledger events",
+"138 entries, four minted") were killed by **two small class-C gates** — "when a doc states a count,
+something must count it" — with no claim-addressing machinery at all. ⇒ **`asserts:` should be
+judged on the residue that cheap gates cannot reach**, not on the whole of class A. That residue is
+real (the charter paraphrase is in it) and it is smaller than 5 of 13.
+
+⇒ **Recommendation: split the decision.** ADR-0037 now carries a `What the owner is being asked`
+section with four separable rulings — `asserts:` (take it for the premise half), the step-2 gate
+(take it stated as exact-only), forward-only versus back-migration (back-migrate), and `headline:`
+(cheap, separable, take it regardless).
+
 ## Open work this plan does NOT cover, carried so it is not lost
 
 - ⚠️ **A golden vector asserts the opposite of an accepted ADR, executably.**
@@ -108,9 +186,14 @@ verifies accounts EXIST; nothing verifies anything posts to them.
   hours in 5801; ADR-0019 (accepted 2026-08-17) says normal idle time on a day that served a job
   belongs to that job. Its name, its `given` and its expected transfers all encode the refuted rule
   — **the derivation prose was amended and the assertion was not.**
-- **`labor_variance` has no posting rule** though ADR-0019 now says it fires, and `unwritten: []` is
-  empty so it is not even parked as known-missing.
-- **ADR-0030's four accounts (5900/5901/5902/6409) have no posting rules and no vectors.**
+- ✅ **`labor_variance` — DONE as far as it can go**: parked in **erp-spec#38** with the survey
+  named as the work. ⚠️ It could not go in `unwritten:` because all four coverage buckets are keyed
+  by EVENT and no event triggers a period-close true-up — recorded in `ledger/posting-rules.yaml`'s
+  header, because `unwritten: []` reads as "no known gaps" and is not.
+- ✅ **ADR-0030's accounts — DONE 2026-08-17.** `vehicle_cost_absorbed` posts 5900/5901/6409 with
+  four golden vectors; 5902 needed no rule (it arrives through the vendor bill) and is declared
+  instead. **Gate 18** now fails on any minted account nothing posts to, and it landed red on FIVE —
+  `5150` was unreachable too.
 - **The charter's payroll non-goal contradicts PSA being in scope** (owner ruling, 2026-08-17):
   _"CFS … does not … move payroll money"_, and on a production service agreement it does. Rule 5
   makes that a `HOT-`; erp-spec#35 names the charter amendment and has not done it.
