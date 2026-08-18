@@ -39,6 +39,15 @@ and is correct where it is.
 Thirteen defects in the 2026-08-17 session. They have different causes and different fixes, and
 conflating them is how a fix ends up aimed at the wrong one.
 
+⚠️ **THE THIRTEEN ARE NOT ENUMERATED ANYWHERE, and this document is the only place the number
+appears.** Found 2026-08-17 by an agent reviewing this plan: `grep -rn thirteen` across the spec
+returns it twice, both here, plus the 5/4/4 table — **so the population cannot be audited, the class
+assignment cannot be checked, and "would X have prevented them" cannot be answered without
+reconstructing them first.** That is exactly the defect this repo turned into gates 10q and 16 the
+same week (_when a doc states a count, something must count it_), sitting inside the document that
+proposes the fix for the class it belongs to. ⇒ **Anyone reasoning from the 5/4/4 split must
+enumerate the thirteen first and say so**; a reconstruction is not the record.
+
 | class                                                           | count | cause                                                        | fix                               |
 | --------------------------------------------------------------- | ----: | ------------------------------------------------------------ | --------------------------------- |
 | **A** — a claim restated in N places, only some updated         |     5 | citations are document-grained                               | **ADR-0037** — addressable claims |
@@ -181,11 +190,15 @@ section with four separable rulings — `asserts:` (take it for the premise half
 
 ## Open work this plan does NOT cover, carried so it is not lost
 
-- ⚠️ **A golden vector asserts the opposite of an accepted ADR, executably.**
-  `ledger/vectors/shift_recorded/guaranteed-hours-unworked-land-in-5801.yaml` puts all three idle
-  hours in 5801; ADR-0019 (accepted 2026-08-17) says normal idle time on a day that served a job
-  belongs to that job. Its name, its `given` and its expected transfers all encode the refuted rule
-  — **the derivation prose was amended and the assertion was not.**
+- ✅ **A golden vector asserting the opposite of an accepted ADR — FIXED 2026-08-17.**
+  `guaranteed-hours-unworked-land-in-5801.yaml` put all three idle hours in 5801 while ADR-0019 said
+  the causing order bears them; it was renamed to
+  `guaranteed-hours-absorb-into-the-job-that-caused-the-hire` and its expected transfers re-pointed
+  the same day, and the account it named was deleted outright by ADR-0038 a few hours later. ⚠️
+  **This entry stayed live in THIS plan for a day after the fix, and a reader took it as current
+  state** — an agent reviewing this plan on 2026-08-17 cited it as an outstanding defect. **A stale
+  plan reads as current intent**, which is the workspace's own rule for plan docs, demonstrated
+  against the plan whose subject is claims going stale.
 - ✅ **`labor_variance` — DONE as far as it can go**: parked in **erp-spec#38** with the survey
   named as the work. ⚠️ It could not go in `unwritten:` because all four coverage buckets are keyed
   by EVENT and no event triggers a period-close true-up — recorded in `ledger/posting-rules.yaml`'s
