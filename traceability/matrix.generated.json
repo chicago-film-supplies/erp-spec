@@ -5,7 +5,7 @@
     "adrs": 38,
     "adrs_accepted": 25,
     "events": 38,
-    "inbox": 90,
+    "inbox": 91,
     "inbox_promoted": 20
   },
   "requirements": [
@@ -638,6 +638,7 @@
       "inbox/2026-08-17-survey-labor-costing-is-normal-costing-not-actual-the-crew-is-two-populations-with-two-true-costs-and-idle-time-splits-normal-from-abnormal.md",
       "inbox/2026-08-17-survey-labor-with-no-cost-object-stays-in-the-natural-expense-account-and-the-vehicle-rate-residual-does-not-follow.md",
       "inbox/2026-08-17-survey-psa-is-a-principal-or-agent-question-and-the-live-books-answer-it-four-different-ways.md",
+      "inbox/2026-08-17-survey-typed-claims-the-vocabulary-emerges-from-the-statements-and-every-tradition-that-typed-the-REASON-died.md",
       "inbox/2026-08-17-the-v2-rebuild-retires-the-prod-to-dev-mirror-and-the-spec-never-states-what-replaces-it.md",
       "inbox/2026-08-17-the-vehicle-figures-measured-in-xero-21844-77-reproduces-exactly-and-6302-is-larger-than-the-whole-owned-block.md"
     ]

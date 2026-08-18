@@ -188,6 +188,70 @@ section with four separable rulings — `asserts:` (take it for the premise half
 (take it stated as exact-only), forward-only versus back-migration (back-migrate), and `headline:`
 (cheap, separable, take it regardless).
 
+## ✅ The typed-boolean question — answered 2026-08-17, three ways
+
+Owner asked whether the decision artifacts could be boiled down to T/F statements with strict types,
+now or in v3/v4, and suspected _"wed need to nail domians tagging labeling type stuff"_ first. Three
+independent investigations — empirical decomposition, prior-art survey, adversarial review — ran
+without sight of each other and converged. Full record:
+`inbox/2026-08-17-survey-typed-claims-the-vocabulary-emerges-from-the-statements-and-every-tradition-that-typed-the-REASON-died.md`.
+
+**The criterion: a statement can be a typed boolean when its terms already denote, AND something
+executes on it. The second half is binding** — every notation that satisfied the first without the
+second produced a standard nobody implemented (OASIS Test Assertions: 13 files in all of GitHub;
+Kruchten's checker never built; SBVR: 334 pages, 515 meta-terms, no ecosystem in 23 years).
+
+**Type the CLAIM, never the REASON.** Every tradition that typed the argument died the same way for
+thirty years.
+
+**Measured here: 202 claims over ten artifacts — 40% clean, 38% need a type that does not exist, 23%
+resist. And ~83% of the WORDS are the connective reasoning between propositions.** Measurements are
+the exception at ~95% clean.
+
+⚠️ **"Nail the domains first" is a trap, and this repo is its own counter-example**: 142 chart
+accounts, 16 posting rules, 38 events and 27 gates, against a glossary of 28 terms with one still
+`TODO`. The vocabulary emerged from deciding things. Arora's 1,760-requirement study found a
+glossary gives **no accuracy gain**, and its best corpus had **zero** glossary terms; ASD-STE100 —
+40 years, mandated across aerospace — closed the grammar and left the domain vocabulary **open by
+rule**.
+
+⚠️ **And vocabulary stability is the precondition this repo fails hardest**: ≥6 taxonomy revisions
+in 9 days. When `labor_line` grew 3 → 7, the `transport` pool's value **stayed type-valid while
+becoming wrong** — a type system does not migrate meaning, it makes stale meaning type-valid.
+
+### What that changes about the work below
+
+- **Step 1 (`asserts:`) is scoped to `kind: premise` over Context claims** — the factual, dated,
+  provenanced half, which is what every working system types: the claim's SOURCE, not its content.
+- **Add a `measurements:` block. It is the cheapest win in the exercise** and it has already paid:
+  typing one caught HOT-018, a defect in a frozen ADR that had survived acceptance, a six-reference
+  survey, a correction to the very same bullet, and twenty gates.
+- **Step 2's gate ships labelled EXACT-restatement-only**, per ruling 2 — no presence test reaches
+  the paraphrase that motivated it.
+- ⚠️ **Step 3, the backfill, needs re-deciding and is NOT started.** See below.
+- **Step 4 (gates declare scope) is reinforced, not replaced**: counting and enum-resolution gates
+  prevented 4–5 defects in one week; the claim corpus prevents 0 outright on the same population.
+
+### ⚠️ The backfill (ruling 3) — two findings that arrived AFTER the ruling
+
+The owner ruled "backfill" on a cost estimate that was wrong, and on evidence that did not yet
+include the second point. Both belong in front of them before any of it is written:
+
+1. **The "afternoon" figure is a figure of a different population.** Gate 19's sweep was 38 × one
+   boolean derived from a written criterion; gate 20's was 120 × one short string derived from an
+   existing title. `asserts:` is ~450 statements, each needing three judgements — is it
+   load-bearing, decision or premise, and how to phrase it in one line without paraphrasing it
+   wrong. **Mechanical transformation is not evidence about judgement extraction**, and reasoning
+   from it is the same class-B defect the plan's own table describes.
+2. **Back-migrating onto 28 frozen bodies MANUFACTURES a historical record rather than recording
+   one.** Writing "what ADR-0030 rested on" today is a reconstruction by someone who was not there —
+   and ADR-0034 exists precisely to keep an accepted ADR the decision **as taken**. RT4's fix then
+   hashes the reconstruction into the freeze, making it permanent and hash-protected.
+
+⇒ **Options for the owner**, cheapest first: premises-only over Context claims that already carry a
+`source:` (no judgement about what was load-bearing — the field already says so); the same but only
+for the most-cited few; or the full 23. **Nothing is written until this is re-answered.**
+
 ## Open work this plan does NOT cover, carried so it is not lost
 
 - ✅ **A golden vector asserting the opposite of an accepted ADR — FIXED 2026-08-17.**

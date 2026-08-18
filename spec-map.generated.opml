@@ -478,7 +478,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (70 unpromoted of 90)" _note="no drops pending">
+      <outline text="Capture (71 unpromoted of 91)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -547,6 +547,7 @@
         <outline text="Survey — ADR-0019's &quot;actual vs standard&quot; is a false binary and the answer is NORMAL costing; the cr…" _note="inbox/2026-08-17-survey-labor-costing-is-normal-costing-not-actual-the-crew-is-two-populations-with-two-true-costs-and-idle-time-splits-normal-from-abnormal.md"/>
         <outline text="Survey — four of six references leave labor with no cost object in the natural expense account and…" _note="inbox/2026-08-17-survey-labor-with-no-cost-object-stays-in-the-natural-expense-account-and-the-vehicle-rate-residual-does-not-follow.md"/>
         <outline text="Survey — PSA is an ASC 606 principal-versus-agent question, and the live books answer it four diffe…" _note="inbox/2026-08-17-survey-psa-is-a-principal-or-agent-question-and-the-live-books-answer-it-four-different-ways.md"/>
+        <outline text="Survey — can decision artifacts become typed booleans? The criterion is that something EXECUTES on…" _note="inbox/2026-08-17-survey-typed-claims-the-vocabulary-emerges-from-the-statements-and-every-tradition-that-typed-the-REASON-died.md"/>
         <outline text="ADR-0003 replaces Firestore, which retires the prod→dev eventarc mirror as a mechanism — but the sp…" _note="inbox/2026-08-17-the-v2-rebuild-retires-the-prod-to-dev-mirror-and-the-spec-never-states-what-replaces-it.md"/>
         <outline text="The vehicle figures measured in Xero — $21,844.77 reproduces EXACTLY, 6302 is 1.75× the whole owned…" _note="inbox/2026-08-17-the-vehicle-figures-measured-in-xero-21844-77-reproduces-exactly-and-6302-is-larger-than-the-whole-owned-block.md"/>
       </outline>

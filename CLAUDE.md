@@ -213,6 +213,12 @@ Not every tool has an upstream dump, and the difference is worth knowing before 
 
 - Payroll, contact and customer exports carry PII. **Record structure and aggregates, never rows.**
 - Xero: read from the Firestore mirror; the API is single-tenant, live, and quota is shared.
+- ⚠️ **A SUMMARISED FETCH CAN FABRICATE THE ARTIFACT YOU WENT LOOKING FOR.** A 2026-08-17 research
+  pass fetched the EARS paper and got back a clean before/after defect table and a ">95% of
+  requirements fit" figure. **The paper contains neither.** It was caught by pulling the PDF and
+  extracting the text locally. The more precisely the expected shape is described in the prompt, the
+  more likely it comes back in that shape. **Extract the primary source before quoting a number from
+  it**, and treat a fetched summary as a pointer, never as evidence.
 - ⚠️ **A platform's own error message is not a diagnosis, especially during an outage.** GitHub
   Actions failed in ~2s on 2026-08-17 saying "recent account payments have failed **or** your
   spending limit needs to be increased" — **billing was fine; it was a GitHub outage.** Check
