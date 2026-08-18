@@ -3,7 +3,7 @@
   "counts": {
     "requirements": 21,
     "adrs": 38,
-    "adrs_accepted": 24,
+    "adrs_accepted": 25,
     "events": 38,
     "inbox": 88,
     "inbox_promoted": 20

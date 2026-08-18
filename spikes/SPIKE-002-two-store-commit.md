@@ -1,5 +1,6 @@
 ---
 id: SPIKE-002
+headline: two-store commit protocol
 question: >-
   What commit protocol keeps a MongoDB document write and a TigerBeetle posting consistent across
   crash and retry at every step?

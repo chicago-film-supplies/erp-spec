@@ -1,5 +1,6 @@
 ---
 id: ADR-0014
+headline: lifecycle state is derived
 title: Lifecycle state is derived from the ledger, never assigned
 status: accepted
 date: 2026-08-09

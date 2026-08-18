@@ -1,5 +1,6 @@
 ---
 id: ADR-0034
+headline: an accepted ADR is a historical record
 title: An accepted ADR is a historical record of the decision as taken; corrections live outside it and superseding is reserved for re-deciding
 status: accepted
 date: 2026-08-16

@@ -2,7 +2,7 @@
 id: ADR-0037
 title: An id carries meaning where it is used — a headline on every id, and addressable claims inside a decision
 headline: ids carry meaning where used
-status: proposed
+status: accepted
 date: 2026-08-17
 review_by: 2026-12-01
 deciders: [repo owner]
@@ -18,6 +18,7 @@ not_accounting_reason: >-
 supersedes:
 supersedes_on_acceptance:
 superseded_by:
+frozen_sha256: 213b229029758384e10b71bbbcd4c1aa83a8105edba8e6737ce21e6ba75d22fe
 ---
 
 > **In the context of** a spec whose authority is prose, **facing** a measured 22:1 mismatch between
@@ -97,21 +98,25 @@ claim; citing the bare ADR remains legal and means "this decision as a whole".
     pointer may be added afterwards. **Nothing in this ADR says that yet, and a gate can enforce
     it** by hashing `asserts[].claim` alongside the body.
 
-**`asserts:` is adopted going forward, not back-migrated.** New and amended ADRs carry it; the
-existing 36 gain it only when they are next touched for another reason.
+**`asserts:` IS BACK-MIGRATED — owner's ruling, 2026-08-17: _"backfill"_.** New and amended ADRs
+carry it, and the **23 in-force ADRs are given one in a pass of their own**.
 
-⚠️ **"When next touched" is not a mechanism for a frozen document, and that is a hole in this
-paragraph rather than a nuance.** An `accepted` ADR's body is immutable, so it is never touched
-again for another reason — meaning the **23 in-force ADRs would never carry `asserts:` at all**, and
-they are precisely where the citations point (ADR-0036 is accepted and holds 231 live citations).
-Forward-only adoption therefore excludes the population the ADR is written for.
+⚠️ **The draft said "adopted going forward… the existing 36 gain it when next touched", and that was
+a hole rather than a preference.** An `accepted` ADR's body is immutable, so it is never touched
+again for another reason — meaning the in-force ADRs would never have carried `asserts:` at all, and
+they are precisely where the citations point (ADR-0036 is accepted and holds 231 live ones).
+**Forward-only adoption excluded the entire population this ADR is written for.**
 
-✅ **Back-migration is legal and its cost is now measured rather than assumed.** Front matter is not
-hashed (gate 14), which is exactly what let **38 ADRs gain `accounting_shaped:` and six gain a
-`survey_exemption:` in one pass on 2026-08-17** for gate 19. That is the existence proof: a
-front-matter migration across every ADR in this repo is an afternoon, not a project. ⇒ **the choice
-between forward-only and back-migration should be made on value, not on assumed cost** — and it is
-one of the things the owner is being asked.
+✅ **Back-migration is legal, and its MECHANICAL cost is measured rather than assumed.** Front
+matter is not hashed (gate 14), which is exactly what let **38 ADRs gain `accounting_shaped:` and
+six gain a `survey_exemption:` in one pass on 2026-08-17** for gate 19 — an afternoon, not a
+project.
+
+⚠️ **What it actually costs is JUDGEMENT.** Someone must read each frozen decision and say what its
+load-bearing claims WERE, without the author present and without the right to amend the body. **A
+claim added to a frozen ADR is a reading of it**, so the backfill inherits the body's freeze: once
+written, an `asserts[].claim` on an accepted ADR is correctable only the way any other frozen text
+is — by a later note saying so, never by an edit.
 
 ### And every id-bearing entity carries a `headline:`
 
@@ -219,26 +224,33 @@ reader usually does not.
 - **Nothing about the three lifecycles changes.** `inbox/` stays append-only, `adr/` bodies stay
   immutable at acceptance, and `contexts/` stays refactorable.
 
-## What the owner is being asked
+## The four rulings, as taken
 
-⚠️ **Four rulings, not one — and they are separable on purpose.** This ADR reads as a single
-decision and is three mechanisms at three scales, which is the shape ADR-0030's first draft had
-before its survey split it into four. Each can be taken or refused without the others, and the last
-two are cheap and already partly adopted.
+⚠️ **Four rulings, not one — separable on purpose**, which is the shape ADR-0030's first draft had
+before its survey split it into four. **All four were taken on 2026-08-17**, each recorded below
+against the recommendation it answered. ⚠️ **Ruling 3 REVERSED the drafted Decision**, which is why
+the adoption paragraph above was corrected before this ADR was frozen.
 
-1. **`asserts:` — claims get ids, typed `decision` or `premise`.** ⇒ **Rec: yes, on the PREMISE half
-   above all.** It removes a frozen document's inability to say a fact it cited was wrong, which is
-   a real position the repo was in for a day. ⚠️ Take it with the append-only bound above, and take
-   the addressability claim at its measured size: for ADR-0019 fewer than half the citations are
-   sweepable at all.
-2. **The step-2 gate — "an assertion's content may not be restated outside its owner".** ⇒ **Rec:
-   yes, but stated as an EXACT-restatement check.** The defect that motivates it was a paraphrase
-   ("costed at actual" versus "actual-cost absorption") and no presence test reaches that. A check
-   sold as the answer to class A and silent on paraphrase is the exact failure mode `m3`
-   demonstrated this week.
-3. **Forward-only versus back-migration.** ⇒ **Rec: back-migrate the in-force 23.** Forward-only
-   never reaches an accepted ADR — "when next touched" cannot happen to a frozen body — and today's
-   gate-19 sweep proves a front-matter migration across all 38 is an afternoon.
-4. **`headline:` on `ADR`/`OQ`/`HOT`/`SPIKE`, and `#### - Name` for GL accounts.** ⇒ **Rec: yes, and
-   decide it separately.** It is cheap, back-migratable in one pass, already in `CLAUDE.md`'s
-   footguns, and it survives a "no" on 1–3 unchanged.
+1. **`asserts:` — claims get ids, typed `decision` or `premise`.** Rec was yes, on the premise half
+   above all — it removes a frozen document's inability to say a fact it cited was wrong, which is a
+   real position the repo was in for a day. ⇒ **RULED: yes to both.** It is taken with the
+   append-only bound above: a premise's `claim:` text freezes with the body, and only `status:` and
+   a `refuted_by:` pointer may be added afterwards. ⚠️ Take the addressability claim at its measured
+   size — for ADR-0019 fewer than half the citations are sweepable at all.
+2. **The step-2 gate — "an assertion's content may not be restated outside its owner".** ⇒ **RULED:
+   build it.** ⚠️ **It ships labelled as an EXACT-restatement check, and its output has to say so**,
+   because the defect that motivates it was a paraphrase ("costed at actual" versus "actual-cost
+   absorption") and no presence test reaches that. A check sold as the answer to the restatement
+   defect class while silent on paraphrase is the exact failure mode `m3` demonstrated this week.
+3. **Forward-only versus back-migration.** ⇒ **RULED: backfill.** The 23 in-force ADRs are given
+   `asserts:` in a pass of their own. **This reversed the draft**, which said forward-only — and the
+   draft was wrong on a mechanism rather than on taste, because "when next touched" cannot happen to
+   a frozen body.
+4. **`headline:` on `ADR`/`OQ`/`HOT`/`SPIKE`, and `#### - Name` for GL accounts.** ⇒ **RULED: yes
+   and yes** — both halves. It is cheap, back-migratable in one pass, and it stands independently of
+   1–3.
+
+⚠️ **What ruling 3 costs is JUDGEMENT, not typing.** Someone must read each frozen decision and say
+what its load-bearing claims WERE — without the author present, and without the right to amend the
+body. **A claim added to a frozen ADR is a reading of it**, so the backfill inherits the body's
+freeze: once written, it is correctable only the way any other frozen text is.

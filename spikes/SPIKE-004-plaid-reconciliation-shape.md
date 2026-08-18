@@ -1,5 +1,6 @@
 ---
 id: SPIKE-004
+headline: what Plaid actually provides
 question: What does Plaid actually provide, and what does bank reconciliation actually need?
 timebox: 3 days
 method: >-

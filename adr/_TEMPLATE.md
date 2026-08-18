@@ -1,5 +1,8 @@
 ---
 id: ADR-0000
+headline: # REQUIRED, <=12 words and ideally under 5 (gate 20). What this is CALLED where it is
+# cited — "vehicle cost into COGS" — not what it IS, which is `title`. A bare id is unreadable to
+# everyone who did not write it, including you next week (ADR-0037).
 title:
 status: proposed # proposed | accepted | rejected | superseded
 date: 2026-08-08

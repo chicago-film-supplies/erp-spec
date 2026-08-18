@@ -1,5 +1,6 @@
 ---
 id: ADR-0017
+headline: reporting authority splits by period state
 title: Reporting authority is split by period state
 status: accepted
 date: 2026-08-09

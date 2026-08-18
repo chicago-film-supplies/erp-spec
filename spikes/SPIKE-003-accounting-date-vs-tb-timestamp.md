@@ -1,5 +1,6 @@
 ---
 id: SPIKE-003
+headline: TigerBeetle timestamps on imported history
 question: >-
   How does TigerBeetle's timestamp behave when loading history, and what are the `imported` flag's
   timestamp and monotonicity semantics?

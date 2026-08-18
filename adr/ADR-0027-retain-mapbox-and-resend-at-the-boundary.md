@@ -1,5 +1,6 @@
 ---
 id: ADR-0027
+headline: keep Mapbox and Resend at the boundary
 title: Retain Mapbox for geocoding and Resend for transactional email, at the boundary
 status: proposed
 date: 2026-08-09

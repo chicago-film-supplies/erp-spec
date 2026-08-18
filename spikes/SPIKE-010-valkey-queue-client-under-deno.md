@@ -1,5 +1,6 @@
 ---
 id: SPIKE-010
+headline: Valkey queue client under Deno
 question: >-
   Does a production-grade Valkey queue client run under Deno, and can it express per-entity
   serialization and repeatable jobs without a paid tier?

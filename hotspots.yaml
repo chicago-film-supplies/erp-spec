@@ -5,8 +5,12 @@
 #
 # status: open | resolved | superseded
 
+# ⚠️ **Every entry carries a `headline:`** — at most 12 words, ideally under 5 (ADR-0037, gate 20).
+# It is what the hotspot is CALLED where it is cited; `statement:` stays the full contradiction.
+# Quote it if it contains a colon, or the file stops parsing.
 hotspots:
   - id: HOT-001
+    headline: "Trucking means two different things"
     statement: >-
       Does `Trucking` mean third-party freight (no wage labor) or an own long-haul run
       (labor-bearing)? The costing model treats these oppositely — one is a passthrough with no
@@ -25,6 +29,7 @@ hotspots:
     resolved_by: ADR-0011
 
   - id: HOT-002
+    headline: "collecting flags: per leg or per destination"
     statement: >-
       Are the collecting/returning flags really per-leg? Only ~2% of revenue sits on asymmetric
       combinations, which contradicts a confirmed deliver-out/customer-returns pattern.
@@ -48,6 +53,7 @@ hotspots:
     resolved_by: ADR-0011
 
   - id: HOT-003
+    headline: "labor cost has no home in the chart"
     statement: Does the `Crew` product line already carry labor today?
     contexts: [ledger, fulfillment]
     why_it_matters: >-
@@ -64,6 +70,7 @@ hotspots:
     resolved_by: ADR-0019
 
   - id: HOT-004
+    headline: "the byproduct premium may double-count"
     statement: >-
       Should long-haul absorb a byproduct-loss premium on top of the person-day, mirroring what
       the customer is charged?
@@ -77,6 +84,7 @@ hotspots:
     resolved_by: ADR-0019
 
   - id: HOT-005
+    headline: "two candidates for reporting truth"
     statement: >-
       Is TigerBeetle or DuckDB the reporting source of truth, given TB timestamps are posting time
       and reporting needs accounting date?
@@ -91,6 +99,7 @@ hotspots:
     resolved_by: ADR-0017
 
   - id: HOT-006
+    headline: "Xero history is behind the lock"
     statement: >-
       Xero history migration: import known-defective lines, or restate? Roughly 90% of historical
       Xero lines are behind the 2025-12-31 lock and unrepairable.
@@ -114,6 +123,7 @@ hotspots:
     resolved_by: ADR-0020
 
   - id: HOT-007
+    headline: "legs derived where the spec says recorded"
     statement: >-
       Are fulfillment legs first-class recorded events, or derived from orders? The current system
       derives them, which is why actor and shift are unrecoverable.
@@ -127,6 +137,7 @@ hotspots:
     resolved_by: ADR-0011
 
   - id: HOT-008
+    headline: "duplicate products split one revenue stream"
     statement: >-
       Duplicate ACTIVE charge products book the same economic event to different revenue accounts,
       so the source data does not determine the posting.
@@ -148,6 +159,7 @@ hotspots:
     resolved_by: ADR-0021
 
   - id: HOT-009
+    headline: "invoice status carries two semantics"
     statement: >-
       `invoice.status` carries two different semantics in one field — an assigned lifecycle fact
       (draft / issued / voided) and a derived balance fact (part_paid / paid) — so no invariant can
@@ -169,6 +181,7 @@ hotspots:
     resolved_by: ADR-0022
 
   - id: HOT-010
+    headline: "a variance rule with no standard rate"
     statement: >-
       The charter and `posting-rules.yaml` specify standard-cost absorption with a
       `labor_variance` posting rule, but CFS does not use standard labor rates — costing is
@@ -192,6 +205,7 @@ hotspots:
     resolved_by: ADR-0019
 
   - id: HOT-011
+    headline: "three artifacts disagree on dimensions"
     statement: >-
       REQ-LED-001 and ADR-0018 require BOTH dimensions on every revenue and COGS posting;
       `ledger/dimensions.yaml` requires only `product_line` on revenue; and the chart of accounts
@@ -221,6 +235,7 @@ hotspots:
     resolved_by: ADR-0025
 
   - id: HOT-012
+    headline: "a frozen ADR cites a retracted number"
     statement: >-
       `ADR-0001` is `accepted` and therefore immutable, and its Context states a number that has
       been retracted and an attribution that has been reversed — "the dimension on a Xero line is
@@ -275,6 +290,7 @@ hotspots:
       validate time) and does not build it.
 
   - id: HOT-013
+    headline: "more dimension claimants than transfer fields"
     statement: >-
       `ADR-0018` says dimensions are "carried on the posting, in `user_data` and in the
       Mongo/Parquet projection". A TigerBeetle transfer has exactly three `user_data` fields, and
@@ -435,6 +451,7 @@ hotspots:
         (`inbox/2026-08-16-survey-the-party-is-a-subledger-key-and-the-dimension-is-a-gl-slice-and-they-ride-different-legs.md`).
 
   - id: HOT-014
+    headline: "a causal order does not identify a row"
     statement: >-
       ADR-0029 requires that "every posting must carry its causal order, or allocation is impossible
       and this decision quietly becomes never allocate" — and no posting carries one. The
@@ -571,6 +588,7 @@ hotspots:
       **Stays `open` until ADR-0036 is accepted.**
 
   - id: HOT-015
+    headline: "the feature file kept a refuted reading"
     statement: >-
       `contexts/ledger/features/posting-keys.feature` — then named `dimensional-postings.feature` —
       still states the reading ADR-0025 REFUTED. Its Feature title is "Revenue and COGS postings carry both mandatory dimensions";
@@ -640,6 +658,7 @@ hotspots:
       a gate would need. Filed as erp-spec#20.
 
   - id: HOT-016
+    headline: "a frozen premise the payroll data refuted"
     statement: >-
       `adr/ADR-0030` — ACCEPTED and FROZEN 2026-08-16 — asserts as a supporting contrast that
       "ADR-0019 could say 'absorption measures utilisation, not rate variance' because labor is
@@ -716,6 +735,7 @@ hotspots:
       change nobody has asked for and one instance is not yet a pattern.
 
   - id: HOT-017
+    headline: "the charter's PSA mechanism is not what the books do"
     statement: >-
       `charter.md` states that a production service agreement's money moves through
       `2800 - PSA Liability Clearing` — _"moving a client's payroll through `2800 - PSA Liability

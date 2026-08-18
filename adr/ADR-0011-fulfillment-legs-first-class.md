@@ -1,5 +1,6 @@
 ---
 id: ADR-0011
+headline: legs are first-class events
 title: Fulfillment legs are first-class recorded events
 status: accepted
 date: 2026-08-08

@@ -11,6 +11,7 @@
 
 open_questions:
   - id: OQ-001
+    headline: "are legs first-class or derived"
     question: >-
       Are fulfillment legs first-class recorded events with their own identity, or derived from
       the order's destinations at read time?
@@ -27,6 +28,7 @@ open_questions:
       ADR-0011.
 
   - id: OQ-002
+    headline: "what groups a trip"
     question: >-
       What is the grouping key for a trip, and may one trip span destinations belonging to
       different orders?
@@ -42,6 +44,7 @@ open_questions:
       split across the jobs that caused it rather than duplicated or arbitrarily assigned.
 
   - id: OQ-003
+    headline: "is fulfillment mode per order or per destination"
     question: >-
       Is `fulfillment_mode` a property of the order, or of each destination?
     owner: alex
@@ -55,6 +58,7 @@ open_questions:
       superseded.
 
   - id: OQ-004
+    headline: "who assigns handling_bucket"
     question: Who assigns a product's `handling_bucket`, and is it revisable per order?
     owner: alex
     decide_by: 2026-08-09
@@ -65,6 +69,7 @@ open_questions:
       an override so costing can distinguish standard from exceptional handling.
 
   - id: OQ-005
+    headline: "is a shift per person or per crew"
     question: Is a shift per-person or per-crew?
     owner: alex
     decide_by: 2026-08-09
@@ -76,6 +81,7 @@ open_questions:
       per-contact wage.
 
   - id: OQ-006
+    headline: "does long-haul absorb a byproduct premium"
     question: >-
       Should a long-haul run absorb a byproduct-loss premium on top of the person-day, mirroring
       what the customer is charged?
@@ -89,6 +95,7 @@ open_questions:
     notes: Resolves HOT-004.
 
   - id: OQ-007
+    headline: "are collecting flags per leg"
     question: >-
       Should the collecting/returning flags become per-leg in the new system, given they are
       per-destination today?
@@ -102,6 +109,7 @@ open_questions:
       starts empty at cutover and accumulates forward. Resolves HOT-002.
 
   - id: OQ-008
+    headline: "who sets standard labor rates"
     question: Who sets standard labor rates, how often are they revised, and what happens to
       in-flight jobs when a rate changes?
     owner: alex
@@ -123,6 +131,7 @@ open_questions:
       (retail, and fixed assets for rental or internal ops). Residual questions: OQ-018, OQ-019.
 
   - id: OQ-009
+    headline: "TigerBeetle or DuckDB as reporting truth"
     question: >-
       Is TigerBeetle or DuckDB the reporting source of truth, given TB timestamps are posting time
       and reporting is periodised by accounting date?
@@ -143,6 +152,7 @@ open_questions:
       cadence, to be confirmed when close is specified in m3. Resolves HOT-005.
 
   - id: OQ-010
+    headline: "is Trucking freight or an own haul"
     question: >-
       Does `Trucking` mean third-party freight (no wage labor) or an own long-haul run
       (labor-bearing)?
@@ -157,6 +167,7 @@ open_questions:
       the glossary, which was m2's remaining exit criterion.
 
   - id: OQ-011
+    headline: "is labor cost recorded today"
     question: >-
       Is any labor COST recorded anywhere in the current system today, or only billable labor
       revenue?
@@ -177,6 +188,7 @@ open_questions:
       Resolves HOT-003.
 
   - id: OQ-012
+    headline: "import or restate Xero history"
     question: Xero history — import the known-defective lines as-is, or restate them?
     owner: alex
     decide_by: 2026-08-09
@@ -200,6 +212,7 @@ open_questions:
       carries the re-scoping, and `Trucking → Transport` still needs OQ-034 to give it a target.
 
   - id: OQ-013
+    headline: "do the 55 missing order uids exist"
     question: >-
       Do the 55 order uids referenced by invoices but absent from `orders` actually not exist, and
       is the count still 55?
@@ -217,6 +230,7 @@ open_questions:
       other grounds, but its cited evidence measures 0.
 
   - id: OQ-014
+    headline: "which duplicate charge product is canonical"
     question: >-
       For each pair of duplicate active charge products, which is canonical — and does a surcharge
       post to COA 4100 or 4110?
@@ -232,6 +246,7 @@ open_questions:
       makes the ambiguity non-recurring. Resolves HOT-008.
 
   - id: OQ-015
+    headline: "what identifies the out-of-state engagement"
     question: >-
       What identifies the one-off out-of-state engagement, and what is the exclusion flag's
       semantics — excluded from run-rate reporting only, or from more?
@@ -248,6 +263,7 @@ open_questions:
       is still unstated and is m3/SPIKE-008 work.
 
   - id: OQ-016
+    headline: "must the spec check pass before merge"
     question: >-
       Does the repo require the `spec` CI check to pass before merge, given `deno task validate`
       is red by design until the seeded worklist is cleared?
@@ -264,6 +280,7 @@ open_questions:
       `gh api -X PUT repos/chicago-film-supplies/erp-spec/branches/main/protection` at that point.
 
   - id: OQ-017
+    headline: "is an employee a record or a role"
     question: >-
       Is an employee a distinct record, or a role attached to a person who may also be a customer
       contact?
@@ -283,6 +300,7 @@ open_questions:
       who should not see it.
 
   - id: OQ-018
+    headline: "which job absorbs the overtime premium"
     question: >-
       When a shift spans several jobs and crosses into overtime, which job absorbs the overtime
       premium?
@@ -317,6 +335,7 @@ open_questions:
       the "distributing OT" guesswork OQ-008 aims to remove, so it needs a stated rule.
 
   - id: OQ-019
+    headline: "what is a consecutive day"
     question: >-
       What defines a "consecutive day" for the 6th/7th-day 1.5x rule, and does it compound with
       the after-8-hours 1.5x?
@@ -356,6 +375,7 @@ open_questions:
       for the last two? Both are defensible; only one can be implemented.
 
   - id: OQ-020
+    headline: "which context owns purchase orders"
     question: >-
       Which context owns purchase orders — or is procurement a ninth bounded context?
     owner: alex
@@ -394,6 +414,7 @@ open_questions:
       also the expensive one: m2's exit criterion names eight, so adding one reopens m2.
 
   - id: OQ-021
+    headline: "which postings owe which dimensions"
     question: >-
       Which postings must carry which dimensions — is `cost_type` a labor-only dimension, and may
       a revenue or COGS account be undimensioned at all?
@@ -432,6 +453,7 @@ open_questions:
       HOT-011 for the evidence.
 
   - id: OQ-022
+    headline: "does the Other product line survive"
     question: >-
       Does `Other` survive as a `product_line` value, and what value do facility and professional
       service lines take instead?
@@ -469,6 +491,7 @@ open_questions:
       sale" and then names no category, which is not.
       ⚠️ It leaves ADR-0020's restatement residue without a target — see OQ-025.
   - id: OQ-023
+    headline: "what posts to 5400 Job Costs"
     question: >-
       What posts to `5400 Cost of Goods Sold: Job Costs` today, and does own-crew labor cost belong
       there rather than in a new 5800?
@@ -501,6 +524,7 @@ open_questions:
       A catchall sitting beside specific COGS accounts is where cost goes to avoid being
       classified, which is the failure the dimensioned COGS block exists to prevent.
   - id: OQ-024
+    headline: "what is labor's credit leg"
     question: What is the CREDIT leg of a labor cost posting?
     owner: alex
     decide_by: 2026-09-15
@@ -539,6 +563,7 @@ open_questions:
       nothing yet owns purchase orders.
 
   - id: OQ-025
+    headline: "where the restatement residue lands"
     question: >-
       With `Other` deleted, where does ADR-0020's restatement residue land — historical revenue
       lines that have no product line and no bucket to fall back on?
@@ -572,6 +597,7 @@ open_questions:
       ADR-0020 asserts the restatement must not alter any amount; only the first option can.
 
   - id: OQ-026
+    headline: "is a supplier discount income or contra-COGS"
     question: >-
       Is a supplier discount other income (4300) or a contra-COGS (5001), and which of the two
       accounts survives?
@@ -636,6 +662,7 @@ open_questions:
       have to come from Xero.
 
   - id: OQ-027
+    headline: "is the tax basis accrual or cash"
     question: >-
       Is the tax basis accrual or cash — and what else besides depreciation differs between the two
       books?
@@ -677,6 +704,7 @@ open_questions:
       book stays cheap.
 
   - id: OQ-028
+    headline: "where an overpayment lands"
     question: >-
       Where does a customer overpayment land — money received that exceeds what the invoices it was
       sent for are owed?
@@ -715,6 +743,7 @@ open_questions:
       model. It is a gap in what the system can record, which is why it is a question and not a bug.
 
   - id: OQ-029
+    headline: "why the two books cost inventory differently"
     question: >-
       Why do the two books cost retail inventory differently, and which basis does v2 carry as the
       GL number?
@@ -757,6 +786,7 @@ open_questions:
       Evidence: `inbox/2026-08-09-book-to-tax-difference-is-exactly-two-accounts.md`.
 
   - id: OQ-030
+    headline: "is there a forced-call premium"
     question: >-
       Does CFS introduce a forced-call (short-turnaround) premium, and if so what is the turnaround
       threshold and does the penalty behave as hours or as a flat amount?
@@ -786,6 +816,7 @@ open_questions:
       Evidence: `inbox/2026-08-09-labour-premium-rules-survey.md`.
 
   - id: OQ-031
+    headline: "do Crew and Trash spread like Delivery"
     question: >-
       Do `Crew` and `Trash & Cleanup` revenue and cost spread across the goods on the order, the way
       `Delivery` does — or are they severable services that keep their own margin?
@@ -850,6 +881,7 @@ open_questions:
       the same question, and `Transport` shows a value can sit unused for years and then matter.
 
   - id: OQ-034
+    headline: "is Transport restored as a product line"
     question: >-
       Is `Transport` restored as a product line, now that the measurement it was dropped on turns
       out to have read the wrong field?
@@ -922,6 +954,7 @@ open_questions:
       goods by omission.
 
   - id: OQ-032
+    headline: "does Distance Charge belong on 4110"
     question: >-
       Does `Distance Charge` belong on 4110, given that 4110 is defined as a premium nobody
       performs — and does `Rush Charge` move to 4110 to match the stated rule?
@@ -1002,6 +1035,7 @@ open_questions:
       says is the whole purpose of keeping it.
 
   - id: OQ-033
+    headline: "which physical basis becomes allocation v2"
     question: >-
       Once the shipping specs are populated, which physical basis becomes allocation basis v2 —
       weight, cube, or dimensional weight — and what coverage precondition gates its activation?
@@ -1054,6 +1088,7 @@ open_questions:
       every `deno task allocation` run, which prints a ⚠️⚠️ the first time a non-zero value appears.
 
   - id: OQ-035
+    headline: "is there a production-type classification"
     question: >-
       Does CFS introduce a production-type classification — `studio | indie |
       corporate/commercial/industrial | event | student`, possibly splitting `studio` by budget tier —
@@ -1124,6 +1159,7 @@ open_questions:
       on OQ-036, because grouping by customer today measures the naming convention.
 
   - id: OQ-036
+    headline: "how company, production and department are modelled"
     question: >-
       How are a customer's company, its productions and its departments modelled, given that
       settlement is per department and the current workaround duplicates the organization with a
@@ -1223,6 +1259,7 @@ open_questions:
       ADR-0020's amount assertion applied to a different axis.
 
   - id: OQ-037
+    headline: "is there an economic customer grouping too"
     question: >-
       Does CFS want an ECONOMIC grouping of customers alongside ADR-0032's liability tree — "which
       studios do we actually depend on" — and if so, what is it keyed on and how is it kept from
@@ -1299,6 +1336,7 @@ open_questions:
       and it is captured in `migration/field-map.yaml`.
 
   - id: OQ-038
+    headline: "does CFS operate credit limits and holds"
     question: >-
       Does CFS operate credit limits and credit holds in v2 — what triggers a hold, who overrides
       one, what may a held organization still do, and does a hold reach every project beneath?
@@ -1333,6 +1371,7 @@ open_questions:
       Not a blocker on ADR-0032 or ADR-0033; neither depends on an answer.
 
   - id: OQ-039
+    headline: "where each half of tax_profile attaches"
     question: >-
       `organizations.tax_profile` carries two different concepts in one enum — who owes (applied /
       exempt) and where the goods went (three Illinois municipalities). Under ADR-0032's tree, where
@@ -1374,6 +1413,7 @@ open_questions:
       assumed.
 
   - id: OQ-040
+    headline: "is settlement point a ledger dimension"
     question: >-
       Is `settlement_point` a declared LEDGER DIMENSION, or a document attribute the read side joins
       to — given that ADR-0033 requires per-settlement-point aging to be computable without walking
@@ -1455,6 +1495,7 @@ open_questions:
       one claimant rather than adding one.
 
   - id: OQ-041
+    headline: "does a pass-through carry a product line"
     question: >-
       Does a pass-through purchase carry a product line — and if so, which one: the line of the
       thing bought, or none at all?
@@ -1586,6 +1627,7 @@ open_questions:
       operator who typed it reached the same answer.
 
   - id: OQ-042
+    headline: "is labor_line posted or derived"
     question: >-
       Does `labor_line` (formerly `cost_type`) stay a POSTING field, or is it derived from the
       shift's allocation row the same way `product_line` is derived from the product master?
@@ -1637,6 +1679,7 @@ open_questions:
       (`inbox/2026-08-16-owner-rulings-line-identity-is-item-path-ephemeral-reports-are-never-sealed-and-cost-type-becomes-labour-line.md`)
 
   - id: OQ-043
+    headline: "do the masters carry an event history"
     question: >-
       Should the product and organization masters carry an EVENT HISTORY, so that a classification as
       it stood at any past date is recoverable?
@@ -1667,6 +1710,7 @@ open_questions:
       categorisation is unverified.
 
   - id: OQ-044
+    headline: "what stays in 6600 Wages"
     question: >-
       Once wages move into COGS, what stays in `6600 Wages` — and can salaried sales/admin staff who
       never touch a delivery be COGS too, or must they remain operating expense?
@@ -1719,6 +1763,7 @@ open_questions:
       kind rather than in degree. That distinction, not the job title, is the likely criterion.
 
   - id: OQ-045
+    headline: "what retires an over-accrual residual"
     question: >-
       When a vendor bills LESS than was accrued, what retires the residual left in
       `2010 Accrued Expenses: Received Not Invoiced` — and who is allowed to do it?
@@ -1755,6 +1800,7 @@ open_questions:
       Not blocking: 2010's residual is visible and reportable either way, and nothing in m3 depends
       on it.
   - id: OQ-046
+    headline: "where counter and warehouse labor lands"
     question: >-
       `counter` and `warehouse` labor bill nobody and name no product line, so no allocation pool
       selects them. Where does their cost land — spread like `delivery`, reported unallocated, or
@@ -1806,6 +1852,7 @@ open_questions:
       (`inbox/2026-08-16-labor-line-is-the-pools-cost-selector-and-a-report-is-a-selector-crossed-with-a-base.md`)
 
   - id: OQ-047
+    headline: "does an unpaid owner shift post"
     question: >-
       An owner works a shift and is not paid for it. Does the ledger post the cost — and if so, what
       does it credit, given that no vendor will ever invoice for it and 2010 Accrued Expenses:
@@ -1897,6 +1944,7 @@ open_questions:
       the discriminator itself**, present from day one so the population is countable the moment the
       stage exists.
   - id: OQ-048
+    headline: "at what rate an owner shift is imputed"
     question: >-
       At what rate is a contributed (unpaid owner) shift costed in the IMPUTED labor view — the
       person's own wage had they been paid, a replacement-hire rate, or a single notional owner
@@ -1934,6 +1982,7 @@ open_questions:
       to size this from. `compensation` being present from day one is what makes the population
       countable the moment the stage exists.
   - id: OQ-049
+    headline: "do the board and threads survive into v2"
     question: >-
       Does v2 carry the operational collaboration surface — the board (`cards`, `lists`) and the
       comment threads (`threads`, `comments`) — or does the charter's silence mean it is out of
@@ -1979,6 +2028,7 @@ open_questions:
       migration behaviour, and it is also exactly the reading that would let a milestone look
       finished. Do not read `quarantine` as `mapped`.
   - id: OQ-050
+    headline: "does the EOR reconcile per person"
     question: >-
       Does the EOR's charge for a W-2 crew member reconcile PER PERSON and PER SHIFT, or only in
       aggregate — and therefore is the burdened cost rate an ACTUAL cost or an estimate that must be
@@ -2062,6 +2112,7 @@ open_questions:
       between 61% and 90.5% because nothing splits 6600 into crew and administrative wages. Same
       measurement, two uses.
   - id: OQ-051
+    headline: "where the chat seam sits"
     question: >-
       Where is the seam between CFS and a chat system for comments and threads — CFS implements
       them, or they live in Matrix (or a comparable open-source company-chat system) and CFS holds
@@ -2090,6 +2141,7 @@ open_questions:
       outside cannot be part of a sealed period artifact (ADR-0017), so anything that needs an
       audit-durable narrative — a dispute, a credit note reason — cannot rely on it.
   - id: OQ-052
+    headline: "the vehicle rate and its denominator"
     question: >-
       What vehicle rate absorbs into 5900, over what normal-capacity denominator — and where does an
       OVER-absorbed balance rest?
@@ -2134,6 +2186,7 @@ open_questions:
       describes spreading a pool proportionally over a base, and a rate applied to a quantity has
       none of them. ADR-0030 cites that file's discipline, not its registry.
   - id: OQ-053
+    headline: "is CFS principal or agent on a PSA"
     question: >-
       On a production service agreement, is CFS the PRINCIPAL or the AGENT — who contracts the crew,
       whose insurance answers for them, and who bears the loss if the client's money does not arrive?

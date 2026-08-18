@@ -1,5 +1,6 @@
 ---
 id: ADR-0006
+headline: DuckDB over Parquet
 title: DuckDB over Parquet as the read side
 status: superseded
 date: 2026-08-08

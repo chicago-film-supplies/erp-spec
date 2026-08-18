@@ -1,5 +1,6 @@
 ---
 id: SPIKE-005
+headline: build or buy the depreciation engine
 question: Hand-roll the depreciation engine, or adopt a library?
 timebox: 1 week
 method: >-

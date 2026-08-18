@@ -1,5 +1,6 @@
 ---
 id: SPIKE-011
+headline: TigerBeetle on Linode storage
 question: >-
   Does TigerBeetle meet its durability and latency expectations on Linode block storage, or does it
   require local NVMe — and what does that imply for replica topology and cost?

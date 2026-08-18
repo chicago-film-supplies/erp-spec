@@ -1,5 +1,6 @@
 ---
 id: ADR-0021
+headline: item type picks the revenue account
 title: Item type determines the revenue account; duplicate charge products are canonicalized
 status: accepted
 date: 2026-08-09

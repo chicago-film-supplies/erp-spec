@@ -1,5 +1,6 @@
 ---
 id: ADR-0013
+headline: self-host on Linode
 title: Self-host on Linode, with Caddy fronting TLS
 status: accepted
 date: 2026-08-09

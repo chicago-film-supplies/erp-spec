@@ -1,5 +1,6 @@
 ---
 id: ADR-0001
+headline: in-house ledger replaces Xero
 title: Replace Xero with an in-house ledger
 status: accepted
 date: 2026-08-08

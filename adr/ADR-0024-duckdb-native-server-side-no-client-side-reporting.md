@@ -1,5 +1,6 @@
 ---
 id: ADR-0024
+headline: DuckDB stays server-side
 title: DuckDB is reached natively and server-side; client-side reporting is rejected
 status: accepted
 date: 2026-08-09

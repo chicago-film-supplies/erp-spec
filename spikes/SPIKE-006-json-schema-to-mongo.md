@@ -1,5 +1,6 @@
 ---
 id: SPIKE-006
+headline: JSON Schema into Mongo
 question: >-
   How lossy is translating JSON Schema 2020-12 to MongoDB's `$jsonSchema`, and what is enforced
   where as a result?

@@ -1,5 +1,6 @@
 ---
 id: ADR-0005
+headline: keep SolidJS clients
 title: Retain SolidJS clients
 status: accepted
 date: 2026-08-08

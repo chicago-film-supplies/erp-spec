@@ -157,7 +157,12 @@ Not every tool has an upstream dump, and the difference is worth knowing before 
 - **Gloss an id on FIRST mention in a file**: `ADR-0030 (vehicle cost into COGS)`,
   `OQ-050 (does the
   EOR reconcile per person)`. **≤12 words, ideally under 5.** Bare ids
-  thereafter.
+  thereafter. ✅ **You no longer write the gloss yourself — every ADR, OQ, HOT and SPIKE carries a
+  `headline:`, and that is the gloss** (ADR-0037 ruling 4, gate 20, 120 artifacts). ⚠️ **Gate 20
+  checks the FIELD, not the prose**: it fails on a missing, over-long or title-duplicating headline,
+  and it cannot see a bare id in a sentence. Detecting a missing gloss means detecting the absence
+  of a phrase, which is crude and needs an exemption list — so that half stays a convention, and
+  this is where you learn the difference rather than assume coverage.
 - A bare id is unreadable to everyone who did not write it — including you, next week. ⚠️ `title:`
   is 11–23 words and `question:` / `statement:` are sentences; **none of them is the gloss.** Write
   a short one.

@@ -1,5 +1,6 @@
 ---
 id: ADR-0030
+headline: vehicle cost into COGS
 title: Vehicle cost moves from operating expense into COGS, absorbed and unabsorbed
 status: accepted
 date: 2026-08-09

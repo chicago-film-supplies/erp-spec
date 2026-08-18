@@ -1,5 +1,6 @@
 ---
 id: SPIKE-000
+headline: # REQUIRED, <=12 words (gate 20, ADR-0037). The short name prose cites.
 question:
 timebox: # e.g. "2 days"
 method: # how it gets answered — what gets built or measured

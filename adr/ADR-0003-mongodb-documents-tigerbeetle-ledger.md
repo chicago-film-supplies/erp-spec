@@ -1,5 +1,6 @@
 ---
 id: ADR-0003
+headline: Mongo for documents, TigerBeetle for the ledger
 title: MongoDB for documents and masterfiles; TigerBeetle for the ledger
 status: accepted
 date: 2026-08-08

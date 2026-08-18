@@ -1,5 +1,6 @@
 ---
 id: ADR-0016
+headline: Quint replaces TLA+
 title: Quint replaces TLA+ for the formal specs
 status: accepted
 date: 2026-08-09

@@ -1,5 +1,6 @@
 ---
 id: SPIKE-007
+headline: how Deno reaches DuckDB
 question: >-
   Which access path reaches DuckDB from Deno — the native addon or WASM — and can a browser query
   a sealed period's Parquet directly, removing a reporting API surface?

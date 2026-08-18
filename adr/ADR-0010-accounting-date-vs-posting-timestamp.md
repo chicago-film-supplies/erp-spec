@@ -1,5 +1,6 @@
 ---
 id: ADR-0010
+headline: accounting date is not the posting timestamp
 title: Accounting date vs posting timestamp policy
 status: accepted
 date: 2026-08-08

@@ -1,5 +1,6 @@
 ---
 id: ADR-0019
+headline: labor costing is normal costing
 title: Labor costing is NORMAL costing — wages actual per person, burden apportioned per run — and absorption measures utilisation together with rate variance
 status: accepted
 date: 2026-08-09

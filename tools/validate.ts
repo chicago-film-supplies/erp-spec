@@ -156,6 +156,8 @@ interface Evt {
 }
 interface Adr {
   id: string;
+  /** ADR-0037 ruling 4 — the short name prose uses at the point of citation. Gate 20. */
+  headline?: string;
   title?: string;
   status?: string;
   date?: Date;
@@ -193,6 +195,7 @@ function toAdr(fm: unknown, file: string, body: string): Adr | null {
   if (id === undefined) return null;
   return {
     id,
+    headline: str(fm.headline),
     title: str(fm.title),
     status: str(fm.status),
     date: dateVal(fm.date),
@@ -214,6 +217,9 @@ function toAdr(fm: unknown, file: string, body: string): Adr | null {
 
 interface Spike {
   id: string;
+  /** ADR-0037 ruling 4. Gate 20. */
+  headline?: string;
+  question?: string;
   closes_adr?: string;
   status?: string;
   exit_criteria: unknown[];
@@ -226,6 +232,8 @@ function toSpike(fm: unknown, file: string): Spike | null {
   if (id === undefined) return null;
   return {
     id,
+    headline: str(fm.headline),
+    question: str(fm.question),
     closes_adr: str(fm.closes_adr),
     status: str(fm.status),
     exit_criteria: Array.isArray(fm.exit_criteria) ? fm.exit_criteria : [],
@@ -254,8 +262,22 @@ function toInboxNote(fm: unknown, file: string): InboxNote {
 const reqs: Req[] = [];
 const evts: Evt[] = [];
 const adrs: Adr[] = [];
-const hots: { id: string; status?: string; contexts?: string[]; blocks?: string[] }[] = [];
-const oqs: { id: string; owner?: unknown; decide_by?: unknown; status?: string }[] = [];
+const hots: {
+  id: string;
+  headline?: unknown;
+  statement?: unknown;
+  status?: string;
+  contexts?: string[];
+  blocks?: string[];
+}[] = [];
+const oqs: {
+  id: string;
+  headline?: unknown;
+  question?: unknown;
+  owner?: unknown;
+  decide_by?: unknown;
+  status?: string;
+}[] = [];
 const spikes: Spike[] = [];
 const inbox: InboxNote[] = [];
 
@@ -3255,6 +3277,95 @@ for (const e of evts) {
   );
 }
 
+// ── gate 20: every id-bearing artifact carries a short headline ────────────
+/**
+ * ADR-0037, ruling 4 (owner, 2026-08-17: _"yes and yes"_).
+ *
+ * ⚠️ **The observation that produced it was a live demonstration.** A session recommending next
+ * steps wrote "ADR-0037" three times without ever saying what it was, in the message asking which
+ * work to do — and the owner had to ask. **Measured then: none of the four id-bearing kinds has a
+ * short form.** `ADR.title` runs 11 to 23 words, `OQ.question` and `SPIKE.question` are full
+ * sentences, and `HOT.statement` is a paragraph. Nothing is inlineable, so every citation in prose
+ * is a bare id and the reader has to go and look — which the reader usually does not.
+ *
+ * So `headline:` is what the thing is CALLED when referred to elsewhere, and `title` / `question` /
+ * `statement` stay exactly as they are, saying what it IS.
+ *
+ * ── what this gate does and does not check ──────────────────────────────────────────────────────
+ *
+ * It checks that a headline EXISTS, is short, and is not a copy of the long form. **It cannot check
+ * that prose citing an id carries the gloss** — that means detecting the ABSENCE of a phrase near a
+ * bare id, which is crude and needs an exemption list, and ADR-0037 says to state it as crude
+ * rather than sell it as precise. That half is a convention in `CLAUDE.md`, unenforced, and this
+ * comment is where a future reader learns the difference rather than assuming coverage.
+ */
+{
+  const G = "20";
+  /** ADR-0037: "at most 12 words, ideally under 5". The bound is the check; the ideal is taste. */
+  const MAX_WORDS = 12;
+  const seen: string[] = [];
+
+  const check = (
+    id: string,
+    headline: unknown,
+    longForm: unknown,
+    kind: string,
+  ) => {
+    if (typeof headline !== "string" || headline.trim() === "") {
+      fail(
+        G,
+        `${id}: no \`headline:\` — every ${kind} carries a short name for prose to use at the point of citation (ADR-0037)`,
+      );
+      return;
+    }
+    const words = headline.trim().split(/\s+/).length;
+    if (words > MAX_WORDS) {
+      fail(
+        G,
+        `${id}: headline is ${words} words — at most ${MAX_WORDS}, ideally under 5. A headline that has to be read is not a headline`,
+      );
+    }
+    if (typeof longForm === "string" && headline.trim() === longForm.trim()) {
+      fail(
+        G,
+        `${id}: headline duplicates its ${
+          kind === "ADR" ? "title" : "long form"
+        } — the two are different jobs, and a copy leaves the id as unreadable as it was`,
+      );
+    }
+    seen.push(id);
+  };
+
+  for (const a of adrs) {
+    check(a.id, (a as unknown as { headline?: unknown }).headline, a.title, "ADR");
+  }
+  for (const q of oqs) {
+    check(
+      q.id,
+      (q as unknown as { headline?: unknown }).headline,
+      (q as unknown as { question?: unknown }).question,
+      "open question",
+    );
+  }
+  for (const h of hots) {
+    check(
+      h.id,
+      (h as unknown as { headline?: unknown }).headline,
+      (h as unknown as { statement?: unknown }).statement,
+      "hotspot",
+    );
+  }
+  for (const sp of spikes) {
+    check(
+      sp.id,
+      (sp as unknown as { headline?: unknown }).headline,
+      (sp as unknown as { question?: unknown }).question,
+      "spike",
+    );
+  }
+  notes.push(`gate 20: ${seen.length} id-bearing artifacts carry a headline`);
+}
+
 // ── gate 19: rule 8a — an accounting-shaped ADR is not ACCEPTED without a survey ────────────
 /**
  * ⚠️ **CLAUDE.md rule 8a has been a standing owner instruction since 2026-08-09 and nothing executed
@@ -3421,6 +3532,7 @@ const GATE_NAMES: Record<string, string> = {
   "17": "house spelling in the refactorable spec",
   "18": "every minted account is reachable from a posting rule",
   "19": "rule 8a — an accounting-shaped ADR is not accepted without a survey",
+  "20": "every id-bearing artifact carries a short headline",
   xref: "cross-references resolve",
   parse: "files parse",
 };

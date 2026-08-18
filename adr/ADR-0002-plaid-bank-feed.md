@@ -1,5 +1,6 @@
 ---
 id: ADR-0002
+headline: Plaid is the bank feed
 title: Bank feed sourced from Plaid, single Chase account
 status: accepted
 date: 2026-08-08

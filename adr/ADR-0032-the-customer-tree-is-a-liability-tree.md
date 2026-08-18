@@ -1,5 +1,6 @@
 ---
 id: ADR-0032
+headline: the organization tree is a liability tree
 title: The organization tree is a liability tree; projects and settlement points are addressing beneath it
 status: proposed
 date: 2026-08-10

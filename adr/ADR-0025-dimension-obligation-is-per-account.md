@@ -1,5 +1,6 @@
 ---
 id: ADR-0025
+headline: dimension obligation is per account
 title: The dimension obligation is per account, and what is refused is absence rather than null
 status: proposed
 date: 2026-08-09

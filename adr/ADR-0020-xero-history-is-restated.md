@@ -1,5 +1,6 @@
 ---
 id: ADR-0020
+headline: Xero history is restated
 title: Xero history is restated, not imported as-is
 status: proposed
 date: 2026-08-09

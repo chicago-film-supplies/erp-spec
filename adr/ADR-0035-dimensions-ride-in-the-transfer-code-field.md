@@ -1,5 +1,6 @@
 ---
 id: ADR-0035
+headline: dimensions ride in Transfer.code
 title: Dimensions ride on the transfer in `Transfer.code`, not in `user_data`
 status: rejected
 date: 2026-08-16

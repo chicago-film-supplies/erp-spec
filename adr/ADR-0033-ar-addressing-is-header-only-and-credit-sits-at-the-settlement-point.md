@@ -1,5 +1,6 @@
 ---
 id: ADR-0033
+headline: one node addresses a document
 title: A document is addressed to exactly one node by a level-tagged reference, and unallocated credit sits at the settlement point
 status: proposed
 date: 2026-08-11

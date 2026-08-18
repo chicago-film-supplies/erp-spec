@@ -1,5 +1,6 @@
 ---
 id: SPIKE-009
+headline: what replaces Firestore listeners
 question: >-
   What replaces Firestore real-time listeners — MongoDB change streams plus a socket layer — and
   what does that actually cost on the client?

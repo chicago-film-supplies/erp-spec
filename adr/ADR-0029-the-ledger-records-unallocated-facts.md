@@ -1,5 +1,6 @@
 ---
 id: ADR-0029
+headline: the ledger does not allocate
 title: The ledger records un-allocated facts; allocation is a specified reporting act
 status: proposed
 date: 2026-08-09

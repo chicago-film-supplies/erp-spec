@@ -1,5 +1,6 @@
 ---
 id: ADR-0018
+headline: plain chart, dimensions on the posting
 title: A plain chart of accounts, with dimensions carried on the posting
 status: superseded
 date: 2026-08-09

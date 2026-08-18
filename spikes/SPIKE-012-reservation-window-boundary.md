@@ -1,5 +1,6 @@
 ---
 id: SPIKE-012
+headline: when a booking becomes a pending transfer
 question: >-
   At which fulfillment moment does a booking become a TigerBeetle pending transfer, and how much of
   order status is derivable once that boundary is fixed?

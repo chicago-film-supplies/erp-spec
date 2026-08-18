@@ -1,5 +1,6 @@
 ---
 id: ADR-0008
+headline: dimension-exploded ledger accounts
 title: Dimension-exploded TigerBeetle accounts
 status: superseded
 date: 2026-08-08

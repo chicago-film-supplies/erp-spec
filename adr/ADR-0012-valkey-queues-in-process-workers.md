@@ -1,5 +1,6 @@
 ---
 id: ADR-0012
+headline: Valkey queues replace Cloud Tasks
 title: Valkey-backed queues with in-process workers, replacing Cloud Tasks
 status: accepted
 date: 2026-08-09

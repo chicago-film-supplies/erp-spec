@@ -1,5 +1,6 @@
 ---
 id: SPIKE-001
+headline: TigerBeetle under Deno
 question: Does the TigerBeetle client load and run under Deno via node-api compatibility?
 timebox: 2 days
 method: >-

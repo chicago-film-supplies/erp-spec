@@ -1,5 +1,6 @@
 ---
 id: ADR-0007
+headline: own the asset register, both bases
 title: Replace asset.accountant; dual GAAP/tax basis in scope
 status: accepted
 date: 2026-08-08

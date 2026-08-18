@@ -1,5 +1,6 @@
 ---
 id: SPIKE-008
+headline: Chicago lease transaction tax
 question: >-
   How do the Chicago Personal Property Lease Transaction Tax and Illinois home-rule sales tax
   apply across equipment rental versus services?

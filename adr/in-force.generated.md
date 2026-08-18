@@ -142,6 +142,12 @@ Accepted and not superseded, as of the last `deno task gen`.
 
 > **In the context of** ADR-0029 having made allocation a reporting act, **facing** a chart that also carried the reporting _classification_ on the posting, **we decided** that a posting records keys — causal order(s), invoice, line — and never a product line, **to achieve** a ledger whose facts do not move when a category does, **accepting** that no dimensional balance can be read from the ledger without joining to the product master.
 
+## [ADR-0037](ADR-0037-decisions-assert-addressable-claims.md) — An id carries meaning where it is used — a headline on every id, and addressable claims inside a decision
+
+**Contexts:** ledger · **Decided:** 2026-08-17
+
+> **In the context of** a spec whose authority is prose, **facing** a measured 22:1 mismatch between what is cited (a document) and what is claimed (about twenty statements inside it), **we decided** that an ADR additionally asserts individually addressable claims, typed as decision or premise, **to achieve** corrections that can be swept and premises that can go stale without touching a frozen decision, **accepting** a second surface on every ADR and a convention that only pays off as it is adopted.
+
 ## [ADR-0038](ADR-0038-labor-with-no-causal-order-is-not-cogs.md) — Labor with no causal order is not COGS — 5801 is not created and 6600 Wages narrows instead
 
 **Contexts:** ledger, fulfillment · **Decided:** 2026-08-17
@@ -161,4 +167,3 @@ Accepted and not superseded, as of the last `deno task gen`.
 | [ADR-0031](ADR-0031-allocation-basis-is-goods-revenue-on-the-causal-order.md) | The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy | 2026-11-01 | — | OQ-006, OQ-018, OQ-031, OQ-032, OQ-033 |
 | [ADR-0032](ADR-0032-the-customer-tree-is-a-liability-tree.md) | The organization tree is a liability tree; projects and settlement points are addressing beneath it | 2026-11-15 | — | OQ-035, OQ-036, OQ-038, OQ-039, HOT-006 |
 | [ADR-0033](ADR-0033-ar-addressing-is-header-only-and-credit-sits-at-the-settlement-point.md) | A document is addressed to exactly one node by a level-tagged reference, and unallocated credit sits at the settlement point | 2026-11-15 | — | OQ-030, OQ-038, OQ-040 |
-| [ADR-0037](ADR-0037-decisions-assert-addressable-claims.md) | An id carries meaning where it is used — a headline on every id, and addressable claims inside a decision | 2026-12-01 | — | HOT-016 |

@@ -1,5 +1,6 @@
 ---
 id: ADR-0028
+headline: self-hosted rendering and observability
 title: The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability
 status: proposed
 date: 2026-08-09

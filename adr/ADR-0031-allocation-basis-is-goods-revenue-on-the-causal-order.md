@@ -1,5 +1,6 @@
 ---
 id: ADR-0031
+headline: allocate by goods revenue on the causal order
 title: The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy
 status: proposed
 date: 2026-08-09

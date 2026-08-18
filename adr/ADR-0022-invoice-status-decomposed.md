@@ -1,5 +1,6 @@
 ---
 id: ADR-0022
+headline: invoice status is two derived projections
 title: Invoice status decomposes into two derived projections
 status: accepted
 date: 2026-08-09

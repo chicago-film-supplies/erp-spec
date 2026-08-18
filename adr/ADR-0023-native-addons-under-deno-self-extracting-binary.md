@@ -1,5 +1,6 @@
 ---
 id: ADR-0023
+headline: native addons under Deno, one binary
 title: Native Node-API addons load under Deno; the deployment unit is a self-extracting compiled binary
 status: accepted
 date: 2026-08-09

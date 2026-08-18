@@ -1,5 +1,6 @@
 ---
 id: ADR-0026
+headline: the tax book does not post
 title: The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time
 status: accepted
 date: 2026-08-09

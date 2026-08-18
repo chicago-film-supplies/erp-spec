@@ -1,5 +1,6 @@
 ---
 id: ADR-0004
+headline: keep Deno and TypeScript
 title: Retain Deno/Hono and TypeScript
 status: accepted
 date: 2026-08-08

@@ -1,5 +1,6 @@
 ---
 id: ADR-0009
+headline: no foreign ids in domain models
 title: Anticorruption layer — foreign identifiers never enter domain models
 status: accepted
 date: 2026-08-08

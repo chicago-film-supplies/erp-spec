@@ -1,5 +1,6 @@
 ---
 id: ADR-0015
+headline: reservations are pending transfers
 title: Inventory reservations are TigerBeetle pending transfers, over the operational window only
 status: proposed
 date: 2026-08-09

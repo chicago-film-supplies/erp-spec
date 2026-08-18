@@ -1,5 +1,6 @@
 ---
 id: ADR-0036
+headline: the ledger carries keys, not classifications
 title: The ledger carries keys, not classifications — product line is derived at report time
 status: accepted
 date: 2026-08-16
