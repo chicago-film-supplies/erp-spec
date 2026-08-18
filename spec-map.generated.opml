@@ -58,7 +58,7 @@
           <outline text="[object Object]"/>
         </outline>
       </outline>
-      <outline text="Open questions (12 of 52 still open)" _note="The bottleneck. Each blocks what is listed under it.">
+      <outline text="Open questions (13 of 53 still open)" _note="The bottleneck. Each blocks what is listed under it.">
         <outline text="OQ-001 — Are fulfillment legs first-class recorded events with their own identity, or derived from the order…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-007"/>
           <outline text="blocks ADR-0011"/>
@@ -196,8 +196,11 @@
         </outline>
         <outline text="OQ-051 — Where is the seam between CFS and a chat system for comments and threads — CFS implements them, or…" _note="owner: alex · decide by: 2027-03-31"/>
         <outline text="OQ-052 — What vehicle rate absorbs into 5900, over what normal-capacity denominator — and where does an OVER…" _note="owner: alex · decide by: 2027-01-31"/>
+        <outline text="OQ-053 — On a production service agreement, is CFS the PRINCIPAL or the AGENT — who contracts the crew, whos…" _note="owner: alex · decide by: 2027-01-31">
+          <outline text="blocks HOT-017"/>
+        </outline>
       </outline>
-      <outline text="Conflicts (0 open)">
+      <outline text="Conflicts (1 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labor) or an own long-haul run (labor-bearing)? T…" _note="Decides whether a trucked fulfillment absorbs labor cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
           <outline text="blocks OQ-010"/>
           <outline text="blocks ADR-0011"/>
@@ -254,6 +257,7 @@
         <outline text="HOT-016 — `adr/ADR-0030` — ACCEPTED and FROZEN 2026-08-16 — asserts as a supporting contrast that &quot;ADR-0019 c…" _note="⚠️ **The DECISION is unaffected and that is what makes this a hotspot rather than a supersession.** Vehicle absorption is still rate-based, 5901 still means utilisation plus rate deviation, and no account or basis in ADR-0030 changes. What is wrong is the CONTRAST it drew, not the conclusion it reached — ADR-0034's third row exactly: &quot;stands, but a fact it cited was wrong ⇒ no new ADR; a dated note in inbox/, plus a hotspots.yaml entry when it contradicts something&quot;. ⚠️ **FIRST USE OF THAT PATH.** HOT-006 through HOT-015 are all `resolved` and all carry `resolved_by: ADR-XXXX` — every one is &quot;two statements conflict and a DECISION settles it&quot;. None is &quot;an accepted ADR cited a fact that later measured false&quot;. Under this repo's own rule that an unexercised branch is a claim rather than a capability, the machinery was assumed not to work until taken. ⚠️ **And FIVE MUTABLE artifacts repeated the refuted claim, two of them left behind by the very amendment that found the defect.** ⚠️ **This entry said THREE until the sweep ran** — the count came from a single grep pattern, and it was wrong TWICE. Two surfaced under different phrasing on the day: the golden vector `guaranteed-hours-unworked-land-in-5801.yaml` (&quot;costing is actual at that person's own wage, so no standard rate exists to deviate from&quot;) and `glossary.yaml`'s `standard cost` term (&quot;the target system does not implement this&quot;). ⚠️ **And a SIXTH was found on 2026-08-17 while proposing a charter edit: `charter.md`'s in-scope bullet said &quot;**actual**-cost absorption into COGS, where the absorbed/unabsorbed split measures **utilisation** rather than rate variance&quot; — both halves refuted, in the repo's TOP-LEVEL document.** The sweep missed it because the pattern was &quot;costed at actual&quot; and the charter says &quot;actual-cost absorption&quot;. ⇒ **A count stated from one search is a count of that search** — recorded as a footgun in `CLAUDE.md` the same afternoon, and violated twice more before the day ended, including here. ADR-0019's body was corrected to the measurement while its TITLE and its SUMMARY BLOCKQUOTE were not — and ADR-0019 has **121 citations** across the spec, so a title is what most readers take away. `5800`'s chart reason repeated it too. ⚠️ **AND IT HAPPENED A FOURTH TIME, INSIDE THIS HOTSPOT.** The file was renamed `…-is-actual.md` → `…-is-normal-costing.md` as part of resolving this, and the evidence list above still cited the old path. **Gate 11 caught it** — which is the difference between this instance and the three before it: the earlier ones survived because nothing executed on them. **That is the HOT-011 / HOT-015 pattern for the third time** — HOT-015's own text calls itself &quot;HOT-011 surviving in the one artifact its resolution did not sweep&quot; — and the first time the incomplete sweep was made by the same session that opened the hotspot. **Amending a body is not amending a decision.**">
           <outline text="blocks ADR-0019"/>
         </outline>
+        <outline text="HOT-017 — `charter.md` states that a production service agreement's money moves through `2800 - PSA Liability…" _note="⚠️ **The charter asserts a MECHANISM, not a preference, and the mechanism decides the revenue figure.** Billing through a liability is the agency treatment: the client's budget is money CFS holds. Billing to 4100 is the principal treatment: it is CFS revenue. Net income is the same either way and **the top line and every margin computed from it are not** — so the two readings produce different financial statements from the same events. ⚠️ **Both treatments are live for the SAME CUSTOMER.** DePaul's four labor-contract invoices total $38,150 on 4100; its September set-dec invoice bills $7,000 through 2800. Nothing in the data distinguishes them, so the discriminator is whoever wrote the invoice. ⚠️ **And the same line NAME is coded to two accounts** — `Contract Labor` is 4120 for N2ition LLC and 4100 for 637 Films. **This is a spec statement against a measurement, which is HOT-016's shape** rather than two spec statements against each other. The charter is not wrong about what SHOULD happen; it asserts as settled a thing that has never been decided, and erp-spec#35 records that PSA has no requirement, no event and no posting rule to make it true. ⚠️ **`4130`'s $13,202.34 must not be used to size PSA** until it reconciles to something. It is 13% of the invoiced total and sits on an account no invoice line names, so whatever produced it is a path this repo has not seen."/>
       </outline>
       <outline text="Decisions (23 in force, 11 proposed)">
         <outline text="In force (23)">
@@ -475,7 +479,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (67 unpromoted of 87)" _note="no drops pending">
+      <outline text="Capture (68 unpromoted of 88)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -541,6 +545,7 @@
         <outline text="Owner — the Wrapbook platform fee absorbs into COGS, so the absorbed rate is the WHOLE charge (19.8…" _note="inbox/2026-08-17-owner-the-platform-fee-absorbs-into-cogs-so-the-absorbed-rate-is-the-whole-wrapbook-charge.md"/>
         <outline text="Survey — ADR-0019's &quot;actual vs standard&quot; is a false binary and the answer is NORMAL costing; the cr…" _note="inbox/2026-08-17-survey-labor-costing-is-normal-costing-not-actual-the-crew-is-two-populations-with-two-true-costs-and-idle-time-splits-normal-from-abnormal.md"/>
         <outline text="Survey — four of six references leave labor with no cost object in the natural expense account and…" _note="inbox/2026-08-17-survey-labor-with-no-cost-object-stays-in-the-natural-expense-account-and-the-vehicle-rate-residual-does-not-follow.md"/>
+        <outline text="Survey — PSA is an ASC 606 principal-versus-agent question, and the live books answer it four diffe…" _note="inbox/2026-08-17-survey-psa-is-a-principal-or-agent-question-and-the-live-books-answer-it-four-different-ways.md"/>
         <outline text="ADR-0003 replaces Firestore, which retires the prod→dev eventarc mirror as a mechanism — but the sp…" _note="inbox/2026-08-17-the-v2-rebuild-retires-the-prod-to-dev-mirror-and-the-spec-never-states-what-replaces-it.md"/>
         <outline text="The vehicle figures measured in Xero — $21,844.77 reproduces EXACTLY, 6302 is 1.75× the whole owned…" _note="inbox/2026-08-17-the-vehicle-figures-measured-in-xero-21844-77-reproduces-exactly-and-6302-is-larger-than-the-whole-owned-block.md"/>
       </outline>

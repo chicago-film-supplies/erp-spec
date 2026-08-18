@@ -714,3 +714,50 @@ hotspots:
       AUTHORITY that settled it"** — which can be an ADR, an answered OQ, or in principle a
       measurement with no home. Recorded rather than fixed, because widening the field is a schema
       change nobody has asked for and one instance is not yet a pattern.
+
+  - id: HOT-017
+    statement: >-
+      `charter.md` states that a production service agreement's money moves through
+      `2800 - PSA Liability Clearing` — _"moving a client's payroll through `2800 - PSA Liability
+      Clearing` is the service being sold"_ — and names `4130 - PSA Income` as what CFS sells.
+      **MEASURED 2026-08-17 against the live invoice corpus, the books do neither for 93% of it**
+      (`code:2026-08-17:erp-spec:spikes/harness/psa-probe.ts`, 1,013 invoices / 14,425 lines):
+      of **$101,720.00** of PSA-shaped invoice lines, **$69,650.00 is billed GROSS to
+      `4100 - Service Income`**, **$25,070.00 gross to `4120 - Contract Labor Income`**, and only
+      **$7,000.00 passes through `2800`**. `4130`, `2801`, `2802` and `2803` are named by **zero**
+      invoice lines, while the Xero P&L shows **$13,202.34** on `4130` for FY2025 — income recorded
+      in Xero with no CFS invoice behind it.
+    contexts: [ledger, billing]
+    why_it_matters: >-
+      ⚠️ **The charter asserts a MECHANISM, not a preference, and the mechanism decides the revenue
+      figure.** Billing through a liability is the agency treatment: the client's budget is money
+      CFS holds. Billing to 4100 is the principal treatment: it is CFS revenue. Net income is the
+      same either way and **the top line and every margin computed from it are not** — so the two
+      readings produce different financial statements from the same events.
+      ⚠️ **Both treatments are live for the SAME CUSTOMER.** DePaul's four labor-contract invoices
+      total $38,150 on 4100; its September set-dec invoice bills $7,000 through 2800. Nothing in the
+      data distinguishes them, so the discriminator is whoever wrote the invoice.
+      ⚠️ **And the same line NAME is coded to two accounts** — `Contract Labor` is 4120 for N2ition
+      LLC and 4100 for 637 Films.
+      **This is a spec statement against a measurement, which is HOT-016's shape** rather than two
+      spec statements against each other. The charter is not wrong about what SHOULD happen; it
+      asserts as settled a thing that has never been decided, and erp-spec#35 records that PSA has
+      no requirement, no event and no posting rule to make it true.
+      ⚠️ **`4130`'s $13,202.34 must not be used to size PSA** until it reconciles to something. It is
+      13% of the invoiced total and sits on an account no invoice line names, so whatever produced it
+      is a path this repo has not seen.
+    evidence: >-
+      `inbox/2026-08-17-survey-psa-is-a-principal-or-agent-question-and-the-live-books-answer-it-four-different-ways.md`
+      — the six-reference survey, and the measurement above.
+    blocks: []
+    status: open
+    resolution_shape: >-
+      **Not a hotspot the spec can close on its own.** ASC 606-10-55-37's control test decides it and
+      it turns on facts only the owner has (OQ-053): who contracts the crew, whose insurance answers
+      for them, and who bears the loss if the client's money does not arrive. Once answered, the
+      charter sentence is either confirmed or amended in the same change as the PSA posting rules
+      (erp-spec#35), and the resolution is an ADR because a classification is being chosen.
+      ⚠️ **Whatever the answer, the history stays inconsistent** — 93% of it disagrees with the
+      agency reading and 7% with the principal one, so the cutover carries a comparability break of
+      a kind neither ADR-0020 nor ADR-0030 has: an inconsistent past rather than a consistent one
+      presented differently.

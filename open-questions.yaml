@@ -2121,3 +2121,37 @@ open_questions:
       `reporting/allocation-bases.yaml`: every field there (`base`, `zero_base`, `rounding`)
       describes spreading a pool proportionally over a base, and a rate applied to a quantity has
       none of them. ADR-0030 cites that file's discipline, not its registry.
+  - id: OQ-053
+    question: >-
+      On a production service agreement, is CFS the PRINCIPAL or the AGENT — who contracts the crew,
+      whose insurance answers for them, and who bears the loss if the client's money does not arrive?
+    owner: alex
+    decide_by: 2027-01-31
+    blocks: [HOT-017]
+    status: open
+    notes: >-
+      Opened 2026-08-17 by the PSA survey
+      (`inbox/2026-08-17-survey-psa-is-a-principal-or-agent-question-and-the-live-books-answer-it-four-different-ways.md`),
+      for erp-spec#35. **It is the question the whole PSA specification waits on**: principal means
+      the client's budget is CFS revenue and the union payroll is CFS cost; agent means CFS reports
+      only its fee and the budget is money held. Net income is identical; the top line and every
+      margin computed from it are not.
+      **ASC 606-10-55-37 decides it by CONTROL** — is CFS primarily responsible for fulfilling the
+      promise — with the indicators at 55-39 being primary responsibility, inventory risk (not
+      applicable to a service) and price discretion.
+      ⚠️ **The indicators point at PRINCIPAL, which is the opposite of what the spec assumes.** Owner,
+      2026-08-17: overseas productions use a PSA because they **will not stand up a US entity** and
+      cannot hold union deals for a few days of filming — so the arrangement exists precisely because
+      the client cannot be the employer. Against that, `charter.md` and erp-spec#35 both describe PSA
+      as a pass-through, and the ledger survey called it "a pass-through, not a cost CFS bears".
+      **Three facts settle it and none of them is in the books:**
+      · who signs the crew's engagement — CFS, or the client with CFS administering;
+      · whose workers' compensation and general liability answer for those people;
+      · who bears the loss if the client's money does not arrive after the crew has been paid.
+      ⚠️ **Do not read the live books as the answer.** Measured 2026-08-17, they say both: $69,650 +
+      $25,070 billed GROSS to 4100 and 4120, and $7,000 through the 2800 liability — for the same
+      customer, on the same shape of work.
+      ✅ **One half needs no ruling**: money received before the work is performed is a liability
+      under every reference, so `2800` is correct as a holding account whatever D1 decides. And PSA
+      labor never enters the rental or delivery pools under either answer — it is its own product
+      line.

@@ -11,18 +11,18 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 12 open | 40 answered of 52 · **0 with no owner or no decide-by** |
-| Conflicts (HOT) | 16 | 0 open |
+| Open questions | 13 open | 40 answered of 53 · **0 with no owner or no decide-by** |
+| Conflicts (HOT) | 17 | 1 open |
 | Decisions (ADR) | 38 | 23 in force · 11 proposed |
 | Spikes | 12 | 9 open |
 | Requirements | 21 | 0 without a scenario |
-| Inbox | 87 | 67 unpromoted |
+| Inbox | 88 | 68 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
 ## The bottleneck: undecided questions
 
-**12 of 52 still open**, soonest decide-by first.
+**13 of 53 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
@@ -35,6 +35,7 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-044` | Once wages move into COGS, what stays in `6600 Wages` — and can salaried sales/admin staf… | alex | 2026-12-15 | — |
 | `OQ-039` | `organizations.tax_profile` carries two different concepts in one enum — who owes (applie… | alex | 2027-01-15 | — |
 | `OQ-052` | What vehicle rate absorbs into 5900, over what normal-capacity denominator — and where do… | alex | 2027-01-31 | — |
+| `OQ-053` | On a production service agreement, is CFS the PRINCIPAL or the AGENT — who contracts the… | alex | 2027-01-31 | `HOT-017` |
 | `OQ-045` | When a vendor bills LESS than was accrued, what retires the residual left in `2010 Accrue… | alex | 2027-02-15 | — |
 | `OQ-048` | At what rate is a contributed (unpaid owner) shift costed in the IMPUTED labor view — the… | alex | 2027-03-15 | — |
 | `OQ-051` | Where is the seam between CFS and a chat system for comments and threads — CFS implements… | alex | 2027-03-31 | — |
@@ -43,7 +44,9 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 
 ## Open conflicts
 
-None.
+| HOT | Statement | Blocks |
+|---|---|---|
+| `HOT-017` | `charter.md` states that a production service agreement's money moves through `2800 - PSA Liability Clearing`… | — |
 
 ## Decisions
 
@@ -117,17 +120,18 @@ it is counted separately on purpose, and a milestone is not done because its che
 | `m1` | Big-picture event storm | `m0` | 1 | — | 2 | — |
 | `m2` | Context map and glossary v1 | `m1` | 2 | — | 1 | — |
 | `m3` | Ledger core | `m2` | 5 | — | — | — |
-| `m4` | All spikes closed by ADR | `m3` | 1 | 1 | — | 1 |
+| `m4` | All spikes closed by ADR | `m3` | 0 | 2 | — | 1 |
 | `m5` | Formal specs checking clean | `m4` | 1 | — | 2 | — |
 | `m6` | Migration field map complete | `m2` | 1 | — | 3 | — |
 | `m7` | Walking skeleton defined | `m3` `m5` `m6` | 0 | — | 3 | — |
 | `spec-v1` | Tag spec-v1 | `m0` `m1` `m2` `m3` `m4` `m5` `m6` `m7` | 1 | — | 3 | 1 |
 
-### Machine-checkable criteria not yet met (1)
+### Machine-checkable criteria not yet met (2)
 
 | Milestone | Criterion | Check | Measured |
 |---|---|---|---|
 | `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 12 spikes, 9 open, 0 closed without naming an ADR |
+| `m4` | Every HOT- is resolved or has an ADR that consciously defers it with… | `hotspots_resolved` | 17 hotspots, 1 unresolved |
 
 ## Coverage gaps
 

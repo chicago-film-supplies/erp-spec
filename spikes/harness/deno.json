@@ -38,6 +38,8 @@
     "//chart": "The LIVE chart of accounts for erp-spec#8 step 4. Writes migration/live-chart.measured.yaml, which gate 16 checks ledger/chart-of-accounts.yaml against. Firestore mirror only — never the Xero API.",
     "chart": "deno run --allow-read --allow-write=../../migration --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal live-chart-probe.ts",
     "matrix-lines": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal product-line-matrix-probe.ts",
+    "//psa": "Where a production service agreement's money sits in the live invoice corpus (erp-spec#35). A census of INVOICED lines, never of the GL — an account with no invoice line naming it may still have moved money.",
+    "psa": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal psa-probe.ts",
     "posting-keys": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal posting-key-width-probe.ts"
   },
 
