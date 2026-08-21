@@ -484,7 +484,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (75 unpromoted of 95)" _note="no drops pending">
+      <outline text="Capture (76 unpromoted of 96)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -560,6 +560,7 @@
         <outline text="Owner — a public client app is IN SCOPE with three capabilities: real-time stock availability, quot…" _note="inbox/2026-08-18-owner-the-public-client-app-is-in-scope-real-time-availability-quote-request-and-in-store-checkout.md"/>
         <outline text="Rule 8a survey — a labor rate variance from per-run EOR burden pricing has no asset to revalue, so…" _note="inbox/2026-08-18-survey-the-labor-variance-has-no-asset-to-revalue-so-the-lever-is-the-rate-not-the-variance-account.md"/>
         <outline text="Superseding ADR-0018 moved the ground under all three unsurveyed proposed ADRs — one mechanism is n…" _note="inbox/2026-08-20-superseding-adr-0018-invalidated-the-foundations-of-three-proposed-adrs-and-nothing-detected-it.md"/>
+        <outline text="Rule 8a survey for ADR-0029 — three of five systems post allocations and none derives at report tim…" _note="inbox/2026-08-20-survey-nobody-keeps-allocations-out-of-the-ledger-they-keep-them-out-of-the-statements.md"/>
       </outline>
     </outline>
   </body>

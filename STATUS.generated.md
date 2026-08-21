@@ -16,7 +16,7 @@ is `deno task validate`'s judgement, not this file's.
 | Decisions (ADR) | 40 | 25 in force · 11 proposed |
 | Spikes | 12 | 7 open |
 | Requirements | 21 | 0 without a scenario |
-| Inbox | 95 | 75 unpromoted |
+| Inbox | 96 | 76 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
@@ -88,7 +88,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | `ADR-0025` | The dimension obligation is per account, and what is refused is absence rather than null | 2026-10-01 | — | **rule 8a survey** |
 | `ADR-0027` | Retain Mapbox for geocoding and Resend for transactional email, at the boundary | 2026-10-01 | — | — |
 | `ADR-0028` | The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability | 2026-10-01 | — | — |
-| `ADR-0029` | The ledger records un-allocated facts; allocation is a specified reporting act | 2026-10-01 | — | **rule 8a survey** |
+| `ADR-0029` | The ledger records un-allocated facts; allocation is a specified reporting act | 2026-10-01 | — | — |
 | `ADR-0031` | The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy | 2026-11-01 | — | `OQ-033` |
 | `ADR-0032` | The organization tree is a liability tree; projects and settlement points are addressing beneath it | 2026-11-15 | — | `OQ-035` `OQ-038` `OQ-039` |
 | `ADR-0033` | A document is addressed to exactly one node by a level-tagged reference, and unallocated credit sits at the settlement point | 2026-11-15 | — | `OQ-030` `OQ-038` `OQ-040` |

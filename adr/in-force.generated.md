@@ -163,7 +163,7 @@ Accepted and not superseded, as of the last `deno task gen`.
 | [ADR-0025](ADR-0025-dimension-obligation-is-per-account.md) | The dimension obligation is per account, and what is refused is absence rather than null | 2026-10-01 | — | **rule 8a survey** |
 | [ADR-0027](ADR-0027-retain-mapbox-and-resend-at-the-boundary.md) | Retain Mapbox for geocoding and Resend for transactional email, at the boundary | 2026-10-01 | — | — |
 | [ADR-0028](ADR-0028-self-hosted-tier-gotenberg-and-victoria.md) | The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability | 2026-10-01 | — | — |
-| [ADR-0029](ADR-0029-the-ledger-records-unallocated-facts.md) | The ledger records un-allocated facts; allocation is a specified reporting act | 2026-10-01 | — | **rule 8a survey** |
+| [ADR-0029](ADR-0029-the-ledger-records-unallocated-facts.md) | The ledger records un-allocated facts; allocation is a specified reporting act | 2026-10-01 | — | — |
 | [ADR-0031](ADR-0031-allocation-basis-is-goods-revenue-on-the-causal-order.md) | The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy | 2026-11-01 | — | `OQ-033` |
 | [ADR-0032](ADR-0032-the-customer-tree-is-a-liability-tree.md) | The organization tree is a liability tree; projects and settlement points are addressing beneath it | 2026-11-15 | — | `OQ-035` `OQ-038` `OQ-039` |
 | [ADR-0033](ADR-0033-ar-addressing-is-header-only-and-credit-sits-at-the-settlement-point.md) | A document is addressed to exactly one node by a level-tagged reference, and unallocated credit sits at the settlement point | 2026-11-15 | — | `OQ-030` `OQ-038` `OQ-040` |

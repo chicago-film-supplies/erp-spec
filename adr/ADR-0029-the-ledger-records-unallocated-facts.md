@@ -9,6 +9,8 @@ deciders: [repo owner]
 contexts: [ledger, billing, fulfillment]
 relates_to: [ADR-0014, ADR-0017, ADR-0018, ADR-0019, ADR-0025, OQ-006, OQ-018]
 accounting_shaped: true
+survey:
+  - inbox/2026-08-20-survey-nobody-keeps-allocations-out-of-the-ledger-they-keep-them-out-of-the-statements.md
 supersedes:
 superseded_by:
 ---
