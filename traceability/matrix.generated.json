@@ -5,7 +5,7 @@
     "adrs": 40,
     "adrs_accepted": 25,
     "events": 38,
-    "inbox": 96,
+    "inbox": 98,
     "inbox_promoted": 20
   },
   "requirements": [
@@ -645,6 +645,8 @@
       "inbox/2026-08-18-owner-the-public-client-app-is-in-scope-real-time-availability-quote-request-and-in-store-checkout.md",
       "inbox/2026-08-18-survey-the-labor-variance-has-no-asset-to-revalue-so-the-lever-is-the-rate-not-the-variance-account.md",
       "inbox/2026-08-20-superseding-adr-0018-invalidated-the-foundations-of-three-proposed-adrs-and-nothing-detected-it.md",
+      "inbox/2026-08-20-survey-every-system-puts-not-applicable-on-the-account-never-on-the-posting-and-the-criterion-is-tie-out-not-classification.md",
+      "inbox/2026-08-20-survey-it-is-a-recast-not-a-restatement-and-the-migration-delta-is-231796-in-lines-untracked-by-both-systems.md",
       "inbox/2026-08-20-survey-nobody-keeps-allocations-out-of-the-ledger-they-keep-them-out-of-the-statements.md"
     ]
   }

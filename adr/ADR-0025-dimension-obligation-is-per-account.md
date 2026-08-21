@@ -7,8 +7,10 @@ date: 2026-08-09
 review_by: 2026-10-01
 deciders: [repo owner]
 contexts: [ledger, billing]
-relates_to: [HOT-011, OQ-021, OQ-022, OQ-025, REQ-LED-001, ADR-0009, ADR-0018, ADR-0020]
+relates_to: [HOT-011, HOT-019, OQ-021, OQ-022, OQ-025, REQ-LED-001, ADR-0009, ADR-0018, ADR-0020]
 accounting_shaped: true
+survey:
+  - inbox/2026-08-20-survey-every-system-puts-not-applicable-on-the-account-never-on-the-posting-and-the-criterion-is-tie-out-not-classification.md
 supersedes:
 superseded_by:
 ---

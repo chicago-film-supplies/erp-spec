@@ -7,8 +7,10 @@ date: 2026-08-09
 review_by: 2026-10-15
 deciders: [repo owner]
 contexts: [ledger, billing]
-relates_to: [HOT-006, OQ-012, ADR-0018]
+relates_to: [HOT-006, HOT-020, OQ-012, ADR-0018]
 accounting_shaped: true
+survey:
+  - inbox/2026-08-20-survey-it-is-a-recast-not-a-restatement-and-the-migration-delta-is-231796-in-lines-untracked-by-both-systems.md
 supersedes:
 superseded_by:
 ---

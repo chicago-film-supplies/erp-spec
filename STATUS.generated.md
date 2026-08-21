@@ -12,11 +12,11 @@ is `deno task validate`'s judgement, not this file's.
 | | Count | |
 |---|---:|---|
 | Open questions | 13 open | 40 answered of 53 · **0 with no owner or no decide-by** |
-| Conflicts (HOT) | 18 | 2 open |
+| Conflicts (HOT) | 20 | 4 open |
 | Decisions (ADR) | 40 | 25 in force · 11 proposed |
 | Spikes | 12 | 7 open |
 | Requirements | 21 | 0 without a scenario |
-| Inbox | 96 | 76 unpromoted |
+| Inbox | 98 | 78 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
@@ -48,6 +48,8 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 |---|---|---|
 | `HOT-017` | `charter.md` states that a production service agreement's money moves through `2800 - PSA Liability Clearing`… | — |
 | `HOT-018` | `adr/ADR-0019` — ACCEPTED and FROZEN 2026-08-17 — states that the capped components of employer burden leave… | — |
+| `HOT-019` | `adr/ADR-0025` — `proposed` — decides that _"Each entry in `ledger/chart-of-accounts.yaml` carries an explici… | `ADR-0025` |
+| `HOT-020` | `adr/ADR-0020` — `proposed` — faces _"a new ledger where that dimension **is not nullable**"_ and decides _"*… | `ADR-0020` |
 
 ## Decisions
 
@@ -84,8 +86,8 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | ADR | Title | Review by | Supersedes on acceptance | Blocked on |
 |---|---|---|---|---|
 | `ADR-0015` | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-11-01 | — | `SPIKE-002` `SPIKE-012` |
-| `ADR-0020` | Xero history is restated, not imported as-is | 2026-10-15 | — | **rule 8a survey** |
-| `ADR-0025` | The dimension obligation is per account, and what is refused is absence rather than null | 2026-10-01 | — | **rule 8a survey** |
+| `ADR-0020` | Xero history is restated, not imported as-is | 2026-10-15 | — | `HOT-020` |
+| `ADR-0025` | The dimension obligation is per account, and what is refused is absence rather than null | 2026-10-01 | — | `HOT-019` |
 | `ADR-0027` | Retain Mapbox for geocoding and Resend for transactional email, at the boundary | 2026-10-01 | — | — |
 | `ADR-0028` | The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability | 2026-10-01 | — | — |
 | `ADR-0029` | The ledger records un-allocated facts; allocation is a specified reporting act | 2026-10-01 | — | — |
@@ -134,7 +136,7 @@ it is counted separately on purpose, and a milestone is not done because its che
 | Milestone | Criterion | Check | Measured |
 |---|---|---|---|
 | `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 12 spikes, 7 open, 0 closed without naming an ADR |
-| `m4` | Every HOT- is resolved or has an ADR that consciously defers it with… | `hotspots_resolved` | 18 hotspots, 2 unresolved |
+| `m4` | Every HOT- is resolved or has an ADR that consciously defers it with… | `hotspots_resolved` | 20 hotspots, 4 unresolved |
 
 ## Coverage gaps
 

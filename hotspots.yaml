@@ -847,3 +847,121 @@ hotspots:
       it does not carry FUTA, SUTA or FICA, because CFS does not compute them. The component
       arithmetic is kept as append-only evidence in case the charter's payroll non-goal is ever
       revisited — which would be an ADR, not an amendment.
+
+  - id: HOT-019
+    headline: "ADR-0025's mechanism is refused by a gate"
+    statement: >-
+      `adr/ADR-0025` — `proposed` — decides that _"Each entry in `ledger/chart-of-accounts.yaml`
+      carries an explicit `dimensions:` list — the dimensions a posting to it must carry"_, and
+      amends REQ-LED-001 so that _"a posting to an account whose `dimensions` list names a dimension
+      must DECLARE it"_. **`ADR-0036` — ACCEPTED 2026-08-16, superseding ADR-0018 — decides the
+      opposite**: _"`product_line` and `cost_type` are **not** posting fields. The product-line view
+      is derived at report time… `ledger/dimensions.yaml` describes a **reporting** taxonomy, not a
+      ledger one."_ ⚠️ **And it executes.** `tools/validate.ts` FAILS on any account carrying a
+      `dimensions` key, naming ADR-0036 in the message; measured 2026-08-20, **zero of 143 chart
+      entries carry one**. Enacting ADR-0025 as written turns CI red.
+    contexts: [ledger, billing]
+    why_it_matters: >-
+      ⚠️ **This is not a stale citation, it is a decision that cannot be enacted.** ADR-0025 is the
+      instrument that was to resolve HOT-011 and answer OQ-021, OQ-022 and OQ-025 — all four of
+      which are already resolved or answered — so the ADR is simultaneously the record of settled
+      rulings and a mechanism the repo has since forbidden.
+      ⚠️ **Of its four decision clauses, only one is both live and undecided.** The per-account
+      `dimensions:` list is refused by the gate; `Other`'s deletion was enacted by OQ-022 rather
+      than by this ADR; the REQ-LED-001 amendment is dead as stated because postings carry no
+      dimension to declare; and the `product_line: null` vs `4800 - Other Income` distinction
+      survives in substance while its phrasing ("a dimensioned account") does not.
+      ⇒ **Nothing detected this.** `validate.ts` mentions supersession 36 times — gate 6 for
+      symmetry, gate 14 to freeze bodies, and erp-spec#18 so the acceptance fields cannot be
+      forgotten — and **never asks whether a `proposed` ADR rests on a `superseded` one**. ADR-0036
+      was the FIRST supersession declared from a `proposed` ADR, so it exercised the declare-and-
+      enact path and not the notify-the-dependents path, which still does not exist. Two other
+      proposed ADRs name ADR-0018 the same way: ADR-0020, whose Y-statement premise ("a new ledger
+      where that dimension is not nullable") no longer holds, and ADR-0029, which is REINFORCED
+      because ADR-0036 preserved the half it relies on.
+      ⚠️ **The 2026-08-20 rule 8a survey found the rule is defensible but pointed at the wrong
+      field.** The criterion running through all five ERPs is not "was this classified" but "can the
+      book still be tied out if this is missing" — which endorses ADR-0036's derive-at-report-time
+      for `product_line`, and endorses moving the declare-or-be-rejected obligation to
+      **`causal_orders`**, a key that must tie out and that ADR-0029 already requires on every
+      posting. `ledger/posting-rules.yaml` already carries ~15 `causal_orders: null` declarations
+      with golden vectors on both arms, so the mechanism is exercised where the criterion says it
+      belongs.
+    evidence: >-
+      `inbox/2026-08-20-superseding-adr-0018-invalidated-the-foundations-of-three-proposed-adrs-and-nothing-detected-it.md`
+      — the supersession chain and the population, measured. ·
+      `inbox/2026-08-20-survey-every-system-puts-not-applicable-on-the-account-never-on-the-posting-and-the-criterion-is-tie-out-not-classification.md`
+      — the six-reference survey, which also measured that **no surveyed system lets a POSTING
+      declare "not applicable"**; every escape hatch sits on the account or the scope. ·
+      `code:2026-08-20:erp-spec@91be529:tools/validate.ts` — the gate that refuses the key.
+    blocks: [ADR-0025]
+    status: open
+    resolution_shape: >-
+      **ADR-0025 is `proposed`, so it may be amended freely** — immutability bites only at
+      `accepted` (ADR-0034), and ADR-0032 is the precedent for substantial amendment while proposed.
+      Three routes, and the choice is the owner's: redraft ADR-0025 onto the surviving question with
+      the obligation moved to `causal_orders`; split it, keeping the `4800` / declared-null half and
+      dropping the per-account list; or withdraw it in favour of a new narrow ADR, since the rulings
+      it was to record (HOT-011, OQ-021, OQ-022, OQ-025) have all landed by other instruments
+      already.
+      ⚠️ **Whichever route is taken, the survey's finding must survive it**: CFS would be the only
+      system in the survey where a posting can say "I considered this and no value applies", and
+      **$688.00 measures the operators who DECLINED, never the ones who GUESSED.**
+      ⚠️ **And a gate is owed** — a `proposed` ADR whose `relates_to` names a `superseded` ADR,
+      reported as a WARNING rather than a failure, because ADR-0029 cites ADR-0018 correctly and a
+      failing check would be wrong one time in three.
+
+  - id: HOT-020
+    headline: "ADR-0020 restates a field the migration drops"
+    statement: >-
+      `adr/ADR-0020` — `proposed` — faces _"a new ledger where that dimension **is not nullable**"_
+      and decides _"**Restate all.** Apply the mapping to every undimensioned line before import."_
+      **Both halves are void.** `ADR-0036` (ACCEPTED 2026-08-16, superseding ADR-0018) makes
+      `product_line` **not a posting field at all** — nullable or otherwise — and
+      `migration/field-map.yaml` already sets `items[].tracking_category` to
+      **`disposition: drop`**. ⇒ **The Decision describes an operation on a field the migration does
+      not carry, to satisfy a constraint that no longer exists.**
+    contexts: [ledger, billing]
+    why_it_matters: >-
+      ⚠️ **Accepting it would freeze the contradiction permanently.** A body freezes at acceptance
+      (ADR-0034, gate 14), and ADR-0020 now cites a 2026-08-20 survey that concludes its own premise
+      is void. **Citing evidence against yourself and then freezing is worse than either alone.**
+      ⚠️ **The restatement is RELOCATED, not removed.** If the product line is derived at report
+      time by joining line identity to the product master, what must be categorised is the
+      **master** — which `api-cloudrun#473` already repaired on 2026-08-10, collapsing the
+      population from 383 lines / $485,821.72 to **$688.00** of genuine operator non-classification.
+      **The $688.00 is not the decision. The 128 custom lines with no product master are** — they
+      have nothing to derive from, and `OQ-025` plus `reporting/product-line-pl.yaml` already hold
+      the house pattern: a declared null, shown on its own row.
+      ⚠️ **Two figures in the ADR and its neighbours are wrong, and one is load-bearing.** The
+      "~90% behind the 2025-12-31 lock" figure, which appears undated in four live places, measures
+      **80.04% of invoices** and ~**73.6–76.6% of lines**. And `charter.md`'s "unrepairable" is a
+      **policy claim wearing a mechanical one** — a period lock is a setting, not a physical
+      impossibility. Neither changes the direction of the decision; both change how it reads.
+      ✅ **What the survey ADDS rather than removes**: the migration delta, previously called
+      unmeasurable, is **$231,796.26 — 106 lines, 15.66% of pre-lock revenue, untracked in BOTH
+      systems**. And ADR-0020's own 13.90% is gone: lines where CFS holds a category and Xero does
+      not are **7 / $1,700.00**, none since 2024-10-07 — so **Xero's tracking-sliced P&L for closed
+      periods is substantially complete**, and there IS a report to diverge from, which the ADR
+      assumed away.
+    evidence: >-
+      `inbox/2026-08-20-survey-it-is-a-recast-not-a-restatement-and-the-migration-delta-is-231796-in-lines-untracked-by-both-systems.md`
+      — the six-reference survey, the delta measured over all 814 pre-lock invoices at 100%
+      coverage. ·
+      `inbox/2026-08-20-superseding-adr-0018-invalidated-the-foundations-of-three-proposed-adrs-and-nothing-detected-it.md`
+      — the supersession chain. · `migration/field-map.yaml`, `items[].tracking_category`.
+    blocks: [ADR-0020]
+    status: open
+    resolution_shape: >-
+      **ADR-0020 is `proposed` and may be amended freely** (ADR-0034; ADR-0032 is the precedent for
+      substantial amendment while proposed). The survey's recommendation is **neither of the ADR's
+      two options**: derive the product line from the product master, and declare a null where there
+      is nothing to derive from.
+      ⭐ **And GAAP already supplies the vocabulary this ADR is missing.** ASU 2023-07 **BC83**
+      records that FASB replaced "restatement" with **"recast"** throughout Topic 280 precisely
+      because Topic 250 reserves "restatement" for correcting an **error**. What ADR-0020 describes
+      is a recast; the disclosure owed is ASC 205-10-50-1, and ASC 280 binds public entities only.
+      ⚠️ **One load-bearing premise is unmeasurable from documentation and needs the owner**: that a
+      tracking category was on no externally filed document. The six references' criteria collapse
+      to two — _was it published_, and _what would the write fail to reach_ — and CFS fails neither,
+      **but only if that premise holds.**
