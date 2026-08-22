@@ -12,11 +12,11 @@ is `deno task validate`'s judgement, not this file's.
 | | Count | |
 |---|---:|---|
 | Open questions | 13 open | 40 answered of 53 · **0 with no owner or no decide-by** |
-| Conflicts (HOT) | 22 | 1 open |
+| Conflicts (HOT) | 23 | 2 open |
 | Decisions (ADR) | 42 | 25 in force · 13 proposed |
 | Spikes | 12 | 7 open |
 | Requirements | 21 | 0 without a scenario |
-| Inbox | 101 | 81 unpromoted |
+| Inbox | 102 | 82 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
@@ -47,6 +47,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | HOT | Statement | Blocks |
 |---|---|---|
 | `HOT-017` | `charter.md` states that a production service agreement's money moves through `2800 - PSA Liability Clearing`… | — |
+| `HOT-023` | Four artifacts enumerate the rules surface SPIKE-005 must cover, and they disagree. `adr/ADR-0007:43` (**acce… | `SPIKE-005` |
 
 ## Decisions
 
@@ -104,7 +105,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | `SPIKE-002` | What commit protocol keeps a MongoDB document write and a TigerBeetle posting c… | 1 week | `ADR-0042` | in_progress |
 | `SPIKE-003` | How does TigerBeetle's timestamp behave when loading history, and what are the… | 3 days | `ADR-0039` | closed |
 | `SPIKE-004` | What does Plaid actually provide, and what does bank reconciliation actually ne… | 3 days | _new ADR_ | open |
-| `SPIKE-005` | Hand-roll the depreciation engine, or adopt a library? | 1 week | _new ADR_ | open |
+| `SPIKE-005` | Hand-roll the depreciation engine, or adopt a library? | 1 week | _new ADR_ | in_progress |
 | `SPIKE-006` | How lossy is translating JSON Schema 2020-12 to MongoDB's `$jsonSchema`, and wh… | 2 days | `ADR-0040` | closed |
 | `SPIKE-007` | Which access path reaches DuckDB from Deno — the native addon or WASM — and can… | 2 days | `ADR-0024` | closed |
 | `SPIKE-008` | How do the Chicago Personal Property Lease Transaction Tax and Illinois home-ru… | 1 week | _new ADR_ | open |
@@ -135,7 +136,7 @@ it is counted separately on purpose, and a milestone is not done because its che
 | Milestone | Criterion | Check | Measured |
 |---|---|---|---|
 | `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 12 spikes, 7 open, 0 closed without naming an ADR |
-| `m4` | Every HOT- is resolved or has an ADR that consciously defers it with… | `hotspots_resolved` | 22 hotspots, 1 unresolved |
+| `m4` | Every HOT- is resolved or has an ADR that consciously defers it with… | `hotspots_resolved` | 23 hotspots, 2 unresolved |
 
 ## Coverage gaps
 

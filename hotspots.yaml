@@ -1229,3 +1229,64 @@ hotspots:
       ⚠️ **Whichever is chosen, the model must gain the expired state permanently.** The defect was
       not a wrong answer, it was an unrepresentable question, and re-representing it is what stops
       the next reader believing the green run means more than it does.
+
+  - id: HOT-023
+    headline: "the depreciation scope omits a mandatory convention"
+    statement: >-
+      Four artifacts enumerate the rules surface SPIKE-005 must cover, and they disagree.
+      `adr/ADR-0007:43` (**accepted**), `spikes/SPIKE-005` exit criterion 1, and
+      `contexts/fixed-assets/requirements.yaml:13` all name **two** conventions — mid-month and
+      half-year. `contexts/fixed-assets/requirements.yaml:52` (REQ-FA-002) names **three**, adding
+      **mid-quarter**. ⚠️ **The lone dissenter is right, and not as a preference**: IRS Publication
+      946 (2025) L2326 says _"**Use** this convention if the mid-month convention does not apply
+      and the total depreciable bases of MACRS property you placed in service during the last 3
+      months of the tax year … are **more than 40%** of the total depreciable bases of all MACRS
+      property you placed in service during the entire year."_ **There is no election.**
+    contexts: [fixed-assets, ledger]
+    why_it_matters: >-
+      ⭐ **AN ASSET'S CONVENTION IS NOT A PROPERTY OF THE ASSET, and that reaches the schema.** The
+      40% test is computed over everything placed in service in the ENTIRE tax year, so it cannot be
+      resolved when an asset is acquired — only once the year closes. **A single late-December
+      purchase retroactively changes the convention, and therefore the first-year deduction, of
+      every personal-property asset placed in service earlier that same year.** Pub 946 works
+      exactly that case with the dollars stated (L2628-2663): a machine placed in **January** takes
+      the mid-quarter convention because of a computer bought in October.
+      ⇒ **An engine that resolves convention at acquisition is wrong, and wrong SILENTLY** — every
+      figure it produces is plausible. A per-asset schedule modelled as a pure function of the asset
+      is structurally wrong whichever engine computes it.
+      ⚠️ **The test's EXCLUSIONS are load-bearing too.** Real property is excluded from the
+      numerator *and* the denominator, so a ratio computed over "everything placed in service" is
+      wrong for any taxpayer holding buildings — and CFS holds `1600 Buildings` and
+      `1603 Building Improvements`.
+      ⚠️ **A SECOND gap, named by none of the four artifacts: listed property and §280F.** CFS holds
+      `1700 Vehicles`; passenger automobiles carry §280F caps and a drop in business-use percentage
+      triggers recapture (Pub 946 L3867 works it, at $4,018 of excess depreciation). Vehicles over
+      6,000 lb GVWR are treated differently, which for a rental house's box trucks is the ordinary
+      case. **ADR-0030 already moved vehicle cost into COGS**, so this is not a hypothetical corner.
+      ⇒ **The pattern is the enumeration being SHORT, not wrong** — the same shape as erp-spec#41,
+      where SPIKE-011 was scoped narrower than the decision depending on it. **A scope list is a
+      coverage claim, and nothing was checking this one.** Now something does: the coverage arm of
+      `deno task dep-corpus` asserts every named facet is exercised, and it is currently RED.
+    evidence: >-
+      `inbox/2026-08-22-spike-005s-convention-list-is-short-by-one-and-mid-quarter-is-mandatory-not-optional.md`
+      — the full finding, with the verbatim rule and the worked example. · IRS Publication 946
+      (2025), Cat. No. 13081F, dated 2026-03-13, **extracted locally with `pdftotext -layout`** on
+      2026-08-22 rather than through a summarizing fetch. ·
+      `code:2026-08-22:erp-spec@76bb601:spikes/harness/depreciation-corpus.yaml` — DEP-002 encodes
+      the retroactive case and DEP-003 the four quarter tables. ·
+      `contexts/fixed-assets/requirements.yaml:13` against `:52`, in one file.
+    blocks: [SPIKE-005]
+    status: open
+    resolution_shape: >-
+      **The practical gap is already closed** — the corpus covers mid-quarter regardless of what the
+      enumeration says. What is open is the recorded SCOPE, and it needs the owner because widening
+      it touches an `accepted` ADR's scope statement.
+      · **`contexts/fixed-assets/requirements.yaml:13` and `spikes/SPIKE-005`'s exit criterion are
+        MUTABLE and can simply be corrected** to name mid-quarter and listed property.
+      · **`ADR-0007` is accepted and immutable**, and this is ADR-0034 row 4 — "stands, but a fact
+        it cited was wrong" — so it takes **no new ADR**: a dated inbox note (landed) plus this
+        hotspot entry, and `relates_to` may gain ids because it is an index rather than a claim.
+      ⚠️ **Decide whether §280F is in SPIKE-005's scope or its own spike.** It is a genuinely
+      separate rules surface — business-use tracking, recapture, and a GVWR threshold — and folding
+      it into a spike already carrying the whole MACRS surface may be how the whole thing stalls.
+      **Sizing it is the decision, not whether it matters.**

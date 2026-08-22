@@ -200,7 +200,7 @@
           <outline text="blocks HOT-017"/>
         </outline>
       </outline>
-      <outline text="Conflicts (1 open)">
+      <outline text="Conflicts (2 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labor) or an own long-haul run (labor-bearing)? T…" _note="Decides whether a trucked fulfillment absorbs labor cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
           <outline text="blocks OQ-010"/>
           <outline text="blocks ADR-0011"/>
@@ -271,6 +271,9 @@
         <outline text="HOT-022 — `adr/ADR-0015:61` — `proposed` — says _&quot;**The two-phase timeout is the compensation mechanism SPIKE…" _note="⭐ **PROVEN, not argued.** A third module — `expiring_timeout`, added 2026-08-22 — is the protocol AS SPECIFIED plus TigerBeetle's real `Transfer.timeout`. Its invariant fails under both randomised simulation and Apalache, and the counterexample is **three steps long with `dead: false` throughout**: `reserve → writeDoc → expire`. ⚠️ **NO CRASH IS REQUIRED.** This is not a crash-interleaving bug — it is a plain race between the writer and the clock. A writer merely slower than the timeout leaves a durable MongoDB document behind a transfer that TigerBeetle has already expired and that can never be posted. ⚠️ **The result code is real and pinned**: `pending_transfer_expired = 35` in `tigerbeetle-node@0.17.9`'s own `bindings.d.ts`, alongside `pending_transfer_already_posted` and `pending_transfer_already_voided`. Upstream is explicit: _&quot;If the timeout interval passes before the transfer is either posted or voided, the transfer expires and the full amount is returned to the original account.&quot;_ **TigerBeetle does it itself and cannot be asked not to once `timeout &gt; 0`.** ⇒ **The protocol module silently assumes `timeout = 0` and never says so.** Its `TbState` has no expired state, so the interleaving was not merely unchecked — **it was unrepresentable.** A model that cannot express a failure reports no violation, and that is indistinguishable from a model that ruled it out. **The spec was green for thirteen days on a case it could not see.** ⚠️ **And it makes exit criterion 3 load-bearing rather than tidy.** SPIKE-002 owes &quot;orphan detection and resolution, **including its time bound**&quot;. The time bound is not documentation — it decides which of two mutually exclusive designs is in force, and ADR-0015 and the formal spec currently hold opposite ones.">
           <outline text="blocks ADR-0015"/>
           <outline text="blocks SPIKE-002"/>
+        </outline>
+        <outline text="HOT-023 — Four artifacts enumerate the rules surface SPIKE-005 must cover, and they disagree. `adr/ADR-0007:4…" _note="⭐ **AN ASSET'S CONVENTION IS NOT A PROPERTY OF THE ASSET, and that reaches the schema.** The 40% test is computed over everything placed in service in the ENTIRE tax year, so it cannot be resolved when an asset is acquired — only once the year closes. **A single late-December purchase retroactively changes the convention, and therefore the first-year deduction, of every personal-property asset placed in service earlier that same year.** Pub 946 works exactly that case with the dollars stated (L2628-2663): a machine placed in **January** takes the mid-quarter convention because of a computer bought in October. ⇒ **An engine that resolves convention at acquisition is wrong, and wrong SILENTLY** — every figure it produces is plausible. A per-asset schedule modelled as a pure function of the asset is structurally wrong whichever engine computes it. ⚠️ **The test's EXCLUSIONS are load-bearing too.** Real property is excluded from the numerator *and* the denominator, so a ratio computed over &quot;everything placed in service&quot; is wrong for any taxpayer holding buildings — and CFS holds `1600 Buildings` and `1603 Building Improvements`. ⚠️ **A SECOND gap, named by none of the four artifacts: listed property and §280F.** CFS holds `1700 Vehicles`; passenger automobiles carry §280F caps and a drop in business-use percentage triggers recapture (Pub 946 L3867 works it, at $4,018 of excess depreciation). Vehicles over 6,000 lb GVWR are treated differently, which for a rental house's box trucks is the ordinary case. **ADR-0030 already moved vehicle cost into COGS**, so this is not a hypothetical corner. ⇒ **The pattern is the enumeration being SHORT, not wrong** — the same shape as erp-spec#41, where SPIKE-011 was scoped narrower than the decision depending on it. **A scope list is a coverage claim, and nothing was checking this one.** Now something does: the coverage arm of `deno task dep-corpus` asserts every named facet is exercised, and it is currently RED.">
+          <outline text="blocks SPIKE-005"/>
         </outline>
       </outline>
       <outline text="Decisions (25 in force, 13 proposed)">
@@ -389,7 +392,7 @@
           <outline text="Transaction id stability confirmed or refuted across updates and re-links."/>
           <outline text="Balance endpoints reconciled against a statement closing balance, to the cent."/>
         </outline>
-        <outline text="SPIKE-005 — Hand-roll the depreciation engine, or adopt a library?" _note="timebox: 1 week · closes: a new ADR · open">
+        <outline text="SPIKE-005 — Hand-roll the depreciation engine, or adopt a library?" _note="timebox: 1 week · closes: a new ADR · in_progress">
           <outline text="Test corpus covers: mid-month and half-year conventions; GDS vs ADS class lives; §179 and bonus effects on basis; partial disposals; prospective useful-life revisions; the deferred GAAP/tax difference."/>
           <outline text="Every candidate is scored against that corpus, with failures itemised rather than summarised."/>
           <outline text="A decision with a stated migration path if the library is later abandoned."/>
@@ -515,7 +518,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (81 unpromoted of 101)" _note="no drops pending">
+      <outline text="Capture (82 unpromoted of 102)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -596,6 +599,7 @@
         <outline text="Rule 8a survey for ADR-0029 — three of five systems post allocations and none derives at report tim…" _note="inbox/2026-08-20-survey-nobody-keeps-allocations-out-of-the-ledger-they-keep-them-out-of-the-statements.md"/>
         <outline text="Correction — the causal_orders declare-or-be-rejected obligation is ADR-0036's decision and REQ-LED…" _note="inbox/2026-08-22-correction-the-causal-orders-obligation-is-adr-0036s-decision-not-adr-0029s-and-two-artifacts-carried-the-wrong-owner.md"/>
         <outline text="Owner — a tracking category was on no externally filed document, which discharges the one load-bear…" _note="inbox/2026-08-22-owner-a-tracking-category-was-on-no-externally-filed-document-so-the-recast-is-owed-to-nobody.md"/>
+        <outline text="SPIKE-005's convention list is short by one — mid-quarter is MANDATORY when the 40% test trips, it…" _note="inbox/2026-08-22-spike-005s-convention-list-is-short-by-one-and-mid-quarter-is-mandatory-not-optional.md"/>
         <outline text="The booking lifecycle is dormant, so SPIKE-012's boundary cannot be chosen yet — the verdict that l…" _note="inbox/2026-08-22-the-booking-lifecycle-is-dormant-so-spike-012s-boundary-cannot-be-chosen-yet-and-the-verdict-that-looked-like-a-pass-rests-on-11-rows.md"/>
       </outline>
     </outline>

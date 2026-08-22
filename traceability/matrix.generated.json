@@ -5,7 +5,7 @@
     "adrs": 42,
     "adrs_accepted": 25,
     "events": 38,
-    "inbox": 101,
+    "inbox": 102,
     "inbox_promoted": 20
   },
   "requirements": [
@@ -650,6 +650,7 @@
       "inbox/2026-08-20-survey-nobody-keeps-allocations-out-of-the-ledger-they-keep-them-out-of-the-statements.md",
       "inbox/2026-08-22-correction-the-causal-orders-obligation-is-adr-0036s-decision-not-adr-0029s-and-two-artifacts-carried-the-wrong-owner.md",
       "inbox/2026-08-22-owner-a-tracking-category-was-on-no-externally-filed-document-so-the-recast-is-owed-to-nobody.md",
+      "inbox/2026-08-22-spike-005s-convention-list-is-short-by-one-and-mid-quarter-is-mandatory-not-optional.md",
       "inbox/2026-08-22-the-booking-lifecycle-is-dormant-so-spike-012s-boundary-cannot-be-chosen-yet-and-the-verdict-that-looked-like-a-pass-rests-on-11-rows.md"
     ]
   }

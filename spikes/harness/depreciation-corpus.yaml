@@ -1,0 +1,404 @@
+# SPIKE-005 exit criterion 1 — the depreciation rules corpus.
+#
+# ── Why this file exists, and why it comes FIRST ────────────────────────────────────────────────
+#
+# SPIKE-005's method is explicit: build the corpus before evaluating anything, because "a library
+# chosen first and tested second gets graded on the cases it happens to handle." This is that
+# corpus. It is the yardstick both candidates — hand-rolled and library — get measured against, and
+# it was authored with no candidate in view.
+#
+# ── The answers are the IRS's, not ours ─────────────────────────────────────────────────────────
+#
+# Every case is taken from IRS Publication 946's OWN worked examples or its OWN percentage tables,
+# so the known-correct answer is the publication's rather than something computed here and then
+# believed. Where the pub states a dollar figure it is quoted as `expect`; where it states only a
+# rate, the rate is quoted and the money is that rate applied to the basis.
+#
+# ⚠️ **Extracted with `pdftotext -layout` from the PDF, not read through a summarizing fetch.** The
+# repo has already been burned once by a summarized fetch inventing a clean table that the source
+# did not contain (CLAUDE.md — the 2026-08-17 EARS incident). Re-extract rather than re-fetch.
+#
+# ── ⚠️ THE RULES ARE YEAR-VERSIONED, AND 2025 CHANGED MID-YEAR ──────────────────────────────────
+#
+# This corpus is pinned to ONE tax year. §179 limits, the phase-out threshold and the bonus rate all
+# move annually, and in 2025 the bonus rate changed **by legislation inside the tax year** —
+# P.L. 119-21 reinstated 100% for property acquired AND placed in service after January 19, 2025,
+# while property acquired before January 20, 2025 stays at 40%. **A depreciation engine is not a
+# pure function of an asset; it is a function of an asset and a body of law with a date on it.**
+# That is the single most important input to the build-versus-buy question and it belongs here
+# rather than in the write-up, because it is what the corpus must be re-run against every year.
+#
+# ── Money ───────────────────────────────────────────────────────────────────────────────────────
+#
+# Integer minor units (cents) everywhere, per CLAUDE.md rule 7. Rates stay decimal percentages —
+# they are not money and quantizing them to the money grain is the defect the workspace money skill
+# names explicitly. Dates are QUOTED, or YAML parses them to a Date and renders in the runner's tz.
+
+meta:
+  source_document: "IRS Publication 946 (2025), 'How To Depreciate Property', Cat. No. 13081F"
+  source_dated: "2026-03-13"
+  source_url: "https://www.irs.gov/pub/irs-pdf/p946.pdf"
+  extraction: "pdftotext -layout, run 2026-08-22; line numbers below are into that extraction"
+  tax_year: 2025
+  spike: SPIKE-005
+  gaap_sources:
+    - "ASC 360 — Property, Plant, and Equipment (useful life, salvage, straight line)"
+    - "ASC 250-10-45-17 — a change in estimate is prospective; prior periods are NOT restated"
+
+# ── The year-versioned parameters. Re-check EVERY ONE against a new Pub 946 annually. ───────────
+parameters_2025:
+  section_179_max_minor: 250000000 # $2,500,000
+  section_179_phaseout_threshold_minor: 400000000 # $4,000,000 — reduces the max dollar for dollar
+  section_179_suv_cap_minor: 3130000 # $31,300
+  bonus_acquired_before_2025_01_20_pct: 40
+  bonus_acquired_after_2025_01_19_pct: 100 # P.L. 119-21; 40% may be ELECTED instead
+  bonus_election_note: >-
+    An election to take 40% instead of 100% is available for property acquired after 2025-01-19,
+    during the first tax year ending after that date. So the rate is not derivable from dates alone
+    — an election is an input.
+
+# ── Convention selection. THIS IS A PRECEDENCE, NOT A MENU. ────────────────────────────────────
+convention_precedence:
+  - id: mid_month
+    when: "nonresidential real property, residential rental property, any railroad grading or tunnel bore"
+    quote: >-
+      "The mid-month convention. Use this convention for nonresidential real property, residential
+      rental property, and any railroad grading or tunnel bore." (p946 L2313)
+  - id: mid_quarter
+    when: "mid-month does not apply AND the 40% test trips"
+    quote: >-
+      "The mid-quarter convention. Use this convention if the mid-month convention does not apply
+      and the total depreciable bases of MACRS property you placed in service during the last 3
+      months of the tax year (excluding nonresidential real property, residential rental property,
+      any railroad grading or tunnel bore, property placed in service and disposed of in the same
+      year, and property that is being depreciated under a method other than MACRS) are more than
+      40% of the total depreciable bases of all MACRS property you placed in service during the
+      entire year." (p946 L2326)
+  - id: half_year
+    when: "neither of the above"
+    quote: >-
+      "The half-year convention. Use this convention if neither the mid-quarter convention nor the
+      mid-month convention applies." (p946 L2289)
+
+# ⚠️ **THE ARCHITECTURAL CONSEQUENCE, and it is the finding this corpus exists to surface.**
+# The 40% test is computed over "all MACRS property you placed in service during the ENTIRE year".
+# ⇒ **An asset's convention is not a property of the asset.** It cannot be resolved when the asset
+# is acquired, only once the tax year is complete — and a single late-December purchase RETROACTIVELY
+# changes the convention, and therefore the first-year deduction, of every personal-property asset
+# placed in service earlier that same year. Any schedule modelled as a per-asset pure function is
+# structurally wrong, whichever engine computes it.
+#
+# ⚠️ And it is MANDATORY, not elective: "Use this convention if..." — there is no opt-out.
+
+disposal_factors:
+  mid_quarter: # applied to a FULL year of depreciation, by the quarter of disposal
+    q1_pct: 12.5
+    q2_pct: 37.5
+    q3_pct: 62.5
+    q4_pct: 87.5
+    source: "p946 L2632-2635 (table), worked at L2650-2654"
+  half_year_pct: 50
+  half_year_quote: >-
+    "you treat all property placed in service or disposed of during a tax year as placed in service
+    or disposed of at the midpoint of the year" (p946 L2294)
+  mid_month_rule: >-
+    "figure your depreciation deduction for the year of the disposition by multiplying a full year
+    of depreciation by a fraction. The numerator of the fraction is the number of months (including
+    partial months) in the year that the property is considered in service. The denominator is 12."
+    (p946 L2656)
+
+cases:
+  # ── half-year, the ordinary case ──────────────────────────────────────────────────────────────
+  - id: DEP-001
+    exercises: [half_year, gds, 7_year, 200_db]
+    source: "p946 L2582 worked example + Table A-1 (L4787)"
+    given:
+      description: "Office furniture, the only property placed in service that year"
+      basis_minor: 1000000
+      property_class: gds_7_year
+      placed_in_service: "2025-08-11"
+      section_179_minor: 0
+      bonus_pct: 0
+    expect:
+      convention: half_year
+      table: "A-1"
+      rates_pct: [14.29, 24.49, 17.49, 12.49, 8.93, 8.92, 8.93, 4.46]
+      year_1_minor: 142900
+    note: >-
+      The pub states the convention and the table; the rates are Table A-1's own. Placed in August
+      and still half-year, because a single asset cannot trip the 40% test — August is not in the
+      last 3 months.
+
+  # ── the 40% test itself: convention SELECTION across three assets ────────────────────────────
+  - id: DEP-002
+    exercises: [mid_quarter, forty_percent_test, convention_selection, cross_asset_dependency]
+    source: "p946 L2628-2663 — the fully worked three-asset example, deductions IRS-stated"
+    given:
+      description: "Machine placed January, furniture September, computer October — one tax year"
+      assets:
+        - {
+            ref: machine,
+            basis_minor: 400000,
+            property_class: gds_7_year,
+            placed_in_service: "2025-01-15",
+          }
+        - {
+            ref: furniture,
+            basis_minor: 100000,
+            property_class: gds_7_year,
+            placed_in_service: "2025-09-15",
+          }
+        - {
+            ref: computer,
+            basis_minor: 500000,
+            property_class: gds_5_year,
+            placed_in_service: "2025-10-15",
+          }
+      section_179_minor: 0
+      bonus_pct: 0
+    expect:
+      total_bases_minor: 1000000
+      last_quarter_bases_minor: 500000
+      last_quarter_share_pct: 50.0
+      trips_forty_percent_test: true
+      convention: mid_quarter
+      applies_to: "ALL THREE assets, including the two placed in service earlier in the year"
+      per_asset:
+        - {
+            ref: machine,
+            table: "A-2",
+            year_1_pct: 25.00,
+            year_1_minor: 100000,
+            year_2_pct: 21.43,
+            year_2_minor: 85700,
+          }
+        - {
+            ref: furniture,
+            table: "A-4",
+            year_1_pct: 10.71,
+            year_1_minor: 10700,
+            year_2_pct: 25.51,
+            year_2_minor: 25500,
+          }
+        - { ref: computer, table: "A-5", year_1_pct: 5.00, year_1_minor: 25000 }
+    note: >-
+      ⭐ **THE LOAD-BEARING CASE.** Every `year_N_minor` here is stated by the IRS, not computed.
+      The machine was placed in service in JANUARY and still takes the mid-quarter convention,
+      because a purchase nine months later changed it. An engine that resolves an asset's convention
+      at acquisition gets this wrong and gets it wrong silently — the numbers are all plausible.
+
+  # ── mid-quarter tables, per quarter ──────────────────────────────────────────────────────────
+  - id: DEP-003
+    exercises: [mid_quarter, table_coverage]
+    source: "Tables A-2 (L4821), A-3 (L4857), A-4 (L4893), A-5 (L4928)"
+    given:
+      description: "First-year rate by placed-in-service quarter — the four mid-quarter tables"
+    expect:
+      first_year_rates_pct:
+        q1_table_A2: {
+          3_year: 58.33,
+          5_year: 35.00,
+          7_year: 25.00,
+          10_year: 17.50,
+          15_year: 8.75,
+          20_year: 6.563,
+        }
+        q2_table_A3: {
+          3_year: 41.67,
+          5_year: 25.00,
+          7_year: 17.85,
+          10_year: 12.50,
+          15_year: 6.25,
+          20_year: 4.688,
+        }
+        q3_table_A4: {
+          3_year: 25.00,
+          5_year: 15.00,
+          7_year: 10.71,
+          10_year: 7.50,
+          15_year: 3.75,
+          20_year: 2.813,
+        }
+        q4_table_A5: { 3_year: 8.33, 5_year: 5.00, 7_year: 3.57, 10_year: 2.50, 15_year: 1.25 }
+    note: >-
+      ⚠️ Table A-5's 20-year column is cut off in the layout extraction and is deliberately absent
+      rather than guessed. **An absent value is honest; a guessed one is indistinguishable from a
+      measured one.** Fill it from the PDF before any candidate is scored on 20-year Q4 property.
+
+  # ── disposal, under mid-quarter ──────────────────────────────────────────────────────────────
+  - id: DEP-004
+    exercises: [disposal, partial_year, mid_quarter, 5_year]
+    source: "p946 L2637-2654 — every figure IRS-stated"
+    given:
+      description: "5-year property, Q4 placement, disposed in Q2 of a later year"
+      basis_minor: 1000000
+      property_class: gds_5_year
+      placed_in_service: "2022-12-02"
+      convention: mid_quarter
+      disposed_on: "2025-04-06"
+      section_179_minor: 0
+      bonus_pct: 0
+    expect:
+      table: "A-5"
+      year_2022_minor: 50000 # 5.00%
+      year_2023_minor: 380000 # 38.00%
+      year_2024_minor: 228000 # 22.80%
+      year_2025_full_minor: 136800 # 13.68%
+      disposal_quarter: 2
+      disposal_factor_pct: 37.5
+      year_2025_allowed_minor: 51300
+    note: >-
+      Self-checking: the pub states all four dollar amounts AND the rates, and they reconcile
+      against Table A-5's 5-year column exactly (5.00 / 38.00 / 22.80 / 13.68).
+
+  # ── mid-month, real property ─────────────────────────────────────────────────────────────────
+  - id: DEP-005
+    exercises: [mid_month, nonresidential_real, 39_year, straight_line]
+    source: "Table A-7a — Nonresidential Real Property, Mid-Month Convention, Straight Line 39 Years"
+    given:
+      description: "Nonresidential real property — CFS holds Buildings (1600) and Building Improvements (1603)"
+      property_class: nonresidential_real_39_year
+    expect:
+      convention: mid_month
+      table: "A-7a"
+      year_1_rate_by_month_pct: [
+        2.461,
+        2.247,
+        2.033,
+        1.819,
+        1.605,
+        1.391,
+        1.177,
+        0.963,
+        0.749,
+        0.535,
+        0.321,
+      ]
+      years_2_to_39_rate_pct: 2.564
+      year_40_rate_by_month_pct: [
+        0.107,
+        0.321,
+        0.535,
+        0.749,
+        0.963,
+        1.177,
+        1.391,
+        1.605,
+        1.819,
+        2.033,
+        2.247,
+      ]
+    note: >-
+      ⚠️ The month-12 column is cut off in the layout extraction and is absent rather than guessed —
+      same rule as DEP-003. **Real property is never subject to mid-quarter**: it is excluded from
+      the 40% test's numerator AND its denominator, which is a second thing an engine gets wrong by
+      treating the test as "everything placed in service".
+
+  # ── land ─────────────────────────────────────────────────────────────────────────────────────
+  - id: DEP-006
+    exercises: [non_depreciable, land]
+    source: "p946 — 'What Property Cannot Be Depreciated' / land"
+    given:
+      description: "CFS holds account 1602 Land, which has no accumulated-depreciation sibling in the chart"
+      property_class: land
+    expect:
+      depreciable: false
+      annual_minor: 0
+    note: >-
+      Trivial and included deliberately. **A zero that is a RULE must be asserted, or an engine that
+      silently returns zero for an unrecognised class passes by accident.** The chart already
+      encodes the answer — 1602 Land is the only fixed-asset account with no
+      `Less-Accumulated Depreciation` counterpart.
+
+  # ── §179 ─────────────────────────────────────────────────────────────────────────────────────
+  - id: DEP-007
+    exercises: [section_179, basis_effect, phaseout]
+    source: "p946 'What's New for 2025' + chapter 2 Dollar Limits"
+    given:
+      description: "The 2025 dollar limits and the phase-out"
+      tax_year: 2025
+    expect:
+      max_deduction_minor: 250000000
+      phaseout_threshold_minor: 400000000
+      phaseout_rule: "reduced dollar-for-dollar by the amount by which §179 property placed in service exceeds the threshold"
+      suv_cap_minor: 3130000
+      basis_effect: "the §179 amount reduces the basis before MACRS percentages are applied"
+    note: >-
+      ⚠️ **All four figures are year-specific and one is asset-type-specific.** Re-verify against a
+      fresh Pub 946 every year; that re-verification is a maintenance cost the build-versus-buy
+      decision has to price.
+
+  # ── bonus / special depreciation allowance ───────────────────────────────────────────────────
+  - id: DEP-008
+    exercises: [bonus_depreciation, basis_effect, year_versioning, legislative_change]
+    source: "p946 'What's New for 2025' — Phase down, and P.L. 119-21 (One Big Beautiful Bill Act)"
+    given:
+      description: "Two bonus regimes inside ONE tax year, split by acquisition date"
+    expect:
+      acquired_before_2025_01_20_pct: 40
+      acquired_after_2025_01_19_pct: 100
+      election_available: true
+      election: "40% may be ELECTED instead of 100%, during the first tax year ending after 2025-01-19"
+      ordering: "bonus applies to the basis remaining after any §179, before MACRS percentages"
+    note: >-
+      ⭐ **THE CASE THAT DECIDES BUILD-VERSUS-BUY.** The rate is not derivable from the placed-in-
+      service date alone: it needs the ACQUISITION date, the property type, and an ELECTION. And it
+      changed mid-year by an Act of Congress. **A hand-rolled engine is a standing annual
+      commitment to track tax legislation**, and that commitment — not the arithmetic — is the cost.
+
+  # ── GAAP side ────────────────────────────────────────────────────────────────────────────────
+  - id: DEP-009
+    exercises: [gaap, prospective_revision, no_restatement]
+    source: "ASC 250-10-45-17"
+    given:
+      description: "Useful life revised on an asset already partly depreciated"
+    expect:
+      treatment: prospective
+      restate_prior_periods: false
+      method: "remaining carrying amount spread over the remaining revised useful life"
+    note: >-
+      ⚠️ **The same ASC 250 rule ADR-0041 leans on** for the labor variance. Two unrelated corners of
+      this spec now rest on it, which is a reason to state it once and cite it, not to re-derive it.
+
+  - id: DEP-010
+    exercises: [deferred_difference, dual_basis, adr_0026]
+    source: "ADR-0007, ADR-0026"
+    given:
+      description: "§179 expenses an asset in year 1 for tax while GAAP carries it over its useful life"
+    expect:
+      gaap_posts_to_ledger: true
+      tax_posts_to_ledger: false
+      deferred_difference: "derived at report time from the register's per-book schedules"
+    note: >-
+      Not an IRS case — a CFS decision, included because the corpus must grade an engine on
+      producing BOTH books, and ADR-0026 is what says only one of them posts.
+
+# ── ⚠️ WHAT THIS CORPUS DOES NOT YET COVER ──────────────────────────────────────────────────────
+# Stated rather than omitted, because a corpus that reports only what it holds is indistinguishable
+# from a complete one — and SPIKE-005's exit criterion is a coverage claim.
+not_yet_covered:
+  - id: partial_disposals
+    why: >-
+      Named in SPIKE-005's exit criterion and NOT yet built. Pub 946 handles it via general asset
+      accounts (GAA) and via basis allocation; the worked examples are at L3399 (Sankofa) and
+      L3405 (Duforcelf) and have not been extracted.
+  - id: ads_class_lives
+    why: >-
+      GDS versus ADS is in the exit criterion. The GDS side is covered by the tables above; the ADS
+      recovery periods (Table A-20 and the class-life tables at L6552+) are not yet extracted.
+  - id: listed_property_and_section_280F
+    why: >-
+      ⚠️ **NOT in SPIKE-005's exit criterion, and it should be.** CFS holds account 1700 Vehicles.
+      Passenger automobiles are listed property with §280F caps, and the business-use percentage
+      drives recapture — Pub 946's Ellen Rye example (L3867) works exactly that. Vehicles over
+      6,000 lb GVWR are treated differently, which for a rental house's box trucks is the common
+      case rather than the exception. Filed as a scope finding.
+  - id: short_tax_year
+    why: >-
+      Pub 946 devotes a section to it (Tara Corporation, L3012/L3074). Not applicable to CFS today —
+      a calendar-year taxpayer with no short year — so it is deliberately out of scope, and this
+      entry records that it was CONSIDERED and excluded rather than missed.
+  - id: qualified_production_property
+    why: >-
+      §168(n), new in 2025, for property placed in service after 2025-07-04. Almost certainly not
+      applicable to CFS, but it is evidence for DEP-008's point: the surface grows by legislation.
