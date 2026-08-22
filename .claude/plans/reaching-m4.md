@@ -1,127 +1,113 @@
-# Reaching m4 — the hotspot half is done; the milestone is now the spikes
+# Reaching m4 — every hotspot is resolved; only the spikes remain
 
-> ## ⚠️ STATUS UPDATE 2026-08-22
+> ## ⚠️ STATUS UPDATE 2026-08-22 (rewritten — the 2026-08-21 revision is superseded)
 >
-> **The hotspot half of m4 went from 4 unresolved to 1**, and a spike attempt turned up a
-> milestone-level blocker: **SPIKE-012 is gated on the manager check process going live (#46)**. The
-> hotspot progress, and the last one is an owner decision, not authoring. `HOT-018`, `HOT-019` and
-> `HOT-020` are resolved; `HOT-021` was opened and resolved on the same grounds. **m4's remaining
-> machine-checkable work is the SPIKES — 7 of 12 still open.** Rewritten rather than prepended:
-> every item in the old _Then, in order_ list above item 4 is done, and a plan that reads as a to-do
-> list of finished work is worse than none.
+> ⭐ **ALL 23 HOTSPOTS ARE RESOLVED.** m4's hotspot criterion is MET, and **one machine-checkable
+> criterion remains in the entire spec**: `spikes_closed_with_adr`. Started the day at 4 of 20
+> unresolved. Two spikes closed or near-closed, five ADRs written or redrafted, and the last open
+> question blocking a whole service line is answered.
 
-- **Date:** 2026-08-22 (rewrites the 2026-08-21 revision, which replaced `open-issue-queue.md`)
+- **Date:** 2026-08-22
 - **Repo:** erp-spec
-- **Status:** `main` is CI-green — `deno task ci` all 5 steps. **`deno task validate` is 0 failures
-  / 17 warnings.** ⚠️ **The warnings are the CLOCK, not a regression** — all 17 are `2026-08-08`
-  inbox notes crossing the 14-day unpromoted threshold on 2026-08-22. That is `validate.ts` reading
-  the real date working exactly as designed, and it is erp-spec#6's backlog. **Do not read the 0→17
-  jump as something this session broke.**
-- **Unpushed:** 3 commits on `main` — `29c7850` (owner's, plan retirement), plus `a3b9b59` and
-  `49487b1` from this session. **Ask before pushing; one is not Claude's.**
-- **Related:** open — #3, #4, #6, #12, #17, #32, #35, #36, #37, #40, #41, **#42, #43, #44, #45, #46
-  (new this run)** · closed this run: **#38** · **HOT-017 is the only open hotspot**
+- **Status:** `main` is CI-green — `deno task ci` all 5 steps, `deno task validate` **0 failures**.
+  ⚠️ **17 warnings are the CLOCK, not a regression** — `2026-08-08` inbox notes crossing the 14-day
+  unpromoted threshold. That is `validate.ts` reading the real date working as designed, and it is
+  erp-spec#6's backlog surfacing.
+- **Everything is pushed.**
+- **Related:** open — #3, #4, #6, #12, #17, #32, #35, #36, #37, #40, #41, #42, #43, #44, #45, #46,
+  #47 · closed 2026-08-22: **#38** · **HOT-017 … HOT-023 all resolved**
 
 ## START HERE
 
-**m0–m3 are met. m4 is the only milestone with unmet machine-checkable criteria**, and after this
-session it needs essentially one thing:
+**m0–m3 are met. m4 is the only milestone with unmet machine-checkable criteria**, and it is now one
+thing:
 
-| criterion                                  | measured 2026-08-21    | measured 2026-08-22    |
-| ------------------------------------------ | ---------------------- | ---------------------- |
-| every hotspot resolved                     | 4 of 20 open           | ⭐ **1 of 21 open**    |
-| every spike closed, naming the ADR it made | **7 of 12 still open** | **7 of 12 still open** |
+| criterion                                  | 2026-08-21   | now                       |
+| ------------------------------------------ | ------------ | ------------------------- |
+| every hotspot resolved                     | 4 of 20 open | ✅ **0 of 23 open — MET** |
+| every spike closed, naming the ADR it made | 7 of 12 open | **6 of 12 open**          |
 
-⇒ **The milestone is now the spikes.** The one remaining hotspot, `HOT-017`, is blocked on `OQ-053`
-(is CFS principal or agent on a PSA) — **an owner decision that no amount of authoring unblocks**,
-and it gates a whole service line (#35).
+### Where each remaining spike actually stands
 
-### What landed 2026-08-21 → 22
+| spike                                    | state         | what it needs                                                                                                                          |
+| ---------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **002** two-store commit → ADR-0042      | `in_progress` | **criterion 2 only.** Criteria 1 and 3 MET. Needs a local `mongod` and the crash harness (#47). **Fully unblocked** — HOT-022 is ruled |
+| **008** Chicago lease tax → new          | open          | reachable, self-contained, ~1 week. Pulls through to api-cloudrun#600 / #598 / #596                                                    |
+| **009** Firestore listeners → new        | open          | reachable but the largest — _"the largest hidden line item in the migration"_                                                          |
+| **012** booking boundary → ADR-0015      | `in_progress` | ⛔ **blocked on a BUSINESS PROCESS** — the manager check-in/out going live (#46)                                                       |
+| **011** TigerBeetle on Linode → ADR-0013 | open          | ⛔ Linode spend, and needs rescoping first (#41)                                                                                       |
+| **004** Plaid → new                      | open          | ⛔ needs live Chase credentials                                                                                                        |
 
-**Three proposed ADRs were redrafted off premises now known false, and a fourth ADR was written.**
+⇒ **Two are reachable today (008, 009), one is nearly done (002), three are gated on money, access
+or the business.**
 
-- **`ADR-0020` (HOT-020)** — redrafted as a **recast**, not a restatement. Both halves of the old
-  decision were void. The new Decision is **neither of its two options**: derive the product line
-  from the product master, declare a null where there is nothing to derive from. ✅ **The
-  load-bearing premise is DISCHARGED** — owner, 2026-08-22: **a tracking category was on no
-  externally filed document.** Typed as `ADR-0020/P1` so a future falsification has an anchor.
-- **`ADR-0025` (HOT-019)** — narrowed to its one surviving clause and retitled: **a non-operating
-  receipt moves ACCOUNT, not bucket.** Three of four decision clauses were dead or already-enacted.
-- **`ADR-0029` (HOT-021)** — the decision stands, the argument changes. Gains the **Considered
-  options** section it never had, carrying the family every reference implements.
-- **`ADR-0041`** (new) — the labor variance posts as a keyed fact. Account, both posting arms, three
-  vectors. **Closes #38 and resolves HOT-018.**
+### ✅ What closed 2026-08-22
 
-### ⛔ NEW 2026-08-22 — BOTH attempted spikes turned out to be blocked, and both for good reasons
+- **SPIKE-005 → ADR-0043.** Build the depreciation engine; there is nothing to buy (`macrs` returns
+  **zero** packages on npm _and_ JSR). Behind a **pure package boundary** the corpus can import,
+  computed **per taxpayer-year**, on **effective-dated rule data**. Corpus at 14/14, candidates
+  scored, and the annual refresh **executes** — `deno task dep-refresh` plus a scheduled workflow,
+  fired red both ways before being believed.
+- **OQ-053 → ADR-0044.** CFS is the **principal** on a PSA. Resolved HOT-017, open since 2026-08-17.
+- **HOT-018 → ADR-0041**, HOT-019 → ADR-0025, HOT-020 → ADR-0020, HOT-021 → ADR-0029, HOT-022 →
+  ADR-0042, HOT-023 → SPIKE-005.
 
-**Two spikes were attempted this session. Neither closed, and each produced a finding worth more
-than the close would have been.** ⚠️ **The hotspot count went 1 → 2**, because SPIKE-002 turned up a
-real contradiction (HOT-022). That is progress, not regression: it was true before and nothing could
-see it.
+### ⭐ THE LESSON OF THE DAY — five findings, ONE shape
 
-✅ **HOT-022 RULED 2026-08-22 — `timeout = 0`, the sweeper is the sole resolver → ADR-0042.**
-Hotspots back to **1 open** (HOT-017 / OQ-053). SPIKE-002 criteria 1 and 3 are MET; only the
-crash-injection harness remains, and it needs a local `mongod` (#47).
+**Every substantive finding this session was an ABSENCE READING AS A RESULT.** None was a wrong
+answer; each was a check that could not have failed, reporting success.
 
-⭐ **SPIKE-002 — the Quint model could not express TigerBeetle's own timeout.** `two_store_commit`'s
-`TbState` has no expired state, but TigerBeetle expires a pending transfer itself once
-`Transfer.timeout` elapses (`pending_transfer_expired = 35`, pinned in the client's own
-`bindings.d.ts`). The new `expiring_timeout` module fails in **three steps with `dead: false`
-throughout — no crash required**, just a writer slower than the timeout. **`ADR-0015:61` proposes to
-rely on exactly the mechanism `naive_sweeper` proves unsafe.** ⭐ **And the ruling immediately
-exposed a SECOND unrepresentable case, bigger than the first**: with expiry refused the sweeper is
-the only resolver, so _how does it FIND an orphan_ becomes the whole problem — and `QueryFilter` has
-**no predicate for `flags.pending` and none for `pending_id`**, while MongoDB's document is written
-_after_ the reserve. `undiscoverable_orphan` fails in **two steps** (`reserve → crash`);
-`intent_first` fixes it and holds. **Five modules now, three of which must keep failing.**
+| finding           | the green that meant nothing                                                               |
+| ----------------- | ------------------------------------------------------------------------------------------ |
+| SPIKE-012         | two boundaries "PASSED — no future-dated unit holds a transfer" **on 11 rows corpus-wide** |
+| SPIKE-002         | no violation on a case its `TbState` **could not represent** (no expired state)            |
+| SPIKE-002 again   | no violation on discovery, because **nothing modelled discovery at all**                   |
+| SPIKE-005         | a coverage claim with **no coverage arm behind it**                                        |
+| the refresh probe | 12/12 figures matching **from the wrong edition**, until an edition check was added        |
 
-⭐ **The two findings share ONE shape, and it is the session's lesson.** SPIKE-012 reported PASSES
-on 11 rows; SPIKE-002 reported no violation on a case its own type system could not represent.
-**Neither was a wrong answer — both were absences reading as results.** A failing arm is loud. **Ask
-of every green check: could this have failed? What population, what state space?**
+⇒ **A failing arm is loud. A passing arm that matched almost nothing is indistinguishable from a
+working one.** Ask of every green check: **could this have failed? Over what population, over what
+state space?** And where the answer is "nothing would have caught it", **land the arm red first** —
+five times today that is what turned a comfortable green into a real finding.
 
-### ⛔ m4 also has a criterion gated on a BUSINESS PROCESS, not on authoring
+⚠️ **AND THE SCOPE VERSION OF THE SAME MISTAKE, corrected twice by the owner in one session.** §280F
+was scoped out on a fleet of two ("we do expect to acquire more vehicles"); four more facets were
+scoped out on populations of zero ("cover all valid gaap and usa tax cases"). **Measuring the
+population is the right test for "is this URGENT" and the WRONG test for "is this IN SCOPE" when the
+requirement is completeness.** The repo's footgun about not minting a branch before measuring its
+population is about not building machinery for branches nothing takes — **it does not license
+omitting a rule that law requires and a future asset will reach.** The two questions look identical
+and are answered by different people.
 
-**SPIKE-012 cannot be closed until the manager check-in/check-out process is live** (owner,
-2026-08-22). It was attempted this session and is now `in_progress` with a measured partial result.
-**It is the only one of the seven gated that way** — the other six are gated on research,
-infrastructure or an owner decision, all of which are ours to move. Re-run condition: **#46**.
+### ⚠️ The one thing that keeps causing the ADR churn
 
-⚠️ **THE LESSON FROM ATTEMPTING IT, and it is the sharpest of the session.** The probe reported
-_"PASSES — no future-dated unit holds a transfer"_ for two of four candidate boundaries. **Those
-passes rest on 11 rows in the entire corpus**, because `prepped` is barely written while the
-lifecycle is dormant. ⭐ **A failing arm is loud; a passing arm that matched almost nothing is
-indistinguishable from a working one.** The repo's "an unexercised branch is a claim, not a
-capability" usually bites on the branch nobody took — here it bit on the branch that **passed**, and
-a boundary would have been chosen on 11 rows while reading as a clean result.
-
-✅ **What the attempt DID establish, and it is not small:** `bookings.breakdown` is an exact
-partition of `quantity` on **6,967 / 6,967 rows**, so v1 already holds a position a ledger can be
-built from; and **B1 "at confirmation" is REFUTED on genuinely exercised data** — 392 future-dated
-units, 43-day max lead. ADR-0015 predicted that failure in prose and now has the number.
-
-### ⚠️ The one thing that keeps causing this
-
-**All four trace to `ADR-0036`'s supersession of `ADR-0018` moving the ground under three proposed
-ADRs, with nothing detecting it.** That is **#40**, still open — and it now has **four** ready-made
-instances to land a gate red against instead of last session's three. **#44** is its sibling: a
-narrower arm for _"ADR-NNNN requires `<field>`"_ where the field is absent from that ADR's body.
+**Four proposed ADRs rested on `ADR-0036`'s supersession of `ADR-0018` and nothing detected it.**
+That is **#40**, still open, and it now has four instances as a ready-made red-first population.
+**#44** is its narrower sibling: _"ADR-NNNN requires `<field>`"_ where the field never appears in
+that ADR's body — which is how ADR-0029 acquired a requirement it never made, in two artifacts at
+once.
 
 ## Then, in order
 
-|       |                                                                                                                                                                                                                                                                                                   |
-| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **1** | **A spike.** ⛔ **NOT SPIKE-012** — `in_progress`, blocked on a business process (#46). ⛔ **SPIKE-002 is `in_progress` too** — criteria 1 and 3 MET, criterion 2 needs a local `mongod` (#47). ⇒ **`SPIKE-005` and `SPIKE-008` are the reachable ones**; `SPIKE-011` needs rescoping first (#41) |
-| **2** | **`OQ-053` — put the PSA question to the owner.** The only thing between m4 and a clean hotspot criterion, and it blocks a whole service line. **Prepare the decision; do not wait for it.**                                                                                                      |
-| **3** | **#40 + #44** — the supersession-dependents gate and its citation-assertion sibling. Small, and four instances are sitting there as a red-first population                                                                                                                                        |
-| **4** | **#6** — requirements. `ordering`, `availability`, `banking`, `procurement` still have **zero**, and the public client app depends on the first two. The 17 warnings are this issue's backlog surfacing                                                                                           |
-| **5** | **#45** — ADR-0041's D4 is a procedure with nothing executing on it, and it is the half that actually removes the seasonal bias                                                                                                                                                                   |
+|       |                                                                                                                                                                                                                                                                                                                                                                                    |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1** | **SPIKE-002's crash harness (#47).** The nearest close: criteria 1 and 3 are MET and HOT-022 is ruled, so only the harness remains. Install `mongod`, stand up TigerBeetle via `deno task tb`, and drive the six cases in #47 — including the **slow-writer** case `expiring_timeout` proved matters, and asserting `pending_transfer_expired` **never** fires under `timeout = 0` |
+| **2** | **SPIKE-008 or SPIKE-009** — the only other reachable spikes. 008 is self-contained and pulls through to three live api-cloudrun tax issues; 009 is the biggest single unknown in the migration                                                                                                                                                                                    |
+| **3** | **#35 PSA, now much smaller than it reads.** ADR-0044 settled principal-vs-agent and the EOR finding means the cost path is already specified — PSA needs the **revenue side and a product line**, not a payroll path. Converts a fresh decision into spec, and feeds #6                                                                                                           |
+| **4** | **#40 + #44** — the supersession-dependents gate and its citation-assertion sibling. Four ready-made instances to land red against                                                                                                                                                                                                                                                 |
+| **5** | **#6** — requirements. `ordering`, `availability`, `banking`, `procurement` still have **zero**, and the 17 validate warnings are this backlog surfacing                                                                                                                                                                                                                           |
+| **6** | **#45** — ADR-0041's D4 is a procedure with nothing executing on it, and it is the half that removes the seasonal bias                                                                                                                                                                                                                                                             |
 
 ⚠️ **The decision backlog is not blocked on the owner's availability — it is blocked on nobody
-having prepared the decisions.** Every survey changed the ADR it was written for; **every redraft
-and every spike attempt this session found something the survey had not.** One prepared decision per
-session is probably worth more than the authoring it displaces — ⭐ **and HOT-022 is the proof: one
-owner ruling, asked in one sentence, unblocked two exit criteria, an ADR amendment and a new ADR.**
+having prepared the decisions.** ⭐ **2026-08-22 is the proof, twice over.** HOT-022 took one
+sentence to rule and unblocked two exit criteria, an ADR amendment and a new ADR. **OQ-053 had been
+open since 2026-08-17 phrased _"is CFS principal or agent"_ — a question that asks the owner to do
+the accounting. Re-asked as _who signs, who insures, who eats the loss_, it was answered in one
+sitting and closed the last hotspot.**
+
+⇒ **A question addressed to the wrong expertise looks like a question nobody has time for.** Before
+concluding a decision is stalled, check whether it is asking its owner for something they actually
+hold.
 
 ## Two capabilities every remaining unit should use
 
@@ -164,7 +150,7 @@ _All six carried forward; the last two are new._
   as the fence, beat answering both** — one is arithmetic and the other is a judgement about a
   vendor relationship.
 
-## Sixteen things to carry across the clear
+## Things to carry across the clear
 
 _The first thirteen are carried forward; this run earned three more, and they are the sharpest._
 
@@ -208,13 +194,42 @@ _The first thirteen are carried forward; this run earned three more, and they ar
   one asserting it — which is how `ADR-0029` acquired a requirement it never made, in two artifacts
   at once (#44).
 
+- ⭐ **NEW — AN ABSENCE READS AS A RESULT, and it is the defect class of this whole session.** Five
+  times: a boundary passing on 11 rows, a model silent on a case it could not represent, a model
+  silent on a question it never asked, a coverage claim with no coverage arm, and 12 figures
+  matching from the wrong edition. **Ask of every green check: could this have failed, and over
+  what?**
+- ⭐ **NEW — MEASURED POPULATION ANSWERS "IS THIS URGENT", NOT "IS THIS IN SCOPE".** Corrected twice
+  by the owner in one day. The footgun about not minting a branch before measuring its population is
+  about machinery for branches nothing takes; **it does not license omitting a rule the law requires
+  and a future asset will reach.**
+- ⭐ **NEW — ASK THE OWNER FOR FACTS, NOT FOR CLASSIFICATIONS.** OQ-053 sat open for five days as
+  "is CFS principal or agent" and was answered in one sitting as "who signs, who insures, who eats
+  the loss". **A question addressed to the wrong expertise looks like a question nobody has time
+  for.**
+- ⭐ **NEW — A CONTROL TOTAL KEYED TO THE NATURAL DOCUMENT TOTAL SILENTLY FORBIDS EVERY ENTRY THAT
+  IS NOT THAT TOTAL**, and `vehicle_cost_absorbed` had already written the reason down two entries
+  away in the same file.
+- ⭐ **NEW — TYPE THE FIGURE.** Gate 22 is the cheapest leverage in this repo. Typing five figures
+  as `measurements:` turned four live files red for quoting them uncited. HOT-018 existed _because_
+  one quantity had three internally-consistent values in three files.
+- ⚠️ **NEW — AN ADR GOES STALE AGAINST THE MIGRATION SPEC THAT IMPLEMENTS IT.** `ADR-0020` said
+  "restate all" while `field-map.yaml` had already encoded derive-from-the-master in three places.
+  **The ADR had stopped tracking what the repo already did**, and nothing compares the two.
+- ⚠️ **NEW — A SENTENCE THAT ACCURATELY QUOTES A SUPERSEDED CLAIM reads, out of context, as
+  asserting it.** That is how ADR-0029 acquired a requirement it never made, in two artifacts (#44).
+- ⚠️ **NEW — DELEGATED RESEARCH WILL FABRICATE A FIGURE, so make fabrication mechanically impossible
+  rather than discouraged.** The tax-rule refresh proposes a **line number** into a locally
+  extracted primary source; **a line number cannot be fabricated.**
+
 ## Context recommendation
 
-**CLEAR CONTEXT.** Nothing needed is in anyone's head. Each resolved hotspot's `measured:` field
-carries what was found and why; `ADR-0041`'s Consequences carry the design reasoning; the four new
-issues (#42–#45) each carry a cold-pickup section; `STATUS.generated.md` reports the milestone
-state; and `deno task ci` reproduces the whole CI contract locally.
+**CLEAR CONTEXT.** Nothing needed is in anyone's head. Every resolved hotspot's `measured:` field
+carries what was found and why; the ADRs carry the reasoning; the eleven open issues each carry a
+cold-pickup section; `STATUS.generated.md` reports the milestone state; and `deno task ci`
+reproduces the whole CI contract locally.
 
-⚠️ **The two things not written down anywhere else** are in this file and nowhere else: that the 17
-validate warnings are the clock rather than a regression, and that **three of the three unpushed
-commits include one that is the owner's** — ask before pushing.
+⚠️ **The two things not written down anywhere else** are in this file: that the 17 validate warnings
+are the clock rather than a regression, and that **the reachable work is now SPIKE-002's harness
+(#47), then 008 or 009** — the other three spikes are gated on money, credentials or the business
+and no amount of authoring moves them.
