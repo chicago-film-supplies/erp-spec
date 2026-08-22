@@ -14,7 +14,7 @@ is `deno task validate`'s judgement, not this file's.
 | Open questions | 14 open | 41 answered of 55 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 23 | 0 open |
 | Decisions (ADR) | 44 | 25 in force · 15 proposed |
-| Spikes | 12 | 7 open |
+| Spikes | 12 | 6 open |
 | Requirements | 21 | 0 without a scenario |
 | Inbox | 105 | 85 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
@@ -94,7 +94,7 @@ None.
 | `ADR-0040` | The Zod schema is the sole authority and the MongoDB validator is generated from it one-way, with every rule the validator cannot carry named in a registry CI walks | 2026-11-15 | — | — |
 | `ADR-0041` | The labor rate variance posts as its own fact keyed to causal orders, and the plan burden rate is re-derived from each observed run | 2026-11-01 | — | `OQ-045` |
 | `ADR-0042` | An orphaned pending transfer is resolved only by the application sweeper, which needs an intent record written before the reserve | 2026-11-15 | — | `SPIKE-002` |
-| `ADR-0043` | The depreciation engine is hand-rolled behind a package boundary, computed per taxpayer-year, with the year's rules as versioned data | 2026-11-15 | — | `OQ-054` `SPIKE-005` |
+| `ADR-0043` | The depreciation engine is hand-rolled behind a package boundary, computed per taxpayer-year, with the year's rules as versioned data | 2026-11-15 | — | `OQ-054` |
 | `ADR-0044` | CFS is the principal on a production service agreement, so the client's budget is revenue and the crew cost is CFS's cost | 2026-11-30 | — | — |
 
 ## Spikes
@@ -105,7 +105,7 @@ None.
 | `SPIKE-002` | What commit protocol keeps a MongoDB document write and a TigerBeetle posting c… | 1 week | `ADR-0042` | in_progress |
 | `SPIKE-003` | How does TigerBeetle's timestamp behave when loading history, and what are the… | 3 days | `ADR-0039` | closed |
 | `SPIKE-004` | What does Plaid actually provide, and what does bank reconciliation actually ne… | 3 days | _new ADR_ | open |
-| `SPIKE-005` | Hand-roll the depreciation engine, or adopt a library? | 1 week | `ADR-0043` | in_progress |
+| `SPIKE-005` | Hand-roll the depreciation engine, or adopt a library? | 1 week | `ADR-0043` | closed |
 | `SPIKE-006` | How lossy is translating JSON Schema 2020-12 to MongoDB's `$jsonSchema`, and wh… | 2 days | `ADR-0040` | closed |
 | `SPIKE-007` | Which access path reaches DuckDB from Deno — the native addon or WASM — and can… | 2 days | `ADR-0024` | closed |
 | `SPIKE-008` | How do the Chicago Personal Property Lease Transaction Tax and Illinois home-ru… | 1 week | _new ADR_ | open |
@@ -135,7 +135,7 @@ it is counted separately on purpose, and a milestone is not done because its che
 
 | Milestone | Criterion | Check | Measured |
 |---|---|---|---|
-| `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 12 spikes, 7 open, 0 closed without naming an ADR |
+| `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 12 spikes, 6 open, 0 closed without naming an ADR |
 
 ## Coverage gaps
 

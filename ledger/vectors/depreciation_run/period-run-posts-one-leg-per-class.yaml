@@ -1,0 +1,93 @@
+name: period-run-posts-one-leg-per-class
+posting_rule: depreciation_run
+kind: accept
+source: >-
+  ADR-0007 (fixed assets in-house on both bases), ADR-0026 (only the GAAP book posts), ADR-0043 (the
+  engine computes the amounts upstream). Accounts are the live chart's — 7000 Depreciation Expense
+  and the per-class `Less-Accumulated Depreciation` siblings 1501 / 1621 / 1701. Amounts are
+  synthetic; the ONE-LEG-PER-CLASS shape and the two-books-one-posting rule are not.
+
+given:
+  ledger_state:
+    closed_periods: ["2026-06"]
+  period:
+    last_day: "2026-07-31"
+  schedule:
+    schedule_id: DEP-SCHED-VEC-0001
+    period: "2026-07"
+    gaap_total_minor: 412500
+    tax_total_minor: 1875000
+    lines:
+      - {
+          asset_ref: ASSET-VEC-0001,
+          asset_account: 1500,
+          accumulated_depreciation_account: 1501,
+          gaap_amount_minor: 250000,
+          tax_amount_minor: 1500000,
+        }
+      - {
+          asset_ref: ASSET-VEC-0002,
+          asset_account: 1700,
+          accumulated_depreciation_account: 1701,
+          gaap_amount_minor: 125000,
+          tax_amount_minor: 300000,
+        }
+      - {
+          asset_ref: ASSET-VEC-0003,
+          asset_account: 1620,
+          accumulated_depreciation_account: 1621,
+          gaap_amount_minor: 37500,
+          tax_amount_minor: 75000,
+        }
+
+derivation: >-
+  July's depreciation run over three assets in three classes. **Three transfers, all debiting 7000
+  and each crediting its OWN contra account**: 250000 + 125000 + 37500 = **412500** =
+  `schedule.gaap_total_minor`, the control total.
+  ⚠️ **THE TAX COLUMN IS PRESENT AND POSTS NOTHING, AND THAT IS THE WHOLE RULE** (ADR-0026). Each
+  line carries `tax_amount_minor` and the schedule totals it at 1875000 — 4.5× the GAAP figure,
+  because §179 expenses in year 1 what GAAP carries over a useful life. **None of it becomes a
+  transfer.** The tax book is derived at report time from these same schedule lines.
+  ⚠️ **A second posting for the tax figure would balance perfectly and double the expense**, so no
+  control total, no trial balance and no balance check could catch it. The control total here is the
+  GAAP total specifically, which is what makes the tax column unpostable rather than merely
+  unposted.
+  ⚠️ **The credit is a PATH because every class has its own contra account.** Crediting one shared
+  accumulated-depreciation account would net the balance sheet correctly and destroy the per-class
+  carrying amounts the register exists to produce — the failure would be invisible in the totals and
+  visible only in a report nobody runs.
+  **`causal_orders` is an explicit null on every leg and it is a determination, not an absence**
+  (REQ-LED-001, ADR-0036). Depreciation is caused by the passage of time and an asset's own service
+  life; **no order causes it**, and attributing it to one would invent a cause to satisfy a key. The
+  asset is identified by the schedule line.
+  **The accounting date is the period's last day** (ADR-0010, ADR-0017), not the run date. June is
+  closed and this run does not touch it: a corrected estimate is prospective under ASC 250-10-45-17
+  and lands in the period of change (ADR-0043, `DEP-009`).
+  ⭐ **Nothing here asserts the amounts are CORRECT depreciation, and that is deliberate.** They
+  arrive computed by the engine and are inputs to this vector. `spikes/harness/depreciation-corpus.yaml`
+  grades whether the engine produced them rightly. **Two oracles, neither consulting the other.**
+
+expect:
+  transfers:
+    - {
+        debit_account: 7000,
+        credit_account: 1501,
+        amount_minor: 250000,
+        accounting_date: "2026-07-31",
+        causal_orders: null,
+      }
+    - {
+        debit_account: 7000,
+        credit_account: 1701,
+        amount_minor: 125000,
+        accounting_date: "2026-07-31",
+        causal_orders: null,
+      }
+    - {
+        debit_account: 7000,
+        credit_account: 1621,
+        amount_minor: 37500,
+        accounting_date: "2026-07-31",
+        causal_orders: null,
+      }
+  rejects: []

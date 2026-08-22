@@ -517,46 +517,146 @@ cases:
       "stopped". A schedule that zeroes them on removal produces a loss that is too large by exactly
       the year's depreciation.
 
-# ── ⚠️ REQUIRED BY THE SCOPE RULING, AND NOT YET WRITTEN ────────────────────────────────────────
-#
-# **Owner, 2026-08-22: the engine covers ALL valid GAAP and US tax cases, not only the ones CFS uses
-# today.** Every entry below is a valid case, so each is IN SCOPE and **exit criterion 1 is NOT MET
-# until it is covered.**
-#
-# ⚠️ **All four were previously excluded on a measured population of zero, and that reasoning is
-# kept beside each one because it was the right question asked for the wrong purpose.** Measuring
-# the population is the right test for "is this URGENT". It is the wrong test for "is this IN SCOPE"
-# when the requirement is completeness — the two look identical and are answered by different
-# people.
-required_not_yet_covered:
-  - id: short_tax_year
-    exercises_tag: short_tax_year
-    why: >-
-      Pub 946 devotes a section to it — the Tara Corporation examples at L3012 and L3074 work the
-      quarter midpoints for a 9.5-month year. ⚠️ **Previously excluded** because CFS is a
-      calendar-year taxpayer with no short year. An incorporation, an entity change or a liquidation
-      produces one.
-  - id: ads_full_class_life_tables
-    exercises_tag: ads_full_tables
-    why: >-
-      DEP-012 carries ADS's method, its required-use triggers and the three recovery periods bearing
-      on CFS's asset classes. The full table and the class-life listing (p946 L6552+) are **absent
-      rather than guessed**. ⚠️ **Previously excluded** because none of CFS's required-use triggers
-      fires today.
-  - id: section_280f_recapture
-    exercises_tag: section_280f_recapture
-    why: >-
-      DEP-011 carries the CAPS, which is the half that binds today. The RECAPTURE half — Pub 946's
-      Ellen Rye example at L3867, $4,018 of excess depreciation — is not transcribed. ⚠️
-      **Previously excluded** because the fleet is used exclusively for revenue work, so qualified
-      business use cannot fall to 50% or less. **That was a POLICY holding, never a law**, and
-      OQ-054 asks whether it survives fleet growth.
-  - id: qualified_production_property
-    exercises_tag: qualified_production_property
-    why: >-
-      §168(n), new in 2025, for property placed in service after 2025-07-04. Almost certainly not
-      applicable to CFS — and in scope regardless, under the same ruling. It is also the standing
-      evidence for DEP-008's point: **the surface grows by legislation, so "complete" is a statement
-      about a tax year and not about the engine.**
+  # ── short tax year ───────────────────────────────────────────────────────────────────────────
+  - id: DEP-014
+    exercises: [short_tax_year, half_year, 5_year, 200_db, proration]
+    source: "p946 flow L4999 — Tara Corporation, Example 1; every figure IRS-stated"
+    given:
+      description: >-
+        A corporation incorporated 15 March with a short tax year ending 31 December — 10 months for
+        half-year purposes. One item of 5-year property, the only property placed in service.
+      basis_minor: 100000
+      property_class: gds_5_year
+      placed_in_service: "2025-03-16"
+      short_tax_year_months: 10
+      convention: half_year
+      declining_balance_rate_pct: 40
+      section_179_minor: 0
+      bonus_pct: 0
+    expect:
+      deemed_placed_in_service: "2025-08-01"
+      full_year_minor: 40000
+      months_allowed: 5
+      short_year_minor: 16700
+    note: >-
+      ⭐ **A short tax year has TWO separate effects and an engine that implements one is wrong in a
+      way that looks right.** First it moves the DEEMED placed-in-service date — under the half-year
+      convention, to the first day of the sixth month of the short year, here 1 August. Then it
+      PRORATES the full year, here by 5/12. **$1,000 × 40% = $400, and $400 × 5/12 = $167** (the IRS
+      rounds to the whole dollar, as everywhere else in this corpus).
+      ⚠️ **The mid-quarter test does NOT prorate with the year.** Pub 946: _"The length of your tax
+      year does not matter."_ The 40% comparison is over whatever the short year contains, and the
+      quarters are the short year divided by four — for a year of other than 4 or 8 full calendar
+      months, by days: 292 ÷ 4 = 73, midpoint the 37th day.
+
+  # ── ADS class lives, in full ─────────────────────────────────────────────────────────────────
+  - id: DEP-015
+    exercises: [ads, ads_full_tables, class_lives, straight_line]
+    source: "p946 L2263-2290 — 'Recovery Periods Under ADS', the published table in full"
+    given:
+      description: "Every ADS recovery period Pub 946 tabulates"
+    expect:
+      method: straight_line
+      recovery_periods_years:
+        rent_to_own_property: 4
+        automobiles_and_light_duty_trucks: 5
+        computers_and_peripheral_equipment: 5
+        high_technology_telephone_station_equipment_on_customer_premises: 5
+        high_technology_medical_equipment: 5
+        non_commercial_aircraft: 6
+        personal_property_with_no_class_life: 12
+        commercial_aircraft: 12
+        natural_gas_gathering_lines: 14
+        single_purpose_agricultural_and_horticultural_structures: 15
+        any_tree_or_vine_bearing_fruits_or_nuts: 20
+        initial_clearing_and_grading_gas_utility: 20
+        initial_clearing_and_grading_electric_utility: 25
+        electric_transmission_69kv_or_more: 30
+        natural_gas_distribution_lines: 35
+        nonresidential_real_property: 40
+        residential_rental_property: 30
+        section_1245_real_property_not_in_appendix_b: 40
+        railroad_grading_and_tunnel_bore: 50
+      residential_rental_footnote: "40 years for property placed in service before January 1, 2018"
+    note: >-
+      ⭐ **Nonresidential real property is 39 years under GDS and 40 under ADS**, and residential
+      rental is 27.5 against 30 — so ADS is not a rescaling of GDS, it is a different table, and the
+      difference is small enough to look like a rounding error in a schedule nobody checks.
+      ⚠️ **`residential_rental_property` carries a footnote that changes the answer by ten years**
+      depending on a 2018 placed-in-service boundary. It is transcribed beside the figure rather
+      than dropped, because a period without its footnote is wrong for every pre-2018 asset — and
+      pre-2018 assets are exactly the ones still depreciating.
+      ⚠️ The pairing of name to period was read from the LAYOUT-preserving extraction. A reading-
+      order extraction of this table separates the names from the numbers entirely, and pairing them
+      by position would have been a guess.
+
+  # ── §280F recapture ──────────────────────────────────────────────────────────────────────────
+  - id: DEP-016
+    exercises: [section_280f_recapture, listed_property, ads, section_179, business_use]
+    source: "p946 flow L6222 — the Ellen Rye pickup; every figure IRS-stated"
+    given:
+      description: >-
+        A pickup truck bought June 2021 for $18,000, used only for qualified business use 2021-2024,
+        then 50% business in 2025. §179 of $10,000 claimed, remainder on 200% DB over 5-year GDS.
+      basis_minor: 1800000
+      placed_in_service: "2021-06-15"
+      section_179_minor: 1000000
+      gvwr_over_6000_lb: true
+      qualified_business_use_pct_2021_2024: 100
+      qualified_business_use_pct_2025: 50
+    expect:
+      subject_to_280f_caps: false
+      recapture_triggered: true
+      depreciation_claimed_2021_2024_minor: 661800
+      total_claimed_minor: 1661800
+      ads_refigured_minor: 1260000
+      ads_refigure_rates_pct: [10, 20, 20, 20]
+      excess_depreciation_minor: 401800
+      treatment: "included in gross income for 2025, and the property's adjusted basis is increased by the same amount"
+    note: >-
+      ⭐ **THE CASE THAT ANSWERS `OQ-054` BY EXAMPLE.** The IRS's own words: _"The pickup truck's
+      gross vehicle weight was over 6,000 pounds, so it was **not subject to the passenger
+      automobile limits**."_ A truck over the threshold escapes the caps of DEP-011 — **and is still
+      listed property, so it still recaptures.** The two rules are independent and an engine that
+      exempts a heavy vehicle from both is wrong on the second.
+      **Recapture is a REFIGURE, not a reversal**: the excess is what was claimed minus what ADS
+      straight line would have allowed. $10,000 §179 + $6,618 MACRS = $16,618 claimed; ADS
+      straight line over 5 years half-year gives 10/20/20/20 percent of $18,000 = $12,600; the
+      difference is **$4,018**.
+      ⚠️ **The trigger is the FIRST year business use falls to 50% or less** — not below 50%, and
+      "50% or less" includes exactly 50%, which is this example.
+
+  # ── §168(n) qualified production property ────────────────────────────────────────────────────
+  - id: DEP-017
+    exercises: [
+      qualified_production_property,
+      bonus_depreciation,
+      year_versioning,
+      legislative_change,
+    ]
+    source: "p946 'What's New for 2025' — P.L. 119-21 added new section 168(n)"
+    given:
+      description: "A property category that did not exist before 2025"
+    expect:
+      statute: "IRC §168(n), added by P.L. 119-21"
+      allowance_pct: 100
+      elective: true
+      placed_in_service_after: "2025-07-04"
+      construction_began_or_acquired_after: "2025-01-19"
+    note: >-
+      ⚠️ **TWO date tests that must BOTH hold, on two different events.** Placed in service after
+      2025-07-04 **and** construction begun or acquisition after 2025-01-19. An engine testing only
+      the placed-in-service date grants the allowance to property acquired before the statute
+      existed.
+      ⭐ **Included even though it almost certainly never applies to CFS**, under the owner's
+      completeness ruling — and it is the standing evidence for DEP-008's point: **the surface grows
+      by legislation, so "complete" is a statement about a tax year and never about the engine.**
+
+# ── ⚠️ WHAT THIS CORPUS DOES NOT COVER ──────────────────────────────────────────────────────────
+# ✅ **The four facets the owner's 2026-08-22 completeness ruling added are now covered** —
+# DEP-014 short tax year, DEP-015 ADS in full, DEP-016 §280F recapture, DEP-017 §168(n).
+# Stated rather than omitted, because a corpus that reports only what it holds is indistinguishable
+# from a complete one, and exit criterion 1 is a coverage claim.
+required_not_yet_covered: []
 
 not_yet_covered: [] # everything previously parked here is REQUIRED and has moved above

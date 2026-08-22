@@ -12,7 +12,7 @@ exit_criteria:
   - Every candidate is scored against that corpus, with failures itemised rather than summarised.
   - A decision with a stated migration path if the library is later abandoned.
 closes_adr: ADR-0043
-status: in_progress
+status: closed
 ---
 
 ## Notes
@@ -131,16 +131,33 @@ is the single most likely trigger of the 40% test** — retroactively re-computi
 personal-property asset placed in service earlier that year. **The timing of a vehicle purchase is a
 tax decision, not only a fleet one.**
 
+## Result — BUILD it, behind a package boundary. Closed 2026-08-22 → ADR-0043
+
+**All three exit criteria met.** The corpus is `spikes/harness/depreciation-corpus.yaml`, graded by
+`deno task dep-corpus` (**14/14**), candidates scored by `deno task dep-candidates`, and the annual
+refresh executes as `deno task dep-refresh` plus a scheduled workflow.
+
+**There is nothing to buy** — `macrs` returns zero packages on npm _and_ JSR, and the best of four
+candidates evidences 2 of 10 required facets while being an IFRS engine. **ADR-0043** decides: build
+it, behind a pure package boundary the corpus can import, computed **per taxpayer-year** because a
+per-asset signature cannot be answered correctly, against **effective-dated rule data** so that a
+new tax year is a data change rather than new functionality.
+
+⭐ **Building the corpus first paid four times before a single candidate was examined** — the scope
+gap (HOT-023), the year-versioning finding, the §280F ceiling, and the rounding regime. **None would
+have surfaced from comparing libraries**, which is exactly what the method predicted.
+
 ### ⭐ FINDING 4 — the scope ruling reopened criterion 1, and that is the arm working
 
 **Owner, 2026-08-22: _"the depreciation engine should cover all valid gaap and usa tax cases"_** —
 not only the ones CFS uses today, and _"i dont want to build new functionality if that changes in
 the future."_
 
-⇒ **Four facets excluded earlier the same day are back in scope**: short tax years, the full ADS
+⇒ **Four facets excluded earlier the same day came back in scope**: short tax years, the full ADS
 class-life tables, §280F recapture, and §168(n). Each had been excluded on a **measured population
-of zero**. **Exit criterion 1 therefore goes from MET back to NOT MET**, and the coverage arm went
-green → red naming exactly those four.
+of zero**. Exit criterion 1 went from MET back to NOT MET and the coverage arm went green → red
+naming exactly those four. ✅ **All four are now covered** — DEP-014 through DEP-017 — and the arm
+is green again **by adding data, never by narrowing the required list.**
 
 ⚠️ **THE PATTERN, and it is the second correction of this shape in one session** — §280F was scoped
 out on a fleet of two and corrected by _"we do expect to acquire more vehicles."_ **Measuring the
@@ -190,11 +207,11 @@ signature cannot be answered correctly; on **year-versioned rule data**.
 
 ### Where the spike stands
 
-| criterion                                                        | state                                                                                                                             |
-| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| 1 — test corpus covers the rules surface                         | 🔴 **NOT MET** — the owner widened scope to ALL valid GAAP and US tax cases on 2026-08-22; the coverage arm is RED on four facets |
-| 2 — every candidate scored against the corpus, failures itemised | ✅ **MET** — `deno task dep-candidates`; nothing reaches the floor                                                                |
-| 3 — a decision with a stated migration path                      | ✅ **MET** → `ADR-0043` (proposed)                                                                                                |
+| criterion                                                        | state                                                                |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------- |
+| 1 — test corpus covers the rules surface                         | ✅ **MET** — 15 cases, 14 facets, `deno task dep-corpus` 14/14 green |
+| 2 — every candidate scored against the corpus, failures itemised | ✅ **MET** — `deno task dep-candidates`; nothing reaches the floor   |
+| 3 — a decision with a stated migration path                      | ✅ **MET** → `ADR-0043` (proposed)                                   |
 
 ⇒ **`in_progress`.** Nothing is blocked on infrastructure or on anyone else — criterion 2 is
 candidate evaluation against a yardstick that now exists, and criterion 3 follows from it. ⚠️ **The

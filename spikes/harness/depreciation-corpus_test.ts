@@ -186,6 +186,72 @@ Deno.test("DEP-012: ADS-required listed property is the link between three facet
   assert(/ineligible/.test(e.side_effect), "ADS-required property also loses bonus");
 });
 
+Deno.test("DEP-014: the short-year proration reconciles", () => {
+  const c = corpus.cases.find((x: { id: string }) => x.id === "DEP-014");
+  const g = c.given, e = c.expect;
+  assertEquals(applyPct(g.basis_minor, g.declining_balance_rate_pct), e.full_year_minor);
+  assertEquals(
+    roundToDollarMinor((e.full_year_minor * e.months_allowed) / 12),
+    e.short_year_minor,
+    "a full year prorated by months-allowed over 12, rounded to the dollar",
+  );
+  // the deemed date is the first day of the sixth month of a 10-month short year
+  assertEquals(g.short_tax_year_months, 10);
+  assertEquals(e.deemed_placed_in_service.slice(5, 7), "08");
+});
+
+Deno.test("DEP-016: the §280F recapture refigure reconciles three ways", () => {
+  const c = corpus.cases.find((x: { id: string }) => x.id === "DEP-016");
+  const g = c.given, e = c.expect;
+  // 1. total claimed is §179 plus the MACRS actually taken
+  assertEquals(g.section_179_minor + e.depreciation_claimed_2021_2024_minor, e.total_claimed_minor);
+  // 2. the ADS refigure is straight line, half-year: 10/20/20/20 of the FULL basis
+  const refigured = e.ads_refigure_rates_pct.reduce(
+    (a: number, pct: number) => a + applyPct(g.basis_minor, pct),
+    0,
+  );
+  assertEquals(
+    refigured,
+    e.ads_refigured_minor,
+    "ADS straight-line refigure over the first 4 years",
+  );
+  // 3. and the excess is the difference
+  assertEquals(e.total_claimed_minor - e.ads_refigured_minor, e.excess_depreciation_minor);
+  // the half-year first year is half of a full straight-line year over 5 years (20%)
+  assertEquals(e.ads_refigure_rates_pct[0] * 2, e.ads_refigure_rates_pct[1]);
+  // heavy vehicle: exempt from the CAPS but NOT from recapture — the two rules are independent
+  assertEquals(g.gvwr_over_6000_lb, true);
+  assertEquals(e.subject_to_280f_caps, false);
+  assertEquals(e.recapture_triggered, true);
+});
+
+Deno.test("DEP-015: ADS periods are never shorter than their GDS counterparts", () => {
+  const ads =
+    corpus.cases.find((x: { id: string }) => x.id === "DEP-015").expect.recovery_periods_years;
+  // An independent shape property: ADS is the SLOWER system, so where both are known it cannot be
+  // shorter. GDS figures come from the tables in DEP-003/DEP-005, not from this case.
+  const GDS: Record<string, number> = {
+    nonresidential_real_property: 39,
+    residential_rental_property: 27.5,
+    automobiles_and_light_duty_trucks: 5,
+    computers_and_peripheral_equipment: 5,
+  };
+  for (const [k, gds] of Object.entries(GDS)) {
+    assert(ads[k] >= gds, `ADS ${k} is ${ads[k]}, shorter than GDS ${gds}`);
+  }
+  assert(ads.nonresidential_real_property > GDS.nonresidential_real_property, "39 vs 40");
+});
+
+Deno.test("DEP-017: §168(n) needs BOTH date tests, on two different events", () => {
+  const e = corpus.cases.find((x: { id: string }) => x.id === "DEP-017").expect;
+  assert(
+    e.placed_in_service_after > e.construction_began_or_acquired_after,
+    "the two dates differ",
+  );
+  assertEquals(e.allowance_pct, 100);
+  assertEquals(e.elective, true);
+});
+
 // ── ⚠️ THE COVERAGE ARM. Expected RED until the corpus is finished. ───────────────────────────
 Deno.test("COVERAGE: every facet SPIKE-005's exit criterion names is exercised", () => {
   // Verbatim from `spikes/SPIKE-005-depreciation-hand-rolled-vs-library.md`, exit criterion 1.

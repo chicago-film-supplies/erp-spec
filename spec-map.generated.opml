@@ -384,7 +384,7 @@
           </outline>
         </outline>
       </outline>
-      <outline text="Spikes (7 open)">
+      <outline text="Spikes (6 open)">
         <outline text="SPIKE-001 — Does the TigerBeetle client load and run under Deno via node-api compatibility?" _note="timebox: 2 days · closes: ADR-0023 · closed">
           <outline text="A Deno process creates accounts and posts a two-phase transfer against a real TigerBeetle cluster."/>
           <outline text="The same code path runs under `deno test` and under `deno compile`."/>
@@ -406,7 +406,7 @@
           <outline text="Transaction id stability confirmed or refuted across updates and re-links."/>
           <outline text="Balance endpoints reconciled against a statement closing balance, to the cent."/>
         </outline>
-        <outline text="SPIKE-005 — Hand-roll the depreciation engine, or adopt a library?" _note="timebox: 1 week · closes: ADR-0043 · in_progress">
+        <outline text="SPIKE-005 — Hand-roll the depreciation engine, or adopt a library?" _note="timebox: 1 week · closes: ADR-0043 · closed">
           <outline text="Test corpus covers: mid-month, half-year AND MID-QUARTER conventions; GDS vs ADS class lives; §179 and bonus effects on basis; §280F caps on listed property; partial disposals; prospective useful-life revisions; the deferred GAAP/tax difference. ⚠️ WIDENED 2026-08-22 (HOT-023) — mid-quarter is mandatory when the 40% test trips, not a third option, and §280F caps the combined §179 + bonus + MACRS figure this corpus computes."/>
           <outline text="Every candidate is scored against that corpus, with failures itemised rather than summarised."/>
           <outline text="A decision with a stated migration path if the library is later abandoned."/>

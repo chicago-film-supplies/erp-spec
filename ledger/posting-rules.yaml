@@ -13,8 +13,8 @@
 # Every one of the 29 appears below in exactly one of four buckets, and gate 10f fails if any event
 # is missing from all of them or present in more than one:
 #
-#   rules[] status: specified  14   fully written, with golden vectors
-#   rules[] status: blocked     2   named blocker that is genuinely still open; NO postings written
+#   rules[] status: specified  15   fully written, with golden vectors
+#   rules[] status: blocked     1   named blocker that is genuinely still open; NO postings written
 #   no_posting[]               13   produces no GL posting at all, with the reason
 #   unwritten[]                 0   in scope, no blocker, not yet specified — each names an issue
 #
@@ -938,30 +938,69 @@ rules:
   # as though the labor rule were blocked. It was left behind when that rule was unblocked.
   # ══════════════════════════════════════════════════════════════════════════════════════════════
   - id: depreciation_run
-    status: blocked
-    blocked_by: [SPIKE-005]
+    status: specified
     trigger:
       event: EVT-FA-002
       source_document: depreciation_schedule
     accounting_date: period.last_day
     posting_timestamp: assigned_by_ledger
-    postings: []
-    known:
-      - "Dr 7000 Depreciation Expense / Cr the matching `Less-Accumulated Depreciation` account."
+    journal_entry:
+      spans_multiple_source_documents: false
+    postings:
+      - debit_account: 7000
+        credit_account: line.accumulated_depreciation_account
+        per: schedule.lines
+        amount: line.gaap_amount_minor
+        keys:
+          causal_orders: null
+    control_total: schedule.gaap_total_minor
+    invariants:
       - >-
-          **Two sets of numbers per asset per period, ONE of them a posting** (ADR-0026). GAAP and tax
-          bases run separately and both must produce a full P&L and balance sheet, but only the GAAP
-          set reaches TigerBeetle; the tax set is derived at report time from the register's schedule.
-          ⚠️ This entry previously read "Two postings per asset per period, not one", which asserted a
-          parallel posting ledger nobody had decided on and which the fixed-asset suites mostly do not
-          build — see `inbox/2026-08-09-tax-and-gaap-statements-are-both-required.md`.
-    unknown:
+          ⚠️ **ONLY THE GAAP BOOK POSTS** (ADR-0026). The schedule carries two numbers per asset per
+          period and exactly one of them reaches TigerBeetle: `line.gaap_amount_minor`. The tax
+          figure is derived at report time from the register's per-book schedules and **must never
+          appear as a transfer** — a second posting for the same asset in the same period would
+          double the expense while balancing perfectly, so no control total or trial balance could
+          catch it. ⚠️ This entry previously read "two postings per asset per period, not one",
+          which asserted a parallel posting ledger nobody had decided on.
       - >-
-          **SPIKE-005** — hand-roll versus library. The conventions the engine applies (mid-month,
-          half-year), the class lives (GDS vs ADS), and §179 and bonus effects on basis all change
-          the AMOUNT, so no vector can be written until the engine is chosen and graded against its
-          corpus. Errors here have filing consequences, not just reporting ones.
-    relates_to: [ADR-0007]
+          ⚠️ **THE CREDIT IS A PATH, NOT A CONSTANT — every depreciable class has its OWN
+          accumulated-depreciation account** and the schedule line names it: `1501` for Rental
+          Inventory, `1601` Buildings, `1604` Building Improvements, `1611` Tools, Machinery &
+          Equipment, `1621` Computer & Office Equipment, `1701` Vehicles. Crediting one shared
+          contra account would net the balance sheet correctly and destroy the per-class carrying
+          amounts the register exists to produce.
+          ⚠️ **`1602 - Land` has no accumulated-depreciation sibling and that is not an omission** —
+          land is not depreciable, so a schedule line naming it is refused rather than posted to a
+          new account (`ledger/vectors/depreciation_run/land-line-rejected.yaml`).
+      - >-
+          ⚠️ **`amount:` IS A PATH AND THAT IS LOAD-BEARING HERE MORE THAN ANYWHERE** (gate 10e).
+          Every convention, class life, §179 election, bonus rate and §280F cap is applied
+          **upstream, in the engine** (ADR-0043), and the schedule arrives with the answer already
+          computed and rounded. **A posting rule is the last place a depreciation rate should be
+          multiplied by anything** — the corpus at `spikes/harness/depreciation-corpus.yaml` is what
+          grades those amounts, and it grades the ENGINE, not this rule.
+      - >-
+          ⭐ **THE CORPUS AND THE VECTORS ARE TWO INDEPENDENT ORACLES AND MUST STAY THAT WAY.** A
+          golden vector supplies `gaap_amount_minor` as an INPUT and asserts the transfers; it says
+          nothing about whether that figure is the correct depreciation. The corpus asserts the
+          figure and says nothing about where it posts. **Neither consults the other**, which is
+          what lets a vector be written before the engine exists — and it is why closing SPIKE-005
+          unblocked this rule even though nothing computes a schedule yet.
+      - >-
+          **A period's run posts once and is not re-run** (ADR-0017). Depreciation for a closed
+          period is history; a corrected estimate is prospective under ASC 250-10-45-17 (ADR-0043,
+          `DEP-009`) and lands in the period of change, never as a restatement of the one that
+          closed. ⚠️ **This is the same rule ADR-0041 leans on for the labor variance**, and two
+          unrelated corners of this spec now rest on it.
+      - >-
+          **`causal_orders` is an explicit null on every leg, and it is a determination rather than
+          an absence** (REQ-LED-001, ADR-0036). Depreciation is caused by the passage of time and by
+          an asset's own service life — **no order causes it**, and attributing it to one would be
+          inventing a cause to satisfy a key. The asset is identified by the schedule line, not by a
+          causal order.
+    relates_to: [REQ-LED-001, ADR-0007, ADR-0017, ADR-0026, ADR-0036, ADR-0043]
+    vectors_dir: ledger/vectors/depreciation_run/
 
   - id: bank_transaction_matched
     status: blocked

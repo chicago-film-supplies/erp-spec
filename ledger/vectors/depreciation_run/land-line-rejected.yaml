@@ -1,0 +1,71 @@
+name: land-line-rejected
+posting_rule: depreciation_run
+kind: reject
+differs_from: period-run-posts-one-leg-per-class
+differs_in: ["schedule.lines[2].asset_account"]
+source: >-
+  `ledger/chart-of-accounts.yaml` — **`1602 - Land` is the only fixed-asset account with no
+  `Less-Accumulated Depreciation` sibling**, and that absence is the rule rather than an omission.
+  IRS Publication 946 lists land under what cannot be depreciated; the corpus asserts it at `DEP-006`.
+
+given:
+  ledger_state:
+    closed_periods: ["2026-06"]
+  period:
+    last_day: "2026-07-31"
+  schedule:
+    schedule_id: DEP-SCHED-VEC-0002
+    period: "2026-07"
+    gaap_total_minor: 412500
+    tax_total_minor: 1875000
+    lines:
+      - {
+          asset_ref: ASSET-VEC-0001,
+          asset_account: 1500,
+          accumulated_depreciation_account: 1501,
+          gaap_amount_minor: 250000,
+          tax_amount_minor: 1500000,
+        }
+      - {
+          asset_ref: ASSET-VEC-0002,
+          asset_account: 1700,
+          accumulated_depreciation_account: 1701,
+          gaap_amount_minor: 125000,
+          tax_amount_minor: 300000,
+        }
+      - {
+          asset_ref: ASSET-VEC-0003,
+          asset_account: 1602,
+          accumulated_depreciation_account: 1621,
+          gaap_amount_minor: 37500,
+          tax_amount_minor: 75000,
+        }
+
+derivation: >-
+  **One field differs from the accept vector: the third line's asset is `1602 - Land`.** Everything
+  else is byte-for-byte identical — the same amounts, the same contra account, the same control
+  total, the same period.
+  ⚠️ **AND THAT IS WHY THE ENTRY BALANCES PERFECTLY.** 250000 + 125000 + 37500 still equals
+  `gaap_total_minor`, every transfer still pairs a debit with a credit, and the trial balance is
+  undisturbed. **A land line is not an arithmetic error, so no arithmetic check can find it** — the
+  only thing that refuses it is knowing that land is not depreciable.
+  ⚠️ **The contra account being *plausible* is the point.** The line names `1621`, which is a real
+  accumulated-depreciation account belonging to a different class, so a validator checking merely
+  that the credit account EXISTS passes this input. **"Present but wrong" beats "absent" at passing
+  every existence check** — the repo's own footgun, in a golden vector.
+  ⇒ **The refusal is on the ASSET, not on the credit account.** `1602 - Land` has no
+  `Less-Accumulated Depreciation` sibling in the chart, and that absence is the rule: a schedule line
+  whose asset is land is refused, never posted to a borrowed contra account and never quietly
+  dropped from the run.
+  ⚠️ **Dropping it silently would be the tempting fix and is worse than posting it.** The schedule
+  would then disagree with its own control total, and an engine that emits a land line at all has a
+  defect that must surface here rather than be absorbed.
+
+expect:
+  transfers: []
+  rejects:
+    - reason: >-
+        Schedule line 3 names asset account `1602 - Land`, which is not depreciable and has no
+        `Less-Accumulated Depreciation` counterpart in the chart. The line is refused rather than
+        posted to another class's contra account (`1621`) or dropped from the run. Land carries no
+        depreciation under any basis (ADR-0007; corpus `DEP-006`).
