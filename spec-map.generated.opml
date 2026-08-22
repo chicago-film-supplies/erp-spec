@@ -419,7 +419,7 @@
           <outline text="The replica count and instance shape the chosen option implies, with monthly cost."/>
           <outline text="If block storage is unsuitable, the alternative is named and priced before ADR-0013 is accepted."/>
         </outline>
-        <outline text="SPIKE-012 — At which fulfillment moment does a booking become a TigerBeetle pending transfer, and how much of o…" _note="timebox: 1 week · closes: ADR-0015 · open">
+        <outline text="SPIKE-012 — At which fulfillment moment does a booking become a TigerBeetle pending transfer, and how much of o…" _note="timebox: 1 week · closes: ADR-0015 · in_progress">
           <outline text="A boundary chosen, with the transitions on each side enumerated."/>
           <outline text="Proof by replay that no future-dated booking consumes balance at the chosen boundary."/>
           <outline text="The derived/assigned split for order status stated field by field, as a table."/>
@@ -505,7 +505,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (80 unpromoted of 100)" _note="no drops pending">
+      <outline text="Capture (81 unpromoted of 101)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -586,6 +586,7 @@
         <outline text="Rule 8a survey for ADR-0029 — three of five systems post allocations and none derives at report tim…" _note="inbox/2026-08-20-survey-nobody-keeps-allocations-out-of-the-ledger-they-keep-them-out-of-the-statements.md"/>
         <outline text="Correction — the causal_orders declare-or-be-rejected obligation is ADR-0036's decision and REQ-LED…" _note="inbox/2026-08-22-correction-the-causal-orders-obligation-is-adr-0036s-decision-not-adr-0029s-and-two-artifacts-carried-the-wrong-owner.md"/>
         <outline text="Owner — a tracking category was on no externally filed document, which discharges the one load-bear…" _note="inbox/2026-08-22-owner-a-tracking-category-was-on-no-externally-filed-document-so-the-recast-is-owed-to-nobody.md"/>
+        <outline text="The booking lifecycle is dormant, so SPIKE-012's boundary cannot be chosen yet — the verdict that l…" _note="inbox/2026-08-22-the-booking-lifecycle-is-dormant-so-spike-012s-boundary-cannot-be-chosen-yet-and-the-verdict-that-looked-like-a-pass-rests-on-11-rows.md"/>
       </outline>
     </outline>
   </body>

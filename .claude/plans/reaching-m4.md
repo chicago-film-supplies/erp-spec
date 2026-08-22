@@ -2,11 +2,13 @@
 
 > ## ⚠️ STATUS UPDATE 2026-08-22
 >
-> **The hotspot half of m4 went from 4 unresolved to 1 in one session**, and the last one is an
-> owner decision, not authoring. `HOT-018`, `HOT-019` and `HOT-020` are resolved; `HOT-021` was
-> opened and resolved on the same grounds. **m4's remaining machine-checkable work is the SPIKES — 7
-> of 12 still open.** Rewritten rather than prepended: every item in the old _Then, in order_ list
-> above item 4 is done, and a plan that reads as a to-do list of finished work is worse than none.
+> **The hotspot half of m4 went from 4 unresolved to 1**, and a spike attempt turned up a
+> milestone-level blocker: **SPIKE-012 is gated on the manager check process going live (#46)**. The
+> hotspot progress, and the last one is an owner decision, not authoring. `HOT-018`, `HOT-019` and
+> `HOT-020` are resolved; `HOT-021` was opened and resolved on the same grounds. **m4's remaining
+> machine-checkable work is the SPIKES — 7 of 12 still open.** Rewritten rather than prepended:
+> every item in the old _Then, in order_ list above item 4 is done, and a plan that reads as a to-do
+> list of finished work is worse than none.
 
 - **Date:** 2026-08-22 (rewrites the 2026-08-21 revision, which replaced `open-issue-queue.md`)
 - **Repo:** erp-spec
@@ -17,8 +19,8 @@
   jump as something this session broke.**
 - **Unpushed:** 3 commits on `main` — `29c7850` (owner's, plan retirement), plus `a3b9b59` and
   `49487b1` from this session. **Ask before pushing; one is not Claude's.**
-- **Related:** open — #3, #4, #6, #12, #17, #32, #35, #36, #37, #40, #41, **#42, #43, #44, #45 (new
-  this run)** · closed this run: **#38** · **HOT-017 is the only open hotspot**
+- **Related:** open — #3, #4, #6, #12, #17, #32, #35, #36, #37, #40, #41, **#42, #43, #44, #45, #46
+  (new this run)** · closed this run: **#38** · **HOT-017 is the only open hotspot**
 
 ## START HERE
 
@@ -50,6 +52,26 @@ and it gates a whole service line (#35).
 - **`ADR-0041`** (new) — the labor variance posts as a keyed fact. Account, both posting arms, three
   vectors. **Closes #38 and resolves HOT-018.**
 
+### ⛔ NEW 2026-08-22 — m4 has a criterion gated on a BUSINESS PROCESS, not on authoring
+
+**SPIKE-012 cannot be closed until the manager check-in/check-out process is live** (owner,
+2026-08-22). It was attempted this session and is now `in_progress` with a measured partial result.
+**It is the only one of the seven gated that way** — the other six are gated on research,
+infrastructure or an owner decision, all of which are ours to move. Re-run condition: **#46**.
+
+⚠️ **THE LESSON FROM ATTEMPTING IT, and it is the sharpest of the session.** The probe reported
+_"PASSES — no future-dated unit holds a transfer"_ for two of four candidate boundaries. **Those
+passes rest on 11 rows in the entire corpus**, because `prepped` is barely written while the
+lifecycle is dormant. ⭐ **A failing arm is loud; a passing arm that matched almost nothing is
+indistinguishable from a working one.** The repo's "an unexercised branch is a claim, not a
+capability" usually bites on the branch nobody took — here it bit on the branch that **passed**, and
+a boundary would have been chosen on 11 rows while reading as a clean result.
+
+✅ **What the attempt DID establish, and it is not small:** `bookings.breakdown` is an exact
+partition of `quantity` on **6,967 / 6,967 rows**, so v1 already holds a position a ledger can be
+built from; and **B1 "at confirmation" is REFUTED on genuinely exercised data** — 392 future-dated
+units, 43-day max lead. ADR-0015 predicted that failure in prose and now has the number.
+
 ### ⚠️ The one thing that keeps causing this
 
 **All four trace to `ADR-0036`'s supersession of `ADR-0018` moving the ground under three proposed
@@ -59,13 +81,13 @@ narrower arm for _"ADR-NNNN requires `<field>`"_ where the field is absent from 
 
 ## Then, in order
 
-|       |                                                                                                                                                                                                                                                    |
-| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **1** | **A spike — this is the milestone now.** `SPIKE-002` is the load-bearing one (ADR-0003's two-store split; a Quint spec already exists). `SPIKE-005` and `SPIKE-008` are self-contained desk research. **`SPIKE-011` needs rescoping first (#41).** |
-| **2** | **`OQ-053` — put the PSA question to the owner.** It is the only thing between m4 and a clean hotspot criterion, and it blocks a whole service line. **Prepare the decision; do not wait for it.**                                                 |
-| **3** | **#40 + #44** — the supersession-dependents gate and its citation-assertion sibling. Small, and four instances are sitting there as a red-first population                                                                                         |
-| **4** | **#6** — requirements. `ordering`, `availability`, `banking`, `procurement` still have **zero**, and the public client app depends on the first two. The 17 new warnings are this issue's backlog surfacing                                        |
-| **5** | **#45** — ADR-0041's D4 is a procedure with nothing executing on it, and it is the half that actually removes the seasonal bias                                                                                                                    |
+|       |                                                                                                                                                                                                                                                                                                                                          |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1** | **A spike — this is the milestone now.** ⛔ **NOT SPIKE-012 — it is `in_progress` and blocked on a business process (#46).** `SPIKE-002` is the load-bearing one **and its first exit criterion is already met** (see below). `SPIKE-005` and `SPIKE-008` are self-contained desk research. **`SPIKE-011` needs rescoping first (#41).** |
+| **2** | **`OQ-053` — put the PSA question to the owner.** It is the only thing between m4 and a clean hotspot criterion, and it blocks a whole service line. **Prepare the decision; do not wait for it.**                                                                                                                                       |
+| **3** | **#40 + #44** — the supersession-dependents gate and its citation-assertion sibling. Small, and four instances are sitting there as a red-first population                                                                                                                                                                               |
+| **4** | **#6** — requirements. `ordering`, `availability`, `banking`, `procurement` still have **zero**, and the public client app depends on the first two. The 17 new warnings are this issue's backlog surfacing                                                                                                                              |
+| **5** | **#45** — ADR-0041's D4 is a procedure with nothing executing on it, and it is the half that actually removes the seasonal bias                                                                                                                                                                                                          |
 
 ⚠️ **The decision backlog is not blocked on the owner's availability — it is blocked on nobody
 having prepared the decisions.** Every survey changed the ADR it was written for; **every redraft

@@ -51,6 +51,8 @@
     "matrix-lines": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal product-line-matrix-probe.ts",
     "//psa": "Where a production service agreement's money sits in the live invoice corpus (erp-spec#35). A census of INVOICED lines, never of the GL — an account with no invoice line naming it may still have moved money.",
     "psa": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal psa-probe.ts",
+    "//boundary": "SPIKE-012 — the booking->pending-transfer boundary and order-status derivability (ADR-0015). Read-only prod Firestore under ADC. `--as-of <iso>` pins the reference date; without it the run reads the clock and prints what it read.",
+    "boundary": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal booking-boundary-probe.ts",
     "posting-keys": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal posting-key-width-probe.ts"
   },
 

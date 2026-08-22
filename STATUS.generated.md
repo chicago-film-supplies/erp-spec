@@ -16,7 +16,7 @@ is `deno task validate`'s judgement, not this file's.
 | Decisions (ADR) | 41 | 25 in force · 12 proposed |
 | Spikes | 12 | 7 open |
 | Requirements | 21 | 0 without a scenario |
-| Inbox | 100 | 80 unpromoted |
+| Inbox | 101 | 81 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
@@ -110,7 +110,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | `SPIKE-009` | What replaces Firestore real-time listeners — MongoDB change streams plus a soc… | 1 week | _new ADR_ | open |
 | `SPIKE-010` | Does a production-grade Valkey queue client run under Deno, and can it express… | 3 days | `ADR-0012` | closed |
 | `SPIKE-011` | Does TigerBeetle meet its durability and latency expectations on Linode block s… | 3 days | `ADR-0013` | open |
-| `SPIKE-012` | At which fulfillment moment does a booking become a TigerBeetle pending transfe… | 1 week | `ADR-0015` | open |
+| `SPIKE-012` | At which fulfillment moment does a booking become a TigerBeetle pending transfe… | 1 week | `ADR-0015` | in_progress |
 
 ## Roadmap
 
