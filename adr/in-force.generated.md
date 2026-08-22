@@ -158,7 +158,7 @@ Accepted and not superseded, as of the last `deno task gen`.
 
 | ADR | Title | Review by | Supersedes on acceptance | Blocked on |
 |---|---|---|---|---|
-| [ADR-0015](ADR-0015-reservations-as-pending-transfers.md) | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-11-01 | — | `SPIKE-002` `SPIKE-012` |
+| [ADR-0015](ADR-0015-reservations-as-pending-transfers.md) | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-11-01 | — | `SPIKE-012` |
 | [ADR-0020](ADR-0020-xero-history-is-recast.md) | Xero history is recast, and the product line is derived from the master rather than assigned to the line | 2026-10-15 | — | — |
 | [ADR-0025](ADR-0025-non-operating-receipts-move-account.md) | A receipt that is not a categorised sale moves to 4800 Other Income rather than taking a null on an operating revenue account | 2026-10-01 | — | — |
 | [ADR-0027](ADR-0027-retain-mapbox-and-resend-at-the-boundary.md) | Retain Mapbox for geocoding and Resend for transactional email, at the boundary | 2026-10-01 | — | — |
@@ -170,6 +170,6 @@ Accepted and not superseded, as of the last `deno task gen`.
 | [ADR-0039](ADR-0039-history-loads-as-ordinary-postings-not-imported-transfers.md) | Historical ledger entries load as ordinary postings with cluster-assigned timestamps; the TigerBeetle `imported` flag is refused | 2026-11-15 | — | — |
 | [ADR-0040](ADR-0040-zod-is-the-schema-authority-and-the-mongo-validator-is-generated.md) | The Zod schema is the sole authority and the MongoDB validator is generated from it one-way, with every rule the validator cannot carry named in a registry CI walks | 2026-11-15 | — | — |
 | [ADR-0041](ADR-0041-the-labor-variance-posts-as-a-keyed-fact.md) | The labor rate variance posts as its own fact keyed to causal orders, and the plan burden rate is re-derived from each observed run | 2026-11-01 | — | `OQ-045` |
-| [ADR-0042](ADR-0042-the-sweeper-is-the-sole-resolver.md) | An orphaned pending transfer is resolved only by the application sweeper, which needs an intent record written before the reserve | 2026-11-15 | — | `SPIKE-002` |
+| [ADR-0042](ADR-0042-the-sweeper-is-the-sole-resolver.md) | An orphaned pending transfer is resolved only by the application sweeper, which needs an intent record written before the reserve | 2026-11-15 | — | — |
 | [ADR-0043](ADR-0043-the-depreciation-engine-is-built-and-packaged.md) | The depreciation engine is hand-rolled behind a package boundary, computed per taxpayer-year, with the year's rules as versioned data | 2026-11-15 | — | `OQ-054` |
 | [ADR-0044](ADR-0044-cfs-is-principal-on-a-psa.md) | CFS is the principal on a production service agreement, so the client's budget is revenue and the crew cost is CFS's cost | 2026-11-30 | — | — |

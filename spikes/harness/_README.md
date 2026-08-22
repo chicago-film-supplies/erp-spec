@@ -125,5 +125,22 @@ Valkey (`brew install valkey`):
 valkey-server --port 6399 --dir .data --appendonly yes --appendfsync everysec
 ```
 
+### SPIKE-002 — the two-store crash harness needs BOTH stores
+
+`deno task two-store`. There is no container runtime on the dev machines, so both servers run
+directly from `.data/`:
+
+```sh
+# mongod — 8.0.x, because --fork is refused by 8.3.x on macOS (see mongo-schema-probe.ts)
+curl -Lo .data/mongo.tgz https://fastdl.mongodb.org/osx/mongodb-macos-arm64-8.0.4.tgz
+tar xzf .data/mongo.tgz -C .data
+mkdir -p .data/mongo-2sc
+.data/mongodb-macos-aarch64-8.0.4/bin/mongod --dbpath .data/mongo-2sc --port 27078 --bind_ip 127.0.0.1
+
+# a SEPARATE TigerBeetle cluster from `deno task tb`'s, so a crash case cannot corrupt SPIKE-001's
+.data/tigerbeetle format --cluster=0 --replica=0 --replica-count=1 --development .data/2sc.tigerbeetle
+.data/tigerbeetle start --addresses=3044 --development .data/2sc.tigerbeetle
+```
+
 `.bin/` (compiled binaries) and `.data/` (cluster files, RDB/AOF, downloaded archives) are
 gitignored.

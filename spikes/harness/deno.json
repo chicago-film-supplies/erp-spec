@@ -59,6 +59,8 @@
     "dep-candidates": "deno run --allow-net=registry.npmjs.org,api.jsr.io depreciation-candidates-probe.ts",
     "//dep-refresh": "ADR-0043/D7 — fetches the publication the depreciation corpus is pinned against, extracts it LOCALLY with pdftotext, and locates every pinned figure or fails. Red means reconcile against a new edition, not breakage. Needs poppler (pdftotext).",
     "dep-refresh": "deno run --allow-net=www.irs.gov --allow-read --allow-write --allow-run=pdftotext --allow-env tax-rules-refresh-probe.ts",
+    "//two-store": "SPIKE-002 criterion 2 — the crash-injection harness for ADR-0042's two-store commit protocol. Needs a local mongod on 27078 and a TigerBeetle cluster on 3044; see _README.md. The writer subprocess SIGKILLs itself, so the state recovery sees is real durable state rather than a simulation.",
+    "two-store": "deno run --allow-read --allow-env --allow-net --allow-sys --allow-ffi --allow-run two-store-crash-probe.ts",
     "posting-keys": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal posting-key-width-probe.ts"
   },
 

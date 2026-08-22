@@ -14,7 +14,7 @@ exit_criteria:
   - A crash-injection harness reproduces each interleaving and the recovery path restores consistency.
   - Orphan detection and resolution is specified, including its time bound.
 closes_adr: ADR-0042
-status: in_progress
+status: closed
 ---
 
 ## Partial result — 2026-08-22. Criterion 1 MET; a new failure mode found on the way
@@ -131,15 +131,13 @@ kill-at-each-step.**
 
 ### Where the spike stands
 
-| criterion                                                          | state                                                     |
-| ------------------------------------------------------------------ | --------------------------------------------------------- |
-| 1 — Quint model checks clean on the three failure questions        | ✅ **MET**, re-verified 2026-08-22                        |
-| 2 — crash-injection harness                                        | ⛔ **NOT STARTED** — needs a local `mongod` (erp-spec#47) |
-| 3 — orphan detection and resolution specified, with its time bound | ✅ **MET** → ADR-0042                                     |
+| criterion                                                          | state                                                                                                       |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| 1 — Quint model checks clean on the three failure questions        | ✅ **MET**, re-verified 2026-08-22                                                                          |
+| 2 — crash-injection harness                                        | ✅ **MET** — `deno task two-store`, **14/14** against a real mongod and a real TigerBeetle, fired RED twice |
+| 3 — orphan detection and resolution specified, with its time bound | ✅ **MET** → ADR-0042                                                                                       |
 
-⇒ **`in_progress`, not closable, and criterion 2 is now the one that matters most** — both findings
-above are about timing and discovery, which is exactly the class a model must assume and a harness
-can measure.
+⇒ ✅ **ALL THREE MET. CLOSED 2026-08-22 → `ADR-0042`.**
 
 ## Notes
 
@@ -150,3 +148,49 @@ verified twice. Unsafe under `timeout > 0`, proven 2026-08-22 (HOT-022).**
 If SPIKE-001 forces a Go sidecar, the extra network hop belongs in this model. ✅ **SPIKE-001 closed
 with no sidecar (ADR-0023)**, so the hop does not exist — but the finding above says the model's
 missing dimension was never the hop, it was the CLOCK.
+
+## Result — the protocol is safe under `timeout = 0`. Closed 2026-08-22 → ADR-0042
+
+`deno task two-store` drives a real writer subprocess to a **real SIGKILL** at each step, then runs
+the recovery sweeper against whatever durable state survives. **14 assertions, 0 failures**, against
+a local `mongod` 8.0.4 and a single-replica TigerBeetle 0.17.9 cluster.
+
+⚠️ **The writer SIGKILLs ITSELF rather than returning early, and that is the difference between
+criterion 2 and a simulation.** An in-process "pretend we stopped here" flag proves the recovery
+agrees with a mock; a SIGKILL leaves real state in two real datastores with no unwinding, no
+`finally`, and no client shutdown — which is what a crash actually is.
+
+| case                                        | asserts                                                                                           |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| SIGKILL between `writeIntent` and `reserve` | the orphan is **discoverable** — an open intent survives, and TigerBeetle could not have told us  |
+| SIGKILL between `reserve` and `writeDoc`    | recovery **VOIDS**, having read MongoDB and found nothing — the branch `naive_sweeper` gets wrong |
+| SIGKILL between `writeDoc` and `post`       | recovery **POSTS**; no document is left unbacked; **a second pass is a no-op**                    |
+| SIGKILL after `post`                        | the retry is refused with `pending_transfer_already_posted` (**33**)                              |
+| sweeper races a live writer                 | the writer's post fails with `pending_transfer_already_voided` (**34**), so it can compensate     |
+| `timeout` is 0                              | expiry **never fires**                                                                            |
+
+⭐ **Every case asserts a CODE, not an absence of throw** — because "the second post did not happen"
+is also exactly what a dropped request looks like.
+
+### ⭐ FIRED RED TWICE, and the second result was larger than expected
+
+A harness that has never failed is indistinguishable from one asserting nothing.
+
+| perturbation                                                                  | result                                                                      |
+| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| **remove the intent record** (revert to the `undiscoverable_orphan` protocol) | the discovery assertions fail — the orphan becomes invisible to both stores |
+| **set `Transfer.timeout` to 1s and let it elapse**                            | ⚠️ **SEVEN assertions fail across FIVE cases**                              |
+
+⚠️ **A non-zero timeout does not degrade gracefully.** It breaks recovery, voiding, posting _and_
+the double-post refusal simultaneously, because pending transfers expire out from under every
+operation. `expiring_timeout` predicted exactly this in the model; the cluster demonstrates it.
+
+⭐ **And case 6 — the assertion that NOTHING HAPPENS, the one most likely to be vacuous — fired.**
+That is the assertion a reviewer would most reasonably have deleted.
+
+### What the harness does NOT establish, stated
+
+- **Concurrency between two DIFFERENT operations.** Every case is one operation.
+- **A crash of MongoDB or TigerBeetle themselves** — only of the writer between them.
+- **That `T_claim` and `T_resolve` are correctly VALUED** (ADR-0042/D4). Case 5 proves the race is
+  detectable and compensable; the numbers are operational and deliberately unset.
