@@ -1,131 +1,76 @@
-# Reaching m4 — the last milestone with unmet machine-checkable criteria
+# Reaching m4 — the hotspot half is done; the milestone is now the spikes
 
-- **Date:** 2026-08-21 (replaces `open-issue-queue.md`, whose framing aged out — the work is no
-  longer "clear the issue queue", it is m4)
+> ## ⚠️ STATUS UPDATE 2026-08-22
+>
+> **The hotspot half of m4 went from 4 unresolved to 1 in one session**, and the last one is an
+> owner decision, not authoring. `HOT-018`, `HOT-019` and `HOT-020` are resolved; `HOT-021` was
+> opened and resolved on the same grounds. **m4's remaining machine-checkable work is the SPIKES — 7
+> of 12 still open.** Rewritten rather than prepended: every item in the old _Then, in order_ list
+> above item 4 is done, and a plan that reads as a to-do list of finished work is worse than none.
+
+- **Date:** 2026-08-22 (rewrites the 2026-08-21 revision, which replaced `open-issue-queue.md`)
 - **Repo:** erp-spec
-- **Status:** `main` is CI-green and **`deno task validate` is 0 failures / 0 warnings** — the first
-  time this has been true. Everything is pushed (`origin/main` = `89724cf` +).
-- **Origin:** the 2026-08-18→21 sessions closed two spikes, produced three rule 8a surveys, and
-  fixed the dashboard that had been misreporting what was blocked.
-- **Related:** open — #3, #4, #6, #12, #17, #32, #35, #36, #37, #38, **#40 (supersession gate)**,
-  **#41 (SPIKE-011 rescope)** · closed this run: **#39** · HOT-017, HOT-018, **HOT-019**,
-  **HOT-020** open · api-cloudrun#597 filed
+- **Status:** `main` is CI-green — `deno task ci` all 5 steps. **`deno task validate` is 0 failures
+  / 17 warnings.** ⚠️ **The warnings are the CLOCK, not a regression** — all 17 are `2026-08-08`
+  inbox notes crossing the 14-day unpromoted threshold on 2026-08-22. That is `validate.ts` reading
+  the real date working exactly as designed, and it is erp-spec#6's backlog. **Do not read the 0→17
+  jump as something this session broke.**
+- **Unpushed:** 3 commits on `main` — `29c7850` (owner's, plan retirement), plus `a3b9b59` and
+  `49487b1` from this session. **Ask before pushing; one is not Claude's.**
+- **Related:** open — #3, #4, #6, #12, #17, #32, #35, #36, #37, #40, #41, **#42, #43, #44, #45 (new
+  this run)** · closed this run: **#38** · **HOT-017 is the only open hotspot**
 
 ## START HERE
 
-**m0–m3 are met. m4 is the only milestone with unmet machine-checkable criteria**, and it needs
-exactly two things:
+**m0–m3 are met. m4 is the only milestone with unmet machine-checkable criteria**, and after this
+session it needs essentially one thing:
 
-| criterion                                  | measured               |
-| ------------------------------------------ | ---------------------- |
-| every spike closed, naming the ADR it made | **7 of 12 still open** |
-| every hotspot resolved                     | **4 of 20 still open** |
+| criterion                                  | measured 2026-08-21    | measured 2026-08-22    |
+| ------------------------------------------ | ---------------------- | ---------------------- |
+| every hotspot resolved                     | 4 of 20 open           | ⭐ **1 of 21 open**    |
+| every spike closed, naming the ADR it made | **7 of 12 still open** | **7 of 12 still open** |
 
-Nothing is half-finished. Pick from _Then, in order_.
+⇒ **The milestone is now the spikes.** The one remaining hotspot, `HOT-017`, is blocked on `OQ-053`
+(is CFS principal or agent on a PSA) — **an owner decision that no amount of authoring unblocks**,
+and it gates a whole service line (#35).
 
-### ⭐ The hotspot half is now mostly WRITING, not research
+### What landed 2026-08-21 → 22
 
-Three of the four open hotspots have their six-reference evidence gathered and a concrete
-recommendation written. **This is the cheapest m4 progress available and it needs no new decision
-from the owner** — a `proposed` ADR may be amended freely (ADR-0034; ADR-0032 is the precedent for
-substantial amendment while proposed), and the owner still rules at acceptance.
+**Three proposed ADRs were redrafted off premises now known false, and a fourth ADR was written.**
 
-| HOT     | needs                                                      | evidence                                        |
-| ------- | ---------------------------------------------------------- | ----------------------------------------------- |
-| **018** | the `labor_variance` account, event, rule + golden vectors | ✅ survey landed `f0d44c1`; the park is **#38** |
-| **019** | ADR-0025 redrafted onto its surviving question             | ✅ survey landed `89724cf`                      |
-| **020** | ADR-0020 redrafted off its void premise                    | ✅ survey landed `89724cf`                      |
-| 017     | **OQ-053** — is CFS principal or agent on a PSA            | ⛔ owner's, and it blocks a whole service line  |
+- **`ADR-0020` (HOT-020)** — redrafted as a **recast**, not a restatement. Both halves of the old
+  decision were void. The new Decision is **neither of its two options**: derive the product line
+  from the product master, declare a null where there is nothing to derive from. ✅ **The
+  load-bearing premise is DISCHARGED** — owner, 2026-08-22: **a tracking category was on no
+  externally filed document.** Typed as `ADR-0020/P1` so a future falsification has an anchor.
+- **`ADR-0025` (HOT-019)** — narrowed to its one surviving clause and retitled: **a non-operating
+  receipt moves ACCOUNT, not bucket.** Three of four decision clauses were dead or already-enacted.
+- **`ADR-0029` (HOT-021)** — the decision stands, the argument changes. Gains the **Considered
+  options** section it never had, carrying the family every reference implements.
+- **`ADR-0041`** (new) — the labor variance posts as a keyed fact. Account, both posting arms, three
+  vectors. **Closes #38 and resolves HOT-018.**
 
-Each hotspot's own `resolution_shape` in `hotspots.yaml` carries the route. Read that first.
+### ⚠️ The one thing that keeps causing this
 
-### What changed 2026-08-18 → 21
-
-**Two spikes closed, each producing a new narrow ADR, and both refuse the obvious mechanism on
-measurement.**
-
-- **SPIKE-003 → ADR-0039.** ADR-0010 **confirmed**. `TransferFlags.imported` is refused:
-  `CreateTransferResult.timestamp` **echoes** the caller's value, so an imported load leaves no
-  record of the real commit time anywhere in TigerBeetle. And the import window is
-  `(last committed ts of that object type, cluster clock]` — **after go-live a backdated import is
-  refused forever**, which binds ADR-0020.
-- **SPIKE-006 → ADR-0040.** The spike's own premise inverted: **MongoDB silently ignores nothing**
-  (63 keywords probed, 29 accepted, 34 rejected, **0 accepted-and-ignored**). The dangerous loss is
-  upstream in Zod, which drops **35 refinements** with no output while `unrepresentable: "throw"`
-  reports no throw. ⭐ **`$expr` enforces all five items invariants** — proven with
-  conforming/violating pairs — and checks (1)(2)(3) **independently of `computeItemPaths`**, which
-  is the first mechanism here to escape the fixed-point-guard problem.
-
-**#39 fixed the dashboard.** The Blocked-on column read _any_ HOT/OQ/SPIKE id in `relates_to` with
-no status check, so **6 of 8 proposed ADRs displayed an already-resolved blocker and three displayed
-nothing else**. ⚠️ **Filtering alone would have replaced one wrong answer with another** — ADR-0020,
-0025 and 0029 would have dropped to `—`, reading as _ready to accept_, when gate 19 meant they could
-not be. They now name `rule 8a survey`, or the hotspot that actually blocks them.
-
-**Three rule 8a surveys, and all three found something the ADR did not have.** See _The three
-surveys_ below — the ADRs cite them and gate 19 is clean.
-
-**The public client app is in scope** (owner, 2026-08-18) — real-time stock availability, quote
-request, checkout for in-store orders. It gives **ADR-0005's already-named second client a purpose
-it never had**.
-
-### ⚠️ Five ADRs show `—` and only two are actually clean
-
-The column can express "blocked on an id" and "needs a survey". **It cannot express _the body says
-something now known false_.** That is what HOT-019 and HOT-020 exist for — and one more may be owed:
-
-| ADR                    | reads as | actually                                                                       |
-| ---------------------- | -------- | ------------------------------------------------------------------------------ |
-| **ADR-0039, ADR-0040** | ready    | ✅ genuinely clean — need a ruling and nothing else                            |
-| **ADR-0029**           | ready    | ⚠️ its opening Context claim is **falsified by the survey it now cites**       |
-| **ADR-0027**           | ready    | ⚠️ Resend enumeration predates the draft-quote use; measured figures not in it |
-| **ADR-0028**           | ready    | ⚠️ still rests on SPIKE-011, scoped narrower than it needs (**#41**)           |
-
-**Open question left deliberately unanswered: does ADR-0029 get a hotspot too?** Identical grounds
-to 019 and 020. Stopped at two because a third in one session reads as inflation rather than signal.
-
-## The three surveys, compressed — read the inbox notes before redrafting
-
-**ADR-0029 (allocation).** Three of five systems post allocations, two have no engine, **none
-derives at report time**. ⚠️ Its claim _"allocation is destructive"_ is **false as stated** — SAP
-`distribution` keeps the grain, `overhead allocation` destroys it, and SAP forces the choice per
-cycle. ⭐ **The option it never considers is the one they all implement: nobody keeps allocations
-out of the LEDGER, they keep them out of the STATEMENTS.** The decision survives on a better
-argument — a number resting on a basis ADR-0031 calls the weakest tier should not get a document
-number — with **Deltek Vision** as production precedent. GAAP's hook is **ASC 280**, and it is a
-bill: **50-30 requires reconciliation to consolidated totals, stated nowhere in the reporting
-spec.**
-
-**ADR-0025 (the dimension obligation).** ⚠️ **No surveyed system lets a POSTING declare "not
-applicable"** — every escape hatch sits on the account or the scope. ⭐ **The criterion is not "was
-this classified" but "can the book still be tied out if this is missing"**, which endorses ADR-0036
-for `product_line` **and endorses moving the obligation to `causal_orders`** — a key that must tie
-out, that ADR-0029 already requires on every posting, and where `posting-rules.yaml` already carries
-~15 `causal_orders: null` declarations with vectors on both arms. **The rule is defensible and
-pointed at the wrong field.**
-
-**ADR-0020 (restate the history).** ⭐ **FASB already fixed the word** — ASU 2023-07 BC83 replaced
-"restatement" with **"recast"** throughout Topic 280. ⭐ **The six criteria collapse into two** —
-_was it published_ and _what would the write fail to reach_ — and **CFS fails neither**. ⚠️
-Load-bearing premise needing the owner: **that a tracking category was on no externally filed
-document.** The delta, previously "unmeasurable", is **$231,796.26** (106 lines, 15.66% of pre-lock
-revenue, untracked in **both** systems). The recommendation is **neither** of the ADR's options:
-derive from the product master, declare a null where there is nothing to derive from.
+**All four trace to `ADR-0036`'s supersession of `ADR-0018` moving the ground under three proposed
+ADRs, with nothing detecting it.** That is **#40**, still open — and it now has **four** ready-made
+instances to land a gate red against instead of last session's three. **#44** is its sibling: a
+narrower arm for _"ADR-NNNN requires `<field>`"_ where the field is absent from that ADR's body.
 
 ## Then, in order
 
-|       |                                                                                                                                                                                                               |
-| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **1** | **HOT-020 → redraft ADR-0020.** Smallest, and its survey's recommendation is fully written                                                                                                                    |
-| **2** | **HOT-019 → redraft ADR-0025.** Move the obligation to `causal_orders`; keep the `4800`/declared-null half                                                                                                    |
-| **3** | **HOT-018 → #38**, the `labor_variance` rule. Account, event, rule, vectors — including the OVER-statement direction, which is CFS's measured one                                                             |
-| **4** | **A spike.** SPIKE-005 and SPIKE-008 are self-contained desk research; **SPIKE-002 is the load-bearing one** (ADR-0003's two-store split, and a Quint spec exists); **SPIKE-011 needs rescoping first (#41)** |
-| **5** | **#40** — the supersession-dependents gate. Small, and today's three are a ready-made red-first population                                                                                                    |
-| **6** | **#6** — requirements. `ordering`, `availability`, `banking`, `procurement` still have **zero**, and the public client app now depends on the first two                                                       |
+|       |                                                                                                                                                                                                                                                    |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1** | **A spike — this is the milestone now.** `SPIKE-002` is the load-bearing one (ADR-0003's two-store split; a Quint spec already exists). `SPIKE-005` and `SPIKE-008` are self-contained desk research. **`SPIKE-011` needs rescoping first (#41).** |
+| **2** | **`OQ-053` — put the PSA question to the owner.** It is the only thing between m4 and a clean hotspot criterion, and it blocks a whole service line. **Prepare the decision; do not wait for it.**                                                 |
+| **3** | **#40 + #44** — the supersession-dependents gate and its citation-assertion sibling. Small, and four instances are sitting there as a red-first population                                                                                         |
+| **4** | **#6** — requirements. `ordering`, `availability`, `banking`, `procurement` still have **zero**, and the public client app depends on the first two. The 17 new warnings are this issue's backlog surfacing                                        |
+| **5** | **#45** — ADR-0041's D4 is a procedure with nothing executing on it, and it is the half that actually removes the seasonal bias                                                                                                                    |
 
 ⚠️ **The decision backlog is not blocked on the owner's availability — it is blocked on nobody
-having prepared the decisions.** Every survey this run changed the ADR it was written for. **One
-prepared decision per session is probably worth more than the authoring it displaces.**
+having prepared the decisions.** Every survey changed the ADR it was written for; **every redraft
+this session found something the survey had not.** One prepared decision per session is probably
+worth more than the authoring it displaces.
 
 ## Two capabilities every remaining unit should use
 
@@ -136,74 +81,89 @@ prepared decision per session is probably worth more than the authoring it displ
   and it omits `credit-notes` and `settlements` — the second being 1,073 documents of cash
   application. Anything scoped from it is scoped short.
 - ⚠️ **`--development` caps TigerBeetle's `createTransfers` at 253, not the documented 8189**
-  (measured 2026-08-18 against a second cluster on production defaults). **Every TB measurement in
-  this repo before that date was taken on `--development`.** `spikes/harness/_README.md` carries the
-  caveat; SPIKE-011 owns the production numbers.
+  (measured 2026-08-18). **Every TB measurement in this repo before that date was taken on
+  `--development`.** `spikes/harness/_README.md` carries the caveat; SPIKE-011 owns the production
+  numbers.
 
 ## Decisions worth not re-litigating
 
-_Carried forward verbatim — all five still hold._
+_All six carried forward; the last two are new._
 
 - **#18 fixed with a new field, not a status-aware gate 6.** Rejected: gating only the acceptance
   transition, which would have left ADR-0036's promise as a comment with nothing behind it.
 - **Gate 10n was deliberately NOT widened to check applicability** — every value in the refuted
   scenarios was legally declared. Both halves landed later as gate 10p, against the posting RULE.
 - **`ledger/dimensions.yaml` did NOT move to `reporting/`**, which #19 proposed: four IMMUTABLE ADRs
-  cite the path in backticks and gate 11 checks citations resolve, so a move buys four PERMANENT
-  exemptions. **Refused on measured cost.**
-- **Gate 18 is scoped to minted accounts, not all 143.** Answering "what may post here" for the
-  adopted ones is a where-does-it-post decision under rule 8a; bulk-typing 104 assignments is
-  exactly the shape 8a exists to prevent. The limit is measured in the gate's own note (#37).
-- **The vehicle absorption rate is NOT registered in `reporting/allocation-bases.yaml`.** Every
-  field there (`base`, `zero_base`, `rounding`) describes spreading a pool proportionally over a
-  base, and a rate applied to a quantity has none of them. ADR-0030 cites that file's
-  **discipline**, not its registry.
-- ⚠️ **NEW — the `closes_adr` exclusion proposed in #39 was wrong and is not implemented.** A spike
-  that is still OPEN and names the ADR it will produce is precisely that ADR's blocker — `SPIKE-012`
+  cite the path and gate 11 checks citations resolve, so a move buys four PERMANENT exemptions.
+  **Refused on measured cost.**
+- **Gate 18 is scoped to minted accounts, not all 143** (#37). A green gate 18 means "every account
+  this spec minted has a home", never "every account has one".
+- **The vehicle absorption rate is NOT registered in `reporting/allocation-bases.yaml`.** ADR-0030
+  cites that file's **discipline**, not its registry.
+- **The `closes_adr` exclusion proposed in #39 was wrong and is not implemented.** `SPIKE-012`
   declares `closes_adr: ADR-0015`, so the exclusion would have deleted ADR-0015's only real blocker.
-  **Status alone is correct and sufficient.** `tools/blockers_test.ts` asserts that exact row.
+  **Status alone is correct.** `tools/blockers_test.ts` asserts that exact row.
+- ⚠️ **NEW — `ADR-0025` was NOT withdrawn**, which its own `resolution_shape` offered as a route.
+  **Five IMMUTABLE ADRs cite it** (0029, 0031, 0034, 0035, 0038) and can never be updated, so
+  withdrawal buys five permanent citations pointing at a rejected decision. **Same shape as the
+  refused `dimensions.yaml` move, and refused for the same measured reason.**
+- ⚠️ **NEW — `ADR-0041` did NOT answer `OQ-045`**, though they are one seam from two sides. It takes
+  the **arithmetic** half (a fully-billed run, a rate estimate error) and leaves the **judgement**
+  half (a vendor who may or may not bill again). **Narrowing explicitly, with a minimal-pair vector
+  as the fence, beat answering both** — one is arithmetic and the other is a judgement about a
+  vendor relationship.
 
-## Thirteen things to carry across the clear, because none is obvious from the artifacts
+## Sixteen things to carry across the clear
 
-_The first ten are carried forward verbatim; this run earned three more._
+_The first thirteen are carried forward; this run earned three more, and they are the sharpest._
 
-- **Firing a gate red is not ceremony — it is the only thing that finds the defects.** Across three
-  sessions ~forty arms were fired and twelve found real bugs, none surfaced by reading.
-- ⚠️ **An INCLUSIVE declaration fails closed; an EXCLUSION list fails open.** "Any expense account
-  except these" silently swallows the next minted COGS account; "these codes" goes red until someone
-  writes the new one down. This decided gate 18's shape and it will decide #37's.
+- **Firing a gate red is not ceremony — it is the only thing that finds the defects.**
+- ⚠️ **An INCLUSIVE declaration fails closed; an EXCLUSION list fails open.**
 - ⚠️ **Scope a gate to what the spec is RESPONSIBLE for, then measure what it does not cover.** **A
   noisy reporter is one nobody reads twice, which is the same outcome as no reporter.**
 - ⚠️ **A value one letter from a legal one, in a file no gate reads, is the cheapest way to be
-  wrong.** **Ask which file the value you just typed is checked AGAINST**; if the answer is none,
-  that is the next gate.
+  wrong.** **Ask which file the value you just typed is checked AGAINST.**
 - ⚠️ **Two messages for one defect is how a gate teaches the wrong lesson at 2am.**
-- **When a doc states a count, something must count it.** Three instances, three gates (10q, 16),
-  one rule.
-- ⚠️ **A rule that exists and is not applied blocks work silently.** ADR-0030 looked like it was
-  waiting for the owner and was waiting for rule 8a.
+- **When a doc states a count, something must count it.**
+- ⚠️ **A rule that exists and is not applied blocks work silently.**
 - ⚠️ **A self-declared flag needs something that can falsify it, and the falsifier should demand a
   REASON rather than a verdict.**
 - ⚠️ **A correct conclusion reached by wrong reasoning is not a checked conclusion.**
 - **The `db_schema` enum is not the collection list** — 35 against 50.
-- ⚠️ **NEW — an incomplete fix is invisible in a way a missing one is not, and #39 nearly shipped
-  one.** Filtering the stale blockers would have dropped three ADRs to `—`, reading as _ready to
-  accept_. **When you remove a wrong signal, ask what the absence will now be read as.**
-- ⚠️ **NEW — a hand-written invariant is easy to get wrong in BOTH directions, and neither error is
-  visible from the expression.** SPIKE-006's contiguity `$expr` took **four attempts** — one
-  rejected conforming documents, one was vacuous, one rejected a legitimate case. **All three read
-  correct.** Only a conforming/violating pair told them apart.
-- ⚠️ **NEW — a delegated research pass will fabricate a quotable source, and it is not rare.** Four
-  fabrications were caught and discarded across three surveys. **Every one was caught by demanding a
-  verbatim quote with a URL**, and the surveys that extracted primary sources locally (`pdftotext`,
-  a machine-readable OpenAPI contract, source code) produced the strongest evidence in the repo.
-  **Treat a fetched summary as a pointer, never as evidence.**
+- ⚠️ **When you remove a wrong signal, ask what the absence will now be read as.**
+- ⚠️ **A hand-written invariant is easy to get wrong in BOTH directions, and neither error is
+  visible from the expression.** Only a conforming/violating pair tells them apart.
+- ⚠️ **A delegated research pass will fabricate a quotable source, and it is not rare.** **Every one
+  was caught by demanding a verbatim quote with a URL.**
+- ⭐ **NEW — TYPE THE FIGURE. Gate 22 is the cheapest leverage in this repo and it is barely used.**
+  Typing five figures as `ADR-0020` `measurements:` **immediately turned four live files red** for
+  quoting them with no owner. HOT-018 exists _because_ one quantity had **three different values in
+  three live files — 13.85/6.00, ~4.51, 12.20 — and every one was internally consistent
+  arithmetic.** A figure with an owner cannot do that. ⚠️ Gate 22 matches **EXACT strings only**, so
+  it cannot see a paraphrase — and `$688.00` is still loose across **seven** files (#43).
+- ⭐ **NEW — A CONTROL TOTAL KEYED TO THE NATURAL DOCUMENT TOTAL SILENTLY FORBIDS EVERY ENTRY THAT
+  IS NOT THE DOCUMENT TOTAL.** `control_total: bill.amount_minor` made CFS's own measured direction
+  **unrepresentable** — where the EOR bills below the accrual, the entry posts the _accrued_ amount
+  and the arithmetic cannot close. ⚠️ **`vehicle_cost_absorbed` had already hit this and written the
+  reason down in its own invariant** — _"Using `pool_minor` … would have made the over-absorbed case
+  unrepresentable"_ — **and nothing connected the two rules.** The same defect, the same fix, two
+  entries apart in one file.
+- ⭐ **NEW — AN ADR GOES STALE AGAINST THE MIGRATION SPEC THAT IMPLEMENTS IT, AND NOTHING COMPARES
+  THEM.** `ADR-0020` said "restate all" while `migration/field-map.yaml` had **already** encoded
+  derive-from-the-master in three places, including the sentence _"the authority the invoice line's
+  tracking denorm is dropped in favour of"_. **The ADR was not proposing something the repo had
+  declined to do — it had stopped tracking what the repo already did.** ⚠️ **And the companion:** a
+  sentence that _accurately quotes a superseded claim_ is indistinguishable, out of context, from
+  one asserting it — which is how `ADR-0029` acquired a requirement it never made, in two artifacts
+  at once (#44).
 
 ## Context recommendation
 
-**CLEAR CONTEXT.** Nothing needed is in anyone's head. The three surveys are committed `inbox/`
-notes; each open hotspot's `resolution_shape` carries its route; `STATUS.generated.md` reports the
-milestone state; and `deno task ci` reproduces the whole CI contract locally.
+**CLEAR CONTEXT.** Nothing needed is in anyone's head. Each resolved hotspot's `measured:` field
+carries what was found and why; `ADR-0041`'s Consequences carry the design reasoning; the four new
+issues (#42–#45) each carry a cold-pickup section; `STATUS.generated.md` reports the milestone
+state; and `deno task ci` reproduces the whole CI contract locally.
 
-⚠️ **The one thing not written down anywhere durable** is the open question above — whether ADR-0029
-earns a hotspot on the same grounds as 019 and 020. It is recorded here and nowhere else.
+⚠️ **The two things not written down anywhere else** are in this file and nowhere else: that the 17
+validate warnings are the clock rather than a regression, and that **three of the three unpushed
+commits include one that is the owner's** — ask before pushing.
