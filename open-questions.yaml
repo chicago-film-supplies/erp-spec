@@ -2213,7 +2213,7 @@ open_questions:
     owner: alex
     decide_by: 2027-01-31
     blocks: [HOT-017]
-    status: open
+    status: answered
     notes: >-
       Opened 2026-08-17 by the PSA survey
       (`inbox/2026-08-17-survey-psa-is-a-principal-or-agent-question-and-the-live-books-answer-it-four-different-ways.md`),
@@ -2240,6 +2240,23 @@ open_questions:
       under every reference, so `2800` is correct as a holding account whatever D1 decides. And PSA
       labor never enters the rental or delivery pools under either answer — it is its own product
       line.
+    answer: >-
+      **CFS is the PRINCIPAL** (owner, 2026-08-22 → `ADR-0044`). The three facts this OQ said were
+      not in the books all point the same way: **CFS signs the crew engagement**, **CFS buys its own
+      GL and inland marine** for the work, and **CFS is out of pocket if the client's money never
+      arrives**. ⚠️ **One indicator dissents and is recorded rather than reconciled away** — there is
+      no price discretion, the crew cost passing through at cost plus a stated fee. It loses because
+      ASC 606-10-55-39's indicators support the assessment of control rather than forming a
+      checklist, and a cost-plus fee is a pricing structure rather than a statement about who is
+      obligated.
+      ⭐ **Answered by asking the FACTS rather than the classification.** It had been open since
+      2026-08-17 phrased as "is CFS principal or agent" — a question that asks the owner to do the
+      accounting. Re-asked as who signs, who insures, who eats the loss, it was answered in one
+      sitting. **A question addressed to the wrong expertise looks like a question nobody has time
+      for.**
+      ⭐ **And it turned up something nobody asked about: PSA payroll runs through an EOR** (EP, Cast
+      & Crew, Revolution). OQ-024 already settled that an EOR is a vendor that invoices, so the PSA
+      cost path exists — erp-spec#35 needs the revenue side, not a payroll path.
 
   - id: OQ-054
     headline: "does the fleet policy admit sub-6,000 lb vehicles"
