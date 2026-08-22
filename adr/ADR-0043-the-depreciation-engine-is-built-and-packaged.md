@@ -58,6 +58,25 @@ asserts:
       2025-01-19, against 40% before it, with an election either way. Completeness is therefore a
       statement about a tax year, not about the engine.
     source: "code:2026-08-22:erp-spec@0f2d985:spikes/harness/depreciation-corpus.yaml"
+  - id: D5
+    kind: decision
+    claim: >-
+      Rule sets are EFFECTIVE-DATED, not keyed by tax year, and are selected by the asset's own
+      acquisition and placed-in-service dates. The engine refuses to compute a date no rule set
+      covers; it never extrapolates from the most recent one.
+  - id: D6
+    kind: decision
+    claim: >-
+      A rule set is immutable once published and is NEVER retired. Forward-edge expiry only — a
+      39-year asset placed in service in 2025 depreciates under 2025's rules until 2064, so every
+      historical set is retained for as long as any asset placed under it is still depreciating.
+  - id: D7
+    kind: decision
+    claim: >-
+      Each rule set carries a dated verification stamp naming the publication it was extracted
+      from. The annual refresh is an agent-driven research pass whose output is a DIFF with a line
+      number into a freshly extracted primary source for every changed figure — never a figure
+      stated from knowledge.
   - id: P4
     kind: premise
     claim: >-
@@ -134,6 +153,75 @@ and became 100% mid-2025 by Act of Congress, with an election either way; §168(
    figures into the algorithm makes every year a code change, and the ruling cannot be honoured no
    matter how complete the first build is.
 
+### ⭐ A tax YEAR is not fine-grained enough, and 2025 proves it
+
+`DEP-008` measures two bonus regimes **inside one tax year**, split by acquisition date: 40% for
+property acquired before 2025-01-20, 100% for property acquired and placed in service after
+2025-01-19, with an election either way.
+
+⇒ **A table keyed by tax year cannot express 2025 at all.** The key has to be a date range, and the
+selector has to be the asset's own acquisition and placed-in-service dates rather than "the current
+year" (D5).
+
+⚠️ **But "effective through" means something narrower than it sounds, and reading it as expiry is
+the trap.** A rule set stops applying to NEW placements; it never stops being NEEDED. Nonresidential
+real property runs 39 years, so an asset placed in service in 2025 is still depreciating under
+2025's table in 2064. ⇒ **rule sets are append-only and immutable, and expiry exists on the forward
+edge only** (D6). The engine may refuse a date it has no rules for; it may never refuse a date it
+does.
+
+### The annual refresh fails CLOSED, and the agent is not allowed to know the answer
+
+⚠️ **An unmatched date must throw rather than fall back to the most recent rule set.** A fallback
+computes a 2027 schedule from 2026's limits and returns an entirely plausible number that nobody
+queries — the repo's own rule, in its sharpest form: an inclusive declaration fails closed, an
+exclusion list fails open, and "use the latest one we have" is an exclusion list.
+
+⭐ **The refresh is an agent-driven research pass, and its single hard constraint is that the agent
+must extract the primary source rather than state a figure** (D7). This repo has measured what
+happens otherwise: **four fabricated sources were caught and discarded across three surveys**, every
+one caught by demanding a verbatim quote with a URL, and the passes that extracted primary sources
+locally produced the strongest evidence here. **"What is next year's §179 limit" is precisely the
+question a model answers confidently and sometimes wrongly, and a wrong §179 limit has filing
+consequences.**
+
+So the pass is shaped to make fabrication mechanically impossible rather than merely discouraged:
+
+1. **Fetch** the new publication as a PDF and extract it **locally**.
+2. **Locate** each figure by search against that extraction, capturing a line number.
+3. **Propose a diff** against the previous rule set — every changed figure carrying its line number
+   and the surrounding quoted text.
+4. **Re-run the corpus** against the proposed set.
+5. **A human accepts**, exactly as an ADR is accepted rather than self-accepted.
+
+⭐ **Step 3 is the checkable one, and it is what makes the whole thing safe: a line number cannot be
+fabricated, because a grep against the extraction either confirms it or does not.** The verification
+stamp records which publication, extracted when — so a rule set that has never been re-verified is
+visibly distinguishable from one that has.
+
+### ⚠️ What the refresh can and cannot automate — measured 2026-08-22, not assumed
+
+| source                               | machine-readable                                                                                                                    | carries what the rule sets need                                                                                                                           |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **eCFR API** (`ecfr.gov/api`)        | ✅ free, no key, **dated** — Title 26 reports `latest_amended_on` and `up_to_date_as_of`                                            | 26 CFR, the Treasury _regulations_. Good for rule TEXT, and it does not carry the annual dollar figures                                                   |
+| **Federal Register API**             | ✅ free, no key, filterable by agency                                                                                               | IRS regulations and notices. ⚠️ **Revenue Procedures generally publish in the IRB, not here**, so the annual inflation figures are not reliably reachable |
+| **IRS publications and Rev. Procs.** | ⚠️ fetchable PDFs, not structured (`/pub/irs-pdf/p946.pdf`, `/pub/irs-drop/rp-*.pdf`, both HTTP 200)                                | ⭐ **This is where §179's limits, the §280F caps and the bonus rate actually live**                                                                       |
+| **IRS developer API**                | ❌ **none** — `api.irs.gov` does not resolve                                                                                        | —                                                                                                                                                         |
+| **FASB ASC (GAAP)**                  | ❌ **none.** `asc.fasb.org` and `fasb.org` both return **HTTP 403** to a plain client; the Codification is copyrighted and licensed | —                                                                                                                                                         |
+
+⇒ **The tax half automates as local PDF extraction and the GAAP half does not automate at all.**
+That is not a limitation of the design — it is the shape of what is published, and D7's pipeline was
+built around it rather than in spite of it.
+
+⭐ **eCFR is a WATCH rather than a SOURCE, and it is free.** It cannot supply a dollar figure, but a
+change in Title 26's `latest_amended_on` is a cheap signal that something may have moved — a trigger
+for the refresh pass rather than an input to it.
+
+⚠️ **And the GAAP 403 has already cost this corpus something.** `DEP-009` (ASC 250-10-45-17) and
+`DEP-010` are sourced from **PwC Viewpoint, a secondary source**, because the primary one is
+paywalled. Every tax case here quotes a primary source; **no GAAP case does, and no automated pass
+will change that.** It is recorded rather than smoothed over.
+
 ## Considered options
 
 - **Adopt a library.** Rejected on P1 — there is none. ⚠️ **Recorded as an option because the
@@ -151,7 +239,14 @@ and became 100% mid-2025 by Act of Congress, with an election either way; §168(
   database in scope, when it is a pure function of numbers and dates.
 - **Expose a per-asset API for convenience, with a batch wrapper.** Rejected on P2: the convenient
   signature is the incorrect one.
-- **Build behind a package boundary, per taxpayer-year, on versioned data** (chosen).
+- **Key the rule data by tax year.** Rejected: `DEP-008` shows 2025 needs two rule sets, so the key
+  must be a date range. ⚠️ Recorded because it is the obvious first design and it looks sufficient
+  right up until a mid-year Act of Congress.
+- **Fall back to the most recent rule set for an unknown year.** Rejected: it converts a loud
+  failure into a silent one, on numbers with filing consequences.
+- **Retire old rule sets once superseded.** Rejected: 39-year property outlives them by decades.
+- **Build behind a package boundary, per taxpayer-year, on effective-dated versioned data**
+  (chosen).
 
 ## Consequences
 
