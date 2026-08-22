@@ -152,3 +152,87 @@ module naive_sweeper {
   val noUnbackedDoc = (settled and mongo == MongoWritten) implies (tb == TbPosted)
   val inv = noUnbackedDoc
 }
+
+/// The SECOND companion, added 2026-08-22, and it is not a strawman — it is the
+/// protocol as specified PLUS TigerBeetle's own `Transfer.timeout`.
+///
+/// `pending_transfer_expired = 35` is a real result code in `tigerbeetle-node@0.17.9`'s
+/// `bindings.d.ts`, and the docs are explicit: "A pending transfer may optionally be
+/// created with a timeout. If the timeout interval passes before the transfer is either
+/// posted or voided, the transfer expires and the full amount is returned to the
+/// original account." TigerBeetle does this ITSELF, consults nothing, and cannot be
+/// asked not to once `timeout > 0`.
+///
+/// ⚠️ The first companion, `naive_sweeper`, models a recovery process that voids on
+/// timeout without reading Mongo, and proves it unsafe. **TigerBeetle's built-in expiry
+/// IS that process** — it is blind by construction. So this module asks whether the
+/// protocol survives when the blind sweeper is the DATABASE rather than our code.
+///
+/// Its invariant must FAIL. If it ever passes, this module is broken, not the protocol.
+module expiring_timeout {
+  type TbState = TbNone | TbPending | TbPosted | TbVoided | TbExpired
+  type MongoState = MongoAbsent | MongoWritten
+
+  var tb: TbState
+  var mongo: MongoState
+  var posts: int
+  var dead: bool
+  var recovered: bool
+
+  /// TbExpired settles the transfer as surely as a void: the funds are released and
+  /// the pending transfer can never be posted again.
+  val settled: bool = tb == TbPosted or tb == TbVoided or tb == TbExpired
+
+  action init = all {
+    tb' = TbNone, mongo' = MongoAbsent, posts' = 0, dead' = false, recovered' = false,
+  }
+  action reserve = all {
+    not(dead), tb == TbNone,
+    tb' = TbPending, mongo' = mongo, posts' = posts, dead' = dead, recovered' = recovered,
+  }
+  action writeDoc = all {
+    not(dead), tb == TbPending, mongo == MongoAbsent,
+    mongo' = MongoWritten, tb' = tb, posts' = posts, dead' = dead, recovered' = recovered,
+  }
+  action post = all {
+    not(dead), tb == TbPending, mongo == MongoWritten,
+    tb' = TbPosted, posts' = posts + 1, mongo' = mongo, dead' = dead, recovered' = recovered,
+  }
+  action voidTransfer = all {
+    not(dead), tb == TbPending, mongo == MongoAbsent,
+    tb' = TbVoided, mongo' = mongo, posts' = posts, dead' = dead, recovered' = recovered,
+  }
+  action crash = all {
+    not(dead), dead' = true,
+    tb' = tb, mongo' = mongo, posts' = posts, recovered' = recovered,
+  }
+  action retry = all {
+    dead, dead' = false,
+    tb' = tb, mongo' = mongo, posts' = posts, recovered' = recovered,
+  }
+  /// Recovery reads Mongo — the protocol's own load-bearing detail, unchanged.
+  action recoverVoid = all {
+    tb == TbPending, mongo == MongoAbsent,
+    tb' = TbVoided, recovered' = true, mongo' = mongo, posts' = posts, dead' = dead,
+  }
+  /// ⚠️ Guarded on TbPending, and that guard is the whole finding: once TigerBeetle has
+  /// expired the transfer, recovery CANNOT post it. `pending_transfer_expired` is what
+  /// the real client returns, so this action simply does not fire.
+  action recoverPost = all {
+    tb == TbPending, mongo == MongoWritten,
+    tb' = TbPosted, posts' = posts + 1, recovered' = true, mongo' = mongo, dead' = dead,
+  }
+  /// The database expires the pending transfer on its own. Not guarded on `dead`,
+  /// because TigerBeetle does not know or care whether our writer is alive.
+  action expire = all {
+    tb == TbPending,
+    tb' = TbExpired, mongo' = mongo, posts' = posts, dead' = dead, recovered' = recovered,
+  }
+
+  action step = any {
+    reserve, writeDoc, post, voidTransfer, crash, retry, recoverVoid, recoverPost, expire,
+  }
+
+  val noUnbackedDoc = (settled and mongo == MongoWritten) implies (tb == TbPosted)
+  val inv = noUnbackedDoc
+}

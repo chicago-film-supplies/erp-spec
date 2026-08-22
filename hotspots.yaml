@@ -1134,3 +1134,68 @@ hotspots:
       the document-number argument (a number resting on ADR-0031's weakest defensible basis tier
       should not get a document number), citing Deltek Vision as production precedent. Add the
       Considered options the survey names. Record the ASC 280 reconciliation bill.
+
+  - id: HOT-022
+    headline: "ADR-0015 relies on the mechanism the model refutes"
+    statement: >-
+      `adr/ADR-0015:61` — `proposed` — says _"**The two-phase timeout is the compensation mechanism
+      SPIKE-002 already needs.** An orphaned pending transfer expires on its own, which is the
+      recovery path for a crash between the TigerBeetle pending and the MongoDB write."_
+      **`formal/two-store-commit.qnt` proves that mechanism unsafe, and has since 2026-08-09.** Its
+      `naive_sweeper` companion models a recovery process that voids a pending transfer on timeout
+      **without reading Mongo**, and its invariant FAILS. ⚠️ **TigerBeetle's built-in expiry IS that
+      process** — blind by construction, consulting nothing. ⇒ **ADR-0015 proposes to rely on
+      precisely the thing the formal spec exists to refuse.**
+    contexts: [availability, fulfillment, ledger]
+    why_it_matters: >-
+      ⭐ **PROVEN, not argued.** A third module — `expiring_timeout`, added 2026-08-22 — is the
+      protocol AS SPECIFIED plus TigerBeetle's real `Transfer.timeout`. Its invariant fails under
+      both randomised simulation and Apalache, and the counterexample is **three steps long with
+      `dead: false` throughout**: `reserve → writeDoc → expire`. ⚠️ **NO CRASH IS REQUIRED.** This is
+      not a crash-interleaving bug — it is a plain race between the writer and the clock. A writer
+      merely slower than the timeout leaves a durable MongoDB document behind a transfer that
+      TigerBeetle has already expired and that can never be posted.
+      ⚠️ **The result code is real and pinned**: `pending_transfer_expired = 35` in
+      `tigerbeetle-node@0.17.9`'s own `bindings.d.ts`, alongside `pending_transfer_already_posted`
+      and `pending_transfer_already_voided`. Upstream is explicit: _"If the timeout interval passes
+      before the transfer is either posted or voided, the transfer expires and the full amount is
+      returned to the original account."_ **TigerBeetle does it itself and cannot be asked not to
+      once `timeout > 0`.**
+      ⇒ **The protocol module silently assumes `timeout = 0` and never says so.** Its `TbState` has
+      no expired state, so the interleaving was not merely unchecked — **it was unrepresentable.**
+      A model that cannot express a failure reports no violation, and that is indistinguishable from
+      a model that ruled it out. **The spec was green for thirteen days on a case it could not see.**
+      ⚠️ **And it makes exit criterion 3 load-bearing rather than tidy.** SPIKE-002 owes "orphan
+      detection and resolution, **including its time bound**". The time bound is not documentation —
+      it decides which of two mutually exclusive designs is in force, and ADR-0015 and the formal
+      spec currently hold opposite ones.
+    evidence: >-
+      `code:2026-08-22:erp-spec@2ba3636:formal/two-store-commit.qnt` — module `expiring_timeout`,
+      landed RED and reproduced two ways (simulation 20,000 traces × 20 steps; Apalache bounded
+      verification, quint 0.32.0, both 2026-08-22). ·
+      `code:2026-08-22:tigerbeetle-node@0.17.9:dist/bindings.d.ts` — `pending_transfer_expired = 35`,
+      and `Transfer.timeout` is a real field. ·
+      `code:2026-08-22:.claude/docs/tigerbeetle.txt` — "Expire Pending Transfer" and "a pending
+      transfer can only be posted or voided once". · `adr/ADR-0015-reservations-as-pending-transfers.md:61`.
+    blocks: [ADR-0015, SPIKE-002]
+    status: open
+    resolution_shape: >-
+      **ADR-0015 is `proposed`, so it may be amended freely** (ADR-0034). The contradiction is
+      recorded rather than silently resolved because **the two readings are different designs, not
+      different wordings**, and the choice is the owner's:
+      · **`timeout = 0` — the application sweeper is the only resolver.** What the protocol module
+        already specifies and verifies: recovery READS Mongo, then posts or voids. Safe, and it makes
+        the time bound the SWEEPER's — which must then be a stated SLO with a monitored orphan-age
+        metric, because TigerBeetle's own warning ("reserved funds are not held in limbo
+        indefinitely") is real and nothing else answers it.
+      · **`timeout > 0` — TigerBeetle is a backstop behind the sweeper.** Requires the timeout to
+        exceed the sweeper's worst-case latency by a stated margin, AND an answer for what happens
+        when the backstop does fire, because that state is the proven-unsafe one. ⚠️ **A backstop
+        that is unsafe when it fires is not a backstop.**
+      · **Make the document write compensatable**, so expiry is survivable: recovery that finds an
+        expired transfer retracts the document instead of posting. ⚠️ Note what this costs — an
+        order document a user has already seen can vanish, which is a product decision rather than a
+        protocol one.
+      ⚠️ **Whichever is chosen, the model must gain the expired state permanently.** The defect was
+      not a wrong answer, it was an unrepresentable question, and re-representing it is what stops
+      the next reader believing the green run means more than it does.

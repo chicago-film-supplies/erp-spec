@@ -12,7 +12,7 @@ is `deno task validate`'s judgement, not this file's.
 | | Count | |
 |---|---:|---|
 | Open questions | 13 open | 40 answered of 53 · **0 with no owner or no decide-by** |
-| Conflicts (HOT) | 21 | 1 open |
+| Conflicts (HOT) | 22 | 2 open |
 | Decisions (ADR) | 41 | 25 in force · 12 proposed |
 | Spikes | 12 | 7 open |
 | Requirements | 21 | 0 without a scenario |
@@ -47,6 +47,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | HOT | Statement | Blocks |
 |---|---|---|
 | `HOT-017` | `charter.md` states that a production service agreement's money moves through `2800 - PSA Liability Clearing`… | — |
+| `HOT-022` | `adr/ADR-0015:61` — `proposed` — says _"**The two-phase timeout is the compensation mechanism SPIKE-002 alrea… | `ADR-0015` `SPIKE-002` |
 
 ## Decisions
 
@@ -100,7 +101,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | Spike | Question | Timebox | Closes | Status |
 |---|---|---|---|---|
 | `SPIKE-001` | Does the TigerBeetle client load and run under Deno via node-api compatibility? | 2 days | `ADR-0023` | closed |
-| `SPIKE-002` | What commit protocol keeps a MongoDB document write and a TigerBeetle posting c… | 1 week | _new ADR_ | open |
+| `SPIKE-002` | What commit protocol keeps a MongoDB document write and a TigerBeetle posting c… | 1 week | _new ADR_ | in_progress |
 | `SPIKE-003` | How does TigerBeetle's timestamp behave when loading history, and what are the… | 3 days | `ADR-0039` | closed |
 | `SPIKE-004` | What does Plaid actually provide, and what does bank reconciliation actually ne… | 3 days | _new ADR_ | open |
 | `SPIKE-005` | Hand-roll the depreciation engine, or adopt a library? | 1 week | _new ADR_ | open |
@@ -134,7 +135,7 @@ it is counted separately on purpose, and a milestone is not done because its che
 | Milestone | Criterion | Check | Measured |
 |---|---|---|---|
 | `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 12 spikes, 7 open, 0 closed without naming an ADR |
-| `m4` | Every HOT- is resolved or has an ADR that consciously defers it with… | `hotspots_resolved` | 21 hotspots, 1 unresolved |
+| `m4` | Every HOT- is resolved or has an ADR that consciously defers it with… | `hotspots_resolved` | 22 hotspots, 2 unresolved |
 
 ## Coverage gaps
 

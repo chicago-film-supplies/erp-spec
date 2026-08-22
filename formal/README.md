@@ -32,12 +32,14 @@ bounded model checking, default 10 steps, Java 21).
 | ---------------------- | -------- | ----------------------------------- | -------------------- | --------------------- | --------------------- |
 | `two_store_commit`     | hold     | `NoError` (8,883 ms)                | `NoError` (5,195 ms) | no violation          | no violation (324 ms) |
 | `naive_sweeper`        | **fail** | `Error` — counterexample (5,011 ms) | `Error` (3,895 ms)   | violation at 4 states | violation (18 ms)     |
+| `expiring_timeout`     | **fail** | `Error` — counterexample (5,296 ms) | —                    | violation at 3 states | —                     |
 | `period_close`         | hold     | `NoError` (19,508 ms)               | `NoError` (3,816 ms) | no violation          | no violation (72 ms)  |
 | `validate_then_commit` | **fail** | `Error` — counterexample (4,174 ms) | `Error` (3,707 ms)   | violation             | violation (19 ms)     |
 
-**All eight runs reproduced their recorded outcome.** The re-run exists because a recorded result
-nobody has repeated is a claim, not a measurement — the same reason a spike's `## Notes` must be
-re-runnable rather than believed.
+**All eight of the original runs reproduced their recorded outcome**, and were reproduced a third
+time on 2026-08-22 (quint 0.32.0) when `expiring_timeout` was added. The re-run exists because a
+recorded result nobody has repeated is a claim, not a measurement — the same reason a spike's
+`## Notes` must be re-runnable rather than believed.
 
 ⚠️ **The timings did not reproduce and that is expected** — `period_close` verified in 19.5 s
 originally and 3.8 s on the re-run, a 5x spread from machine, JIT and Apalache-download warmth.
@@ -53,6 +55,19 @@ more steps than the bound is not found. Raising `--max-steps` is the lever.
   transfer on timeout _without reading Mongo_ leaves a written document behind a voided transfer.
   That is SPIKE-002's failure mode 2, and blind-timeout is the obvious implementation. The fix is in
   the protocol: recovery reads Mongo and either voids (document absent) or posts (document present).
+- ⭐ **`expiring_timeout`** (added 2026-08-22, HOT-022) — `reserve → writeDoc → expire`. **The
+  protocol as specified, plus TigerBeetle's own `Transfer.timeout`.** Not a strawman and not our
+  code: `pending_transfer_expired = 35` is a real result in `tigerbeetle-node@0.17.9`'s
+  `bindings.d.ts`, and upstream is explicit that _"if the timeout interval passes before the
+  transfer is either posted or voided, the transfer expires"_. **TigerBeetle's expiry is
+  `naive_sweeper` — blind by construction — running inside the database.** ⚠️ **The counterexample
+  is three steps long with `dead: false` throughout: NO CRASH IS REQUIRED.** A writer merely slower
+  than the timeout strands a durable document behind a transfer that can never be posted. This is a
+  race with the clock, not a crash-interleaving bug. ⚠️ **And note WHY it went unseen for thirteen
+  days.** `two_store_commit`'s `TbState` has no expired state, so the interleaving was not unchecked
+  — **it was unrepresentable**, and a model that cannot express a failure reports no violation.
+  **That is indistinguishable from a model that ruled it out.** The protocol module silently assumes
+  `timeout = 0` and never says so; `ADR-0015` assumes the opposite. HOT-022 holds the choice.
 - **`validate_then_commit`** — `validate(period 0) → close(0) → commit`. Checking the period only at
   validation time lands a posting in a period closed underneath it. Time-of-check/time-of-use. The
   fix is a re-check at commit, and `refuse` exists so a posting whose period closed is refused
@@ -74,8 +89,9 @@ npx @informalsystems/quint verify formal/period-close.qnt \
   --main=period_close --invariant=inv
 ```
 
-Swap `--main` for the companion module and the run must report a violation. **If a companion ever
-passes, the spec is broken — not the protocol.**
+Swap `--main` for a companion module (`naive_sweeper`, `expiring_timeout`, `validate_then_commit`)
+and the run must report a violation. **If a companion ever passes, the spec is broken — not the
+protocol.**
 
 `verify` writes counterexample traces to `_apalache-out/` (gitignored), including ITF JSON.
 
