@@ -1,0 +1,88 @@
+# ADR-0043/D7 — the annual tax-rule refresh.
+#
+# ⚠️ **THIS WORKFLOW DETECTS. IT DOES NOT DECIDE, AND IT NEVER COMMITS.**
+#
+# `deno task dep-refresh` fetches the publication the depreciation corpus is pinned against,
+# extracts it LOCALLY with pdftotext, and locates every pinned figure. Going red means the IRS has
+# published a new edition or moved a figure — a PROMPT to reconcile, not a breakage.
+#
+# The split is deliberate and is the whole safety property:
+#
+#   · **This workflow is deterministic.** It runs a grep against a freshly extracted primary source.
+#     It cannot invent a figure because it never produces one — only a line number or a miss.
+#   · **An agent interprets the miss**, following the steps the probe prints, and its output is a
+#     DIFF where every changed figure carries the line number a grep confirms.
+#   · **A human accepts the diff**, exactly as an ADR is accepted rather than self-accepted.
+#
+# ⚠️ This repo has measured what happens when a research pass is trusted to state a number: four
+# fabricated sources across three surveys. A wrong §179 limit has filing consequences, so the
+# machinery is shaped to make fabrication mechanically impossible rather than merely discouraged.
+#
+# ⚠️ **Separate from `spec.yml` on purpose.** That workflow runs `deno task validate`, which has no
+# npm dependencies and no network BY DESIGN. This one needs both, so it is its own job and cannot
+# weaken that contract.
+#
+# ⚠️ **The GAAP half is not here and cannot be.** FASB's Codification returns HTTP 403 to a plain
+# client and is licensed, so DEP-009 and DEP-010 have no automatable source. Their annual review is
+# a human task with no workflow behind it, and saying so is better than implying coverage.
+
+name: tax-rules-refresh
+
+on:
+  schedule:
+    # 09:00 UTC on the 1st of March, April and May. The IRS publishes the prior year's Pub 946 in
+    # the spring — the 2025 edition is dated 2026-03-13 — so three tries straddle the usual window
+    # without waiting a whole year to notice a miss. Quarterly-ish, not daily: the underlying facts
+    # move about once a year, and a check that cries wolf is one nobody reads.
+    - cron: "0 9 1 3,4,5 *"
+  workflow_dispatch: # so it can be run on demand when legislation moves mid-year, as 2025 did
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Install poppler (pdftotext)
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends poppler-utils
+
+      - name: Check the corpus against a freshly extracted primary source
+        id: check
+        working-directory: spikes/harness
+        # ⚠️ Never pipe this into tail/head — a pipeline's exit code is the LAST command's, which is
+        # exactly how a red check gets pushed as green. The repo has that footgun written down.
+        run: |
+          set -o pipefail
+          deno task dep-refresh 2>&1 | tee "$RUNNER_TEMP/refresh.txt"
+
+      - name: Open an issue when the corpus needs reconciling
+        if: failure() && steps.check.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # One open issue at a time — a yearly check that files a duplicate every run is noise.
+          existing=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+            --search "in:title tax rule refresh" --json number --jq '.[0].number // empty')
+          body="$(printf '%s\n' \
+            'The annual tax-rule refresh went red. **This is a prompt, not a breakage** — the IRS has published a new edition or moved a figure.' \
+            '' \
+            '## What the probe found' '' '```' "$(cat "$RUNNER_TEMP/refresh.txt")" '```' '' \
+            '## What to do' '' \
+            'The probe prints the steps. The constraint that matters: **do not write a figure you did not read at a line number** in a freshly extracted primary source. Propose a diff to `verification.figures` AND to the case that uses it, re-run `deno task dep-corpus` so the worked examples still reconcile, then bump `verified_on` and `verified_against`.' \
+            '' \
+            'Related: ADR-0043/D7, SPIKE-005, `spikes/harness/tax-rules-refresh-probe.ts`.')"
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$GITHUB_REPOSITORY" --body "$body"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" \
+              --title "Tax rule refresh: the depreciation corpus needs reconciling against a new publication" \
+              --label ledger --body "$body"
+          fi

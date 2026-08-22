@@ -57,6 +57,8 @@
     "dep-corpus": "deno test --allow-read depreciation-corpus_test.ts",
     "//dep-candidates": "SPIKE-005 exit criterion 2 — sweeps npm and JSR for a US tax depreciation engine and scores the named candidates facet by facet. The finding is an ABSENCE, which is the most perishable kind of claim, so it is re-runnable rather than asserted.",
     "dep-candidates": "deno run --allow-net=registry.npmjs.org,api.jsr.io depreciation-candidates-probe.ts",
+    "//dep-refresh": "ADR-0043/D7 — fetches the publication the depreciation corpus is pinned against, extracts it LOCALLY with pdftotext, and locates every pinned figure or fails. Red means reconcile against a new edition, not breakage. Needs poppler (pdftotext).",
+    "dep-refresh": "deno run --allow-net=www.irs.gov --allow-read --allow-write --allow-run=pdftotext --allow-env tax-rules-refresh-probe.ts",
     "posting-keys": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal posting-key-width-probe.ts"
   },
 

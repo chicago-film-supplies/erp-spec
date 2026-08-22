@@ -199,6 +199,25 @@ fabricated, because a grep against the extraction either confirms it or does not
 stamp records which publication, extracted when — so a rule set that has never been re-verified is
 visibly distinguishable from one that has.
 
+✅ **BUILT AND EXECUTING, 2026-08-22.** `spikes/harness/tax-rules-refresh-probe.ts`
+(`deno task dep-refresh`) reads the pinned figures from the corpus's own `verification:` block — one
+copy, not two — fetches, extracts locally and reports a line number per figure. The scheduled half
+is `.github/workflows/tax-rules-refresh.yml`, which files or comments on a single issue when the
+check goes red. **12/12 figures currently locate.**
+
+⚠️ **It was fired RED both ways before being believed**, because a green check that has never failed
+is indistinguishable from one matching nothing:
+
+| arm                                               | result                                          |
+| ------------------------------------------------- | ----------------------------------------------- |
+| a figure moved (a simulated next-year §179 limit) | `✗ NOT FOUND`, exit 1                           |
+| a NEW EDITION served from the same URL            | **flagged, while all 12 figures still matched** |
+
+⭐ **The second arm is the one that matters.** The figures kept matching because the old values
+still appear in the document — so without an explicit edition check the run reads green against the
+wrong year. **The dangerous failure here is not a missing figure, it is a found one from the wrong
+publication.**
+
 ### ⚠️ What the refresh can and cannot automate — measured 2026-08-22, not assumed
 
 | source                               | machine-readable                                                                                                                    | carries what the rule sets need                                                                                                                           |

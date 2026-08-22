@@ -67,6 +67,36 @@ parameters_2025:
     during the first tax year ending after that date. So the rate is not derivable from dates alone
     — an election is an input.
 
+# ── The VERIFICATION STAMP (ADR-0043/D7), and it EXECUTES ──────────────────────────────────────
+#
+# Every year-versioned figure this corpus pins, with the literal string that must appear in the
+# publication it came from. `deno task dep-refresh` fetches that publication, extracts it locally,
+# and reports a line number for each — or fails.
+#
+# ⚠️ **The `find:` strings are the whole safety property.** An agent refreshing this file may not
+# state a figure from knowledge; it proposes a new `find:` plus the line number a grep confirms.
+# **A line number cannot be fabricated.**
+#
+# ⚠️ And `verified_on` is what makes a STALE stamp visible. A rule set nobody has re-checked looks
+# exactly like one that was checked and unchanged — unless the date says otherwise.
+verification:
+  source_url: "https://www.irs.gov/pub/irs-pdf/p946.pdf"
+  verified_against: "IRS Publication 946 (2025), Cat. No. 13081F, dated 2026-03-13"
+  verified_on: "2026-08-22"
+  figures:
+    - { id: section_179_max, minor: 250000000, find: "$2,500,000" }
+    - { id: section_179_phaseout_threshold, minor: 400000000, find: "$4,000,000" }
+    - { id: section_179_suv_cap, minor: 3130000, find: "$31,300" }
+    - { id: bonus_pct_before_2025_01_20, minor: null, find: "40%" }
+    - { id: sec280f_year_1_with_bonus, minor: 2020000, find: "$20,200" }
+    - { id: sec280f_year_1_without_bonus, minor: 1220000, find: "$12,200" }
+    - { id: sec280f_year_2, minor: 1960000, find: "$19,600" }
+    - { id: sec280f_year_3, minor: 1180000, find: "$11,800" }
+    - { id: sec280f_year_4_and_later, minor: 706000, find: "$7,060" }
+    - { id: macrs_7yr_half_year_y1, minor: null, find: "14.29%" }
+    - { id: macrs_5yr_midquarter_q4_y1, minor: null, find: "5.00%" }
+    - { id: nonres_real_39yr_mm1, minor: null, find: "2.461%" }
+
 # ── Convention selection. THIS IS A PRECEDENCE, NOT A MENU. ────────────────────────────────────
 convention_precedence:
   - id: mid_month
