@@ -11,18 +11,18 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 13 open | 41 answered of 54 · **0 with no owner or no decide-by** |
+| Open questions | 14 open | 41 answered of 55 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 23 | 0 open |
 | Decisions (ADR) | 44 | 25 in force · 15 proposed |
 | Spikes | 12 | 7 open |
 | Requirements | 21 | 0 without a scenario |
-| Inbox | 104 | 84 unpromoted |
+| Inbox | 105 | 85 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
 ## The bottleneck: undecided questions
 
-**13 of 54 still open**, soonest decide-by first.
+**14 of 55 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
@@ -34,6 +34,7 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-040` | Is `settlement_point` a declared LEDGER DIMENSION, or a document attribute the read side… | alex | 2026-12-15 | `ADR-0033` |
 | `OQ-043` | Should the product and organization masters carry an EVENT HISTORY, so that a classificat… | alex | 2026-12-15 | — |
 | `OQ-044` | Once wages move into COGS, what stays in `6600 Wages` — and can salaried sales/admin staf… | alex | 2026-12-15 | — |
+| `OQ-055` | On a production service agreement, must the client fund before the crew is paid, or is ad… | alex | 2026-12-15 | — |
 | `OQ-039` | `organizations.tax_profile` carries two different concepts in one enum — who owes (applie… | alex | 2027-01-15 | — |
 | `OQ-052` | What vehicle rate absorbs into 5900, over what normal-capacity denominator — and where do… | alex | 2027-01-31 | — |
 | `OQ-045` | When a vendor bills LESS than was accrued, what retires the residual left in `2010 Accrue… | alex | 2027-02-15 | — |

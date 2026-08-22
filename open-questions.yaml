@@ -2243,8 +2243,11 @@ open_questions:
     answer: >-
       **CFS is the PRINCIPAL** (owner, 2026-08-22 → `ADR-0044`). The three facts this OQ said were
       not in the books all point the same way: **CFS signs the crew engagement**, **CFS buys its own
-      GL and inland marine** for the work, and **CFS is out of pocket if the client's money never
-      arrives**. ⚠️ **One indicator dissents and is recorded rather than reconciled away** — there is
+      GL and inland marine** for the work, and **CFS pays the crew and then pursues the client**, who is
+      obligated to repay — so CFS holds a receivable for the FULL BUDGET and bears the risk it
+      proves uncollectible. ⭐ **That last fact reads like a hedge and is the evidence**: an agent
+      never holds a receivable for the budget, only for its fee, and "difficult to collect" is
+      credit risk realised rather than absent. ⚠️ **One indicator dissents and is recorded rather than reconciled away** — there is
       no price discretion, the crew cost passing through at cost plus a stated fee. It loses because
       ASC 606-10-55-39's indicators support the assessment of control rather than forming a
       checklist, and a cost-plus fee is a pricing structure rather than a statement about who is
@@ -2294,3 +2297,34 @@ open_questions:
       **A growing fleet makes that more likely, not less**, and the timing of a vehicle purchase is
       therefore a tax decision and not only a fleet one.
       Related: `1700 Vehicles`, ADR-0030 (vehicle cost into COGS), HOT-023, SPIKE-005, DEP-011.
+
+  - id: OQ-055
+    headline: "is advance funding required on a PSA"
+    question: >-
+      On a production service agreement, must the client fund before the crew is paid, or is
+      advance funding merely usual? It is the primary mitigation for the credit exposure the
+      principal treatment reveals, and the books do not show it happening.
+    owner: alex
+    decide_by: 2026-12-15
+    blocks: []
+    status: open
+    notes: >-
+      Opened 2026-08-22 by `ADR-0044`, which makes CFS the **principal** on a PSA — so the client's
+      whole budget is revenue and **the maximum bad-debt exposure is the budget rather than the
+      fee**. The owner's own framing is why this matters: _"they would be obligated to it, but were
+      small and if theyre overseas it may be difficult to collect"_
+      (`inbox/2026-08-22-owner-refines-the-psa-credit-risk-the-client-is-obligated-but-cfs-is-small-and-overseas-collection-is-hard.md`).
+      ⭐ **If the client funds before the crew is paid, the exposure never opens.** Money received in
+      advance of performance is a liability under every reference in the 2026-08-17 survey, sits in
+      `2800 - PSA Liability Clearing`, and is relieved as the work is performed. ⇒ **advance funding
+      stops being a cash-flow preference and becomes the control**, which is `2800`'s real job now
+      that ADR-0044 has taken away `charter.md`'s reading of it as the mechanism by which the
+      service is sold.
+      ⚠️ **THE CORPUS CANNOT ANSWER THIS AND THAT IS ITSELF THE FINDING.** Only **$7,000.00** of
+      PSA-shaped value ever passed through `2800` (`ADR-0044/M1`), against 93% billed gross with no
+      holding step at all. **If advance funding is already the real policy, the books do not show
+      it** — which means either the policy is not what is practised, or the practice is not what is
+      recorded, and both are worth knowing before the migration carries the shape forward.
+      **What answers it**: the PSA template or engagement letter, and whether crew have ever been
+      paid ahead of client funds in practice. ⚠️ **Ask both** — a stated term nobody enforces and an
+      enforced habit nobody wrote down are different problems with the same appearance.

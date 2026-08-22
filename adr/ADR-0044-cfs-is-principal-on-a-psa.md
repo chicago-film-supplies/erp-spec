@@ -114,6 +114,17 @@ staffing and construction principals bill that way routinely. And the control fa
 arrangement exists because the client cannot be the employer.** A party that signs, insures and
 absorbs the loss is not arranging for someone else to provide the service; it is providing it.
 
+⭐ **The credit-risk fact is worth reading twice, because its second half sounds like a hedge and is
+actually the evidence.** Owner, 2026-08-22: _"they would be obligated to it, but were small and if
+theyre overseas it may be difficult to collect."_
+
+- **"Obligated to it"** means CFS holds a receivable **for the full budget**. ⇒ **An agent never
+  holds that receivable** — the crew's claim would run against the client directly and CFS's only
+  receivable would be its fee. **You can only chase someone who owes YOU**, and being owed the whole
+  budget is only possible because CFS paid the whole budget as its own obligation.
+- **"Difficult to collect"** is credit risk **realised**, not credit risk absent. A right of
+  recovery that may prove worthless is exactly what bearing the risk means.
+
 ## Decision
 
 **CFS is the principal (D1).** The client's budget is CFS revenue; the crew cost is CFS's cost; both
@@ -153,9 +164,22 @@ be wrong however the revenue is presented. `ADR-0019`'s decision table asserts b
   `ADR-0041`'s labor variance applies unchanged, because an EOR prices burden per payroll RUN
   whoever the crew is working for. **What PSA genuinely needs is the revenue side and its product
   line, not a payroll path.**
-- **`2800` stays correct and stops being the mechanism.** Money received before the work is
+- ⚠️ **THE GROSS-UP CUTS BOTH WAYS, and only one direction usually gets discussed.** Revenue is
+  larger — and so is the maximum bad-debt exposure. An unrecovered PSA budget is a write-off against
+  `1200 - Accounts Receivable` to `6900 - Bad Debt` **at the size of the budget**; under the agency
+  reading it would never have been revenue and the write-off would be a fraction of it. ⇒ **This
+  decision does not create that exposure, it reveals it** — a small company fronting a full
+  production budget to an overseas client is exposed whether or not its income statement says so,
+  which is an argument for the principal treatment rather than against it.
+- ⭐ **`2800` stops being the mechanism and becomes the CONTROL.** Money received before the work is
   performed is a liability under every reference surveyed, so 2800 remains right as a holding
-  account. What changes is that moving money through it is no longer _the service being sold_.
+  account — and under a principal reading with hard-to-collect overseas clients, **funding in
+  advance stops being a cash-flow preference and becomes the primary mitigation** for the exposure
+  above. If the client funds before the crew is paid, the exposure never opens. ⚠️ **Whether advance
+  funding is REQUIRED on a PSA or merely usual is a policy the spec should surface rather than
+  assume, and the corpus cannot answer it**: only $7,000.00 of PSA-shaped value ever passed through
+  2800 (M1), against 93% billed gross with no holding step at all. **If advance funding is the real
+  policy, the books do not show it.**
 - ⚠️ **`charter.md` must be amended in the same change that lands the PSA posting rules**, not
   before and not after — its two sentences on PSA are the ones M1 contradicts.
 - ⚠️ **The history stays inconsistent and no decision fixes that.** 93% of the invoiced value agrees

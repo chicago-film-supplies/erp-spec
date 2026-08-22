@@ -5,7 +5,7 @@
     "adrs": 44,
     "adrs_accepted": 25,
     "events": 38,
-    "inbox": 104,
+    "inbox": 105,
     "inbox_promoted": 20
   },
   "requirements": [
@@ -651,6 +651,7 @@
       "inbox/2026-08-22-correction-the-causal-orders-obligation-is-adr-0036s-decision-not-adr-0029s-and-two-artifacts-carried-the-wrong-owner.md",
       "inbox/2026-08-22-owner-a-tracking-category-was-on-no-externally-filed-document-so-the-recast-is-owed-to-nobody.md",
       "inbox/2026-08-22-owner-answers-oq-053-cfs-signs-insures-and-eats-the-loss-on-a-psa-and-uses-an-eor-for-the-payroll.md",
+      "inbox/2026-08-22-owner-refines-the-psa-credit-risk-the-client-is-obligated-but-cfs-is-small-and-overseas-collection-is-hard.md",
       "inbox/2026-08-22-owner-the-depreciation-engine-covers-all-valid-gaap-and-us-tax-cases-not-just-the-ones-cfs-uses-today.md",
       "inbox/2026-08-22-spike-005s-convention-list-is-short-by-one-and-mid-quarter-is-mandatory-not-optional.md",
       "inbox/2026-08-22-the-booking-lifecycle-is-dormant-so-spike-012s-boundary-cannot-be-chosen-yet-and-the-verdict-that-looked-like-a-pass-rests-on-11-rows.md"

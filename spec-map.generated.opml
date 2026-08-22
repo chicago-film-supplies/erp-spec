@@ -58,7 +58,7 @@
           <outline text="[object Object]"/>
         </outline>
       </outline>
-      <outline text="Open questions (13 of 54 still open)" _note="The bottleneck. Each blocks what is listed under it.">
+      <outline text="Open questions (14 of 55 still open)" _note="The bottleneck. Each blocks what is listed under it.">
         <outline text="OQ-001 — Are fulfillment legs first-class recorded events with their own identity, or derived from the order…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-007"/>
           <outline text="blocks ADR-0011"/>
@@ -202,6 +202,7 @@
         <outline text="OQ-054 — As CFS acquires more vehicles, will any be rated at or below 6,000 lb gross vehicle weight, and wil…" _note="owner: alex · decide by: 2026-11-15">
           <outline text="blocks SPIKE-005"/>
         </outline>
+        <outline text="OQ-055 — On a production service agreement, must the client fund before the crew is paid, or is advance fund…" _note="owner: alex · decide by: 2026-12-15"/>
       </outline>
       <outline text="Conflicts (0 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labor) or an own long-haul run (labor-bearing)? T…" _note="Decides whether a trucked fulfillment absorbs labor cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
@@ -531,7 +532,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (84 unpromoted of 104)" _note="no drops pending">
+      <outline text="Capture (85 unpromoted of 105)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -613,6 +614,7 @@
         <outline text="Correction — the causal_orders declare-or-be-rejected obligation is ADR-0036's decision and REQ-LED…" _note="inbox/2026-08-22-correction-the-causal-orders-obligation-is-adr-0036s-decision-not-adr-0029s-and-two-artifacts-carried-the-wrong-owner.md"/>
         <outline text="Owner — a tracking category was on no externally filed document, which discharges the one load-bear…" _note="inbox/2026-08-22-owner-a-tracking-category-was-on-no-externally-filed-document-so-the-recast-is-owed-to-nobody.md"/>
         <outline text="Owner answers OQ-053 — CFS signs the crew engagement, buys its own GL and inland marine, and eats t…" _note="inbox/2026-08-22-owner-answers-oq-053-cfs-signs-insures-and-eats-the-loss-on-a-psa-and-uses-an-eor-for-the-payroll.md"/>
+        <outline text="Owner refines the PSA credit-risk answer — the client is obligated to repay, but CFS is small and a…" _note="inbox/2026-08-22-owner-refines-the-psa-credit-risk-the-client-is-obligated-but-cfs-is-small-and-overseas-collection-is-hard.md"/>
         <outline text="Owner — the depreciation engine covers ALL valid GAAP and US tax cases, not just the ones CFS uses…" _note="inbox/2026-08-22-owner-the-depreciation-engine-covers-all-valid-gaap-and-us-tax-cases-not-just-the-ones-cfs-uses-today.md"/>
         <outline text="SPIKE-005's convention list is short by one — mid-quarter is MANDATORY when the 40% test trips, it…" _note="inbox/2026-08-22-spike-005s-convention-list-is-short-by-one-and-mid-quarter-is-mandatory-not-optional.md"/>
         <outline text="The booking lifecycle is dormant, so SPIKE-012's boundary cannot be chosen yet — the verdict that l…" _note="inbox/2026-08-22-the-booking-lifecycle-is-dormant-so-spike-012s-boundary-cannot-be-chosen-yet-and-the-verdict-that-looked-like-a-pass-rests-on-11-rows.md"/>
