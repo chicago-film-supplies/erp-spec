@@ -11,8 +11,8 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 13 open | 40 answered of 53 · **0 with no owner or no decide-by** |
-| Conflicts (HOT) | 23 | 2 open |
+| Open questions | 14 open | 40 answered of 54 · **0 with no owner or no decide-by** |
+| Conflicts (HOT) | 23 | 1 open |
 | Decisions (ADR) | 42 | 25 in force · 13 proposed |
 | Spikes | 12 | 7 open |
 | Requirements | 21 | 0 without a scenario |
@@ -22,12 +22,13 @@ is `deno task validate`'s judgement, not this file's.
 
 ## The bottleneck: undecided questions
 
-**13 of 53 still open**, soonest decide-by first.
+**14 of 54 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
 | `OQ-030` | Does CFS introduce a forced-call (short-turnaround) premium, and if so what is the turnar… | alex | 2026-10-15 | `REQ-LED` |
 | `OQ-035` | Does CFS introduce a production-type classification — `studio | indie | corporate/commerc… | alex | 2026-10-15 | — |
+| `OQ-054` | As CFS acquires more vehicles, will any be rated at or below 6,000 lb gross vehicle weigh… | alex | 2026-11-15 | `SPIKE-005` |
 | `OQ-033` | Once the shipping specs are populated, which physical basis becomes allocation basis v2 —… | alex | 2026-12-15 | `ADR-0031` |
 | `OQ-038` | Does CFS operate credit limits and credit holds in v2 — what triggers a hold, who overrid… | alex | 2026-12-15 | — |
 | `OQ-040` | Is `settlement_point` a declared LEDGER DIMENSION, or a document attribute the read side… | alex | 2026-12-15 | `ADR-0033` |
@@ -47,7 +48,6 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | HOT | Statement | Blocks |
 |---|---|---|
 | `HOT-017` | `charter.md` states that a production service agreement's money moves through `2800 - PSA Liability Clearing`… | — |
-| `HOT-023` | Four artifacts enumerate the rules surface SPIKE-005 must cover, and they disagree. `adr/ADR-0007:43` (**acce… | `SPIKE-005` |
 
 ## Decisions
 
@@ -136,7 +136,7 @@ it is counted separately on purpose, and a milestone is not done because its che
 | Milestone | Criterion | Check | Measured |
 |---|---|---|---|
 | `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 12 spikes, 7 open, 0 closed without naming an ADR |
-| `m4` | Every HOT- is resolved or has an ADR that consciously defers it with… | `hotspots_resolved` | 23 hotspots, 2 unresolved |
+| `m4` | Every HOT- is resolved or has an ADR that consciously defers it with… | `hotspots_resolved` | 23 hotspots, 1 unresolved |
 
 ## Coverage gaps
 

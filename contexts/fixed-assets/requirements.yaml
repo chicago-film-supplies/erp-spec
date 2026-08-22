@@ -12,6 +12,12 @@
 # the safe side of it. ADR-0007 requires that the spike "cover the whole rules surface before any
 # schema": mid-month and half-year conventions, GDS versus ADS class lives, §179 and bonus effects
 # on basis, partial disposals, prospective useful-life revisions, and the deferred difference.
+# ⚠️ **THAT LIST IS SHORT BY TWO, and the quote above is left exactly as ADR-0007 wrote it** — the
+# ADR is accepted and immutable, and a historical record of the decision as taken (ADR-0034).
+# **Add the MID-QUARTER convention**, which is mandatory rather than optional whenever the 40% test
+# trips, and **§280F caps on listed property**, which bind the combined §179 + bonus + MACRS figure.
+# Corrected 2026-08-22 (HOT-023); both are now covered by
+# `spikes/harness/depreciation-corpus.yaml` and asserted by `deno task dep-corpus`'s coverage arm.
 #
 # So these five say what the register must HOLD, what a run must PRODUCE, and what must be
 # REPRODUCIBLE. **Not one of them says how a depreciation amount is computed.** That is the spike's,

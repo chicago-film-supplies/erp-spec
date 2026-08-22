@@ -1276,7 +1276,39 @@ hotspots:
       the retroactive case and DEP-003 the four quarter tables. ·
       `contexts/fixed-assets/requirements.yaml:13` against `:52`, in one file.
     blocks: [SPIKE-005]
-    status: open
+    status: resolved
+    resolved_by: SPIKE-005
+    measured: >-
+      **Resolved 2026-08-22 by covering both omissions and correcting the two mutable
+      enumerations.** `spikes/harness/depreciation-corpus.yaml` now covers mid-quarter (DEP-002,
+      DEP-003, DEP-004) and §280F (DEP-011), and `deno task dep-corpus` runs **10 arms, all green,
+      including the coverage arm that was RED when it was written**. It went green by adding data,
+      which is the correct direction.
+      **`contexts/fixed-assets/requirements.yaml` and SPIKE-005's exit criterion are corrected**;
+      `ADR-0007` is left exactly as written — accepted, immutable, a historical record of the
+      decision as taken (ADR-0034 row 4) — and the requirements banner now **quotes it accurately
+      and flags the omission beneath**, rather than silently widening a frozen quotation.
+      ⚠️ **THE §280F SCOPE CALL WAS MADE ON A PREMISE THE OWNER THEN CORRECTED, AND THE CORRECTION
+      IS THE LESSON.** It was first scoped OUT on a measured population of two vehicles used
+      exclusively for revenue work — "measure the population before minting a branch", applied
+      correctly to a static fleet. **Owner, 2026-08-22: "we do expect to acquire more vehicles."**
+      ⇒ **A population measured today is not a population, it is a snapshot.** The argument was
+      sound and the premise was wrong, which is the harder failure to notice: nothing about the
+      reasoning looked weak.
+      ⭐ **And the primary source settled it independently of the fleet size anyway.** Pub 946: _"The
+      depreciation deduction, **including the section 179 deduction and special depreciation
+      allowance**, you can claim for a passenger automobile each year is limited."_ **§280F is a
+      CEILING on the very figure this spike's engine computes**, so it could never have been a
+      separate spike — a candidate either applies it to the combined number or returns one that is
+      too large and entirely plausible.
+      ⇒ **No spike was minted.** What survives as a question is a POLICY, not research — `OQ-054`,
+      reframed from "what is the GVWR of the two vans" to "does the acquisition policy admit
+      sub-6,000 lb vehicles, and will exclusivity hold" — and asked **per vehicle**, because two
+      vans can straddle the threshold and one fleet-level answer hides it.
+      ⚠️ **One second-order effect worth carrying to the next purchase:** a vehicle is a large-basis
+      asset, so **a Q4 vehicle purchase is the single most likely trigger of the 40% test**, which
+      retroactively re-computes every personal-property asset placed in service earlier that year.
+      **The timing of a vehicle purchase is a tax decision, not only a fleet one.**
     resolution_shape: >-
       **The practical gap is already closed** — the corpus covers mid-quarter regardless of what the
       enumeration says. What is open is the recorded SCOPE, and it needs the owner because widening
@@ -1286,7 +1318,18 @@ hotspots:
       · **`ADR-0007` is accepted and immutable**, and this is ADR-0034 row 4 — "stands, but a fact
         it cited was wrong" — so it takes **no new ADR**: a dated inbox note (landed) plus this
         hotspot entry, and `relates_to` may gain ids because it is an index rather than a claim.
-      ⚠️ **Decide whether §280F is in SPIKE-005's scope or its own spike.** It is a genuinely
-      separate rules surface — business-use tracking, recapture, and a GVWR threshold — and folding
-      it into a spike already carrying the whole MACRS surface may be how the whole thing stalls.
-      **Sizing it is the decision, not whether it matters.**
+      ✅ **§280F RESOLVED 2026-08-22 BY MEASURING THE POPULATION FIRST — neither integrated nor
+      spiked.** The owner was neutral on the scope question, so it was settled the repo's own way:
+      *do not mint a branch before measuring its population.* **CFS owns exactly two vehicles**, both
+      ruled 2026-08-16 to be used *exclusively* for delivery and trash removal.
+      ⇒ **The recapture half — the expensive part, and the one that would have justified a spike —
+      has a population of ZERO**, because recapture fires only when business use falls to 50% or
+      less. Pub 946's worked recapture example describes a case CFS's own stated policy excludes.
+      ⇒ **What survives is the §280F caps, and they reduce to ONE FACT**: is each van over 6,000 lb
+      GVWR? Tracked as **`OQ-054`**, asked **per vehicle** rather than per fleet, because two vans
+      can straddle the threshold and a single answer is the shape that hides it.
+      ⚠️ **A spike was deliberately NOT minted.** A spike is for a question needing research; this
+      one needs a door-jamb sticker. **And m4 requires every spike closed, so minting one for a
+      lookup moves the milestone further away while gaining no evidence.**
+      ⇒ **What is still open here is only the ENUMERATION** — the mutable artifacts should name
+      mid-quarter, and ADR-0007 stays as written under ADR-0034 row 4.

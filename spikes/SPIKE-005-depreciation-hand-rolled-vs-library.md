@@ -8,7 +8,7 @@ method: >-
   from IRS publications and GAAP references. Then evaluate candidate libraries against that corpus
   and estimate the hand-rolled implementation against the same.
 exit_criteria:
-  - "Test corpus covers: mid-month and half-year conventions; GDS vs ADS class lives; §179 and bonus effects on basis; partial disposals; prospective useful-life revisions; the deferred GAAP/tax difference."
+  - "Test corpus covers: mid-month, half-year AND MID-QUARTER conventions; GDS vs ADS class lives; §179 and bonus effects on basis; §280F caps on listed property; partial disposals; prospective useful-life revisions; the deferred GAAP/tax difference. ⚠️ WIDENED 2026-08-22 (HOT-023) — mid-quarter is mandatory when the 40% test trips, not a third option, and §280F caps the combined §179 + bonus + MACRS figure this corpus computes."
   - Every candidate is scored against that corpus, with failures itemised rather than summarised.
   - A decision with a stated migration path if the library is later abandoned.
 closes_adr: new
@@ -53,16 +53,17 @@ FAILED | 6 passed | 1 failed
 nothing can fail is exactly what burned SPIKE-012 and SPIKE-002 this same week. The six passing arms
 matter because they prove the red one is a real gap rather than a broken test.
 
-| facet                                   | state                                                                 |
-| --------------------------------------- | --------------------------------------------------------------------- |
-| mid-month · half-year · **mid-quarter** | ✅ DEP-001, DEP-002, DEP-003, DEP-005                                 |
-| GDS class lives                         | ✅ Tables A-1 to A-5, A-7a                                            |
-| **ADS class lives**                     | ❌ recovery periods not extracted (Table A-20, class lives at L6552+) |
-| §179 effects on basis                   | ✅ DEP-007                                                            |
-| bonus effects on basis                  | ✅ DEP-008                                                            |
-| **partial disposals**                   | ❌ GAA examples at L3399/L3405 not extracted                          |
-| prospective useful-life revisions       | ✅ DEP-009 (ASC 250-10-45-17)                                         |
-| deferred GAAP/tax difference            | ✅ DEP-010 (ADR-0026)                                                 |
+| facet                                             | case                                                   |
+| ------------------------------------------------- | ------------------------------------------------------ |
+| mid-month · half-year · **mid-quarter**           | DEP-001, DEP-002, DEP-003, DEP-005                     |
+| GDS class lives                                   | Tables A-1 to A-5, A-7a                                |
+| ADS class lives, method and required-use triggers | DEP-012                                                |
+| §179 effects on basis                             | DEP-007                                                |
+| bonus effects on basis                            | DEP-008                                                |
+| **§280F caps on listed property**                 | DEP-011                                                |
+| **partial disposals**                             | DEP-013 — the Sankofa GAA example, six chained figures |
+| prospective useful-life revisions                 | DEP-009 (ASC 250-10-45-17)                             |
+| deferred GAAP/tax difference                      | DEP-010 (ADR-0026)                                     |
 
 ### ⭐ FINDING 1 — the scope list is short, and the missing rule is mandatory (HOT-023)
 
@@ -106,16 +107,42 @@ differs from the publication by up to fifty cents a line. **So the corpus has to
 rule and a tolerance or it is not gradeable at all** — and that is invisible until something
 actually tries to reconcile a figure.
 
+### ⭐ FINDING 3 — §280F was scoped OUT on a premise the owner corrected the same day
+
+It was first excluded by **measuring the population**: two owned vehicles, used exclusively for
+revenue work, so the recapture branch had no members. Correct reasoning — applied to a static fleet.
+
+**Owner, 2026-08-22: _"we do expect to acquire more vehicles."_**
+
+⇒ ⚠️ **A population measured today is not a population, it is a snapshot** — and this is the harder
+failure to catch, because nothing about the reasoning looked weak.
+
+⭐ **The primary source then settled it independently of fleet size.** Pub 946: _"The depreciation
+deduction, **including the section 179 deduction and special depreciation allowance**, you can claim
+for a passenger automobile each year is limited."_ **§280F is a CEILING on the exact figure this
+spike's engine computes**, so it could never have been a separate spike — a candidate either applies
+it to the combined number or returns one too large and entirely plausible.
+
+**No spike was minted.** What remains is a POLICY question, `OQ-054`, asked **per vehicle** because
+two vans can straddle the 6,000 lb threshold and one fleet-level answer hides it.
+
+⚠️ **Carry this to the next purchase:** a vehicle is a large-basis asset, so a **Q4 vehicle purchase
+is the single most likely trigger of the 40% test** — retroactively re-computing every
+personal-property asset placed in service earlier that year. **The timing of a vehicle purchase is a
+tax decision, not only a fleet one.**
+
 ### Where the spike stands
 
-| criterion                                                        | state                                                                |
-| ---------------------------------------------------------------- | -------------------------------------------------------------------- |
-| 1 — test corpus covers the rules surface                         | 🟡 **8 of 10 facets**; coverage arm RED on ADS and partial disposals |
-| 2 — every candidate scored against the corpus, failures itemised | ⛔ not started — the corpus had to exist first                       |
-| 3 — a decision with a stated migration path                      | ⛔ not started                                                       |
+| criterion                                                        | state                                                                                                      |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| 1 — test corpus covers the rules surface                         | ✅ **MET** — 11 facets; `deno task dep-corpus` 10/10 green, including the coverage arm that was landed RED |
+| 2 — every candidate scored against the corpus, failures itemised | ⛔ not started — the corpus had to exist first                                                             |
+| 3 — a decision with a stated migration path                      | ⛔ not started                                                                                             |
 
-⇒ **`in_progress`.** Nothing here is blocked on infrastructure or on anyone else; the remaining work
-is extraction and evaluation.
+⇒ **`in_progress`.** Nothing is blocked on infrastructure or on anyone else — criterion 2 is
+candidate evaluation against a yardstick that now exists, and criterion 3 follows from it. ⚠️ **The
+corpus was authored with no candidate in view and must stay that way.** Widening it to accommodate
+what a library happens to support would invert the method it was built to serve.
 
 ## Notes
 

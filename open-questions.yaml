@@ -2240,3 +2240,40 @@ open_questions:
       under every reference, so `2800` is correct as a holding account whatever D1 decides. And PSA
       labor never enters the rental or delivery pools under either answer — it is its own product
       line.
+
+  - id: OQ-054
+    headline: "does the fleet policy admit sub-6,000 lb vehicles"
+    question: >-
+      As CFS acquires more vehicles, will any be rated at or below 6,000 lb gross vehicle weight,
+      and will any be used less than exclusively for revenue-producing work? The first decides
+      whether the §280F passenger-automobile caps bind; the second decides whether listed-property
+      recapture can ever fire.
+    owner: alex
+    decide_by: 2026-11-15
+    blocks: [SPIKE-005]
+    status: open
+    notes: >-
+      Opened 2026-08-22 while building SPIKE-005's depreciation corpus, which found §280F named by
+      **none** of the four artifacts enumerating that spike's scope (HOT-023).
+      ⚠️ **ASKED AS A POLICY QUESTION, NOT A LOOKUP, AND THE FIRST FRAMING WAS WRONG.** It was
+      opened as "are the two owned vans over 6,000 lb GVWR" — a one-off sticker check, on the
+      reasoning that the population was two and therefore small. **The owner corrected the premise
+      the same day: "we do expect to acquire more vehicles."** A static population of two is an
+      argument for excluding §280F; a growing fleet is not. **The population that matters is the one
+      the policy will produce, not the one on the lot today.**
+      **What is settled**: today's two vehicles are used _exclusively_ for delivery and trash
+      removal (owner, 2026-08-16), so recapture — which fires only when business use falls to 50% or
+      less — has no live population **as long as that exclusivity holds for new vehicles too.** That
+      is the second half of this question and it is a policy, not a measurement.
+      ⚠️ **§280F is a CEILING ON THE COMBINED DEDUCTION, not a separate calculation.** Pub 946:
+      _"The depreciation deduction, **including the section 179 deduction and special depreciation
+      allowance**, you can claim for a passenger automobile each year is limited."_ ⇒ it caps the
+      very number SPIKE-005's engine computes, which is why it belongs inside that spike rather than
+      in one of its own, and why `DEP-011` now covers it regardless of how this question is answered.
+      ⭐ **A SECOND-ORDER EFFECT WORTH KNOWING BEFORE THE NEXT PURCHASE.** A vehicle is a
+      large-basis asset, so **a Q4 vehicle purchase is the single most likely trigger of the
+      mid-quarter 40% test** — which retroactively changes the convention, and the first-year
+      deduction, of every personal-property asset placed in service earlier that year (HOT-023).
+      **A growing fleet makes that more likely, not less**, and the timing of a vehicle purchase is
+      therefore a tax decision and not only a fleet one.
+      Related: `1700 Vehicles`, ADR-0030 (vehicle cost into COGS), HOT-023, SPIKE-005, DEP-011.

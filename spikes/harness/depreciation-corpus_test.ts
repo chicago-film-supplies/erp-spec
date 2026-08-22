@@ -126,6 +126,66 @@ Deno.test("convention selection is a precedence, and half-year is the FALLBACK",
   assertEquals(order, ["mid_month", "mid_quarter", "half_year"]);
 });
 
+Deno.test("DEP-013: the Sankofa partial disposal chains, figure by figure", () => {
+  const c = corpus.cases.find((x: { id: string }) => x.id === "DEP-013");
+  const g = c.given, e = c.expect;
+  // the GAA's basis and reserve are each reduced by the removed machines' own share
+  assertEquals(
+    g.gaa_unadjusted_basis_minor - g.removed_basis_minor,
+    e.gaa_basis_after_removal_minor,
+  );
+  assertEquals(
+    g.reserve_at_2025_01_01_minor - g.dep_allowed_on_removed_through_2024_minor,
+    e.reserve_after_removal_minor,
+  );
+  // the year's GAA depreciation is the rate applied to what is left
+  assertEquals(
+    applyPct(e.gaa_basis_after_removal_minor - e.reserve_after_removal_minor, g.annual_rate_pct),
+    e.gaa_depreciation_2025_minor,
+  );
+  // and the removed machines KEEP depreciating in the disposal year, at half a year
+  const perMachineAllowedThrough2024 = g.dep_allowed_on_removed_through_2024_minor /
+    g.removed_count;
+  assertEquals(
+    applyPct(g.machine_cost_minor - perMachineAllowedThrough2024, g.annual_rate_pct) / 2,
+    e.per_machine_dep_2025_minor,
+    "the disposal-year half-year deduction on a removed asset",
+  );
+  assertEquals(
+    (g.machine_cost_minor - perMachineAllowedThrough2024) - e.per_machine_dep_2025_minor,
+    e.per_machine_adjusted_basis_minor,
+  );
+  assertEquals(
+    e.per_machine_adjusted_basis_minor - g.proceeds_per_machine_minor,
+    e.per_machine_loss_minor,
+  );
+});
+
+Deno.test("DEP-011: the §280F first-year cap has TWO values and they differ by $8,000", () => {
+  const e = corpus.cases.find((x: { id: string }) => x.id === "DEP-011").expect;
+  assertEquals(
+    e.year_1_with_bonus_minor - e.year_1_without_bonus_minor,
+    800000,
+    "the §168(k) first-year increase",
+  );
+  // the caps decline monotonically after year 1 — a shape property, independent of transcription
+  const tail = [e.year_2_minor, e.year_3_minor, e.year_4_and_later_minor];
+  for (let i = 1; i < tail.length; i++) {
+    assert(tail[i] < tail[i - 1], `cap year ${i + 2} is not below year ${i + 1}`);
+  }
+  assert(e.exempt_above_gvwr_lb === 6000, "the GVWR threshold is what makes a van exempt");
+});
+
+Deno.test("DEP-012: ADS-required listed property is the link between three facets", () => {
+  const e = corpus.cases.find((x: { id: string }) => x.id === "DEP-012").expect;
+  assertEquals(e.method, "straight_line");
+  assert(
+    e.required_use_triggers.some((t: string) => /listed property used 50% or less/.test(t)),
+    "the listed-property trigger is what ties §280F, ADS and bonus into one dependency",
+  );
+  assert(/ineligible/.test(e.side_effect), "ADS-required property also loses bonus");
+});
+
 // ── ⚠️ THE COVERAGE ARM. Expected RED until the corpus is finished. ───────────────────────────
 Deno.test("COVERAGE: every facet SPIKE-005's exit criterion names is exercised", () => {
   // Verbatim from `spikes/SPIKE-005-depreciation-hand-rolled-vs-library.md`, exit criterion 1.
@@ -137,6 +197,7 @@ Deno.test("COVERAGE: every facet SPIKE-005's exit criterion names is exercised",
     "§179 effects on basis": ["section_179"],
     "bonus effects on basis": ["bonus_depreciation"],
     "partial disposals": ["partial_disposal"],
+    "listed property / §280F caps (OQ-054, HOT-023)": ["section_280f"],
     "prospective useful-life revisions": ["prospective_revision"],
     "the deferred GAAP/tax difference": ["deferred_difference"],
     // ⚠️ NOT in the exit criterion, and REQ-FA-002 says it should be. Asserted deliberately.

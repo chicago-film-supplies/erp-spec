@@ -373,26 +373,127 @@ cases:
       Not an IRS case — a CFS decision, included because the corpus must grade an engine on
       producing BOTH books, and ADR-0026 is what says only one of them posts.
 
+  # ── §280F — a CEILING on everything above, not a separate calculation ────────────────────────
+  - id: DEP-011
+    exercises: [section_280f, listed_property, vehicles, caps]
+    source: "p946 L4013 (2025 row of the cap table) + L4033 the combining rule + footnote 1"
+    given:
+      description: >-
+        A passenger automobile (including trucks and vans) acquired after 2017-09-27 and placed in
+        service in 2025. CFS holds account 1700 Vehicles and expects to acquire more (owner,
+        2026-08-22), so the population this rule applies to is growing rather than fixed.
+      tax_year: 2025
+    expect:
+      applies_to: "passenger automobiles, INCLUDING trucks and vans, rated 6,000 lb GVWR or less"
+      exempt_above_gvwr_lb: 6000
+      caps_are_on: >-
+        "The depreciation deduction, INCLUDING the section 179 deduction and special depreciation
+        allowance, you can claim for a passenger automobile each year is limited." — so the cap
+        binds the COMBINED §179 + bonus + MACRS figure, not a separate one.
+      year_1_with_bonus_minor: 2020000
+      year_1_without_bonus_minor: 1220000
+      year_2_minor: 1960000
+      year_3_minor: 1180000
+      year_4_and_later_minor: 706000
+      also: >-
+        Listed property used 50% or less in a qualified business use must be depreciated under ADS
+        straight line and is ineligible for bonus — see DEP-012. CFS's current fleet is used
+        exclusively for revenue work (owner, 2026-08-16), so that branch has no live population
+        today; OQ-054 asks whether the acquisition policy keeps it that way.
+    note: >-
+      ⭐ **THIS IS WHY §280F IS IN THIS CORPUS RATHER THAN ITS OWN SPIKE.** It is not adjacent
+      arithmetic — it is a ceiling on the exact number every other case here computes, so a
+      candidate engine either applies it to the combined figure or produces a number that is too
+      large and entirely plausible.
+      ⚠️ **The first-year cap has two values and the difference is $8,000**, turning on an election
+      and on whether the vehicle is qualified property. A single "2025 first-year cap" constant is
+      wrong half the time.
+      ⚠️ **Second-order, and it is the reason the timing of a vehicle purchase is a tax decision:** a
+      vehicle is a large-basis asset, so a Q4 purchase is the single most likely trigger of DEP-002's
+      40% test — retroactively re-computing every other asset placed in service that year.
+
+  # ── ADS ──────────────────────────────────────────────────────────────────────────────────────
+  - id: DEP-012
+    exercises: [ads, gds, class_lives, straight_line, required_use]
+    source: "p946 L2343 (method), L3524 (periods), L2577 (required use — listed property)"
+    given:
+      description: "When ADS is required rather than elected, and what it changes"
+    expect:
+      method: straight_line
+      method_quote: '"The straight line method over an ADS recovery period." (p946 L2343)'
+      generally: "recovery periods under ADS are longer than under GDS"
+      required_use_triggers:
+        - "listed property used 50% or less in a qualified business use"
+        - "nonresidential real, residential real and qualified improvement property held by an electing real property trade or business (§163(j)(7)(B))"
+        - "any property with a GDS recovery period of 10 years or more held by an electing farming business (§163(j)(7)(C))"
+        - "any tax-exempt use property"
+        - "any tax-exempt bond-financed property"
+      recovery_periods_years:
+        rent_to_own_property: 4
+        automobiles_and_light_duty_trucks: 5
+        computers_and_peripheral_equipment: 5
+      side_effect: "ADS-required property is also ineligible for the special depreciation allowance"
+    note: >-
+      ⭐ **The first trigger is the one that links three facets.** Listed property used ≤50% for
+      business forces ADS straight line AND kills bonus AND opens recapture — so §280F, ADS and the
+      bonus rules are one dependency rather than three independent switches, and an engine that
+      models them separately can produce a self-inconsistent schedule.
+      ⚠️ **Only three ADS periods are transcribed** — the ones bearing on CFS's asset classes. The
+      rest of the table and the full class-life listing (p946 L6552+) are **absent rather than
+      guessed**; none of CFS's required-use triggers fires today, so the periods that matter are the
+      elected ones. Extend before scoring a candidate on farming or tax-exempt-use property.
+
+  # ── partial disposal, from a general asset account ───────────────────────────────────────────
+  - id: DEP-013
+    exercises: [partial_disposal, gaa, disposal, gain_loss, section_1231]
+    source: "p946 L5490-5530 — the Sankofa example; every figure below is IRS-stated"
+    given:
+      description: >-
+        One GAA of 12 machines placed in service 2023, 200% DB, 5-year, half-year convention. Three
+        of them are sold in May 2025 in a qualifying disposition and removed from the GAA.
+      machine_cost_minor: 1500000
+      machines_total: 12
+      gaa_unadjusted_basis_minor: 18000000
+      removed_count: 3
+      removed_basis_minor: 4500000
+      reserve_at_2025_01_01_minor: 9360000
+      dep_allowed_on_removed_through_2024_minor: 2340000
+      proceeds_per_machine_minor: 500000
+      annual_rate_pct: 40
+    expect:
+      gaa_basis_after_removal_minor: 13500000
+      reserve_after_removal_minor: 7020000
+      gaa_depreciation_2025_minor: 2592000
+      per_machine_dep_2025_minor: 144000
+      per_machine_adjusted_basis_minor: 576000
+      per_machine_loss_minor: 76000
+      loss_character: section_1231
+    note: >-
+      Six stated figures, and they chain: the GAA's basis and reserve are each reduced by the removed
+      machines' share, the year's GAA depreciation is 40% of the difference, and the per-machine
+      figure is halved because the disposal year takes the half-year convention.
+      ⚠️ **The removed machines keep depreciating in the year of disposal** — $1,440 each — which is
+      the part an engine is most likely to drop, because "removed from the account" reads as
+      "stopped". A schedule that zeroes them on removal produces a loss that is too large by exactly
+      the year's depreciation.
+
 # ── ⚠️ WHAT THIS CORPUS DOES NOT YET COVER ──────────────────────────────────────────────────────
 # Stated rather than omitted, because a corpus that reports only what it holds is indistinguishable
 # from a complete one — and SPIKE-005's exit criterion is a coverage claim.
 not_yet_covered:
-  - id: partial_disposals
+  - id: ads_full_class_life_tables
     why: >-
-      Named in SPIKE-005's exit criterion and NOT yet built. Pub 946 handles it via general asset
-      accounts (GAA) and via basis allocation; the worked examples are at L3399 (Sankofa) and
-      L3405 (Duforcelf) and have not been extracted.
-  - id: ads_class_lives
+      DEP-012 transcribes the three ADS recovery periods bearing on CFS's asset classes. The full
+      table and the class-life listing (p946 L6552+) are **absent rather than guessed** — none of
+      CFS's required-use triggers fires today. Extend before scoring a candidate on farming or
+      tax-exempt-use property.
+  - id: section_280f_worked_recapture
     why: >-
-      GDS versus ADS is in the exit criterion. The GDS side is covered by the tables above; the ADS
-      recovery periods (Table A-20 and the class-life tables at L6552+) are not yet extracted.
-  - id: listed_property_and_section_280F
-    why: >-
-      ⚠️ **NOT in SPIKE-005's exit criterion, and it should be.** CFS holds account 1700 Vehicles.
-      Passenger automobiles are listed property with §280F caps, and the business-use percentage
-      drives recapture — Pub 946's Ellen Rye example (L3867) works exactly that. Vehicles over
-      6,000 lb GVWR are treated differently, which for a rental house's box trucks is the common
-      case rather than the exception. Filed as a scope finding.
+      DEP-011 covers the CAPS, which is the half that binds. The RECAPTURE half — Pub 946's Ellen
+      Rye example at L3867, $4,018 of excess depreciation — is not transcribed, because it fires
+      only when qualified business use falls to 50% or less and CFS's fleet is used exclusively for
+      revenue work (owner, 2026-08-16). ⚠️ **This exclusion rests on a POLICY holding as the fleet
+      grows, not on a measurement** — `OQ-054`. If the policy changes, transcribe it.
   - id: short_tax_year
     why: >-
       Pub 946 devotes a section to it (Tara Corporation, L3012/L3074). Not applicable to CFS today —

@@ -58,7 +58,7 @@
           <outline text="[object Object]"/>
         </outline>
       </outline>
-      <outline text="Open questions (13 of 53 still open)" _note="The bottleneck. Each blocks what is listed under it.">
+      <outline text="Open questions (14 of 54 still open)" _note="The bottleneck. Each blocks what is listed under it.">
         <outline text="OQ-001 — Are fulfillment legs first-class recorded events with their own identity, or derived from the order…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-007"/>
           <outline text="blocks ADR-0011"/>
@@ -199,8 +199,11 @@
         <outline text="OQ-053 — On a production service agreement, is CFS the PRINCIPAL or the AGENT — who contracts the crew, whos…" _note="owner: alex · decide by: 2027-01-31">
           <outline text="blocks HOT-017"/>
         </outline>
+        <outline text="OQ-054 — As CFS acquires more vehicles, will any be rated at or below 6,000 lb gross vehicle weight, and wil…" _note="owner: alex · decide by: 2026-11-15">
+          <outline text="blocks SPIKE-005"/>
+        </outline>
       </outline>
-      <outline text="Conflicts (2 open)">
+      <outline text="Conflicts (1 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labor) or an own long-haul run (labor-bearing)? T…" _note="Decides whether a trucked fulfillment absorbs labor cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
           <outline text="blocks OQ-010"/>
           <outline text="blocks ADR-0011"/>
@@ -393,7 +396,7 @@
           <outline text="Balance endpoints reconciled against a statement closing balance, to the cent."/>
         </outline>
         <outline text="SPIKE-005 — Hand-roll the depreciation engine, or adopt a library?" _note="timebox: 1 week · closes: a new ADR · in_progress">
-          <outline text="Test corpus covers: mid-month and half-year conventions; GDS vs ADS class lives; §179 and bonus effects on basis; partial disposals; prospective useful-life revisions; the deferred GAAP/tax difference."/>
+          <outline text="Test corpus covers: mid-month, half-year AND MID-QUARTER conventions; GDS vs ADS class lives; §179 and bonus effects on basis; §280F caps on listed property; partial disposals; prospective useful-life revisions; the deferred GAAP/tax difference. ⚠️ WIDENED 2026-08-22 (HOT-023) — mid-quarter is mandatory when the 40% test trips, not a third option, and §280F caps the combined §179 + bonus + MACRS figure this corpus computes."/>
           <outline text="Every candidate is scored against that corpus, with failures itemised rather than summarised."/>
           <outline text="A decision with a stated migration path if the library is later abandoned."/>
         </outline>
