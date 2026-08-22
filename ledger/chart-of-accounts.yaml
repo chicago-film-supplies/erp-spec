@@ -75,9 +75,13 @@
 #    6001 under 6000). ⚠️ This read "the absorbed/unabsorbed pair moves to 5800/5801" until
 #    2026-08-17; ADR-0038 removed the unabsorbed half, so 5800 stands alone and the 58xx block has
 #    no second member.
-# 2. **`5190 COGS – Labor Variance` is gone**, and 5100's "standard cost applied to causal jobs"
+# 2. **`5190 COGS – Labor Variance` was removed**, and 5100's "standard cost applied to causal jobs"
 #    note with it. HOT-010 and ADR-0019 killed the rate variance — with no standard rate it could
 #    never fire — but only `posting-rules.yaml`'s comment followed; the accounts did not.
+#    ⚠️ **RESTORED 2026-08-22 as `5190 Cost of Goods Sold: Labor Variance` (ADR-0041).** The premise
+#    the deletion rested on was refuted by OQ-050: burden is priced per payroll RUN while wages are
+#    itemised per person per day, so a standard rate does exist and the variance does fire. The
+#    entry is below, under the live house naming rather than the invented `COGS – ` form.
 #
 # ── THERE IS NO `dimensions:` KEY, AND THAT IS THE DECISION (ADR-0036, superseding ADR-0018) ────
 # **An account is a GL code and its behaviour. It says nothing about what a posting to it must
@@ -1307,6 +1311,35 @@ accounts:
       style (`Cost of Goods Sold: <thing>`) rather than the invented `COGS – ` form, and it is the
       "cogs: wages" of the taxonomy that retires 5400.
     source: ADR-0019
+
+  - code: 5190
+    name: "Cost of Goods Sold: Labor Variance"
+    class: expense
+    normal_balance: debit
+    disposition: new
+    status_live: absent
+    reason: >-
+      Required by ADR-0041. **The difference between the burden accrued at the plan rate and what the
+      EOR actually charged for the run**, posted once when the bill resolves the accrual and keyed to
+      the causal orders of every job the run served — un-allocated, for the reporting layer to
+      allocate (ADR-0029, ADR-0031). It stays in **Direct Costs** because it is a cost of labor that
+      served jobs, merely no longer attributable to one of them.
+      ⚠️ **RESTORED, and the deletion it reverses was correct when made.** This file's header records
+      `5190` as gone: HOT-010 and ADR-0019 killed the rate variance because with no standard rate it
+      could never fire. **OQ-050 refuted that premise** — burden is priced per payroll RUN while
+      wages are itemised per person per day, so apportioning a run's burden pro-rata IS a standard
+      rate applied to actual hours.
+      ⚠️ **It takes BOTH directions and the credit direction is CFS's measured one.** Run 759715 came
+      in below the blended plan rate, so the accrual over-stated and 5190 is CREDITED. A variance
+      account written for one direction only is a hole (ADR-0041; the same reason
+      `vehicle_cost_absorbed` needed `a-period-that-over-absorbs-credits-5901`).
+      **Code chosen, not inherited:** `5190` is the code the deleted account held, and nothing has
+      occupied it since — the live Direct Costs block runs 5000, 5001, 5100, 5200, 5300, 5400, 5500,
+      5600, 5700 with 5150, 5800 and 5900 minted here, so restoring the original code costs nothing
+      and keeps the citation trail in HOT-010 and this file's header resolvable. Named in the live
+      house style (`Cost of Goods Sold: <thing>`) rather than the deleted account's invented
+      `COGS – ` form.
+    source: ADR-0041
 
   - code: 5900
     name: "Cost of Goods Sold: Vehicle (Absorbed)"

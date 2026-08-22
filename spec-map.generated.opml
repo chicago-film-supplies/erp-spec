@@ -200,7 +200,7 @@
           <outline text="blocks HOT-017"/>
         </outline>
       </outline>
-      <outline text="Conflicts (2 open)">
+      <outline text="Conflicts (1 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labor) or an own long-haul run (labor-bearing)? T…" _note="Decides whether a trucked fulfillment absorbs labor cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
           <outline text="blocks OQ-010"/>
           <outline text="blocks ADR-0011"/>
@@ -269,7 +269,7 @@
           <outline text="blocks ADR-0029"/>
         </outline>
       </outline>
-      <outline text="Decisions (25 in force, 11 proposed)">
+      <outline text="Decisions (25 in force, 12 proposed)">
         <outline text="In force (25)">
           <outline text="ADR-0001 — Replace Xero with an in-house ledger" _note="**In the context of** owning the order-to-invoice path but renting the ledger, **facing** a tracking-dimension defect that Xero silently absorbs and a costing model Xero cannot express, **we decided** to build the general ledger in-house, **to achieve** dimensional postings that cannot be null and a labour-absorption model we control, **accepting** that a large amount of unglamorous accounting surface area becomes ours to build and keep correct."/>
           <outline text="ADR-0002 — Bank feed sourced from Plaid, single Chase account" _note="**In the context of** needing bank transactions now that Xero's feed goes away, **facing** one bank and one account, **we decided** to source the feed from Plaid, **to achieve** a working feed without a bank-specific integration, **accepting** that Plaid's transaction model is a consumer-fintech model, not an accounting bank feed."/>
@@ -297,7 +297,7 @@
           <outline text="ADR-0037 — An id carries meaning where it is used — a headline on every id, and addressable claims inside a decision" _note="**In the context of** a spec whose authority is prose, **facing** a measured 22:1 mismatch between what is cited (a document) and what is claimed (about twenty statements inside it), **we decided** that an ADR additionally asserts individually addressable claims, typed as decision or premise, **to achieve** corrections that can be swept and premises that can go stale without touching a frozen decision, **accepting** a second surface on every ADR and a convention that only pays off as it is adopted."/>
           <outline text="ADR-0038 — Labor with no causal order is not COGS — 5801 is not created and 6600 Wages narrows instead" _note="**In the context of** but-for attribution putting a guaranteed day onto the order that caused the hire, **facing** the consequence that labor no order caused has no revenue it is applicable to, **we decided** that such labor is operating expense and stays in `6600 - Wages` rather than reaching a COGS account, **to achieve** a cost-of-revenue line that contains only costs of revenue, **accepting** that ADR-0019's `5801` is not created and that a superficially identical vehicle account deliberately does not follow."/>
         </outline>
-        <outline text="Proposed (11)">
+        <outline text="Proposed (12)">
           <outline text="ADR-0015 — Inventory reservations are TigerBeetle pending transfers, over the operational window only" _note="review by: 2026-11-01 · **In the context of** wanting order state derivable and oversell prevented in the database, **facing** a balance model with no time dimension and an availability question that is entirely about time, **we decided** to model reservations as two-phase transfers over the operational window only, **to achieve** custody oversell that is unrepresentable and a fulfillment state that is derived, **accepting** that future-dated booking conflicts stay with the interval engine.">
             <outline text="blocked on SPIKE-002"/>
             <outline text="blocked on SPIKE-012"/>
@@ -347,6 +347,13 @@
           </outline>
           <outline text="ADR-0040 — The Zod schema is the sole authority and the MongoDB validator is generated from it one-way, with every rule the validator cannot carry named in a registry CI walks" _note="review by: 2026-11-15 · **In the context of** ADR-0003 moving documents into MongoDB, **facing** a `$jsonSchema` dialect that accepts 29 of 63 probed keywords and a Zod translator that discards constraints silently, **we decided** that the Zod schema is the sole authority and the MongoDB validator is generated from it one-way as a deliberately narrower artifact — `$jsonSchema` for shape, `$expr` for the cross-element items invariants — with every rule the validator cannot carry named in a registry CI walks, **to achieve** no rule enforced in neither layer, **accepting** that the generator must be written and maintained rather than taken off the shelf.">
             <outline text="blocked on SPIKE-006"/>
+          </outline>
+          <outline text="ADR-0041 — The labor rate variance posts as its own fact keyed to causal orders, and the plan burden rate is re-derived from each observed run" _note="review by: 2026-11-01 · **In the context of** an employer of record that itemises wages per person per day but prices employer burden per payroll RUN, **facing** an accrual made at a plan rate that is systematically wrong rather than merely imprecise, **we decided** to post the resulting difference once, as its own fact keyed to the causal orders, and to re-derive the plan rate from each observed run, **to achieve** a shrinking variance rather than a well-bookkept one, **accepting** that a job's margin is provisional until the run that paid for it is billed.">
+            <outline text="blocked on HOT-010"/>
+            <outline text="blocked on HOT-016"/>
+            <outline text="blocked on HOT-018"/>
+            <outline text="blocked on OQ-045"/>
+            <outline text="blocked on OQ-050"/>
           </outline>
         </outline>
       </outline>

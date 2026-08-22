@@ -20,6 +20,7 @@ given:
     due_date: "2026-09-19"
     terms: net_30
     amount_minor: 199500
+    entry_total_minor: 199500
     reclassifications:
       - { obligation_id: OBL-VEC-0001, amount_minor: 185000 }
     direct_lines:

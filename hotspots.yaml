@@ -793,7 +793,7 @@ hotspots:
       Security caps at the federal taxable maximum — **$184,500 for 2026, or 6,150 hours at $30/hr**
       (IRS Topic 751). The only components
       that switch off in a season are FUTA and SUTA: **7.65 points, not 13.85**, leaving a
-      **12.20%** floor rather than 6.00%. ⚠️ `open-questions.yaml`'s OQ-050 states a THIRD figure for
+      **12.20%** floor rather than 6.00% (`ADR-0041/M1`). ⚠️ `open-questions.yaml`'s OQ-050 states a THIRD figure for
       the same quantity — "~4.51% uncapped floor of Medicare plus workers comp" — which omits both
       Social Security and the platform fee.
     contexts: [ledger, fulfillment]
@@ -834,7 +834,41 @@ hotspots:
       (`https://www.irs.gov/taxtopics/tc751`, read 2026-08-17) — **6,150 hours at $30/hr**, against
       233 for FUTA and 453 for Illinois SUTA. Those two bases are ADR-0019's own and stay unpinned.
     blocks: []
-    status: open
+    status: resolved
+    resolved_by: ADR-0041
+    measured: >-
+      **Resolved 2026-08-22 by ADR-0041** (the labor variance posts as a keyed fact), which carries
+      the corrected sizing **from this hotspot rather than from ADR-0019's body** — 7.65 points of
+      wage, floor 12.20% (`ADR-0041/M1`) — as `resolution_shape` requires. ADR-0019 is untouched and
+      stays as written: an accepted ADR is a historical record of the decision as taken (ADR-0034),
+      wrong premise included.
+      **What landed, closing erp-spec#38 end to end:** `5190 - Cost of Goods Sold: Labor Variance`
+      restored to the chart on the premise OQ-050 refuted; two posting arms on
+      `vendor_bill_received`; and three golden vectors — both directions plus the minimal-pair
+      rejection.
+      ⚠️ **The sizing figure is now TYPED, which is what stops this recurring.** The whole hotspot
+      exists because one quantity had three different values in three live files (13.85/6.00 in
+      ADR-0019, ~4.51 in OQ-050, 12.20 here) and **every one of them was internally consistent
+      arithmetic**. `ADR-0041/M1` owns it under gate 22, and the gate immediately found the two live
+      files quoting it without citation.
+      ⭐ **TWO FINDINGS FROM ACTUALLY WRITING THE RULE, neither visible from the survey:**
+      · **erp-spec#38's "there is no EVENT to trigger it" was false** — `vendor_bill_received`
+        already fires on the EOR's invoice and already relieves 2010. The claim had been read off
+        ADR-0019's "period-close true-up" phrasing rather than checked against the rule set. It is
+        the reason this went to a GitHub issue instead of `unwritten:`, so a false premise routed
+        two months of work to the wrong place.
+      · ⚠️ **`control_total: bill.amount_minor` made CFS'S OWN MEASURED DIRECTION UNREPRESENTABLE.**
+        Where the bill lands below the accrual the entry posts the ACCRUED amount, not the billed
+        one, and the arithmetic does not close. Changed to `bill.entry_total_minor`, exactly as
+        `vehicle_cost_absorbed` did — and its invariant had already written the reason down:
+        _"Using `pool_minor` as the control total would have made the over-absorbed case
+        unrepresentable."_ **The same defect, the same fix, two rules apart, and nothing connected
+        them.** A control total keyed to the natural document total silently forbids every entry
+        that is not the document total.
+      ⚠️ **ONE HALF IS A PROCEDURE AND NOTHING EXECUTES ON IT.** ADR-0041's D4 — re-derive the plan
+      burden rate from each observed run — is the half that actually removes the seasonal bias, and
+      unlike D1–D3 it produces no account, rule or vector a gate can check. **A stated guarantee
+      that nothing executes is not a guarantee.** Filed as deferred work.
     resolution_shape: >-
       **Not resolvable by editing ADR-0019** — it is frozen, and ADR-0034 makes it a historical
       record of the decision as taken, wrong premise included. The resolution is: correct OQ-050

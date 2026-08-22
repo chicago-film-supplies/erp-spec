@@ -1797,6 +1797,19 @@ open_questions:
       is their criterion for writing one off rather than chasing it. SAP's F.19 reclassification is
       the obvious starting point, and note that it **reclassifies rather than clears** — which is
       evidence the write-off is a separate, deliberate act everywhere.
+      ⚠️ **NARROWED 2026-08-22, and the other half is now decided.** `ADR-0041` found — via the
+      2026-08-18 rule 8a survey — that this OQ and erp-spec#38 are **one seam from two sides**: the
+      residual left in 2010 after `vendor_bill_received` relieves the accrual IS the labor variance,
+      and neither artifact named the other. ADR-0041 takes the **arithmetic** half: an EOR run that
+      is FULLY BILLED, where the difference is a rate estimate error, posts to
+      `5190 - Cost of Goods Sold: Labor Variance` keyed to the run's causal orders. **What stays
+      here is the JUDGEMENT half** — a vendor who may or may not bill again, where nobody can say
+      whether the residual is a variance or a liability still owed. **One is arithmetic; the other
+      is a judgement about a vendor relationship**, which is precisely why this OQ says it must be a
+      decision and not a default. The fence executes:
+      `ledger/vectors/vendor_bill_received/partial-bill-residual-routed-through-5190-rejected.yaml`
+      is a true minimal pair — identical amount, accounts and keys — refusing a variance on an
+      incomplete run.
       Not blocking: 2010's residual is visible and reportable either way, and nothing in m3 depends
       on it.
   - id: OQ-046
@@ -2055,7 +2068,7 @@ open_questions:
       rather than imprecise.** FUTA (0.60%) stops at ~$7,000 and Illinois SUTA (7.05%, the largest
       component) at ~$13,600 — about 233 and 453 hours at $30/hr. ⚠️ **CORRECTED 2026-08-17: this
       read "leaving a ~4.51% uncapped floor of Medicare plus workers comp", and the floor is
-      12.20%.** `4.51` is `1.45 + 3.06` — it omits the 1.49% platform fee (which ADR-0019 later
+      12.20%** (`ADR-0041/M1`). `4.51` is `1.45 + 3.06` — it omits the 1.49% platform fee (which ADR-0019 later
       established is uncapped) **and Social Security's 6.20%, which caps at the SSA wage base —
       thousands of hours at $30/hr, against the 233 and 453 above.** Only FUTA and SUTA switch off
       within a season: **7.65 points, not 13.85**. ADR-0019 carries the same defect at 6.00% / 13.85

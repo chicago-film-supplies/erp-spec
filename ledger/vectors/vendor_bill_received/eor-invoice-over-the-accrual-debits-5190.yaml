@@ -1,0 +1,92 @@
+name: eor-invoice-over-the-accrual-debits-5190
+posting_rule: vendor_bill_received
+kind: accept
+source: >-
+  ADR-0041. The EARLY-season direction: the unemployment wage bases have not yet exhausted, so the
+  actual burden rate sits ABOVE the blended plan rate and the accrual UNDER-states. The within-season
+  swing that makes both directions reachable is 7.65 points of wage (`ADR-0041/M1`). Accounts — 2010
+  (new), 2000 (Active), 5190 (new, restored by ADR-0041). Amounts synthetic; the direction is the
+  arithmetic complement of the measured one.
+
+given:
+  ledger_state:
+    closed_periods: ["2026-01"]
+    outstanding_obligations:
+      - { obligation_id: OBL-VEC-0211, accrued_minor: 120000 }
+      - { obligation_id: OBL-VEC-0212, accrued_minor: 96000 }
+      - { obligation_id: OBL-VEC-0213, accrued_minor: 84000 }
+  bill:
+    bill_id: BILL-VEC-0022
+    vendor_ref: VEN-VEC-EOR
+    bill_date: "2026-02-16"
+    due_date: "2026-03-03"
+    terms: net_15
+    amount_minor: 307500
+    entry_total_minor: 307500
+    run_fully_billed: true
+    reclassifications:
+      - { obligation_id: OBL-VEC-0211, amount_minor: 120000 }
+      - { obligation_id: OBL-VEC-0212, amount_minor: 96000 }
+      - { obligation_id: OBL-VEC-0213, amount_minor: 84000 }
+    direct_lines: []
+    labor_variance_under_minor: 7500
+    labor_causal_orders: ["ORD-VEC-0211"]
+
+derivation: >-
+  The same fortnight shape in February. `shift_recorded` accrued $3,000.00 at the plan rate; the EOR
+  charged **$3,075.00**, because FUTA and Illinois SUTA are both still live on these wages.
+  **Four transfers.** Three reclassifications relieve each obligation IN FULL — 120000 + 96000 +
+  84000 = **300000**, so 2010 nets to zero for all three. The fourth, Dr 5190 / Cr 2000 for **7500**,
+  books the excess burden as a further cost. 2000 is credited 300000 + 7500 = **307500** = the
+  invoice, and the control total `bill.entry_total_minor` is the same 307500.
+  ⭐ **In THIS direction `amount_minor` and `entry_total_minor` agree**, and in
+  `eor-invoice-under-the-accrual-credits-5190` they do not. **Both vectors exist because a rule that
+  only works when the numbers go one way is a hole** — the same reason `vehicle_cost_absorbed` owes
+  `a-period-that-over-absorbs-credits-5901`. ⚠️ **Reading only this vector would make
+  `control_total: bill.amount_minor` look correct**, which is exactly how the over-accrual case would
+  have been left unrepresentable.
+  ⚠️ **THIS IS NOT `bill-exceeds-the-accrual-and-the-excess-is-a-direct-line`, and the difference is
+  the whole discrimination.** There the excess is a SEPARATE COST the vendor billed — it arrives with
+  its own `debit_account` and its own `causal_orders` on a `direct_lines[]` entry, and it is the
+  first posting of that cost. Here the excess is **the same labor costing more than estimated**: no
+  new cost object, no line identity, and it lands in 5190 rather than in a natural expense account.
+  **`direct_lines: []` and `labor_variance_under_minor: 7500` is what says which one this is** — the
+  discrimination lives in the source document, never in the rule.
+  ⚠️ **It is also not the unabsorbed-wages account.** ADR-0019 defines unabsorbed as hours
+  attributable to no job at all; these hours were worked on real jobs and the RATE was wrong. The
+  account erp-spec#38 named for that tempting answer (`5801`) was deleted by ADR-0038 on 2026-08-17,
+  so the option is doubly refused.
+  The variance leg carries `causal_orders` for the same reason as in the credit direction, and the
+  reclassification legs carry `null` for the same reason as in every other bill.
+
+expect:
+  transfers:
+    - {
+        debit_account: 2010,
+        credit_account: 2000,
+        amount_minor: 120000,
+        accounting_date: "2026-02-16",
+        causal_orders: null,
+      }
+    - {
+        debit_account: 2010,
+        credit_account: 2000,
+        amount_minor: 96000,
+        accounting_date: "2026-02-16",
+        causal_orders: null,
+      }
+    - {
+        debit_account: 2010,
+        credit_account: 2000,
+        amount_minor: 84000,
+        accounting_date: "2026-02-16",
+        causal_orders: null,
+      }
+    - {
+        debit_account: 5190,
+        credit_account: 2000,
+        amount_minor: 7500,
+        accounting_date: "2026-02-16",
+        causal_orders: ["ORD-VEC-0211"],
+      }
+  rejects: []

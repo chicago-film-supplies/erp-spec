@@ -12,8 +12,8 @@ is `deno task validate`'s judgement, not this file's.
 | | Count | |
 |---|---:|---|
 | Open questions | 13 open | 40 answered of 53 · **0 with no owner or no decide-by** |
-| Conflicts (HOT) | 21 | 2 open |
-| Decisions (ADR) | 40 | 25 in force · 11 proposed |
+| Conflicts (HOT) | 21 | 1 open |
+| Decisions (ADR) | 41 | 25 in force · 12 proposed |
 | Spikes | 12 | 7 open |
 | Requirements | 21 | 0 without a scenario |
 | Inbox | 100 | 80 unpromoted |
@@ -47,7 +47,6 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | HOT | Statement | Blocks |
 |---|---|---|
 | `HOT-017` | `charter.md` states that a production service agreement's money moves through `2800 - PSA Liability Clearing`… | — |
-| `HOT-018` | `adr/ADR-0019` — ACCEPTED and FROZEN 2026-08-17 — states that the capped components of employer burden leave… | — |
 
 ## Decisions
 
@@ -79,7 +78,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 - `ADR-0037` — An id carries meaning where it is used — a headline on every id, and addressable claims inside a decision
 - `ADR-0038` — Labor with no causal order is not COGS — 5801 is not created and 6600 Wages narrows instead
 
-### Proposed (11)
+### Proposed (12)
 
 | ADR | Title | Review by | Supersedes on acceptance | Blocked on |
 |---|---|---|---|---|
@@ -94,6 +93,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | `ADR-0033` | A document is addressed to exactly one node by a level-tagged reference, and unallocated credit sits at the settlement point | 2026-11-15 | — | `OQ-030` `OQ-038` `OQ-040` |
 | `ADR-0039` | Historical ledger entries load as ordinary postings with cluster-assigned timestamps; the TigerBeetle `imported` flag is refused | 2026-11-15 | — | — |
 | `ADR-0040` | The Zod schema is the sole authority and the MongoDB validator is generated from it one-way, with every rule the validator cannot carry named in a registry CI walks | 2026-11-15 | — | — |
+| `ADR-0041` | The labor rate variance posts as its own fact keyed to causal orders, and the plan burden rate is re-derived from each observed run | 2026-11-01 | — | `OQ-045` |
 
 ## Spikes
 
@@ -134,7 +134,7 @@ it is counted separately on purpose, and a milestone is not done because its che
 | Milestone | Criterion | Check | Measured |
 |---|---|---|---|
 | `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 12 spikes, 7 open, 0 closed without naming an ADR |
-| `m4` | Every HOT- is resolved or has an ADR that consciously defers it with… | `hotspots_resolved` | 21 hotspots, 2 unresolved |
+| `m4` | Every HOT- is resolved or has an ADR that consciously defers it with… | `hotspots_resolved` | 21 hotspots, 1 unresolved |
 
 ## Coverage gaps
 

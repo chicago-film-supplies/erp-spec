@@ -1,0 +1,65 @@
+name: partial-bill-residual-routed-through-5190-rejected
+posting_rule: vendor_bill_received
+kind: reject
+differs_from: eor-invoice-under-the-accrual-credits-5190
+differs_in: ["bill.run_fully_billed"]
+source: >-
+  ADR-0041's explicit narrowing — the variance arm is for a rate estimate error on a FULLY BILLED
+  run, and `OQ-045` owns every other unclearable 2010 residual. The 2026-08-18 rule 8a survey found
+  that erp-spec#38 and OQ-045 are one seam from two sides and that neither named the other; this
+  vector is the fence between them.
+
+given:
+  ledger_state:
+    closed_periods: ["2026-07"]
+    outstanding_obligations:
+      - { obligation_id: OBL-VEC-0201, accrued_minor: 120000 }
+      - { obligation_id: OBL-VEC-0202, accrued_minor: 96000 }
+      - { obligation_id: OBL-VEC-0203, accrued_minor: 84000 }
+  bill:
+    bill_id: BILL-VEC-0023
+    vendor_ref: VEN-VEC-EOR
+    bill_date: "2026-09-15"
+    due_date: "2026-09-30"
+    terms: net_15
+    amount_minor: 292500
+    entry_total_minor: 300000
+    run_fully_billed: false
+    reclassifications:
+      - { obligation_id: OBL-VEC-0201, amount_minor: 117000 }
+      - { obligation_id: OBL-VEC-0202, amount_minor: 93600 }
+      - { obligation_id: OBL-VEC-0203, amount_minor: 81900 }
+    direct_lines: []
+    labor_variance_over_minor: 7500
+    labor_causal_orders: ["ORD-VEC-0201", "ORD-VEC-0202"]
+
+derivation: >-
+  **Byte-for-byte the accept vector except for ONE boolean: the run is not fully billed.**
+  ⚠️ **A true minimal pair — `labor_variance_over_minor` is 7500 in BOTH**, which is the strongest
+  form this check takes: the amount, the accounts and the keys are all identical, so nothing but
+  `run_fully_billed` can be doing the discriminating. A further invoice for
+  these shifts is still expected — the EOR split the fortnight across two runs — so the 7500 left in
+  2010 is **received-not-invoiced**, which is the ordinary and correct state of that account.
+  ⚠️ **Booking it as a variance would be wrong twice over in one entry**: it credits 5190 with a
+  rate variance that does not exist, and it clears a liability that is still genuinely owed. **The
+  entry balances perfectly** — 292500 + 7500 = 300000 against `entry_total_minor` — so the control
+  total, the trial balance and every arithmetic check pass. Only the `run_fully_billed`
+  discrimination can refuse it, which is why the flag is on the document rather than inferred.
+  ⚠️ **This is the minimal pair that proves the rule discriminates on the right field.** Without it
+  the accept vector proves only that a 2010/5190 transfer can be produced, never that it is produced
+  for the right reason — and "a partial bill leaves a residual" is stated as normal in this rule's
+  own invariants, so the wrong reading is the LIKELY one rather than an exotic one.
+  ⇒ **The residual stays in 2010 and awaits the next bill.** Where no next bill is ever coming, that
+  is `OQ-045`'s undecided case: it needs a fourth procurement event and a survey of its own, and
+  ADR-0041 narrows away from it on purpose. **One is arithmetic; the other is a judgement about a
+  vendor relationship.**
+
+expect:
+  transfers: []
+  rejects:
+    - reason: >-
+        `labor_variance_over_minor` is declared on a bill whose run is not fully billed
+        (`run_fully_billed: false`) — the residual in 2010 is received-not-invoiced awaiting a
+        further bill, not a rate variance. A variance may only be booked where the run is complete
+        and the difference is a rate estimate error (ADR-0041). An unclearable residual on an
+        incomplete run is OQ-045's open case and stays in 2010.

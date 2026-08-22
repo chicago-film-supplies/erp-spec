@@ -1164,7 +1164,17 @@ rules:
             "It needs nothing new." ⚠️ A hire that genuinely cannot be attributed still posts here,
             with `causal_orders: null` as an explicit determination (REQ-LED-001) rather than earning
             a fourth account for a population that may have no members.
-    control_total: bill.amount_minor
+      - debit_account: 5190
+        credit_account: 2000
+        amount: bill.labor_variance_under_minor
+        keys:
+          causal_orders: bill.labor_causal_orders
+      - debit_account: 2010
+        credit_account: 5190
+        amount: bill.labor_variance_over_minor
+        keys:
+          causal_orders: bill.labor_causal_orders
+    control_total: bill.entry_total_minor
     invariants:
       - >-
           ⚠️ **THE BILL RECLASSIFIES. IT NEVER RE-BOOKS.** Where the bill resolves an obligation the
@@ -1233,7 +1243,43 @@ rules:
           **A vendor bill is received once.** A duplicate credits 2000 twice for one invoice and
           would relieve the same accrual twice. Payment of the bill is Banking's event, not this one
           (`contexts/procurement/context.md`).
-    relates_to: [REQ-LED-001, ADR-0010, ADR-0017, ADR-0018, ADR-0020, ADR-0025]
+      - >-
+          ⚠️ **THE VARIANCE LEGS CARRY `causal_orders` WHERE THE RECLASSIFICATION LEG CARRIES `null`,
+          AND THE ASYMMETRY IS THE POINT** (ADR-0041). A reclassification moves a liability between
+          two liability accounts and therefore cannot re-key a cost. A variance leg touches an
+          EXPENSE account and is a NEW FACT about cost — so it both can and must carry the causal
+          orders of every job the run served, or the reporting layer has nothing to allocate it by.
+          **It carries the whole list on ONE transfer and apportions nothing**: the ledger records
+          the fact un-allocated (ADR-0029) and `reporting/` allocates on ADR-0031's basis. This is
+          also why no arithmetic appears in `amount:` — apportioning here would put a rate inside a
+          posting rule, which gate 10e forbids for exactly this reason.
+      - >-
+          ⚠️ **BOTH VARIANCE DIRECTIONS EXIST, AND THE `2010`/`5190` ONE IS CFS'S MEASURED
+          DIRECTION.** Under-accrued (bill above accrual): Dr 5190 / Cr 2000, the excess burden is a
+          further cost. Over-accrued (bill below accrual): Dr 2010 / Cr 5190, the residual left in
+          2010 is released back against COGS. Run 759715 came in BELOW the blended plan rate, so the
+          credit direction is the ordinary one. **A rule that only works when the numbers go one way
+          is a hole** — `vehicle_cost_absorbed` needed the identical third arm for the identical
+          reason, and both branches carry a golden vector so neither is a claim nobody exercised.
+      - >-
+          ⚠️ **`control_total: bill.entry_total_minor`, NOT `bill.amount_minor`, and the change is
+          forced.** Where the bill comes in BELOW the accrual the entry posts the ACCRUED amount, not
+          the billed one — 2010 is debited in full across two legs while 2000 is credited only what
+          was billed. Against `bill.amount_minor` the arithmetic simply does not close, so the
+          over-accrual case would be **unrepresentable**. This is verbatim the problem
+          `vehicle_cost_absorbed` solved with `run.entry_total_minor`, whose own invariant records
+          it: _"Using `pool_minor` as the control total would have made the over-absorbed case
+          unrepresentable."_ **The bill states both, and the two disagreeing is the signal rather
+          than an error** — they are equal exactly when the accrual was right.
+      - >-
+          ⚠️ **THE VARIANCE ARM IS FOR A RATE ESTIMATE ERROR ON A FULLY-BILLED RUN, AND IT IS NOT
+          `OQ-045`** (ADR-0041). The residual in 2010 after a reclassification is the labor variance
+          **only** where the run is fully billed and no further bill is coming — arithmetic. OQ-045's
+          case is the unknown one: a vendor who may or may not bill again, which needs a fourth
+          procurement event and a survey of its own. **Routing an ordinary partial bill's residual
+          through 5190 would book a variance that does not exist and clear a liability that is still
+          owed.** A partial bill leaves its residual in 2010, as it always did.
+    relates_to: [REQ-LED-001, ADR-0010, ADR-0017, ADR-0018, ADR-0020, ADR-0025, ADR-0029, ADR-0041]
     vectors_dir: ledger/vectors/vendor_bill_received/
 
 # ══════════════════════════════════════════════════════════════════════════════════════════════════

@@ -17,6 +17,7 @@ given:
     due_date: "2026-09-04"
     terms: net_30
     amount_minor: 120000
+    entry_total_minor: 120000
     reclassifications: []
     direct_lines:
       - { debit_account: 6004, amount_minor: 120000 }

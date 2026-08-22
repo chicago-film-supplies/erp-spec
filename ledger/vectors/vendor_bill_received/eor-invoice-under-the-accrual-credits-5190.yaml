@@ -1,0 +1,95 @@
+name: eor-invoice-under-the-accrual-credits-5190
+posting_rule: vendor_bill_received
+kind: accept
+source: >-
+  ADR-0041, on OQ-050's measurement of Wrapbook run 759715 — actual burden 19.85% (ADR-0019/M2)
+  against a 23% blended plan rate, so the accrual OVER-states and 5190 is CREDITED. **This is CFS's
+  measured direction.** Accounts — 2010 Accrued Expenses: Received Not Invoiced (new), 2000 Accounts
+  Payable (Active), 5190 Cost of Goods Sold: Labor Variance (new, restored by ADR-0041). Amounts are
+  synthetic and chosen to divide cleanly; the direction and the shape are measured.
+
+given:
+  ledger_state:
+    closed_periods: ["2026-07"]
+    outstanding_obligations:
+      - { obligation_id: OBL-VEC-0201, accrued_minor: 120000 }
+      - { obligation_id: OBL-VEC-0202, accrued_minor: 96000 }
+      - { obligation_id: OBL-VEC-0203, accrued_minor: 84000 }
+  bill:
+    bill_id: BILL-VEC-0021
+    vendor_ref: VEN-VEC-EOR
+    bill_date: "2026-09-15"
+    due_date: "2026-09-30"
+    terms: net_15
+    amount_minor: 292500
+    entry_total_minor: 300000
+    run_fully_billed: true
+    reclassifications:
+      - { obligation_id: OBL-VEC-0201, amount_minor: 117000 }
+      - { obligation_id: OBL-VEC-0202, amount_minor: 93600 }
+      - { obligation_id: OBL-VEC-0203, amount_minor: 81900 }
+    direct_lines: []
+    labor_variance_over_minor: 7500
+    labor_causal_orders: ["ORD-VEC-0201", "ORD-VEC-0202"]
+
+derivation: >-
+  The employer of record's invoice for a late-season fortnight. `shift_recorded` accrued $3,000.00
+  across three crew days at the PLAN burden rate; the EOR's actual charge is **$2,925.00**, because
+  the unemployment wage bases have exhausted and the real burden rate has stepped down.
+  **Four transfers.** Three reclassifications relieve what was actually billed — 117000 + 93600 +
+  81900 = **292500** = `bill.amount_minor`, so 2000 is credited exactly the invoice. The fourth,
+  Dr 2010 / Cr 5190 for **7500**, releases the over-accrual back against COGS. 2010 is debited
+  292500 + 7500 = **300000**, discharging the accrual in full, and that is
+  `bill.entry_total_minor` — the control total.
+  ⭐ **`amount_minor` and `entry_total_minor` DISAGREE here, and the disagreement is the whole
+  point.** They are equal exactly when the accrual was right. Against `bill.amount_minor` the
+  arithmetic would not close and this case would be **unrepresentable** — verbatim the problem
+  `vehicle_cost_absorbed` solved with `run.entry_total_minor`.
+  ⚠️ **THE VARIANCE LEG CARRIES `causal_orders` AND THE RECLASSIFICATION LEGS DO NOT.** A
+  reclassification moves a LIABILITY between two liability accounts and cannot re-key a cost — the
+  keys were declared at the accrual and stay on those transfers. The variance leg touches an EXPENSE
+  account and is a **new fact about cost**, so it must carry the causal orders of every job the run
+  served, or `reporting/` has nothing to allocate it by (ADR-0029, ADR-0031).
+  ⚠️ **It carries the WHOLE LIST on ONE transfer and apportions nothing.** Splitting 7500 across
+  ORD-VEC-0201 and ORD-VEC-0202 in the posting rule would put a rate inside a posting rule, which
+  gate 10e forbids, and would allocate in the ledger, which ADR-0029 forbids. The ledger records the
+  fact un-allocated; the reporting layer allocates it.
+  ⚠️ **This is NOT `OQ-045`'s residual.** `run_fully_billed: true` and the difference is a rate
+  estimate error on a complete run — arithmetic. OQ-045's case is a vendor who may or may not bill
+  again, which stays in 2010 and needs a fourth procurement event. Contrast
+  `partial-bill-residual-routed-through-5190-rejected`, which refuses exactly that confusion.
+  **The accounting date is the BILL's** (ADR-0010, ADR-0017). ASC 250-10-45-17 puts a change in
+  estimate in the period of change and forbids restating the shifts' own periods — one of which is
+  closed.
+
+expect:
+  transfers:
+    - {
+        debit_account: 2010,
+        credit_account: 2000,
+        amount_minor: 117000,
+        accounting_date: "2026-09-15",
+        causal_orders: null,
+      }
+    - {
+        debit_account: 2010,
+        credit_account: 2000,
+        amount_minor: 93600,
+        accounting_date: "2026-09-15",
+        causal_orders: null,
+      }
+    - {
+        debit_account: 2010,
+        credit_account: 2000,
+        amount_minor: 81900,
+        accounting_date: "2026-09-15",
+        causal_orders: null,
+      }
+    - {
+        debit_account: 2010,
+        credit_account: 5190,
+        amount_minor: 7500,
+        accounting_date: "2026-09-15",
+        causal_orders: ["ORD-VEC-0201", "ORD-VEC-0202"],
+      }
+  rejects: []
