@@ -7,7 +7,7 @@ date: 2026-08-09
 review_by: 2026-11-01
 deciders: [repo owner]
 contexts: [availability, fulfillment, ordering]
-relates_to: [ADR-0003, ADR-0014, SPIKE-002, SPIKE-012]
+relates_to: [ADR-0003, ADR-0014, ADR-0042, HOT-022, SPIKE-002, SPIKE-012]
 accounting_shaped: false
 supersedes:
 superseded_by:
@@ -58,9 +58,16 @@ forward booking book.
   contributes nothing there, and the interval engine's exactness rule continues to hold. Anyone
   reading "reservations are in the ledger" must not conclude the ledger prevents double-booking a
   future date — it does not.
-- **The two-phase timeout is the compensation mechanism SPIKE-002 already needs.** An orphaned
-  pending transfer expires on its own, which is the recovery path for a crash between the
-  TigerBeetle pending and the MongoDB write.
+- ⚠️ **AMENDED 2026-08-22 (HOT-022, ADR-0042). This bullet read: _"The two-phase timeout is the
+  compensation mechanism SPIKE-002 already needs. An orphaned pending transfer expires on its own,
+  which is the recovery path for a crash between the TigerBeetle pending and the MongoDB write."_ It
+  is REFUTED.** TigerBeetle's expiry is blind — it cannot read MongoDB — and
+  `formal/two-store-commit.qnt`'s `naive_sweeper` has been failing on exactly that mechanism since
+  2026-08-09. The `expiring_timeout` module proves it directly: `reserve → writeDoc → expire`
+  strands a durable document behind a transfer that can never be posted, **in three steps with no
+  crash involved.** ⇒ **`Transfer.timeout` is ZERO** and the compensation mechanism is an
+  application sweeper that reads both stores, enumerating an intent record written before the
+  reserve (ADR-0042). **The orphan bound becomes an SLO we own rather than a database setting.**
 - **Where the boundary sits is not yet settled** — at pick, at staging, or at some earlier
   commitment point. SPIKE-012 decides it, and the answer determines how much of order status is
   derived versus recorded.

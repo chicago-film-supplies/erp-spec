@@ -1178,7 +1178,37 @@ hotspots:
       `code:2026-08-22:.claude/docs/tigerbeetle.txt` — "Expire Pending Transfer" and "a pending
       transfer can only be posted or voided once". · `adr/ADR-0015-reservations-as-pending-transfers.md:61`.
     blocks: [ADR-0015, SPIKE-002]
-    status: open
+    status: resolved
+    resolved_by: ADR-0042
+    measured: >-
+      **RULED BY THE OWNER 2026-08-22: `timeout = 0`, the sweeper is the sole resolver.** Recorded as
+      ADR-0042 (`proposed`), and ADR-0015's compensation bullet is AMENDED rather than superseded —
+      it is `proposed`, and only that one bullet was wrong; the two-phase mapping, the
+      operational-window scoping and the interval-math argument all stand.
+      ⭐ **THE RULING IMMEDIATELY EXPOSED A SECOND UNREPRESENTABLE CASE, and it is the bigger one.**
+      With TigerBeetle's expiry refused, the sweeper is the only resolver — so the question
+      `two_store_commit` never asks becomes the whole problem: **how does the sweeper FIND an
+      orphan?** The model lets recovery fire out of nowhere, so nothing could show discovery
+      failing.
+      ⚠️ **It cannot come from TigerBeetle.** `QueryFilter` carries **no predicate for
+      `flags.pending` and none for `pending_id`** — measured against the client's own
+      `bindings.d.ts` — so "list unresolved pending transfers" is not a question the ledger can
+      answer. `ledger/tigerbeetle-accounts.yaml` owns the query surface and already records what IS
+      filterable; this is the consequence, not a restatement.
+      ⚠️ **And MongoDB cannot help in the window that matters**, because the protocol writes the
+      document AFTER the reserve. A fourth module, `undiscoverable_orphan`, fails in **two steps** —
+      `reserve → crash` — leaving a pending transfer holding stock that neither store can find.
+      ✅ **Fixed and verified**: a fifth module, `intent_first`, writes an intent record BEFORE the
+      reserve and clears it only once the transfer settles. It holds under simulation and Apalache,
+      and is a **minimal pair** against `undiscoverable_orphan` — same invariant, and the only
+      difference is the write ordering.
+      ⇒ **Both defects were UNREPRESENTABLE before they were refuted**, which is why all five
+      modules stay in the file permanently: two must keep holding, three must keep failing. **A
+      model that cannot express a failure reports no violation, and that is indistinguishable from
+      one that ruled the case out.**
+      ⚠️ **The trade is now explicit and is ours to meet.** TigerBeetle offered to bound the orphan
+      and we refused because its offer is unsafe, so `T_resolve` and its orphan-age metric are not
+      extras — they stand in for the mechanism we declined.
     resolution_shape: >-
       **ADR-0015 is `proposed`, so it may be amended freely** (ADR-0034). The contradiction is
       recorded rather than silently resolved because **the two readings are different designs, not

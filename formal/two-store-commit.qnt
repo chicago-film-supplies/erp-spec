@@ -236,3 +236,126 @@ module expiring_timeout {
   val noUnbackedDoc = (settled and mongo == MongoWritten) implies (tb == TbPosted)
   val inv = noUnbackedDoc
 }
+
+/// The THIRD companion, added 2026-08-22 once HOT-022 ruled `timeout = 0`.
+///
+/// With TigerBeetle's expiry refused, the application sweeper is the ONLY resolver — so
+/// the question the other modules never ask becomes load-bearing: **how does the sweeper
+/// FIND an orphan?** `two_store_commit` lets `recoverVoid` / `recoverPost` fire out of
+/// nowhere. Nothing models discovery, so nothing can show it failing.
+///
+/// It cannot come from TigerBeetle. `QueryFilter` is equality-only on `user_data_128`,
+/// `user_data_64`, `user_data_32`, `ledger` and `code`, plus a timestamp range
+/// (`ledger/tigerbeetle-accounts.yaml` owns that surface) — **there is no predicate for
+/// `flags.pending` and none for `pending_id`**, so "list unresolved pending transfers"
+/// is not a query TigerBeetle can answer.
+///
+/// So discovery needs a trace in a store we control. `discoverable` says one exists.
+/// This module keeps the protocol's own ordering — reserve, THEN write — and its
+/// invariant must FAIL: crash in that window and the pending transfer is invisible to
+/// both stores at once.
+module undiscoverable_orphan {
+  type TbState = TbNone | TbPending | TbPosted | TbVoided
+  type MongoState = MongoAbsent | MongoWritten
+
+  var tb: TbState
+  var mongo: MongoState
+  var dead: bool
+
+  /// The sweeper can act only on something it can find. With no intent record, the only
+  /// trace of an in-flight operation is the document — which is written AFTER the reserve.
+  val discoverable: bool = mongo == MongoWritten
+
+  action init = all { tb' = TbNone, mongo' = MongoAbsent, dead' = false }
+  action reserve = all {
+    not(dead), tb == TbNone,
+    tb' = TbPending, mongo' = mongo, dead' = dead,
+  }
+  action writeDoc = all {
+    not(dead), tb == TbPending, mongo == MongoAbsent,
+    mongo' = MongoWritten, tb' = tb, dead' = dead,
+  }
+  action post = all {
+    not(dead), tb == TbPending, mongo == MongoWritten,
+    tb' = TbPosted, mongo' = mongo, dead' = dead,
+  }
+  action crash = all { not(dead), dead' = true, tb' = tb, mongo' = mongo }
+
+  action step = any { reserve, writeDoc, post, crash }
+
+  /// A pending transfer whose writer is dead must be findable by something. Fair by
+  /// construction: while the writer lives it holds the operation in memory, so the
+  /// obligation is guarded on `dead`.
+  val noUndiscoverableOrphan = (tb == TbPending and dead) implies discoverable
+  val inv = noUndiscoverableOrphan
+}
+
+/// The fix, and the protocol SPIKE-002 recommends under HOT-022's ruling: write an
+/// INTENT record before reserving, clear it once the transfer settles. The intent is
+/// what the sweeper enumerates; TigerBeetle is never asked a question it cannot answer.
+///
+/// Its invariant must HOLD — it is the same property `undiscoverable_orphan` violates,
+/// so the pair is a minimal one and the difference is exactly the write ordering.
+module intent_first {
+  type TbState = TbNone | TbPending | TbPosted | TbVoided
+  type MongoState = MongoAbsent | MongoWritten
+
+  var tb: TbState
+  var mongo: MongoState
+  var dead: bool
+  /// The in-flight record, written FIRST and cleared last.
+  var intent: bool
+
+  val discoverable: bool = intent or mongo == MongoWritten
+
+  action init = all { tb' = TbNone, mongo' = MongoAbsent, dead' = false, intent' = false }
+
+  /// 0. Record the intent. Nothing has touched the ledger yet, so a crash here is inert.
+  action writeIntent = all {
+    not(dead), tb == TbNone, not(intent),
+    intent' = true, tb' = tb, mongo' = mongo, dead' = dead,
+  }
+  /// 1. Reserve — now guarded on the intent existing, which is the whole change.
+  action reserve = all {
+    not(dead), tb == TbNone, intent,
+    tb' = TbPending, mongo' = mongo, dead' = dead, intent' = intent,
+  }
+  action writeDoc = all {
+    not(dead), tb == TbPending, mongo == MongoAbsent,
+    mongo' = MongoWritten, tb' = tb, dead' = dead, intent' = intent,
+  }
+  action post = all {
+    not(dead), tb == TbPending, mongo == MongoWritten,
+    tb' = TbPosted, mongo' = mongo, dead' = dead, intent' = intent,
+  }
+  action voidTransfer = all {
+    not(dead), tb == TbPending, mongo == MongoAbsent,
+    tb' = TbVoided, mongo' = mongo, dead' = dead, intent' = intent,
+  }
+  /// The sweeper resolves a discovered orphan by READING MONGO, exactly as the protocol
+  /// module specifies. Discovery is now possible because the intent exists.
+  action recoverVoid = all {
+    tb == TbPending, mongo == MongoAbsent, intent,
+    tb' = TbVoided, mongo' = mongo, dead' = dead, intent' = intent,
+  }
+  action recoverPost = all {
+    tb == TbPending, mongo == MongoWritten, intent,
+    tb' = TbPosted, mongo' = mongo, dead' = dead, intent' = intent,
+  }
+  /// 4. Clear the intent — legal ONLY once the transfer has settled. Clearing it while
+  /// pending would recreate the undiscoverable orphan this module exists to prevent.
+  action clearIntent = all {
+    intent, tb == TbPosted or tb == TbVoided,
+    intent' = false, tb' = tb, mongo' = mongo, dead' = dead,
+  }
+  action crash = all { not(dead), dead' = true, tb' = tb, mongo' = mongo, intent' = intent }
+  action retry = all { dead, dead' = false, tb' = tb, mongo' = mongo, intent' = intent }
+
+  action step = any {
+    writeIntent, reserve, writeDoc, post, voidTransfer, recoverVoid, recoverPost,
+    clearIntent, crash, retry,
+  }
+
+  val noUndiscoverableOrphan = (tb == TbPending and dead) implies discoverable
+  val inv = noUndiscoverableOrphan
+}

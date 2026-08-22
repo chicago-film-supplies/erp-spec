@@ -28,13 +28,15 @@ it. A single-module spec would have reported "no violation found" and been belie
 Both **simulated** (randomised, 20,000 traces × 20 steps) and **verified** (Apalache symbolic
 bounded model checking, default 10 steps, Java 21).
 
-| Module                 | Expected | Apalache                            | Re-run               | Simulation            | Re-run                |
-| ---------------------- | -------- | ----------------------------------- | -------------------- | --------------------- | --------------------- |
-| `two_store_commit`     | hold     | `NoError` (8,883 ms)                | `NoError` (5,195 ms) | no violation          | no violation (324 ms) |
-| `naive_sweeper`        | **fail** | `Error` — counterexample (5,011 ms) | `Error` (3,895 ms)   | violation at 4 states | violation (18 ms)     |
-| `expiring_timeout`     | **fail** | `Error` — counterexample (5,296 ms) | —                    | violation at 3 states | —                     |
-| `period_close`         | hold     | `NoError` (19,508 ms)               | `NoError` (3,816 ms) | no violation          | no violation (72 ms)  |
-| `validate_then_commit` | **fail** | `Error` — counterexample (4,174 ms) | `Error` (3,707 ms)   | violation             | violation (19 ms)     |
+| Module                  | Expected | Apalache                            | Re-run               | Simulation            | Re-run                |
+| ----------------------- | -------- | ----------------------------------- | -------------------- | --------------------- | --------------------- |
+| `two_store_commit`      | hold     | `NoError` (8,883 ms)                | `NoError` (5,195 ms) | no violation          | no violation (324 ms) |
+| `naive_sweeper`         | **fail** | `Error` — counterexample (5,011 ms) | `Error` (3,895 ms)   | violation at 4 states | violation (18 ms)     |
+| `expiring_timeout`      | **fail** | `Error` — counterexample (5,296 ms) | —                    | violation at 3 states | —                     |
+| `undiscoverable_orphan` | **fail** | `Error` — counterexample (4,187 ms) | —                    | violation at 2 states | —                     |
+| `intent_first`          | hold     | `NoError` (6,396 ms)                | —                    | no violation (340 ms) | —                     |
+| `period_close`          | hold     | `NoError` (19,508 ms)               | `NoError` (3,816 ms) | no violation          | no violation (72 ms)  |
+| `validate_then_commit`  | **fail** | `Error` — counterexample (4,174 ms) | `Error` (3,707 ms)   | violation             | violation (19 ms)     |
 
 **All eight of the original runs reproduced their recorded outcome**, and were reproduced a third
 time on 2026-08-22 (quint 0.32.0) when `expiring_timeout` was added. The re-run exists because a
@@ -68,6 +70,17 @@ more steps than the bound is not found. Raising `--max-steps` is the lever.
   — **it was unrepresentable**, and a model that cannot express a failure reports no violation.
   **That is indistinguishable from a model that ruled it out.** The protocol module silently assumes
   `timeout = 0` and never says so; `ADR-0015` assumes the opposite. HOT-022 holds the choice.
+- ⭐ **`undiscoverable_orphan` / `intent_first`** (added 2026-08-22, ADR-0042) — **a minimal pair,
+  and the difference is the write ordering.** Once HOT-022 ruled `timeout = 0`, the sweeper became
+  the only resolver, which made a question the other modules never ask into the whole problem: **how
+  does the sweeper FIND an orphan?** `two_store_commit` lets recovery fire out of nowhere — nothing
+  modelled discovery, so nothing could show it failing. It cannot come from TigerBeetle:
+  `QueryFilter` carries **no predicate for `flags.pending` and none for `pending_id`**
+  (`ledger/tigerbeetle-accounts.yaml` owns the query surface). And under the protocol's own ordering
+  it cannot come from MongoDB either, because the document is written **after** the reserve. ⇒
+  `undiscoverable_orphan` fails in **two steps** — `reserve → crash` — a pending transfer holding
+  stock that neither store can find. `intent_first` writes an intent record **before** the reserve
+  and clears it only once the transfer settles; it holds both ways.
 - **`validate_then_commit`** — `validate(period 0) → close(0) → commit`. Checking the period only at
   validation time lands a posting in a period closed underneath it. Time-of-check/time-of-use. The
   fix is a re-check at commit, and `refuse` exists so a posting whose period closed is refused
@@ -89,9 +102,15 @@ npx @informalsystems/quint verify formal/period-close.qnt \
   --main=period_close --invariant=inv
 ```
 
-Swap `--main` for a companion module (`naive_sweeper`, `expiring_timeout`, `validate_then_commit`)
-and the run must report a violation. **If a companion ever passes, the spec is broken — not the
-protocol.**
+Swap `--main` for a companion module (`naive_sweeper`, `expiring_timeout`, `undiscoverable_orphan`,
+`validate_then_commit`) and the run must report a violation. `two_store_commit`, `intent_first` and
+`period_close` must hold.
+
+⚠️ **Two of the three failing companions describe defects that were UNREPRESENTABLE before they were
+written** — `two_store_commit` has no expired state and no notion of discovery, so it reported no
+violation on both. **A model that cannot express a failure is indistinguishable from one that ruled
+it out.** That is why the companions are kept rather than deleted once understood. **If a companion
+ever passes, the spec is broken — not the protocol.**
 
 `verify` writes counterexample traces to `_apalache-out/` (gitignored), including ITF JSON.
 

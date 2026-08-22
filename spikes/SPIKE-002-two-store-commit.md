@@ -13,16 +13,9 @@ exit_criteria:
   - "Quint model checks clean for the three failure questions: can a pending transfer be orphaned; can a Mongo doc exist with no posted transfer; can a retry double-post."
   - A crash-injection harness reproduces each interleaving and the recovery path restores consistency.
   - Orphan detection and resolution is specified, including its time bound.
-closes_adr: new
+closes_adr: ADR-0042
 status: in_progress
 ---
-
-## Notes
-
-This is the load-bearing consequence of ADR-0003. If the protocol cannot be made safe, the two-store
-split is wrong and ADR-0003 needs superseding rather than patching.
-
-If SPIKE-001 forces a Go sidecar, the extra network hop belongs in this model.
 
 ## Partial result — 2026-08-22. Criterion 1 MET; a new failure mode found on the way
 
@@ -43,7 +36,7 @@ recorded counterexample.
 repeated is a claim, not a measurement — and the re-run is what put the model in front of someone
 long enough to find what follows.
 
-### ⭐ THE FINDING: the model could not express TigerBeetle's own timeout
+### ⭐ FINDING 1: the model could not express TigerBeetle's own timeout
 
 `two_store_commit`'s `TbState` is `TbNone | TbPending | TbPosted | TbVoided`. **There is no expired
 state.** But TigerBeetle expires a pending transfer _itself_ once `Transfer.timeout` elapses:
@@ -81,7 +74,7 @@ opposite — _"the two-phase timeout is the compensation mechanism SPIKE-002 alr
 unsafe.** The two are different designs, not different wordings. Recorded as **HOT-022** rather than
 picked, per rule 5.
 
-### Criterion 3 — the shape is now clear, and the choice is the owner's
+### Criterion 3 — ✅ MET. Ruled 2026-08-22, and the ruling found a second defect
 
 "Orphan detection and resolution is specified, **including its time bound**" is not documentation:
 **the time bound decides which of two mutually exclusive designs is in force.**
@@ -92,12 +85,37 @@ picked, per rule 5.
 | **`timeout > 0`**          | TigerBeetle, as a backstop behind the sweeper                    | Needs the timeout to exceed worst-case sweeper latency by a stated margin **and** an answer for when the backstop fires — because that state is the proven-unsafe one. ⚠️ **A backstop that is unsafe when it fires is not a backstop**        |
 | **compensatable document** | recovery retracts the document when it finds an expired transfer | Makes expiry survivable. ⚠️ An order document a user has already seen can vanish — a product decision, not a protocol one                                                                                                                      |
 
-**Recommendation: `timeout = 0`.** It is the only one of the three already verified, it keeps
-resolution in the process that can read both stores, and it converts the open question from "is the
-protocol safe" into "what is the sweeper's SLO" — which is an operational number someone can own. ⚠️
-**Whichever is chosen, the model keeps the expired state permanently.** The defect was an
-unrepresentable question, and re-representing it is what stops the next reader over-reading a green
-run.
+✅ **OWNER RULED `timeout = 0`, 2026-08-22 → `ADR-0042`.** ADR-0015's compensation bullet is amended
+rather than superseded; only that bullet was wrong.
+
+⭐ **The ruling immediately exposed a second unrepresentable case, and it is the bigger one.** With
+expiry refused the sweeper is the only resolver, so the question `two_store_commit` never asks
+becomes the whole problem: **how does the sweeper FIND an orphan?** Recovery fires out of nowhere in
+the model — nothing modelled discovery, so nothing could show it failing.
+
+- ⚠️ **Not from TigerBeetle.** `QueryFilter` carries **no predicate for `flags.pending` and none for
+  `pending_id`** (measured against `bindings.d.ts`), so "list unresolved pending transfers" is not a
+  question the ledger can answer. `ledger/tigerbeetle-accounts.yaml` owns the query surface; this is
+  its consequence, not a restatement of it.
+- ⚠️ **Not from MongoDB either, in the window that matters** — the document is written _after_ the
+  reserve. **`undiscoverable_orphan` fails in two steps**: `reserve → crash` leaves a pending
+  transfer holding stock that neither store can find.
+- ✅ **`intent_first` fixes it and holds** under simulation and Apalache: write an intent record
+  before the reserve, clear it only once the transfer settles. **A minimal pair against
+  `undiscoverable_orphan`** — same invariant, difference is the write ordering. ⭐ The intent may be
+  the MongoDB document itself in a pre-committed state; the model is abstract over where it lives
+  and does **not** demand a third store.
+
+**The time bound criterion 3 asks for is two numbers** (ADR-0042/D4): `T_claim`, the age at which
+the sweeper may claim an intent, which must exceed the writer's worst-case completion; and
+`T_resolve`, the SLO for how long an orphan may hold stock, with an orphan-age metric behind it. ⚠️
+**The numbers are deliberately not set** — they depend on measured writer latency, and a number
+invented before that measurement is a guess wearing a decision's clothes.
+
+⚠️ **All five modules stay permanently**: `two_store_commit` and `intent_first` must keep holding;
+`naive_sweeper`, `expiring_timeout` and `undiscoverable_orphan` must keep failing. **Both defects
+were unrepresentable before they were refuted**, and keeping the states is what stops the next
+reader over-reading a green run.
 
 ### ⛔ Criterion 2 — not started, and it needs infrastructure
 
@@ -110,6 +128,18 @@ TigerBeetle is proven under Deno by SPIKE-001 with `spikes/harness/tb-probe.ts`.
 shows the failure is a timing race, and a timing race is exactly the class a crash-injection harness
 measures and a model can only assume. **The harness should now include a slow-writer case, not only
 kill-at-each-step.**
+
+### Where the spike stands
+
+| criterion                                                          | state                                                     |
+| ------------------------------------------------------------------ | --------------------------------------------------------- |
+| 1 — Quint model checks clean on the three failure questions        | ✅ **MET**, re-verified 2026-08-22                        |
+| 2 — crash-injection harness                                        | ⛔ **NOT STARTED** — needs a local `mongod` (erp-spec#47) |
+| 3 — orphan detection and resolution specified, with its time bound | ✅ **MET** → ADR-0042                                     |
+
+⇒ **`in_progress`, not closable, and criterion 2 is now the one that matters most** — both findings
+above are about timing and discovery, which is exactly the class a model must assume and a harness
+can measure.
 
 ## Notes
 

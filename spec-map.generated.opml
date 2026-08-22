@@ -200,7 +200,7 @@
           <outline text="blocks HOT-017"/>
         </outline>
       </outline>
-      <outline text="Conflicts (2 open)">
+      <outline text="Conflicts (1 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labor) or an own long-haul run (labor-bearing)? T…" _note="Decides whether a trucked fulfillment absorbs labor cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
           <outline text="blocks OQ-010"/>
           <outline text="blocks ADR-0011"/>
@@ -273,7 +273,7 @@
           <outline text="blocks SPIKE-002"/>
         </outline>
       </outline>
-      <outline text="Decisions (25 in force, 12 proposed)">
+      <outline text="Decisions (25 in force, 13 proposed)">
         <outline text="In force (25)">
           <outline text="ADR-0001 — Replace Xero with an in-house ledger" _note="**In the context of** owning the order-to-invoice path but renting the ledger, **facing** a tracking-dimension defect that Xero silently absorbs and a costing model Xero cannot express, **we decided** to build the general ledger in-house, **to achieve** dimensional postings that cannot be null and a labour-absorption model we control, **accepting** that a large amount of unglamorous accounting surface area becomes ours to build and keep correct."/>
           <outline text="ADR-0002 — Bank feed sourced from Plaid, single Chase account" _note="**In the context of** needing bank transactions now that Xero's feed goes away, **facing** one bank and one account, **we decided** to source the feed from Plaid, **to achieve** a working feed without a bank-specific integration, **accepting** that Plaid's transaction model is a consumer-fintech model, not an accounting bank feed."/>
@@ -301,8 +301,9 @@
           <outline text="ADR-0037 — An id carries meaning where it is used — a headline on every id, and addressable claims inside a decision" _note="**In the context of** a spec whose authority is prose, **facing** a measured 22:1 mismatch between what is cited (a document) and what is claimed (about twenty statements inside it), **we decided** that an ADR additionally asserts individually addressable claims, typed as decision or premise, **to achieve** corrections that can be swept and premises that can go stale without touching a frozen decision, **accepting** a second surface on every ADR and a convention that only pays off as it is adopted."/>
           <outline text="ADR-0038 — Labor with no causal order is not COGS — 5801 is not created and 6600 Wages narrows instead" _note="**In the context of** but-for attribution putting a guaranteed day onto the order that caused the hire, **facing** the consequence that labor no order caused has no revenue it is applicable to, **we decided** that such labor is operating expense and stays in `6600 - Wages` rather than reaching a COGS account, **to achieve** a cost-of-revenue line that contains only costs of revenue, **accepting** that ADR-0019's `5801` is not created and that a superficially identical vehicle account deliberately does not follow."/>
         </outline>
-        <outline text="Proposed (12)">
+        <outline text="Proposed (13)">
           <outline text="ADR-0015 — Inventory reservations are TigerBeetle pending transfers, over the operational window only" _note="review by: 2026-11-01 · **In the context of** wanting order state derivable and oversell prevented in the database, **facing** a balance model with no time dimension and an availability question that is entirely about time, **we decided** to model reservations as two-phase transfers over the operational window only, **to achieve** custody oversell that is unrepresentable and a fulfillment state that is derived, **accepting** that future-dated booking conflicts stay with the interval engine.">
+            <outline text="blocked on HOT-022"/>
             <outline text="blocked on SPIKE-002"/>
             <outline text="blocked on SPIKE-012"/>
           </outline>
@@ -359,6 +360,11 @@
             <outline text="blocked on OQ-045"/>
             <outline text="blocked on OQ-050"/>
           </outline>
+          <outline text="ADR-0042 — An orphaned pending transfer is resolved only by the application sweeper, which needs an intent record written before the reserve" _note="review by: 2026-11-15 · **In the context of** a two-store commit whose pending transfer can be orphaned by a crash, **facing** a ledger that expires such transfers blindly and cannot enumerate them at all, **we decided** that the application sweeper is the sole resolver and that an intent record is written before the reserve, **to achieve** an orphan that is always findable and always resolved against both stores, **accepting** that &quot;not held in limbo indefinitely&quot; becomes our SLO to meet rather than the database's to enforce.">
+            <outline text="blocked on HOT-022"/>
+            <outline text="blocked on SPIKE-002"/>
+            <outline text="blocked on SPIKE-001"/>
+          </outline>
         </outline>
       </outline>
       <outline text="Spikes (7 open)">
@@ -367,7 +373,7 @@
           <outline text="The same code path runs under `deno test` and under `deno compile`."/>
           <outline text="If it fails, the failure mode is characterised precisely enough to size the Go sidecar."/>
         </outline>
-        <outline text="SPIKE-002 — What commit protocol keeps a MongoDB document write and a TigerBeetle posting consistent across cra…" _note="timebox: 1 week · closes: a new ADR · in_progress">
+        <outline text="SPIKE-002 — What commit protocol keeps a MongoDB document write and a TigerBeetle posting consistent across cra…" _note="timebox: 1 week · closes: ADR-0042 · in_progress">
           <outline text="Quint model checks clean for the three failure questions: can a pending transfer be orphaned; can a Mongo doc exist with no posted transfer; can a retry double-post."/>
           <outline text="A crash-injection harness reproduces each interleaving and the recovery path restores consistency."/>
           <outline text="Orphan detection and resolution is specified, including its time bound."/>

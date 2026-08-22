@@ -12,8 +12,8 @@ is `deno task validate`'s judgement, not this file's.
 | | Count | |
 |---|---:|---|
 | Open questions | 13 open | 40 answered of 53 · **0 with no owner or no decide-by** |
-| Conflicts (HOT) | 22 | 2 open |
-| Decisions (ADR) | 41 | 25 in force · 12 proposed |
+| Conflicts (HOT) | 22 | 1 open |
+| Decisions (ADR) | 42 | 25 in force · 13 proposed |
 | Spikes | 12 | 7 open |
 | Requirements | 21 | 0 without a scenario |
 | Inbox | 101 | 81 unpromoted |
@@ -47,7 +47,6 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | HOT | Statement | Blocks |
 |---|---|---|
 | `HOT-017` | `charter.md` states that a production service agreement's money moves through `2800 - PSA Liability Clearing`… | — |
-| `HOT-022` | `adr/ADR-0015:61` — `proposed` — says _"**The two-phase timeout is the compensation mechanism SPIKE-002 alrea… | `ADR-0015` `SPIKE-002` |
 
 ## Decisions
 
@@ -79,7 +78,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 - `ADR-0037` — An id carries meaning where it is used — a headline on every id, and addressable claims inside a decision
 - `ADR-0038` — Labor with no causal order is not COGS — 5801 is not created and 6600 Wages narrows instead
 
-### Proposed (12)
+### Proposed (13)
 
 | ADR | Title | Review by | Supersedes on acceptance | Blocked on |
 |---|---|---|---|---|
@@ -95,13 +94,14 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | `ADR-0039` | Historical ledger entries load as ordinary postings with cluster-assigned timestamps; the TigerBeetle `imported` flag is refused | 2026-11-15 | — | — |
 | `ADR-0040` | The Zod schema is the sole authority and the MongoDB validator is generated from it one-way, with every rule the validator cannot carry named in a registry CI walks | 2026-11-15 | — | — |
 | `ADR-0041` | The labor rate variance posts as its own fact keyed to causal orders, and the plan burden rate is re-derived from each observed run | 2026-11-01 | — | `OQ-045` |
+| `ADR-0042` | An orphaned pending transfer is resolved only by the application sweeper, which needs an intent record written before the reserve | 2026-11-15 | — | `SPIKE-002` |
 
 ## Spikes
 
 | Spike | Question | Timebox | Closes | Status |
 |---|---|---|---|---|
 | `SPIKE-001` | Does the TigerBeetle client load and run under Deno via node-api compatibility? | 2 days | `ADR-0023` | closed |
-| `SPIKE-002` | What commit protocol keeps a MongoDB document write and a TigerBeetle posting c… | 1 week | _new ADR_ | in_progress |
+| `SPIKE-002` | What commit protocol keeps a MongoDB document write and a TigerBeetle posting c… | 1 week | `ADR-0042` | in_progress |
 | `SPIKE-003` | How does TigerBeetle's timestamp behave when loading history, and what are the… | 3 days | `ADR-0039` | closed |
 | `SPIKE-004` | What does Plaid actually provide, and what does bank reconciliation actually ne… | 3 days | _new ADR_ | open |
 | `SPIKE-005` | Hand-roll the depreciation engine, or adopt a library? | 1 week | _new ADR_ | open |
@@ -135,7 +135,7 @@ it is counted separately on purpose, and a milestone is not done because its che
 | Milestone | Criterion | Check | Measured |
 |---|---|---|---|
 | `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 12 spikes, 7 open, 0 closed without naming an ADR |
-| `m4` | Every HOT- is resolved or has an ADR that consciously defers it with… | `hotspots_resolved` | 22 hotspots, 2 unresolved |
+| `m4` | Every HOT- is resolved or has an ADR that consciously defers it with… | `hotspots_resolved` | 22 hotspots, 1 unresolved |
 
 ## Coverage gaps
 
