@@ -7,7 +7,18 @@ date: 2026-08-09
 review_by: 2026-10-01
 deciders: [repo owner]
 contexts: [ledger, billing, fulfillment]
-relates_to: [ADR-0014, ADR-0017, ADR-0018, ADR-0019, ADR-0025, OQ-006, OQ-018]
+relates_to: [
+  ADR-0014,
+  ADR-0017,
+  ADR-0018,
+  ADR-0019,
+  ADR-0025,
+  ADR-0031,
+  ADR-0036,
+  HOT-021,
+  OQ-006,
+  OQ-018,
+]
 accounting_shaped: true
 survey:
   - inbox/2026-08-20-survey-nobody-keeps-allocations-out-of-the-ledger-they-keep-them-out-of-the-statements.md
@@ -25,10 +36,18 @@ superseded_by:
 
 ## Context
 
-- **Allocation is destructive; grouping is not.** An un-allocated posting that carries its causal
-  order can be allocated downstream by any basis a question needs. An allocated posting cannot be
-  un-allocated — the fact that the cost was _delivery_ is gone from the ledger, and only the source
-  documents remember.
+- **An un-allocated posting that carries its causal order can be allocated downstream by any basis a
+  question needs.** The reverse is not free: recovering the original grain from an allocated posting
+  requires that the implementation deliberately preserved it. ⚠️ **This bullet read "Allocation is
+  destructive; grouping is not" until 2026-08-22, and the rule 8a survey this ADR cites refutes that
+  as stated** (HOT-021). **SAP `distribution` keeps the grain while posting; `overhead allocation`
+  destroys it — and SAP forces the choice per cycle.** NetSuite's credit-account mode and Sage
+  Intacct's segregated book each keep both grains while posting. ⇒ **Destructiveness is a property
+  of the primitive chosen, not of allocation.** The claim was too strong, and the decision never
+  needed it — see the Decision's stated reason below.
+- ⚠️ **Three of five surveyed systems post allocations, two have no allocation engine at all, and
+  NONE derives at report time.** By the default alone this decision departs from every reference
+  that has the feature, which is a claim that needs an argument rather than an assumption.
 - The repo has already landed on this principle three times without naming it. **ADR-0014** derives
   lifecycle rather than assigning it. **ADR-0017** makes TigerBeetle balance-integrity and reporting
   a projection. **ADR-0018** keeps the chart plain expressly so it does not explode into reporting
@@ -80,6 +99,31 @@ Both views are legitimate and they answer different questions:
 | --------------------------------------------- | -------------------------------- | ---------------------------------------------------- |
 | **Un-allocated** (the ledger's own grouping)  | postings as posted               | what did delivery cost us; what did we charge for it |
 | **Allocated** (the official product-line P&L) | postings + the stated allocation | what does a product line really earn, delivered      |
+
+## Considered options
+
+⚠️ **This section did not exist until 2026-08-22.** The survey's sharpest finding was not that the
+ADR chose wrongly but that **it never considered the family every reference actually implements**
+(HOT-021).
+
+- **Post the allocation to the general ledger, destroying the original grain.** Rejected, and this
+  is the only option the ADR originally argued against. SAP's `overhead allocation` is this, and SAP
+  itself treats it as the heavier end of a six-rung permanence ladder.
+- ⭐ **Post the allocation to the ledger while PRESERVING the original grain — keep it out of the
+  STATEMENTS rather than out of the LEDGER.** _The option nobody here had considered, and the one
+  they all implement._ Three shapes: SAP's `S Secondary Costs` account type, Sage Intacct's
+  mandatory user-defined allocation book, NetSuite's contra credit account. **Rejected, but on a
+  narrow and stateable ground rather than by omission**: each gives the allocated number a document
+  number, and _a number whose correctness depends on a basis `ADR-0031` itself calls the weakest
+  defensible tier should not be given one._ That is SAP's own second criterion for choosing a
+  primitive, and it is the argument this decision actually rests on.
+- **Derive the allocation at report time, posting nothing** (chosen). ✅ **It has a production
+  precedent that had not been cited**: Deltek Vision — _"Overhead allocation does not impact the
+  general ledger… they are not posted to the database"_ — with **year-to-date recomputation**, which
+  is the same idempotence property as `sealed_at_close: false`. ⚠️ **The known cost is real and
+  documented**: reporting-layer allocations rot. A posted allocation is maintained because the close
+  cannot finish without it, and nothing yet makes the official product-line P&L a thing that must
+  keep working.
 
 ## Consequences
 
@@ -137,3 +181,18 @@ Both views are legitimate and they answer different questions:
 - **This governs the questions not yet asked.** Vehicle COGS, trip travel cost, warehouse overhead
   and any future shared cost are all the same shape, and the answer is now stated once instead of
   re-argued each time.
+
+- ⚠️ **ASC 280's hook is a BILL, and one line of it is unpaid.** 280-10-50-27 never mentions posting
+  — the test is membership of the measure the chief operating decision maker actually uses, which
+  runs both ways and treats the ledger as an input rather than the authority. But 50-29(b) requires
+  the allocation policy disclosed, (d) requires method changes and **their effect** quantified, (e)
+  requires **asymmetrical allocations** disclosed, and **50-30 requires reconciliation to the
+  consolidated totals.** `ADR-0031`'s `basis_version` and `sealed_at_close: false` satisfy the first
+  three by construction. ⚠️ **The reconciliation is stated nowhere in the reporting spec** — and it
+  is the obligation that makes the un-allocated view load-bearing rather than merely available,
+  because it is what forces the derived statement to tie back to the book. ASC 280 exempts nonpublic
+  entities (280-10-15-2 "encourages" rather than requires), so this is a criterion for CFS and not a
+  requirement — but it is the criterion this whole decision is measured against.
+- ✅ **"Recast", not "restate", is the word for a change in allocation method** — ASU 2023-07 chose
+  it deliberately, because Topic 250 reserves "restatement" for correcting an error. `ADR-0020`
+  carries the same correction.

@@ -882,11 +882,17 @@ hotspots:
       ⚠️ **The 2026-08-20 rule 8a survey found the rule is defensible but pointed at the wrong
       field.** The criterion running through all five ERPs is not "was this classified" but "can the
       book still be tied out if this is missing" — which endorses ADR-0036's derive-at-report-time
-      for `product_line`, and endorses moving the declare-or-be-rejected obligation to
-      **`causal_orders`**, a key that must tie out and that ADR-0029 already requires on every
-      posting. `ledger/posting-rules.yaml` already carries ~15 `causal_orders: null` declarations
-      with golden vectors on both arms, so the mechanism is exercised where the criterion says it
-      belongs.
+      for `product_line`, and endorses the declare-or-be-rejected obligation sitting on
+      **`causal_orders`**, a key that must tie out.
+      ⚠️ **CORRECTED 2026-08-22 — this hotspot and the survey both named the wrong owner.** Both
+      said ADR-0029 "already requires" `causal_orders` on every posting. **ADR-0029's body does not
+      contain the string.** The owners are **ADR-0036** (accepted 2026-08-16, absorbing HOT-014 —
+      "That requirement is now this ADR's decision") and **REQ-LED-001**, restated the same day. It
+      executes: 24 `causal_orders` declarations in `ledger/posting-rules.yaml` with golden vectors
+      on all three arms. ⇒ **There is nothing to "move" — the obligation is already in force, and
+      what the survey delivers is CONFIRMATION of an existing rule rather than a proposal.** Full
+      note:
+      `inbox/2026-08-22-correction-the-causal-orders-obligation-is-adr-0036s-decision-not-adr-0029s-and-two-artifacts-carried-the-wrong-owner.md`.
     evidence: >-
       `inbox/2026-08-20-superseding-adr-0018-invalidated-the-foundations-of-three-proposed-adrs-and-nothing-detected-it.md`
       — the supersession chain and the population, measured. ·
@@ -895,7 +901,33 @@ hotspots:
       declare "not applicable"**; every escape hatch sits on the account or the scope. ·
       `code:2026-08-20:erp-spec@91be529:tools/validate.ts` — the gate that refuses the key.
     blocks: [ADR-0025]
-    status: open
+    status: resolved
+    resolved_by: ADR-0025
+    measured: >-
+      **Resolved 2026-08-22 by narrowing ADR-0025 to its one surviving clause** (owner's choice of
+      the three routes; `proposed`, so amendable freely under ADR-0034). The refused per-account
+      `dimensions:` list is gone, so nothing in the ADR turns CI red.
+      ⭐ **THE FINDING: with the misattribution corrected, three of ADR-0025's four decision clauses
+      turned out to be dead or already-enacted, and the fourth had been invisible.** The per-account
+      list is refused by a gate; `Other`'s deletion was enacted by OQ-022; the declare-or-be-rejected
+      rule is ADR-0036's and already executes. **What remains is the `4800 - Other Income` vs
+      operating-revenue account boundary — alive, undecided, decided in no other ADR, and already
+      leaned on in five places in `ledger/chart-of-accounts.yaml`.** The route this hotspot
+      originally recommended ("move the obligation to `causal_orders`") would have had a `proposed`
+      ADR re-decide an `accepted` one and left the 4800 boundary unhoused.
+      ⇒ **The ADR is retitled to what it actually decides** and `resolution_shape`'s third route —
+      withdraw in favour of a new narrow ADR — was refused on measured cost: **five IMMUTABLE ADRs
+      cite ADR-0025** (0029, 0031, 0034, 0035, 0038) and can never be updated, so withdrawal would
+      leave five permanent citations pointing at a rejected decision. **Same shape as the refused
+      `ledger/dimensions.yaml` move.**
+      ⚠️ **The survey's finding survived the narrowing, as this hotspot required**: CFS is still the
+      only surveyed system where a posting may declare "no value applies" — recorded as a
+      Consequence, on `causal_orders` where it actually lives — and **$688.00 still measures the
+      operators who DECLINED, never the ones who GUESSED.** That figure's own ownership is
+      unassigned across seven live files and is filed as deferred work.
+      ⚠️ **The gate this hotspot asked for is still owed** — a `proposed` ADR whose `relates_to`
+      names a `superseded` ADR, as a WARNING not a failure. **erp-spec#40**, still open, and today's
+      corrections do not remove the need: nothing detected any of this.
     resolution_shape: >-
       **ADR-0025 is `proposed`, so it may be amended freely** — immutability bites only at
       `accepted` (ADR-0034), and ADR-0032 is the precedent for substantial amendment while proposed.
@@ -935,13 +967,13 @@ hotspots:
       the house pattern: a declared null, shown on its own row.
       ⚠️ **Two figures in the ADR and its neighbours are wrong, and one is load-bearing.** The
       "~90% behind the 2025-12-31 lock" figure, which appears undated in four live places, measures
-      **80.04% of invoices** and ~**73.6–76.6% of lines**. And `charter.md`'s "unrepairable" is a
+      **80.04% of invoices** and ~**73.6–76.6% of lines** (`ADR-0020/M3`). And `charter.md`'s "unrepairable" is a
       **policy claim wearing a mechanical one** — a period lock is a setting, not a physical
       impossibility. Neither changes the direction of the decision; both change how it reads.
       ✅ **What the survey ADDS rather than removes**: the migration delta, previously called
-      unmeasurable, is **$231,796.26 — 106 lines, 15.66% of pre-lock revenue, untracked in BOTH
+      unmeasurable, is **$231,796.26 — 106 lines, 15.66% of pre-lock revenue, untracked in BOTH (`ADR-0020/M1`)
       systems**. And ADR-0020's own 13.90% is gone: lines where CFS holds a category and Xero does
-      not are **7 / $1,700.00**, none since 2024-10-07 — so **Xero's tracking-sliced P&L for closed
+      not are **7 / $1,700.00** (`ADR-0020/M4`), none since 2024-10-07 — so **Xero's tracking-sliced P&L for closed
       periods is substantially complete**, and there IS a report to diverge from, which the ADR
       assumed away.
     evidence: >-
@@ -951,7 +983,39 @@ hotspots:
       `inbox/2026-08-20-superseding-adr-0018-invalidated-the-foundations-of-three-proposed-adrs-and-nothing-detected-it.md`
       — the supersession chain. · `migration/field-map.yaml`, `items[].tracking_category`.
     blocks: [ADR-0020]
-    status: open
+    status: resolved
+    resolved_by: ADR-0020
+    measured: >-
+      **Resolved 2026-08-22 by redrafting ADR-0020, which is `proposed` and so may be amended
+      freely** (ADR-0034; ADR-0032 is the precedent). Both void halves are gone: the Y-statement no
+      longer faces "a dimension that is not nullable", and the Decision no longer operates on a
+      field the migration drops. **The new Decision is neither of the ADR's two options** — derive
+      the product line from the product master, and record an explicit null where there is nothing
+      to derive from.
+      ✅ **The load-bearing premise is DISCHARGED, not assumed.** The owner ruled 2026-08-22 that a
+      tracking category was on no externally filed document
+      (`inbox/2026-08-22-owner-a-tracking-category-was-on-no-externally-filed-document-so-the-recast-is-owed-to-nobody.md`),
+      which is what lets the six criteria collapse to two with CFS failing neither, and what makes
+      the migration delta cost nothing. It is typed as `ADR-0020/P1` so that a future falsification
+      has something to attach to.
+      ⭐ **THE FINDING THIS ONE TURNED UP: the migration spec had already decided it.**
+      `migration/field-map.yaml` sets `items[].tracking_category` to `disposition: drop` AND
+      describes the products collection as "the authority the invoice line's tracking denorm is
+      dropped in favour of". **Derive-from-the-master was encoded in three places while the ADR
+      still said "restate all".** The ADR was not proposing something the repo had declined to do —
+      **it had simply stopped tracking what the repo already did**, and nothing compares an ADR's
+      Decision against the migration spec that implements it.
+      ⚠️ **Two figures were corrected on the way, and both were quoted in more places than they were
+      sourced.** The undated "~90% behind the lock" is **80.04% of invoices** (`ADR-0020/M3`), and
+      the 13.90% CFS-ahead-of-Xero figure is replaced by **7 lines / $1,700.00** (`ADR-0020/M4`) —
+      the divergence runs the OTHER way, 151 lines / $19,350.96 (`ADR-0020/M5`, api-cloudrun#597).
+      ⚠️ **And the population figure in this hotspot's own text was stale**: `128 / $233,667.63` is
+      the 2026-08-10 measurement; re-measured 2026-08-16 it is **130 / $233,610.63**
+      (`ADR-0020/M2`). The money is flat and the denominator grew.
+      ⇒ **All five figures are now typed as `measurements:` under gate 21, and gate 22 immediately
+      found four live files quoting them without citing an owner.** That is the gate working: a
+      figure this ADR owns can no longer drift in `hotspots.yaml`, `ledger/dimensions.yaml` or
+      `reporting/product-line-pl.yaml` without CI going red.
     resolution_shape: >-
       **ADR-0020 is `proposed` and may be amended freely** (ADR-0034; ADR-0032 is the precedent for
       substantial amendment while proposed). The survey's recommendation is **neither of the ADR's
@@ -965,3 +1029,74 @@ hotspots:
       tracking category was on no externally filed document. The six references' criteria collapse
       to two — _was it published_, and _what would the write fail to reach_ — and CFS fails neither,
       **but only if that premise holds.**
+
+  - id: HOT-021
+    headline: "ADR-0029 opens on a claim its survey refutes"
+    statement: >-
+      `adr/ADR-0029` — `proposed` — opens its Context with _"**Allocation is destructive; grouping
+      is not.** … An allocated posting cannot be un-allocated — the fact that the cost was
+      _delivery_ is gone from the ledger."_ **The rule 8a survey it now cites refutes this as
+      stated.** SAP `distribution` keeps the grain while posting; `overhead allocation` destroys it;
+      SAP forces the choice per cycle. NetSuite's credit-account mode and Sage Intacct's segregated
+      book each keep both grains while posting. ⇒ **Destructiveness is a property of one
+      implementation choice, not of allocation.**
+    contexts: [ledger, billing, fulfillment]
+    why_it_matters: >-
+      ⚠️ **Same grounds as HOT-019 and HOT-020, and opened for the same reason: accepting it would
+      freeze the contradiction permanently.** A body freezes at acceptance (ADR-0034, gate 14), and
+      ADR-0029 cites a survey whose opening finding is that ADR-0029's opening claim is false.
+      **Citing evidence against yourself and then freezing is worse than either alone.**
+      ⚠️ **The DECISION is not in doubt — the ARGUMENT for it is.** The survey found three of five
+      systems post allocations, two have no engine, and **none derives at report time**, so ADR-0029
+      departs from every reference that has the feature. It survives on a better argument the ADR
+      does not currently make: **a number whose correctness depends on a basis ADR-0031 itself calls
+      the weakest defensible tier should not be given a document number.** That is SAP's own second
+      criterion. ✅ And it has a production precedent nobody had cited — **Deltek Vision**, whose
+      overhead allocation "does not impact the general ledger… they are not posted to the database",
+      with year-to-date recomputation giving it the same idempotence as `sealed_at_close: false`.
+      ⭐ **The option ADR-0029 never considers is the one they all implement: nobody keeps
+      allocations out of the LEDGER — they keep them out of the STATEMENTS.** SAP's `S Secondary
+      Costs` account type, Intacct's mandatory allocation book, NetSuite's contra credit. Three
+      implementations of one idea, and ADR-0029 has no Considered Options section at all.
+      ⚠️ **And GAAP's hook is a BILL, not a free pass.** ASC 280-10-50-27 never mentions posting —
+      the test is membership of the measure the CODM actually uses — but 50-29(b)/(d)/(e) demand the
+      policy, quantified method changes and asymmetrical allocations, and **50-30 requires
+      reconciliation to the consolidated totals.** ADR-0031's `basis_version` and
+      `sealed_at_close: false` satisfy the first three by construction. **The reconciliation is
+      stated nowhere in the reporting spec** — and it is the one that makes the un-allocated view
+      load-bearing rather than merely available. ⚠️ ASC 280 exempts nonpublic entities, so this is a
+      criterion for CFS rather than a requirement.
+    evidence: >-
+      `inbox/2026-08-20-survey-nobody-keeps-allocations-out-of-the-ledger-they-keep-them-out-of-the-statements.md`
+      — the six-reference survey. ASC 280 extracted locally with `pdftotext` from RSM's reproduction
+      of the Codification text rather than through a summarizing fetch; Xero measured against its
+      own OpenAPI contract (**139 of 139** uses of `allocat*` are settlement, not cost allocation);
+      Odoo read from source. ·
+      `adr/ADR-0029-the-ledger-records-unallocated-facts.md:28` — the refuted claim.
+    blocks: [ADR-0029]
+    status: resolved
+    resolved_by: ADR-0029
+    measured: >-
+      **Resolved 2026-08-22 by amending ADR-0029**, which is `proposed` and so may be amended freely
+      (ADR-0034). Three changes, and the decision itself is untouched: the opening claim is restated
+      as the true narrower one; a **Considered options** section is added carrying the
+      keep-it-out-of-the-statements family the ADR had never considered; and the ASC 280-10-50-30
+      reconciliation obligation is recorded as a Consequence.
+      ⚠️ **OPENED AND RESOLVED IN THE SAME SESSION, deliberately.** The last session stopped at two
+      hotspots because a third read as inflation. **The record is the point** — HOT-019 and HOT-020
+      both show that a `proposed` ADR resting on a claim known false is invisible to every gate, and
+      a third instance is what makes it a pattern rather than two anecdotes. All three trace to the
+      same cause: **ADR-0036's supersession of ADR-0018 moved the ground under three proposed ADRs
+      and nothing detected it** (erp-spec#40, still open).
+      ⚠️ **ONE PART IS NOT RESOLVED HERE AND IS NOT PRETENDED TO BE.** The ASC 280-10-50-30
+      reconciliation is recorded in ADR-0029 as an obligation, but **making the reporting spec
+      actually express it is work in `reporting/`, not a line in an ADR** — and per the survey it is
+      the requirement that makes the un-allocated view load-bearing. Filed as deferred work rather
+      than left in this hotspot's prose.
+    resolution_shape: >-
+      **ADR-0029 is `proposed` and may be amended freely.** The decision stands; what changes is the
+      argument. Restate the opening claim to the true narrower one — destructiveness is a property
+      of the primitive chosen, not of allocation — and replace it as the load-bearing reason with
+      the document-number argument (a number resting on ADR-0031's weakest defensible basis tier
+      should not get a document number), citing Deltek Vision as production precedent. Add the
+      Considered options the survey names. Record the ASC 280 reconciliation bill.

@@ -159,8 +159,8 @@ Accepted and not superseded, as of the last `deno task gen`.
 | ADR | Title | Review by | Supersedes on acceptance | Blocked on |
 |---|---|---|---|---|
 | [ADR-0015](ADR-0015-reservations-as-pending-transfers.md) | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-11-01 | — | `SPIKE-002` `SPIKE-012` |
-| [ADR-0020](ADR-0020-xero-history-is-restated.md) | Xero history is restated, not imported as-is | 2026-10-15 | — | `HOT-020` |
-| [ADR-0025](ADR-0025-dimension-obligation-is-per-account.md) | The dimension obligation is per account, and what is refused is absence rather than null | 2026-10-01 | — | `HOT-019` |
+| [ADR-0020](ADR-0020-xero-history-is-recast.md) | Xero history is recast, and the product line is derived from the master rather than assigned to the line | 2026-10-15 | — | — |
+| [ADR-0025](ADR-0025-non-operating-receipts-move-account.md) | A receipt that is not a categorised sale moves to 4800 Other Income rather than taking a null on an operating revenue account | 2026-10-01 | — | — |
 | [ADR-0027](ADR-0027-retain-mapbox-and-resend-at-the-boundary.md) | Retain Mapbox for geocoding and Resend for transactional email, at the boundary | 2026-10-01 | — | — |
 | [ADR-0028](ADR-0028-self-hosted-tier-gotenberg-and-victoria.md) | The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability | 2026-10-01 | — | — |
 | [ADR-0029](ADR-0029-the-ledger-records-unallocated-facts.md) | The ledger records un-allocated facts; allocation is a specified reporting act | 2026-10-01 | — | — |

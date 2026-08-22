@@ -55,7 +55,8 @@
 # `inbox/2026-08-10-the-untracked-revenue-denorm-is-repaired-and-28-7-percent-is-now-15-percent.md`).
 # `tracking_missing` 227 → **0**; a dry re-run of the repair touches 0 invoices. Untracked line
 # revenue is now **14.76%** ($253,269.75 of $1,715,472.79), and what remains is the two populations
-# that were never defects: 130 custom lines with no product master ($233,610.63) and 183 lines on
+# that were never defects: 130 custom lines with no product master ($233,610.63 — `ADR-0020/M2`
+# owns this figure) and 183 lines on
 # genuinely uncategorised products ($19,659.12) — re-measured 2026-08-16 (15.00% of $1,688,980.87
 # across 128 / $233,667.63 and 170 / $19,638.96 on 2026-08-10: the money is flat and the denominator
 # grew). ✅ **`tracking_missing` is still 0 and the denorm now agrees with the master on every one of

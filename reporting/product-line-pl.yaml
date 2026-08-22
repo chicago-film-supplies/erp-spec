@@ -572,7 +572,8 @@ report:
       outcome**, which is why the population is now measured rather than declared.
       Re-measured 2026-08-16 the untracked share is **14.76% of line revenue** ($253,269.75 of
       $1,715,472.79), and it is exactly the two populations that are not defects: **130 custom lines
-      with no product master** ($233,610.63) and **183 lines on genuinely uncategorised products**
+      with no product master** ($233,610.63 — `ADR-0020/M2` owns this figure) and **183 lines on
+      genuinely uncategorised products**
       ($19,659.12). The first is the one to watch — a custom line is where a new product line announces
       itself. (15.00% of $1,688,980.87 on 2026-08-10, across 128 / $233,667.63 and 170 / $19,638.96 —
       the money is flat and the denominator grew.)
