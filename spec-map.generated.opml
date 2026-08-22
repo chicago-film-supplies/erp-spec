@@ -279,7 +279,7 @@
           <outline text="blocks SPIKE-005"/>
         </outline>
       </outline>
-      <outline text="Decisions (25 in force, 13 proposed)">
+      <outline text="Decisions (25 in force, 14 proposed)">
         <outline text="In force (25)">
           <outline text="ADR-0001 — Replace Xero with an in-house ledger" _note="**In the context of** owning the order-to-invoice path but renting the ledger, **facing** a tracking-dimension defect that Xero silently absorbs and a costing model Xero cannot express, **we decided** to build the general ledger in-house, **to achieve** dimensional postings that cannot be null and a labour-absorption model we control, **accepting** that a large amount of unglamorous accounting surface area becomes ours to build and keep correct."/>
           <outline text="ADR-0002 — Bank feed sourced from Plaid, single Chase account" _note="**In the context of** needing bank transactions now that Xero's feed goes away, **facing** one bank and one account, **we decided** to source the feed from Plaid, **to achieve** a working feed without a bank-specific integration, **accepting** that Plaid's transaction model is a consumer-fintech model, not an accounting bank feed."/>
@@ -307,7 +307,7 @@
           <outline text="ADR-0037 — An id carries meaning where it is used — a headline on every id, and addressable claims inside a decision" _note="**In the context of** a spec whose authority is prose, **facing** a measured 22:1 mismatch between what is cited (a document) and what is claimed (about twenty statements inside it), **we decided** that an ADR additionally asserts individually addressable claims, typed as decision or premise, **to achieve** corrections that can be swept and premises that can go stale without touching a frozen decision, **accepting** a second surface on every ADR and a convention that only pays off as it is adopted."/>
           <outline text="ADR-0038 — Labor with no causal order is not COGS — 5801 is not created and 6600 Wages narrows instead" _note="**In the context of** but-for attribution putting a guaranteed day onto the order that caused the hire, **facing** the consequence that labor no order caused has no revenue it is applicable to, **we decided** that such labor is operating expense and stays in `6600 - Wages` rather than reaching a COGS account, **to achieve** a cost-of-revenue line that contains only costs of revenue, **accepting** that ADR-0019's `5801` is not created and that a superficially identical vehicle account deliberately does not follow."/>
         </outline>
-        <outline text="Proposed (13)">
+        <outline text="Proposed (14)">
           <outline text="ADR-0015 — Inventory reservations are TigerBeetle pending transfers, over the operational window only" _note="review by: 2026-11-01 · **In the context of** wanting order state derivable and oversell prevented in the database, **facing** a balance model with no time dimension and an availability question that is entirely about time, **we decided** to model reservations as two-phase transfers over the operational window only, **to achieve** custody oversell that is unrepresentable and a fulfillment state that is derived, **accepting** that future-dated booking conflicts stay with the interval engine.">
             <outline text="blocked on HOT-022"/>
             <outline text="blocked on SPIKE-002"/>
@@ -371,6 +371,11 @@
             <outline text="blocked on SPIKE-002"/>
             <outline text="blocked on SPIKE-001"/>
           </outline>
+          <outline text="ADR-0043 — The depreciation engine is hand-rolled behind a package boundary, computed per taxpayer-year, with the year's rules as versioned data" _note="review by: 2026-11-15 · **In the context of** an accepted decision to bring fixed assets in-house on both a GAAP and a tax basis, **facing** a registry with no US tax depreciation engine in it, **we decided** to build one behind a package boundary, computed per taxpayer-year against year-versioned rule data, **to achieve** an engine graded by a corpus rather than trusted, and an annual tax-law update that is a data change, **accepting** that correctness on filing-consequential numbers is now ours to own.">
+            <outline text="blocked on HOT-023"/>
+            <outline text="blocked on OQ-054"/>
+            <outline text="blocked on SPIKE-005"/>
+          </outline>
         </outline>
       </outline>
       <outline text="Spikes (7 open)">
@@ -395,7 +400,7 @@
           <outline text="Transaction id stability confirmed or refuted across updates and re-links."/>
           <outline text="Balance endpoints reconciled against a statement closing balance, to the cent."/>
         </outline>
-        <outline text="SPIKE-005 — Hand-roll the depreciation engine, or adopt a library?" _note="timebox: 1 week · closes: a new ADR · in_progress">
+        <outline text="SPIKE-005 — Hand-roll the depreciation engine, or adopt a library?" _note="timebox: 1 week · closes: ADR-0043 · in_progress">
           <outline text="Test corpus covers: mid-month, half-year AND MID-QUARTER conventions; GDS vs ADS class lives; §179 and bonus effects on basis; §280F caps on listed property; partial disposals; prospective useful-life revisions; the deferred GAAP/tax difference. ⚠️ WIDENED 2026-08-22 (HOT-023) — mid-quarter is mandatory when the 40% test trips, not a third option, and §280F caps the combined §179 + bonus + MACRS figure this corpus computes."/>
           <outline text="Every candidate is scored against that corpus, with failures itemised rather than summarised."/>
           <outline text="A decision with a stated migration path if the library is later abandoned."/>
@@ -521,7 +526,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (82 unpromoted of 102)" _note="no drops pending">
+      <outline text="Capture (83 unpromoted of 103)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -602,6 +607,7 @@
         <outline text="Rule 8a survey for ADR-0029 — three of five systems post allocations and none derives at report tim…" _note="inbox/2026-08-20-survey-nobody-keeps-allocations-out-of-the-ledger-they-keep-them-out-of-the-statements.md"/>
         <outline text="Correction — the causal_orders declare-or-be-rejected obligation is ADR-0036's decision and REQ-LED…" _note="inbox/2026-08-22-correction-the-causal-orders-obligation-is-adr-0036s-decision-not-adr-0029s-and-two-artifacts-carried-the-wrong-owner.md"/>
         <outline text="Owner — a tracking category was on no externally filed document, which discharges the one load-bear…" _note="inbox/2026-08-22-owner-a-tracking-category-was-on-no-externally-filed-document-so-the-recast-is-owed-to-nobody.md"/>
+        <outline text="Owner — the depreciation engine covers ALL valid GAAP and US tax cases, not just the ones CFS uses…" _note="inbox/2026-08-22-owner-the-depreciation-engine-covers-all-valid-gaap-and-us-tax-cases-not-just-the-ones-cfs-uses-today.md"/>
         <outline text="SPIKE-005's convention list is short by one — mid-quarter is MANDATORY when the 40% test trips, it…" _note="inbox/2026-08-22-spike-005s-convention-list-is-short-by-one-and-mid-quarter-is-mandatory-not-optional.md"/>
         <outline text="The booking lifecycle is dormant, so SPIKE-012's boundary cannot be chosen yet — the verdict that l…" _note="inbox/2026-08-22-the-booking-lifecycle-is-dormant-so-spike-012s-boundary-cannot-be-chosen-yet-and-the-verdict-that-looked-like-a-pass-rests-on-11-rows.md"/>
       </outline>

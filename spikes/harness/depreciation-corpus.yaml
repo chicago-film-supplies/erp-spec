@@ -41,6 +41,16 @@ meta:
   extraction: "pdftotext -layout, run 2026-08-22; line numbers below are into that extraction"
   tax_year: 2025
   spike: SPIKE-005
+  scope_ruling: >-
+    **ALL valid GAAP and US tax cases**, not only the ones CFS uses today (owner, 2026-08-22).
+    ⚠️ This OVERRODE three exclusions taken earlier the same day, each justified by a measured
+    population of zero — short tax years, the full ADS class-life tables, and §280F recapture.
+    **Measuring the population is the right test for "is this URGENT" and the wrong test for "is
+    this IN SCOPE" when the requirement is completeness.**
+  cfs_book_today: >-
+    Heavy §179 on the tax side, straight line on everything else (owner, 2026-08-22). ⇒ **the two
+    books diverge on most assets**, so ADR-0026's deferred difference (DEP-010) is the ORDINARY case
+    rather than an illustration — high-volume and the number most likely to be materially wrong.
   gaap_sources:
     - "ASC 360 — Property, Plant, and Equipment (useful life, salvage, straight line)"
     - "ASC 250-10-45-17 — a change in estimate is prospective; prior periods are NOT restated"
@@ -477,29 +487,46 @@ cases:
       "stopped". A schedule that zeroes them on removal produces a loss that is too large by exactly
       the year's depreciation.
 
-# ── ⚠️ WHAT THIS CORPUS DOES NOT YET COVER ──────────────────────────────────────────────────────
-# Stated rather than omitted, because a corpus that reports only what it holds is indistinguishable
-# from a complete one — and SPIKE-005's exit criterion is a coverage claim.
-not_yet_covered:
-  - id: ads_full_class_life_tables
-    why: >-
-      DEP-012 transcribes the three ADS recovery periods bearing on CFS's asset classes. The full
-      table and the class-life listing (p946 L6552+) are **absent rather than guessed** — none of
-      CFS's required-use triggers fires today. Extend before scoring a candidate on farming or
-      tax-exempt-use property.
-  - id: section_280f_worked_recapture
-    why: >-
-      DEP-011 covers the CAPS, which is the half that binds. The RECAPTURE half — Pub 946's Ellen
-      Rye example at L3867, $4,018 of excess depreciation — is not transcribed, because it fires
-      only when qualified business use falls to 50% or less and CFS's fleet is used exclusively for
-      revenue work (owner, 2026-08-16). ⚠️ **This exclusion rests on a POLICY holding as the fleet
-      grows, not on a measurement** — `OQ-054`. If the policy changes, transcribe it.
+# ── ⚠️ REQUIRED BY THE SCOPE RULING, AND NOT YET WRITTEN ────────────────────────────────────────
+#
+# **Owner, 2026-08-22: the engine covers ALL valid GAAP and US tax cases, not only the ones CFS uses
+# today.** Every entry below is a valid case, so each is IN SCOPE and **exit criterion 1 is NOT MET
+# until it is covered.**
+#
+# ⚠️ **All four were previously excluded on a measured population of zero, and that reasoning is
+# kept beside each one because it was the right question asked for the wrong purpose.** Measuring
+# the population is the right test for "is this URGENT". It is the wrong test for "is this IN SCOPE"
+# when the requirement is completeness — the two look identical and are answered by different
+# people.
+required_not_yet_covered:
   - id: short_tax_year
+    exercises_tag: short_tax_year
     why: >-
-      Pub 946 devotes a section to it (Tara Corporation, L3012/L3074). Not applicable to CFS today —
-      a calendar-year taxpayer with no short year — so it is deliberately out of scope, and this
-      entry records that it was CONSIDERED and excluded rather than missed.
+      Pub 946 devotes a section to it — the Tara Corporation examples at L3012 and L3074 work the
+      quarter midpoints for a 9.5-month year. ⚠️ **Previously excluded** because CFS is a
+      calendar-year taxpayer with no short year. An incorporation, an entity change or a liquidation
+      produces one.
+  - id: ads_full_class_life_tables
+    exercises_tag: ads_full_tables
+    why: >-
+      DEP-012 carries ADS's method, its required-use triggers and the three recovery periods bearing
+      on CFS's asset classes. The full table and the class-life listing (p946 L6552+) are **absent
+      rather than guessed**. ⚠️ **Previously excluded** because none of CFS's required-use triggers
+      fires today.
+  - id: section_280f_recapture
+    exercises_tag: section_280f_recapture
+    why: >-
+      DEP-011 carries the CAPS, which is the half that binds today. The RECAPTURE half — Pub 946's
+      Ellen Rye example at L3867, $4,018 of excess depreciation — is not transcribed. ⚠️
+      **Previously excluded** because the fleet is used exclusively for revenue work, so qualified
+      business use cannot fall to 50% or less. **That was a POLICY holding, never a law**, and
+      OQ-054 asks whether it survives fleet growth.
   - id: qualified_production_property
+    exercises_tag: qualified_production_property
     why: >-
       §168(n), new in 2025, for property placed in service after 2025-07-04. Almost certainly not
-      applicable to CFS, but it is evidence for DEP-008's point: the surface grows by legislation.
+      applicable to CFS — and in scope regardless, under the same ruling. It is also the standing
+      evidence for DEP-008's point: **the surface grows by legislation, so "complete" is a statement
+      about a tax year and not about the engine.**
+
+not_yet_covered: [] # everything previously parked here is REQUIRED and has moved above

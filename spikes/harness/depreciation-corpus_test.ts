@@ -198,6 +198,12 @@ Deno.test("COVERAGE: every facet SPIKE-005's exit criterion names is exercised",
     "bonus effects on basis": ["bonus_depreciation"],
     "partial disposals": ["partial_disposal"],
     "listed property / §280F caps (OQ-054, HOT-023)": ["section_280f"],
+    // ⚠️ Added 2026-08-22 by the owner's scope ruling — ALL valid GAAP and US tax cases, not only
+    // the ones CFS uses today. Each was previously excluded on a measured population of zero.
+    "short tax year": ["short_tax_year"],
+    "ADS full class-life tables": ["ads_full_tables"],
+    "§280F recapture": ["section_280f_recapture"],
+    "§168(n) qualified production property": ["qualified_production_property"],
     "prospective useful-life revisions": ["prospective_revision"],
     "the deferred GAAP/tax difference": ["deferred_difference"],
     // ⚠️ NOT in the exit criterion, and REQ-FA-002 says it should be. Asserted deliberately.

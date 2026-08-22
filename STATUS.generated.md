@@ -13,10 +13,10 @@ is `deno task validate`'s judgement, not this file's.
 |---|---:|---|
 | Open questions | 14 open | 40 answered of 54 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 23 | 1 open |
-| Decisions (ADR) | 42 | 25 in force · 13 proposed |
+| Decisions (ADR) | 43 | 25 in force · 14 proposed |
 | Spikes | 12 | 7 open |
 | Requirements | 21 | 0 without a scenario |
-| Inbox | 102 | 82 unpromoted |
+| Inbox | 103 | 83 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
@@ -79,7 +79,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 - `ADR-0037` — An id carries meaning where it is used — a headline on every id, and addressable claims inside a decision
 - `ADR-0038` — Labor with no causal order is not COGS — 5801 is not created and 6600 Wages narrows instead
 
-### Proposed (13)
+### Proposed (14)
 
 | ADR | Title | Review by | Supersedes on acceptance | Blocked on |
 |---|---|---|---|---|
@@ -96,6 +96,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | `ADR-0040` | The Zod schema is the sole authority and the MongoDB validator is generated from it one-way, with every rule the validator cannot carry named in a registry CI walks | 2026-11-15 | — | — |
 | `ADR-0041` | The labor rate variance posts as its own fact keyed to causal orders, and the plan burden rate is re-derived from each observed run | 2026-11-01 | — | `OQ-045` |
 | `ADR-0042` | An orphaned pending transfer is resolved only by the application sweeper, which needs an intent record written before the reserve | 2026-11-15 | — | `SPIKE-002` |
+| `ADR-0043` | The depreciation engine is hand-rolled behind a package boundary, computed per taxpayer-year, with the year's rules as versioned data | 2026-11-15 | — | `OQ-054` `SPIKE-005` |
 
 ## Spikes
 
@@ -105,7 +106,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | `SPIKE-002` | What commit protocol keeps a MongoDB document write and a TigerBeetle posting c… | 1 week | `ADR-0042` | in_progress |
 | `SPIKE-003` | How does TigerBeetle's timestamp behave when loading history, and what are the… | 3 days | `ADR-0039` | closed |
 | `SPIKE-004` | What does Plaid actually provide, and what does bank reconciliation actually ne… | 3 days | _new ADR_ | open |
-| `SPIKE-005` | Hand-roll the depreciation engine, or adopt a library? | 1 week | _new ADR_ | in_progress |
+| `SPIKE-005` | Hand-roll the depreciation engine, or adopt a library? | 1 week | `ADR-0043` | in_progress |
 | `SPIKE-006` | How lossy is translating JSON Schema 2020-12 to MongoDB's `$jsonSchema`, and wh… | 2 days | `ADR-0040` | closed |
 | `SPIKE-007` | Which access path reaches DuckDB from Deno — the native addon or WASM — and can… | 2 days | `ADR-0024` | closed |
 | `SPIKE-008` | How do the Chicago Personal Property Lease Transaction Tax and Illinois home-ru… | 1 week | _new ADR_ | open |

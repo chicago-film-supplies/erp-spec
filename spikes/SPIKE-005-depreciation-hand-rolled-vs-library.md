@@ -11,7 +11,7 @@ exit_criteria:
   - "Test corpus covers: mid-month, half-year AND MID-QUARTER conventions; GDS vs ADS class lives; §179 and bonus effects on basis; §280F caps on listed property; partial disposals; prospective useful-life revisions; the deferred GAAP/tax difference. ⚠️ WIDENED 2026-08-22 (HOT-023) — mid-quarter is mandatory when the 40% test trips, not a third option, and §280F caps the combined §179 + bonus + MACRS figure this corpus computes."
   - Every candidate is scored against that corpus, with failures itemised rather than summarised.
   - A decision with a stated migration path if the library is later abandoned.
-closes_adr: new
+closes_adr: ADR-0043
 status: in_progress
 ---
 
@@ -131,13 +131,70 @@ is the single most likely trigger of the 40% test** — retroactively re-computi
 personal-property asset placed in service earlier that year. **The timing of a vehicle purchase is a
 tax decision, not only a fleet one.**
 
+### ⭐ FINDING 4 — the scope ruling reopened criterion 1, and that is the arm working
+
+**Owner, 2026-08-22: _"the depreciation engine should cover all valid gaap and usa tax cases"_** —
+not only the ones CFS uses today, and _"i dont want to build new functionality if that changes in
+the future."_
+
+⇒ **Four facets excluded earlier the same day are back in scope**: short tax years, the full ADS
+class-life tables, §280F recapture, and §168(n). Each had been excluded on a **measured population
+of zero**. **Exit criterion 1 therefore goes from MET back to NOT MET**, and the coverage arm went
+green → red naming exactly those four.
+
+⚠️ **THE PATTERN, and it is the second correction of this shape in one session** — §280F was scoped
+out on a fleet of two and corrected by _"we do expect to acquire more vehicles."_ **Measuring the
+population is the right test for "is this URGENT" and the wrong test for "is this IN SCOPE" when the
+requirement is completeness.** The repo's own footgun — _do not mint a branch before measuring its
+population_ — is about not inventing machinery for branches nothing takes. **It does not license
+omitting a rule that law requires and a future asset will reach.** The two questions look identical
+and are answered by different people.
+
+⚠️ **And "no new functionality later" is achievable while "no work later" is not.** Coverage
+completeness is buildable once. Rule currency is not, by any design — the bonus rate changed inside
+tax year 2025 by an Act of Congress. **They reconcile by SHAPE**: year-versioned rule DATA consumed
+by the algorithm makes an annual update a data change plus a corpus re-run. That is ADR-0043/D4, and
+it comes from the ruling rather than from taste.
+
+### Criterion 2 — ✅ MET. There is nothing to buy, and it is measured
+
+`deno task dep-candidates` sweeps both registries the stack can consume and scores each candidate
+facet by facet, **itemised rather than summarised** as the criterion requires.
+
+| candidate                                        | evidences                                     | verdict       |
+| ------------------------------------------------ | --------------------------------------------- | ------------- |
+| npm `macrs` · JSR `macrs`                        | **0 packages exist on either**                | —             |
+| npm `section179`                                 | **0 packages exist**                          | —             |
+| `asset-depreciation-calculator`                  | 0 of 10 · last published 2021                 | not scoreable |
+| `@finprecise/depreciation`                       | 0 of 10 · SLN/DB/DDB/SYD, the Excel functions | not scoreable |
+| `@classytic/assets`                              | 2 of 10 · **IFRS** (IAS 16/36/8)              | not scoreable |
+| `@simplifyingcalculation/irs-sec-179-calculator` | 2 of 10 · §179 only                           | not scoreable |
+
+⚠️ **Every failure is a CAPABILITY gap, not a quality judgement.** The nearest candidate is a
+competent engine for the wrong standard — IFRS has no MACRS, no §179 and no §280F because those are
+US tax law rather than accounting. ⭐ **The finding is an ABSENCE, which is the most perishable kind
+of claim** — true until someone publishes one, and nothing announces that. It is a re-runnable probe
+for exactly that reason.
+
+### Criterion 3 — ✅ MET → ADR-0043, and the migration path is INVERTED
+
+The criterion asks for "a stated migration path **if the library is later abandoned**" — written
+when buying looked possible. **There is no library to abandon.** ⇒ the path that matters runs the
+other way: if a credible engine ever appears, the probe finds it, the corpus scores it, and the
+package boundary is the seam it is swapped in behind. **The corpus and the boundary together ARE the
+migration path, in both directions.**
+
+ADR-0043 decides: build; behind a **pure package boundary** the corpus can import (SPIKE-006's
+precedent); computed per **taxpayer-year** rather than per asset, because DEP-002 proves a per-asset
+signature cannot be answered correctly; on **year-versioned rule data**.
+
 ### Where the spike stands
 
-| criterion                                                        | state                                                                                                      |
-| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| 1 — test corpus covers the rules surface                         | ✅ **MET** — 11 facets; `deno task dep-corpus` 10/10 green, including the coverage arm that was landed RED |
-| 2 — every candidate scored against the corpus, failures itemised | ⛔ not started — the corpus had to exist first                                                             |
-| 3 — a decision with a stated migration path                      | ⛔ not started                                                                                             |
+| criterion                                                        | state                                                                                                                             |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| 1 — test corpus covers the rules surface                         | 🔴 **NOT MET** — the owner widened scope to ALL valid GAAP and US tax cases on 2026-08-22; the coverage arm is RED on four facets |
+| 2 — every candidate scored against the corpus, failures itemised | ✅ **MET** — `deno task dep-candidates`; nothing reaches the floor                                                                |
+| 3 — a decision with a stated migration path                      | ✅ **MET** → `ADR-0043` (proposed)                                                                                                |
 
 ⇒ **`in_progress`.** Nothing is blocked on infrastructure or on anyone else — criterion 2 is
 candidate evaluation against a yardstick that now exists, and criterion 3 follows from it. ⚠️ **The

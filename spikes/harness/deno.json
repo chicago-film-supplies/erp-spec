@@ -55,6 +55,8 @@
     "boundary": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal booking-boundary-probe.ts",
     "//dep-corpus": "SPIKE-005 exit criterion 1 — grades depreciation-corpus.yaml for internal consistency against Pub 946's own stated figures, and asserts COVERAGE of the exit criterion facet by facet. The coverage arm is expected RED until the corpus is finished.",
     "dep-corpus": "deno test --allow-read depreciation-corpus_test.ts",
+    "//dep-candidates": "SPIKE-005 exit criterion 2 — sweeps npm and JSR for a US tax depreciation engine and scores the named candidates facet by facet. The finding is an ABSENCE, which is the most perishable kind of claim, so it is re-runnable rather than asserted.",
+    "dep-candidates": "deno run --allow-net=registry.npmjs.org,api.jsr.io depreciation-candidates-probe.ts",
     "posting-keys": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal posting-key-width-probe.ts"
   },
 
