@@ -52,7 +52,27 @@ and it gates a whole service line (#35).
 - **`ADR-0041`** (new) — the labor variance posts as a keyed fact. Account, both posting arms, three
   vectors. **Closes #38 and resolves HOT-018.**
 
-### ⛔ NEW 2026-08-22 — m4 has a criterion gated on a BUSINESS PROCESS, not on authoring
+### ⛔ NEW 2026-08-22 — BOTH attempted spikes turned out to be blocked, and both for good reasons
+
+**Two spikes were attempted this session. Neither closed, and each produced a finding worth more
+than the close would have been.** ⚠️ **The hotspot count went 1 → 2**, because SPIKE-002 turned up a
+real contradiction (HOT-022). That is progress, not regression: it was true before and nothing could
+see it.
+
+⭐ **SPIKE-002 — the Quint model could not express TigerBeetle's own timeout.** `two_store_commit`'s
+`TbState` has no expired state, but TigerBeetle expires a pending transfer itself once
+`Transfer.timeout` elapses (`pending_transfer_expired = 35`, pinned in the client's own
+`bindings.d.ts`). The new `expiring_timeout` module fails in **three steps with `dead: false`
+throughout — no crash required**, just a writer slower than the timeout. **`ADR-0015:61` proposes to
+rely on exactly the mechanism `naive_sweeper` proves unsafe.** Criterion 1 re-verified, criterion 3
+framed with a recommendation, criterion 2 needs a `mongod` and a ruling (#47).
+
+⭐ **The two findings share ONE shape, and it is the session's lesson.** SPIKE-012 reported PASSES
+on 11 rows; SPIKE-002 reported no violation on a case its own type system could not represent.
+**Neither was a wrong answer — both were absences reading as results.** A failing arm is loud. **Ask
+of every green check: could this have failed? What population, what state space?**
+
+### ⛔ m4 also has a criterion gated on a BUSINESS PROCESS, not on authoring
 
 **SPIKE-012 cannot be closed until the manager check-in/check-out process is live** (owner,
 2026-08-22). It was attempted this session and is now `in_progress` with a measured partial result.
@@ -81,13 +101,14 @@ narrower arm for _"ADR-NNNN requires `<field>`"_ where the field is absent from 
 
 ## Then, in order
 
-|       |                                                                                                                                                                                                                                                                                                                                          |
-| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **1** | **A spike — this is the milestone now.** ⛔ **NOT SPIKE-012 — it is `in_progress` and blocked on a business process (#46).** `SPIKE-002` is the load-bearing one **and its first exit criterion is already met** (see below). `SPIKE-005` and `SPIKE-008` are self-contained desk research. **`SPIKE-011` needs rescoping first (#41).** |
-| **2** | **`OQ-053` — put the PSA question to the owner.** It is the only thing between m4 and a clean hotspot criterion, and it blocks a whole service line. **Prepare the decision; do not wait for it.**                                                                                                                                       |
-| **3** | **#40 + #44** — the supersession-dependents gate and its citation-assertion sibling. Small, and four instances are sitting there as a red-first population                                                                                                                                                                               |
-| **4** | **#6** — requirements. `ordering`, `availability`, `banking`, `procurement` still have **zero**, and the public client app depends on the first two. The 17 new warnings are this issue's backlog surfacing                                                                                                                              |
-| **5** | **#45** — ADR-0041's D4 is a procedure with nothing executing on it, and it is the half that actually removes the seasonal bias                                                                                                                                                                                                          |
+|       |                                                                                                                                                                                                                                                                                                                         |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1** | **HOT-022 — rule the timeout question.** Owner's, small, and it unblocks SPIKE-002 criterion 2 (#47) AND ADR-0015. Recommendation and the three options are in `spikes/SPIKE-002-two-store-commit.md`                                                                                                                   |
+| **2** | **A spike.** ⛔ **NOT SPIKE-012** — `in_progress`, blocked on a business process (#46). ⛔ **SPIKE-002 is `in_progress` too** — criteria 1 and 3 done, criterion 2 needs a local `mongod` and a HOT-022 ruling (#47). ⇒ **`SPIKE-005` and `SPIKE-008` are the reachable ones**; `SPIKE-011` needs rescoping first (#41) |
+| **3** | **`OQ-053` — put the PSA question to the owner.** It is the only thing between m4 and a clean hotspot criterion, and it blocks a whole service line. **Prepare the decision; do not wait for it.**                                                                                                                      |
+| **4** | **#40 + #44** — the supersession-dependents gate and its citation-assertion sibling. Small, and four instances are sitting there as a red-first population                                                                                                                                                              |
+| **5** | **#6** — requirements. `ordering`, `availability`, `banking`, `procurement` still have **zero**, and the public client app depends on the first two. The 17 new warnings are this issue's backlog surfacing                                                                                                             |
+| **6** | **#45** — ADR-0041's D4 is a procedure with nothing executing on it, and it is the half that actually removes the seasonal bias                                                                                                                                                                                         |
 
 ⚠️ **The decision backlog is not blocked on the owner's availability — it is blocked on nobody
 having prepared the decisions.** Every survey changed the ADR it was written for; **every redraft
