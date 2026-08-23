@@ -44,8 +44,9 @@ asserts:
     kind: decision
     claim: >-
       The resolved jurisdiction is stored on the document together with the LEVEL that produced it.
-      A derived answer and an asserted answer that name the same jurisdiction must be distinguishable
-      in the stored record, and queryable as such.
+      There are TWO assertion levels and ONE fallback — a per-order statement and a standing
+      org/project statement are both determinations of intended use; only the derivation is the
+      unknown case. All three must be distinguishable in the stored record, and queryable as such.
   - id: D2
     kind: decision
     claim: >-
@@ -98,6 +99,13 @@ asserts:
       warehouse's own Chicago address resolves through destination sourcing — an affirmative claim
       that the goods went to Chicago.
     source: "inbox/2026-08-23-destination-sourcing-cannot-tell-delivered-to-chicago-from-collected-at-our-chicago-dock-and-the-lease-tax-predicate-is-use.md"
+  - id: P6
+    kind: premise
+    claim: >-
+      An org-level or project-level jurisdiction is a DEFAULT OVERRIDE FOR NEW ORDERS, based on the
+      customer's stated intended use. It is an assertion of the same kind as a per-order one, made
+      once instead of per order — not a weaker signal consulted when the order is silent.
+    source: "inbox/2026-08-23-owner-an-org-or-project-jurisdiction-is-a-default-override-for-new-orders-based-on-stated-intended-use.md"
 supersedes:
 superseded_by:
 ---
@@ -152,6 +160,36 @@ answer and disagree on the question, and nothing in the record says which was as
 question, not one this ADR settles.** `Hertz Corp. v. City of Chicago`, 2017 IL 119945, invalidated
 Lease Transaction Tax Ruling 11 on exactly the "used in Chicago" question. **A table keyed on a
 stored enum is a simplification of a rule the Illinois Supreme Court has already narrowed once.**
+
+### ⭐⭐ Two determinations and one fallback — not one determination and two fallbacks
+
+⚠️ **The precedence chain reads like a ladder of decreasing confidence, and it is not one** (P6,
+owner 2026-08-23). An org-level or project-level jurisdiction is a **default override for new
+orders, based on the customer's stated intended use.** It is an assertion of the same kind as a
+per-order one — made once rather than repeated — and **specificity governs** because a later
+statement supersedes a standing one, **not** because the per-order value is more trustworthy.
+
+| level          | what it is                                                  | kind              |
+| -------------- | ----------------------------------------------------------- | ----------------- |
+| `document`     | this order's own statement of intended use                  | **determination** |
+| `organization` | the customer's standing statement, applied to new orders    | **determination** |
+| `derived`      | nobody stated anything; the address and registration answer | **the fallback**  |
+
+⇒ **the fallback/determination line falls BELOW both assertion levels, not between them.** CFS has
+no project entity — a project maps onto an order — so "project level" is the `document` rung.
+
+⭐ **And the implementation expresses that intent one step differently, which is the same theme a
+rung up.** The org claim is **snapshotted onto the document** at write (`buildOrganizationSnapshot`,
+_"mirrored from `Organization.jurisdiction_claim`"_), so a later change to the customer master
+cannot restate a stored order — that half is right and is the _"snapshot on the DOCUMENT, derive on
+the MASTER"_ rule already applied. **But it is not SEEDED onto the destination**: the order form's
+empty option is the _inherit_ option, whose stored value is `null` rather than a member.
+
+⇒ **a destination reading `null` means "inherit", and an order whose use was affirmatively
+determined to be Frankfort — matching the standing claim — is indistinguishable from one where
+nobody looked.** The two produce the same tax and record different facts, and only the level tells
+them apart. ⚠️ **That is D1's problem again, one rung up, and it is why the level rather than the
+value is the thing worth storing.**
 
 ### ⭐⭐ The failure mode, and CFS is one step from it
 
