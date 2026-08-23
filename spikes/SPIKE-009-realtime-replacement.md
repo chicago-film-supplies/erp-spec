@@ -25,3 +25,227 @@ tempting to treat the client as mostly done. The framework survives; the data la
 
 The authorization point is easy to miss: today the manager reads Firestore directly under security
 rules. A socket layer inherits that responsibility with nothing enforcing it by default.
+
+## ✅ Criterion 3 — the listener inventory, 2026-08-23
+
+Source-read of `code:2026-08-23:manager@56e41fd`, writer sets from
+`code:2026-08-23:api-cloudrun@968c9542`. Read via `git archive HEAD`, so the uncommitted tax-surface
+work influenced nothing; diffed separately and it adds no subscription site.
+
+**52 distinct subscription sites across 34 collections.**
+
+### ⭐ Three chokepoints cover 65% of them
+
+| primitive                      | shape                                        | sites  |
+| ------------------------------ | -------------------------------------------- | ------ |
+| `createEntityCache`            | `onSnapshot(doc(...))`, one per cached doc   | **22** |
+| `createEntityListCache`        | `onSnapshot(query)`, LRU-keyed               | **7**  |
+| `createPaginatedFirestoreList` | `onSnapshot(pageQuery)` + count + cursor map | **5**  |
+| hand-rolled                    | —                                            | 18     |
+
+All funnel through `createAsyncState`, whose listener contract is _a fetcher that returns a cleanup
+function_. ⚠️ **Anyone costing this from a raw `grep onSnapshot` count overestimates the porting and
+underestimates the hard parts.**
+
+### The verdict on "the largest hidden line item" — SUPPORTED, and do not soften it
+
+| why it is live    | sites | share   |
+| ----------------- | ----- | ------- |
+| `external`        | 25    | 48%     |
+| `collaborative`   | 16    | 31%     |
+| `cross-surface`   | 6     | 12%     |
+| **`convenience`** | **5** | **10%** |
+
+⇒ **79% are driven by writers the client cannot invalidate against, because the client never made
+the write** — five webhook endpoints (CRMS Member / Opportunity / Invoice, Xero Payment, GitHub
+Templates) and ~30 Cloud Task workers. ⭐ **A fetch-on-mount + refetch-after-write architecture has
+no answer for "Xero just paid this invoice" or "an admin revoked your role."**
+
+Effort spread: **S ×20, M ×27, L ×5** — the L's are `orders`, `invoices` and three card fan-out
+sites.
+
+### ⭐⭐ THE HARD PARTS ARE NOT IN THE TABLE, and none of them scales with the site count
+
+1. **Server-side predicate re-evaluation.** A change stream reports _the document that changed_, not
+   _that it left some subscriber's query_. Firestore emits a removal when a doc stops matching; with
+   `fullDocument: "updateLookup"` you get the new document and must re-evaluate **every live
+   subscriber's predicate** yourself. ⚠️ **This is the single largest genuinely-new engineering
+   piece and it has no Firestore analogue to copy.** Five sites depend on the effect —
+   `deleted_at == null`, `status in INCOMPLETE`, `date_fs == null`, `array-contains`, date-overlap —
+   and **none of them is a delete.** ⭐ **The mitigation is already latent**: the app never reads
+   `docChanges()` and only ever consumes whole result sets, so **re-sending the full matched set
+   reproduces all five exactly** — no `removed` event type on the wire. The cost moves to the
+   server, entire.
+2. ⚠️ **Transparent reconnect is assumed absolutely and guarded NOWHERE.** `createAsyncState`'s
+   listener branch logs and stops — no retry, no backoff, no re-subscribe, and no `visibilitychange`
+   / `navigator.onLine` handler anywhere in `src/`. **A dropped subscription today is unrecoverable
+   short of a page reload, and nothing tries.** The Firestore SDK resumes transparently, so the gap
+   has never been exercised. ⇒ **a transport that does not resume converts this into a
+   silent-stale-data class across all 52 sites at once**, and it will not show up in any site count.
+3. ⭐⭐ **A 2-SECOND HARD DEADLINE at eight sites, three of them money.**
+   `waitUntil(pred, { timeoutMs: 2000, intervalMs: 50 })` reconciles an **unknown-outcome write** by
+   observing the listener deliver the row — `settlements`, `creditNotes`, `bookings`,
+   `HolidayManager`, and three arms of `TaxManager`. ⇒ **a poll-based replacement with an interval
+   above ~2s turns a LANDED PAYMENT into a reported failure.** This is invisible from the
+   subscription table and is the sharpest single dependency in the inventory.
+
+### What is free, and one way it can be broken
+
+⭐ **Latency compensation is not used and could not be** — the manager makes **zero direct Firestore
+writes** (`allow write: if false` on every collection), so a write never enters the SDK's mutation
+queue. Zero hits for `hasPendingWrites` / `includeMetadataChanges` / `fromCache`.
+
+It **built its own** instead: `createEntityCache.applyServerData` overlays local divergence on every
+snapshot with three-tier precedence (live dirty > stashed > server), a dirty set recomputed by field
+diff, and a `localStorage` stash epoch-versioned by `PENDING_SCHEMA_EPOCH = "cents"` so a pre-cents
+stash cannot replay values 100× low. **Portable verbatim.**
+
+⚠️ **But the new transport must deliver SERVER TRUTH, UNMERGED.** If a socket layer helpfully echoes
+the client's own write back as authoritative, `recomputeDirty` clears dirty fields that were never
+persisted. **A well-meant optimization silently discards unsaved operator edits.**
+
+### Two sites worth naming individually
+
+- ⭐⭐ **`users/{own uid}` is the RBAC REVOCATION PATH, not a UI nicety.** An admin bumps
+  `token_version`; the listener fires; `getIdToken(true)` refreshes and `/auth/me` re-fetches.
+  `firestore.rules`' `notStale()` refuses claims older than the doc's `token_version`, so **without
+  this channel the client holds a stale claim for ~1h and every read is denied meanwhile.** ⇒
+  **whatever replaces it must exist BEFORE any other listener migrates.**
+- ⭐ **`typesense` is the cheapest win in the inventory.** `updates` is a monotonic counter used
+  only as an edge trigger — it carries no domain data. **It is already the "collection X changed,
+  re-query" message a socket layer would send.** One server-push message type replaces it and
+  **retires a Firestore collection.**
+
+⭐ **And one line item SHRINKS.** The per-list card fan-out exists because Firestore's `in` caps at
+30, so N listeners are spun up reactively per selected list. **MongoDB has no such cap — one query
+replaces N listeners.**
+
+### What was NOT measured, and it would sharpen the estimate
+
+⚠️ **`collaborative` was classified from WRITER SETS — who is capable of writing — not from measured
+concurrency.** Whether two operators actually hold the same order open, and how often, is
+**unmeasured**, and it decides whether ~16 sites need a socket or survive on refetch-after-write.
+**It is measurable from VictoriaLogs.** Also unmeasured: per-collection change rates (which set poll
+intervals for the 12 fetch-on-mount sites), and steady-state concurrent listeners per session —
+**that number, not 52, sizes the server-side fan-out.**
+
+## ✅ Criterion 4 — the authorization model, 2026-08-23
+
+`code:2026-08-23:manager@56e41fd:firestore.rules`, 152 lines. ⭐ **Verified LIVE rather than
+assumed** — fetched both deployed rulesets from `firebaserules.googleapis.com` and diffed:
+**byte-identical to the repo file in both projects**, 9,985 bytes, 0 diff lines.
+
+### ⭐⭐ The structural fact that sizes the whole obligation
+
+**No rule in the file references `resource.` at all** — zero matches for `resource.data`,
+`resource.id`, `request.resource`. ⇒ **every read rule is COLLECTION-scoped, never
+document-scoped.** Authorization is a pure function of the caller:
+`(token.roles, token.tv, token.email_verified,
+auth.uid)` plus two `get()` lookups, and for a given
+user and collection it is **one boolean, constant across every document in it.**
+
+⇒ ⭐ **There is no per-document authorization removal to reproduce**, because Firestore is never
+making a per-document decision here. ⚠️ **Do not confuse this with criterion 3's predicate
+re-evaluation** — a document leaving a _query's_ result set is still real work; a document leaving a
+user's _permitted_ set does not happen.
+
+38 collection blocks: **34 permission-gated** and collection-scoped, **1 hybrid** (`users/{uid}` —
+self-read OR `users.read`, path-scoped, and the self-read arm deliberately bypasses `notStale()` so
+a stale client can still discover its own `token_version` bump), **1 public** (`stock`,
+`allow read: if true`, pre-reduced to anonymous `{start, end, quantity, kind}` intervals), **2
+explicit deny**, and `allow write: if false` on all 38.
+
+### The claims are NOT Firebase custom claims
+
+⚠️ **There is no `setCustomUserClaims` anywhere in the workspace.** `api-cloudrun` is its own
+identity provider and mints a **Firebase custom token whose DEVELOPER claims** carry the payload —
+`{ email_verified, roles, tv }` — from three sites (`/auth/login`, `/auth/me`,
+`/auth/accept-invite`).
+
+⭐ **`roles` is a list of NAMES, not permissions.** The rules resolve name → permissions with a live
+`get()` on `roles/{name}` at every evaluation, which is why that collection's document id is the
+name rather than a uid — _"firestore.rules can only `get()` by path and never query, so the doc id
+must BE the claim string."_
+
+**The `get()` budget is 1 + 9 = 10, which is exactly Firestore's cap** for a single-document read,
+and it is why roles are capped at 9 per user, enforced server-side. Recursion is unavailable, so the
+role loop is manually unrolled `roleAt(0..8)`.
+
+### ⭐⭐ Authorization is NOT stable for the life of a subscription
+
+| vector                                | client's token changes?   | effect on an OPEN listener                              |
+| ------------------------------------- | ------------------------- | ------------------------------------------------------- |
+| **`roles/{name}.permissions` edited** | ⚠️ **No — not at all**    | every holder re-authorized or **de-authorized at once** |
+| `users/{uid}.token_version` bumped    | not until the client acts | `notStale()` flips → **all 34 collections deny**        |
+| `users/{uid}.roles` changed           | only on a new mint        | none until the token is replaced                        |
+
+⭐ **The first row is the load-bearing one.** A socket layer authorizing once at subscribe would
+keep serving a user whose role was stripped seconds earlier, **indefinitely, because nothing about
+that session changed.** Firestore re-derives it on every evaluation.
+
+⇒ ⭐⭐ **subscribe-time authorization is WRONG, and per-document authorization is UNNECESSARY.** The
+obligation is a per-`(user, collection)` boolean, re-evaluated per event, invalidated only by writes
+to two well-known document classes. **That is the whole of what v2 must reproduce** — there is no
+redaction and no row-level scoping anywhere to carry across, on either the Firestore or the API
+side.
+
+⚠️ **And when it flips, the listener ERRORS and terminates — it does not silently empty.** Evidenced
+by manager#233 (a rule naming a non-existent permission denied every user and surfaced as
+`listener_error`) and by a code comment recording direct observation. ⇒ **the socket layer needs an
+explicit REVOCATION FRAME**; dropping documents would be a semantic the current system does not
+have, and the manager's detail routes now gate on `loadError()`.
+
+⭐ **A useful precedent already exists**: `api-cloudrun/src/lib/permissionCache.ts` is a 60s-TTL
+in-process role→permissions cache with explicit invalidation from the admin mutators. **So the API
+is already up to 60s stale on a role edit while the rules are not** — v2 inherits that choice with a
+documented answer rather than an open question.
+
+### Two things the socket layer must not inherit by accident
+
+- ⭐ **The authorization lookup is PRIVILEGED.** The rules' internal `get()`s bypass rules, so a
+  user with `orders.read` but not `roles.read` reads orders while unable to read the role document
+  that authorized them. **The socket layer must make the same split.**
+- **App Check is ENFORCED** on `firestore.googleapis.com` in both projects (verified live). ⇒ even
+  the "public" `stock` read is not reachable from an arbitrary HTTP client in production, and the
+  rules test asserting anonymous success runs against an emulator where App Check does not apply.
+
+### ⚠️ Where the model is a claim rather than a check
+
+- **The rules test suite is a PRE-PUSH GIT HOOK, not CI.** Neither deploy workflow runs it — both go
+  straight to `firebase deploy --only firestore:rules`. ⇒ **a `--no-verify` push, or any cloud
+  agent, deploys rules to prod with the suite never having run.** Its `GATED_COLLECTIONS` list is
+  also hand-maintained, so a new `match` block is untested by default.
+- **`manager/firestore.rules.previous` exists, is referenced by nothing, and contains the pre-RBAC
+  blanket rule** `allow read: if request.auth != null && email_verified`. ⚠️ **A dead file that
+  reads as current config** — the same failure mode as a stale plan doc.
+- ⭐ **The suite injects claims directly**, so it proves the RULE behaves correctly given a claim.
+  **It proves nothing about whether the real system can produce that claim** — which is the next
+  item.
+
+### 🔴 A flagged finding, NOT asserted — the revocation RECOVERY path may not work
+
+`user.ts` intends: bump `token_version` → listener fires → `getIdToken(true)` → re-fetch `/auth/me`,
+so _"role revocations bite within seconds instead of ~1h."_ **Four facts sit uneasily against it**:
+there is **no `setCustomUserClaims`**, so no server-side record for a refreshed ID token to re-read
+`tv` from; `refreshFromServer` **receives a new custom token in `result.firebaseToken` and discards
+it**, never calling `signInWithCustomToken`; `checkSession` re-exchanges only when the uid differs,
+so **even a full reload does not re-exchange**; and Firebase documents the refresh mechanisms for
+`setCustomUserClaims`, not for custom-token developer claims.
+
+⚠️ **If developer claims are pinned to the sign-in session, a `tv` bump denies all 34 gated
+collections until an explicit logout.** ⭐ **Corroborating**: "View as Role" is documented as _"not
+server enforcement or `firestore.rules`"_ — true only because the manager never exchanges the
+preview-role token minted by the same mechanism. **Test coverage: zero.**
+
+⇒ **Not stated as fact — the experiment was not run.** Filed as manager#332. ⭐ **It is load-bearing
+for this spike either way**: it is the difference between _"revocation propagates in seconds"_ and
+_"revocation requires re-authentication"_, and **a socket layer holding its own session has the
+easier job — it can push a revocation frame — which is an argument in the socket design's favour.**
+
+### Unknowns that bound the design
+
+⚠️ **The propagation delay for a DATA-driven rule change under an active listener is undocumented.**
+Firebase publishes a bound for changes to the rules _source_ (up to 10 minutes for active
+listeners), not for a `roles/{name}` edit. ⭐ **This is the single most consequential unknown for
+the socket spec, because it sets the bar the socket layer is being compared against** — and it is
+measurable.
