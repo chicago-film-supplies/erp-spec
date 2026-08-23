@@ -2328,3 +2328,44 @@ open_questions:
       **What answers it**: the PSA template or engagement letter, and whether crew have ever been
       paid ahead of client funds in practice. ⚠️ **Ask both** — a stated term nobody enforces and an
       enforced habit nobody wrote down are different problems with the same appearance.
+
+  - id: OQ-056
+    headline: "what jurisdiction means, and which date the rate attaches to"
+    question: >-
+      Three decisions SPIKE-008 cannot make for itself: is `destinations[].jurisdiction` a cache
+      derived from the address or an operator-declared override; does a rental's tax rate attach to
+      the charge date, the charge-window start, or prorate across the window; and how is the
+      ordinance's 50% partial exemption represented at all?
+    owner: alex
+    decide_by: 2026-12-15
+    blocks: [SPIKE-008]
+    status: open
+    notes: >-
+      Opened 2026-08-22 by SPIKE-008's criterion 3, which is **specified but not closable** — the
+      empirical half is unanswerable from the corpus and the rest is a decision.
+      **1. WHAT `jurisdiction` IS.** Measured: **34 of 946 destinations carry one (3.6%)**, and where
+      both it and a mappable city exist it **disagrees with the delivery address 15 times against 13
+      agreements**. Invoice 2392 is the worked case — `jurisdiction: rantoul`, delivery city
+      **Chicago**, tax charged **Chicago Sales Tax 10.5%**. ⇒ **the applied tax follows the ADDRESS,
+      so whatever drives tax today is not this field.** It is currently behaving as both a cache and
+      an override, which is exactly what produces disagreements. **Derived means it must never be
+      hand-authored; override means it needs a stated meaning and a reason to differ.** It cannot
+      stay both. Also filed against v1 as api-cloudrun#620.
+      **2. WHICH DATE THE RATE ATTACHES TO.** Measured: **48 charge windows cross a rate boundary,
+      $61,994.60 of rental base** — and **rentals are billed IN ADVANCE**, so the charge date and
+      the use period genuinely diverge (invoice 2100 is dated 2025-11-06 for a window starting
+      2025-11-07). The City imposes the tax **"of receipts or charges for all leases"**, which reads
+      as the CHARGE being the taxable event rather than day-by-day use. ⚠️ **That reading is an
+      INFERENCE from the City's summary phrasing — §3-32-030's own text is behind an HTTP 403 and
+      was not read.** Draft on it; do not treat it as settled. **Whatever is chosen becomes a named
+      field with golden vectors on each arm**, because 42 of the 48 windows are unscoreable today
+      and the next rate change adds more.
+      **3. A REPRESENTABLE PARTIAL EXEMPTION.** The ordinance grants **50%** relief for property
+      leased outside the city and primarily used outside it. CFS models exemption as a **boolean**
+      (`invoice.tax_exempt`, `organization.tax_exempt`), so a partial exemption is **unrepresentable
+      and therefore undetectable** — the probe cannot even measure whether one was ever owed. **For
+      a rental house whose gear travels to location shoots this is not an edge case.**
+      ⚠️ **All three are tax-law shaped and this repo produces rules rather than authority.** The
+      spike says so itself: **a CPA should review the output**, and the *Hertz Corp. v. City of
+      Chicago* (2017 IL 119945) invalidation of Ruling 11 shows the sourcing question has already
+      been narrowed once by the Illinois Supreme Court.

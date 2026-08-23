@@ -11,7 +11,7 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 14 open | 41 answered of 55 · **0 with no owner or no decide-by** |
+| Open questions | 15 open | 41 answered of 56 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 23 | 0 open |
 | Decisions (ADR) | 44 | 25 in force · 15 proposed |
 | Spikes | 12 | 5 open |
@@ -22,7 +22,7 @@ is `deno task validate`'s judgement, not this file's.
 
 ## The bottleneck: undecided questions
 
-**14 of 55 still open**, soonest decide-by first.
+**15 of 56 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
@@ -35,6 +35,7 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-043` | Should the product and organization masters carry an EVENT HISTORY, so that a classificat… | alex | 2026-12-15 | — |
 | `OQ-044` | Once wages move into COGS, what stays in `6600 Wages` — and can salaried sales/admin staf… | alex | 2026-12-15 | — |
 | `OQ-055` | On a production service agreement, must the client fund before the crew is paid, or is ad… | alex | 2026-12-15 | — |
+| `OQ-056` | Three decisions SPIKE-008 cannot make for itself: is `destinations[].jurisdiction` a cach… | alex | 2026-12-15 | `SPIKE-008` |
 | `OQ-039` | `organizations.tax_profile` carries two different concepts in one enum — who owes (applie… | alex | 2027-01-15 | — |
 | `OQ-052` | What vehicle rate absorbs into 5900, over what normal-capacity denominator — and where do… | alex | 2027-01-31 | — |
 | `OQ-045` | When a vendor bills LESS than was accrued, what retires the residual left in `2010 Accrue… | alex | 2027-02-15 | — |
