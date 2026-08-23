@@ -2362,6 +2362,27 @@ open_questions:
       arise.** No unrelated conversation, no crew lists riding along for seven years. It also moves
       the assertion to the right party: **the customer represents it themselves** rather than an
       operator recording a claim about them.
+      **Making the attestation verifiable** (design input 2026-08-22,
+      `inbox/2026-08-22-design-input-making-attestations-verifiable-the-legal-bar-is-lower-than-the-evidentiary-one-and-the-customers-copy-is-the-cheapest-strong-control.md`):
+      ⚠️ **the LEGAL bar and the EVIDENTIARY bar are different heights.** ESIGN/UETA are
+      technology-neutral — a checkbox with intent IS a signature, and cryptography is not required;
+      what the statutes want is intent, attribution, and a record capable of accurate reproduction.
+      **Everything built beyond that buys evidentiary strength, not validity, so build to the value
+      at risk.** ⭐⭐ Capture the ACT rather than the outcome (`accepted: true` loses everything that
+      made it meaningful); **hash the RENDERED INSTANCE, not the clause version** — a page
+      interpolates the name, order and jurisdiction, so hashing the TEMPLATE reproduces a template
+      rather than what they saw; ⭐⭐ **send the customer a copy at signing**, which places a copy
+      outside CFS's control and is the strongest attribution evidence per dollar available;
+      hash-chain the entries so a retroactive edit breaks the chain (an isolated hash proves one
+      record intact, a chain proves none removed); and **exercise the reproduction path** rather
+      than assuming it. ⭐ **This is `ADR-0006`'s existing pattern** — *"the Parquet file is the audit
+      artifact, and its hash goes into the close record"* — reused rather than reinvented.
+      ⚠️ **Skip RFC 3161 timestamping** (the customer's copy plus the chain covers most of it) and
+      **ask the value-at-risk question before buying a signing vendor**: a jurisdiction attestation
+      protects ~7 points of tax on one order, a rental agreement protects the equipment's
+      replacement value — **those may deserve different answers.** ⚠️ **And clock trust is the
+      genuinely hard part**: every timestamp is CFS's own, the chain proves ordering and not *when*,
+      and the customer's copy is the practical mitigation.
       ⭐ **The hash discipline transfers to the CLAUSE TEXT** — versioned and immutably snapshotted,
       because "they accepted v3" is worthless unless v3 is reproducible. ⚠️ **And the reordering is
       the real output: client-app attestation is the PRIMARY mechanism; the operator-recorded claim

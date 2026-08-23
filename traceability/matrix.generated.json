@@ -5,7 +5,7 @@
     "adrs": 44,
     "adrs_accepted": 25,
     "events": 38,
-    "inbox": 114,
+    "inbox": 115,
     "inbox_promoted": 20
   },
   "requirements": [
@@ -650,6 +650,7 @@
       "inbox/2026-08-20-survey-nobody-keeps-allocations-out-of-the-ledger-they-keep-them-out-of-the-statements.md",
       "inbox/2026-08-22-correction-the-causal-orders-obligation-is-adr-0036s-decision-not-adr-0029s-and-two-artifacts-carried-the-wrong-owner.md",
       "inbox/2026-08-22-correction-the-jurisdiction-field-is-an-override-that-works-and-the-50-percent-exemption-i-cited-does-not-apply-to-cfs.md",
+      "inbox/2026-08-22-design-input-making-attestations-verifiable-the-legal-bar-is-lower-than-the-evidentiary-one-and-the-customers-copy-is-the-cheapest-strong-control.md",
       "inbox/2026-08-22-design-input-the-gmail-evidence-picker-store-raw-mime-hash-it-verify-dkim-at-capture-and-keep-it-out-of-the-reaper.md",
       "inbox/2026-08-22-evidence-storage-belongs-on-linode-not-gcs-and-the-retention-lock-collides-with-erasure-in-a-way-redaction-cannot-fix.md",
       "inbox/2026-08-22-owner-a-tracking-category-was-on-no-externally-filed-document-so-the-recast-is-owed-to-nobody.md",

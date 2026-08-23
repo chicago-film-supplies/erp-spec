@@ -535,7 +535,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (94 unpromoted of 114)" _note="no drops pending">
+      <outline text="Capture (95 unpromoted of 115)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -616,6 +616,7 @@
         <outline text="Rule 8a survey for ADR-0029 — three of five systems post allocations and none derives at report tim…" _note="inbox/2026-08-20-survey-nobody-keeps-allocations-out-of-the-ledger-they-keep-them-out-of-the-statements.md"/>
         <outline text="Correction — the causal_orders declare-or-be-rejected obligation is ADR-0036's decision and REQ-LED…" _note="inbox/2026-08-22-correction-the-causal-orders-obligation-is-adr-0036s-decision-not-adr-0029s-and-two-artifacts-carried-the-wrong-owner.md"/>
         <outline text="Correction — `destinations[].jurisdiction` is an override seeded from the organization's claim and…" _note="inbox/2026-08-22-correction-the-jurisdiction-field-is-an-override-that-works-and-the-50-percent-exemption-i-cited-does-not-apply-to-cfs.md"/>
+        <outline text="Design input — making attestations auditable: the legal bar is lower than the evidentiary one, the…" _note="inbox/2026-08-22-design-input-making-attestations-verifiable-the-legal-bar-is-lower-than-the-evidentiary-one-and-the-customers-copy-is-the-cheapest-strong-control.md"/>
         <outline text="Design input — the Gmail evidence picker: store RAW MIME rather than a PDF, hash it, verify DKIM at…" _note="inbox/2026-08-22-design-input-the-gmail-evidence-picker-store-raw-mime-hash-it-verify-dkim-at-capture-and-keep-it-out-of-the-reaper.md"/>
         <outline text="Evidence storage belongs on Linode rather than GCS — a retention lock IS platform lock-in, which is…" _note="inbox/2026-08-22-evidence-storage-belongs-on-linode-not-gcs-and-the-retention-lock-collides-with-erasure-in-a-way-redaction-cannot-fix.md"/>
         <outline text="Owner — a tracking category was on no externally filed document, which discharges the one load-bear…" _note="inbox/2026-08-22-owner-a-tracking-category-was-on-no-externally-filed-document-so-the-recast-is-owed-to-nobody.md"/>
