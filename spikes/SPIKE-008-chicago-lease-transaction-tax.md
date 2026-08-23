@@ -160,6 +160,18 @@ Corpus-wide the Chicago rental rate appears as 15% on 7,167 lines and 11% on **3
 class as api-cloudrun#537** — a denorm restamped by a later write, where the artifacts assert
 point-in-time fidelity and the writer does not implement it.
 
+⭐ **THE MECHANISM, and it makes this a LIVE defect rather than an import artifact.** The owner:
+_"firestore taxes carry applied from/to fields orders use to derive tax."_ ⇒ those windows **are**
+the ladder, already correct — and the bug is the DATE fed into the lookup. 3,001 of 3,003 mis-rated
+lines are the CRMS import cohort, which looks like a one-off; but **only 4 post-import orders have a
+`charge_start` before 2026-01-01**, two carry no Chicago rental tax, and **both that can test the
+ladder FAIL** (orders 795 and 702, both created February 2026, both carrying 15% where 11% was
+lawful). **2 of 2 testable live cases fail.**
+
+⚠️ **It looks fine in production only because it is almost never exercised** — 197 of 201
+post-import orders rent in 2026, where 15% is right anyway. **The ladder is correct by coincidence,
+not by construction.**
+
 ⚠️ **The issued invoice appears to preserve what the order lost** — invoice 2128 (2025-12-08)
 carries 11%, and criterion 2 found one registry-level disagreement in 333 scored invoice lines. **A
 head-to-head comparison was not completed**, so that reading rests on two observations and should be

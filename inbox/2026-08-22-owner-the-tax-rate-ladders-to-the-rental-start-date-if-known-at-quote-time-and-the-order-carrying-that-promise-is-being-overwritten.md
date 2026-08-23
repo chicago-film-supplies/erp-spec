@@ -66,6 +66,37 @@ and the order is not**, so the promise survives exactly where it has already bee
 everywhere it has not. **A head-to-head order-versus-invoice comparison was not completed and this
 reading rests on those two observations — it should be confirmed before it is relied on.**
 
+## ⭐ THE MECHANISM, given by the owner — and it identifies the defect exactly
+
+> _"firestore taxes carry applied from/to fields orders use to derive tax"_
+
+⇒ **`applied_from`/`applied_to` are not a passive record of when CFS charged what. They are the
+DERIVATION WINDOW an order looks up against.** Which means the windows are **already a correct
+ladder** — 9% to 2025-01-01, 11% to 2026-01-01, 15% open — and the defect is not the data. **It is
+which date gets fed into the lookup.**
+
+⚠️ **And it is LIVE, not an import artifact.** 3,001 of the 3,003 mis-rated lines sit in the CRMS
+import cohort, which looks like a one-off. It is not: **only 4 post-import orders have a
+`charge_start` before 2026-01-01**, so only 4 can exercise the ladder at all. Two carry no Chicago
+rental tax. **Both of the two that do, fail:**
+
+| order | created    | charge_start | lawful |   carries |
+| ----- | ---------- | ------------ | -----: | --------: |
+| 795   | 2026-02-02 | 2025-12-24   |    11% | **15%** ✗ |
+| 702   | 2026-02-06 | 2025-11-17   |    11% | **15%** ✗ |
+
+⇒ **2 of 2 testable live cases fail. The derivation uses the current date rather than
+`charge_start`.**
+
+⭐ **It looks fine in production only because it is almost never exercised.** 197 of 201 post-import
+orders rent in 2026, where 15% _is_ the right answer — **so the ladder is correct by coincidence
+rather than by construction.** An unexercised branch is a claim, not a capability, and this is the
+fifth instance of that shape in one session.
+
+⚠️ **One correction to the cohort analysis above: `updated_at` carries no signal.** It is `2026-08`
+on **all 994** orders, so any split drawn on it means nothing. Only `created_at` separates the
+import.
+
 ## ⚠️ The knowledge condition is unrepresentable today
 
 "Only if that rate change is known at quote time" needs a **third date** on a tax record. The schema
