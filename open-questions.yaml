@@ -2364,6 +2364,29 @@ open_questions:
       reference sources weekly and its delta canary cannot see a source that was never counted; a
       **retention-locked GCS bucket** is the control that makes "we could not have altered it" a
       property rather than a promise.
+      ⭐ **STORAGE: LINODE, NOT GCS** (2026-08-22). `ADR-0013` chose Linode for **"no platform
+      lock-in"**, and a locked retention policy **IS** platform lock-in in the most literal sense —
+      objects cannot be deleted, and cannot be moved either, because moving means copying and then
+      deleting the source. **Locking seven years of evidence into GCS means paying GCP until 2033
+      for a bucket that cannot be emptied, chosen mid-migration off GCP.** Linode Object Storage is
+      S3-compatible and documents Object Lock plus versioning. ⚠️ **Confirm it exposes COMPLIANCE
+      mode and not only GOVERNANCE before locking** — GOVERNANCE is bypassable by a principal with
+      `s3:BypassGovernanceRetention`, making it a policy control rather than a physical one. The doc
+      page is a JS shell and did not answer it; **do not infer it from S3 compatibility.**
+      ⚠️ **PII — the lock and erasure collide, and redaction CANNOT resolve it.** A locked bucket
+      means an erasure request cannot be honoured for seven years; tax retention is a lawful basis
+      for refusing, **but only for what is NECESSARY**, and a whole thread of unrelated conversation
+      is not. ⭐⭐ **And verifiability and minimisation are in direct conflict**: verification needs
+      the message raw and unmodified, and **redacting anything breaks the DKIM signature and changes
+      the hash**. ⇒ **minimisation cannot happen after capture — the only lever is choosing what to
+      capture**, once, irreversibly. So: **default the picker to a single MESSAGE rather than the
+      thread**; ⚠️ **decide attachments explicitly and probably exclude them by default**, because a
+      production thread may carry crew lists — the payroll-adjacent data the workspace rule warns
+      about — and that is the one part that could retain something genuinely sensitive for seven
+      years without anyone choosing to. And **record the exception to "record structure and
+      aggregates, never rows"** rather than drifting past it: the exception is justified because the
+      artifact IS the evidence, but an unwritten reasoned exception becomes a precedent nobody
+      intended.
       **Retention: 7 years** (owner, 2026-08-22), believed to match the audit limitation. ⚠️ **NOT
       VERIFIED** — amlegal 403s and the chicago.gov PDFs 404, so Chapter 3-4's limitations text was
       never read, and the commonly-cited IRS "7 years" is a records rule-of-thumb rather than a
