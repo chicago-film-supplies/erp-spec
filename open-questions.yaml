@@ -2353,7 +2353,28 @@ open_questions:
       obvious, its just the evidence thats not."_** An exemption's reason is that the customer is
       exempt; an override's is exclusive use. ⇒ **an enum over one obvious value per case buys
       nothing.** What is missing is a durable, checkable artifact that the assertion was made.
-      **Direction chosen: a Gmail evidence picker** — design input in
+      ⭐⭐ **DIRECTION CHANGED 2026-08-22 — the assertion becomes an ACTIVE PATH IN THE CLIENT APP**
+      (owner): _"confirm exclusive use in x jurisdiction kind of thing, we'll need a surface to
+      facilitate rental agreements anyway."_ **This is strictly better than the picker and it
+      DISSOLVES the hardest problem rather than managing it**: a structured attestation contains
+      exactly the data the purpose requires, so the verifiability-versus-minimisation conflict —
+      raw MIME needed for DKIM, redaction impossible without breaking it — **simply does not
+      arise.** No unrelated conversation, no crew lists riding along for seven years. It also moves
+      the assertion to the right party: **the customer represents it themselves** rather than an
+      operator recording a claim about them.
+      ⭐ **The hash discipline transfers to the CLAUSE TEXT** — versioned and immutably snapshotted,
+      because "they accepted v3" is worthless unless v3 is reproducible. ⚠️ **And the reordering is
+      the real output: client-app attestation is the PRIMARY mechanism; the operator-recorded claim
+      with attached correspondence is the FALLBACK** for phone orders and standing relationships
+      that never touch the app. The picker is demoted from mechanism to exception — much smaller,
+      far less permission-hungry.
+      ⚠️ **Two things the spec must now decide that the picker never raised**: what happens when an
+      honest representation turns out wrong (gear attested for Frankfort shoots in Chicago) — a
+      dated attestation makes it *"as represented at T"* so a change of use is a NEW FACT rather
+      than a contradiction, but the correction path must be stated; and **the client app gains a
+      FOURTH capability** beyond the 2026-08-18 three, landing on contexts that have zero
+      requirements between them.
+      **Superseded direction — a Gmail evidence picker** — design input in
       `inbox/2026-08-22-design-input-the-gmail-evidence-picker-store-raw-mime-hash-it-verify-dkim-at-capture-and-keep-it-out-of-the-reaper.md`.
       Store **raw MIME rather than a PDF** (a rendering discards the headers that carry the
       verifiable facts) and render on demand; **hash at capture**; ⭐ **verify DKIM at capture and

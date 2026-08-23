@@ -535,7 +535,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (93 unpromoted of 113)" _note="no drops pending">
+      <outline text="Capture (94 unpromoted of 114)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -624,6 +624,7 @@
         <outline text="Owner — jurisdiction overrides exist at org, order and invoice level, are used only for Frankfort a…" _note="inbox/2026-08-22-owner-jurisdiction-overrides-are-org-order-and-invoice-level-frankfort-and-rantoul-only-per-project-on-exclusive-use.md"/>
         <outline text="Owner refines the PSA credit-risk answer — the client is obligated to repay, but CFS is small and a…" _note="inbox/2026-08-22-owner-refines-the-psa-credit-risk-the-client-is-obligated-but-cfs-is-small-and-overseas-collection-is-hard.md"/>
         <outline text="Owner — the depreciation engine covers ALL valid GAAP and US tax cases, not just the ones CFS uses…" _note="inbox/2026-08-22-owner-the-depreciation-engine-covers-all-valid-gaap-and-us-tax-cases-not-just-the-ones-cfs-uses-today.md"/>
+        <outline text="Owner — make the jurisdiction assertion an active path in the client app rather than archaeology ov…" _note="inbox/2026-08-22-owner-the-jurisdiction-assertion-becomes-a-client-app-attestation-which-dissolves-the-pii-conflict-rather-than-managing-it.md"/>
         <outline text="Owner — the tax rate ladders to the rate effective at the rental's start date, but only if that cha…" _note="inbox/2026-08-22-owner-the-tax-rate-ladders-to-the-rental-start-date-if-known-at-quote-time-and-the-order-carrying-that-promise-is-being-overwritten.md"/>
         <outline text="SPIKE-005's convention list is short by one — mid-quarter is MANDATORY when the 40% test trips, it…" _note="inbox/2026-08-22-spike-005s-convention-list-is-short-by-one-and-mid-quarter-is-mandatory-not-optional.md"/>
         <outline text="SPIKE-008 — the tax decision table already exists as data, the rate history matches the ordinance e…" _note="inbox/2026-08-22-spike-008-the-tax-decision-table-already-exists-as-data-and-the-jurisdiction-field-it-would-source-from-is-absent-or-wrong.md"/>
