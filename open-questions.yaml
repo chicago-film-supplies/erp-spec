@@ -2330,7 +2330,7 @@ open_questions:
       enforced habit nobody wrote down are different problems with the same appearance.
 
   - id: OQ-056
-    headline: "a jurisdiction override records no reason"
+    headline: "a jurisdiction override records no evidence"
     question: >-
       What remains after 2026-08-22's answers and corrections, and it is machinery rather than
       judgement, now that precedence is answered (invoice > order > org, and unexercised): how the
@@ -2349,7 +2349,24 @@ open_questions:
       `Tax.effective_from`**, which prices nothing and makes the lag auditable; and the
       Frankfort/Rantoul restriction is **WRONG** — three narrower sets already exist for three
       stated reasons, and the owner's phrasing was the practice rather than the constraint.
-      ⭐ **WHAT SURVIVES IS ONE ITEM: an override carries no REASON.** Zero grep hits across `core`,
+      ⭐ **AND THE OWNER REFRAMED WHAT THE ITEM IS (2026-08-22): _"the reason in both cases is
+      obvious, its just the evidence thats not."_** An exemption's reason is that the customer is
+      exempt; an override's is exclusive use. ⇒ **an enum over one obvious value per case buys
+      nothing.** What is missing is a durable, checkable artifact that the assertion was made.
+      **Direction chosen: a Gmail evidence picker** — design input in
+      `inbox/2026-08-22-design-input-the-gmail-evidence-picker-store-raw-mime-hash-it-verify-dkim-at-capture-and-keep-it-out-of-the-reaper.md`.
+      Store **raw MIME rather than a PDF** (a rendering discards the headers that carry the
+      verifiable facts) and render on demand; **hash at capture**; ⭐ **verify DKIM at capture and
+      record the verdict**, because verification degrades as selectors rotate; **bind the evidence to
+      the order, destination and jurisdiction value it justifies**; record **three dates** so an
+      auditor can see whether the evidence predates the billing; **per-user OAuth, never
+      domain-wide**. ⚠️ **And keep it out of Uploadcare** — `uploadcare-sweep` reaps unregistered
+      reference sources weekly and its delta canary cannot see a source that was never counted; a
+      **retention-locked GCS bucket** is the control that makes "we could not have altered it" a
+      property rather than a promise.
+      ⚠️ **Nothing is built**: no Gmail integration, no inbound-email pipeline, no bucket in the
+      terraform. **The cheapest control is the strongest — if only one thing ships, ship the hash.**
+      ⭐ **WHAT SURVIVES IS ONE ITEM: an override carries no EVIDENCE.** Zero grep hits across `core`,
       `api-cloudrun` and `manager`, and it is explicitly listed as out of scope in
       `api-cloudrun/.claude/plans/tax-jurisdiction-campaign-RECORD.md`. **That is the whole of this
       OQ now.** Reconciliation:
