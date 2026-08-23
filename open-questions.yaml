@@ -2384,6 +2384,54 @@ open_questions:
       ⚠️ **Skip RFC 3161 timestamping** (the customer's copy plus the chain covers most of it). ⚠️ **And clock trust is the
       genuinely hard part**: every timestamp is CFS's own, the chain proves ordering and not *when*,
       and the customer's copy is the practical mitigation.
+      ✅ **THE STATUTES WERE READ, 2026-08-22 — and one finding CHANGES the design rather than
+      confirming it**:
+      `inbox/2026-08-22-esign-and-illinois-ueta-researched-from-statute-the-teeth-are-illinois-8c-and-attribution-is-any-manner.md`.
+      ⭐⭐ **815 ILCS 333/8(c): a record is NOT ENFORCEABLE against a recipient whose ability to store
+      or print it the sender inhibited — and §8(d) says that CANNOT BE VARIED BY AGREEMENT.**
+      Stricter than the federal analogue, ESIGN §7001(e), which only says enforceability *"may be
+      denied"*. ⇒ **"send the customer a retainable copy" stops being the best evidence per dollar
+      and becomes close to an enforceability precondition** — **two independent reasons for one
+      control**, the other being that it is the only artifact outside CFS's hands once a vendor was
+      declined. ⚠️ **And it constrains the UI, not only the storage**: §8(a) reaches the sender's
+      *"information processing system"*, so a view-only, download-disabled attestation screen is
+      the exact fact pattern the section describes.
+      ⭐ **Attribution is STATE law and it is permissive** — ESIGN has no general attribution
+      provision at all (the only "attribut" in §§7001–7006 is §7001(h), about electronic agents).
+      815 ILCS 333/9(a): attributable *"if it was the act of the person"*, and the act *"may be
+      shown **in any manner**"*, with security procedures given as an EXAMPLE rather than a
+      requirement. ⭐ **§2(14) defines "security procedure" to expressly include "identifying words
+      or numbers"** ⇒ **an emailed magic-link token IS a statutory security procedure**, not a
+      compromise position. ⇒ **identity strength is a value-at-risk judgement, not a compliance
+      floor.**
+      ✅ **A B2B rental escapes ESIGN §7001(c) entirely** — the paper-copy, withdrawal,
+      hardware/software and re-consent regime attaches only where a **consumer** is a party AND
+      another law independently requires a writing to them. §7006(1) is cumulative: **an
+      individual**, obtaining, for **personal, family or household purposes**. ⚠️ **But the test is
+      the PURPOSE OF USE, not who signs** — a sole proprietor renting for personal use would
+      qualify, which makes it **a data question about CFS's customer book**, and exactly the kind of
+      assumption that holds until the one counterparty who breaks it. ⚠️ **Illinois has its own
+      gate and it is NOT consumer-limited**: §5(b) applies the Act only between parties **each of
+      which has agreed** to transact electronically — inferred from *"the parties' conduct"*, so
+      signing through the app is itself the evidence, but it is a gate on every transaction.
+      ⭐ **Illinois §12(a)(1) supplies the statutory reason for hashing the rendered instance** —
+      accuracy is measured against the record *"after it was **first generated in its final
+      form**"*, an anchor ESIGN's §7001(d) lacks. The design already said hash the rendering rather
+      than the template; it now has a source rather than only an engineering argument.
+      ✅ **No third party is required, confirmed from the text three ways** — the definitions name
+      only a sound/symbol/process, association, and **intent to sign**; a grep of the Illinois act
+      for "third party"/"certificate" returns one hit, §18(b)(2), governing a *governmental
+      agency's own filings*; and §7002(a)(2)(A)(ii) + §7004(b)(2)(C)(iii) **forbid according greater
+      legal effect to a specific technology.** ⇒ the owner's decision is not a compromise against
+      the statutes; it is what they were written to permit. ⭐ **And equipment rental is expressly
+      IN scope** — both UCC carve-outs preserve **Article 2A, leases of goods.** ⚠️ ESIGN
+      §7003(b)(2)(B) excludes notices under *"a rental agreement for, a primary residence of an
+      individual"* — residential tenancy, and **the word "rental" in an exclusion list is precisely
+      what gets misread.**
+      ⚠️ **A METHOD FINDING worth more than the topic**: ILGA's redesigned site **serves a DIFFERENT
+      STATUTE with HTTP 200 on a stale ActID** — `4181` returned the Coal Tar Sealant Disclosure
+      Act. A pass that trusted the 200 would have produced confident, well-formatted nonsense. ⇒
+      **an HTTP 200 is not evidence that you fetched what you asked for.**
       ⭐ **The hash discipline transfers to the CLAUSE TEXT** — versioned and immutably snapshotted,
       because "they accepted v3" is worthless unless v3 is reproducible. ⚠️ **And the reordering is
       the real output: client-app attestation is the PRIMARY mechanism; the operator-recorded claim
