@@ -85,9 +85,30 @@ Every disagreement is `jurisdiction=frankfort, city=chicago` (×13) or
 `jurisdiction=rantoul,
 city=chicago` (×2).
 
-⇒ **The field a tax engine would source from disagrees with the delivery address more often than it
-agrees, and is absent 96.4% of the time.** ⚠️ **Both failure modes at once** — "present but wrong"
-beats "absent" at passing every existence check, and here neither is rare.
+⚠️ **CORRECTED 2026-08-22 — the counts above are right; the reading I drew from them was wrong,
+twice.** `destinations[].jurisdiction` is an **OVERRIDE seeded from
+`organization.jurisdiction_claim`** — the field name says so, it is a _claim_ — and **the tax DOES
+follow it**:
+
+| invoices                   | org claim | dest jurisdiction | delivery city | tax applied          |
+| -------------------------- | --------- | ----------------- | ------------- | -------------------- |
+| Kenwood TV Productions ×13 | frankfort | frankfort         | **Chicago**   | **Frankfort 8%** ✅  |
+| Chili Finger               | null      | rantoul           | Chicago       | **Rantoul 9%** ✅    |
+| **2392**                   | null      | rantoul           | Chicago       | **Chicago 10.5%** ⚠️ |
+
+⇒ **13 of the 15 "disagreements" are ONE customer's claim honoured correctly**, and the tax follows
+the field in 4 of 5 checked. **"Wrong more often than right" miscounted what the number meant, and
+"the applied tax follows the address" generalised from invoice 2392 against four cases showing the
+opposite.**
+
+⭐ **What survives is sharper, and it is a CPA question rather than a data one.** Kenwood is
+delivered to `3100 W Fillmore St, Chicago` and billed **Frankfort 8%** on a claim. The Chicago lease
+tax reaches property **used in Chicago**. ⇒ **a jurisdiction claim is a tax POSITION, not a data
+field** — seven points of difference on 13 invoices here.
+
+⚠️ **Two things remain genuinely open**: **96.4% of destinations carry no jurisdiction at all**, so
+an unstated default drives everything else; and **invoice 2392** followed neither its claim (there
+is none) nor its field.
 
 **Invoice 2392 (2026-08-21)** is the worked case: `jurisdiction: "rantoul"`, delivery city
 **Chicago**, tax charged **Chicago Sales Tax 10.5%**. The applied tax follows the ADDRESS. ⇒
@@ -186,19 +207,21 @@ confirmed rather than relied on.
 2. **Which date the rate attaches to** — charge date, charge-window start, or prorated across the
    window — **as a NAMED FIELD with golden vectors on each arm.** 48 windows already cross a
    boundary; the next rate change makes it 48 more.
-3. **A representable partial exemption.** The ordinance's 50% relief for property leased outside the
-   city and primarily used outside it **cannot be expressed by a boolean**, and for a rental house
-   whose gear travels to location shoots this is not an edge case.
+3. ⛔ **WITHDRAWN 2026-08-22.** I claimed the ordinance's _"property leased outside the city that is
+   primarily used outside the city (50%)"_ was a **partial exemption** a boolean could not express.
+   **It does not apply to CFS at all** — the predicate is property _leased outside the city_, and
+   CFS is a Chicago lessor. `(50%)` most likely defines "primarily", not a relief rate. ⚠️ **A rate
+   inferred from a parenthetical on a summary page** — the footgun this repo names. §3-32-050 was
+   never read; it is behind an HTTP 403.
 
 ### ⛔ What criterion 3 still owes
 
 Rate-change handling is half-answered — the two-date model exists and the gap is measured — but
 **nexus is not**, and it is now the harder half:
 
-- ⚠️ **The ordinance's 50% exemption for "property leased outside the city that is primarily used
-  outside the city" is UNREPRESENTABLE.** CFS models exemption as a boolean, so a partial exemption
-  cannot be expressed and the probe cannot detect whether one was ever owed. **For a rental house
-  whose gear travels to location shoots, this is not an edge case.**
+- ⛔ **WITHDRAWN** — the 50% exemption cited here does not apply to CFS (Chicago lessor; the
+  predicate is property _leased outside_ the city), and `(50%)` most likely defines "primarily"
+  rather than a relief rate. See the correction note.
 - ⚠️ **The sourcing rule is contested law.** The tax reaches property _used in Chicago_, and **Hertz
   Corp. v. City of Chicago, 2017 IL 119945** held Lease Transaction Tax Ruling 11 invalid on exactly
   that point. A table keyed on a stored enum simplifies a rule the Illinois Supreme Court has
