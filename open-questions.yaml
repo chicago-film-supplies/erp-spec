@@ -2330,12 +2330,13 @@ open_questions:
       enforced habit nobody wrote down are different problems with the same appearance.
 
   - id: OQ-056
-    headline: "what jurisdiction means, and which date the rate attaches to"
+    headline: "is a jurisdiction claim a defensible tax position"
     question: >-
-      Three decisions SPIKE-008 cannot make for itself: is `destinations[].jurisdiction` a cache
-      derived from the address or an operator-declared override; does a rental's tax rate attach to
-      the charge date, the charge-window start, or prorate across the window; and how is the
-      ordinance's 50% partial exemption represented at all?
+      What remains after 2026-08-22's answers and corrections: is a customer's
+      `jurisdiction_claim` a defensible tax POSITION when gear is delivered to a Chicago address —
+      and what is the unstated default for the 96.4% of destinations carrying no jurisdiction at
+      all? (Parts 2 and 3 as originally framed are answered and withdrawn respectively; the notes
+      below keep the record.)
     owner: alex
     decide_by: 2026-12-15
     blocks: [SPIKE-008]
@@ -2343,7 +2344,27 @@ open_questions:
     notes: >-
       Opened 2026-08-22 by SPIKE-008's criterion 3, which is **specified but not closable** — the
       empirical half is unanswerable from the corpus and the rest is a decision.
-      **1. WHAT `jurisdiction` IS.** Measured: **34 of 946 destinations carry one (3.6%)**, and where
+      ✅ **1 IS LARGELY ANSWERED BY THE DATA (2026-08-22), and my first reading of it was wrong on
+      two counts.** `destinations[].jurisdiction` is an **OVERRIDE seeded from
+      `organization.jurisdiction_claim`** — the field name says so, it is a *claim* — and **the tax
+      DOES follow it**: Kenwood TV Productions (claim `frankfort`, delivered to Chicago) is billed
+      Frankfort 8% on 13 invoices, and Chili Finger likewise. **13 of the 15 "disagreements" are one
+      customer's claim honoured correctly**, so "wrong more often than right" was a miscount of what
+      the number meant, and "the applied tax follows the ADDRESS" generalised from a single case
+      against four that showed the opposite. Corrected in
+      `inbox/2026-08-22-correction-the-jurisdiction-field-is-an-override-that-works-and-the-50-percent-exemption-i-cited-does-not-apply-to-cfs.md`.
+      ⭐ **WHAT SURVIVES IS SHARPER AND IS A CPA QUESTION.** Kenwood is delivered to
+      `3100 W Fillmore St, Chicago` and billed **Frankfort 8%** on a claim. The Chicago Personal
+      Property Lease Transaction Tax reaches property **used in Chicago**, and gear delivered to a
+      Chicago address is on its face used in Chicago. ⇒ **a customer's jurisdiction claim is a tax
+      POSITION, not a data field.** If it is right, something must record WHY; if it is wrong, CFS
+      under-collects Chicago lease tax at 15% while remitting Frankfort sales tax at 8% — **seven
+      points, on 13 invoices in this sample alone.**
+      **What else remains**: **96.4% of destinations carry no jurisdiction at all** (34 of 946), so
+      an unstated default drives everything else and the default is what needs writing down; and
+      **invoice 2392** is a genuine one-off whose tax followed neither its claim (there is none) nor
+      its field, dated 2026-08-21 and unexplained.
+      **1. WHAT `jurisdiction` IS — original framing, kept for the record.** Measured: **34 of 946 destinations carry one (3.6%)**, and where
       both it and a mappable city exist it **disagrees with the delivery address 15 times against 13
       agreements**. Invoice 2392 is the worked case — `jurisdiction: rantoul`, delivery city
       **Chicago**, tax charged **Chicago Sales Tax 10.5%**. ⇒ **the applied tax follows the ADDRESS,
@@ -2379,7 +2400,14 @@ open_questions:
       was not read.** Draft on it; do not treat it as settled. **Whatever is chosen becomes a named
       field with golden vectors on each arm**, because 42 of the 48 windows are unscoreable today
       and the next rate change adds more.
-      **3. A REPRESENTABLE PARTIAL EXEMPTION.** The ordinance grants **50%** relief for property
+      ⛔ **3 IS WITHDRAWN — the exemption I cited does not apply to CFS, and the owner caught it.**
+      The provision is for property **leased outside the city** and CFS is a Chicago lessor, so the
+      predicate fails at its first clause. And **`(50%)` most likely defines "primarily"** — more
+      than half of use — rather than stating the size of a relief. ⚠️ **I inferred a
+      partial-exemption RATE from a parenthetical on a summary page**, which is exactly the footgun
+      this repo names: extract the primary source before quoting a number from it. §3-32-050's text
+      was never read; it is behind an HTTP 403. **There is no partial exemption to represent.**
+      **3. A REPRESENTABLE PARTIAL EXEMPTION — original framing, WITHDRAWN, kept for the record.** The ordinance grants **50%** relief for property
       leased outside the city and primarily used outside it. CFS models exemption as a **boolean**
       (`invoice.tax_exempt`, `organization.tax_exempt`), so a partial exemption is **unrepresentable
       and therefore undetectable** — the probe cannot even measure whether one was ever owed. **For

@@ -16,7 +16,7 @@ is `deno task validate`'s judgement, not this file's.
 | Decisions (ADR) | 44 | 25 in force · 15 proposed |
 | Spikes | 12 | 5 open |
 | Requirements | 21 | 0 without a scenario |
-| Inbox | 107 | 87 unpromoted |
+| Inbox | 108 | 88 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
@@ -35,7 +35,7 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-043` | Should the product and organization masters carry an EVENT HISTORY, so that a classificat… | alex | 2026-12-15 | — |
 | `OQ-044` | Once wages move into COGS, what stays in `6600 Wages` — and can salaried sales/admin staf… | alex | 2026-12-15 | — |
 | `OQ-055` | On a production service agreement, must the client fund before the crew is paid, or is ad… | alex | 2026-12-15 | — |
-| `OQ-056` | Three decisions SPIKE-008 cannot make for itself: is `destinations[].jurisdiction` a cach… | alex | 2026-12-15 | `SPIKE-008` |
+| `OQ-056` | What remains after 2026-08-22's answers and corrections: is a customer's `jurisdiction_cl… | alex | 2026-12-15 | `SPIKE-008` |
 | `OQ-039` | `organizations.tax_profile` carries two different concepts in one enum — who owes (applie… | alex | 2027-01-15 | — |
 | `OQ-052` | What vehicle rate absorbs into 5900, over what normal-capacity denominator — and where do… | alex | 2027-01-31 | — |
 | `OQ-045` | When a vendor bills LESS than was accrued, what retires the residual left in `2010 Accrue… | alex | 2027-02-15 | — |
