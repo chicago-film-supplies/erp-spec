@@ -2330,7 +2330,7 @@ open_questions:
       enforced habit nobody wrote down are different problems with the same appearance.
 
   - id: OQ-056
-    headline: "the override reason, target set and the unstated default"
+    headline: "a jurisdiction override records no reason"
     question: >-
       What remains after 2026-08-22's answers and corrections, and it is machinery rather than
       judgement, now that precedence is answered (invoice > order > org, and unexercised): how the
@@ -2342,7 +2342,19 @@ open_questions:
     blocks: [SPIKE-008]
     status: open
     notes: >-
-      📝 **A DRAFT SPECIFICATION IS WRITTEN AND AWAITS THE OWNER'S RULING** — `SPIKE-008`,
+      ⚠️ **SUPERSEDED IN PART, 2026-08-22 — the tax model was rebuilt 2026-08-17 → 2026-08-22 and
+      most of this was already decided in `api-cloudrun`/`core`.** The default is implemented
+      (`resolveJurisdiction` = destination ?? org claim ?? `deriveJurisdiction(address, origin)`,
+      never a hardcoded `chicago`); the `announced_at` field asked for **already exists as
+      `Tax.effective_from`**, which prices nothing and makes the lag auditable; and the
+      Frankfort/Rantoul restriction is **WRONG** — three narrower sets already exist for three
+      stated reasons, and the owner's phrasing was the practice rather than the constraint.
+      ⭐ **WHAT SURVIVES IS ONE ITEM: an override carries no REASON.** Zero grep hits across `core`,
+      `api-cloudrun` and `manager`, and it is explicitly listed as out of scope in
+      `api-cloudrun/.claude/plans/tax-jurisdiction-campaign-RECORD.md`. **That is the whole of this
+      OQ now.** Reconciliation:
+      `inbox/2026-08-22-the-tax-model-was-rebuilt-in-five-days-and-most-of-oq-056-was-already-decided-in-api-cloudrun.md`.
+      📝 **The draft specification below is kept for the record and is superseded** — `SPIKE-008`,
       "DRAFT SPECIFICATION for OQ-056". Four items, three decisions and one test obligation:
       **D1** the default jurisdiction is **Chicago**, stated rather than implied — measured at
       **82.5%** of the no-override taxed base, with nothing else appearing at all, and justified as

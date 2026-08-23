@@ -248,6 +248,37 @@ confirmed rather than relied on.
    inferred from a parenthetical on a summary page** — the footgun this repo names. §3-32-050 was
    never read; it is behind an HTTP 403.
 
+### ⚠️ THE DRAFT BELOW IS SUPERSEDED — read this first
+
+**The tax model was rebuilt 2026-08-17 → 2026-08-22, in `api-cloudrun` and `core`, and most of what
+the draft proposes already exists.** Verified 2026-08-22 against
+`code:2026-08-22:core@7bcc2db:src/utils/taxes.ts`. Full reconciliation:
+`inbox/2026-08-22-the-tax-model-was-rebuilt-in-five-days-and-most-of-oq-056-was-already-decided-in-api-cloudrun.md`.
+
+| draft item                                          | verdict                                                                                                                                                                                                                |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **D1** default is the warehouse, stated not implied | ✅ **ALREADY IMPLEMENTED** — `resolveJurisdiction` = `destination ?? org claim ?? deriveJurisdiction(address, origin)`. Never a hardcoded `chicago`, and `requireOriginJurisdiction()` **throws** rather than guessing |
+| **D1a** `tax = exempt × date × jurisdiction`        | ✅ implemented, with **item type as the fourth axis** — `const key = item.taxed_as ?? item.type`                                                                                                                       |
+| **D2** an override carries a REASON                 | ⭐ **THE ONE ITEM THAT SURVIVES.** Zero grep hits in `core`, `api-cloudrun`, `manager`; explicitly listed as out of scope in the campaign record                                                                       |
+| **D3** targets restricted to Frankfort/Rantoul      | ❌ **WRONG** — three narrower sets already exist (derivable / assertable / levyable), each for a stated reason. The owner's phrasing was the PRACTICE, not the constraint                                              |
+| **T1** precedence needs vectors                     | 🟡 the precedence is implemented; what I measured is a fact about the DATA                                                                                                                                             |
+
+⭐ **And the `announced_at` field D-items asked for already exists as `Tax.effective_from`** — which
+**prices nothing**, and exists so the `[effective_from, applied_from)` lag is auditable. The two
+dates this spike "discovered" are a deliberate design.
+
+⚠️ **THE LESSON, and it is new for this repo: A MEASUREMENT OF STATE IS NOT A MEASUREMENT OF
+BEHAVIOUR WHEN THE CODE CHANGED LAST WEEK.** Every probe here was accurate and every figure real —
+**the figures were right and the inferences were wrong**, because a corpus records what the code did
+across its whole history, not what it does now. The repo's rule _"verify structural assumptions
+against the live API"_ was followed and was the wrong instrument. **Read the writer before inferring
+intent from what it wrote, and check when it last changed.**
+
+⇒ **Two issues filed from this spike were filed on wrong readings**: api-cloudrun#620 is **closed as
+invalid** (invoice 2392 is the `replacement` rule working, not a defect), and #622 is **corrected
+and retitled** (the delivery-start ladder already exists; my "live defect" evidence was two orders
+created before it landed).
+
 ### 📝 DRAFT SPECIFICATION for OQ-056 — for the owner's review, not yet ruled
 
 Four items. **Three are decisions; the fourth is a test obligation.** Written as spec prose so they
