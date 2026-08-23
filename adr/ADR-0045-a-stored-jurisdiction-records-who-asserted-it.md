@@ -61,6 +61,17 @@ asserts:
       The org and project levels INITIALIZE a new order or invoice with an override and do nothing
       else. There is no live organization rung in the precedence, so a document's own stored value
       is either an assertion or absent, and absent means derived.
+  - id: D4
+    kind: decision
+    claim: >-
+      A correction to a jurisdiction is a new assertion at the order or invoice destination level,
+      using the same override field. There is no separate correction mechanism.
+  - id: D5
+    kind: decision
+    claim: >-
+      A replacement line sources to the CFS store, because CFS is the end user and the customer is
+      only paying for it. The default store determines it, overridable to another CFS store, and a
+      customer's attestation about their own use never reaches it.
   - id: P7
     kind: premise
     claim: >-
@@ -233,6 +244,31 @@ carries only what remains genuinely unrecorded — **who asserted, and under wha
 ⚠️ **The cost is real.** With no rung, correcting an organization's standing position does not reach
 documents already created; each affected document must be re-opened. That is a feature under the
 snapshot principle and a support burden in practice.
+
+### ⭐ The correction path is the override itself (D4), which promotes a UI gap to a blocker
+
+Owner, 2026-08-23: _"the correction path would need to be at the order/invoice level utilizing the
+same destination overide."_ ⇒ **no new machinery** — a later, more specific statement supersedes the
+standing one, which is the precedence already ruled on.
+
+⚠️ **But an invoice's jurisdiction is not editable after create**
+(`api-cloudrun/src/services/invoices.ts:898-901`), and the manager's control is typed for
+`Order | Fulfillment` only. ⭐ **An invoice is exactly where corrections arrive**, since invoices
+are issued after the fact — `SPIKE-008` measured one dated 2025-11-06 for a window running to
+2026-02-13. **The document most likely to need a correction is the one that cannot take one.**
+
+### ⭐ A replacement sources to the CFS store, and that closes a question rather than opening one (D5)
+
+_"replacements are used by cfs (not the customer, the customer is just paying for them)."_ The code
+already implements it — `resolveLineTax` returns `ctx.origin` before levels 1 and 2 are consulted. ⇒
+**an override to `no_nexus` not reaching a replacement line is CORRECT**, not a gap: a customer's
+attestation about where _they_ will use gear says nothing about a part _CFS_ consumed.
+
+⚠️ **The override half of D5 is not reachable in three of four writers.** `updateOrder` resolves
+`order.uid_store`; `createOrder` and both invoice writers resolve the **default** store, and
+`CreateOrderInput` carries no `uid_store` at all. ⇒ an order with a non-default store **prices at
+one origin on create and another on its first edit** — dormant only while every store shares a
+jurisdiction, and the day that stops being true is the day the override is needed.
 
 ## Considered options — the three withdrawn decisions, and why each is worse
 
