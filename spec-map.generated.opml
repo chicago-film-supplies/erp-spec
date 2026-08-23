@@ -535,7 +535,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (91 unpromoted of 111)" _note="no drops pending">
+      <outline text="Capture (92 unpromoted of 112)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -619,6 +619,7 @@
         <outline text="Design input — the Gmail evidence picker: store RAW MIME rather than a PDF, hash it, verify DKIM at…" _note="inbox/2026-08-22-design-input-the-gmail-evidence-picker-store-raw-mime-hash-it-verify-dkim-at-capture-and-keep-it-out-of-the-reaper.md"/>
         <outline text="Owner — a tracking category was on no externally filed document, which discharges the one load-bear…" _note="inbox/2026-08-22-owner-a-tracking-category-was-on-no-externally-filed-document-so-the-recast-is-owed-to-nobody.md"/>
         <outline text="Owner answers OQ-053 — CFS signs the crew engagement, buys its own GL and inland marine, and eats t…" _note="inbox/2026-08-22-owner-answers-oq-053-cfs-signs-insures-and-eats-the-loss-on-a-psa-and-uses-an-eor-for-the-payroll.md"/>
+        <outline text="Owner — evidence retention is 7 years, believed to be the audit limitation; I could not verify it f…" _note="inbox/2026-08-22-owner-evidence-retention-is-seven-years-unverified-and-the-lock-is-the-irreversible-act-so-sequence-it-after-the-check.md"/>
         <outline text="Owner — jurisdiction overrides exist at org, order and invoice level, are used only for Frankfort a…" _note="inbox/2026-08-22-owner-jurisdiction-overrides-are-org-order-and-invoice-level-frankfort-and-rantoul-only-per-project-on-exclusive-use.md"/>
         <outline text="Owner refines the PSA credit-risk answer — the client is obligated to repay, but CFS is small and a…" _note="inbox/2026-08-22-owner-refines-the-psa-credit-risk-the-client-is-obligated-but-cfs-is-small-and-overseas-collection-is-hard.md"/>
         <outline text="Owner — the depreciation engine covers ALL valid GAAP and US tax cases, not just the ones CFS uses…" _note="inbox/2026-08-22-owner-the-depreciation-engine-covers-all-valid-gaap-and-us-tax-cases-not-just-the-ones-cfs-uses-today.md"/>

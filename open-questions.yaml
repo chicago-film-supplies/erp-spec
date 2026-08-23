@@ -2364,6 +2364,17 @@ open_questions:
       reference sources weekly and its delta canary cannot see a source that was never counted; a
       **retention-locked GCS bucket** is the control that makes "we could not have altered it" a
       property rather than a promise.
+      **Retention: 7 years** (owner, 2026-08-22), believed to match the audit limitation. ⚠️ **NOT
+      VERIFIED** — amlegal 403s and the chicago.gov PDFs 404, so Chapter 3-4's limitations text was
+      never read, and the commonly-cited IRS "7 years" is a records rule-of-thumb rather than a
+      statutory limit. ⭐ **Both errors here are ONE-WAY** — too short loses the evidence, too long
+      cannot be shortened because a locked GCS policy can only be increased. ⇒ **sequence the
+      irreversible act after the check**: build with the policy SET and UNLOCKED, confirm the period
+      with the CPA, then lock. ⚠️ **Name the gap** — an unlocked bucket is durable by convention, not
+      tamper-evident, so the window must be short and locking must have an owner. **The hash carries
+      the tamper-evidence through that window**, which is a third reason to build it first. And
+      ⚠️ **seven years of customer correspondence is a data-protection decision as much as a tax
+      one**: the same lock that protects the evidence forbids deleting it on request.
       ⚠️ **Nothing is built**: no Gmail integration, no inbound-email pipeline, no bucket in the
       terraform. **The cheapest control is the strongest — if only one thing ships, ship the hash.**
       ⭐ **WHAT SURVIVES IS ONE ITEM: an override carries no EVIDENCE.** Zero grep hits across `core`,
