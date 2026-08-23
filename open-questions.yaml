@@ -2342,6 +2342,18 @@ open_questions:
     blocks: [SPIKE-008]
     status: open
     notes: >-
+      📝 **A DRAFT SPECIFICATION IS WRITTEN AND AWAITS THE OWNER'S RULING** — `SPIKE-008`,
+      "DRAFT SPECIFICATION for OQ-056". Four items, three decisions and one test obligation:
+      **D1** the default jurisdiction is **Chicago**, stated rather than implied — measured at
+      **82.5%** of the no-override taxed base, with nothing else appearing at all, and justified as
+      the lessor's situs rather than as a convention; **D2** an override carries a **reason, an
+      author and a date**, because the position rests on the factual assertion *used exclusively
+      there* and nothing records it (the `EVT-TAX-002` pattern, over a seven-point difference);
+      **D3** the permitted targets are **Frankfort and Rantoul only**, expressed as a narrower enum
+      so the invalid cases are unrepresentable — ⚠️ **and the restriction itself has no recorded
+      reason either**; **T1** the precedence is settled but **unexercised in 954 invoices**, so it
+      needs a golden vector per arm, landed red.
+      ⚠️ **Nothing above is ruled.** Rule 3 — drafted, not decided.
       Opened 2026-08-22 by SPIKE-008's criterion 3, which is **specified but not closable** — the
       empirical half is unanswerable from the corpus and the rest is a decision.
       ✅ **1 IS LARGELY ANSWERED BY THE DATA (2026-08-22), and my first reading of it was wrong on

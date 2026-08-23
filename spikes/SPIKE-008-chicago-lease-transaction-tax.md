@@ -248,6 +248,75 @@ confirmed rather than relied on.
    inferred from a parenthetical on a summary page** — the footgun this repo names. §3-32-050 was
    never read; it is behind an HTTP 403.
 
+### 📝 DRAFT SPECIFICATION for OQ-056 — for the owner's review, not yet ruled
+
+Four items. **Three are decisions; the fourth is a test obligation.** Written as spec prose so they
+can be promoted to `REQ-TAX-*` once approved.
+
+#### D1 — The default jurisdiction is CHICAGO, and it is stated rather than implied
+
+> **Absent any override, a line's tax jurisdiction is Chicago.**
+
+⭐ **Measured, not assumed.** Across invoices carrying neither an org claim nor a destination
+jurisdiction — **941 of 954**, i.e. the overwhelming majority:
+
+| tax applied                               |               share of base |
+| ----------------------------------------- | --------------------------: |
+| Chicago Rental Tax (9% / 11% / 15%)       |                   **63.3%** |
+| Chicago Sales Tax (10.25% / 10.5%)        |                   **19.2%** |
+| tax-exempt invoice                        |                       15.8% |
+| ⚠️ no tax applied on a non-exempt invoice | 1.7% — 13 lines, $15,167.18 |
+
+⇒ **82.5% of the taxed base takes a Chicago rate, and nothing else appears at all.**
+
+**The default is not arbitrary — it is the lessor's situs.** Gear is collected from or delivered by
+a Chicago shop, so absent an assertion that it is used elsewhere, it is used in Chicago and the
+Personal Property Lease Transaction Tax reaches it. ⚠️ **Today that is true only by convention:
+`jurisdiction` absent means Chicago because the writer happens to do that, and nothing says so.**
+
+⚠️ The 13 no-tax lines on non-exempt invoices are **api-cloudrun#598**, not this rule.
+
+#### D2 — An override carries a REASON, an author and a date — not just a value
+
+> **A jurisdiction override records the target jurisdiction, the factual assertion it rests on, who
+> made that assertion, and when.**
+
+The policy is that gear collected in Chicago but **used exclusively** in Frankfort or Rantoul takes
+that jurisdiction's tax. **That is a factual claim about future use**, and it is the whole basis of
+the position — yet **nothing in the data records it.** An override is currently a bare enum value.
+
+⭐ **This is already the house pattern.** `EVT-TAX-002` carries a reason precisely because _"no
+tax"_ and _"no tax BECAUSE"_ audit differently. A jurisdiction override is the same shape and a
+larger number: **seven points** between Chicago's 15% lease tax and Frankfort's 8%.
+
+⚠️ **The test is not "can we explain it today" but "can we explain it in 2029."** Kenwood's 13
+invoices are defensible right now because the owner remembers why. The record does not.
+
+#### D3 — The permitted override targets are FRANKFORT and RANTOUL only
+
+> **An override may name only Frankfort or Rantoul. Chicago and Paxton are not valid targets.**
+
+⚠️ **The `jurisdiction` enum is wider than the policy** — it admits `chicago`, `paxton` and
+`no_nexus`, and nothing forbids overriding to them. The permitted-target set is therefore a
+**narrower type than the field it constrains**, and expressing it as a separate enum makes the
+invalid cases unrepresentable rather than merely discouraged.
+
+⚠️ **And the restriction itself has no recorded reason.** Why those two and not Paxton — which is a
+live jurisdiction with its own tax record — is not written down anywhere. **D2 asks an override to
+justify itself; this asks the same of the rule that bounds them.**
+
+#### T1 — Precedence needs golden vectors, because nothing exercises it
+
+> **Specificity governs: invoice > order > org** (owner, 2026-08-22).
+
+The rule is settled. ⚠️ **What is not settled is whether it works**, because measured over all 954
+non-void invoices: **22 carry both an org claim and a destination jurisdiction and all 22 AGREE**,
+and **0** have a destination jurisdiction differing from their order's.
+
+⇒ **Zero cases decide anything.** ⭐ **Not "one option untried" but no option ever taken** — the
+repo's own rule at full strength, and both prior instances here were broken the first time someone
+took the other branch. **A vector per arm, landed red first.**
+
 ### ⛔ What criterion 3 still owes
 
 Rate-change handling is half-answered — the two-date model exists and the gap is measured — but
