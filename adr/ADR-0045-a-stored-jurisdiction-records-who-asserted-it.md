@@ -251,11 +251,18 @@ Owner, 2026-08-23: _"the correction path would need to be at the order/invoice l
 same destination overide."_ ⇒ **no new machinery** — a later, more specific statement supersedes the
 standing one, which is the precedence already ruled on.
 
-⚠️ **But an invoice's jurisdiction is not editable after create**
-(`api-cloudrun/src/services/invoices.ts:898-901`), and the manager's control is typed for
-`Order | Fulfillment` only. ⭐ **An invoice is exactly where corrections arrive**, since invoices
-are issued after the fact — `SPIKE-008` measured one dated 2025-11-06 for a window running to
-2026-02-13. **The document most likely to need a correction is the one that cannot take one.**
+⚠️ **The invoice PUT has no jurisdiction input** — `src/services/invoices.ts:897-901`: _"This is the
+only tax lever a PUT has… An invoice's jurisdiction has never been editable after create."_ ⭐ **But
+the invoice is NOT immutable** (owner, 2026-08-23): it is editable until a payment is applied, and
+the PUT already re-materializes tax through `invoiceTaxContext`. ⇒ **the gap is one missing input
+riding a slot that exists**, not a closed document.
+
+⭐⭐ **And the payment boundary answers the accounting question rather than leaving it open.**
+Unpaid, a correction is an ordinary edit and the amount may move; paid, a credit note is the only
+route — which is `ADR-0020`'s _"a restatement must not alter any amount"_, already drawn. ⚠️ **A
+CFS-side payment gate on `updateInvoice` was NOT located** — the refusals found describe Xero's
+rule, not CFS's — so whether that boundary is enforced server-side or relied on from the UI is
+unresolved, and it must be settled **before** a jurisdiction input is added rather than after.
 
 ### ⭐ A replacement sources to the CFS store, and that closes a question rather than opening one (D5)
 
