@@ -2478,13 +2478,40 @@ open_questions:
       aggregates, never rows"** rather than drifting past it: the exception is justified because the
       artifact IS the evidence, but an unwritten reasoned exception becomes a precedent nobody
       intended.
-      **Retention: 7 years** (owner, 2026-08-22), believed to match the audit limitation. ⚠️ **NOT
-      VERIFIED** — amlegal 403s and the chicago.gov PDFs 404, so Chapter 3-4's limitations text was
-      never read, and the commonly-cited IRS "7 years" is a records rule-of-thumb rather than a
-      statutory limit. ⭐ **Both errors here are ONE-WAY** — too short loses the evidence, too long
-      cannot be shortened because a locked GCS policy can only be increased. ⇒ **sequence the
-      irreversible act after the check**: build with the policy SET and UNLOCKED, confirm the period
-      with the CPA, then lock. ⚠️ **Name the gap** — an unlocked bucket is durable by convention, not
+      ✅ **RETENTION MEASURED FROM STATUTE, 2026-08-22 — and 7 YEARS IS THE WRONG NUMBER**:
+      `inbox/2026-08-22-seven-years-is-the-wrong-retention-number-chicago-runs-eight-and-the-clock-does-not-start-at-the-transaction.md`.
+      The owner's CRITERION was right — the audit limitation — and worked through it yields **8, not
+      7**. A 7-year stamp covers the ordinary Chicago case with about a year to spare and **misses
+      three non-exotic ones**: IRS §6501(e)(1)'s 6-year substantial-omission arm by 3.5 months,
+      Chicago §3-4-120(E)'s amended-return arm by 7.6 months, and **Chicago §3-4-120(D)'s shortfall
+      extension by a full year.** ⭐ **Filing an amended return is routine business, not misconduct,
+      and it alone breaks a 7-year policy.**
+      ⭐⭐ **THE CLOCK ANCHOR IS A SECOND, QUIETER ERROR.** §3-4-120(A) runs four years from **the
+      end of the calendar year in which the RETURN was filed**, not from the transaction — so an
+      annual return carries two "free" years of drift. ⇒ **retention keyed to the transaction date
+      silently UNDER-RETAINS January records by up to a year**, invisibly: every object gets its
+      stamp, nothing errors, and the shortfall surfaces only when the record is asked for.
+      ⭐⭐ **TWO CLASSES, and the second dominates for a rental company.** 26 CFR §1.6001-1(e) is
+      open-ended — keep records *"so long as the contents thereof may become material"* — and the
+      IRS's property clause says keep them *"until the period of limitations expires for the year in
+      which you **dispose** of the property"*. ⇒ a camera acquired 2026 and disposed 2040 needs its
+      records until ~2047, **about 21 years.** So: **(1) transactional tax evidence — 8 years
+      minimum, keyed to end-of-CY-of-filing; (2) fixed-asset and depreciation records — asset life
+      + ~8 years, effectively indefinite.** ⭐ **Class 2 lands on `ADR-0043` (the depreciation engine
+      is built and packaged)** — its inputs are exactly the records that clause reaches.
+      ⚠️ **And three arms have NO limitation at all**, which no finite retention satisfies:
+      §3-4-120(B)(2) unremitted **collected** tax — **which is CFS's own posture as a lessor
+      required to collect under §3-32-070** — plus ROT non-filing and §6501(c). Retention is a risk
+      decision, not a compliance calculation.
+      ⭐ **The asymmetry decides the rounding**: §3-4-130 puts the burden on the TAXPAYER to disprove
+      an assessment *"with documentary evidence, books and records"*, so under-retention does not
+      merely lose evidence — **it loses by default.** ⇒ **sequence the irreversible act after the
+      check**: build with the policy SET and UNLOCKED, confirm with the CPA, then lock.
+      ⚠️ **What still gates the lock**: the Chicago text is from the **2021 S-55** edition (the only
+      Wayback capture; amlegal 403s every UA), and ch. 3-32 is demonstrably live since the rate has
+      changed. **Counsel checks the current print edition before anything is locked.** Chicago's
+      lease-tax **filing frequency** is also unverified and swings the ordinary case between 5.00
+      and 6.00 years. ⚠️ **Name the gap** — an unlocked bucket is durable by convention, not
       tamper-evident, so the window must be short and locking must have an owner. **The hash carries
       the tamper-evidence through that window**, which is a third reason to build it first. And
       ⚠️ **seven years of customer correspondence is a data-protection decision as much as a tax
