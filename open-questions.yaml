@@ -2330,10 +2330,10 @@ open_questions:
       enforced habit nobody wrote down are different problems with the same appearance.
 
   - id: OQ-056
-    headline: "override precedence, reason and the unstated default"
+    headline: "the override reason, target set and the unstated default"
     question: >-
       What remains after 2026-08-22's answers and corrections, and it is machinery rather than
-      judgement: which of the three override levels wins when more than one is set; how the
+      judgement, now that precedence is answered (invoice > order > org, and unexercised): how the
       permitted target set (Frankfort and Rantoul only) is expressed; what REASON an override
       carries, given the policy rests on an assertion of exclusive use that nothing records; and
       what the unstated default is for the 96.4% of destinations carrying no jurisdiction at all.
@@ -2363,8 +2363,22 @@ open_questions:
       **Re-scored: 13 of 14 taxed overrides are HONOURED and the mechanism is sound.** The single
       defect is invoice 2392 — an order/invoice-level `rantoul` override charged Chicago 10.5%, an
       OVER-charge of $3.04 (api-cloudrun#620). Every org-level override works.
-      ⇒ **WHAT REMAINS FOR THE SPEC is machinery, not judgement**: three override levels with a
-      **stated precedence** (undecided and unexercised — no invoice carries both); a permitted
+      ✅ **PRECEDENCE ANSWERED 2026-08-22: "specificity governs so invoice overrides order overrides
+      org."** Most specific wins, matching the per-project grain — the org claim is a standing
+      default, the order is the project, the invoice narrower still.
+      ⚠️ **AND IT IS COMPLETELY UNEXERCISED.** Measured over all 954 non-void invoices: **22 carry
+      both an org claim and a destination jurisdiction and all 22 AGREE**; **0** have a destination
+      jurisdiction differing from their order's. ⇒ **zero cases where precedence decides anything.**
+      ⭐ **The repo's footgun in its strongest form** — not "one option is untried" but **no option
+      has ever been taken.** Both recorded instances of that pattern here were broken the first time
+      someone took the other branch, and neither was found by reading. **Assume the resolution order
+      does not work until a golden vector takes each arm.**
+      ⭐ **And it sharpens the DEFAULT question rather than the precedence one: 941 of 954 invoices
+      carry NEITHER**, so the unstated default governs **98.6%** of invoices while the whole override
+      machinery decides 13. **The default is the rule and the overrides are the exception — and only
+      the exception is written down.**
+      ⇒ **WHAT REMAINS FOR THE SPEC is machinery, not judgement**: the precedence above, needing
+      **golden vectors on each arm** because nothing exercises it; a permitted
       target set of **Frankfort and Rantoul only**, which the enum cannot express; **a REASON on the
       override rather than just a value**, since the policy rests on the assertion *used exclusively
       in Frankfort* and nothing records who asserted it (the `EVT-TAX-002` pattern); and **the

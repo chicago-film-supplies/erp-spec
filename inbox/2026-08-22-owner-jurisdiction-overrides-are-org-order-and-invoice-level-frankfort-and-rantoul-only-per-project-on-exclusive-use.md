@@ -83,3 +83,34 @@ the tax applied is **Chicago Sales Tax 10.5%** instead of **Rantoul 9%**.
 - **Whether exclusivity holds in fact.** If gear claimed for exclusive Frankfort use is used in
   Chicago, the position fails — and nothing records the assertion, so nothing could be checked
   against it. **That is the reason requirement above, not a doubt about the policy.**
+
+## ✅ Precedence, answered — and measured as completely unexercised
+
+> _"specificity governs so invoice overides order overrides org"_
+
+**INVOICE > ORDER > ORG.** Most specific wins, which matches the per-project grain: the org claim is
+a standing default, the order is the project, and the invoice is narrower still.
+
+⚠️ **And nothing in the corpus exercises it.** Measured across all 954 non-void invoices:
+
+|                                                               |                               |
+| ------------------------------------------------------------- | ----------------------------: |
+| carrying **both** an org claim and a destination jurisdiction | **22** — and all **22 AGREE** |
+| whose destination jurisdiction differs from its **order's**   |                         **0** |
+| org claim only                                                |                             1 |
+| destination jurisdiction only                                 |                            12 |
+| **neither**                                                   |                       **941** |
+
+⇒ **Zero cases where the precedence decides anything.** The levels have never disagreed, so the rule
+is stated, correct, and entirely untested.
+
+⭐ **This is the repo's own footgun in its strongest form.** _An unexercised branch of a rule is a
+claim, not a capability_ — and here it is not that one option is untried, it is that **no option has
+ever been taken.** The repo's two recorded instances of this both turned out broken the first time
+someone took the other branch, and neither was found by reading. **Assume the resolution order does
+not work until a golden vector takes each arm.**
+
+⚠️ **And it sharpens the default question rather than the precedence one.** 941 of 954 invoices
+carry **neither** an org claim nor a destination jurisdiction. ⇒ **the unstated default governs
+98.6% of invoices**, and the override machinery — precedence included — decides 13. **The default is
+the rule; the overrides are the exception**, and only the exception is written down.

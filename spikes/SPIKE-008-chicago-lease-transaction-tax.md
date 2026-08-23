@@ -123,12 +123,22 @@ of $3.04, so a refund question rather than an under-remittance. ⭐ **Every ORG-
 of the two order/invoice-level ones, the 2025 case worked and yesterday's did not** — a testable
 hypothesis that the bug is in the order/invoice-level path. api-cloudrun#620.
 
-⚠️ **What the spec must carry**: three override levels **with a stated precedence** (undecided, and
-unexercised — no invoice carries both); a permitted target set of **Frankfort and Rantoul only**,
-which the `jurisdiction` enum cannot express; and ⭐ **a REASON on the override, not just a value**
-— the policy rests on the factual assertion _used exclusively in Frankfort_, and nothing records who
-asserted it or for which project. **Same shape as `EVT-TAX-002` carrying a reason**, because "no
-tax" and "no tax BECAUSE" audit differently.
+✅ **PRECEDENCE ANSWERED (owner, 2026-08-22): "specificity governs — invoice overrides order
+overrides org."** ⚠️ **And measured as completely unexercised**: of 954 non-void invoices, **22
+carry both an org claim and a destination jurisdiction and all 22 AGREE**, and **0** have a
+destination jurisdiction differing from their order's. ⇒ **zero cases where precedence decides
+anything**, so it needs **golden vectors on each arm** before it can be believed — the repo's own
+rule, in its strongest form: not one untried option but **no option ever taken**.
+
+⭐ **And it sharpens the DEFAULT question instead: 941 of 954 invoices carry NEITHER**, so the
+unstated default governs **98.6%** of invoices while the whole override machinery decides 13. **The
+default is the rule and the overrides are the exception — and only the exception is written down.**
+
+⚠️ **What the spec must carry beyond precedence**: a permitted target set of **Frankfort and Rantoul
+only**, which the `jurisdiction` enum cannot express; and ⭐ **a REASON on the override, not just a
+value** — the policy rests on the factual assertion _used exclusively in Frankfort_, and nothing
+records who asserted it or for which project. **Same shape as `EVT-TAX-002` carrying a reason**,
+because "no tax" and "no tax BECAUSE" audit differently.
 
 ⚠️ **Still open**: **96.4% of destinations carry no jurisdiction at all**, so an unstated default
 drives everything else.
