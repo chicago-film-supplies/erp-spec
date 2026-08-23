@@ -117,3 +117,123 @@ requirements:
     verification_method: analysis
     status: draft
     relates_to: []
+
+  - id: REQ-TAX-006
+    statement: >-
+      The system shall resolve a line's tax jurisdiction as a registration answer: no obligation
+      where the destination is outside every jurisdiction CFS is registered in; the destination's own
+      jurisdiction where CFS is registered there; and otherwise the jurisdiction of the selling
+      location.
+    rationale: >-
+      ADR-0045 P7, ruled by the owner 2026-08-23. ⭐ **The framing is the requirement.** An earlier
+      draft called the third arm "a fallback for the case where CFS does not know where the gear is
+      used", and that is wrong twice: a customer collection is a **determination** — the buyer's
+      location is the seller's counter — and the answer asserts only that CFS is **registered**
+      there, never that the property is used there.
+      ⚠️ **Stated as a rule rather than as a list of places**, because the places change. Naming
+      Chicago in the requirement would hardcode the current warehouse; the selling location's own
+      jurisdiction moves with it.
+    source: adr/ADR-0045-a-stored-jurisdiction-records-who-asserted-it.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [REQ-TAX-007, REQ-TAX-008]
+
+  - id: REQ-TAX-007
+    statement: >-
+      The system shall permit a customer's attested statement of intended use to override the
+      resolved jurisdiction, and shall restrict the override to a jurisdiction CFS is registered in
+      or to the explicit no-obligation answer.
+    rationale: >-
+      ADR-0045 D3 and P7. The override is not an exception carved out of a known fact — ⭐ **it is
+      the only case where the place of use is actually KNOWN**, because the customer asserted it.
+      The derivation covers the unknown.
+      ⚠️ **The permitted set is the registration set, not a named list.** A list goes stale the day
+      CFS registers somewhere new or retires a registration, which has already happened once —
+      Paxton was a one-off and is retired (HOT-024).
+    source: adr/ADR-0045-a-stored-jurisdiction-records-who-asserted-it.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [REQ-TAX-006, REQ-TAX-008, REQ-TAX-009]
+
+  - id: REQ-TAX-008
+    statement: >-
+      An organization-level or project-level jurisdiction shall initialize a newly created order or
+      invoice and shall have no other effect. A document's own stored jurisdiction shall be the only
+      value the rule consults, and its absence shall mean the value was derived.
+    rationale: >-
+      ADR-0045 D3, ruled by the owner 2026-08-23: *"the org and/or project level just inits created
+      orders and invoices with the override it doesnt do anything else."*
+      ⭐⭐ **This is what makes a derived answer distinguishable from an asserted one with no extra
+      field.** With a live inheritance rung, an absent value means "ask the next rung" and an order
+      whose use was affirmatively determined is indistinguishable from one where nobody looked. With
+      initialization only, absent means **derived**, unambiguously.
+      ⚠️ **And it protects a billed document**: a change to a customer's standing position cannot
+      restate an order that was already priced. **The cost is stated rather than hidden** — that
+      correction reaches no existing document, and each must be re-opened.
+    source: adr/ADR-0045-a-stored-jurisdiction-records-who-asserted-it.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [REQ-TAX-006, REQ-TAX-007]
+
+  - id: REQ-TAX-009
+    statement: >-
+      An override shall record who asserted it and the level of the customer tree their authority
+      reached. The system shall not record which rung of the precedence supplied the value.
+    rationale: >-
+      ADR-0045 D1, P5, P6. ⚠️ **The negative half is load-bearing.** The rung is a total function of
+      fields the document already stores, so a stored copy can only agree with the rule or be wrong
+      — and it answers the wrong question anyway: a migration script and an operator both produce a
+      document-level value. Prod orders 895 and 902 are that case, and are recorded as *"ordinary
+      level-1 overrides indistinguishable from an operator's"*.
+      ⭐ **Authority is the fact a derivation cannot reproduce.** A coordinator holds project access
+      and not organization access, and at a large customer no contact holds organization access at
+      all — so an organization-level value is in practice CFS's own default while a project-level
+      one is the customer's representation. **They differ in who COULD have asserted, not only in
+      specificity.**
+    source: adr/ADR-0045-a-stored-jurisdiction-records-who-asserted-it.md
+    priority: must
+    verification_method: analysis
+    status: draft
+    relates_to: [REQ-TAX-007, REQ-TAX-010]
+
+  - id: REQ-TAX-010
+    statement: >-
+      A correction to a jurisdiction shall be a new assertion at the order or invoice level using the
+      same override, and shall be refused once the document carries a payment.
+    rationale: >-
+      ADR-0045 D4, ruled by the owner 2026-08-23. ⭐ **No separate correction mechanism** — a later,
+      more specific statement supersedes a standing one, which is the precedence already ruled on.
+      ⭐⭐ **The payment boundary is what reconciles this with ADR-0020's "a restatement must not
+      alter any amount."** Unpaid, a correction is an ordinary edit and the amount may move; paid,
+      the document is closed and a credit note is the only route.
+      ⚠️ **The v1 system enforces neither half** — the payment guard is intended and not installed
+      (owner, 2026-08-23; api-cloudrun#648), and the invoice write path carries no jurisdiction input
+      (api-cloudrun#630). **The ordering matters: the guard before the input**, or an editable
+      jurisdiction on a paid invoice would move a billed amount.
+    source: adr/ADR-0045-a-stored-jurisdiction-records-who-asserted-it.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [REQ-TAX-009]
+
+  - id: REQ-TAX-011
+    statement: >-
+      A line for an item CFS itself consumes shall resolve to the jurisdiction of the CFS location
+      that supplied it, and no customer assertion shall reach such a line.
+    rationale: >-
+      ADR-0045 D5, ruled by the owner 2026-08-23: *"replacements are used by cfs (not the customer,
+      the customer is just paying for them) cfs is the end user."*
+      ⭐ **This closes a question rather than opening one.** That a customer's override does not reach
+      a replacement line looked like a gap and is correct behaviour: an attestation about where the
+      **customer** will use gear says nothing about a part **CFS** consumed.
+      ⚠️ **Stated as "the CFS location that supplied it" rather than "the default location"**, because
+      the owner's rule has two halves and the second is the one v1 cannot honour — three of four write
+      paths resolve the default regardless of the document's own store (api-cloudrun#630).
+    source: adr/ADR-0045-a-stored-jurisdiction-records-who-asserted-it.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [REQ-TAX-006]

@@ -23,3 +23,13 @@ between what Plaid returns and what reconciliation needs is the actual deliverab
 
 Unstable transaction ids would be a serious finding — reconciliation state keyed on them would
 corrupt silently.
+
+## Unblocked 2026-08-23 — the owner is obtaining Plaid sandbox credentials
+
+Owner ruling: CFS will create the Plaid sandbox account and place `client_id` / `secret` in Secret
+Manager. ⇒ **this spike closes against real sandbox traffic rather than against the API reference**,
+which matters here more than usual: the reconciliation shape turns on the cursor model and the
+webhook payloads, and ⭐ **an unexercised branch of a rule is a claim, not a capability** — the
+repo's own standing rule, and the reason the cheaper "close it from the docs" path was declined.
+
+**Blocked on:** credentials only. Nothing else in the spike needs a decision.

@@ -28,3 +28,14 @@ and the topology, not the ledger.
 A silent failure mode matters more than the throughput number here: if the volume acknowledges a
 write before it is durable, TigerBeetle's guarantees are weakened in a way no load test surfaces.
 Verify the fsync path explicitly rather than inferring it from performance looking fine.
+
+## Unblocked 2026-08-23 — a small Linode spend is authorized
+
+Owner ruling: provision a short-lived Linode instance with block storage, take the measurements,
+destroy it.
+
+⚠️ **The spend does NOT resolve erp-spec#41, and that has to be handled in the same pass.** #41
+records that this spike is **scoped narrower than the decision resting on it** — `ADR-0013` chose
+self-hosting on Linode, and one exit criterion here gates an acceptance that has already happened. ⇒
+**measuring the narrow scope would buy an answer to the wrong question with real money.** Widen the
+scope to what `ADR-0013` actually depends on **before** provisioning, not after.

@@ -525,12 +525,18 @@
           <outline text="EVT-BNK-002 — BankTransactionMatched" _note="banking → ledger"/>
           <outline text="EVT-BNK-003 — BankTransactionUnmatched" _note="banking → ledger"/>
         </outline>
-        <outline text="tax (TAX)" _note="5 requirement(s) · 3 event(s)">
+        <outline text="tax (TAX)" _note="11 requirement(s) · 3 event(s)">
           <outline text="REQ-TAX-001 — No tax-basis value shall ever be posted to the general ledger, and an account that exists only for…"/>
           <outline text="REQ-TAX-002 — The tax basis shall be derived at report time from exactly one source — the fixed-asset register's…"/>
           <outline text="REQ-TAX-003 — The tax-basis derivation shall be deterministic, shall live in exactly one place, and shall be cove…"/>
           <outline text="REQ-TAX-004 — A closed period shall seal both bases in one artifact, hashed as a unit, so that a tax-basis statem…"/>
           <outline text="REQ-TAX-005 — Permanent differences between accounting income and taxable income shall belong to neither basis, a…"/>
+          <outline text="REQ-TAX-006 — The system shall resolve a line's tax jurisdiction as a registration answer: no obligation where th…"/>
+          <outline text="REQ-TAX-007 — The system shall permit a customer's attested statement of intended use to override the resolved ju…"/>
+          <outline text="REQ-TAX-008 — An organization-level or project-level jurisdiction shall initialize a newly created order or invoi…"/>
+          <outline text="REQ-TAX-009 — An override shall record who asserted it and the level of the customer tree their authority reached…"/>
+          <outline text="REQ-TAX-010 — A correction to a jurisdiction shall be a new assertion at the order or invoice level using the sam…"/>
+          <outline text="REQ-TAX-011 — A line for an item CFS itself consumes shall resolve to the jurisdiction of the CFS location that s…"/>
           <outline text="EVT-TAX-001 — TaxDetermined" _note="tax → billing, ledger"/>
           <outline text="EVT-TAX-002 — TaxExemptionApplied" _note="tax → billing, ledger"/>
           <outline text="EVT-TAX-003 — TaxRateSuperseded" _note="tax → billing"/>
