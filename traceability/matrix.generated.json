@@ -5,7 +5,7 @@
     "adrs": 45,
     "adrs_accepted": 25,
     "events": 38,
-    "inbox": 125,
+    "inbox": 126,
     "inbox_promoted": 26
   },
   "requirements": [
@@ -804,6 +804,7 @@
       "inbox/2026-08-22-the-booking-lifecycle-is-dormant-so-spike-012s-boundary-cannot-be-chosen-yet-and-the-verdict-that-looked-like-a-pass-rests-on-11-rows.md",
       "inbox/2026-08-22-the-tax-model-was-rebuilt-in-five-days-and-most-of-oq-056-was-already-decided-in-api-cloudrun.md",
       "inbox/2026-08-23-destination-sourcing-cannot-tell-delivered-to-chicago-from-collected-at-our-chicago-dock-and-the-lease-tax-predicate-is-use.md",
+      "inbox/2026-08-23-owner-contacts-will-log-in-which-inverts-the-authorization-finding-recorded-hours-earlier.md",
       "inbox/2026-08-23-survey-how-six-references-source-a-tax-jurisdiction-and-what-substantiates-a-departure.md"
     ]
   }

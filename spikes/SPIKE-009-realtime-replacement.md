@@ -135,6 +135,33 @@ intervals for the 12 fetch-on-mount sites), and steady-state concurrent listener
 assumed** — fetched both deployed rulesets from `firebaserules.googleapis.com` and diffed:
 **byte-identical to the repo file in both projects**, 9,985 bytes, 0 diff lines.
 
+### ⚠️⚠️ READ THIS BEFORE THE REST — the conclusion below is scoped to the OPERATOR app
+
+**Owner, 2026-08-23, after this criterion was written:** _"we should expect contacts to log in to
+view orders, invoices make new orders manage access control and contacts for their project, that
+will require som scoped permissions we potentially dont have today."_
+
+⭐ **Everything below is accurately measured and was stated unconditionally when it is
+conditional.** It holds for an operator-facing application, which is the only one that exists today.
+**The moment a customer logs in, per-document authorization becomes mandatory** — and the current
+model has no machinery for it: verified at
+`code:2026-08-23:core@ccaf327:src/schemas/permissions.ts`, **every permission is `<resource>.<verb>`
+and not one carries a scope dimension.** `orders.read` means every order.
+
+⇒ **two authorization models, and they must not be one retrofitted.** The operator model
+(collection-scoped, exists, tested) stands as described. The customer model (row-scoped, does not
+exist) is new work, and it lands on **every `/db/*` route**, not only the socket layer — `dbRead.ts`
+returns documents _"as stored, unredacted… the gate is RBAC, not field-level redaction"_, which is
+defensible for operators and a leak the moment a customer holds a token.
+
+⭐ **The scoping key already exists in the target spec**: `ADR-0032`'s contact **membership edges**,
+each carrying a role at the `(project × department)` leaf. **The same model scopes the `ADR-0045`
+tax attestation**, which is a strong sign it is right rather than two coincidences.
+
+⚠️ **And it makes criterion 3's hardest item harder** — the server must now re-evaluate
+**authorization** per event as well as query membership. Full note:
+`inbox/2026-08-23-owner-contacts-will-log-in-which-inverts-the-authorization-finding-recorded-hours-earlier.md`.
+
 ### ⭐⭐ The structural fact that sizes the whole obligation
 
 **No rule in the file references `resource.` at all** — zero matches for `resource.data`,

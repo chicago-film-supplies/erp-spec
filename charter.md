@@ -28,13 +28,16 @@ allocated to COGS against the job that caused it.
   survives (`OQ-049`); the board's current form is a rough draft, and where the chat seam sits is
   open (`OQ-051`).
 - **A public client app** (owner, 2026-08-18) — the second SolidJS client `ADR-0005` already names
-  but never gave a purpose. **Four** capabilities: **real-time stock availability**, **quote
-  request**, **checkout for in-store orders**, and — added 2026-08-23 — **agreements and
-  attestations**, the surface on which a customer signs a rental agreement and attests to the
-  jurisdiction of intended use (`ADR-0045`, `OQ-056`, erp-spec#48). It replaces the third-party
-  webshop, which is itself out of scope and migrates nothing. ⚠️ Real-time to a _public_ audience is
-  not the operator-UI problem `SPIKE-009` is scoped to, and checkout is a money path — both are
-  named in
+  but never gave a purpose. **Six** capabilities: **real-time stock availability**, **quote
+  request**, **checkout for in-store orders**, and — all added 2026-08-23 — **agreements and
+  attestations** (a customer signs a rental agreement and attests to the jurisdiction of intended
+  use: `ADR-0045`, `OQ-056`, erp-spec#48), **viewing their own orders and invoices**, and
+  **delegated administration of their own project's contacts and access**. ⚠️ **The last two require
+  ROW-SCOPED permissions that exist in no form today** — every permission is `<resource>.<verb>` and
+  `orders.read` means every order. The scoping key is `ADR-0032`'s contact membership edges. It
+  replaces the third-party webshop, which is itself out of scope and migrates nothing. ⚠️ Real-time
+  to a _public_ audience is not the operator-UI problem `SPIKE-009` is scoped to, and checkout is a
+  money path — both are named in
   `inbox/2026-08-18-owner-the-public-client-app-is-in-scope-real-time-availability-quote-request-and-in-store-checkout.md`.
 - Year-end close, retained earnings roll, and CPA read access.
 
