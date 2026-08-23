@@ -1361,3 +1361,37 @@ hotspots:
       lookup moves the milestone further away while gaining no evidence.**
       ⇒ **What is still open here is only the ENUMERATION** — the mutable artifacts should name
       mid-quarter, and ADR-0007 stays as written under ADR-0034 row 4.
+
+  - id: HOT-024
+    headline: "paxton is a live registration and a closed one at once"
+    statement: >-
+      Two live, mutable statements about whether CFS still collects in Paxton contradict each other.
+      **The catalog says YES**: `taxes` holds `Paxton Sales Tax` at 6.25%, `applied_from 2020-01-01`,
+      `applied_to 2026-12-01` — a live window on the shared renewal anchor, and **no 0% successor**.
+      **The manager says NO**: `JURISDICTION_OPTIONS` omits `paxton` and says why — _"CFS no longer
+      delivers there, so it must not be newly assertable — but it stays a `JurisdictionType` member
+      because one prod order and one invoice embed the Paxton tax uid."_ ⚠️ **The codebase's own
+      convention decides against the UI**: `core/src/utils/taxes.ts` states that _"a deliberate
+      deregistration is expressed as a **successor at 0% with an open window**, never as a closed
+      window with no successor."_ Paxton has no successor at all. ⇒ **on the convention CFS writes
+      down, Paxton is registered.**
+    contexts: [tax]
+    why_it_matters: >-
+      ⭐ **It is the case that decides what a permitted override target IS**, and it is why
+      `ADR-0045` withdrew a decision that would have keyed the target set on live registrations.
+      That rule would have made `paxton` newly assertable again — reversing a deliberate closure —
+      while deleting `no_nexus`, which is deliberately offered and is **not** a registration at all.
+      **Both non-trivial members come out wrong**, and the reason is that "registered" and
+      "assertable" are different predicates that happen to coincide on the easy members.
+      ⚠️ **And the ambiguity is not free while it stands.** `deriveJurisdiction`'s city table omits
+      Paxton, so no address derives there; only a stored value reaches it. But `findTaxFor` will
+      still price a `paxton` line at 6.25% today, because the window is open. ⇒ **the catalog would
+      collect a tax the UI says CFS no longer collects**, and nothing fails.
+      ⭐ **The cheap resolution is the one the convention already names**: if CFS is deregistered,
+      write the 0% successor and the two statements agree. If CFS is still registered, the UI is
+      wrong. **Either way the fix is one write, and the value of the hotspot is that nobody has
+      decided which.**
+    artifacts:
+      - code:2026-08-23:core@c553f3c:src/utils/taxes.ts
+      - code:2026-08-23:manager@7b29116:src/utils/jurisdictionLabels.ts
+    status: open
