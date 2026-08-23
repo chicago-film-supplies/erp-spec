@@ -1394,4 +1394,18 @@ hotspots:
     artifacts:
       - code:2026-08-23:core@c553f3c:src/utils/taxes.ts
       - code:2026-08-23:manager@7b29116:src/utils/jurisdictionLabels.ts
-    status: open
+    status: resolved
+    resolution: >-
+      ✅ **Decided by the owner, 2026-08-23, in favour of the manager**: _"were not collecting paxton
+      tax anymore, that was a one off."_ ⇒ CFS collects in **chicago, rantoul and frankfort** only,
+      and the catalog is the side that is wrong.
+      ⚠️ **The catalog row cannot be deleted** — one prod order and one invoice embed the Paxton tax
+      uid and `calculateItemTax` throws on a missing one. ⚠️ **And letting the window lapse is also
+      wrong**: `taxCellState` would report `expired`, defined as _"a configuration failure, not a
+      rate of zero"_, alerting forever on a cell nobody collects. ⭐ **The codebase already names the
+      move** — _"a deliberate deregistration is expressed as a successor at 0% with an open window,
+      never as a closed window with no successor."_ The one write lives in `api-cloudrun`
+      (api-cloudrun#629 carries it).
+      Source:
+      `inbox/2026-08-23-owner-states-the-whole-jurisdiction-model-paxton-is-retired-and-the-org-level-only-inits.md`
+    resolved_by: ADR-0045

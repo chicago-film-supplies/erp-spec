@@ -12,11 +12,11 @@ is `deno task validate`'s judgement, not this file's.
 | | Count | |
 |---|---:|---|
 | Open questions | 16 open | 41 answered of 57 · **0 with no owner or no decide-by** |
-| Conflicts (HOT) | 24 | 1 open |
+| Conflicts (HOT) | 24 | 0 open |
 | Decisions (ADR) | 45 | 25 in force · 16 proposed |
 | Spikes | 12 | 4 open |
 | Requirements | 21 | 0 without a scenario |
-| Inbox | 122 | 99 unpromoted |
+| Inbox | 123 | 99 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
@@ -47,9 +47,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 
 ## Open conflicts
 
-| HOT | Statement | Blocks |
-|---|---|---|
-| `HOT-024` | Two live, mutable statements about whether CFS still collects in Paxton contradict each other. **The catalog… | — |
+None.
 
 ## Decisions
 
@@ -100,7 +98,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | `ADR-0042` | An orphaned pending transfer is resolved only by the application sweeper, which needs an intent record written before the reserve | 2026-11-15 | — | — |
 | `ADR-0043` | The depreciation engine is hand-rolled behind a package boundary, computed per taxpayer-year, with the year's rules as versioned data | 2026-11-15 | — | `OQ-054` |
 | `ADR-0044` | CFS is the principal on a production service agreement, so the client's budget is revenue and the crew cost is CFS's cost | 2026-11-30 | — | — |
-| `ADR-0045` | A stored jurisdiction records WHO asserted it and under what authority — not which rung of the precedence answered, which is a restatement of fields the document already holds | 2026-11-30 | — | `HOT-024` `OQ-056` `OQ-057` |
+| `ADR-0045` | A stored jurisdiction records WHO asserted it and under what authority — not which rung of the precedence answered, which is a restatement of fields the document already holds | 2026-11-30 | — | `OQ-056` `OQ-057` |
 
 ## Spikes
 
@@ -130,18 +128,17 @@ it is counted separately on purpose, and a milestone is not done because its che
 | `m1` | Big-picture event storm | `m0` | 1 | — | 2 | — |
 | `m2` | Context map and glossary v1 | `m1` | 2 | — | 1 | — |
 | `m3` | Ledger core | `m2` | 5 | — | — | — |
-| `m4` | All spikes closed by ADR | `m3` | 0 | 2 | — | 1 |
+| `m4` | All spikes closed by ADR | `m3` | 1 | 1 | — | 1 |
 | `m5` | Formal specs checking clean | `m4` | 1 | — | 2 | — |
 | `m6` | Migration field map complete | `m2` | 1 | — | 3 | — |
 | `m7` | Walking skeleton defined | `m3` `m5` `m6` | 0 | — | 3 | — |
 | `spec-v1` | Tag spec-v1 | `m0` `m1` `m2` `m3` `m4` `m5` `m6` `m7` | 1 | — | 3 | 1 |
 
-### Machine-checkable criteria not yet met (2)
+### Machine-checkable criteria not yet met (1)
 
 | Milestone | Criterion | Check | Measured |
 |---|---|---|---|
 | `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 12 spikes, 4 open, 0 closed without naming an ADR |
-| `m4` | Every HOT- is resolved or has an ADR that consciously defers it with… | `hotspots_resolved` | 24 hotspots, 1 unresolved |
 
 ## Coverage gaps
 

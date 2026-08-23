@@ -206,7 +206,7 @@
         <outline text="OQ-056 — What remains after 2026-08-22's answers and corrections, and it is machinery rather than judgement,…" _note="owner: alex · decide by: 2026-12-15"/>
         <outline text="OQ-057 — Has CFS made the ASC 606-10-32-2A accounting policy election to exclude collected sales and lease t…" _note="owner: alex · decide by: 2026-12-15"/>
       </outline>
-      <outline text="Conflicts (1 open)">
+      <outline text="Conflicts (0 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labor) or an own long-haul run (labor-bearing)? T…" _note="Decides whether a trucked fulfillment absorbs labor cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
           <outline text="blocks OQ-010"/>
           <outline text="blocks ADR-0011"/>
@@ -541,7 +541,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (99 unpromoted of 122)" _note="no drops pending">
+      <outline text="Capture (99 unpromoted of 123)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>

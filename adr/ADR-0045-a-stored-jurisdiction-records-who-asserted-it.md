@@ -55,6 +55,19 @@ asserts:
       A stored jurisdiction records WHO asserted it and under what authority — the acting party and
       the tree level their access reaches. It does NOT record which rung of the precedence answered,
       because that is a total function of fields the document already stores.
+  - id: D3
+    kind: decision
+    claim: >-
+      The org and project levels INITIALIZE a new order or invoice with an override and do nothing
+      else. There is no live organization rung in the precedence, so a document's own stored value
+      is either an assertion or absent, and absent means derived.
+  - id: P7
+    kind: premise
+    claim: >-
+      CFS collects in chicago, rantoul and frankfort only. Out of state is no nexus; anywhere else
+      in Illinois origin-sources to the warehouse. Paxton was a one-off and is retired. An override
+      may target only a collecting jurisdiction or no_nexus.
+    source: "inbox/2026-08-23-owner-states-the-whole-jurisdiction-model-paxton-is-retired-and-the-org-level-only-inits.md"
   - id: D2
     kind: decision
     claim: >-
@@ -192,6 +205,34 @@ default lives at is not a rung anyone can attest at.**
 non-destructive, and follows the survey's criterion (P4): a reason appears where an outside
 authority will read it, and a Chicago auditor may test an exclusive-use assertion. ⚠️ **The
 precondition half is withdrawn — see below.**
+
+### ⭐⭐ The org and project levels INITIALIZE — they do not answer a rung (D3)
+
+Owner, 2026-08-23: _"the org and/or project level just inits created orders and invoices with the
+override it doesnt do anything else."_
+
+⚠️ **The shipped model is the opposite** — `organization.jurisdiction_claim` is level 2 of a live
+precedence read from the document snapshot, and the seed was **deliberately deleted** at
+api-cloudrun#596: _"a stored copy is not a convenience but an OVERRIDE that outranks the thing it
+copied."_
+
+⭐⭐ **That objection assumed the seed and the rung would COEXIST. Under D3 there is no rung**, so a
+seed outranks nothing — it is simply the value, authored once at creation. The two are different
+design points rather than a disagreement about a fact.
+
+⭐ **And D3 is stronger on the codebase's own stated principle** — `core/src/schemas/order.ts:297`:
+_"**This is a SNAPSHOT.** An order records what it was billed, so level 1 must not re-resolve out
+from under a live document."_ With no rung, changing a customer master cannot move a stored order,
+and `destinations[i].jurisdiction == null` means **derived**, unambiguously, rather than _"inherit —
+ask the next rung"_.
+
+⇒ ⭐⭐ **D3 delivers for free what the withdrawn store-the-level decision tried and failed to buy:
+the fallback/determination distinction becomes visible in the data, with no new field.** D1 then
+carries only what remains genuinely unrecorded — **who asserted, and under what authority.**
+
+⚠️ **The cost is real.** With no rung, correcting an organization's standing position does not reach
+documents already created; each affected document must be re-opened. That is a feature under the
+snapshot principle and a support burden in practice.
 
 ## Considered options — the three withdrawn decisions, and why each is worse
 
