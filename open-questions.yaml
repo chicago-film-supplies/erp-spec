@@ -2377,10 +2377,11 @@ open_questions:
       record intact, a chain proves none removed); and **exercise the reproduction path** rather
       than assuming it. ⭐ **This is `ADR-0006`'s existing pattern** — *"the Parquet file is the audit
       artifact, and its hash goes into the close record"* — reused rather than reinvented.
-      ⚠️ **Skip RFC 3161 timestamping** (the customer's copy plus the chain covers most of it) and
-      **ask the value-at-risk question before buying a signing vendor**: a jurisdiction attestation
-      protects ~7 points of tax on one order, a rental agreement protects the equipment's
-      replacement value — **those may deserve different answers.** ⚠️ **And clock trust is the
+      ✅ **NO THIRD-PARTY SIGNING VENDOR (owner, 2026-08-22).** The value-at-risk question is
+      answered: CFS builds it. ⇒ **the third-party attestation a vendor would supply is deliberately
+      forgone**, and its absence is what makes items 2, 3 and 4 above load-bearing rather than
+      optional — **the customer's own copy is now the ONLY evidence held outside CFS's control.**
+      ⚠️ **Skip RFC 3161 timestamping** (the customer's copy plus the chain covers most of it). ⚠️ **And clock trust is the
       genuinely hard part**: every timestamp is CFS's own, the chain proves ordering and not *when*,
       and the customer's copy is the practical mitigation.
       ⭐ **The hash discipline transfers to the CLAUSE TEXT** — versioned and immutably snapshotted,
