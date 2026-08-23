@@ -253,12 +253,41 @@ confirmed rather than relied on.
 Four items. **Three are decisions; the fourth is a test obligation.** Written as spec prose so they
 can be promoted to `REQ-TAX-*` once approved.
 
-#### D1 — The default jurisdiction is CHICAGO, and it is stated rather than implied
+#### D1 — The default is the WAREHOUSE, and the default case is the one where use is UNKNOWN
 
-> **Absent any override, a line's tax jurisdiction is Chicago.**
+> **Absent any override, a line's tax jurisdiction is the jurisdiction of CFS's own warehouse —
+> `3100 W Fillmore St, Chicago, IL 60612` — and the tax it resolves to is a function of
+> `exempt status × date × jurisdiction`, with item type selecting which taxes in that jurisdiction
+> apply to the line.**
 
-⭐ **Measured, not assumed.** Across invoices carrying neither an org claim nor a destination
-jurisdiction — **941 of 954**, i.e. the overwhelming majority:
+⚠️ **AN EARLIER DRAFT SAID "the default is Chicago because it is the lessor's situs — gear is
+collected from a Chicago shop, so absent an assertion of use elsewhere it IS used in Chicago." That
+justification is wrong, and the owner's framing is what corrects it.**
+
+Measured: **stores are `Fillmore` and `CSR`**; **540 of 946 destinations (57.1%) carry a Fillmore
+delivery address**, **584 have `customer_collecting: true`**, and **510 are both.**
+
+⇒ **A Fillmore address on a destination means the customer COLLECTED from the warehouse.** It is not
+a delivery to Chicago. **It records where the gear left from, and says nothing whatever about where
+it is used.**
+
+⭐ **So the default is not a determination that the gear is used in Chicago. It is a FALLBACK for
+the case where CFS does not know where it is used** — and the Chicago Personal Property Lease
+Transaction Tax reaches property _used in Chicago_, which for 510 collections is unestablished
+rather than established.
+
+⇒ ⭐ **THIS INVERTS THE FRAMING OF THE WHOLE OVERRIDE MECHANISM.** The override is not an exception
+carved out of a known fact. **It is the only case where the use location is actually KNOWN** — the
+customer has told CFS the gear will be used exclusively in Frankfort or Rantoul. The default covers
+the unknown; the override covers the known. **Reading it the other way round is what made an earlier
+revision of this spike treat 13 legitimate invoices as data defects.**
+
+⚠️ **And the default must name the WAREHOUSE, not the jurisdiction.** "Chicago" is derived from the
+Fillmore address; it is not the rule. **If CFS opens or moves a warehouse the default moves with
+it**, and a spec that hardcodes `chicago` would silently keep taxing from a building CFS no longer
+occupies. `CSR` is already a second store.
+
+**The empirical picture, for the 941 invoices carrying no override at all:**
 
 | tax applied                               |               share of base |
 | ----------------------------------------- | --------------------------: |
@@ -267,14 +296,28 @@ jurisdiction — **941 of 954**, i.e. the overwhelming majority:
 | tax-exempt invoice                        |                       15.8% |
 | ⚠️ no tax applied on a non-exempt invoice | 1.7% — 13 lines, $15,167.18 |
 
-⇒ **82.5% of the taxed base takes a Chicago rate, and nothing else appears at all.**
+⇒ 82.5% of taxed base takes a Chicago rate and **nothing else appears at all**, which is consistent
+with the warehouse default — but it is consistent with it, not evidence FOR it. The 13 no-tax lines
+are **api-cloudrun#598**.
 
-**The default is not arbitrary — it is the lessor's situs.** Gear is collected from or delivered by
-a Chicago shop, so absent an assertion that it is used elsewhere, it is used in Chicago and the
-Personal Property Lease Transaction Tax reaches it. ⚠️ **Today that is true only by convention:
-`jurisdiction` absent means Chicago because the writer happens to do that, and nothing says so.**
+⭐ **`customer_collecting` is already a field, and it is the signal the spec should use.** A
+collected order has an unknown use location; a delivered one has a destination address that is
+genuinely about use. **The two cases deserve different treatment and the data already distinguishes
+them** — 584 collections against 362 deliveries.
 
-⚠️ The 13 no-tax lines on non-exempt invoices are **api-cloudrun#598**, not this rule.
+#### D1a — The decision function, as the owner states it
+
+> **`tax = exempt status × date × jurisdiction`**
+
+Three axes, and the multiplication is the point: **all three are required to resolve a rate, and
+none of them is a short-circuit.** ⚠️ An earlier reading here treated exemption as a boolean gate
+applied before the rest; it is a dimension of the same function.
+
+⚠️ **A fourth axis is in the data and not in that sentence: ITEM TYPE.** `taxes.item_types[]`
+selects which taxes in a jurisdiction reach a given line — Chicago splits `[rental]` from
+`[sale, replacement]` at different rates, and `service`/`surcharge` appear in no tax's list at all.
+**Confirm whether item type is understood as part of "jurisdiction" or as a fourth axis**, because
+the spec must name it either way.
 
 #### D2 — An override carries a REASON, an author and a date — not just a value
 
