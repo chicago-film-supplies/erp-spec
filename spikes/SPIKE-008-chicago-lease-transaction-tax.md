@@ -131,6 +131,40 @@ change between them changes the answer.
   jurisdiction enum is a simplification of a rule the Illinois Supreme Court has already narrowed
   once, and the spec should say so rather than imply the enum is the law.**
 
+#### ✅ The rate-attachment half is ANSWERED (owner, 2026-08-22)
+
+**The rate LADDERS to the rate effective at the rental's `charge_start` — but only if that change
+was known at quote time — and an invoice issued later must still honour the promised price.**
+
+⇒ three requirements, none of which the model meets:
+
+1. **The rate is a PROMISED value stored at pricing time**, not derived on read.
+2. **It keys on `charge_start`**, so an order spanning a change needs a rate per charge window.
+3. **The tax record needs `announced_at`** — `effective_from` and `applied_from` cannot distinguish
+   a change enacted in November from one announced on 30 December, and the owner's rule gives those
+   opposite answers.
+
+⚠️ **AND THE ORDER — WHICH IS THE PROMISE — IS BEING OVERWRITTEN.** Quotes in Firestore are PDF
+wrappers generated from orders and carry no pricing, so the order is the artifact that holds the
+promise. Scored against the rate lawful at each order's earliest `charge_start`:
+
+| rental started | lawful | order carries | lines |        base |
+| -------------- | -----: | ------------: | ----: | ----------: |
+| 2025           |    11% |       **15%** | 1,752 | $339,543.21 |
+| 2024           |     9% |       **15%** |   945 | $169,664.00 |
+| 2023           |     9% |       **15%** |   306 |  $58,850.40 |
+| ✅             |    15% |           15% |   840 | $145,834.90 |
+
+**3,003 lines, $568,057.61 of base, carrying a rate that did not exist when the rental happened.**
+Corpus-wide the Chicago rental rate appears as 15% on 7,167 lines and 11% on **3**. ⭐ **Same defect
+class as api-cloudrun#537** — a denorm restamped by a later write, where the artifacts assert
+point-in-time fidelity and the writer does not implement it.
+
+⚠️ **The issued invoice appears to preserve what the order lost** — invoice 2128 (2025-12-08)
+carries 11%, and criterion 2 found one registry-level disagreement in 333 scored invoice lines. **A
+head-to-head comparison was not completed**, so that reading rests on two observations and should be
+confirmed rather than relied on.
+
 #### What the spec must decide, and it is `OQ-056`
 
 1. **What `jurisdiction` IS.** Derived from the destination address — in which case it is a CACHE

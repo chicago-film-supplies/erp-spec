@@ -2351,7 +2351,26 @@ open_questions:
       an override, which is exactly what produces disagreements. **Derived means it must never be
       hand-authored; override means it needs a stated meaning and a reason to differ.** It cannot
       stay both. Also filed against v1 as api-cloudrun#620.
-      **2. WHICH DATE THE RATE ATTACHES TO.** Measured: **48 charge windows cross a rate boundary,
+      ✅ **2 IS ANSWERED (owner, 2026-08-22) — and the answer adds a requirement none of the three
+      candidates contained.** _"There should be a ladder, a rental that starts after rate change
+      should bill the effective rate for its start date (but only if that rate change is known at
+      quote time)"_, and _"invoices may be issued well after the fact and need to reflect the quoted
+      (promised) price"_. ⇒ the rate keys on **`charge_start`**; it is a **PROMISED value stored at
+      pricing time**, never derived on read; and evaluating "known at quote time" needs a THIRD date
+      on the tax record — **`announced_at`** — because `effective_from` and `applied_from` cannot
+      distinguish a change enacted in November from one announced on 30 December.
+      ⚠️ **AND THE ARTIFACT CARRYING THE PROMISE IS BEING OVERWRITTEN.** Measured over all 994
+      orders: **3,003 rental lines carry today's 15% for rentals that started when 9% or 11% was
+      lawful — $568,057.61 of base**; only 842 lines are correct. Corpus-wide the Chicago rental
+      rate appears as 15% on 7,167 lines and 11% on **3**. **Quotes are PDF wrappers generated from
+      orders, so the ORDER is the promise** — and whatever re-prices it stamps the current rate over
+      the promised one. Same defect class as api-cloudrun#537. Full evidence:
+      `inbox/2026-08-22-owner-the-tax-rate-ladders-to-the-rental-start-date-if-known-at-quote-time-and-the-order-carrying-that-promise-is-being-overwritten.md`.
+      **What remains of 2** is not the rule but its machinery: `announced_at` on the tax record, a
+      rate per charge window rather than per order, and golden vectors on BOTH arms — change known
+      (ladder up) and change not known (promise holds, CFS absorbs). ⚠️ **The second arm is
+      exercised by nothing today.**
+      **2. WHICH DATE THE RATE ATTACHES TO — original framing, kept for the record.** Measured: **48 charge windows cross a rate boundary,
       $61,994.60 of rental base** — and **rentals are billed IN ADVANCE**, so the charge date and
       the use period genuinely diverge (invoice 2100 is dated 2025-11-06 for a window starting
       2025-11-07). The City imposes the tax **"of receipts or charges for all leases"**, which reads
