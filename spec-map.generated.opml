@@ -203,7 +203,7 @@
           <outline text="blocks SPIKE-005"/>
         </outline>
         <outline text="OQ-055 — On a production service agreement, must the client fund before the crew is paid, or is advance fund…" _note="owner: alex · decide by: 2026-12-15"/>
-        <outline text="OQ-056 — What remains after 2026-08-22's answers and corrections: is a customer's `jurisdiction_claim` a def…" _note="owner: alex · decide by: 2026-12-15">
+        <outline text="OQ-056 — What remains after 2026-08-22's answers and corrections, and it is machinery rather than judgement:…" _note="owner: alex · decide by: 2026-12-15">
           <outline text="blocks SPIKE-008"/>
         </outline>
       </outline>
@@ -535,7 +535,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (88 unpromoted of 108)" _note="no drops pending">
+      <outline text="Capture (89 unpromoted of 109)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -618,6 +618,7 @@
         <outline text="Correction — `destinations[].jurisdiction` is an override seeded from the organization's claim and…" _note="inbox/2026-08-22-correction-the-jurisdiction-field-is-an-override-that-works-and-the-50-percent-exemption-i-cited-does-not-apply-to-cfs.md"/>
         <outline text="Owner — a tracking category was on no externally filed document, which discharges the one load-bear…" _note="inbox/2026-08-22-owner-a-tracking-category-was-on-no-externally-filed-document-so-the-recast-is-owed-to-nobody.md"/>
         <outline text="Owner answers OQ-053 — CFS signs the crew engagement, buys its own GL and inland marine, and eats t…" _note="inbox/2026-08-22-owner-answers-oq-053-cfs-signs-insures-and-eats-the-loss-on-a-psa-and-uses-an-eor-for-the-payroll.md"/>
+        <outline text="Owner — jurisdiction overrides exist at org, order and invoice level, are used only for Frankfort a…" _note="inbox/2026-08-22-owner-jurisdiction-overrides-are-org-order-and-invoice-level-frankfort-and-rantoul-only-per-project-on-exclusive-use.md"/>
         <outline text="Owner refines the PSA credit-risk answer — the client is obligated to repay, but CFS is small and a…" _note="inbox/2026-08-22-owner-refines-the-psa-credit-risk-the-client-is-obligated-but-cfs-is-small-and-overseas-collection-is-hard.md"/>
         <outline text="Owner — the depreciation engine covers ALL valid GAAP and US tax cases, not just the ones CFS uses…" _note="inbox/2026-08-22-owner-the-depreciation-engine-covers-all-valid-gaap-and-us-tax-cases-not-just-the-ones-cfs-uses-today.md"/>
         <outline text="Owner — the tax rate ladders to the rate effective at the rental's start date, but only if that cha…" _note="inbox/2026-08-22-owner-the-tax-rate-ladders-to-the-rental-start-date-if-known-at-quote-time-and-the-order-carrying-that-promise-is-being-overwritten.md"/>

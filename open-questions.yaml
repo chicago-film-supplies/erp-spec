@@ -2330,13 +2330,13 @@ open_questions:
       enforced habit nobody wrote down are different problems with the same appearance.
 
   - id: OQ-056
-    headline: "is a jurisdiction claim a defensible tax position"
+    headline: "override precedence, reason and the unstated default"
     question: >-
-      What remains after 2026-08-22's answers and corrections: is a customer's
-      `jurisdiction_claim` a defensible tax POSITION when gear is delivered to a Chicago address —
-      and what is the unstated default for the 96.4% of destinations carrying no jurisdiction at
-      all? (Parts 2 and 3 as originally framed are answered and withdrawn respectively; the notes
-      below keep the record.)
+      What remains after 2026-08-22's answers and corrections, and it is machinery rather than
+      judgement: which of the three override levels wins when more than one is set; how the
+      permitted target set (Frankfort and Rantoul only) is expressed; what REASON an override
+      carries, given the policy rests on an assertion of exclusive use that nothing records; and
+      what the unstated default is for the 96.4% of destinations carrying no jurisdiction at all.
     owner: alex
     decide_by: 2026-12-15
     blocks: [SPIKE-008]
@@ -2353,7 +2353,23 @@ open_questions:
       the number meant, and "the applied tax follows the ADDRESS" generalised from a single case
       against four that showed the opposite. Corrected in
       `inbox/2026-08-22-correction-the-jurisdiction-field-is-an-override-that-works-and-the-50-percent-exemption-i-cited-does-not-apply-to-cfs.md`.
-      ⭐ **WHAT SURVIVES IS SHARPER AND IS A CPA QUESTION.** Kenwood is delivered to
+      ✅ **AND THE OWNER SUPPLIED THE POLICY 2026-08-22, which settles the substantive question.**
+      Overrides exist at **org, order and invoice** level, are used **only for Frankfort and
+      Rantoul**, are decided **per project**, and rest on the gear being used **exclusively** in
+      that jurisdiction despite being collected from the Chicago shop. ⇒ **that is the ordinance's
+      own test correctly applied** — the Chicago lease tax reaches property *used in Chicago*, and
+      gear used exclusively in Frankfort is not. ⚠️ **The framing below called it a tax POSITION
+      needing a CPA to defend; that was too suspicious and is withdrawn.**
+      **Re-scored: 13 of 14 taxed overrides are HONOURED and the mechanism is sound.** The single
+      defect is invoice 2392 — an order/invoice-level `rantoul` override charged Chicago 10.5%, an
+      OVER-charge of $3.04 (api-cloudrun#620). Every org-level override works.
+      ⇒ **WHAT REMAINS FOR THE SPEC is machinery, not judgement**: three override levels with a
+      **stated precedence** (undecided and unexercised — no invoice carries both); a permitted
+      target set of **Frankfort and Rantoul only**, which the enum cannot express; **a REASON on the
+      override rather than just a value**, since the policy rests on the assertion *used exclusively
+      in Frankfort* and nothing records who asserted it (the `EVT-TAX-002` pattern); and **the
+      unstated default** covering the 96.4% of destinations carrying no jurisdiction.
+      **SUPERSEDED FRAMING, kept for the record:** Kenwood is delivered to
       `3100 W Fillmore St, Chicago` and billed **Frankfort 8%** on a claim. The Chicago Personal
       Property Lease Transaction Tax reaches property **used in Chicago**, and gear delivered to a
       Chicago address is on its face used in Chicago. ⇒ **a customer's jurisdiction claim is a tax

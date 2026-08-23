@@ -101,14 +101,37 @@ the field in 4 of 5 checked. **"Wrong more often than right" miscounted what the
 "the applied tax follows the address" generalised from invoice 2392 against four cases showing the
 opposite.**
 
-⭐ **What survives is sharper, and it is a CPA question rather than a data one.** Kenwood is
-delivered to `3100 W Fillmore St, Chicago` and billed **Frankfort 8%** on a claim. The Chicago lease
-tax reaches property **used in Chicago**. ⇒ **a jurisdiction claim is a tax POSITION, not a data
-field** — seven points of difference on 13 invoices here.
+⭐ **AND THE OWNER SUPPLIED THE POLICY, which settles it.** Overrides exist at **org, order and
+invoice** level, are used **only for Frankfort and Rantoul**, are decided **per project**, and rest
+on the gear being used **exclusively** in that jurisdiction despite being collected from the Chicago
+shop. ⇒ **that is the ordinance's own test correctly applied** — the Chicago lease tax reaches
+property _used in Chicago_, and gear used exclusively in Frankfort is not. **An earlier revision
+here called it a tax POSITION needing a CPA to defend; that was too suspicious.**
 
-⚠️ **Two things remain genuinely open**: **96.4% of destinations carry no jurisdiction at all**, so
-an unstated default drives everything else; and **invoice 2392** followed neither its claim (there
-is none) nor its field.
+Re-scored against the tax actually applied, all 15 differing destinations:
+
+| outcome                  |                                                                   count |
+| ------------------------ | ----------------------------------------------------------------------: |
+| ✅ **override honoured** |                 **13** — 12 org-level (Kenwood) + 1 order/invoice-level |
+| ✅ correctly untaxed     | 1 — inv 2328, all lines `service`/`surcharge`, in no tax's `item_types` |
+| ❌ **override IGNORED**  |                                                    **1 — invoice 2392** |
+
+⇒ **13 of 14 taxed cases honoured. The mechanism is sound**, and the single defect is narrow:
+invoice 2392 carries an **order/invoice-level** `rantoul` override (org claim null) on a
+`replacement` line and was charged **Chicago 10.5%** instead of **Rantoul 9%** — an **over**-charge
+of $3.04, so a refund question rather than an under-remittance. ⭐ **Every ORG-level override works;
+of the two order/invoice-level ones, the 2025 case worked and yesterday's did not** — a testable
+hypothesis that the bug is in the order/invoice-level path. api-cloudrun#620.
+
+⚠️ **What the spec must carry**: three override levels **with a stated precedence** (undecided, and
+unexercised — no invoice carries both); a permitted target set of **Frankfort and Rantoul only**,
+which the `jurisdiction` enum cannot express; and ⭐ **a REASON on the override, not just a value**
+— the policy rests on the factual assertion _used exclusively in Frankfort_, and nothing records who
+asserted it or for which project. **Same shape as `EVT-TAX-002` carrying a reason**, because "no
+tax" and "no tax BECAUSE" audit differently.
+
+⚠️ **Still open**: **96.4% of destinations carry no jurisdiction at all**, so an unstated default
+drives everything else.
 
 **Invoice 2392 (2026-08-21)** is the one genuine anomaly: `jurisdiction: "rantoul"`, delivery city
 **Chicago**, no organization claim at all, and tax charged **Chicago Sales Tax 10.5%** — following

@@ -5,7 +5,7 @@
     "adrs": 44,
     "adrs_accepted": 25,
     "events": 38,
-    "inbox": 108,
+    "inbox": 109,
     "inbox_promoted": 20
   },
   "requirements": [
@@ -652,6 +652,7 @@
       "inbox/2026-08-22-correction-the-jurisdiction-field-is-an-override-that-works-and-the-50-percent-exemption-i-cited-does-not-apply-to-cfs.md",
       "inbox/2026-08-22-owner-a-tracking-category-was-on-no-externally-filed-document-so-the-recast-is-owed-to-nobody.md",
       "inbox/2026-08-22-owner-answers-oq-053-cfs-signs-insures-and-eats-the-loss-on-a-psa-and-uses-an-eor-for-the-payroll.md",
+      "inbox/2026-08-22-owner-jurisdiction-overrides-are-org-order-and-invoice-level-frankfort-and-rantoul-only-per-project-on-exclusive-use.md",
       "inbox/2026-08-22-owner-refines-the-psa-credit-risk-the-client-is-obligated-but-cfs-is-small-and-overseas-collection-is-hard.md",
       "inbox/2026-08-22-owner-the-depreciation-engine-covers-all-valid-gaap-and-us-tax-cases-not-just-the-ones-cfs-uses-today.md",
       "inbox/2026-08-22-owner-the-tax-rate-ladders-to-the-rental-start-date-if-known-at-quote-time-and-the-order-carrying-that-promise-is-being-overwritten.md",
