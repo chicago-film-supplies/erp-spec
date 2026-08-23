@@ -11,18 +11,18 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 15 open | 41 answered of 56 · **0 with no owner or no decide-by** |
+| Open questions | 16 open | 41 answered of 57 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 23 | 0 open |
-| Decisions (ADR) | 44 | 25 in force · 15 proposed |
-| Spikes | 12 | 5 open |
+| Decisions (ADR) | 45 | 25 in force · 16 proposed |
+| Spikes | 12 | 4 open |
 | Requirements | 21 | 0 without a scenario |
-| Inbox | 115 | 95 unpromoted |
+| Inbox | 119 | 99 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
 ## The bottleneck: undecided questions
 
-**15 of 56 still open**, soonest decide-by first.
+**16 of 57 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
@@ -35,7 +35,8 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-043` | Should the product and organization masters carry an EVENT HISTORY, so that a classificat… | alex | 2026-12-15 | — |
 | `OQ-044` | Once wages move into COGS, what stays in `6600 Wages` — and can salaried sales/admin staf… | alex | 2026-12-15 | — |
 | `OQ-055` | On a production service agreement, must the client fund before the crew is paid, or is ad… | alex | 2026-12-15 | — |
-| `OQ-056` | What remains after 2026-08-22's answers and corrections, and it is machinery rather than… | alex | 2026-12-15 | `SPIKE-008` |
+| `OQ-056` | What remains after 2026-08-22's answers and corrections, and it is machinery rather than… | alex | 2026-12-15 | — |
+| `OQ-057` | Has CFS made the ASC 606-10-32-2A accounting policy election to exclude collected sales a… | alex | 2026-12-15 | — |
 | `OQ-039` | `organizations.tax_profile` carries two different concepts in one enum — who owes (applie… | alex | 2027-01-15 | — |
 | `OQ-052` | What vehicle rate absorbs into 5900, over what normal-capacity denominator — and where do… | alex | 2027-01-31 | — |
 | `OQ-045` | When a vendor bills LESS than was accrued, what retires the residual left in `2010 Accrue… | alex | 2027-02-15 | — |
@@ -78,7 +79,7 @@ None.
 - `ADR-0037` — An id carries meaning where it is used — a headline on every id, and addressable claims inside a decision
 - `ADR-0038` — Labor with no causal order is not COGS — 5801 is not created and 6600 Wages narrows instead
 
-### Proposed (15)
+### Proposed (16)
 
 | ADR | Title | Review by | Supersedes on acceptance | Blocked on |
 |---|---|---|---|---|
@@ -97,6 +98,7 @@ None.
 | `ADR-0042` | An orphaned pending transfer is resolved only by the application sweeper, which needs an intent record written before the reserve | 2026-11-15 | — | — |
 | `ADR-0043` | The depreciation engine is hand-rolled behind a package boundary, computed per taxpayer-year, with the year's rules as versioned data | 2026-11-15 | — | `OQ-054` |
 | `ADR-0044` | CFS is the principal on a production service agreement, so the client's budget is revenue and the crew cost is CFS's cost | 2026-11-30 | — | — |
+| `ADR-0045` | A tax jurisdiction is a registration rather than a claim about use, and the record stores which rung of the precedence answered — so a derived answer is never mistaken for an asserted one | 2026-11-30 | — | `OQ-056` `OQ-057` |
 
 ## Spikes
 
@@ -109,7 +111,7 @@ None.
 | `SPIKE-005` | Hand-roll the depreciation engine, or adopt a library? | 1 week | `ADR-0043` | closed |
 | `SPIKE-006` | How lossy is translating JSON Schema 2020-12 to MongoDB's `$jsonSchema`, and wh… | 2 days | `ADR-0040` | closed |
 | `SPIKE-007` | Which access path reaches DuckDB from Deno — the native addon or WASM — and can… | 2 days | `ADR-0024` | closed |
-| `SPIKE-008` | How do the Chicago Personal Property Lease Transaction Tax and Illinois home-ru… | 1 week | _new ADR_ | in_progress |
+| `SPIKE-008` | How do the Chicago Personal Property Lease Transaction Tax and Illinois home-ru… | 1 week | `ADR-0045` | closed |
 | `SPIKE-009` | What replaces Firestore real-time listeners — MongoDB change streams plus a soc… | 1 week | _new ADR_ | open |
 | `SPIKE-010` | Does a production-grade Valkey queue client run under Deno, and can it express… | 3 days | `ADR-0012` | closed |
 | `SPIKE-011` | Does TigerBeetle meet its durability and latency expectations on Linode block s… | 3 days | `ADR-0013` | open |
@@ -136,7 +138,7 @@ it is counted separately on purpose, and a milestone is not done because its che
 
 | Milestone | Criterion | Check | Measured |
 |---|---|---|---|
-| `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 12 spikes, 5 open, 0 closed without naming an ADR |
+| `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 12 spikes, 4 open, 0 closed without naming an ADR |
 
 ## Coverage gaps
 

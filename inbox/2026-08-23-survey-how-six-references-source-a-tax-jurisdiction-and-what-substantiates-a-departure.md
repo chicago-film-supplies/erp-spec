@@ -24,7 +24,8 @@ questions, carried over from that spike's draft:
 
 - **D1** — absent an override, a line's jurisdiction defaults to CFS's own warehouse. Is that a
   **fallback for unknown use** or a **determination**?
-- **D2** — an override today carries a value and **no reason and no evidence**. Should it carry them?
+- **D2** — an override today carries a value and **no reason and no evidence**. Should it carry
+  them?
 - **D3** — what constrains the permitted set of override targets?
 
 ## The one-line answer per reference
@@ -42,76 +43,76 @@ questions, carried over from that spike's draft:
 
 This is the strongest signal in the survey, and it runs against D1 as drafted:
 
-- **SAP blocks the document.** `TAX_TXJCD` 100: *"Transaction processing is blocked, preventing
-  order creation, invoice posting, or other tax-relevant business processes."*
-- **Intacct fails closed** in order entry — *"If a tax schedule map … can't be found for a line
-  item, the tax can't be calculated"* — and in AR it **widens the menu to every tax detail defined**
+- **SAP blocks the document.** `TAX_TXJCD` 100: _"Transaction processing is blocked, preventing
+  order creation, invoice posting, or other tax-relevant business processes."_
+- **Intacct fails closed** in order entry — _"If a tax schedule map … can't be found for a line
+  item, the tax can't be calculated"_ — and in AR it **widens the menu to every tax detail defined**
   rather than narrowing to a default.
-- **NetSuite SuiteTax computes nothing** — *"If no ZIP code is provided in the address used for the
-  tax determination, the taxes are not calculated for this address."*
+- **NetSuite SuiteTax computes nothing** — _"If no ZIP code is provided in the address used for the
+  tax determination, the taxes are not calculated for this address."_
 - **Odoo falls through silently** to the product's default tax.
 
 ⚠️ **Every warehouse fallback any of them has is on the ORIGIN side, never the destination side.**
-Intacct cascades *"the warehouse contact address, the entity contact address, or the company
-address"* — for **ship-from**. Its warehouse-derived `Reporting location` decides **where you file**;
-*what tax applies* never is. SAP's plant jurisdiction *"provides the external tax system with the
-ship-from location for A/R."*
+Intacct cascades _"the warehouse contact address, the entity contact address, or the company
+address"_ — for **ship-from**. Its warehouse-derived `Reporting location` decides **where you
+file**; _what tax applies_ never is. SAP's plant jurisdiction _"provides the external tax system
+with the ship-from location for A/R."_
 
-**One construct in six matches D1's shape**, and it is NetSuite Legacy's **`Home Tax Code`** —
-*"Tax code to use for sales that you don't ship to another location."* ⭐ **Framed by the ABSENCE of
-a shipment, not by a determination that goods are used at the seller's site**, which is D1's wording
+**One construct in six matches D1's shape**, and it is NetSuite Legacy's **`Home Tax Code`** — _"Tax
+code to use for sales that you don't ship to another location."_ ⭐ **Framed by the ABSENCE of a
+shipment, not by a determination that goods are used at the seller's site**, which is D1's wording
 exactly. ⚠️ NetSuite never says why it is defensible, only when it applies.
 
 ### ⭐⭐ But the CRITERION reframes the question, and two references supply it
 
 **Intacct answers CFS's ~57% customer-collection case directly** — its AvaTax FAQ defines the
-sourcing input as *"the buyer's location (**specifically, their shipping address unless they are
-coming to you to pick up the product being sold**)."*
+sourcing input as _"the buyer's location (**specifically, their shipping address unless they are
+coming to you to pick up the product being sold**)."_
 
-⇒ **a pickup is a DIFFERENT DETERMINATION, not a missing one.** The buyer's location *is* the
+⇒ **a pickup is a DIFFERENT DETERMINATION, not a missing one.** The buyer's location _is_ the
 seller's counter. So for **sales tax**, CFS's collection case is not the unknown case at all, and
 sourcing it to the Chicago shop is correct rather than a fallback.
 
 ⚠️ **For the lease transaction tax it is still the wrong question**, and **SAP is the reference that
 names why.** SAP types **six** location concepts and never lets one stand in for another:
 
-| SAP field    | What it is                                          |
-| ------------ | --------------------------------------------------- |
-| `TXJCD_SF`   | ship-from                                           |
-| `TXJCD_ST`   | ship-to                                             |
-| `TXJCD_POA`  | point of order **acceptance**                       |
-| `TXJCD_POO`  | point of order **origin**                           |
-| `PTP_IND`    | point of **title passage**                          |
-| `COST_OBJECT`| ⭐ **"where the goods are consumed"**                |
+| SAP field     | What it is                            |
+| ------------- | ------------------------------------- |
+| `TXJCD_SF`    | ship-from                             |
+| `TXJCD_ST`    | ship-to                               |
+| `TXJCD_POA`   | point of order **acceptance**         |
+| `TXJCD_POO`   | point of order **origin**             |
+| `PTP_IND`     | point of **title passage**            |
+| `COST_OBJECT` | ⭐ **"where the goods are consumed"** |
 
-⭐⭐ **That last row is the distinction D1 needs.** CFS's *"where the gear left from"* is `TXJCD_SF`.
-It is **not** `COST_OBJECT`, and SAP would never let one answer for the other. A pickup determines
-ship-from, ship-to, order acceptance and title passage all at the Chicago counter — and determines
-**nothing** about consumption, which is the predicate the Chicago Personal Property Lease Transaction
-Tax actually turns on. ⭐ SAP also types `TAX_TYPE: 3 – Rental/Lease Tax` as its own category,
-separate from sales tax, which is the same distinction expressed on the other axis.
+⭐⭐ **That last row is the distinction D1 needs.** CFS's _"where the gear left from"_ is
+`TXJCD_SF`. It is **not** `COST_OBJECT`, and SAP would never let one answer for the other. A pickup
+determines ship-from, ship-to, order acceptance and title passage all at the Chicago counter — and
+determines **nothing** about consumption, which is the predicate the Chicago Personal Property Lease
+Transaction Tax actually turns on. ⭐ SAP also types `TAX_TYPE: 3 – Rental/Lease Tax` as its own
+category, separate from sales tax, which is the same distinction expressed on the other axis.
 
 ### ⭐⭐ And NetSuite supplies the framing that makes CFS's default defensible
 
 **NetSuite asks "am I registered where this is going?" BEFORE "where is this going?"** — stated
-twice: *"If the Ship To state isn't the same as the transaction nexus, we always apply the non-liable
-tax code"*, and *"A sales transaction isn't taxable if the nexus isn't assigned to the subsidiary,
-even if the customer is taxable or the item is taxable in the customer's state."*
+twice: _"If the Ship To state isn't the same as the transaction nexus, we always apply the
+non-liable tax code"_, and _"A sales transaction isn't taxable if the nexus isn't assigned to the
+subsidiary, even if the customer is taxable or the item is taxable in the customer's state."_
 
 ⇒ **under that criterion CFS's default is NOT a claim about use.** It is a claim about the only
 jurisdiction CFS is **registered** in — a much narrower and far more defensible claim.
 
-⭐ **And CFS already holds this criterion in its own code.** `core/src/schemas/common.ts`:
-*"A jurisdiction is a **registration**, not a place: CFS is registered to collect in exactly these,
-and an address outside them does not get its own rate."* **The survey did not supply a new idea here
-— it supplied the reason the existing one is right, and the vocabulary to say so.**
+⭐ **And CFS already holds this criterion in its own code.** `core/src/schemas/common.ts`: _"A
+jurisdiction is a **registration**, not a place: CFS is registered to collect in exactly these, and
+an address outside them does not get its own rate."_ **The survey did not supply a new idea here —
+it supplied the reason the existing one is right, and the vocabulary to say so.**
 
 ### ⚠️ THE FAILURE MODE, from Odoo, and CFS HAS IT
 
-Odoo's `fiscal_position_id = False` is the stored result of **at least three different situations** —
-the partner had no country, no `auto_apply` position matched, or none was ever configured. All three
-collapse to one empty value and none writes a marker. **The record cannot distinguish "we fell back"
-from "the rule applied and mapped nothing."**
+Odoo's `fiscal_position_id = False` is the stored result of **at least three different situations**
+— the partner had no country, no `auto_apply` position matched, or none was ever configured. All
+three collapse to one empty value and none writes a marker. **The record cannot distinguish "we fell
+back" from "the rule applied and mapped nothing."**
 
 ⇒ **"fallback, not determination" is a claim about the RECORD's meaning, and Odoo shows what happens
 when it is left implicit: the distinction survives in the design intent and evaporates in the
@@ -119,19 +120,19 @@ database.**
 
 ⭐⭐ **VERIFIED 2026-08-23 — CFS is one step from that failure mode already.** `resolveJurisdiction`
 **does** return which rung answered (`level: "document" | "organization" | "derived"`), and that is
-deliberate — a second implementation of the precedence to compute it is *"exactly the drift this
-function exists to prevent."* **But the level is consumed by ONE caller, the manager's
+deliberate — a second implementation of the precedence to compute it is _"exactly the drift this
+function exists to prevent."_ **But the level is consumed by ONE caller, the manager's
 `DestinationJurisdiction.tsx`, for display at render time. `resolveJurisdiction` appears nowhere in
 `api-cloudrun/src`. The level is computed and never stored.**
 
 ⇒ a stored line whose jurisdiction was **derived** is indistinguishable from one whose jurisdiction
 came from a **document override naming the same value**. ⚠️ **And the data proves operators already
 need that distinction**: across 994 orders, `chicago` was written **explicitly, twice**, both on
-customers whose org claim said `frankfort`. **Chicago-as-fallback is `null`; Chicago-as-determination
-was typed by hand — because the schema offers no other way to say it.**
+customers whose org claim said `frankfort`. **Chicago-as-fallback is `null`;
+Chicago-as-determination was typed by hand — because the schema offers no other way to say it.**
 
-⭐ **SAP already solved this and names the field.** `TXJCD_IND` — *"Jurisdiction indicator used for
-tax calculation"* — is returned **per line** and records **which of the four candidates the engine
+⭐ **SAP already solved this and names the field.** `TXJCD_IND` — _"Jurisdiction indicator used for
+tax calculation"_ — is returned **per line** and records **which of the four candidates the engine
 actually used.** That is an audit trail on the **determination**, entirely separate from any reason
 for a **departure**, and it is the thing CFS computes and discards.
 
@@ -140,17 +141,17 @@ for a **departure**, and it is the thing CFS computes and discards.
 **The default is unanimous and it is "no".** GAAP has no override concept. Xero has no reason field
 at any of its three override levels and `TaxRates` is one of the few objects with **no
 `/Attachments` endpoint** — 0 hits for `certificate|exemption|resale` across 929 KB of its spec.
-Intacct's entire override payload is `overridedetailid` + `trx_tax`. NetSuite's only control is
-*"at least the Edit level of the Tax Details Tab permission."* Odoo's header `fiscal_position_id`
-**does not even carry `tracking=True`**, while the line's `tax_ids` does — *"overriding the tax on a
-line is logged while overriding the jurisdiction on the document is not,"* which is backwards from an
+Intacct's entire override payload is `overridedetailid` + `trx_tax`. NetSuite's only control is _"at
+least the Edit level of the Tax Details Tab permission."_ Odoo's header `fiscal_position_id` **does
+not even carry `tracking=True`**, while the line's `tax_ids` does — _"overriding the tax on a line
+is logged while overriding the jurisdiction on the document is not,"_ which is backwards from an
 audit standpoint.
 
 ⚠️ **SAP looks like the exception and is not.** It types reason codes as first-class fields —
-`EXCUSFLG`, `EXMATFLAG`, `EXT_EXREASON`, `EXCODE` — but they are **OUTPUTS**, authored by the engine.
-Of the two *input* fields SAP says of both: *"It is recommended to leave this field blank"*, and of
-`EXREASON` specifically, *"It is recommended to fill this field for reporting purposes only and not
-to use it for tax calculation."*
+`EXCUSFLG`, `EXMATFLAG`, `EXT_EXREASON`, `EXCODE` — but they are **OUTPUTS**, authored by the
+engine. Of the two _input_ fields SAP says of both: _"It is recommended to leave this field blank"_,
+and of `EXREASON` specifically, _"It is recommended to fill this field for reporting purposes only
+and not to use it for tax calculation."_
 
 ### ⭐ THE CRITERION — and it is unanimous where the default is uninformative
 
@@ -159,8 +160,8 @@ to use it for tax calculation."*
 The proof is Odoo's, and it is unusually clean. A GitHub search for `exemption` across `odoo/odoo`
 returns 205 hits and **none in `addons/account`** — every one is in a non-US e-invoicing
 localization. The single per-transaction reason in the whole codebase is
-`l10n_my_edi_exemption_reason`, *"Buyer's sales tax exemption certificate number, special exemption
-as per gazette orders, etc."*, and it is **enforced at transmission** because **Malaysia's regulator
+`l10n_my_edi_exemption_reason`, _"Buyer's sales tax exemption certificate number, special exemption
+as per gazette orders, etc."_, and it is **enforced at transmission** because **Malaysia's regulator
 demands it.** Intacct converges from the other side: it specifies the full certificate shape —
 jurisdiction, exemption reason, effective dates, image, status, expiry — and then **declines to own
 it**, delegating to Avalara ECM.
@@ -183,27 +184,27 @@ externally validated — never as a field on the transaction.** That is a better
 string, and it is the one thing in six references that resembles what D2 needs.
 
 ⚠️ **And one hazard worth importing as a rejected option.** NetSuite's Tax Details Override is
-**sticky**: once set, tax lines are *"retained, even if tax-related fields are changed… the tax
-engine isn't notified about the changes"* and is demoted to *"reporting purposes."* **An override
+**sticky**: once set, tax lines are _"retained, even if tax-related fields are changed… the tax
+engine isn't notified about the changes"_ and is demoted to _"reporting purposes."_ **An override
 that survives a change to the facts it was justified by is how a defensible position becomes a stale
 one silently.**
 
 ## D3 — the two best answers are Odoo's shape and SuiteTax's clock
 
-- ⭐ **SuiteTax constrains by DATE-VALID REGISTRATION**: *"Tax registrations that are not valid on
+- ⭐ **SuiteTax constrains by DATE-VALID REGISTRATION**: _"Tax registrations that are not valid on
   the date of the transaction are ignored by the nexus lookup logic and **are not available for
-  selection on nexus override**."* You cannot override to a jurisdiction you were not registered in
+  selection on nexus override**."_ You cannot override to a jurisdiction you were not registered in
   **on that day**. Registrations are never deleted — invalidated by a `Valid Until` date instead.
 - ⭐ **Odoo constrains by DECLARATIVE ELIMINATION**: every criterion is
   `not fpos.<field> or (<match> and 2)`, so a target that declares a constraint and fails it is
-  **filtered out entirely**, while one that declares nothing scores 1 and stays eligible.
-  **Silence is permissive; a declared-and-unmet constraint is disqualifying.**
+  **filtered out entirely**, while one that declares nothing scores 1 and stays eligible. **Silence
+  is permissive; a declared-and-unmet constraint is disqualifying.**
 - **Intacct and NetSuite both constrain by CAPABILITY only** — a config toggle plus a permission.
 
-⇒ `SPIKE-008`'s D3 asked for *"a permitted target set of Frankfort and Rantoul only, which the
-enum cannot express."* ⭐ **All three references say the constraint is not a list.** It is the
+⇒ `SPIKE-008`'s D3 asked for _"a permitted target set of Frankfort and Rantoul only, which the enum
+cannot express."_ ⭐ **All three references say the constraint is not a list.** It is the
 registration set, evaluated **as of the transaction date** — which is what
-`core/src/schemas/common.ts` already means by *"a jurisdiction is a registration, not a place"*, and
+`core/src/schemas/common.ts` already means by _"a jurisdiction is a registration, not a place"_, and
 what `paxton` staying in the vocabulary while leaving the derivation rule already implements.
 
 ## ⭐ The measured migration delta — only Xero can supply it
@@ -224,9 +225,9 @@ jurisdiction dimension is **adding a dimension the incumbent has never held**, n
 
 ⚠️ **A GAAP question this raised that nobody has answered.** ASC 606-10-32-2A is an **entity-wide**
 policy election to exclude collected taxes from the transaction price. Nothing in CFS's data records
-whether CFS has made it, and **it changes what the jurisdiction field is FOR** — if elected, sourcing
-stops affecting revenue presentation and becomes purely a liability and remittance question. ⇒ an
-`OQ-` for the owner and the CPA.
+whether CFS has made it, and **it changes what the jurisdiction field is FOR** — if elected,
+sourcing stops affecting revenue presentation and becomes purely a liability and remittance
+question. ⇒ an `OQ-` for the owner and the CPA.
 
 ## ⚠️ Corrections — two survey findings that reading the code dissolved
 
@@ -240,7 +241,7 @@ and it recurred twice more today.**
 - **"All five live rates carry `applied_to: 2026-12-01` — a hard cliff, not a rolling window."**
   True, and **deliberate: rates must be RENEWED to keep them from going stale** (owner, 2026-08-23).
   `TaxSchema` requires both bounds so two versions cannot bracket one instant; a lapse resolves to a
-  third state, `expired` — *"a configuration failure, not a rate of zero"* — and
+  third state, `expired` — _"a configuration failure, not a rate of zero"_ — and
   `api-cloudrun/src/services/taxExpiryCheck.ts` evaluates every cell at `now` **and** at
   `now + 14 days`, wired into `routes/tasks.ts` with a coverage test in the gate. ⭐ **The expiry is
   a forcing function that fails into a DETECTED state, which is the opposite of a silent zero.**
@@ -258,7 +259,7 @@ and it recurred twice more today.**
   and defaults both fields and **defines neither**. ⚠️ **A search summarizer returned confident
   definitions for both; they appear in no SAP page, and are excluded here.**
 - **Whether Intacct writes a tax override to its audit trail** — no page says it does, none says it
-  does not. *"Not documented"* rather than *"absent"*.
+  does not. _"Not documented"_ rather than _"absent"_.
 - **Whether Intacct's line-level override dropdown is filtered**, which is the D3 question on that
   side and the one gap most worth closing.
 - **Which Xero tax model CFS's tenant has enabled** — inferred from stored `TAX001`–`TAX009` values
@@ -267,6 +268,6 @@ and it recurred twice more today.**
 - **Whether CFS has made the ASC 606-10-32-2A election.**
 - ⭐ **A SEVENTH REFERENCE EXISTS and this survey cannot reach it.** Both SAP and NetSuite
   **delegate the actual determination** to Vertex / Avalara / Sovos, so neither vendor's docs state
-  whether the engine demands substantiation for a departure — **neither vendor makes that decision.**
-  If D2 needs an answer on what substantiates an override in practice, the engine vendors are where
-  it lives.
+  whether the engine demands substantiation for a departure — **neither vendor makes that
+  decision.** If D2 needs an answer on what substantiates an override in practice, the engine
+  vendors are where it lives.

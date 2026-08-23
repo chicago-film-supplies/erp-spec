@@ -23,20 +23,20 @@ irreversible lock.
 
 ## The answer: the CRITERION was right and the NUMBER that follows from it is not 7
 
-The owner's instinct — *"7 years (i think limitation on how long you can be audited for)"* — named
+The owner's instinct — _"7 years (i think limitation on how long you can be audited for)"_ — named
 the correct criterion. **Worked through, that criterion yields 8, not 7**, and it yields a different
 clock anchor.
 
 Take a lease transaction on **2026-01-01**, annual return filed 2027:
 
-| Regime                                  | Rule                                            | Bars at        | From txn   |
-| --------------------------------------- | ----------------------------------------------- | -------------- | ---------- |
-| IL ROT (35 ILCS 120/4)                  | 3 yr, semiannual step                           | 2029-07-01     | 3.50 yr    |
-| IRS §6501(a)                            | 3 yr after filing                               | 2030-04-15     | 4.28 yr    |
-| **Chicago §3-4-120(A)**                 | **4 yr after END OF CY OF FILING**              | **2031-12-31** | **6.00 yr**|
-| IRS §6501(e)(1) — >25% omission         | 6 yr                                            | 2033-04-15     | 7.29 yr    |
-| Chicago §3-4-120(E) — amended return    | 6 yr after original return filed                | 2033-08-15     | 7.62 yr    |
-| **Chicago §3-4-120(D) — shortfall**     | **4 + 2 yr after end of CY**                    | **2033-12-31** | **8.00 yr**|
+| Regime                               | Rule                               | Bars at        | From txn    |
+| ------------------------------------ | ---------------------------------- | -------------- | ----------- |
+| IL ROT (35 ILCS 120/4)               | 3 yr, semiannual step              | 2029-07-01     | 3.50 yr     |
+| IRS §6501(a)                         | 3 yr after filing                  | 2030-04-15     | 4.28 yr     |
+| **Chicago §3-4-120(A)**              | **4 yr after END OF CY OF FILING** | **2031-12-31** | **6.00 yr** |
+| IRS §6501(e)(1) — >25% omission      | 6 yr                               | 2033-04-15     | 7.29 yr     |
+| Chicago §3-4-120(E) — amended return | 6 yr after original return filed   | 2033-08-15     | 7.62 yr     |
+| **Chicago §3-4-120(D) — shortfall**  | **4 + 2 yr after end of CY**       | **2033-12-31** | **8.00 yr** |
 
 A 7-year lock stamped 2026-01-01 expires 2033-01-01. It **covers** the ordinary Chicago case with
 about a year to spare — and **misses three non-exotic ones**: the IRS 6-year substantial-omission
@@ -62,11 +62,11 @@ which the return was filed.**
 §3-32-070 makes a lessor responsible for collecting and remitting the lease tax. **§3-4-120(B)(2)
 removes the statute of limitations entirely where a person "failed to remit collected taxes to the
 department"** — alongside fraud, and alongside ROT non-filing (§120/5, where the clock starts at
-*actual filing*, so a never-filed period is open forever) and §6501(c)(3).
+_actual filing_, so a never-filed period is open forever) and §6501(c)(3).
 
 ⇒ **three regimes have no upper bound, which no finite retention can satisfy.** That is not an
-argument for a longer number; it is the reason retention is a risk decision rather than a
-compliance calculation.
+argument for a longer number; it is the reason retention is a risk decision rather than a compliance
+calculation.
 
 ## ⭐⭐ TWO CLASSES, and the second is the dominant one for a rental company
 
@@ -91,21 +91,21 @@ clause reaches.
 **So the policy is two classes, not one:**
 
 1. **Transactional tax evidence — 8 years minimum**, keyed to the end of the calendar year the
-   return was filed. 8 covers §3-4-120(D), the binding *finite* maximum.
+   return was filed. 8 covers §3-4-120(D), the binding _finite_ maximum.
 2. **Fixed-asset and depreciation records — asset life + ~8 years, i.e. effectively indefinite.**
 
 ## ⚠️ "7 years" is a real IRS number for a case CFS is not in
 
 The figure exists — but it is one line of a six-line list, and it is about **worthless securities
-and bad-debt deductions**. It is not a general retention rule. The only *fixed* federal number is
+and bad-debt deductions**. It is not a general retention rule. The only _fixed_ federal number is
 employment tax at **four** years (26 CFR §31.6001-1(e)(2)).
 
 ⭐ **Chicago does state a flat number, and it is five, not seven** — §3-32-110: lessors and lessees
-*"shall **retain for at least five years** … including all original source documents."* ⚠️ **And
-ch. 3-4 states none at all** — §3-4-170 imposes the duty to keep records with no duration, across
-all 47 sections. **The number everyone expects to be in the general ordinance is in the lease-tax
-chapter instead**, and the City's own audit guidance tells you to retain for the §3-4-120 window
-rather than the flat five.
+_"shall **retain for at least five years** … including all original source documents."_ ⚠️ **And ch.
+3-4 states none at all** — §3-4-170 imposes the duty to keep records with no duration, across all 47
+sections. **The number everyone expects to be in the general ordinance is in the lease-tax chapter
+instead**, and the City's own audit guidance tells you to retain for the §3-4-120 window rather than
+the flat five.
 
 ## ⭐ The asymmetry that decides how to round
 
@@ -117,8 +117,8 @@ and **loses by default**. Round up.
 
 A WebSearch summary of §3-4-120 returned subsections **A, B and E — and omitted D**, the two-year
 extension. **D is the arm that produces the 8-year maximum and breaks the 7-year policy.** The
-omission was not flagged, not hedged, and left a clean, plausible, well-formed answer that was
-wrong in its bottom line.
+omission was not flagged, not hedged, and left a clean, plausible, well-formed answer that was wrong
+in its bottom line.
 
 ⇒ this is the repo's own warning caught in the act: **the more precisely you describe the shape you
 expect, the more likely it comes back in that shape.** An enumeration returned by a summary is not

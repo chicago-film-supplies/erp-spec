@@ -13,8 +13,8 @@ exit_criteria:
   - Decision table covering every product type in the catalogue, including the mixed-regime case.
   - Reproduces the historical treatment on a sample of real invoices, with every disagreement explained rather than tolerated.
   - Nexus and rate-change handling specified, including how a rate change mid-rental is treated.
-closes_adr: new
-status: in_progress
+closes_adr: ADR-0045
+status: closed
 ---
 
 ## Notes
@@ -428,3 +428,52 @@ and take the latest, summing only across lineages, and **nothing in the schema s
 ⇒ **`in_progress`, and now blocked on a DECISION rather than on work** — `OQ-056` — and, per this
 spike's own note, **a CPA should review the output. This spike produces the rules; it does not
 produce the authority.**
+
+## ✅ CLOSED 2026-08-23 — `ADR-0045` (jurisdiction is a registration, and the level is stored)
+
+All three exit criteria met, and the six-reference survey required by rule 8a is recorded at
+`inbox/2026-08-23-survey-how-six-references-source-a-tax-jurisdiction-and-what-substantiates-a-departure.md`.
+
+| criterion                                   | outcome                                                                                                                                                              |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. decision table over every product type   | ✅ **it already existed as data** — `(jurisdiction × item type × date)` in the `taxes` collection, 100% coverage of 1,019 invoices                                   |
+| 2. reproduces historical treatment          | ✅ scored twice; 1 disagreement against CFS's registry, 10 against the law, **every one explained** rather than tolerated                                            |
+| 3. nexus and rate-change handling specified | ✅ nexus is `deriveJurisdiction` case 1; the rate ladders to `charge_start` where the change was known at quote time, and `deriveOrderTaxAsOf` already implements it |
+
+⚠️ **Criterion 3's EMPIRICAL half stays unanswerable and that is a finding, not a shortfall.** 48
+charge windows cross a rate boundary, but only 6 carry any jurisdiction and all 6 are Rantoul, whose
+rate never moved. **The sourcing field is absent exactly where the question lives**, so the
+criterion was closed by decision rather than by measurement.
+
+### ⭐ What the survey changed, and it was the REASONS rather than the decisions
+
+**Two of this spike's three draft items were already implemented — and the justifications written
+here for them were wrong twice over.** The draft called the default _"a fallback for the case where
+CFS does not know where the gear is used"_:
+
+- **It is not a fallback.** Intacct's sourcing rule names the pickup case: the input is the
+  customer's shipping address _"unless they are coming to you to pick up the product being sold."_ A
+  collection is a **determination**.
+- **It is not a claim about use.** NetSuite gates on registration before address. Under that
+  criterion the default asserts only that CFS is registered in Chicago — ⭐ **which is what
+  `core/src/schemas/common.ts` already said: "a jurisdiction is a registration, not a place."**
+
+⇒ **the survey supplied the reason the existing design is right, not a new design.** Recording that
+is the point: this spike derived a wrong justification twice, and a wrong reason survives review
+because the decision it supports is correct.
+
+### ⭐⭐ And it produced one thing nobody had: the level is computed and discarded
+
+`resolveJurisdiction` returns which rung answered. **Exactly one caller consumes it — the manager's
+`DestinationJurisdiction.tsx`, for display — and it appears nowhere in `api-cloudrun/src`.** So a
+derived jurisdiction and a document override naming the same value are **indistinguishable in
+storage**, which is Odoo's documented failure mode reached by a different route.
+
+⭐ **The corpus shows operators already need the distinction**: `chicago` was written **explicitly,
+twice**, both over a `frankfort` org claim. Chicago-as-fallback is `null`; Chicago-as-determination
+was typed by hand because nothing else could express it. **That is `ADR-0045` D1.**
+
+⚠️ **What this spike does NOT settle**, carried forward: whether the ordinance permits a lessor to
+source a collection to the lessee's use location at all. `Hertz Corp. v. City of Chicago`, 2017 IL
+119945, invalidated Lease Transaction Tax Ruling 11 on exactly that question. **A CPA question, and
+the one that decides how much D2 is worth.**

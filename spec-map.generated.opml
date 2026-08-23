@@ -58,7 +58,7 @@
           <outline text="[object Object]"/>
         </outline>
       </outline>
-      <outline text="Open questions (15 of 56 still open)" _note="The bottleneck. Each blocks what is listed under it.">
+      <outline text="Open questions (16 of 57 still open)" _note="The bottleneck. Each blocks what is listed under it.">
         <outline text="OQ-001 — Are fulfillment legs first-class recorded events with their own identity, or derived from the order…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-007"/>
           <outline text="blocks ADR-0011"/>
@@ -203,9 +203,8 @@
           <outline text="blocks SPIKE-005"/>
         </outline>
         <outline text="OQ-055 — On a production service agreement, must the client fund before the crew is paid, or is advance fund…" _note="owner: alex · decide by: 2026-12-15"/>
-        <outline text="OQ-056 — What remains after 2026-08-22's answers and corrections, and it is machinery rather than judgement,…" _note="owner: alex · decide by: 2026-12-15">
-          <outline text="blocks SPIKE-008"/>
-        </outline>
+        <outline text="OQ-056 — What remains after 2026-08-22's answers and corrections, and it is machinery rather than judgement,…" _note="owner: alex · decide by: 2026-12-15"/>
+        <outline text="OQ-057 — Has CFS made the ASC 606-10-32-2A accounting policy election to exclude collected sales and lease t…" _note="owner: alex · decide by: 2026-12-15"/>
       </outline>
       <outline text="Conflicts (0 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labor) or an own long-haul run (labor-bearing)? T…" _note="Decides whether a trucked fulfillment absorbs labor cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
@@ -283,7 +282,7 @@
           <outline text="blocks SPIKE-005"/>
         </outline>
       </outline>
-      <outline text="Decisions (25 in force, 15 proposed)">
+      <outline text="Decisions (25 in force, 16 proposed)">
         <outline text="In force (25)">
           <outline text="ADR-0001 — Replace Xero with an in-house ledger" _note="**In the context of** owning the order-to-invoice path but renting the ledger, **facing** a tracking-dimension defect that Xero silently absorbs and a costing model Xero cannot express, **we decided** to build the general ledger in-house, **to achieve** dimensional postings that cannot be null and a labour-absorption model we control, **accepting** that a large amount of unglamorous accounting surface area becomes ours to build and keep correct."/>
           <outline text="ADR-0002 — Bank feed sourced from Plaid, single Chase account" _note="**In the context of** needing bank transactions now that Xero's feed goes away, **facing** one bank and one account, **we decided** to source the feed from Plaid, **to achieve** a working feed without a bank-specific integration, **accepting** that Plaid's transaction model is a consumer-fintech model, not an accounting bank feed."/>
@@ -311,7 +310,7 @@
           <outline text="ADR-0037 — An id carries meaning where it is used — a headline on every id, and addressable claims inside a decision" _note="**In the context of** a spec whose authority is prose, **facing** a measured 22:1 mismatch between what is cited (a document) and what is claimed (about twenty statements inside it), **we decided** that an ADR additionally asserts individually addressable claims, typed as decision or premise, **to achieve** corrections that can be swept and premises that can go stale without touching a frozen decision, **accepting** a second surface on every ADR and a convention that only pays off as it is adopted."/>
           <outline text="ADR-0038 — Labor with no causal order is not COGS — 5801 is not created and 6600 Wages narrows instead" _note="**In the context of** but-for attribution putting a guaranteed day onto the order that caused the hire, **facing** the consequence that labor no order caused has no revenue it is applicable to, **we decided** that such labor is operating expense and stays in `6600 - Wages` rather than reaching a COGS account, **to achieve** a cost-of-revenue line that contains only costs of revenue, **accepting** that ADR-0019's `5801` is not created and that a superficially identical vehicle account deliberately does not follow."/>
         </outline>
-        <outline text="Proposed (15)">
+        <outline text="Proposed (16)">
           <outline text="ADR-0015 — Inventory reservations are TigerBeetle pending transfers, over the operational window only" _note="review by: 2026-11-01 · **In the context of** wanting order state derivable and oversell prevented in the database, **facing** a balance model with no time dimension and an availability question that is entirely about time, **we decided** to model reservations as two-phase transfers over the operational window only, **to achieve** custody oversell that is unrepresentable and a fulfillment state that is derived, **accepting** that future-dated booking conflicts stay with the interval engine.">
             <outline text="blocked on HOT-022"/>
             <outline text="blocked on SPIKE-002"/>
@@ -385,9 +384,14 @@
             <outline text="blocked on OQ-024"/>
             <outline text="blocked on OQ-053"/>
           </outline>
+          <outline text="ADR-0045 — A tax jurisdiction is a registration rather than a claim about use, and the record stores which rung of the precedence answered — so a derived answer is never mistaken for an asserted one" _note="review by: 2026-11-30 · **In the context of** a tax jurisdiction model whose derivation is sound and whose stored record cannot say how it got its answer, **facing** a lease transaction tax whose predicate is use rather than delivery, **we decided** that the jurisdiction is a registration answer stored with the level that produced it, and that an override carries evidence as a precondition, **to achieve** a record in which a derived answer is never mistaken for an asserted one, **accepting** that this departs from the default of all six surveyed references, which require nothing.">
+            <outline text="blocked on OQ-056"/>
+            <outline text="blocked on OQ-057"/>
+            <outline text="blocked on SPIKE-008"/>
+          </outline>
         </outline>
       </outline>
-      <outline text="Spikes (5 open)">
+      <outline text="Spikes (4 open)">
         <outline text="SPIKE-001 — Does the TigerBeetle client load and run under Deno via node-api compatibility?" _note="timebox: 2 days · closes: ADR-0023 · closed">
           <outline text="A Deno process creates accounts and posts a two-phase transfer against a real TigerBeetle cluster."/>
           <outline text="The same code path runs under `deno test` and under `deno compile`."/>
@@ -425,7 +429,7 @@
           <outline text="A verdict on client-side reporting via duckdb-wasm — viable or not, and at what corpus size it stops being viable."/>
           <outline text="An explicit fallback stated for the case where the native addon cannot be used, since no ADR names one today."/>
         </outline>
-        <outline text="SPIKE-008 — How do the Chicago Personal Property Lease Transaction Tax and Illinois home-rule sales tax apply a…" _note="timebox: 1 week · closes: a new ADR · in_progress">
+        <outline text="SPIKE-008 — How do the Chicago Personal Property Lease Transaction Tax and Illinois home-rule sales tax apply a…" _note="timebox: 1 week · closes: ADR-0045 · closed">
           <outline text="Decision table covering every product type in the catalogue, including the mixed-regime case."/>
           <outline text="Reproduces the historical treatment on a sample of real invoices, with every disagreement explained rather than tolerated."/>
           <outline text="Nexus and rate-change handling specified, including how a rate change mid-rental is treated."/>
@@ -535,7 +539,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (95 unpromoted of 115)" _note="no drops pending">
+      <outline text="Capture (99 unpromoted of 119)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -618,6 +622,7 @@
         <outline text="Correction — `destinations[].jurisdiction` is an override seeded from the organization's claim and…" _note="inbox/2026-08-22-correction-the-jurisdiction-field-is-an-override-that-works-and-the-50-percent-exemption-i-cited-does-not-apply-to-cfs.md"/>
         <outline text="Design input — making attestations auditable: the legal bar is lower than the evidentiary one, the…" _note="inbox/2026-08-22-design-input-making-attestations-verifiable-the-legal-bar-is-lower-than-the-evidentiary-one-and-the-customers-copy-is-the-cheapest-strong-control.md"/>
         <outline text="Design input — the Gmail evidence picker: store RAW MIME rather than a PDF, hash it, verify DKIM at…" _note="inbox/2026-08-22-design-input-the-gmail-evidence-picker-store-raw-mime-hash-it-verify-dkim-at-capture-and-keep-it-out-of-the-reaper.md"/>
+        <outline text="ESIGN and Illinois UETA read from statute — the teeth are Illinois §8(c), which makes a record UNEN…" _note="inbox/2026-08-22-esign-and-illinois-ueta-researched-from-statute-the-teeth-are-illinois-8c-and-attribution-is-any-manner.md"/>
         <outline text="Evidence storage belongs on Linode rather than GCS — a retention lock IS platform lock-in, which is…" _note="inbox/2026-08-22-evidence-storage-belongs-on-linode-not-gcs-and-the-retention-lock-collides-with-erasure-in-a-way-redaction-cannot-fix.md"/>
         <outline text="Owner — a tracking category was on no externally filed document, which discharges the one load-bear…" _note="inbox/2026-08-22-owner-a-tracking-category-was-on-no-externally-filed-document-so-the-recast-is-owed-to-nobody.md"/>
         <outline text="Owner answers OQ-053 — CFS signs the crew engagement, buys its own GL and inland marine, and eats t…" _note="inbox/2026-08-22-owner-answers-oq-053-cfs-signs-insures-and-eats-the-loss-on-a-psa-and-uses-an-eor-for-the-payroll.md"/>
@@ -627,10 +632,13 @@
         <outline text="Owner — the depreciation engine covers ALL valid GAAP and US tax cases, not just the ones CFS uses…" _note="inbox/2026-08-22-owner-the-depreciation-engine-covers-all-valid-gaap-and-us-tax-cases-not-just-the-ones-cfs-uses-today.md"/>
         <outline text="Owner — make the jurisdiction assertion an active path in the client app rather than archaeology ov…" _note="inbox/2026-08-22-owner-the-jurisdiction-assertion-becomes-a-client-app-attestation-which-dissolves-the-pii-conflict-rather-than-managing-it.md"/>
         <outline text="Owner — the tax rate ladders to the rate effective at the rental's start date, but only if that cha…" _note="inbox/2026-08-22-owner-the-tax-rate-ladders-to-the-rental-start-date-if-known-at-quote-time-and-the-order-carrying-that-promise-is-being-overwritten.md"/>
+        <outline text="Seven years is the wrong retention figure — Chicago's own extension arm runs to EIGHT years, the cl…" _note="inbox/2026-08-22-seven-years-is-the-wrong-retention-number-chicago-runs-eight-and-the-clock-does-not-start-at-the-transaction.md"/>
         <outline text="SPIKE-005's convention list is short by one — mid-quarter is MANDATORY when the 40% test trips, it…" _note="inbox/2026-08-22-spike-005s-convention-list-is-short-by-one-and-mid-quarter-is-mandatory-not-optional.md"/>
         <outline text="SPIKE-008 — the tax decision table already exists as data, the rate history matches the ordinance e…" _note="inbox/2026-08-22-spike-008-the-tax-decision-table-already-exists-as-data-and-the-jurisdiction-field-it-would-source-from-is-absent-or-wrong.md"/>
         <outline text="The booking lifecycle is dormant, so SPIKE-012's boundary cannot be chosen yet — the verdict that l…" _note="inbox/2026-08-22-the-booking-lifecycle-is-dormant-so-spike-012s-boundary-cannot-be-chosen-yet-and-the-verdict-that-looked-like-a-pass-rests-on-11-rows.md"/>
         <outline text="The tax model was rebuilt 2026-08-17 → 2026-08-22 and most of OQ-056 was already decided in api-clo…" _note="inbox/2026-08-22-the-tax-model-was-rebuilt-in-five-days-and-most-of-oq-056-was-already-decided-in-api-cloudrun.md"/>
+        <outline text="Destination sourcing cannot distinguish &quot;delivered to Chicago&quot; from &quot;collected at our Chicago dock&quot;…" _note="inbox/2026-08-23-destination-sourcing-cannot-tell-delivered-to-chicago-from-collected-at-our-chicago-dock-and-the-lease-tax-predicate-is-use.md"/>
+        <outline text="Rule 8a survey for the ADR that closes SPIKE-008 — how six references source a tax jurisdiction and…" _note="inbox/2026-08-23-survey-how-six-references-source-a-tax-jurisdiction-and-what-substantiates-a-departure.md"/>
       </outline>
     </outline>
   </body>

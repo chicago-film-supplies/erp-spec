@@ -2339,7 +2339,7 @@ open_questions:
       what the unstated default is for the 96.4% of destinations carrying no jurisdiction at all.
     owner: alex
     decide_by: 2026-12-15
-    blocks: [SPIKE-008]
+    blocks: []
     status: open
     notes: >-
       ⚠️ **SUPERSEDED IN PART, 2026-08-22 — the tax model was rebuilt 2026-08-17 → 2026-08-22 and
@@ -2518,6 +2518,12 @@ open_questions:
       one**: the same lock that protects the evidence forbids deleting it on request.
       ⚠️ **Nothing is built**: no Gmail integration, no inbound-email pipeline, no bucket in the
       terraform. **The cheapest control is the strongest — if only one thing ships, ship the hash.**
+      ✅ **`SPIKE-008` CLOSED 2026-08-23 against `ADR-0045` (jurisdiction is a registration), so
+      this no longer BLOCKS it** — the ADR decides the shape (an override carries a reason and an
+      evidence reference, and the evidence is a **precondition** on the override rather than a note
+      beside it). ⚠️ **What is still open is the ARTIFACT**, which is this OQ: nothing is built, and
+      **D2 is inert until it lands.** Stating the shape now is what stops the evidence being
+      designed as a free-text box.
       ⭐ **WHAT SURVIVES IS ONE ITEM: an override carries no EVIDENCE.** Zero grep hits across `core`,
       `api-cloudrun` and `manager`, and it is explicitly listed as out of scope in
       `api-cloudrun/.claude/plans/tax-jurisdiction-campaign-RECORD.md`. **That is the whole of this
@@ -2639,3 +2645,41 @@ open_questions:
       spike says so itself: **a CPA should review the output**, and the *Hertz Corp. v. City of
       Chicago* (2017 IL 119945) invalidation of Ruling 11 shows the sourcing question has already
       been narrowed once by the Illinois Supreme Court.
+  - id: OQ-057
+    headline: "has CFS elected to present tax net of revenue"
+    question: >-
+      Has CFS made the ASC 606-10-32-2A accounting policy election to exclude collected sales and
+      lease taxes from the transaction price? Nothing in the data records it, and it changes what
+      the jurisdiction field is FOR.
+    owner: alex
+    decide_by: 2026-12-15
+    blocks: []
+    status: open
+    notes: >-
+      Opened 2026-08-23 by the rule 8a survey behind `ADR-0045` (jurisdiction is a registration),
+      which is the only place GAAP touches this subject at all.
+      **ASC 606-10-32-2A is an ENTITY-WIDE, all-or-nothing election**, verbatim: *"An entity may
+      make an accounting policy election to exclude from the measurement of the transaction price
+      all taxes assessed by a governmental authority that are both imposed on and concurrent with a
+      specific revenue-producing transaction and collected by the entity from a customer."* An
+      entity that elects *"shall exclude from the transaction price ALL taxes in the scope of the
+      election"* — it is not per customer, order, invoice or line.
+      ⭐ **Why it matters here rather than being a presentation footnote: it changes what the
+      jurisdiction field is FOR.** Elected, sourcing stops affecting revenue presentation entirely
+      and becomes purely a liability-measurement and remittance question. Not elected, the entity
+      must apply the **principal-versus-agent** guidance at ASC 606-10-55-36 through 55-40 to every
+      jurisdiction — and the Board's own reason for creating the election (ASU 2016-12 BC30) was
+      that stakeholders found this costly *"because the laws in some jurisdictions are unclear about
+      which party to the transaction is primarily obligated for payment of the taxes."*
+      ⭐ **That posture is itself evidence for `ADR-0045`**: the standard-setter treats an
+      indeterminate jurisdiction answer as a normal condition to be managed by a declared,
+      consistently-applied policy — **not as a defect to be papered over with a determination nobody
+      made.**
+      ⚠️ **Nothing in Firestore records an accounting policy election**, so this cannot be measured
+      from CFS data at all; it comes from the financial statements or from the CPA. That is unusual
+      for this repo and worth naming rather than leaving as an unexplained gap.
+      ⚠️ **And it is not the same question as `ADR-0044`'s**, which asks whether CFS is principal on
+      a PSA. This asks whether CFS is agent for the TAX, on every transaction. The guidance is the
+      same; the population and the answer need not be.
+      Survey:
+      `inbox/2026-08-23-survey-how-six-references-source-a-tax-jurisdiction-and-what-substantiates-a-departure.md`.

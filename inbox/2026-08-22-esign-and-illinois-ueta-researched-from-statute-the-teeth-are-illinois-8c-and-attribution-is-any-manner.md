@@ -29,7 +29,7 @@ information processing system** inhibits the ability of the recipient to print o
 
 ⇒ **Serving a signed agreement in a form that blocks download or print makes it UNENFORCEABLE**, and
 no contract term can cure that. This is stricter than the federal analogue, ESIGN §7001(e), which
-says enforceability *"may be denied"* in the same situation.
+says enforceability _"may be denied"_ in the same situation.
 
 ⭐⭐ **This promotes "send the customer a retainable copy" from the best evidence per dollar to
 something close to an enforceability precondition.** It was already the only artifact held outside
@@ -82,7 +82,7 @@ app is itself conduct evidencing agreement.
 > forth in the contract" and "(B) **remain accessible** … in a form **capable of being accurately
 > reproduced** for later reference, whether by transmission, printing, or otherwise."
 
-⚠️ **§7001(d) imposes no freestanding retention duty** — it is conditional on some *other* law
+⚠️ **§7001(d) imposes no freestanding retention duty** — it is conditional on some _other_ law
 requiring retention. And **§7001(d)(2) puts transport metadata expressly outside it**: information
 "whose sole purpose is to enable the contract or other record to be sent, communicated, or
 received."
@@ -95,7 +95,7 @@ design already says — and now it has a statutory reason rather than only an en
 
 The definitions name only a sound, symbol or process, association with the record, and **intent to
 sign**. A grep of the full Illinois act for "third party", "certification authority" and
-"certificate" returns **one** hit — §18(b)(2), which lets a *governmental agency* set requirements
+"certificate" returns **one** hit — §18(b)(2), which lets a _governmental agency_ set requirements
 for its **own** filings. Nothing conditions validity on a third party in a private commercial
 transaction. **Technology neutrality is affirmatively protected** by §7002(a)(2)(A)(ii) and
 §7004(b)(2)(C)(iii), which forbid according greater legal effect to a specific technology.
