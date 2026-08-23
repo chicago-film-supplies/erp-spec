@@ -110,10 +110,11 @@ field** — seven points of difference on 13 invoices here.
 an unstated default drives everything else; and **invoice 2392** followed neither its claim (there
 is none) nor its field.
 
-**Invoice 2392 (2026-08-21)** is the worked case: `jurisdiction: "rantoul"`, delivery city
-**Chicago**, tax charged **Chicago Sales Tax 10.5%**. The applied tax follows the ADDRESS. ⇒
-**whatever drives tax today, it is not this field**, and the spec cannot adopt it as the sourcing
-input without first deciding what it is for.
+**Invoice 2392 (2026-08-21)** is the one genuine anomaly: `jurisdiction: "rantoul"`, delivery city
+**Chicago**, no organization claim at all, and tax charged **Chicago Sales Tax 10.5%** — following
+neither the field nor a claim. ⚠️ **One destination out of 946, dated yesterday.** An earlier
+revision of this spike read it as the system's behaviour; four other invoices show the opposite, and
+generalising from it was the error.
 
 ### 🟡 Criterion 3 — specified, and the empirical half is UNANSWERABLE from this corpus
 
