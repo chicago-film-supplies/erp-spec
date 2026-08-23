@@ -61,6 +61,8 @@
     "dep-refresh": "deno run --allow-net=www.irs.gov --allow-read --allow-write --allow-run=pdftotext --allow-env tax-rules-refresh-probe.ts",
     "//two-store": "SPIKE-002 criterion 2 — the crash-injection harness for ADR-0042's two-store commit protocol. Needs a local mongod on 27078 and a TigerBeetle cluster on 3044; see _README.md. The writer subprocess SIGKILLs itself, so the state recovery sees is real durable state rather than a simulation.",
     "two-store": "deno run --allow-read --allow-env --allow-net --allow-sys --allow-ffi --allow-run two-store-crash-probe.ts",
+    "//tax-table": "SPIKE-008 — the tax decision table the `taxes` registry already encodes, scored against every taxable invoice line TWICE: against CFS's own applied_from, and against the law's effective_from. The gap between them is api-cloudrun#600 with a number.",
+    "tax-table": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal tax-decision-table-probe.ts",
     "posting-keys": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal posting-key-width-probe.ts"
   },
 

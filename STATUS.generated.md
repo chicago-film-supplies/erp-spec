@@ -16,7 +16,7 @@ is `deno task validate`'s judgement, not this file's.
 | Decisions (ADR) | 44 | 25 in force · 15 proposed |
 | Spikes | 12 | 5 open |
 | Requirements | 21 | 0 without a scenario |
-| Inbox | 105 | 85 unpromoted |
+| Inbox | 106 | 86 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
@@ -108,7 +108,7 @@ None.
 | `SPIKE-005` | Hand-roll the depreciation engine, or adopt a library? | 1 week | `ADR-0043` | closed |
 | `SPIKE-006` | How lossy is translating JSON Schema 2020-12 to MongoDB's `$jsonSchema`, and wh… | 2 days | `ADR-0040` | closed |
 | `SPIKE-007` | Which access path reaches DuckDB from Deno — the native addon or WASM — and can… | 2 days | `ADR-0024` | closed |
-| `SPIKE-008` | How do the Chicago Personal Property Lease Transaction Tax and Illinois home-ru… | 1 week | _new ADR_ | open |
+| `SPIKE-008` | How do the Chicago Personal Property Lease Transaction Tax and Illinois home-ru… | 1 week | _new ADR_ | in_progress |
 | `SPIKE-009` | What replaces Firestore real-time listeners — MongoDB change streams plus a soc… | 1 week | _new ADR_ | open |
 | `SPIKE-010` | Does a production-grade Valkey queue client run under Deno, and can it express… | 3 days | `ADR-0012` | closed |
 | `SPIKE-011` | Does TigerBeetle meet its durability and latency expectations on Linode block s… | 3 days | `ADR-0013` | open |
