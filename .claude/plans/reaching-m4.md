@@ -1,5 +1,60 @@
 # Reaching m4 — every hotspot is resolved; only the spikes remain
 
+> ## ⚠️ STATUS UPDATE 2026-08-23
+>
+> **m4: 5 open spikes → 4.** `SPIKE-008` closed against `ADR-0045`. Two of the three owner-blocked
+> spikes are unblocked. Everything in `erp-spec` is committed and pushed; `deno task ci` green.
+>
+> ⭐ **The session's real output was a correction, not a decision.** `ADR-0045` was drafted, then an
+> adversarial read of the implementation **falsified three of its four decisions and inverted the
+> evidence for the fourth** — the two `chicago` overrides it rested on were written by a migration
+> script, not typed by an operator, and the repo's own integration test says so. It was rewritten,
+> then reshaped again by five owner rulings, then promoted to six `REQ-TAX-*` with 16 scenarios.
+> **The owner's read was right: the API's tax model is superior to what the spec proposed.**
+>
+> ⭐⭐ **One pattern bit TWICE in one day and is worth carrying forward: a finding measured
+> accurately against the CURRENT system, generalised into a claim about the TARGET one.** First,
+> concluding `project` does not exist because it is absent from the v1 schemas — it has been an
+> `ADR-0032` level all along. Then, concluding from `firestore.rules` that _"there is no
+> per-document authorization decision to reproduce"_ — true for an operator app, and **customers
+> will log in** (erp-spec#50). **The v1 code is the wrong oracle for a target-state question, and it
+> is seductive precisely because it is executable.**
+>
+> - **`SPIKE-009` is half done.** Criteria 3 and 4 are recorded from source. The inventory
+>   **supports** the "largest hidden line item" claim — only 5 of 52 sites are `convenience` — but
+>   **relocates its weight**: three primitives back 34 of 52 sites, and the hard parts are not in
+>   the table at all (server-side predicate re-evaluation, transparent reconnect which is assumed
+>   absolutely and guarded nowhere, and a **2-second `waitUntil` deadline at eight sites, three of
+>   them money**). Criteria 1 and 2 remain and need mongod re-initialized as a **replica set** —
+>   `SPIKE-002` left it standalone and change streams need an oplog.
+> - **`SPIKE-004` is unblocked.** `PLAID_CLIENT_ID` / `PLAID_SECRET_SANDBOX` are in Secret Manager
+>   (`cfs-dev-3100`), declared in `api-cloudrun/infra/main.tf` and **imported into the dev TF
+>   state** — dev plans clean apart from the four accessor bindings. ⚠️ **The prod plan still shows
+>   2 creates**, and the `_SANDBOX` suffix fights the house convention; renaming is
+>   destroy-and-recreate so it is **cheapest to decide before any real value exists**.
+> - **`SPIKE-011` has a spend authorized but must NOT be run yet** — erp-spec#41 says it is scoped
+>   narrower than `ADR-0013`, so **widen the scope before provisioning** or the money answers the
+>   wrong question.
+> - **`SPIKE-012`** remains blocked on check-in/check-out going live (#46).
+> - **`HOT-024` opened and resolved** the same day — Paxton is a live catalog registration and a
+>   closed one at once; the owner retired it, and the fix is the 0% successor the codebase's own
+>   convention names.
+> - ⚠️ **CI was RED on `main` at `6cb39ce`** (two inbox notes failed `deno fmt --check`) and I did
+>   not notice for several commits. ⭐ **`deno task generate` is not a task name — it is `gen`** —
+>   so generated files went stale behind a `>/dev/null` redirect all session. **The same
+>   masked-exit-code footgun the repo warns about, in its redirect form.**
+> - **Filed:** erp-spec **#49** (retention gates the WORM lock), **#50** (customer login needs
+>   row-scoped permissions); api-cloudrun **#628** (an alert tells operators writes are refused —
+>   they are not), **#629** (the reprice gate has no destination arm), **#630** (create and update
+>   resolve different tax origins), **#648** (`updateInvoice` has no payment guard — **intended and
+>   not installed**, so a paid invoice is editable today); manager **#332** (RBAC revocation may not
+>   propagate — flagged, not asserted).
+> - **`api-cloudrun` carries one unpushed commit**, `05bf674b`, the TF secret declarations.
+>
+> **Next, in order:** `SPIKE-009` criteria 1–2 (change-stream slice + resume tokens), then
+> `SPIKE-004` against the sandbox. Both are self-contained and benefit from fresh context — this
+> session is loaded with tax-model detail neither needs.
+
 > ## ⚠️ STATUS UPDATE 2026-08-22 (rewritten — the 2026-08-21 revision is superseded)
 >
 > ⭐ **ALL 23 HOTSPOTS ARE RESOLVED.** m4's hotspot criterion is MET, and **one machine-checkable
