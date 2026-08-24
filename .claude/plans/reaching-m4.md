@@ -19,11 +19,14 @@
 >
 > ⭐ **The three findings worth carrying across a clear**, none of which came from reading:
 >
-> 1. **The popover arbitrates the wrong axis.** It shows author + timestamp; **orders carry no
->    author at either end** (no `created_by` on 0 of 995, and `updated_by` does not exist), and on
->    invoices **all 1019 authors are bots**. The conflict surface is **actor-vs-STATE**, not
->    actor-vs-actor, and prod has **ONE operator account** so the actor-vs-actor half is
->    unmeasurable rather than zero.
+> 1. ⛔ **THIS ITEM WAS WRONG AND IS THE LESSON.** It read: _"the popover arbitrates the wrong axis
+>    — orders carry no author, invoice authors are all bots, prod has one operator account."_ **v2
+>    records an actor** (`REQ-FUL-001`), v1's missing `updated_by` is a v1 gap with an issue against
+>    it, and one operator account measures the staffing of an **unfinished** app. ⇒ **a v1 absence
+>    reasoned into a v2 constraint, for the fifth time.** What survives is the half that never
+>    needed v1: **the conflict surface is actor-vs-STATE** — paid invoice, vanished row, moved rate,
+>    derived field, immutable posting — which is a **domain** argument, true at any staffing level
+>    under any actor model.
 > 2. **The app cannot start offline.** `manager` has no service worker; a reload while disconnected
 >    fails outright. **The queue survives and is unreachable.**
 > 3. **The base does not survive a reload today.** `latestSnapshot` is an in-memory Map; the stash

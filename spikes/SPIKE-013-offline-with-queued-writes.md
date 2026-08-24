@@ -376,6 +376,53 @@ in a tick.
 - **Ledger postings are out of scope BY CONSTRUCTION.** This merges documents. The boundary between
   what merges and what posts is the ADR's, and is unchanged by anything here.
 
+## ⭐⭐ Owner ruling, 2026-08-24 — the popover is retired; the surface is a per-document notification
+
+Full note:
+`inbox/2026-08-24-owner-the-conflict-popover-is-the-wrong-shape-it-is-a-global-notifications-surface.md`.
+
+> _"a popover for conflict resolution is the wrong shape, it should probably be a global
+> notifications menu, surfacing"_ — and immediately after, on granularity: _"a doc conflict as a
+> notification (per doc not per field)"_.
+
+⚠️ **This retires the shape that exit criterion 4 is worded against.** The criterion asks what a
+_"same-field author/timestamp popover"_ cannot arbitrate. ⭐ **The evidence is unaffected and the
+answer is unchanged** — Finding 3 measured the conflict surface itself, not the widget — but the
+finding now reads as _what the surface must carry_ rather than _what the widget cannot do_, which is
+the more useful direction.
+
+⭐ **The two rulings converge on the same place from opposite ends.** Finding 3 found that four of
+the five classes are **not choices at all** (a refusal, a failure, a recomputation, a union), so a
+two-option widget had no question to ask in most of them. The owner's ruling says the same thing
+from the UI side.
+
+### The invariant the per-document ruling buys
+
+⭐ **Replay is already per document** — Finding 1: each document must be re-read, re-based and
+re-diffed on its own, because the first write bumps the version. ⇒ notifying per document makes the
+**notification unit and the replay unit the same unit**, and that yields a testable property rather
+than a convention:
+
+> **one notification ⟺ one document whose replay is held back.** It appears when a document's replay
+> cannot complete, and it clears when that replay succeeds — not when a human has looked at it.
+
+⇒ the notification is an **invitation to open the document**, not a decision in itself. ⭐ **And all
+four kinds roll up to a document** — a refusal is a property of one, a failed row belongs to one, a
+rejected replay is one's write, a failed blob upload attaches to one — so **nothing in the surface
+needs a second granularity.**
+
+⚠️ **Per-field indicators are not replaced.** Criterion 6 asks that offline / pending / synced be
+derivable **at every save-on-focusout site**, and a global menu cannot tell an operator that the
+field under their cursor is unsaved. The two coexist.
+
+### ⭐ The prototype already built the seed of this, from the criterion rather than the shape
+
+`spikes/harness/offline-queue/` carries a **durable failure inbox** because criterion 3 demanded a
+failure land _"somewhere a human sees it… with the operator absent"_ — which a popover cannot do by
+construction. **That is this surface in miniature**, arrived at independently. ⚠️ **What it does not
+yet do is group by document or carry conflicts and refusals alongside failures**, which is the
+concrete delta between what is built and what was just ruled.
+
 ## What is already known, and did not come from here
 
 Three things were established during `SPIKE-009` and should not be re-derived:

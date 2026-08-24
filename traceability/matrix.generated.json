@@ -5,7 +5,7 @@
     "adrs": 45,
     "adrs_accepted": 25,
     "events": 38,
-    "inbox": 135,
+    "inbox": 136,
     "inbox_promoted": 26
   },
   "requirements": [
@@ -814,7 +814,8 @@
       "inbox/2026-08-23-owner-the-quo-contact-sync-is-a-one-way-push-and-the-text-thread-may-be-the-transmission-record.md",
       "inbox/2026-08-23-staging-needs-a-sanitized-prod-mirror.md",
       "inbox/2026-08-23-survey-how-six-references-source-a-tax-jurisdiction-and-what-substantiates-a-departure.md",
-      "inbox/2026-08-23-what-a-minted-line-id-costs-and-why-path-interning-converges-on-it.md"
+      "inbox/2026-08-23-what-a-minted-line-id-costs-and-why-path-interning-converges-on-it.md",
+      "inbox/2026-08-24-owner-the-conflict-popover-is-the-wrong-shape-it-is-a-global-notifications-surface.md"
     ]
   }
 }
