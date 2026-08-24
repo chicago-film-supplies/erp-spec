@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>SPIKE-009 — change stream → socket → SolidJS</title>
+    <style>
+    body {
+      font: 15px/1.5 ui-sans-serif, system-ui, sans-serif;
+      margin: 2rem;
+      color: #111;
+    }
+    table {
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: .4rem .8rem;
+      text-align: left;
+    }
+    .meta {
+      color: #555;
+      font-size: 13px;
+    }
+    .n {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+    .flash {
+      background: #fff3b0;
+      transition: background 1.2s;
+    }
+    </style>
+  </head>
+  <body>
+    <h1>SPIKE-009 vertical slice</h1>
+    <p class="meta">
+      HTTP requests served by this process:
+      <span class="n" id="reqs">–</span>
+      · socket frames received: <span class="n" id="frames">0</span>
+    </p>
+    <p class="meta">
+      The request counter is the whole point: if it does not move while the table does, the update
+      did not come from a refetch.
+    </p>
+    <div id="app"></div>
+    <script type="module" src="/client.js"></script>
+  </body>
+</html>

@@ -21,7 +21,11 @@
     "bson": "npm:bson@6.10.4",
     "zod": "npm:zod@4.3.6",
     "date-fns": "npm:date-fns@4.1.0",
-    "@date-fns/tz": "npm:@date-fns/tz@1.4.1"
+    "@date-fns/tz": "npm:@date-fns/tz@1.4.1",
+
+    "//solid": "SPIKE-009 criterion 1. Version tracks manager/package.json (^1.9.12) — the slice measures the CURRENT client library. ⚠️ `?target=es2022` IS LOAD-BEARING AND MUST NOT BE DROPPED. Solid ships a reactive browser build and a non-reactive SSR build, and there are TWO independent ways to silently get the SSR one under Deno: `npm:solid-js` honours an explicit `deno` export condition pointing at dist/server.js, and esm.sh serves Deno the same SSR build unless a browser target is forced. In the SSR build createEffect NEVER RUNS and createRenderEffect runs once — so a reactivity test written the obvious way measures NOTHING and reports success. Same class as the Zod double-instance note above: one library, two copies, and every check silently agrees.",
+    "solid-js": "https://esm.sh/solid-js@1.9.12?target=es2022",
+    "solid-js/store": "https://esm.sh/solid-js@1.9.12/store?target=es2022"
   },
 
   "//nodeModulesDir": "Node-API addons need a real node_modules tree on disk; Deno's default global npm cache does not give the dlopen'ing addon a sibling directory to resolve against.",
@@ -63,6 +67,13 @@
     "two-store": "deno run --allow-read --allow-env --allow-net --allow-sys --allow-ffi --allow-run two-store-crash-probe.ts",
     "//tax-table": "SPIKE-008 — the tax decision table the `taxes` registry already encodes, scored against every taxable invoice line TWICE: against CFS's own applied_from, and against the law's effective_from. The gap between them is api-cloudrun#600 with a number.",
     "tax-table": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal tax-decision-table-probe.ts",
+    "//slice-store": "SPIKE-009 criterion 1 — the reactivity assertion. A screenshot cannot tell a fine-grained update from a whole-table re-render; an effect count can.",
+    "slice-store": "deno test --allow-read --allow-env --allow-net=esm.sh,jsr.io realtime-slice/store_test.ts",
+    "//slice": "SPIKE-009 criterion 1 — the vertical slice: a change stream on one collection, a WebSocket, and a live SolidJS store. Needs the replica set on 27079 (see _README.md); a standalone mongod has no oplog and watch() fails outright. Open http://127.0.0.1:8791, then drive it with `deno task slice-mutate`, which writes to mongod DIRECTLY and never touches this server.",
+    "slice": "deno run --allow-read --allow-env --allow-net --allow-sys --allow-ffi realtime-slice/server.ts",
+    "slice-mutate": "deno run --allow-read --allow-env --allow-net --allow-sys --allow-ffi realtime-slice/mutate.ts",
+    "//change-stream": "SPIKE-009 criterion 2 — resume-token semantics against a real replica set: token shape and ordering, resumeAfter exclusivity, the post-batch resume token on a filtered stream, oplog retention, invalidate, and the updateLookup-vs-post-image distinction. Needs the replica set on 27079.",
+    "change-stream": "deno run --allow-read --allow-env --allow-net --allow-sys --allow-ffi change-stream-probe.ts",
     "posting-keys": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal posting-key-width-probe.ts"
   },
 

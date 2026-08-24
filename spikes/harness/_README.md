@@ -80,9 +80,19 @@ a measurement, so the staging is load-bearing rather than tidiness.
 | `bullmq`              | 6.0.9          |                                                                   |
 | `ioredis`             | 6.0.0          |                                                                   |
 | `msgpackr`            | 2.0.5          | transitive via bullmq; pinned so the probe can import it directly |
+| `mongodb`             | 6.20.0         | SPIKE-006 and SPIKE-009; must track `core/deno.json`              |
+| mongod                | 8.0.4          | macOS arm64 tarball; `--fork` is refused by 8.3.x                 |
+| `solid-js`            | 1.9.12         | tracks `manager/package.json`; **browser build only** — see below |
 
 `deno.lock` is gitignored repo-wide, so **`deno.json` is the lockfile** — every npm specifier is an
 exact version, never a caret range.
+
+⚠️ **`solid-js` is pinned as an esm.sh URL carrying `?target=es2022`, and that is not cosmetic.**
+Solid ships a reactive browser build and a non-reactive SSR build, and there are two independent
+ways to get the SSR one under Deno: `npm:solid-js` honours an explicit `deno` export condition
+pointing at `dist/server.js`, and esm.sh serves Deno the same build unless a browser target is
+forced. In the SSR build **`createEffect` never runs**, so a reactivity test written the obvious way
+measures nothing and reports success. Full account in SPIKE-009 criterion 1.
 
 ## This will rot, and that is fine
 
@@ -124,6 +134,31 @@ Valkey (`brew install valkey`):
 ```
 valkey-server --port 6399 --dir .data --appendonly yes --appendfsync everysec
 ```
+
+### SPIKE-009 — change streams need a REPLICA SET, not the standalone above
+
+`deno task change-stream` (criterion 2) and `deno task slice` (criterion 1). Change streams read the
+oplog and a standalone `mongod` has none, so `SPIKE-002`'s server cannot be reused — a separate
+dbpath and port, left as a replica set:
+
+```sh
+mkdir -p .data/mongo-cs
+.data/mongodb-macos-aarch64-8.0.4/bin/mongod --dbpath .data/mongo-cs --port 27079 \
+  --bind_ip 127.0.0.1 --replSet rs0 --oplogSize 1 --fork --logpath .data/mongod-cs.log
+```
+
+Then initiate it once — the server tarball ships **no `mongosh`**, so it goes through the driver:
+`db.admin().command({ replSetInitiate: { _id: "rs0", members: [{ _id: 0, host: "127.0.0.1:27079" }] } })`
+against `mongodb://127.0.0.1:27079/?directConnection=true`, then poll `hello` until
+`isWritablePrimary`.
+
+⚠️ **`--oplogSize 1` does not produce a 1 MB oplog** — measured retention was **104x** the
+configured cap, because WiredTiger truncates in markers with a large minimum size that a 1 MB oplog
+cannot divide into. It is set small anyway because it makes the retention finding fast to reproduce,
+not because it bounds anything. Full numbers in the spike.
+
+⚠️ The probe **wipes and reseeds** `spike009.*` on every run and writes ~100 MB into the oplog. Run
+it against this server only.
 
 ### SPIKE-002 — the two-store crash harness needs BOTH stores
 
