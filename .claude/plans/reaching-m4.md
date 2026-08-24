@@ -1,9 +1,10 @@
 # Reaching m4 — the spikes are externally blocked; the ACCEPTANCE QUEUE is the deadline
 
-**Date:** 2026-08-24 • **Repo:** erp-spec • **Status:** ⏳ in progress, and now on a clock
-**Origin:** m4 is the only milestone with an unmet machine-checkable criterion **Related:**
-`roadmap/milestones.yaml` m4 · `STATUS.generated.md` · issues #6, #35, #40, #44, #45, #52, #53, #54,
-#55 · `tools/validate.ts` gate 6
+**Date:** 2026-08-24 • **Repo:** erp-spec • **Status:** ⏳ in progress — **the decision batch is
+PREPARED and the ball is with the owner** **Origin:** m4 is the only milestone with an unmet
+machine-checkable criterion **Related:** `roadmap/milestones.yaml` m4 · `STATUS.generated.md` ·
+issues **#56 (the batch — the brief is a comment on it)**, #57, #6, #35, #40, #42, #43, #44, #45,
+#52, #53, #54, #55 · `tools/validate.ts` gate 6
 
 ## START HERE
 
@@ -35,7 +36,36 @@ red** and stays red until those ADRs are accepted, superseded, or their `review_
 ⇒ **Re-derive this table rather than trusting it.** One command, and it is the only part of this doc
 about the future.
 
-## The next unit of work: PREPARE THE DECISION BATCH
+## ✅ The batch is PREPARED — 2026-08-24. The next unit of work is the OWNER'S RULING
+
+**The brief is a comment on #56**: one section per ADR — what it decides, what changed since it was
+drafted, what accepting costs, what stays open, and a recommendation. Four of the five need a
+yes/no. **The fifth needs a purchase.**
+
+⚠️ **Three of the five would have frozen something WRONG, and all three are fixed** (`e1cd282`) — a
+body freezes at acceptance and none of it could have been written afterwards:
+
+| ADR        | what would have frozen                                                                                                                                                         |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ADR-0027` | _"cost and quota are unmeasured"_ — **both halves were measured 2026-08-18 and neither is a constraint.** Now typed as `M1`/`M2`, with the two surviving limits attached       |
+| `ADR-0028` | nothing — **`STATUS.generated.md` showed it blocked on nothing, which reads as ready to sign.** `SPIKE-011` is now in `relates_to`, so the open spike shows as an open blocker |
+| `ADR-0029` | _"the allocation basis is a decision that has not been made"_ — **contradicted twice by the same document.** `ADR-0031` makes exactly that choice                              |
+
+⇒ **What is left on this criterion is not authoring.** It is the ruling, and `ADR-0028`'s host.
+
+### The batch's own leftovers, for whoever picks this up next
+
+- ⭐ **`ADR-0029`'s figures foreclose at acceptance.** It quotes ~12 in prose and types **none**.
+  `measurements:` freezes under its own hash and **cannot be added afterwards** — that is why
+  `ADR-0019` and `ADR-0030` are `as_of`-exempt. Its activity-line figures (`$144,975.00`,
+  `$39,665.00`, `8.45%`, `2.31%`, `22.2%`, `1.98%`) are **owned by nobody** and already quoted
+  across **four mutable files**, so typing them binds those files through gate 22. ⚠️ **Do NOT type
+  `13.79%` or `$236,487.75` — `ADR-0030/M2` owns both**, and gate 22 now fails on a second claimant.
+- **`ADR-0020` needs one thing re-affirmed, not re-argued**: P1, the owner's own 2026-08-22 ruling
+  that a tracking category was on no externally filed document. The whole `$231,796.26` consequence
+  is contingent on it, and falsifying it makes an ASC 205-10-50-1 disclosure owed.
+
+---
 
 **Nothing is missing from those five but a decision.** `gate 19: 0 proposed and unsurveyed` — every
 accounting-shaped ADR already carries its six-reference survey. They are not blocked on research, on
@@ -83,13 +113,13 @@ inverted. If a date genuinely was wrong, move it **and say why in the same commi
 
 |       |                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **1** | ⭐ **The decision batch above.** Deadline-driven, unblocked, and it is what m4 criterion 2 needs. **Start here.**                                                                                                                                                                                                                                                                                                                                                           |
+| **1** | ✅ **DONE 2026-08-24 — the brief is a comment on #56.** What remains on m4 criterion 2 is the owner's ruling, not authoring. ⚠️ **Do not re-prepare it**; read the brief, then act on what it asks for                                                                                                                                                                                                                                                                      |
 | **2** | ⛔ **Get the Linode host bought** — or accept that `ADR-0028` cannot be decided by 2026-10-01 and move its date deliberately, with the reason recorded                                                                                                                                                                                                                                                                                                                      |
 | **3** | **#6 — requirements.** `ordering`, `availability`, `banking`, `procurement` still have **zero**; ~39 validate warnings are this backlog surfacing and growing daily. ⚠️ **`banking` is the ripest** — `ADR-0048`'s 16 decisions are already implementation-free, and rule 2 lets an ADR be a `source:`. ⚠️ But that path is barely travelled: the first ADR-sourced requirements recorded **no ADR at all** in the matrix. **Check `generate.ts` output, do not assume it** |
 | **4** | **#35 PSA, smaller than it reads.** `ADR-0044` settled principal-vs-agent and the EOR finding means the cost path is specified — PSA needs the **revenue side and a product line**, not a payroll path. Feeds #3                                                                                                                                                                                                                                                            |
 | **5** | **#40 + #44** — the supersession-dependents gate and its citation-assertion sibling. **Four ready-made instances to land red against**                                                                                                                                                                                                                                                                                                                                      |
 | **6** | **#52** — the census for target-state claims resting only on non-target evidence. ⭐ **Widen the predicate**: SPIKE-004 found the third-party-sandbox sibling of the v1 problem, so one rule over the `source:` prefix covers both                                                                                                                                                                                                                                          |
-| **7** | **#53 / #54 / #55** — public-app research (shopping feeds, agentic commerce, payment acceptance). ⚠️ **Owner said research SESSIONS**, and **#54 is the highest fabrication-risk topic in the repo**: new field, May 2026 cutoff, heavily written about by people guessing                                                                                                                                                                                                  |
+| **7** | **#53 / #54 / #55 / #57** — the boundary and public-app queue. #53/#54/#55 are research (shopping feeds, agentic commerce, payment acceptance); ⚠️ **owner said research SESSIONS**, and **#54 is the highest fabrication-risk topic in the repo**: new field, May 2026 cutoff, heavily written about by people guessing. **#57 is two DECISIONS** — a CDN and Quo — and its sharp end is that **two of the image manager's three jobs are evidence, not decoration**       |
 | **8** | **#45** — `ADR-0041`'s D4 is a procedure with nothing executing on it, and it is the half that removes the seasonal bias                                                                                                                                                                                                                                                                                                                                                    |
 
 ## Decisions worth not re-litigating
@@ -154,6 +184,14 @@ SUCCESS, AND AN ABSENCE READS AS A RESULT.**
 - ⭐ **A measuring SPIKE owns a figure; a deciding ADR CITES it.** Landing `ADR-0047` with
   re-declared figures made the gate report the _spike_ for restating the _ADR_ — ownership exactly
   backwards.
+- ⭐ **And "one owner" was a PREMISE gate 22 could not enforce until 2026-08-24.** `owned` is a Map
+  keyed by the figure, so a second declaration **silently replaced** the first and every file citing
+  the losing id failed while the winning id looked clean. **Latent, not live** — 34 owned figures, 0
+  duplicates — which is precisely why it needed writing down: nobody would have known either way. ⚠️
+  **Its first draft was wrong, and only landing it RED caught that**: keyed on the figure alone it
+  reported `SPIKE-012/M1` against itself, whose value is `"6,967 of 6,967 — 100.00%"`. **One
+  measurement naming one figure twice is not two owners**, and no reading of the expression shows
+  you which direction it is wrong in.
 - ⚠️ **A CONTROL TOTAL KEYED TO THE NATURAL DOCUMENT TOTAL SILENTLY FORBIDS EVERY ENTRY THAT IS NOT
   THAT TOTAL.** `control_total: bill.amount_minor` made CFS's own measured direction
   **unrepresentable**. `vehicle_cost_absorbed` had already hit this and written the reason down
@@ -215,6 +253,10 @@ this revision is full of Plaid sandbox internals the batch does not need.
 the `review_by` cliff, not the spikes**, and it breaks CI on **2026-10-02**. Everything else —
 milestone state, hotspot reasoning, issue backlog — is in `STATUS.generated.md`, the ADRs, and the
 issues.
+
+⚠️ **And as of 2026-08-24 the batch is PREPARED, so a fresh session's job on criterion 2 is NOT to
+write the brief again.** It is a comment on #56. Read it, then either act on a ruling or work item 3
+onward — re-preparing it would be a day spent producing something that already exists.
 
 ⚠️ **The recommendation is the part of a plan doc that goes stale fastest**, because it is the only
 part written about the future. This one named "the shared 009+013 ADR, then SPIKE-004" until
