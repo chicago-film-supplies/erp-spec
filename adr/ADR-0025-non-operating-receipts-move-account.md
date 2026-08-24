@@ -20,6 +20,7 @@ measurements:
     of: >-
       The live `Other Income` block in the chart, all Active with no archived sixth. ⚠️ **Corrects
       this ADR's own "`4820 Interest Income` and five siblings"**, which counted six.
+    as_of: 2026-08-17
     source: "code:2026-08-22:erp-spec@29c7850:ledger/chart-of-accounts.yaml"
 asserts:
   - id: D1

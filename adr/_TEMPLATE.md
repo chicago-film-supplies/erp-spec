@@ -20,8 +20,15 @@ survey: [] # `inbox/` paths, REQUIRED before `accepted` when accounting_shaped. 
 # survey_exemption: only for an ADR already frozen without one — say why it never will have one.
 # not_accounting_reason: required when `accounting_shaped: false` and the body names a GL code.
 measurements: [] # the figures this ADR asserts. Each: id (M1…), value, `of` (the POPULATION it is
-# a figure of — a figure without one is a number nobody can check), and a dated pinned `source:`.
-# ~95% of measured claims decompose cleanly; this is the block that pays (gate 21).
+# a figure of — a figure without one is a number nobody can check), `as_of`, and a dated pinned
+# `source:`. ~95% of measured claims decompose cleanly; this is the block that pays (gate 21).
+# ⚠️ `as_of` is NOT the source date. The SOURCE date says when you READ; `as_of` says when the
+# population WAS that population — and v1 is under active development with a pending CRMS break, so
+# the referent moves underneath a description that stays word-for-word the same. The two
+# legitimately differ (a 2026-01-24 import cohort, measured 2026-08-24), and `as_of` may precede its
+# source but never follow it: that would be a forecast wearing a measurement's clothes.
+# ⭐ SPIKES CARRY THIS BLOCK TOO, and it is required once a spike is no longer `closed` — a spike is
+# where measuring actually happens, and it typed nothing until 2026-08-24.
 asserts: [] # claims with ids. Each: id (D1/P1…), kind: decision | premise, claim, and — for a
 # premise — a `source:`. A PREMISE is a fact the decision rested on: it may later gain
 # `status: refuted` + `refuted_by:`, which is how a frozen ADR says a fact it cited was wrong.

@@ -12,6 +12,7 @@ exit_criteria:
   - Backfill window established — how far back history reaches on first link.
   - Transaction id stability confirmed or refuted across updates and re-links.
   - Balance endpoints reconciled against a statement closing balance, to the cent.
+measurements: [] # Nothing measured yet — the spike is unblocked (sandbox credentials are in place) but has not
 closes_adr: new
 status: open
 ---

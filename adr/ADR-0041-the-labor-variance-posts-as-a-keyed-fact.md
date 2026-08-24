@@ -23,6 +23,7 @@ measurements:
       body**, which states 13.85 points and a 6.00% floor. Both of the ADR's figures require Social
       Security to cap mid-season; it caps at the federal taxable maximum, ~6,150 hours at $30/hr.
       ⚠️ `OQ-050` stated a third figure, ~4.51%, omitting both Social Security and the platform fee.
+    as_of: 2026-08-17
     source: "inbox/2026-08-17-adr-0019s-burden-cap-arithmetic-treats-social-security-as-capping-mid-season-and-it-does-not.md"
 asserts:
   - id: D1

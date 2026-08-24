@@ -45,15 +45,21 @@ is ever deleted.
   `accepted` ADR that still carries the promise, and on a `superseded_by` set without the matching
   status, so neither half can be forgotten (erp-spec#18).
 - ✅ **An ADR may carry `measurements:` and `asserts:`** (ADR-0037, gate 21). `measurements[]` types
-  the FIGURES — each with a `value`, the population it is a figure **`of`**, and a dated pinned
-  `source:`. `asserts[]` types the CLAIMS — `kind: decision | premise`, and a premise may later gain
-  `status: refuted` + `refuted_by:`, **which is how a frozen ADR finally says a fact it cited was
-  wrong** without an edit or a supersession. Both freeze at acceptance under their own
-  `frozen_asserts_sha256:`. ⚠️ **Type the claim, never the reason.** The reasoning stays in the
-  body, and that is a finding rather than laziness: every notation surveyed that typed RATIONALE
-  produced a standard nobody implemented, and ~83% of the load-bearing words here are the connective
-  reasoning between propositions. ⚠️ **Backfill is PREMISES ONLY** (owner, 2026-08-17) — writing
-  "what a frozen ADR rested on" is a reconstruction by someone who was not there.
+  the FIGURES — each with a `value`, the population it is a figure **`of`**, an **`as_of`**, and a
+  dated pinned `source:`. ⚠️ **`as_of` is not the source date**: the source says when you READ, and
+  `as_of` says when the population WAS that population. v1 is unfinished and its corpus has a
+  pending structural break, so the referent moves while the description does not. It may precede its
+  source (a historical cohort, measured later) and never follow it. ⭐ **`measurements:` is REQUIRED
+  on every spike that is not `closed`** (owner, 2026-08-24) — a spike is where measuring happens,
+  and it typed nothing until then, which is where all five "a v1 figure reasoned into a v2
+  constraint" instances lived. `asserts[]` types the CLAIMS — `kind: decision | premise`, and a
+  premise may later gain `status: refuted` + `refuted_by:`, **which is how a frozen ADR finally says
+  a fact it cited was wrong** without an edit or a supersession. Both freeze at acceptance under
+  their own `frozen_asserts_sha256:`. ⚠️ **Type the claim, never the reason.** The reasoning stays
+  in the body, and that is a finding rather than laziness: every notation surveyed that typed
+  RATIONALE produced a standard nobody implemented, and ~83% of the load-bearing words here are the
+  connective reasoning between propositions. ⚠️ **Backfill is PREMISES ONLY** (owner, 2026-08-17) —
+  writing "what a frozen ADR rested on" is a reconstruction by someone who was not there.
 - ✅ **Enforced by `validate` gate 14.** An accepted or superseded ADR carries `frozen_sha256:` in
   its front matter, recomputed over the body on every run — edit the body and CI goes red. **Front
   matter is not hashed**, which is what lets `relates_to` gain the id of a later correction and lets

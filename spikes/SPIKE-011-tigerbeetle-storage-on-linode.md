@@ -20,6 +20,7 @@ exit_criteria:
   - The whole tier sized together as a table, one row per process — the nine Victoria-stack containers, the OpenTelemetry collector, Gotenberg, Caddy, the Deno application, MongoDB, Valkey and TigerBeetle — each carrying a memory and CPU figure that is measured or cited, never estimated.
   - The replica count and instance shape that sum implies, with monthly cost.
   - If block storage is unsuitable, the alternative is named and priced — and what that does to ADR-0013, which is accepted and frozen and can therefore no longer be gated by this spike.
+measurements: [] # Nothing measured yet — the spike needs a provisioned Linode host that does not exist. ⚠️ Its
 closes_adr: ADR-0013
 status: open
 ---

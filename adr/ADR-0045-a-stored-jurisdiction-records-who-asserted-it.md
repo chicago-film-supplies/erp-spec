@@ -22,6 +22,7 @@ measurements:
       server-side — `destinationJurisdictions` at `api-cloudrun/src/services/orders.ts:2528` —
       and **discarded at `:2537`**. ⚠️ **Nothing persists it, and that is deliberate rather than an
       omission** — see D1's rejected options.
+    as_of: 2026-08-23
     source: "code:2026-08-23:api-cloudrun@22672044:src/services/orders.ts"
   - id: M2
     value: "6 of 994 orders use level 1 to say anything level 2 does not"
@@ -31,6 +32,7 @@ measurements:
       this ADR read the residue as operator intent and it is migration output.** Commit `9a43032b`
       applied `migrate-document-tax-jurisdiction.ts` to 55 documents, and the manager control that
       lets an operator author one shipped days before the measurement.
+    as_of: 2026-08-23
     source: "code:2026-08-23:api-cloudrun@22672044:tests/integration/orders/jurisdiction.test.ts"
   - id: M3
     value: "5 conceptual taxes occupy 9 distinct Xero TaxTypes"
@@ -39,6 +41,7 @@ measurements:
       date-effectivity, no item scope and no attachment endpoint, so every rate change mints a new
       TaxType and strands its predecessor. ⇒ formalising the jurisdiction dimension **adds** one the
       incumbent never held; there is no history to restate and no Xero figure that can check it.
+    as_of: 2026-08-23
     source: "inbox/2026-08-23-survey-how-six-references-source-a-tax-jurisdiction-and-what-substantiates-a-departure.md"
   - id: M4
     value: "1,723 lines of rule in `core`; 1,131 of the API's 2,481 die with Xero and CRMS"
@@ -47,6 +50,7 @@ measurements:
       per-line materialization — is `core/src/utils/taxes.ts` + `src/schemas/tax.ts`, **pure, with
       no I/O, published**. `api-cloudrun` holds catalog CRUD, the Xero mapping and the lifecycle
       monitors. ⇒ **the rule is already portable and survives the rebuild nearly intact.**
+    as_of: 2026-08-23
     source: "code:2026-08-23:core@c553f3c:src/utils/taxes.ts"
 asserts:
   - id: D1

@@ -232,10 +232,22 @@ interface Spike {
   closes_adr?: string;
   status?: string;
   exit_criteria: unknown[];
+  /**
+   * The figures this spike measured — same shape as an ADR's, and gate 21 checks both.
+   *
+   * ⚠️ **Spikes got this a week after ADRs did, and the gap is where the damage was.** ADR-0037
+   * typed the figures an ADR *asserts*; **a spike is where measuring actually happens**, and it
+   * typed nothing. Five instances of "a v1 measurement reasoned into a v2 constraint" in two days
+   * all landed in spike findings, none in an ADR block — because the block makes you write down
+   * the population and the date, and prose does not.
+   */
+  measurements?: unknown;
   _file: string;
+  /** Needed by gate 21's falsifier: a spike citing a dated pin in prose owes a measurement. */
+  _body: string;
 }
 
-function toSpike(fm: unknown, file: string): Spike | null {
+function toSpike(fm: unknown, file: string, body: string): Spike | null {
   if (!isRecord(fm)) return null;
   const id = str(fm.id);
   if (id === undefined) return null;
@@ -246,7 +258,9 @@ function toSpike(fm: unknown, file: string): Spike | null {
     closes_adr: str(fm.closes_adr),
     status: str(fm.status),
     exit_criteria: Array.isArray(fm.exit_criteria) ? fm.exit_criteria : [],
+    measurements: fm.measurements,
     _file: file,
+    _body: body,
   };
 }
 
@@ -321,7 +335,7 @@ for (const f of await filesIn("spikes", ".md")) {
     fail("1", `${rel(f)}: missing or unparseable front matter`);
     continue;
   }
-  const spike = toSpike(parsed.fm, f);
+  const spike = toSpike(parsed.fm, f, parsed.body);
   if (!spike) {
     fail("1", `${rel(f)}: front matter has no string \`id\``);
     continue;
@@ -3329,7 +3343,100 @@ for (const e of evts) {
   /** The same provenance forms `source:` takes everywhere else in this repo (gate 10d, rule 1). */
   const SOURCE_FORM =
     /^((api|code|xero|wrapbook):\d{4}-\d{2}-\d{2}:|ADR-\d{4}|inbox\/\d{4}-\d{2}-\d{2}|OQ-\d{3}|HOT-\d{3}|SPIKE-\d{3})/;
-  let withBlocks = 0, claims = 0, measures = 0;
+  /** The date inside a pinned `api:`/`code:` source, or null for an id/inbox reference. */
+  const sourceDate = (src: string): string | null =>
+    src.match(/^(?:api|code|xero|wrapbook):(\d{4}-\d{2}-\d{2}):/)?.[1] ?? null;
+
+  /**
+   * ⚠️ **`as_of` is NOT a duplicate of the source date, and the difference is the whole point**
+   * (owner, 2026-08-24: _"`of` should come with a timestamp though since v1 is evolving fast"_).
+   *
+   * The **source date** says when the READ happened. **`as_of` says when the POPULATION was that
+   * population** — and v1 is under active development with a pending CRMS structural break, so the
+   * referent moves underneath a description that stays word-for-word the same. "995 prod orders"
+   * named one set on 2026-08-23 and will name a differently-shaped one after cutover.
+   *
+   * ⭐ **The two legitimately differ**, which is why one field cannot carry both: SPIKE-013's
+   * conflict-surface probe reports a figure OF the *2026-01-24 CRMS import cohort*, measured on
+   * *2026-08-24*. The population is dated four months before the read.
+   *
+   * ⇒ `as_of` may precede its source (a historical cohort, measured later) and may **never follow
+   * it** — a population described as of a date after you measured it is a forecast wearing a
+   * measurement's clothes.
+   */
+  const AS_OF_EXEMPT: Record<string, string> = {
+    "ADR-0019":
+      "accepted and frozen 2026-08-17, before `as_of` existed; its two measurements are inside `frozen_asserts_sha256` and adding a field would break the freeze",
+    "ADR-0030":
+      "accepted and frozen 2026-08-17, same reason — exempt by identity rather than by a date cutoff, so the list can only shrink",
+  };
+
+  let withBlocks = 0, claims = 0, measures = 0, spikeBlocks = 0, spikeMeasures = 0;
+
+  /** Check one `measurements[]` entry. Shared by ADRs and spikes — one owner for the shape. */
+  const checkMeasurement = (
+    where: string,
+    m: Record<string, unknown>,
+    ids: Set<string>,
+    exemptReason: string | undefined,
+  ) => {
+    const id = String(m.id ?? "");
+    if (!/^M\d+$/.test(id)) fail(G, `${where}: id "${id}" must look like \`M1\``);
+    else if (ids.has(id)) fail(G, `${where}: id "${id}" is duplicated`);
+    else ids.add(id);
+    if (m.value === undefined || String(m.value).trim() === "") {
+      fail(G, `${where}: no \`value\``);
+    }
+    // The footgun made structural: a figure without its population is unusable and this repo has
+    // paid for it three times ("before using a number, ask what it is a figure OF").
+    if (!m.of || String(m.of).trim() === "") {
+      fail(G, `${where}: no \`of\` — a figure with no population is a number nobody can check`);
+    }
+    const src = String(m.source ?? "");
+    if (!src) fail(G, `${where}: a measurement needs a \`source\``);
+    else if (!SOURCE_FORM.test(src)) {
+      fail(
+        G,
+        `${where}: source "${src}" is not a dated, pinned form (\`api:<date>:…\`, \`code:<date>:…\`, \`xero:<date>:…\`, an id, or an inbox path)`,
+      );
+    }
+
+    // ── `as_of` — when the POPULATION was that population ──
+    // ⚠️ Decoded through `dateVal`, NOT `str`. An unquoted YAML `as_of: 2026-08-16` parses to a JS
+    // `Date`, so a string check reports "no as_of" on a field that is plainly there — which is
+    // exactly what it did on the first run of this backfill. The same footgun this repo has already
+    // paid for twice; `dateVal` + `ymdUTC` are its owners and this uses them rather than a third
+    // copy, and rather than demanding quotes an author will forget.
+    const asOfD = m.as_of === undefined ? undefined : dateVal(m.as_of);
+    if (exemptReason) {
+      if (m.as_of !== undefined) {
+        fail(
+          G,
+          `${where}: carries \`as_of\` but is exempt — ${exemptReason}. Adding it would silently change what the freeze covers`,
+        );
+      }
+      return;
+    }
+    if (m.as_of !== undefined && !asOfD) {
+      fail(G, `${where}: as_of "${String(m.as_of)}" is not a date`);
+      return;
+    }
+    if (!asOfD) {
+      fail(
+        G,
+        `${where}: no \`as_of\` — the source date says when you READ, \`as_of\` says when the population WAS that population, and v1 moves underneath a description that does not`,
+      );
+      return;
+    }
+    const asOf = ymdUTC(asOfD);
+    const sd = sourceDate(src);
+    if (sd && asOf > sd) {
+      fail(
+        G,
+        `${where}: as_of ${asOf} is AFTER its source read on ${sd} — a population described as of a date later than it was measured is a forecast, not a measurement`,
+      );
+    }
+  };
 
   const encoder = new TextEncoder();
   const sha = async (t: string) =>
@@ -3357,27 +3464,7 @@ for (const e of evts) {
     const ids = new Set<string>();
 
     for (const [i, m] of (measurements ?? []).entries()) {
-      const where = `${a.id} measurements[${i}]`;
-      const id = String(m.id ?? "");
-      if (!/^M\d+$/.test(id)) fail(G, `${where}: id "${id}" must look like \`M1\``);
-      else if (ids.has(id)) fail(G, `${where}: id "${id}" is duplicated`);
-      else ids.add(id);
-      if (m.value === undefined || String(m.value).trim() === "") {
-        fail(G, `${where}: no \`value\``);
-      }
-      // The footgun made structural: a figure without its population is unusable and this repo has
-      // paid for it three times ("before using a number, ask what it is a figure OF").
-      if (!m.of || String(m.of).trim() === "") {
-        fail(G, `${where}: no \`of\` — a figure with no population is a number nobody can check`);
-      }
-      const src = String(m.source ?? "");
-      if (!src) fail(G, `${where}: a measurement needs a \`source\``);
-      else if (!SOURCE_FORM.test(src)) {
-        fail(
-          G,
-          `${where}: source "${src}" is not a dated, pinned form (\`api:<date>:…\`, \`code:<date>:…\`, \`xero:<date>:…\`, an id, or an inbox path)`,
-        );
-      }
+      checkMeasurement(`${a.id} measurements[${i}]`, m, ids, AS_OF_EXEMPT[a.id]);
       measures++;
     }
 
@@ -3445,10 +3532,65 @@ for (const e of evts) {
     }
   }
 
+  // ── the same block on SPIKES, which is where measuring actually happens ─────────────────────
+  /**
+   * ⚠️ **ADR-0037 typed the figures an ADR ASSERTS and left untouched the artifact that PRODUCES
+   * them.** A spike measures; an ADR cites. So the block landed on the citing end and not on the
+   * measuring end, and **every one of the five recorded "a v1 figure reasoned into a v2 constraint"
+   * instances lived in a spike finding.** Written in prose, a figure carries whatever context the
+   * sentence happened to give it; in this block it cannot exist without naming its population and
+   * the date that population held.
+   *
+   * **Required once a spike is no longer `closed`.** A closed spike's evidence is settled and its
+   * ADR is written, so retyping it is transcription with no reader — exempt by lifecycle, not by
+   * date, and the exempt set can only shrink as spikes are opened.
+   *
+   * ⚠️ **An empty block would otherwise pass while the prose is full of figures**, which is gate
+   * 20's exact limitation. So there is a falsifier, and it is crude on purpose: **a spike whose
+   * body cites a dated pin (`api:<date>:` / `code:<date>:`) has measured something**, and a
+   * declared-empty `measurements` beside one is a contradiction the gate can see. It cannot see a
+   * bare number in prose, and that is stated rather than implied.
+   */
+  const PIN_IN_PROSE = /\b(api|code|xero|wrapbook):\d{4}-\d{2}-\d{2}:/;
+  for (const sp of spikes) {
+    const ms = Array.isArray(sp.measurements) ? sp.measurements as Record<string, unknown>[] : null;
+    if (sp.measurements !== undefined && !ms) {
+      fail(G, `${sp.id}: \`measurements\` is not a list`);
+      continue;
+    }
+    const settled = String(sp.status) === "closed";
+    if (!ms) {
+      if (!settled) {
+        fail(
+          G,
+          `${sp.id}: no \`measurements\` block — a spike that is not \`closed\` owes one, empty if it has measured nothing yet (write \`measurements: []\`)`,
+        );
+      }
+      continue;
+    }
+    if (ms.length === 0 && PIN_IN_PROSE.test(sp._body)) {
+      fail(
+        G,
+        `${sp.id}: \`measurements: []\` but the body cites a dated pin — something was measured and its population and \`as_of\` are nowhere`,
+      );
+    }
+    spikeBlocks++;
+    const ids = new Set<string>();
+    for (const [i, m] of ms.entries()) {
+      checkMeasurement(`${sp.id} measurements[${i}]`, m, ids, undefined);
+      spikeMeasures++;
+    }
+  }
+
   const inForce = adrs.filter((a) => a.status === "accepted" && !a.superseded_by).length;
+  const live = spikes.filter((sp) => String(sp.status) !== "closed").length;
   notes.push(
-    `gate 21: ${claims} claims + ${measures} measurements across ${withBlocks} ADRs; ` +
-      `NOT CHECKED — ${inForce - withBlocks} of ${inForce} in-force ADRs carry neither block`,
+    `gate 21: ${claims} claims + ${measures} measurements across ${withBlocks} ADRs, ` +
+      `${spikeMeasures} measurements across ${spikeBlocks} spikes; ` +
+      `NOT CHECKED — ${inForce - withBlocks} of ${inForce} in-force ADRs carry neither block, ` +
+      `${
+        spikes.length - live
+      } closed spikes are exempt, and no gate can see a bare figure in prose`,
   );
 }
 

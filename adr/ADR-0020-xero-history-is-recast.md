@@ -21,6 +21,7 @@ measurements:
       This is the migration delta: the amount by which v2's tracking-sliced view of closed periods
       will differ from Xero's. ⚠️ It is a figure OF the pre-lock corpus, not of the whole corpus —
       M2 is the corpus-wide population and the two are not the same denominator.
+    as_of: 2026-08-20
     source: "inbox/2026-08-20-survey-it-is-a-recast-not-a-restatement-and-the-migration-delta-is-231796-in-lines-untracked-by-both-systems.md"
   - id: M2
     value: "130 lines / $233,610.63"
@@ -29,12 +30,14 @@ measurements:
       the lines with nothing to derive from, and they are the whole subject of this decision.**
       ⚠️ Read `128 / $233,667.63` in several places — that is the 2026-08-10 measurement, still
       quoted in `hotspots.yaml` HOT-020 and in the m4 plan. The money is flat; the denominator grew.
+    as_of: 2026-08-16
     source: "code:2026-08-22:erp-spec@29c7850:ledger/dimensions.yaml"
   - id: M3
     value: "80.04% of invoices, ~73.6–76.6% of lines"
     of: >-
       The share of the corpus behind the 2025-12-31 period lock. ⚠️ **Corrects the "~90%" this ADR
       carried undated**, a figure that appeared in four live places at once.
+    as_of: 2026-08-20
     source: "inbox/2026-08-20-survey-it-is-a-recast-not-a-restatement-and-the-migration-delta-is-231796-in-lines-untracked-by-both-systems.md"
   - id: M4
     value: "7 lines / $1,700.00, none since 2024-10-07"
@@ -42,12 +45,14 @@ measurements:
       Lines where CFS holds a tracking category and Xero does not. ⚠️ **Replaces this ADR's 13.90% /
       $234,960.36**, which counted absent `xero_tracking_option_id` and was read as CFS-ahead-of-Xero.
       The real direction is the opposite one, and it is measured at M5.
+    as_of: 2026-08-20
     source: "inbox/2026-08-20-survey-it-is-a-recast-not-a-restatement-and-the-migration-delta-is-231796-in-lines-untracked-by-both-systems.md"
   - id: M5
     value: "151 lines / $19,350.96"
     of: >-
       Lines that are CFS-empty but Xero-SET — the incumbent holds a classification CFS's own line
       does not. A live v1 defect, not a migration question, and it belongs to api-cloudrun#597.
+    as_of: 2026-08-20
     source: "inbox/2026-08-20-survey-every-system-puts-not-applicable-on-the-account-never-on-the-posting-and-the-criterion-is-tie-out-not-classification.md"
 asserts:
   - id: D1

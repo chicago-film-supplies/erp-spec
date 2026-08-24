@@ -17,6 +17,47 @@ exit_criteria:
   - Proof by replay that no future-dated booking consumes balance at the chosen boundary.
   - The derived/assigned split for order status stated field by field, as a table.
   - A count of orders in the replay whose status could NOT be derived, with the reason for each.
+measurements:
+  - id: M1
+    value: "6,967 of 6,967 — 100.00%, zero exceptions"
+    of: >-
+      Bookings whose `breakdown` counters sum EXACTLY to that booking's own declared `quantity`.
+      Checked against each row's own quantity, which no rollup authors, so it is independent of the
+      order-level denorm. ⇒ **a TigerBeetle-style position can be built from `breakdown`**, which is
+      what made the boundary question measurable at all.
+    as_of: 2026-08-22
+    source: "code:2026-08-22:erp-spec@26bf708:spikes/harness/booking-boundary-probe.ts"
+  - id: M2
+    value: "392 future-dated units across 38 rows, max lead 43 days"
+    of: >-
+      Units held in `reserved` whose charge window has not started — i.e. a forward booking already
+      consuming balance at candidate boundary B1 ("at confirmation").
+      ⭐ **This REFUTES B1 on exercised data**, and it is exactly the failure ADR-0015 predicts. It
+      is a real measurement rather than an absence: `reserved` is genuinely in use post-import
+      (906 rows / 8,268 units).
+    as_of: 2026-08-22
+    source: "code:2026-08-22:erp-spec@26bf708:spikes/harness/booking-boundary-probe.ts"
+  - id: M3
+    value: "11 rows — 0.77%"
+    of: >-
+      Post-import bookings with the `prepped` counter populated, out of 1,422.
+      ⛔ **THIS IS WHY THE SPIKE CANNOT CLOSE, AND IT IS RECORDED AS A MEASUREMENT SO IT CANNOT BE
+      MISREAD AS A PASS.** Candidate boundaries B2 and B3 both reported "PASSES — no future-dated
+      unit holds a transfer" resting on these 11 rows. **The manager's check-in/check-out process
+      is not live**, so the verdict is an absence of data wearing a result's clothes. An unexercised
+      branch is a claim, not a capability (erp-spec#46).
+    as_of: 2026-08-22
+    source: "code:2026-08-22:erp-spec@26bf708:spikes/harness/booking-boundary-probe.ts"
+  - id: M4
+    value: "49.40% derived == stored · 22.13% disagree · 28.47% not derivable"
+    of: >-
+      Orders whose status was compared against a status derived from the booking position alone.
+      ⛔ **DO NOT CARRY THESE FORWARD.** With the lifecycle dormant, `orders.status` is driven by
+      CRMS sync rather than by the position, so this measures agreement between a LIVE system and a
+      DORMANT one — two coherent systems that simply disagree. The largest disagreeing pair (177
+      orders, 23,409 units still `out`) is entirely the 2026-01-24 import cohort.
+    as_of: 2026-08-22
+    source: "code:2026-08-22:erp-spec@26bf708:spikes/harness/booking-boundary-probe.ts"
 closes_adr: ADR-0015
 status: in_progress
 ---

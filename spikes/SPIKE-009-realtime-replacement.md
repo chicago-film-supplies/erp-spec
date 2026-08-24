@@ -14,6 +14,30 @@ exit_criteria:
   - Resume-token handling specified, including what happens after a disconnect longer than the oplog window.
   - An honest inventory of manager-side listener dependencies, with per-site effort — not a single aggregate estimate.
   - Authorization model stated: Firestore rules enforced reads directly; a socket layer must re-implement that.
+measurements:
+  - id: M1
+    value: "52 subscription sites across 34 collections"
+    of: >-
+      Distinct `onSnapshot` subscription sites in the manager app — the port surface this spike
+      exists to size. Three primitives cover 34 of them (`createEntityCache` 22,
+      `createEntityListCache` 7, `createPaginatedFirestoreList` 5) and 18 are hand-rolled.
+      ⚠️ **A figure OF PORTING EFFORT, not of the v2 design.** It says how much of an UNFINISHED
+      app has to be moved; it does not say how many subscriptions v2 will have. ⚠️ And anyone
+      costing it from a raw `grep onSnapshot` count overestimates the porting and underestimates
+      the hard parts, which do not scale with the site count at all.
+    as_of: 2026-08-23
+    source: "code:2026-08-23:manager@56e41fd:src"
+  - id: M2
+    value: "79% — 25 external (48%) + 16 collaborative (31%) + 6 cross-surface (12%); 5 convenience (10%)"
+    of: >-
+      The 52 sites above, classified by WHY they must be live. 79% are driven by writers the client
+      cannot invalidate against because the client never made the write — five webhook endpoints
+      among them.
+      ⚠️ **The `external` share is the one that moves**: five of those writers are CRMS and Xero
+      integrations, and CRMS retires. ⇒ this proportion describes the pre-cutover system and the
+      external share only falls from cutover onward.
+    as_of: 2026-08-23
+    source: "code:2026-08-23:manager@56e41fd:src"
 closes_adr: new
 status: in_progress
 ---

@@ -19,6 +19,72 @@ exit_criteria:
   - Whether the undo path requires OQ-043's document event history is answered yes or no, with what breaks if it is no.
   - The offline/pending/synced state is shown to be derivable at every save-on-focusout site — the absence of an error is currently the only feedback, so this is the load-bearing half.
   - A field photo captured offline survives and uploads on reconnect — blobs are not field writes, and a queue that treats `qty: 2` and a 4 MB JPEG identically has not been designed for the second.
+measurements:
+  - id: M1
+    value: "182 — 18.3%"
+    of: >-
+      Prod orders in which a LEAF `items[].uid` repeats, over 995 orders / 13,671 items / 9,847
+      leaves. **This is the population that forces the merge key to be `(uid, k-th occurrence)`**:
+      keying on `uid` alone pairs the wrong rows in nearly a fifth of the corpus, silently. Divider
+      uids repeat in 0, so only leaves need the counter.
+      ⚠️ **A figure OF the PRE-CUTOVER, CRMS-shaped corpus.** 995 of 995 prod orders carry a
+      `crms_id`, and that share only falls from cutover onward — so this proportion describes a
+      corpus that will not exist in this shape when the migration runs. It is a migration
+      constraint, not a v2 design fact.
+    as_of: 2026-08-23
+    source: "code:2026-08-23:erp-spec@26bf708:spikes/harness/merge-key-probe.ts"
+  - id: M2
+    value: "879 orders — 88.3%; 998 invoices — 97.9%"
+    of: >-
+      Documents in the migration corpus sitting in a TERMINAL state (orders `complete`/`canceled`,
+      invoices `paid`/`void`) — the class that must REFUSE a merge rather than resolve it.
+      ⚠️ **Sizes history, not a forecast.** It says how much of what migrates is already closed; it
+      does not say how often a v2 operator meets a closed document.
+    as_of: 2026-08-24
+    source: "code:2026-08-24:erp-spec@26bf708:spikes/harness/conflict-surface-probe.ts"
+  - id: M3
+    value: "19,283 of 28,157 lines — 68.5%"
+    of: >-
+      Order and invoice lines in the migration corpus carrying at least one DERIVED money leaf
+      (subtotal, discounted subtotal, total, discount amount, a tax amount) — values that must be
+      recomputed after a merge, never chosen from a side. 91,329 derived leaves against 39,994
+      authored ones.
+      ⚠️ **The authored/derived partition exists in NO schema.** The probe's list is hand-written
+      because there is nowhere to read it from, and that absence is the finding rather than a
+      parameter of the measurement.
+    as_of: 2026-08-24
+    source: "code:2026-08-24:erp-spec@26bf708:spikes/harness/conflict-surface-probe.ts"
+  - id: M4
+    value: "11 dangling refs across 3 destinations, of 3,486"
+    of: >-
+      `destinations.products[]` references pointing at product documents that no longer exist —
+      measured with nobody offline, so it is the standing rate of vanished targets in live data.
+      ⇒ a queued edit addressed at one FAILS rather than conflicts; there is nothing to merge into
+      and no question a conflict surface can ask. Filed as api-cloudrun#654.
+      ⚠️ 2 of 5 reference arms measured matched NOTHING and are reported VACUOUS, not clean.
+    as_of: 2026-08-24
+    source: "code:2026-08-24:erp-spec@26bf708:spikes/harness/conflict-surface-probe.ts"
+  - id: M5
+    value: "1"
+    of: >-
+      Live operator accounts in prod (`users`, role `admin`, not deleted).
+      ⛔ **THIS BOUNDS NOTHING ABOUT v2 AND IS RECORDED SO THAT IT CANNOT BE USED AS IF IT DID.** It
+      measures the staffing of an UNFINISHED single-operator app. v2's actor model is a requirement
+      (`REQ-FUL-001`), not an observation, and a public client app is in scope. An earlier revision
+      of this spike reasoned from this figure to a claim about v2's conflict UI; that was the
+      absence-to-absence error and it was withdrawn.
+    as_of: 2026-08-24
+    source: "code:2026-08-24:erp-spec@26bf708:spikes/harness/conflict-surface-probe.ts"
+  - id: M6
+    value: "4,194,304 bytes, byte-exact"
+    of: >-
+      A blob captured while offline in the prototype, surviving the destruction of the page that
+      captured it and uploaded whole by a fresh one — the criterion 7 assertion.
+      ⭐ **Not a corpus figure at all**, and it is here to make that distinction visible: it is a
+      measurement of the ARTIFACT THIS SPIKE BUILT, so it carries no migration caveat and no
+      dependence on v1.
+    as_of: 2026-08-24
+    source: "code:2026-08-24:erp-spec@26bf708:spikes/harness/offline-queue/browser_test.ts"
 closes_adr: new
 status: in_progress
 ---

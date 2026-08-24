@@ -21,6 +21,7 @@ measurements:
       14,425 lines. **93% by value is already billed GROSS**, which is the principal treatment, and
       7% through the liability, which is the agency one — for the same customer, on the same shape
       of work. `4130`, `2801`, `2802` and `2803` are named by **zero** invoice lines.
+    as_of: 2026-08-17
     source: "inbox/2026-08-17-survey-psa-is-a-principal-or-agent-question-and-the-live-books-answer-it-four-different-ways.md"
 asserts:
   - id: D1
