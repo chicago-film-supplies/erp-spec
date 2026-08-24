@@ -2683,3 +2683,45 @@ open_questions:
       same; the population and the answer need not be.
       Survey:
       `inbox/2026-08-23-survey-how-six-references-source-a-tax-jurisdiction-and-what-substantiates-a-departure.md`.
+
+  - id: OQ-058
+    headline: "what is identity for v2 domain entities"
+    question: >-
+      What is the identity scheme for v2 domain entities — is it one opaque minted id per row
+      everywhere, and what happens to the business identifiers (SKU, order number, invoice number)
+      that people actually use to refer to things?
+    owner: alex
+    decide_by: 2026-11-30
+    blocks: []
+    status: open
+    notes: >-
+      Opened 2026-08-23. The owner is **inclined to accept the line-identity recommendation but
+      wants it researched against the broader schema first**, and that is the right instinct — the
+      recommendation was derived from ONE row type under TWO pressures, and identity is a
+      whole-schema question.
+      **The recommendation as it stands, and what it rests on:** a client-generatable **random u64
+      with a uniqueness constraint at the write**. Client-generatable because offline creates need
+      identity before the server sees the row (`SPIKE-013`), which rules out a server sequence. u64
+      because `user_data_64` is where `ledger/tigerbeetle-accounts.yaml` puts line identity, and
+      `user_data_128` holds `journal_entry_id` and was refused for eviction (erp-spec#3). The
+      uniqueness constraint is what turns collision from a probability into a caught error.
+      ⭐ **Two pressures produced it and they agree, which is the strongest thing about it**:
+      identity across two versions of a document (the `SPIKE-013` three-way merge) and identity
+      forever (an immutable posting). Neither is served by `uid` — a leaf uid repeats in **182 of
+      995 orders, 18.3%** — nor by `path`, which is derived and changes on rename and on reparent.
+      ⚠️ **What has NOT been considered, and is the reason this is an OQ rather than a decision:**
+      whether one scheme suits every entity (a product master is not a line item); whether
+      `order.number` and `invoice.number` stay human-facing sequences beside the opaque id and who
+      mints them offline; what identity a **booking** carries, given it is one row per (order,
+      product, destination) and nothing here has looked at it; and how this interacts with
+      **`ADR-0009` — foreign identifiers never enter domain models**, which is adjacent and does not
+      decide it.
+      ⚠️⚠️ **SKU must not become the product identity.** It is human-authored and mutable, and this
+      codebase already carries the precedent one level down: `reuseMemberUids` reuses divider uids
+      **BY NAME**, which is exactly what makes a path unstable across a rebuild. A SKU is a **label
+      with a uniqueness constraint**; the product keeps an opaque immutable id. Recorded here
+      because the owner named SKU as `crms_id`'s replacement, and the two roles are different.
+      Evidence:
+      `inbox/2026-08-23-owner-greenfield-ids-change-the-size-answer-but-not-the-binding-one-and-sku-as-identity-is-the-recorded-trap.md`
+      and
+      `inbox/2026-08-23-what-a-minted-line-id-costs-and-why-path-interning-converges-on-it.md`.

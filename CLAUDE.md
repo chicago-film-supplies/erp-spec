@@ -235,9 +235,9 @@ Not every tool has an upstream dump, and the difference is worth knowing before 
   githubstatus.com before believing a stated cause: a generic message names the path it fell into,
   not the reason.
 
-## Four rules that exist because something here broke on them
+## Five rules that exist because something here broke on them
 
-The first two are already enforced in the `~/cfs` workspace. All four are load-bearing here:
+The first two are already enforced in the `~/cfs` workspace. All five are load-bearing here:
 
 - **A guard that can only consult its own oracle is not a guard.** A fixed-point check — "the stored
   value equals what the recompute produces" — is defined in terms of the normalizer and can only
@@ -263,6 +263,32 @@ The first two are already enforced in the `~/cfs` workspace. All four are load-b
 
   So: when you are about to be the first to use a documented-but-untravelled path, go and check the
   artifacts that claim to cover it, rather than assuming they do.
+
+- **v1 answers WHAT IS, never WHAT MUST BE — and its SCHEDULE is not a v2 constraint either.** Every
+  legitimate v1 read in this repo measures the **migration corpus** or **current behaviour**. The
+  moment a v1 read is used to answer a **design** question it is outside its competence, and it is
+  seductive precisely because it is executable, pinned and citable while the target system is none
+  of those things. ⚠️ **Four instances in two days, all four caught by the owner and none by
+  reading**, in two shapes:
+  - **Absence-to-absence** — _X is absent from v1, therefore v2 does not need X._ `project` was
+    declared not to exist because it is missing from the v1 schemas (it is an `ADR-0032` level);
+    `firestore.rules` was read as proving _"there is no per-document authorization decision to
+    reproduce"_ — true of an operator app, and **customers will log in** (erp-spec#50).
+  - **Solution transplant** — _v1 solves it this way, therefore v2 should._ `(uid, k-th occurrence)`
+    was proposed as the v2 merge key because that is what the CRMS carry-forwards use; and a whole
+    cost analysis was built around a CRMS-overlap timing decision that **cannot occur** — CRMS
+    retires a year before ERP scaffolding starts.
+
+  ⚠️ **NOTHING EXECUTES ON THIS, and that is a stated limit rather than an oversight.** A gate
+  cannot see reasoning, and a check keyed on "cites a `code:` source" would fire on nearly every
+  verification in the repo — most of which are legitimately about v1. **A noisy reporter is one
+  nobody reads twice.** The one tractable executable form is a **census line, not a failure**:
+  report how many target-state artifacts carry evidence that is _exclusively_ v1-sourced, the way
+  gate 18 reports what it does not check. That is erp-spec#52.
+
+  ⇒ Until then the guard is a question you ask yourself, and it is a sharp one: **am I using this
+  measurement to describe what EXISTS, or to decide what SHOULD exist?** The first is what `db_*`
+  and `code:` pins are for. The second needs the owner, and asking is cheap.
 
 - **A fact about a third-party API has ONE owner in the structured spec, and something executes
   against the API.** `research-drop/reference/tigerbeetle.md` said `user_data_128/64/32` were "the

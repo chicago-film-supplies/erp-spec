@@ -11,7 +11,7 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 16 open | 41 answered of 57 · **0 with no owner or no decide-by** |
+| Open questions | 17 open | 41 answered of 58 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 24 | 0 open |
 | Decisions (ADR) | 45 | 25 in force · 16 proposed |
 | Spikes | 13 | 5 open |
@@ -22,13 +22,14 @@ is `deno task validate`'s judgement, not this file's.
 
 ## The bottleneck: undecided questions
 
-**16 of 57 still open**, soonest decide-by first.
+**17 of 58 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
 | `OQ-030` | Does CFS introduce a forced-call (short-turnaround) premium, and if so what is the turnar… | alex | 2026-10-15 | `REQ-LED` |
 | `OQ-035` | Does CFS introduce a production-type classification — `studio | indie | corporate/commerc… | alex | 2026-10-15 | — |
 | `OQ-054` | As CFS acquires more vehicles, will any be rated at or below 6,000 lb gross vehicle weigh… | alex | 2026-11-15 | `SPIKE-005` |
+| `OQ-058` | What is the identity scheme for v2 domain entities — is it one opaque minted id per row e… | alex | 2026-11-30 | — |
 | `OQ-033` | Once the shipping specs are populated, which physical basis becomes allocation basis v2 —… | alex | 2026-12-15 | `ADR-0031` |
 | `OQ-038` | Does CFS operate credit limits and credit holds in v2 — what triggers a hold, who overrid… | alex | 2026-12-15 | — |
 | `OQ-040` | Is `settlement_point` a declared LEDGER DIMENSION, or a document attribute the read side… | alex | 2026-12-15 | `ADR-0033` |
