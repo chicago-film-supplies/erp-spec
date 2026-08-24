@@ -1,5 +1,45 @@
 # Reaching m4 — every hotspot is resolved; only the spikes remain
 
+> ## ⚠️ STATUS 2026-08-24 late (compacted — every earlier block is folded in, not stacked)
+>
+> ⭐⭐ **SPIKE-013 HAS EVIDENCE ON ALL SEVEN EXIT CRITERIA. The only thing between it and closed is
+> the shared ADR** — which is also the only thing between `SPIKE-009` and closed, because they name
+> one ADR by owner ruling. ⇒ **writing it takes m4 from 5 open spikes to 3**, and both remaining
+> ones are blocked on things nobody at a keyboard can unblock (provisioning, and a business process
+> going live).
+>
+> **What landed today**, in three commits:
+>
+> | commit    | what                                                                                                       |
+> | --------- | ---------------------------------------------------------------------------------------------------------- |
+> | `800d91b` | housekeeping — the SPIKE-011 rescope erp-spec#41 asked for and never got; SPIKE-004's stale "blocked" line |
+> | `2a5702a` | criterion 4 — the conflict surface, `deno task conflict-surface`                                           |
+> | `c9dc4b9` | criterion 5 — undo does not need OQ-043; `OQ-061` minted                                                   |
+> | `26bf708` | criteria 1/2/3/6/7 — the queue is BUILT: `deno task queue-test` + `deno task oq-browser`, 26 assertions    |
+>
+> ⭐ **The three findings worth carrying across a clear**, none of which came from reading:
+>
+> 1. **The popover arbitrates the wrong axis.** It shows author + timestamp; **orders carry no
+>    author at either end** (no `created_by` on 0 of 995, and `updated_by` does not exist), and on
+>    invoices **all 1019 authors are bots**. The conflict surface is **actor-vs-STATE**, not
+>    actor-vs-actor, and prod has **ONE operator account** so the actor-vs-actor half is
+>    unmeasurable rather than zero.
+> 2. **The app cannot start offline.** `manager` has no service worker; a reload while disconnected
+>    fails outright. **The queue survives and is unreachable.**
+> 3. **The base does not survive a reload today.** `latestSnapshot` is an in-memory Map; the stash
+>    persists a `baseVersion` NUMBER the type itself calls display-only; and the stash is written
+>    **only when a human clicks a button** — two `onClick` call sites and nothing else.
+>
+> ⚠️ **One mutation survived the first sweep and it is the lesson**: "re-pin the base on every boot"
+> makes `base === theirs`, so our edit applies _cleanly_ and silently overwrites the other operator.
+> The browser suite could not see it. **The test that closes the hole asserts a NON-EVENT** — that
+> our write is never sent.
+>
+> ⚠️ **The 08-23 plan's ranking was dead on arrival** and is rewritten below: it put "SPIKE-009's
+> ADR" at #1 as _"pure desk work"_, which the owner's ruling the same day made impossible.
+>
+> ---
+>
 > ## ⚠️ STATUS 2026-08-24 (compacted — 08-23 and earlier are folded in, not stacked)
 >
 > ⭐ **ALL 23 HOTSPOTS RESOLVED, and m4 is down to ONE machine-checkable criterion in the whole
@@ -139,15 +179,15 @@ once.
 
 ## Then, in order
 
-|       |                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **1** | **SPIKE-013 (offline queued writes).** ⭐ The only m4 blocker that is startable today, and it closes two spikes. **Measure before you build**: criterion 4 enumerates the conflict surface from the live corpus and is the criterion most likely to change the design, so it de-risks the prototype's scope. `deno task merge-key` already landed the key finding — `(uid, k-th occurrence)`, because a leaf uid repeats in **18.3%** of orders |
-| **2** | **The shared ADR — 009 + 013 in ONE document, by owner ruling.** Six decisions: R1–R3 rest on SPIKE-009's measurements, R4–R6 on owner rulings, and **the ADR must label which is which** rather than let them read alike. Closes both spikes and takes m4 from 5 open to 3                                                                                                                                                                     |
-| **3** | **SPIKE-004 against the Plaid sandbox.** Self-contained, credentials verified in place, nothing depends on it. The fallback if 013 stalls. Settle the `_SANDBOX` naming before any real value exists                                                                                                                                                                                                                                            |
-| **4** | **#6 — requirements.** `ordering`, `availability`, `banking`, `procurement` still have **zero**, and the ~25 validate warnings are this backlog surfacing and growing daily                                                                                                                                                                                                                                                                     |
-| **5** | **#35 PSA, now much smaller than it reads.** ADR-0044 settled principal-vs-agent and the EOR finding means the cost path is already specified — PSA needs the **revenue side and a product line**, not a payroll path. Feeds #6                                                                                                                                                                                                                 |
-| **6** | **#40 + #44** — the supersession-dependents gate and its citation-assertion sibling. Four ready-made instances to land red against                                                                                                                                                                                                                                                                                                              |
-| **7** | **#45** — ADR-0041's D4 is a procedure with nothing executing on it, and it is the half that removes the seasonal bias                                                                                                                                                                                                                                                                                                                          |
+|       |                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **1** | ✅ **DONE 2026-08-24 — SPIKE-013 has evidence on all seven criteria.** `deno task conflict-surface`, `deno task queue-test`, `deno task oq-browser`. Nothing is left in it but the ADR                                                                                                                                                                                                                                                           |
+| **2** | ⭐ **THE SHARED ADR — 009 + 013 in ONE document, by owner ruling. This is now the whole critical path.** SPIKE-009's six decisions (R1–R3 measured, R4–R6 ruled — **the ADR must label which is which**) plus SPIKE-013's: the storage split, the persisted base, terminal-refusal, the authored/derived partition, what the popover is actually for, and **whether an offline app shell is in scope at all**. Closes BOTH spikes; m4 goes 5 → 3 |
+| **3** | **SPIKE-004 against the Plaid sandbox.** Self-contained, credentials verified in place, nothing depends on it. The fallback if 013 stalls. Settle the `_SANDBOX` naming before any real value exists                                                                                                                                                                                                                                             |
+| **4** | **#6 — requirements.** `ordering`, `availability`, `banking`, `procurement` still have **zero**, and the ~25 validate warnings are this backlog surfacing and growing daily                                                                                                                                                                                                                                                                      |
+| **5** | **#35 PSA, now much smaller than it reads.** ADR-0044 settled principal-vs-agent and the EOR finding means the cost path is already specified — PSA needs the **revenue side and a product line**, not a payroll path. Feeds #6                                                                                                                                                                                                                  |
+| **6** | **#40 + #44** — the supersession-dependents gate and its citation-assertion sibling. Four ready-made instances to land red against                                                                                                                                                                                                                                                                                                               |
+| **7** | **#45** — ADR-0041's D4 is a procedure with nothing executing on it, and it is the half that removes the seasonal bias                                                                                                                                                                                                                                                                                                                           |
 
 ⚠️ **The decision backlog is not blocked on the owner's availability — it is blocked on nobody
 having prepared the decisions.** ⭐ **2026-08-22 is the proof, twice over.** HOT-022 took one
@@ -281,9 +321,10 @@ cold-pickup section; `STATUS.generated.md` reports the milestone state; and `den
 reproduces the whole CI contract locally.
 
 ⚠️ **The two things not written down anywhere else** are in this file: that the ~39 validate
-warnings are the clock rather than a regression, and that **the reachable work is now `SPIKE-013`,
-then the shared 009+013 ADR, then `SPIKE-004`** — `SPIKE-011` is gated on provisioning and
-`SPIKE-012` on a business process, and no amount of authoring moves either.
+warnings are the clock rather than a regression, and that **the reachable work is now the shared
+009+013 ADR, then `SPIKE-004`** — SPIKE-013's evidence is complete as of 2026-08-24, and `SPIKE-011`
+is gated on provisioning while `SPIKE-012` waits on a business process, so no amount of authoring
+moves either.
 
 ⚠️ **This paragraph named SPIKE-002 and "008 or 009" until 2026-08-24; all three had closed or moved
 underneath it.** ⭐ **The recommendation itself is the thing that goes stale fastest in a plan
