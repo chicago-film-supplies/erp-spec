@@ -5,7 +5,7 @@
     "adrs": 45,
     "adrs_accepted": 25,
     "events": 38,
-    "inbox": 132,
+    "inbox": 133,
     "inbox_promoted": 26
   },
   "requirements": [
@@ -807,6 +807,7 @@
       "inbox/2026-08-23-correction-the-per-field-save-is-a-trigger-not-a-payload-and-the-write-path-depends-on-the-listener.md",
       "inbox/2026-08-23-destination-sourcing-cannot-tell-delivered-to-chicago-from-collected-at-our-chicago-dock-and-the-lease-tax-predicate-is-use.md",
       "inbox/2026-08-23-owner-contacts-will-log-in-which-inverts-the-authorization-finding-recorded-hours-earlier.md",
+      "inbox/2026-08-23-owner-greenfield-ids-change-the-size-answer-but-not-the-binding-one-and-sku-as-identity-is-the-recorded-trap.md",
       "inbox/2026-08-23-owner-proposes-three-way-merge-replay-the-queue-against-both-base-and-fresh-and-diff.md",
       "inbox/2026-08-23-owner-rules-the-realtime-replacement-and-folds-offline-with-queued-writes-into-it.md",
       "inbox/2026-08-23-staging-needs-a-sanitized-prod-mirror.md",
