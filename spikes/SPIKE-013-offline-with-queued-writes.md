@@ -39,6 +39,41 @@ makes **zero direct client writes** (`allow write: if false` on all 38 collectio
 lost in the move to MongoDB**, and that is precisely why this is a spike of its own rather than a
 line item inside the listener replacement.
 
+## ⭐⭐⭐ Finding 1, 2026-08-23 — the write path's recovery DEPENDS on the listener
+
+Measured at `code:2026-08-23:manager@fd2fd54:src/primitives/createEntityCache.ts` and
+`code:2026-08-23:api-cloudrun@bbb791af:src/lib/version.ts`. Full account and the claim it corrects:
+`inbox/2026-08-23-correction-the-per-field-save-is-a-trigger-not-a-payload-and-the-write-path-depends-on-the-listener.md`.
+
+⚠️ **Save-on-focusout is a TRIGGER, not a payload.** `update(id, field)` uses the field name only to
+choose what to VALIDATE; `buildDiff` sends the **whole entity diff** plus `uid` and `version`.
+`checkVersion` 409s on any mismatch — **23 API service files, 21 `versioned: true` caches across 17
+manager stores.** ⇒ **concurrency is DOCUMENT-level**, and two operators editing different fields of
+one order **do** collide.
+
+⭐ **It does not bite today because the LISTENER keeps `version` fresh.** The 409 path rebuilds the
+diff against the concurrent writer's state, and the unknown-outcome path — a 5xx, a timeout, a
+network failure — is reconciled by _"wait for the listener, then re-enter the loop to rebuild the
+diff against whatever the server now holds"_. **There is no idempotency key: the version IS the
+idempotency key, and the listener is how the client learns it** (api-cloudrun#247 — a same-doc PUT
+burst can time out or phantom-500 _after_ Firestore committed).
+
+⇒ ⚠️⚠️ **Four consequences, and they make this spike harder rather than easier:**
+
+1. **Offline the snapshot baseline FREEZES**, so every queued write replays at a version stale by
+   the length of the disconnect — **409 for every document anyone else touched.**
+2. **Queued writes cannot resolve their own fate offline.** Both recovery paths need fresh server
+   state from a listener that is not there.
+3. **Replay is not "send the queue".** The first replayed write bumps the version, so the second is
+   stale by its own predecessor. **Replay must re-read, re-base and re-diff** — that is where
+   conflict resolution lives, not in the popover.
+4. **Per-field payloads with a server-side field-level merge are a CHANGE TO THE WRITE PATH**, not
+   something already present.
+
+⭐ **This is why the shared ADR is right.** The write path's recovery is _defined in terms of_ the
+listener, so "what replaces the listener" and "what happens offline" are one decision seen from two
+sides — which neither side knew when the ruling was made.
+
 ## What is already known, and did not come from here
 
 Three things were established during `SPIKE-009` and should not be re-derived:
