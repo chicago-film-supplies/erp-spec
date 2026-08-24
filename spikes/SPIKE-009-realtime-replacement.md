@@ -341,11 +341,27 @@ second is what a naive socket client does. The test was inverted to check it can
 `deno task slice-mutate`, and the view updated as expected. ⇒ **criterion 1 is met end to end** —
 transport by execution, reactivity by assertion, and the DOM paint by observation.
 
-⚠️ **It is an OBSERVATION, not a re-runnable artifact**, and the difference is worth keeping: the
-probe and the store test both fail loudly on a regression, and this does not. `manager`'s Playwright
-setup can count network requests while asserting the DOM changed — that remains the regression net
-worth building, and it is the only realistic way to exercise reconnect, since the oplog cannot be
-raced.
+✅ **And it is now a RE-RUNNABLE ARTIFACT, not only an observation** — `deno task slice-browser`
+drives real Chromium (reusing `manager`'s installed browser via the shared `ms-playwright` cache, so
+no second download) and asserts the two things a screenshot cannot:
+
+| assertion                                 | measured                                                  |
+| ----------------------------------------- | --------------------------------------------------------- |
+| the row changed                           | `"Cooke S4 Set on hire 1"` → `"Cooke S4 Set available 2"` |
+| ⭐ requests issued by the PAGE after load | **0**                                                     |
+| ⭐ untouched row DOM nodes surviving      | **3 of 3**                                                |
+
+⭐ **The network assertion is made from OUTSIDE the client.** The slice server counts what it
+serves, but that is the server's word for it; Playwright observes every request the page issues, so
+_"updated without a refetch"_ becomes a statement about the client, proven externally.
+
+**Both arms were landed red before being believed.** A 300 ms `fetch` poll in the client fails the
+network arm; replacing `reconcile` with a plain array assignment fails the fine-grained arm with
+`markers surviving: [null,null,null]`.
+
+⚠️ **Still not covered: RECONNECT.** The oplog cannot be raced (a token survived 586 MB into a 200
+MB oplog), so the resume-failure path needs an injectable seam rather than an integration test.
+**That is a design constraint, not a test gap** — `SPIKE-013`.
 
 ### ⭐⭐ A test-infrastructure finding that outlives this spike
 
@@ -467,9 +483,7 @@ Rulings and their reasoning:
 **Three rest on this spike's measurements (R1, R2, R3) and three on owner rulings (R4, R5, R6); the
 ADR must label which is which** rather than let them read alike.
 
-- ✅ **Criterion 1's browser confirmation is DONE** (owner, 2026-08-23). ⭐ Still worth building as
-  a regression net: `manager`'s Playwright setup (`light`/`dark`/`smoke`, auth + fixture setup,
-  route graph) can assert the DOM changed **while counting network requests**, and it is the only
-  realistic way to exercise reconnect, since the oplog cannot be raced.
+- ✅ **Criterion 1 is fully covered** — confirmed by the owner in a browser, then made re-runnable
+  as `deno task slice-browser`. Reconnect remains uncovered **by design, not by omission**.
 - **The shared ADR**, once SPIKE-013 lands. ⇒ **all four exit criteria now carry evidence; the ADR
   is the only thing between this spike and closed.**
