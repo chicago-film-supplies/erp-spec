@@ -38,8 +38,8 @@ measurements:
       external share only falls from cutover onward.
     as_of: 2026-08-23
     source: "code:2026-08-23:manager@56e41fd:src"
-closes_adr: new
-status: in_progress
+closes_adr: ADR-0047
+status: closed
 ---
 
 ## Notes
@@ -511,3 +511,21 @@ ADR must label which is which** rather than let them read alike.
   as `deno task slice-browser`. Reconnect remains uncovered **by design, not by omission**.
 - **The shared ADR**, once SPIKE-013 lands. ⇒ **all four exit criteria now carry evidence; the ADR
   is the only thing between this spike and closed.**
+
+## ✅ CLOSED 2026-08-24 — ADR-0047
+
+The shared ADR is written: `adr/ADR-0047-the-client-data-model-live-transport-and-offline-queue.md`,
+`proposed`. **It closes `SPIKE-009` and `SPIKE-013` together**, which is what the owner's 2026-08-23
+ruling required — one coherent statement of how the client works, chosen over closing m4 sooner.
+
+Seventeen decisions, **labelled by what each rests on**, because a measured decision and a ruled one
+fail differently: a measured one is falsified by re-measuring, a ruled one changes only when the
+owner changes their mind. D1–D3 and D6–D12 rest on measurement; D4, D5 and D13–D17 on owner rulings
+(2026-08-23 and 2026-08-24).
+
+⚠️ **The ADR owns no figures and that is deliberate.** Every figure it rests on was measured here or
+in the sibling spike, and gate 22 makes whoever MEASURED a figure its owner — so the ADR cites
+`SPIKE-009/M1`, `SPIKE-013/M1` and `SPIKE-013/M3` rather than restating them. ⭐ **The first draft
+did re-declare them, and the gate reported the SPIKE for restating the ADR — ownership exactly
+backwards.** That is how the hole was found: gate 22 built owners from ADRs alone while scanning
+`spikes/`, so a spike could restate a figure and never own one. Fixed in the same pass.

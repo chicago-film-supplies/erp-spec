@@ -13,10 +13,10 @@ is `deno task validate`'s judgement, not this file's.
 |---|---:|---|
 | Open questions | 20 open | 41 answered of 61 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 24 | 0 open |
-| Decisions (ADR) | 46 | 25 in force · 17 proposed |
-| Spikes | 13 | 5 open |
+| Decisions (ADR) | 47 | 25 in force · 18 proposed |
+| Spikes | 13 | 3 open |
 | Requirements | 27 | 0 without a scenario |
-| Inbox | 136 | 110 unpromoted |
+| Inbox | 137 | 111 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
@@ -83,7 +83,7 @@ None.
 - `ADR-0037` — An id carries meaning where it is used — a headline on every id, and addressable claims inside a decision
 - `ADR-0038` — Labor with no causal order is not COGS — 5801 is not created and 6600 Wages narrows instead
 
-### Proposed (17)
+### Proposed (18)
 
 | ADR | Title | Review by | Supersedes on acceptance | Blocked on |
 |---|---|---|---|---|
@@ -104,6 +104,7 @@ None.
 | `ADR-0044` | CFS is the principal on a production service agreement, so the client's budget is revenue and the crew cost is CFS's cost | 2026-11-30 | — | — |
 | `ADR-0045` | A stored jurisdiction records WHO asserted it and under what authority — not which rung of the precedence answered, which is a restatement of fields the document already holds | 2026-11-30 | — | `OQ-056` `OQ-057` |
 | `ADR-0046` | Adopt date-fns and @date-fns/tz as planned dependencies for every business datetime | 2026-11-01 | — | — |
+| `ADR-0047` | The client data model — one live transport replacing Firestore listeners, and an offline queue reconciled by three-way merge | 2026-11-15 | — | `OQ-043` `OQ-061` |
 
 ## Spikes
 
@@ -117,11 +118,11 @@ None.
 | `SPIKE-006` | How lossy is translating JSON Schema 2020-12 to MongoDB's `$jsonSchema`, and wh… | 2 days | `ADR-0040` | closed |
 | `SPIKE-007` | Which access path reaches DuckDB from Deno — the native addon or WASM — and can… | 2 days | `ADR-0024` | closed |
 | `SPIKE-008` | How do the Chicago Personal Property Lease Transaction Tax and Illinois home-ru… | 1 week | `ADR-0045` | closed |
-| `SPIKE-009` | What replaces Firestore real-time listeners — MongoDB change streams plus a soc… | 1 week | _new ADR_ | in_progress |
+| `SPIKE-009` | What replaces Firestore real-time listeners — MongoDB change streams plus a soc… | 1 week | `ADR-0047` | closed |
 | `SPIKE-010` | Does a production-grade Valkey queue client run under Deno, and can it express… | 3 days | `ADR-0012` | closed |
 | `SPIKE-011` | Does TigerBeetle meet its durability and latency expectations on Linode block s… | 3 days | `ADR-0013` | open |
 | `SPIKE-012` | At which fulfillment moment does a booking become a TigerBeetle pending transfe… | 1 week | `ADR-0015` | in_progress |
-| `SPIKE-013` | What does offline with queued writes actually cost, given that most fields save… | 1 week | _new ADR_ | in_progress |
+| `SPIKE-013` | What does offline with queued writes actually cost, given that most fields save… | 1 week | `ADR-0047` | closed |
 
 ## Roadmap
 
@@ -144,7 +145,7 @@ it is counted separately on purpose, and a milestone is not done because its che
 
 | Milestone | Criterion | Check | Measured |
 |---|---|---|---|
-| `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 13 spikes, 5 open, 0 closed without naming an ADR |
+| `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 13 spikes, 3 open, 0 closed without naming an ADR |
 
 ## Coverage gaps
 

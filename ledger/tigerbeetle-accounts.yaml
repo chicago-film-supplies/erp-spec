@@ -296,7 +296,8 @@ transfer_field_budget:
   # ⚠️ Added 2026-08-23, answering "can a path token be reversibly encoded into 8 bytes?"
   interning_a_path_converges_on_the_minted_surrogate: >-
     Measured over **28,157 items** across all prod orders and invoices
-    (`spikes/harness/path-encoding-probe.ts`, `deno task path-encoding`).
+    (`spikes/harness/path-encoding-probe.ts`, `deno task path-encoding`; the denominator is
+    `SPIKE-013/M3`'s, so the two cannot go stale apart).
     ⚠️ **Compression and interning are different, and only one is available.** A v4 uuid segment
     carries ~122 bits of entropy, so reversibly encoding ONE of them in 8 bytes is impossible by the
     pigeonhole principle — not merely hard. **Interning is not compression**: a dictionary gives each

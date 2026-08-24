@@ -3628,18 +3628,37 @@ for (const e of evts) {
   const G = "22";
   /** Atomic figures inside a measurement's `value`: money, percentages, thousands-separated ints. */
   const FIGURES = /\$[\d,]+(?:\.\d{2})?|\b\d+(?:\.\d{1,2})?%|\b\d{1,3}(?:,\d{3})+\b/g;
-  const owned = new Map<string, { adr: string; mid: string; of: string }>();
-  for (const a of adrs) {
-    if (!Array.isArray(a.measurements)) continue;
-    for (const m of a.measurements as Record<string, unknown>[]) {
+  const owned = new Map<string, { adr: string; mid: string; of: string; file: string }>();
+  /**
+   * ⚠️ **SPIKES OWN FIGURES TOO, and until 2026-08-24 they could only ever RESTATE them.** Owners
+   * were built from ADRs alone while `spikes/` sat in the scan list below — so a spike was a
+   * restater by construction and never an owner, which was harmless only while spikes carried no
+   * `measurements[]` block. Gate 21 gave them one the same day, and this is the other half:
+   * **whoever MEASURED a figure owns it, and whoever DECIDED from it cites the owner.**
+   *
+   * ⭐ Found by landing `ADR-0047`, which re-declared four figures `SPIKE-013` had already measured
+   * — the gate reported the spike for restating the ADR, with the ownership exactly backwards.
+   *
+   * The owner's own file is skipped: that is where the figure is explained, and it is why `adr/`
+   * was never in the scan list. Spikes need it stated explicitly because `spikes/` IS scanned.
+   */
+  const declareOwner = (
+    id: string,
+    file: string,
+    measurements: unknown,
+  ) => {
+    if (!Array.isArray(measurements)) return;
+    for (const m of measurements as Record<string, unknown>[]) {
       const mid = String(m.id ?? "");
       for (const f of String(m.value ?? "").matchAll(FIGURES)) {
         // A figure short enough to collide by accident is not worth owning.
         if (f[0].replace(/[^\d]/g, "").length < 3) continue;
-        owned.set(f[0], { adr: a.id, mid, of: String(m.of ?? "") });
+        owned.set(f[0], { adr: id, mid, of: String(m.of ?? ""), file });
       }
     }
-  }
+  };
+  for (const a of adrs) declareOwner(a.id, a._file, a.measurements);
+  for (const sp of spikes) declareOwner(sp.id, sp._file, sp.measurements);
 
   const scan: string[] = [];
   for (const d of ["ledger", "reporting", "contexts", "migration", "roadmap", "spikes"]) {
@@ -3659,6 +3678,7 @@ for (const e of evts) {
       continue;
     }
     for (const [figure, owner] of owned) {
+      if (owner.file === f) continue; // the owner explains its own figure — that is the point of it
       if (!text.includes(figure)) continue;
       hits++;
       if (text.includes(`${owner.adr}/${owner.mid}`)) continue;

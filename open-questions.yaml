@@ -2742,7 +2742,8 @@ open_questions:
       ⭐ **Two pressures produced it and they agree, which is the strongest thing about it**:
       identity across two versions of a document (the `SPIKE-013` three-way merge) and identity
       forever (an immutable posting). Neither is served by `uid` — a leaf uid repeats in **182 of
-      995 orders, 18.3%** — nor by `path`, which is derived and changes on rename and on reparent.
+      995 orders, 18.3%** (`SPIKE-013/M1`) — nor by `path`, which is derived and changes on rename
+      and on reparent.
       ⚠️⚠️ **SKU must not become the product identity.** It is human-authored and mutable, and this
       codebase already carries the precedent one level down: `reuseMemberUids` reuses divider uids
       **BY NAME**, which is exactly what makes a path unstable across a rebuild. A SKU is a **label
