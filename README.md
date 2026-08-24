@@ -80,7 +80,9 @@ The single easiest thing to blur:
 - **`HOT-`** — a **contradiction** between two statements. Resolved by an ADR, never by quietly
   picking a side. → `hotspots.yaml`
 - **`SPIKE-`** — an **investigation**. Timeboxed, must close by producing an ADR. → `spikes/`
-- **GitHub issue** — **work** someone must do.
+- **GitHub issue** — **work** someone must do. Labeled per the org schema in the workspace
+  `CLAUDE.md` (`kind:` + `area:` required); this repo's contexts and spec areas are its `area:`
+  vocabulary.
 
 ### A working session
 
