@@ -80,6 +80,8 @@
     "path-encoding": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal path-encoding-probe.ts",
     "//merge-key": "SPIKE-013 — whether a three-way merge can key items[] by uid, measured over the prod order corpus. Read-only Firestore under ADC.",
     "merge-key": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal merge-key-probe.ts",
+    "//conflict-surface": "SPIKE-013 criterion 4 — the conflict classes a same-field author/timestamp popover CANNOT arbitrate, counted from prod. Read-only Firestore under ADC. Reports the actor-vs-actor half as UNMEASURABLE rather than as zero: prod has one operator account.",
+    "conflict-surface": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal conflict-surface-probe.ts",
     "posting-keys": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal posting-key-width-probe.ts"
   },
 

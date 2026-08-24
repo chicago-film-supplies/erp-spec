@@ -131,6 +131,100 @@ replay against `theirs` can FAIL, not merely conflict, when its target row is go
 postings do not merge at all** — a posting is reversed by a further posting, so the boundary between
 what merges and what posts is a decision this ADR owes.
 
+## ⭐⭐⭐ Finding 3, 2026-08-24 — criterion 4 answered, and the popover is arbitrating the wrong axis
+
+Harness `spikes/harness/conflict-surface-probe.ts`, `deno task conflict-surface`, read-only prod
+under ADC. Corpus: **995 orders · 1019 invoices · 6,975 bookings · 568 products · 458 destinations ·
+291 organizations · 166 contacts · 11 taxes**.
+
+⚠️ **Every figure below is a POPULATION IN WHICH A CLASS APPLIES, never an observed frequency.** The
+corpus holds current state and no edit history, so concurrency leaves no trace to count. A count
+here answers _"how many documents could hit this"_, not _"how often it happened"_.
+
+### ⛔ Half the criterion is structurally unanswerable, and that is the first result
+
+**Prod has ONE live operator account** (`users`, role `admin`, created 2026-03-07, not deleted). A
+popover arbitrates **actor vs actor** — two people moved the same field, here are their names and
+times, pick one. ⇒ **every actor-vs-actor class has a corpus count of exactly 0, and 0 here means
+UNOBSERVABLE rather than "does not happen".**
+
+⚠️ **This is SPIKE-012's trap verbatim** — two boundaries reported _"PASSES — no future-dated unit
+holds a transfer"_ on 11 rows corpus-wide. **The probe therefore refuses to print a zero for these
+classes** and names them unmeasurable with the reason instead.
+
+⚠️ **And it must not be read as "the popover is unnecessary."** That is the absence-to-absence error
+this repo has now made four times. A **public client app is in scope** (owner, 2026-08-18 and
+2026-08-23), so the actor count is known to be **rising** — the figure is a floor with a date on it.
+
+⭐ **One account is not one person, and that cuts the other way.** If several humans share the
+single admin login, the popover cannot name who made the competing edit **even in principle**. The
+corpus cannot tell them apart and neither can the design. **Whether they do is an owner question,
+not a query** — and it is the cheaper half of the answer.
+
+### ⭐⭐ The reframing that makes criterion 4 answerable
+
+**The conflicts a popover cannot arbitrate are mostly not actor-vs-actor at all. They are actor vs
+STATE** — the invoice was paid while you were offline, the row your edit addressed is gone, the rate
+moved, the field is derived, the posting is immutable. ⇒ **the second party is the SYSTEM, not a
+second person**, and a single-actor corpus counts those exactly, because they need no concurrency to
+exist.
+
+### The classes, with counts
+
+| class                                    | measured                                                                                                                                                               |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **0 — the popover has no author**        | orders carry `created_by` on **0 of 995** and have **no `updated_by` field at all**; invoices carry `updated_by` on **1019 of 1019 — and 0 name a live human account** |
+| **A — terminal state, refuse the merge** | **879 orders (88.3%)** complete/canceled · **998 invoices (97.9%)** paid/void                                                                                          |
+| **B — derived, recompute not merge**     | **19,283 of 28,157 lines (68.5%)** carry ≥1 derived MONEY leaf; **91,329** derived leaves against **39,994** authored; `totals{}` on **100%** of orders                |
+| **C — union, not choice**                | items[] is the populated set — median **8**, max **150** rows per order                                                                                                |
+| **D — the target is gone**               | **11 dangling refs across 3 destinations**, live today with nobody offline                                                                                             |
+| **E — the rate moved**                   | **11** tax definitions, all windowed; **9** superseded; **3** names reissued                                                                                           |
+| **F — physical facts do not merge**      | **34 bookings / 2,461 units** natively out (see the cohort warning below)                                                                                              |
+| **⛔ G — actor vs actor**                | **UNMEASURABLE** — 1 operator account                                                                                                                                  |
+
+### ⭐ Class 0 is the sharpest of them, and it was not on anyone's list
+
+The popover's own inputs are **author and timestamp**. On `orders` — the most heavily edited
+collection in the system, and the one this spike is mostly about — **there is no author to show at
+either end**: `created_by` is present on 0 of 995 documents and `updated_by` **does not exist in the
+schema**. Deliberately so: `orders` is the most machine-written collection, and a field reading
+"Cloud Task Worker" on almost every row was judged worse than no field
+(`code:2026-08-24:core@9e38e9d:src/schemas/order.ts`, api-cloudrun#407).
+
+On `invoices`, where `updated_by` does exist and is populated on **100%** of the corpus, **not one
+of the 1019 values names a live user account.** The four names present are
+`migrate-drop-tax-profile` (1018), `Manager Bot` (880), `CRMS Webhook` (134) and `Xero Sync` (6).
+
+⇒ ⚠️ **the design owes an ANSWER to "who edited this", not merely a popover to display it.** The
+popover is specified against a field that is absent on one collection and machine-valued on the
+other.
+
+### ⚠️ Two figures the probe corrects on the way past
+
+- **Class F was 23,548 units out until it was split by cohort.** **21,087 of them belong to the
+  2026-01-24 CRMS import**, which wrote terminal counters only — SPIKE-012's finding, reaching a
+  second consumer. The honest number is **2,461 natively booked out across 34 bookings**. _Ask what
+  a number is a figure OF._
+- **Two of five reference arms in class D matched NOTHING** and are printed as **VACUOUS** rather
+  than clean: `destinations.contacts[]` (0 refs) and `orders.destinations[].*.contact.uid` (0 refs).
+  **A check that reads green while matching nothing is indistinguishable from one that passes.** The
+  11 dangling refs come from the arms that did match.
+- ⚠️ **The order-destination union case is vacuous too** — **all 995 orders carry exactly one
+  destination**, so "two operators add different destinations" has no population. That is a fact
+  about the CRMS-shaped corpus and **not** about the design: the schema is an array, and the v2
+  invoice model bills several orders.
+
+### What this does to the design
+
+- ⭐ **The popover is a small part of the answer, not the centre of it.** Classes A, B, D, E and F
+  all need machinery **before** any human is asked anything: a terminal-state refusal, an
+  authored/derived partition, a failed-replay path, a repricing rule and a posting boundary.
+- ⚠️ **Class B has no data behind it.** The authored/derived split **does not exist in any schema**
+  — the probe's list is hand-written because there is nowhere to read it from, and **that absence is
+  the finding.** It is the same shape as the transfer-field budget: a fact with no owner.
+- ⇒ **Criterion 4 is met** for the classes that admit a count, with the actor-vs-actor half reported
+  as unmeasurable and reasoned rather than scored zero.
+
 ## What is already known, and did not come from here
 
 Three things were established during `SPIKE-009` and should not be re-derived:
