@@ -74,6 +74,45 @@ burst can time out or phantom-500 _after_ Firestore committed).
 listener, so "what replaces the listener" and "what happens offline" are one decision seen from two
 sides — which neither side knew when the ruling was made.
 
+## ⭐⭐ Finding 2, 2026-08-23 — the architecture is a THREE-WAY MERGE, and its key is measured
+
+Owner ruling — _"we dont have to replicate the current system… play the whole queue on stale doc,
+and the fresh doc, the diff the 2 and raise conflicts in client"_. Full note:
+`inbox/2026-08-23-owner-proposes-three-way-merge-replay-the-queue-against-both-base-and-fresh-and-diff.md`.
+
+⭐ **Strictly stronger than the version gate it replaces**, which discards the base and so cannot
+tell _"we both changed this"_ from _"only one of us did"_. Keeping the common ancestor makes
+_"different fields do not collide"_ true **by construction** rather than as an accident of listener
+freshness — and it makes the author/timestamp popover fire only on genuine collisions.
+
+**Measured** — `deno task merge-key`, read-only prod under ADC, 995 orders / 13,671 items:
+
+| measured                               | value                             |
+| -------------------------------------- | --------------------------------- |
+| orders where a **leaf** uid repeats    | **182 — 18.3%**                   |
+| leaves in a repeated group             | 892 — **9.1% of all leaves**      |
+| worst repetition of one uid            | **5×**                            |
+| orders where a **divider** uid repeats | **0 — 0.0%**                      |
+| edited ≥5 times / ≥20 / max            | 840 (84.4%) / 78 (7.8%) / **153** |
+
+⇒ ⚠️ **keying the merge on `items[].uid` pairs the WRONG ROWS in 18.3% of orders, silently.** The
+key must be `(uid, k-th occurrence)` — the API carry-forwards' key, for the same reason. ⇒ ⭐
+**dividers key cleanly by uid (0 collisions), so only leaf rows need occurrence counting** —
+materially cheaper than "items are unmergeable", and unknowable without the number. ⚠️ **`path` is
+not the alternative**: divider uids are reused by name, so a group rename churns every descendant
+path, and a merge compares exactly two document versions.
+
+⭐ **18.3% independently confirms the workspace `CLAUDE.md` figure of "18% of prod orders"**,
+carried as an assertion and never re-measured until now.
+
+**Six things the design still owes, and none is the popover:** pin the base (today's baseline is
+mutated in place); exclude and recompute derived fields (totals/tax/`path` — an authored-vs-derived
+distinction the schemas do not carry); union semantics for concurrent adds, not just field choice; a
+terminal-state class that REFUSES the merge (an invoice paid while you were offline is closed);
+replay against `theirs` can FAIL, not merely conflict, when its target row is gone; and **ledger
+postings do not merge at all** — a posting is reversed by a further posting, so the boundary between
+what merges and what posts is a decision this ADR owes.
+
 ## What is already known, and did not come from here
 
 Three things were established during `SPIKE-009` and should not be re-derived:

@@ -74,6 +74,8 @@
     "slice-mutate": "deno run --allow-read --allow-env --allow-net --allow-sys --allow-ffi realtime-slice/mutate.ts",
     "//change-stream": "SPIKE-009 criterion 2 — resume-token semantics against a real replica set: token shape and ordering, resumeAfter exclusivity, the post-batch resume token on a filtered stream, oplog retention, invalidate, and the updateLookup-vs-post-image distinction. Needs the replica set on 27079.",
     "change-stream": "deno run --allow-read --allow-env --allow-net --allow-sys --allow-ffi change-stream-probe.ts",
+    "//merge-key": "SPIKE-013 — whether a three-way merge can key items[] by uid, measured over the prod order corpus. Read-only Firestore under ADC.",
+    "merge-key": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal merge-key-probe.ts",
     "posting-keys": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal posting-key-width-probe.ts"
   },
 
