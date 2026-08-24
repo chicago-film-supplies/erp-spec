@@ -1,0 +1,68 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>SPIKE-013 — offline queued writes</title>
+<style>
+body {
+  font: 14px/1.5 ui-sans-serif, system-ui;
+  margin: 2rem;
+  max-width: 46rem;
+}
+label {
+  display: block;
+  margin: .75rem 0;
+}
+input {
+  font: inherit;
+  padding: .3rem .5rem;
+  width: 20rem;
+}
+.on {
+  color: #0a7;
+  font-weight: 600;
+}
+.off {
+  color: #c00;
+  font-weight: 600;
+}
+.pending {
+  color: #b60;
+}
+.failed {
+  color: #c00;
+}
+.synced {
+  color: #888;
+}
+ul {
+  padding-left: 1.1rem;
+}
+.failure {
+  color: #c00;
+}
+dl {
+  display: grid;
+  grid-template-columns: max-content auto;
+  gap: .2rem 1rem;
+}
+dt {
+  color: #666;
+}
+dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+</style>
+<h1>SPIKE-013 — offline queued writes</h1>
+<dl>
+  <dt>network</dt>
+  <dd id="net">…</dd>
+  <dt>queued field writes</dt>
+  <dd id="queued">0</dd>
+  <dt>queued blobs</dt>
+  <dd id="blobq">0</dd>
+</dl>
+<label>subject <input id="subject"> <span id="state-subject" class="synced">synced</span></label>
+<label>qty <input id="qty" type="number"> <span id="state-qty" class="synced">synced</span></label>
+<h2>Failure inbox</h2>
+<ul id="inbox"></ul>
+<script type="module" src="/client.js"></script>

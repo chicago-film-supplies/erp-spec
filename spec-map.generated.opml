@@ -466,7 +466,7 @@
           <outline text="The derived/assigned split for order status stated field by field, as a table."/>
           <outline text="A count of orders in the replay whose status could NOT be derived, with the reason for each."/>
         </outline>
-        <outline text="SPIKE-013 — What does offline with queued writes actually cost, given that most fields save on focusout — how a…" _note="timebox: 1 week · closes: a new ADR · open">
+        <outline text="SPIKE-013 — What does offline with queued writes actually cost, given that most fields save on focusout — how a…" _note="timebox: 1 week · closes: a new ADR · in_progress">
           <outline text="A queued field write survives a disconnect longer than the session and replays exactly once, with three offline edits to one field replaying as one write."/>
           <outline text="An offline create is addressable by subsequent queued writes before it reaches the server — so the identity decision (client-generated uid or otherwise) is made and demonstrated, not assumed."/>
           <outline text="A write that fails validation on replay lands somewhere a human sees it, with the field named; measured with the operator absent, which is the case that makes it hard."/>

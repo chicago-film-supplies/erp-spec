@@ -82,6 +82,12 @@
     "merge-key": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal merge-key-probe.ts",
     "//conflict-surface": "SPIKE-013 criterion 4 — the conflict classes a same-field author/timestamp popover CANNOT arbitrate, counted from prod. Read-only Firestore under ADC. Reports the actor-vs-actor half as UNMEASURABLE rather than as zero: prod has one operator account.",
     "conflict-surface": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal conflict-surface-probe.ts",
+    "//queue-test": "SPIKE-013 — the offline queue's merge algebra, asserted. Pure: no clock, no storage, no network, so the criteria are checkable in-process. The durability and blob halves are browser_test.ts, because a Deno fake cannot honestly stand in for them.",
+    "queue-test": "deno test offline-queue/queue_test.ts",
+    "//oq-server": "SPIKE-013 — the offline-queue slice. Open http://127.0.0.1:8793/. The disconnect is driven by Playwright's setOffline, not by a server flag, so the real network stack fails.",
+    "oq-server": "deno run --allow-read --allow-net offline-queue/server.ts",
+    "//oq-browser": "SPIKE-013 criteria 1, 3 and 7 — the halves a Deno fake cannot stand in for: durability across a RELOAD, a rejected replay with the operator absent, and a 4 MB blob. Needs `deno task oq-server` running.",
+    "oq-browser": "deno test --allow-read --allow-env --allow-net --allow-run --allow-sys --allow-write --allow-ffi offline-queue/browser_test.ts",
     "posting-keys": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal posting-key-width-probe.ts"
   },
 

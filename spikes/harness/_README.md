@@ -160,6 +160,34 @@ not because it bounds anything. Full numbers in the spike.
 ⚠️ The probe **wipes and reseeds** `spike009.*` on every run and writes ~100 MB into the oplog. Run
 it against this server only.
 
+### SPIKE-013 — the offline queue needs NO server of its own
+
+`deno task queue-test` (the merge algebra, pure — no setup at all) and `deno task oq-browser`
+(durability and blobs, which need a real browser). The browser half needs `deno task oq-server`
+running on **8793**; that server holds one document in memory and is reset by the test between
+cases, so there is nothing to install and nothing to clean up.
+
+⭐ **The disconnect is `context.setOffline(true)`, not a server flag.** Playwright fails the real
+network stack, so `navigator.onLine` flips, the `offline` event fires and `fetch` rejects. A
+server-side "wired to off" switch would have exercised the client's happy path with a different
+status code and proved nothing about being offline.
+
+⚠️ **The session ends by DESTROYING THE PAGE, not by reloading it** — and that is a finding rather
+than a test-writing convenience. `page.reload()` while offline fails with
+`ERR_INTERNET_DISCONNECTED` because the shell itself has to be fetched: **the app cannot start
+offline at all.** One test asserts exactly that, so the limitation is executable rather than
+remembered.
+
+⚠️ **The 4 MB blob case is the reason this half is not in Deno.** localStorage would refuse those
+bytes and a Deno `Uint8Array` would not care, so the storage decision is only tested where the quota
+is real. The test also asserts the bytes are **not** in localStorage, which is the assertion that
+makes the IndexedDB choice load-bearing instead of incidental.
+
+⭐ **All 26 assertions were mutation-tested** — 11 mutations of `queue.ts` and 8 of `client.js`,
+each run against the suite. Every one goes red. **One survived at first** ("the base is re-pinned on
+every boot", which silently loses the other operator's edit); the browser suite could not see it,
+and the test that closes that hole is the one asserting a NON-EVENT — that our write is never sent.
+
 ### SPIKE-002 — the two-store crash harness needs BOTH stores
 
 `deno task two-store`. There is no container runtime on the dev machines, so both servers run

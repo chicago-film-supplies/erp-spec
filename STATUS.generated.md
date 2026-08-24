@@ -120,7 +120,7 @@ None.
 | `SPIKE-010` | Does a production-grade Valkey queue client run under Deno, and can it express… | 3 days | `ADR-0012` | closed |
 | `SPIKE-011` | Does TigerBeetle meet its durability and latency expectations on Linode block s… | 3 days | `ADR-0013` | open |
 | `SPIKE-012` | At which fulfillment moment does a booking become a TigerBeetle pending transfe… | 1 week | `ADR-0015` | in_progress |
-| `SPIKE-013` | What does offline with queued writes actually cost, given that most fields save… | 1 week | _new ADR_ | open |
+| `SPIKE-013` | What does offline with queued writes actually cost, given that most fields save… | 1 week | _new ADR_ | in_progress |
 
 ## Roadmap
 

@@ -20,7 +20,7 @@ exit_criteria:
   - The offline/pending/synced state is shown to be derivable at every save-on-focusout site — the absence of an error is currently the only feedback, so this is the load-bearing half.
   - A field photo captured offline survives and uploads on reconnect — blobs are not field writes, and a queue that treats `qty: 2` and a 4 MB JPEG identically has not been designed for the second.
 closes_adr: new
-status: open
+status: in_progress
 ---
 
 ## Notes
@@ -290,6 +290,91 @@ extension is the automatic half, and that half is where the work is.
 criterion 6's _"the offline/pending/synced state is derivable at every save-on-focusout site"_
 starts from **no offline detection at all**, not from a signal that needs plumbing. Recorded here so
 the criterion is costed against the real starting point.
+
+## ⭐⭐⭐ Finding 5, 2026-08-24 — the queue is BUILT, and criteria 1, 2, 3, 6 and 7 have executable evidence
+
+`spikes/harness/offline-queue/` — `deno task queue-test` (20 assertions, pure) and
+`deno task oq-browser` (6 assertions, real Chromium). **All 26 mutation-tested: 19 mutations, every
+one goes red.**
+
+⚠️ **Split deliberately into a pure half and a browser half**, because three criteria are claims
+about **durability** and **bytes** that an in-process fake satisfies by construction. A Deno object
+that survives because nothing tore it down proves nothing about surviving a session; a `Uint8Array`
+does not care that 4 MB will not fit in localStorage.
+
+| where                        | what it can honestly assert                                                       |
+| ---------------------------- | --------------------------------------------------------------------------------- |
+| `queue.ts` + `queue_test`    | the merge ALGEBRA — coalescing, three-way outcomes, the item key, per-field state |
+| `client.js` + `browser_test` | DURABILITY across a destroyed session, a rejected replay, and 4 MB of real bytes  |
+
+⭐ **The disconnect is Playwright's `context.setOffline(true)`** — the real network stack fails, so
+`navigator.onLine` flips, the `offline` event fires and `fetch` rejects. A server-side "wired to
+off" flag would have run the client's happy path with a different status code.
+
+### Criterion by criterion
+
+| # | criterion                                                                      | evidence                                                                                                                                                                     |
+| - | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 | survives a disconnect longer than the session, replays once, 3 edits → 1 write | ✅ browser. 3 offline edits coalesce to **1** queued op; the page is **destroyed**; a fresh page replays and the server receives **exactly one** PUT carrying the last value |
+| 2 | an offline create is addressable before it reaches the server                  | ✅ pure. **Client-minted uid**, and later queued writes address it normally with **no rewrite pass**                                                                         |
+| 3 | a failed replay lands where a human sees it, field named, operator absent      | ✅ browser. A 422 naming `qty` lands in a **durable inbox**, survives the session, and the field itself reads `failed`                                                       |
+| 4 | the conflict surface enumerated with counts                                    | ✅ Finding 3                                                                                                                                                                 |
+| 5 | does undo need OQ-043's event history                                          | ✅ Finding 4 — **no**, and `OQ-061` carries what is actually owed                                                                                                            |
+| 6 | offline/pending/synced derivable at every save-on-focusout site                | ⚠️ **partly** — see the caveat below                                                                                                                                         |
+| 7 | a field photo survives offline and uploads on reconnect                        | ✅ browser. **4,194,304 bytes**, byte-exact across a destroyed session, uploaded on reconnect — and asserted **not** to be in localStorage                                   |
+
+### ⭐⭐ The identity decision (criterion 2), made rather than assumed
+
+**Client-minted document ids.** ⭐ **And the argument is that this is not new**: v1 already does it
+— `newDraft` calls `doc(collection(db, name))` with no id, which mints a Firestore auto-id
+**locally, with no round-trip**, seeds a draft under it and persists it to localStorage
+(`code:2026-08-24:manager@9504a1e:src/primitives/createEntityCache.ts`). MongoDB's own convention is
+the same shape.
+
+⇒ the alternative — a server-assigned id with a client temp-id and a rewrite pass over every queued
+op referencing it — buys nothing and adds a rewrite that can half-apply.
+
+### ⚠️ Two findings the build produced, and neither was on the list
+
+**1. THE APP CANNOT START OFFLINE.** `page.reload()` while disconnected fails with
+`ERR_INTERNET_DISCONNECTED` — the shell itself has to be fetched. Measured, not inferred:
+**`manager` has no service worker**, no `serviceWorker` registration, no PWA plugin, and `public/`
+holds only a favicon (`code:2026-08-24:manager@9504a1e`).
+
+⇒ ⚠️ **the queue survives and is unreachable.** An operator who closes the tab out of signal reopens
+to a browser error page, with the work intact in IndexedDB and no way to see it. **An offline queue
+without an offline app shell is half a capability**, and the ADR owes a position on the other half.
+There is a test asserting exactly this failure, so the limit is executable rather than remembered.
+
+**2. THE STORAGE SPLIT IS A DECISION, not an implementation detail.** The queue, the pinned base and
+the failure inbox go to **IndexedDB**; blob bytes go to **IndexedDB in their own store**. v1's stash
+is localStorage — string-only, ~5 MB for the whole origin — and a 4 MB JPEG base64s to ~5.5 MB,
+taking the entire budget. ⇒ **"the queue carries blobs" is a storage decision before it is a queue
+decision**, and the browser test asserts the bytes are _not_ in localStorage precisely so the choice
+cannot quietly revert.
+
+### ⚠️ Criterion 6 is PARTLY met, and the gap is stated rather than glossed
+
+`fieldState(queue, doc, path)` is a **pure function of the queue** — no per-site wiring, no extra
+store, no flag any of the 52 subscription sites has to remember to set. That is the derivability the
+criterion asks about, and it is asserted twice (pure and in the page).
+
+⚠️ **But "at every save-on-focusout site" is not demonstrated, because the prototype is a harness
+slice and does not touch the manager's 52 sites.** What is shown is that the derivation _needs_
+nothing from them. **What is not shown is that all 52 render it** — and today the absence of an
+error is their only feedback. ⇒ that residue is real work and belongs in the ADR's consequences, not
+in a tick.
+
+### ⚠️ What the prototype deliberately does NOT do
+
+- **It does not resolve conflicts.** It _detects_ them and holds the write back — asserted by a test
+  about a **non-event**: with the base re-pinned on boot, our edit would apply "cleanly" and
+  silently overwrite the other operator, and the assertion is that our write is never sent. ⭐
+  **That mutation survived the first mutation sweep**, which is why the test exists.
+- **It does not merge `items[]` in the browser.** `mergeItems` and the measured
+  `(uid, k-th occurrence)` key are asserted in the pure half only.
+- **Ledger postings are out of scope BY CONSTRUCTION.** This merges documents. The boundary between
+  what merges and what posts is the ADR's, and is unchanged by anything here.
 
 ## What is already known, and did not come from here
 
