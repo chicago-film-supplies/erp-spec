@@ -470,11 +470,11 @@ Open questions are different from deferred work: an `OQ-` is a _decision_ someon
 lives in `open-questions.yaml` with an owner and a decide-by date. A GitHub issue is _work_ someone
 must do.
 
-**Label it.** The org-wide schema is in the workspace `CLAUDE.md` § _Deferred tasks → GitHub issues_
-— `kind:` and `area:` on every issue, `blocked:` / `risk:` / `size:` only when their bar is met.
-**This repo's bounded contexts and spec areas ARE its `area:` vocabulary** (`area:ledger`,
-`area:tax`, `area:formal`, `area:roadmap`, …), renamed into the `area:` namespace on 2026-08-24 so
-one query reaches the same subject here and in the product repos.
+**Label it.** The **`cfs-issues` skill** (`cfs-skills` plugin) is the authority — `kind:` and
+`area:` on every issue, `blocked:` / `risk:` / `size:` only when their bar is met. **This repo's
+bounded contexts and spec areas ARE its `area:` vocabulary** (`area:ledger`, `area:tax`,
+`area:formal`, `area:roadmap`, …), renamed into the `area:` namespace on 2026-08-24 so one query
+reaches the same subject here and in the product repos.
 
 ⚠️ **`blocked:owner-decision` and an `OQ-` are not the same claim, and the split above is exactly
 why.** An `OQ-` says a decision is unmade; `blocked:owner-decision` says _this work cannot start
