@@ -3669,6 +3669,42 @@ for (const e of evts) {
       for (const f of String(m.value ?? "").matchAll(FIGURES)) {
         // A figure short enough to collide by accident is not worth owning.
         if (f[0].replace(/[^\d]/g, "").length < 3) continue;
+        /**
+         * ⚠️ **TWO OWNERS FOR ONE FIGURE IS THE HOLE THIS GATE WAS BUILT TO CLOSE, INVERTED.**
+         * `owned` is a Map keyed by the figure, so a second declaration silently REPLACED the
+         * first — and then every file citing the losing id failed while the winning id looked
+         * clean. The whole premise is "a measured figure has ONE owner and everyone else cites
+         * it"; a gate that lets two artifacts claim the same number cannot deliver it.
+         *
+         * Latent rather than live when this landed (2026-08-24: 34 owned figures, 0 duplicates),
+         * and that is exactly why it needed writing down — nobody would have known either way.
+         * Found while preparing `ADR-0029` for acceptance: it restates `13.79%` and
+         * `$236,487.75`, which `ADR-0030/M2` already owns, and typing them here would have taken
+         * ownership away from a FROZEN ADR that can never gain a citation back.
+         *
+         * Fails on a same-artifact duplicate too: `ADR-0029/M1` and `ADR-0029/M2` claiming one
+         * figure makes the citation ambiguous, and only one of the two ids would satisfy it.
+         */
+        const prior = owned.get(f[0]);
+        /**
+         * ⚠️ **The same measurement may name one figure twice, and that is not two owners.**
+         * `SPIKE-012/M1` is `"6,967 of 6,967 — 100.00%"` — a total and its matching subtotal, which
+         * is the clearest way to write a 100% result. The first draft of this check keyed on the
+         * figure alone and reported it against ITSELF. ⭐ **Landed red first, and that is the only
+         * reason it was caught**: a hand-written invariant is easy to get wrong in both directions,
+         * and neither error is visible from the expression.
+         */
+        if (prior && (prior.adr !== id || prior.mid !== mid)) {
+          fail(
+            G,
+            `${id}/${mid} declares ${f[0]}, which ${prior.adr}/${prior.mid} already declares — ` +
+              `a figure has ONE owner and everyone else CITES it. ⚠️ Which of the two is NAMED here ` +
+              `is just id order, not a verdict: the owner is whoever MEASURED it, and the edit ` +
+              `belongs to whichever declaration is not frozen. Cite the owner by id, or move the ` +
+              `ownership deliberately`,
+          );
+          continue;
+        }
         owned.set(f[0], { adr: id, mid, of: String(m.of ?? ""), file });
       }
     }
