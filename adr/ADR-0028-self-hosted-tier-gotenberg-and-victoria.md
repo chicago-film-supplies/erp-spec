@@ -7,7 +7,7 @@ date: 2026-08-09
 review_by: 2026-10-01
 deciders: [repo owner]
 contexts: [billing, ledger]
-relates_to: [ADR-0013, ADR-0017, ADR-0023]
+relates_to: [ADR-0013, ADR-0017, ADR-0023, ADR-0027, SPIKE-011]
 accounting_shaped: false
 supersedes:
 superseded_by:
@@ -65,6 +65,23 @@ and VictoriaTraces are the observability stores, reached through an OpenTelemetr
 - **Observability is in scope for the host budget** — nine containers before the application, the
   database or the ledger. SPIKE-011 sizes Linode for TigerBeetle's durability and latency; it should
   size for this tier too, or the answer is about the wrong machine.
+- ⛔ ✅ **That sentence is now enacted, and it makes SPIKE-011 THIS ADR'S BLOCKER.** SPIKE-011 was
+  rescoped 2026-08-24 and its criterion 3 is exactly this tier — one row per process, each memory
+  and CPU figure measured or cited, never estimated. ⇒ **this ADR cannot be accepted until that
+  spike lands**, and the spike is waiting on a Linode host nobody has provisioned. ⚠️ **Nothing said
+  so until 2026-08-24**: `SPIKE-011` declares `closes_adr: ADR-0013` and can hold only one id, and
+  the blocker index is built from `relates_to` — which did not name the spike.
+  **`STATUS.generated.md` therefore showed this ADR blocked on nothing, which reads as ready to
+  sign.** The id is now in `relates_to`, so an open spike shows as an open blocker. ⚠️ **And the
+  rescope widened what must be measured without widening the spend already authorized** — a
+  half-sized measurement buys an answer to the wrong question, so settle the budget before
+  provisioning.
+- ⚠️ **Gotenberg is Chromium, and it is the line item most likely to be under-sized.** The
+  corroborating datapoint next door is api-cloudrun#552 — the prod API container sits at p95 0.822
+  of its 512Mi just serving traffic, ~91 MiB of headroom, before any renderer shares the box.
+- **This ADR and ADR-0027 meet on one path and neither names it.** A draft quote to a customer who
+  requested online is **rendered by Gotenberg and delivered by Resend**. Whatever else that path
+  needs, it is the first flow that depends on both decisions at once.
 - **Agents can already query production telemetry.** All three stores are exposed as MCP servers
   with `-prod` twins, so an investigation can read live metrics, logs and traces directly. That is a
   capability the v2 design should keep rather than rediscover.

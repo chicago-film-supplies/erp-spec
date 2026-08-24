@@ -9,6 +9,52 @@ deciders: [repo owner]
 contexts: [fulfillment, ordering, billing]
 relates_to: [ADR-0009, ADR-0011, ADR-0014]
 accounting_shaped: false
+not_accounting_reason: >-
+  Geocoding and transactional email post nothing and appear in no book. The two GL codes in the body
+  — 4700 and 5500 — are named only to say that the CARD PROCESSOR is accounting-shaped and owes its
+  own rule 8a survey (OQ-064). They are the reason a different decision is fenced out of this one,
+  not a posting this ADR makes.
+measurements:
+  - id: M1
+    value: "459 destinations"
+    of: >-
+      The entire Mapbox geocoding population — every destination CFS has ever geocoded, behind a
+      one-year cache. ⚠️ A figure OF the v1 corpus while CRMS still supplied every order, so it is
+      the pre-cutover shape rather than a stable one.
+    as_of: 2026-08-18
+    source: "api:2026-08-18:db_destinations_count"
+  - id: M2
+    value: "16 requests in the peak month; 3.5/month mean over 14 full months"
+    of: >-
+      Online quote requests arriving through the INCUMBENT third-party webshop — the surface v2
+      replaces. ⚠️ **A floor, not a forecast**: it measures demand through a surface that exists to
+      be changed, and it cannot be re-measured once the webshop is gone. Plan on the peak, which the
+      most recent complete month already set at 4.6× the mean.
+    as_of: 2026-07-31
+    source: "inbox/2026-08-18-online-request-volume-and-the-mapbox-population-measured-so-adr-0027s-stated-unknown-is-closed.md"
+asserts:
+  - id: D1
+    kind: decision
+    claim: >-
+      Mapbox and Resend are retained as BOUNDARY services: called at the edge, their outputs are
+      enrichments or side effects, and neither appears in a domain model or a domain event.
+  - id: D2
+    kind: decision
+    claim: >-
+      This ADR adopts these two services and no others. A boundary service not named here is
+      undecided, not adopted by implication.
+  - id: P1
+    kind: premise
+    claim: >-
+      Neither service's volume is a constraint at v2 scale. The Xero-quota lesson does not transfer,
+      and that is a measured result rather than an assumption (M1, M2).
+    source: "inbox/2026-08-18-online-request-volume-and-the-mapbox-population-measured-so-adr-0027s-stated-unknown-is-closed.md"
+  - id: P2
+    kind: premise
+    claim: >-
+      An online request never arrives AS email. It lands in a system CFS owns and email only
+      notifies, so Resend stays a side effect of an event that already happened.
+    source: "inbox/2026-08-18-online-request-volume-and-the-mapbox-population-measured-so-adr-0027s-stated-unknown-is-closed.md"
 supersedes:
 superseded_by:
 ---
@@ -38,7 +84,22 @@ superseded_by:
 ## Decision
 
 Retain both, as **boundary services**: they are called at the edge, their outputs are enrichments or
-side effects, and neither appears in a domain model or a domain event.
+side effects, and neither appears in a domain model or a domain event (D1).
+
+⚠️ **What this ADR does NOT decide, and the list has grown since it was drafted.** This ADR's own
+Context says the problem it fixes is that a service the system cannot work without appears nowhere
+in the spec. **Three more services are now in exactly that position, and adopting them is not
+implied by adopting these two** (D2):
+
+| service                               | state                                                                                                                                                                                                            |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **A CDN / image manager**             | Uploadcare is incumbent and is to be **re-evaluated** against imgix and others; most of what it was bought for went unused, and the residual need is signed uploads + a custom domain                            |
+| **Quo** — outbound SMS + contact sync | Appears nowhere in the spec or in v1. It would be a **second** outbound channel to a customer contact alongside Resend, and its "contact crud should sync" is a cross-boundary three-way merge                   |
+| **A card processor**                  | Most likely Authorize.Net, because CFS banks at Chase. **Accounting-shaped** — it reaches `4700 - Transaction Fee Income` and `5500 - Cost of Goods Sold: Merchant Fees`, so it owes a rule 8a survey (`OQ-064`) |
+
+⇒ Each needs its own decision. Naming them here is a fence, not an adoption
+(`inbox/2026-08-23-owner-the-image-manager-is-three-jobs-two-of-them-evidence-and-quo-is-a-new-boundary-with-a-contact-sync.md`,
+`charter.md`).
 
 ## Consequences
 
@@ -61,6 +122,19 @@ side effects, and neither appears in a domain model or a domain event.
 - **Both are replaceable, and the cache is why.** Geocoding results are stored, so a provider swap
   re-geocodes rather than loses history. Email has no history to lose. Neither creates the kind of
   lock-in the ledger did.
-- **Cost and quota are unmeasured.** Neither service's usage volume, price, or rate limit has been
-  looked at for v2 scale. Recorded as unknown rather than assumed benign — the Xero quota lesson is
-  that a shared external limit becomes a production incident before anyone thinks to measure it.
+- ✅ **Cost and quota were recorded here as unknown, and both halves are now MEASURED — neither is a
+  constraint** (M1, M2). Mapbox's whole lifetime population is 459 destinations behind a one-year
+  cache; Resend's commercial traffic is one draft quote per online request at a peak of 16 in a
+  month, on top of four unchanged account-mail identities. Even at peak this is orders of magnitude
+  inside any tier with a limit, so **the Xero-quota lesson does not transfer — and that is a
+  measured result rather than an assumption** (P1). ⚠️ **Two limits on that comfort.** The request
+  figure is a **floor**: it was taken through the third-party webshop v2 replaces, so reading it as
+  v2's volume assumes the replacement changes nothing, which is the opposite of why it is being
+  built. And neither service's **price** was looked at — volume and rate limit were.
+- ⭐ **Resend gains a FIFTH use, of a different kind, and it crosses ADR-0028.** The four identities
+  are account mail; a draft quote sent to a customer who requested online is a **commercial document
+  to a counterparty**. That path is rendered by Gotenberg and delivered by Resend, and **neither ADR
+  names the other in it**. The framing still holds — measured across 50 threads, the request lands
+  in a system CFS owns and the email only notifies, so it is a side effect of an event that already
+  happened (P2) — but under the replacement the request becomes a domain event in `ordering`, which
+  is one of the contexts with zero requirements. **ADR-0027's reasoning survives; its scope grows.**

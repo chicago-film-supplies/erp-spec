@@ -58,7 +58,7 @@ superseded_by:
   products, we would rent far fewer products if we weren't delivering them." Delivery cost is a
   **joint cost** of the product revenue, not the cost of a product called delivery.
 - **`Delivery` is the largest tracked product line in the business — 537 lines, $236,487.75, 13.79%
-  of revenue** (re-measured 2026-08-16,
+  of revenue** (`ADR-0030/M2` owns that figure; this ADR cites it. Re-measured 2026-08-16,
   `inbox/2026-08-16-the-product-line-matrix-rebuilt-with-the-master-join-denorm-and-master-now-agree-on-every-line.md`;
   534 / $234,987.75 / 13.91% on 2026-08-10). It currently has almost no cost against it, because
   labor and vehicle costs are not in the ledger yet. ⚠️ The figures first written here — 473 lines,
@@ -134,11 +134,15 @@ ADR chose wrongly but that **it never considered the family every reference actu
   likely misreading of the whole design and it is why the official allocated P&L exists.
 - **The allocated number is the managed number.** "True income from product" requires the
   allocation; the ledger's own grouping is an input to it, not a substitute.
-- **The allocation basis is a decision that has not been made** — by revenue, by weight, by item
-  count, by line count. It belongs to the reporting spec, and it must be stated once rather than
-  chosen per report, or two reports will disagree about the margin on the same product line. That is
-  the real cost of this decision and the reason the allocation is _specified_ rather than merely
-  _permitted_.
+- **The allocation basis must be stated once rather than chosen per report**, or two reports will
+  disagree about the margin on the same product line. That is the real cost of this decision and the
+  reason the allocation is _specified_ rather than merely _permitted_. ⚠️ **This bullet read "the
+  allocation basis is a decision that has not been made — by revenue, by weight, by item count, by
+  line count" until 2026-08-24, and this same document contradicts that twice**: `ADR-0031`
+  (allocate by goods revenue on the causal order) makes exactly that choice, and the Considered
+  options above already lean on it — _"a basis ADR-0031 itself calls the weakest defensible tier"_.
+  ⇒ **the basis IS decided, in ADR-0031, which is `proposed`.** What this ADR places on the
+  reporting spec is the requirement that there be **one** stated basis, not the choice of which.
 - **Delivery revenue spans two accounts and BOTH are the Delivery product line.** Owner, 2026-08-09:
   4100 Service Income is the delivery/setup/removal charge — a service performed by a person, and
   labor-bearing; 4110 Delivery Surcharges is off-hours, rush, weekend or distance. ⚠️ **This bullet

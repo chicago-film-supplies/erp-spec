@@ -94,7 +94,7 @@ None.
 | `ADR-0020` | Xero history is recast, and the product line is derived from the master rather than assigned to the line | 2026-10-15 | — | — |
 | `ADR-0025` | A receipt that is not a categorised sale moves to 4800 Other Income rather than taking a null on an operating revenue account | 2026-10-01 | — | — |
 | `ADR-0027` | Retain Mapbox for geocoding and Resend for transactional email, at the boundary | 2026-10-01 | — | — |
-| `ADR-0028` | The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability | 2026-10-01 | — | — |
+| `ADR-0028` | The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability | 2026-10-01 | — | `SPIKE-011` |
 | `ADR-0029` | The ledger records un-allocated facts; allocation is a specified reporting act | 2026-10-01 | — | — |
 | `ADR-0031` | The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy | 2026-11-01 | — | `OQ-033` |
 | `ADR-0032` | The organization tree is a liability tree; projects and settlement points are addressing beneath it | 2026-11-15 | — | `OQ-035` `OQ-038` `OQ-039` |
