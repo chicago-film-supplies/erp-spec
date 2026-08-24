@@ -290,6 +290,10 @@ The first two are already enforced in the `~/cfs` workspace. All five are load-b
   measurement to describe what EXISTS, or to decide what SHOULD exist?** The first is what `db_*`
   and `code:` pins are for. The second needs the owner, and asking is cheap.
 
+  ⚠️ **And "what exists" is itself moving** — v1 is unfinished and CRMS deprecation is pending, so
+  the corpus has a structural break ahead of it rather than ordinary drift. See _Verification
+  etiquette_.
+
 - **A fact about a third-party API has ONE owner in the structured spec, and something executes
   against the API.** `research-drop/reference/tigerbeetle.md` said `user_data_128/64/32` were "the
   **only** per-transfer reference fields". That is an **exhaustiveness claim about someone else's
@@ -390,6 +394,49 @@ evidence and evidence is append-only. Worked examples:
 The live CFS API is production. `db_*` reads are safe and are the point. Do not write, and do not
 reach Xero or CRMS from here at all — both are single-tenant and live, and Xero's daily quota is a
 shared exhaustible resource (workspace `CLAUDE.md` → _External systems_).
+
+⚠️⚠️ **V1 IS NOT FINISHED, AND THE MIGRATION CORPUS HAS A PENDING STRUCTURAL BREAK.** Both halves
+matter, and the second is not ordinary staleness:
+
+- **v1 is under active development.** Every `code:` pin reads a moving repo, and the manager app is
+  still being built — CRMS retires _"once the manager app is finished"_ (workspace `CLAUDE.md`). So
+  **v2's scope target moves too**: a capability that does not exist in v1 today may exist before
+  scaffolding starts, and v2 has to carry it.
+- **CRMS deprecation is PENDING** — cutover imminent, and `api-cloudrun#556` removes the ingest
+  surface in one piece. Measured `api:2026-08-23:db_orders_count`: **995 of 995 prod orders carry a
+  `crms_id`, 100%.** ⇒ **that share only falls from cutover onward.** It is not drift; it is a
+  **structural break in what the corpus IS**.
+- ⇒ Every CRMS-shaped figure measured before cutover describes the **pre-cutover** corpus — the
+  **18.3%** duplicate-leaf-uid population, the **30** invoices carrying no `order` divider, divider
+  uids reused by name. **A migration spec written against those proportions is describing a corpus
+  that will not exist in that shape when the migration runs.**
+- ⭐ **And the direction is knowable, which is the useful part**: the CRMS-shaped share only
+  **shrinks** and the natively-shaped share only grows. ⚠️ **So a CRMS-derived constraint that looks
+  binding today may be gone by migration time** — the opposite of the usual staleness risk, and easy
+  to get backwards. `(uid, k-th occurrence)` is the worked example: it looked like a requirement and
+  was an artifact.
+- ⇒ **Re-measure before MIGRATING, not merely before writing.** A figure pinned to a date is honest;
+  a figure treated as stable is not. This is the corpus half of _v1 answers what is, never what must
+  be_ (**Five rules**, fifth entry).
+
+⭐⭐ **THE LIVE WORKED EXAMPLE, and it inverts an absence this repo has already recorded twice.**
+**v1 will get a public client app** (owner, 2026-08-23). ⇒ **row-scoped authorization will be BUILT
+IN V1**, before ERP scaffolding starts. So erp-spec#50's premise — _"a row-scoped authorization
+model that exists nowhere"_ — and `SPIKE-009` criterion 4's _"the customer model does not exist"_
+are both **true only until it is built**, which is soon.
+
+⚠️ **Note the shape, because it is the third turn of the same screw.** First the absence was
+measured accurately and over-generalised (_"there is no per-document authorization decision to
+reproduce"_ — true of an operator app). Then it was corrected to _"customers will log in, so v2
+needs a model that exists nowhere"_. **Now that correction is itself expiring**, because v1 is
+getting the app. ⇒ **an absence in v1 is not even a reliable claim about V1'S OWN FUTURE**, let
+alone about v2.
+
+⚠️ **And the rule still cuts the other way — do not now transplant it.** That v1 will have a
+row-scoped model does **not** make it v2's model; that is exactly the solution-transplant error
+above. What changes is the evidence available: v2 will be able to **measure** a working
+implementation instead of designing against a blank, and a measured implementation is worth far more
+than a guess **and is still not a decision.**
 
 **Two kinds of verification count, and both set `verified: true`.** Both must be dated and pinned to
 something that can go stale, because an undated claim silently becomes a lie:

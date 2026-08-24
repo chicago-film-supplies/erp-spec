@@ -148,11 +148,20 @@ model has no machinery for it: verified at
 `code:2026-08-23:core@ccaf327:src/schemas/permissions.ts`, **every permission is `<resource>.<verb>`
 and not one carries a scope dimension.** `orders.read` means every order.
 
+⚠️⚠️ **UPDATED 2026-08-23 — "does not exist" is expiring: V1 WILL GET A PUBLIC CLIENT APP** (owner).
+⇒ **row-scoped authorization will be BUILT IN V1**, before ERP scaffolding starts, so v2 will be
+able to **measure a working implementation** rather than design against a blank. ⚠️ **That is
+evidence, not a decision** — v1 having a model does not make it v2's model, which would be the
+solution-transplant error the fifth rule in `CLAUDE.md` names. ⭐ **And note the shape: this is the
+THIRD turn of the same screw** — the absence was measured accurately, over-generalised, corrected to
+"v2 needs a model that exists nowhere", and that correction is now expiring too. **An absence in v1
+is not a reliable claim about v1's own future.**
+
 ⇒ **two authorization models, and they must not be one retrofitted.** The operator model
-(collection-scoped, exists, tested) stands as described. The customer model (row-scoped, does not
-exist) is new work, and it lands on **every `/db/*` route**, not only the socket layer — `dbRead.ts`
-returns documents _"as stored, unredacted… the gate is RBAC, not field-level redaction"_, which is
-defensible for operators and a leak the moment a customer holds a token.
+(collection-scoped, exists, tested) stands as described. The customer model (row-scoped, not yet
+built) lands on **every `/db/*` route**, not only the socket layer — `dbRead.ts` returns documents
+_"as stored, unredacted… the gate is RBAC, not field-level redaction"_, which is defensible for
+operators and a leak the moment a customer holds a token.
 
 ⭐ **The scoping key already exists in the target spec**: `ADR-0032`'s contact **membership edges**,
 each carrying a role at the `(project × department)` leaf. **The same model scopes the `ADR-0045`
