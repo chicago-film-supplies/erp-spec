@@ -13,7 +13,7 @@ is `deno task validate`'s judgement, not this file's.
 |---|---:|---|
 | Open questions | 20 open | 41 answered of 61 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 24 | 0 open |
-| Decisions (ADR) | 45 | 25 in force · 16 proposed |
+| Decisions (ADR) | 46 | 25 in force · 17 proposed |
 | Spikes | 13 | 5 open |
 | Requirements | 27 | 0 without a scenario |
 | Inbox | 136 | 110 unpromoted |
@@ -83,7 +83,7 @@ None.
 - `ADR-0037` — An id carries meaning where it is used — a headline on every id, and addressable claims inside a decision
 - `ADR-0038` — Labor with no causal order is not COGS — 5801 is not created and 6600 Wages narrows instead
 
-### Proposed (16)
+### Proposed (17)
 
 | ADR | Title | Review by | Supersedes on acceptance | Blocked on |
 |---|---|---|---|---|
@@ -103,6 +103,7 @@ None.
 | `ADR-0043` | The depreciation engine is hand-rolled behind a package boundary, computed per taxpayer-year, with the year's rules as versioned data | 2026-11-15 | — | `OQ-054` |
 | `ADR-0044` | CFS is the principal on a production service agreement, so the client's budget is revenue and the crew cost is CFS's cost | 2026-11-30 | — | — |
 | `ADR-0045` | A stored jurisdiction records WHO asserted it and under what authority — not which rung of the precedence answered, which is a restatement of fields the document already holds | 2026-11-30 | — | `OQ-056` `OQ-057` |
+| `ADR-0046` | Adopt date-fns and @date-fns/tz as planned dependencies for every business datetime | 2026-11-01 | — | — |
 
 ## Spikes
 

@@ -174,3 +174,4 @@ Accepted and not superseded, as of the last `deno task gen`.
 | [ADR-0043](ADR-0043-the-depreciation-engine-is-built-and-packaged.md) | The depreciation engine is hand-rolled behind a package boundary, computed per taxpayer-year, with the year's rules as versioned data | 2026-11-15 | — | `OQ-054` |
 | [ADR-0044](ADR-0044-cfs-is-principal-on-a-psa.md) | CFS is the principal on a production service agreement, so the client's budget is revenue and the crew cost is CFS's cost | 2026-11-30 | — | — |
 | [ADR-0045](ADR-0045-a-stored-jurisdiction-records-who-asserted-it.md) | A stored jurisdiction records WHO asserted it and under what authority — not which rung of the precedence answered, which is a restatement of fields the document already holds | 2026-11-30 | — | `OQ-056` `OQ-057` |
+| [ADR-0046](ADR-0046-date-fns-and-tzdate-for-business-datetimes.md) | Adopt date-fns and @date-fns/tz as planned dependencies for every business datetime | 2026-11-01 | — | — |
