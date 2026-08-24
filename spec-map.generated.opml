@@ -436,7 +436,7 @@
           <outline text="Reproduces the historical treatment on a sample of real invoices, with every disagreement explained rather than tolerated."/>
           <outline text="Nexus and rate-change handling specified, including how a rate change mid-rental is treated."/>
         </outline>
-        <outline text="SPIKE-009 — What replaces Firestore real-time listeners — MongoDB change streams plus a socket layer — and what…" _note="timebox: 1 week · closes: a new ADR · open">
+        <outline text="SPIKE-009 — What replaces Firestore real-time listeners — MongoDB change streams plus a socket layer — and what…" _note="timebox: 1 week · closes: a new ADR · in_progress">
           <outline text="A working slice where a server-side document change updates a SolidJS view without a refetch."/>
           <outline text="Resume-token handling specified, including what happens after a disconnect longer than the oplog window."/>
           <outline text="An honest inventory of manager-side listener dependencies, with per-site effort — not a single aggregate estimate."/>

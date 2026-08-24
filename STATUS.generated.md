@@ -112,7 +112,7 @@ None.
 | `SPIKE-006` | How lossy is translating JSON Schema 2020-12 to MongoDB's `$jsonSchema`, and wh… | 2 days | `ADR-0040` | closed |
 | `SPIKE-007` | Which access path reaches DuckDB from Deno — the native addon or WASM — and can… | 2 days | `ADR-0024` | closed |
 | `SPIKE-008` | How do the Chicago Personal Property Lease Transaction Tax and Illinois home-ru… | 1 week | `ADR-0045` | closed |
-| `SPIKE-009` | What replaces Firestore real-time listeners — MongoDB change streams plus a soc… | 1 week | _new ADR_ | open |
+| `SPIKE-009` | What replaces Firestore real-time listeners — MongoDB change streams plus a soc… | 1 week | _new ADR_ | in_progress |
 | `SPIKE-010` | Does a production-grade Valkey queue client run under Deno, and can it express… | 3 days | `ADR-0012` | closed |
 | `SPIKE-011` | Does TigerBeetle meet its durability and latency expectations on Linode block s… | 3 days | `ADR-0013` | open |
 | `SPIKE-012` | At which fulfillment moment does a booking become a TigerBeetle pending transfe… | 1 week | `ADR-0015` | in_progress |

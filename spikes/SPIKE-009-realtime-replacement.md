@@ -15,7 +15,7 @@ exit_criteria:
   - An honest inventory of manager-side listener dependencies, with per-site effort — not a single aggregate estimate.
   - Authorization model stated: Firestore rules enforced reads directly; a socket layer must re-implement that.
 closes_adr: new
-status: open
+status: in_progress
 ---
 
 ## Notes
@@ -276,3 +276,172 @@ Firebase publishes a bound for changes to the rules _source_ (up to 10 minutes f
 listeners), not for a `roles/{name}` edit. ⭐ **This is the single most consequential unknown for
 the socket spec, because it sets the bar the socket layer is being compared against** — and it is
 measurable.
+
+## ✅ Criterion 1 — the vertical slice, 2026-08-23
+
+Executed. `spikes/harness/realtime-slice/` — a change stream on one collection, a Hono WebSocket,
+and a SolidJS store that stays live. `deno task slice`, driven by `deno task slice-mutate`, which
+connects to mongod **directly** and never touches the slice server, so the change under test is one
+the client did not make and cannot invalidate against — the 79% case from criterion 3.
+
+Needs a **replica set**, not the standalone `SPIKE-002` left behind: change streams read the oplog
+and a standalone `mongod` has none. Setup in `spikes/harness/_README.md`.
+
+### "Without a refetch" is asserted, not assumed
+
+The server counts every HTTP request it serves and ships the count in each frame. Measured across a
+server-side update: **`httpRequests` stayed at 1** — the page load — while the row changed. The
+initial snapshot rides the socket for the same reason; otherwise "no refetch" would be true of
+updates and false of the initial load, which is not what the criterion asks.
+
+### ⭐ The manager's existing listener contract SURVIVES the transport swap
+
+`createAsyncState` accepts _a fetcher that returns a cleanup function_
+(`code:2026-08-23:manager@56e41fd:src/primitives/createAsyncState.ts`), which is how it consumes
+`onSnapshot` today. `subscribeCollection` in the slice has exactly that shape. ⇒ **the primitive
+does not have to change, and the 52 subscription sites keep their call signature.** That is the
+single largest cost-reducer found so far, and it is why criterion 3's three chokepoints matter.
+
+⚠️ **What does NOT survive is the FAILURE branch.** `createAsyncState`'s listener arm logs and stops
+— no retry, no backoff, no re-subscribe. The slice reproduces that gap deliberately rather than
+papering over it, and it is criterion 3's item 2 restated with a working example in front of it.
+
+### ⚠️ NEW failure mode with no Firestore analogue: `watch()` is LAZY
+
+The server-side cursor opens on the **first read**, not at the `watch()` call. A write issued
+between the two lands before the stream's start point and **is never delivered** — silently.
+Firestore's `onSnapshot` has no equivalent gap: it delivers an initial snapshot, so "subscribe then
+write" is safe there and is a race here.
+
+⭐ **Found by being bitten, not by reading.** The first probe run hung with zero output because the
+insert it was waiting for had happened before the cursor existed. ⇒ **every subscription site
+acquires a start-point obligation it does not have today**, and the fix (`tryNext()` before
+announcing readiness) has to be inside the shared primitive or it will be forgotten at 52 sites.
+
+### ⭐⭐ Reactivity is asserted by EFFECT COUNT, because a screenshot cannot tell the difference
+
+`deno task slice-store` — applying a change frame for row `b` notifies the render effect watching
+`b.qty` **exactly once** and the effects on `a` and `c` **not at all**; an identical redelivered
+frame notifies **nothing**.
+
+A fine-grained cell update and a wholesale table re-render produce the **same screenshot**, and the
+second is what a naive socket client does. The test was inverted to check it can fail: replacing
+`reconcile` with a plain array assignment turns it red, which is the regression it exists for.
+
+⚠️ **NOT verified: the actual DOM painting in a browser.** No browser automation was available this
+session. The transport is proven by execution and the reactivity by assertion; a human loading
+`http://127.0.0.1:8791` and running `deno task slice-mutate` is what closes the last gap. **Recorded
+as unverified rather than implied.**
+
+### ⭐⭐ A test-infrastructure finding that outlives this spike
+
+**Solid ships a reactive browser build and a non-reactive SSR build, and there are TWO independent
+ways to silently get the SSR one under Deno:**
+
+1. `npm:solid-js` honours an explicit **`deno` export condition** pointing at `dist/server.js`.
+2. **esm.sh serves Deno the same SSR build** unless a browser target is forced (`?target=es2022`).
+
+In the SSR build **`createEffect` never runs and `createRenderEffect` runs once and never again.** ⇒
+**a reactivity test written the obvious way measures nothing and reports success.** It cost four red
+runs to find, and only because the assertions were positive counts — an assertion of the form "the
+other rows did not update" would have passed against a runtime where **nothing** updates.
+
+⚠️ There is a third variant of the same trap: mapping `solid-js` to the browser build while
+`solid-js/store` re-resolves its own internal `solid-js` through the `deno` condition gives **two
+reactive runtimes**, store signals in one and effects in the other, and nothing notifies anything.
+Same class as this harness's existing Zod double-instance warning.
+
+⇒ **Client reactivity belongs in `manager`'s existing vitest/jsdom suite, not in a Deno harness.**
+The pin and the reason are in `spikes/harness/deno.json`; it is `?target=es2022` that is
+load-bearing.
+
+## ✅ Criterion 2 — resume tokens, 2026-08-23
+
+`deno task change-stream` — 11 probes, all green from a cold server, against **mongod 8.0.4**
+single-node replica set, driver `mongodb@6.20.0`. Every probe asserts a value; none asserts an
+absence of throw.
+
+### What a resume token is
+
+| measured                | value                                                              |
+| ----------------------- | ------------------------------------------------------------------ |
+| shape                   | `{_data}` and nothing else — **188 hex chars, 94 bytes**           |
+| ordering                | arrival order **is** lexicographic order — a token is COMPARABLE   |
+| `resumeAfter` semantics | **exclusive** of its own event, so persisting it cannot re-deliver |
+
+### ⭐ The post-batch resume token is what makes a filtered subscription safe
+
+A stream whose `$match` nothing satisfies still advances `stream.resumeToken` — measured across
+**200 non-matching writes with zero events delivered**.
+
+⚠️ **This only helps a client that persists `stream.resumeToken`.** A client that persists the token
+of the **last delivered event** — the obvious implementation — lets an idle filtered subscriber's
+token rot at the oplog's rate while the server knew better the whole time. **The distinction is
+invisible until a reconnect, and it is a one-word difference in the client.**
+
+### ⭐⭐ The oplog window is NOT a quantity the application can compute
+
+The intended probe was: evict a real token, assert `ChangeStreamHistoryLost`. **It could not be made
+to happen.**
+
+| configured `oplogSize` | incompressible writes + 30s settling | token still resumable? | retention |
+| ---------------------- | ------------------------------------ | ---------------------- | --------- |
+| 1 MB                   | 98 MB                                | **yes**                | **104x**  |
+| 200 MB                 | 586 MB                               | **yes**                | **3x**    |
+
+WiredTiger truncates in markers with a large minimum size, which a small oplog cannot divide into —
+the ratio collapsing from 104x to 3x as the oplog grows is that mechanism showing itself. Truncation
+also lags **far** behind a sustained burn (the oplog was measured at 85x its cap mid-burn) and
+catches up once writes stop.
+
+⇒ ⭐ **Two consequences, and the second is the one that changes the design:**
+
+1. `oplogSize` is a **floor** for retention, never a bound. Capacity planning on the ADR-0013 host
+   cannot use it to answer "how long may a client be offline".
+2. **The resume-failure path cannot be exercised by racing the oplog.** It has to be driven by
+   INJECTION — so the client's recovery code needs a **test seam**, and a plan to integration-test
+   it against a real server is a plan that will never run the branch.
+
+⚠️ **Code 286 `ChangeStreamHistoryLost` WAS observed twice**, via `startAtOperationTime` on a server
+whose oplog had been through repeated burn cycles — but **not reproducibly from a clean start**, so
+it is recorded here as a dated observation and is **not** asserted by a green probe.
+
+### ⭐ 286 means "truncated past you", NOT "your token is old"
+
+A start point **an hour before** an un-truncated oplog is **accepted**, not rejected. The error is
+about lost history, not about age — so a client that treats "my token is old" as the failure
+condition will handle a case the server never raises, and miss the one it does.
+
+### A drop emits TWO events, and only one resume option survives it
+
+| step                      | measured                                                   |
+| ------------------------- | ---------------------------------------------------------- |
+| `drop` then `invalidate`  | two events, in that order; `invalidate` closes the stream  |
+| `resumeAfter(invalidate)` | **code 260 `InvalidResumeToken`**                          |
+| `startAfter(invalidate)`  | works — delivers the next event on the recreated namespace |
+
+⇒ a client that persists the token of the last event it saw persists the **invalidate**, and
+`resumeAfter` — the obvious call — is the one that fails on it.
+
+### ⭐⭐ `fullDocument: "updateLookup"` hands a lagging reader a state that NEVER EXISTED at the event
+
+Measured: an update `v:1→2` followed by `v:2→3` before the stream is read delivers the **v=2 event**
+carrying **`fullDocument.v === 3`**.
+
+⇒ **the event's `updateDescription` and its `fullDocument` describe different moments**, and the gap
+widens exactly when the reader is behind — which is precisely when a reconnect replay is running. ⚠️
+This directly sharpens criterion 3's item 1: **a server re-evaluating subscriber predicates against
+`updateLookup` is evaluating them against the wrong document.**
+
+**The fix is measured and it is per-collection opt-in**:
+`changeStreamPreAndPostImages: { enabled:
+true }` plus `fullDocument: "required"` returns **v=2**,
+the event's own state. That is a storage cost and a per-collection decision, and it is not the
+default. ⇒ **the collections where a lagging reader would act on a state that never existed — the
+money ones — have to be named.**
+
+## What remains
+
+- **Criterion 1's browser confirmation** — one human, one page load, one `deno task slice-mutate`.
+- **The ADR.** `closes_adr: new`; nothing is written yet, and that is what keeps this spike open
+  against m4's `spikes_closed_with_adr`.
