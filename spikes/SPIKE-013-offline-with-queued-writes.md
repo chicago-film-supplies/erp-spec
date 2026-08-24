@@ -24,6 +24,11 @@ status: open
 
 ## Notes
 
+⚠️⚠️ **THE ADR IS SHARED WITH `SPIKE-009` (what replaces Firestore listeners), BY OWNER RULING,
+2026-08-23.** `closes_adr: new` on both — **they name the SAME new ADR, and a session that writes
+two has misread this.** SPIKE-009's evidence is already complete and is waiting on this spike, so
+**this spike is the critical path to m4's last machine-checkable criterion**, not a side quest.
+
 **Opened 2026-08-23 at the owner's suggestion**, out of the `SPIKE-009` ADR interview. Full rulings
 and their reasoning:
 `inbox/2026-08-23-owner-rules-the-realtime-replacement-and-folds-offline-with-queued-writes-into-it.md`.

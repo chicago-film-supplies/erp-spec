@@ -442,6 +442,20 @@ money ones — have to be named.**
 
 ## What remains
 
+⚠️⚠️ **THE ADR IS SHARED WITH `SPIKE-013` (offline queued writes), BY OWNER RULING, 2026-08-23.**
+`closes_adr: new` on both — **they name the SAME new ADR, and a session that writes two has misread
+this.** ⇒ **this spike's evidence is complete and its ADR cannot be drafted until SPIKE-013
+reports**, because the owner chose one coherent statement of how the client works over closing m4
+sooner. The cost was stated and accepted: m4's last machine-checkable criterion now waits on both.
+
+Rulings and their reasoning:
+`inbox/2026-08-23-owner-rules-the-realtime-replacement-and-folds-offline-with-queued-writes-into-it.md`.
+**Three rest on this spike's measurements (R1, R2, R3) and three on owner rulings (R4, R5, R6); the
+ADR must label which is which** rather than let them read alike.
+
 - **Criterion 1's browser confirmation** — one human, one page load, one `deno task slice-mutate`.
-- **The ADR.** `closes_adr: new`; nothing is written yet, and that is what keeps this spike open
-  against m4's `spikes_closed_with_adr`.
+  ⭐ `manager` has a mature Playwright setup (`light`/`dark`/`smoke` projects, auth + fixture setup,
+  a route graph) which can assert the DOM changed **while counting network requests** — strictly
+  better than the manual step, and it is also the only realistic way to exercise reconnect, since
+  the oplog cannot be raced.
+- **The shared ADR**, once SPIKE-013 lands.
