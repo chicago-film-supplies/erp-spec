@@ -2935,3 +2935,38 @@ open_questions:
       picks up either should read the other.
       Connects to `ADR-0048` (the ingestion boundary), `ADR-0002` (Plaid is the bank feed) and
       `ADR-0009` (no foreign ids in domain models).
+
+  - id: OQ-064
+    headline: "how the public app takes money"
+    question: >-
+      Which processor does the public app take card payments through, and is more than one payment
+      method in scope at v1?
+    owner: alex
+    decide_by: 2027-01-31
+    blocks: []
+    status: open
+    notes: >-
+      Opened 2026-08-24 out of the owner's ruling that the public app _"will most likely be using
+      authorize.net for credit card payments (b/c we bank at chase and our merchant account is
+      there)"_, with _"other ways too"_ of interest. **`most likely` is the owner's own hedge and it
+      is preserved** — this is a leading candidate, not a decision.
+      ⭐ **The reason matters more than the candidate.** The argument is about where settlement
+      already lands, so the durable criterion is: **whatever CFS chooses must settle into the
+      existing Chase merchant account without a second banking relationship.** That is testable
+      against any candidate; the candidate is not.
+      ⚠️ **Accounting-shaped under rule 8a** — it reaches `4700 - Transaction Fee Income` and
+      `5500 - Cost of Goods Sold: Merchant Fees`, whose recharge spread the chart already records,
+      and it introduces a **settlement shape ADR-0048 does not cover**: a processor pays out in
+      batches, net of fees, so one bank-feed deposit is many receipts minus a fee. ⇒ the answering
+      ADR owes the six-reference survey, and **Xero is the reference that matters most** — how card
+      receipts and merchant fees are recorded in CFS's books TODAY is the migration delta and
+      nothing else can tell you.
+      ⚠️ **Verify what the Chase merchant account already provides before treating Authorize.Net as
+      an independent choice** — the two may not be independent.
+      ⚠️ **"Other ways too" is unenumerated; do not invent the list.** What it establishes is a
+      constraint: the payment path must not assume one processor or one instrument. And **an
+      unexercised branch of a rule is a claim, not a capability** — if only cards are ever built,
+      assume the rest does not work. Worth asking the owner about ACH, and about check/wire, which
+      is almost certainly an EXISTING path that would be recorded rather than added.
+      Connects to `ADR-0048` (the ingestion boundary the settlement batch arrives through) and to
+      `inbox/2026-08-24-owner-authorize-net-is-the-likely-card-processor-because-cfs-banks-at-chase.md`.

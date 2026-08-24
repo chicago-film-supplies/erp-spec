@@ -39,6 +39,26 @@ allocated to COGS against the job that caused it.
   to a _public_ audience is not the operator-UI problem `SPIKE-009` is scoped to, and checkout is a
   money path — both are named in
   `inbox/2026-08-18-owner-the-public-client-app-is-in-scope-real-time-availability-quote-request-and-in-store-checkout.md`.
+- **Machine discoverability for the public app** (owner, 2026-08-24) — the **seventh** capability,
+  and the first whose audience is not a person. Two halves that are not one problem: **syndication**
+  (a product feed conforming to whatever Google Shopping requires, and the equivalent for Bing,
+  DuckDuckGo and others) and **agentic commerce** (whatever OpenAI and Anthropic require or advise
+  for LLM-friendly ecommerce, plus NEAR AI and any other open standard for agentic search and
+  purchase). ⚠️ **Nothing about what any of them actually requires is established** — the owner's
+  instruction is that research sessions look into all of these, and every name here is a candidate
+  to read rather than a fact this repo holds. ⚠️ **Only the agentic half is a money path.** ⚠️ Every
+  feed schema in this area models a **purchasable retail unit**, and CFS rents equipment whose
+  availability is an interval computation (`ADR-0015`) rather than a stock number — so "price" and
+  "in stock" are commercial decisions before they are schema ones. Named in
+  `inbox/2026-08-24-owner-the-public-app-must-be-syndicated-to-shopping-feeds-and-legible-to-buying-agents.md`.
+- **Card acceptance on the public app** (owner, 2026-08-24, `confidence: medium`) — **most likely
+  Authorize.Net, because CFS banks at Chase and the merchant account is there**, with other payment
+  methods of interest. ⭐ **The criterion outlives the candidate**: whatever is chosen must settle
+  into the existing Chase merchant account without a second banking relationship. Accounting-shaped
+  — it reaches `4700 - Transaction Fee Income`, `5500 - Cost of Goods Sold: Merchant Fees`, and a
+  settlement shape (one net batch deposit against many receipts) that `ADR-0048` does not cover.
+  `OQ-064`, and
+  `inbox/2026-08-24-owner-authorize-net-is-the-likely-card-processor-because-cfs-banks-at-chase.md`.
 - Year-end close, retained earnings roll, and CPA read access.
 
 ## Out of scope — non-goals

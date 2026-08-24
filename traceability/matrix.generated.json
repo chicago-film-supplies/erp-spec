@@ -5,7 +5,7 @@
     "adrs": 48,
     "adrs_accepted": 25,
     "events": 38,
-    "inbox": 137,
+    "inbox": 139,
     "inbox_promoted": 26
   },
   "requirements": [
@@ -815,8 +815,10 @@
       "inbox/2026-08-23-staging-needs-a-sanitized-prod-mirror.md",
       "inbox/2026-08-23-survey-how-six-references-source-a-tax-jurisdiction-and-what-substantiates-a-departure.md",
       "inbox/2026-08-23-what-a-minted-line-id-costs-and-why-path-interning-converges-on-it.md",
+      "inbox/2026-08-24-owner-authorize-net-is-the-likely-card-processor-because-cfs-banks-at-chase.md",
       "inbox/2026-08-24-owner-rules-the-notification-surface-shell-in-scope-dismissal-archives-one-typed-surface-and-nothing-blocks.md",
-      "inbox/2026-08-24-owner-the-conflict-popover-is-the-wrong-shape-it-is-a-global-notifications-surface.md"
+      "inbox/2026-08-24-owner-the-conflict-popover-is-the-wrong-shape-it-is-a-global-notifications-surface.md",
+      "inbox/2026-08-24-owner-the-public-app-must-be-syndicated-to-shopping-feeds-and-legible-to-buying-agents.md"
     ]
   }
 }

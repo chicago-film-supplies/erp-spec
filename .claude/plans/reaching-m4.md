@@ -41,6 +41,15 @@
 >    _"widen the scope before provisioning, not after"_ — and the widening was never written.
 >    **Check the artifact, not the queue.**
 >
+> ⭐ **NEW SCOPE, 2026-08-24, and it is not m4 work** — the owner added a **seventh** public-app
+> capability: **machine discoverability**. Two halves that are not one problem — **syndication**
+> (Google Shopping / Bing / DuckDuckGo product feeds, #53) and **agentic commerce** (OpenAI,
+> Anthropic, NEAR AI, open standards, #54) — plus **card acceptance most likely via Authorize.Net**
+> because CFS banks at Chase (`OQ-064`, #55). ⚠️ **Nothing is established about what any of those
+> parties requires**; both notes are `verified: false` and the owner's instruction is that research
+> sessions read the primary sources. ⚠️ **#54 is the highest fabrication-risk topic in the repo** —
+> new field, knowledge cutoff May 2026, heavily written-about by people guessing.
+>
 > ⚠️ **The ~39 validate warnings are the CLOCK, not a regression** — `2026-08-08`/`08-09` inbox
 > notes crossing the 14-day unpromoted threshold. That is erp-spec#6's backlog surfacing, and it
 > grows every day nobody promotes.
@@ -48,7 +57,8 @@
 - **Date:** 2026-08-24
 - **Repo:** erp-spec · **everything is pushed**
 - **Open issues:** #3, #4, #6, #12, #17, #32, #35, #36, #37, #40, #42, #43, #44, #45, #46, #48, #49,
-  #50, #52 — **#51 closed by `ADR-0047`**
+  #50, #52, **#53 / #54 / #55 (new — public-app machine discoverability and payment acceptance,
+  owner 2026-08-24)** — **#51 closed by `ADR-0047`**
 
 ## START HERE
 
