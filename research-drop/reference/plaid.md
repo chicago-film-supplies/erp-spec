@@ -61,25 +61,69 @@ Where sandbox cannot answer, that is said instead of guessed.
 - **`date` and `authorized_date` are different fields** [C1b] — 96 of 108 differ. `authorized_date`
   is nullable, so it cannot be the accounting date on its own. This is the same distinction the repo
   already enforces between accounting date and posting timestamp.
-- **The balance is not a running total of the feed** [C4a]. Neither `/accounts/balance/get` nor
-  `/transactions/sync` carries an **opening balance**, so a tie-out is a comparison against a figure
-  _we_ carry forward, never a derivation.
+- **The balance is not a running total of the feed** [C4a]. `/accounts/balance/get` carries no
+  opening balance, so a tie-out is a comparison against a figure _we_ carry forward.
+- **⚠️ `running_balance` EXISTS on every posted transaction and is NULL in all of them** [C4c] — a
+  key on 104 of 104 posted rows, absent from pending rows, and present on Plaid's own transactions
+  reference **only inside example payloads**, with no entry in the response-field list (primary page
+  read 2026-08-24). ⇒ **a per-row opening balance may exist in production and is UNMEASURED.**
+  Present-but-empty is the shape that passes an existence check. **Check it on the production link
+  before building a carried-forward opening balance.**
 - **`/transactions/refresh` is capped at 2 per minute PER ITEM** (120/hour, 2,880/day) — the
   per-Item column, not the roomy per-client one. A 429 is expected traffic when driving transitions.
 - **A refresh does not guarantee a delta** [C1j] — one round came back wholly empty even for the
   `user_transactions_dynamic` user, which the docs say always produces new transactions.
 
+## Statements — importable, and the cheap half needs no parsing
+
+- **`/statements/list`** returns a **structured index** per account:
+  `{statement_id, year, month,
+  date_posted}` [C5b]. ⭐ **A recurring job can prove no statement
+  PERIOD is missing from this alone**, with no PDF parsing at all.
+- **`/statements/download`** returns a **bank-branded PDF** and nothing else [C5c] — no balance, no
+  amounts. ⇒ any tie-out is a PDF-extraction job. Precedent in this repo:
+  `spikes/harness/tax-rules-refresh-probe.ts` pulls a publication and extracts it **locally** with
+  `pdftotext` rather than trusting a fetch.
+- ⚠️ **Statements is a separate product and its WINDOW is fixed at LINK TIME.** `initial_products`
+  must contain `statements` **and** `options.statements` must carry `{start_date, end_date}`;
+  omitting the object is a hard `INVALID_FIELD`, not a default [C5a]. Up to 2 years. ⇒ **one
+  decision at link bounds every statement that Item can ever produce.**
+- ⚠️ **A `plaid-content-hash` header accompanies the download** — useful for dedup and integrity.
+
+## Where a bank transaction goes — and it is NOT TigerBeetle
+
+- **Ingestion does not post** ([[ADR-0048]]/D14). The boundary store is a **MongoDB inbox of
+  retractable facts awaiting recognition**; the ledger is reached on a **match**, through
+  `bank_transaction_matched`, which is blocked on [[OQ-063]].
+- **The placement is forced, not stylistic.** Plaid rows are added, modified and **removed**;
+  TigerBeetle transfers are **immutable and append-only**. A retraction arriving after a match is
+  corrected by a **reversing posting** ([[ADR-0048]]/D15) — the shape `invoice_voided` and
+  `settlement_reversed` already use — never by amending a transfer.
+- ⚠️⚠️ **PLAID'S `pending` AND TIGERBEETLE'S PENDING TRANSFER ARE FALSE COGNATES.** One is an
+  unsettled _bank_ record; the other is a two-phase reservation resolved by
+  `post_pending`/`void_pending`. **No GL posting rule uses a pending transfer**; two-phase appears
+  only on the inventory-custody ledger ([[ADR-0015]]). Modelling one as the other puts an
+  unrecognised bank fact into the ledger under the wrong resolution protocol — **and it looks
+  right.**
+- **ADR-0042's two-store commit is not engaged by ingestion**, which writes one store. It engages at
+  the match.
+
 ## What sandbox CANNOT tell you
 
 Recorded as unmeasured, not as benign:
 
-- **The statement tie-out.** Sandbox balances are seeded constants — `current` did not move at all
-  while the feed moved $3,031.42 [C4b]. [[SPIKE-004]] exit criterion 4 is **unmet** and needs the
-  production link.
+- **The statement tie-out**, for TWO independent reasons. Sandbox balances are seeded constants —
+  `current` did not move at all while the feed moved (SPIKE-004/M8) [C4b] — **and** the sandbox
+  statement PDF is a **static sample**, rendering dates as literal `XX/XX` with a Balance column
+  that repeats values, unrelated to the Item's own transactions [C5d]. The **mechanism** is proven
+  end to end; the tie-out is not. [[SPIKE-004]] exit criterion 4 is **unmet**.
+- **Whether Chase populates `running_balance`.** See above — this is the one unmeasured field that
+  could materially simplify reconciliation.
 - **Whether `added` and `removed` can split across pages.** Every delta measured drained in one page
   [C3h]. Plaid states the pair _"aren't guaranteed to be in the same page"_ ⇒ **apply per-delta, not
   per-page**, or a split double-counts.
 - **Anything Chase-specific** — backfill depth beyond `transactions.days_requested`, whether Chase
   supplies pending data at all (Capital One and USAA do not), real amount precision.
 
-Cross-refs: [[ADR-0002]] · [[ADR-0048]] · [[ADR-0009]] · [[SPIKE-004]] · [[OQ-062]]
+Cross-refs: [[ADR-0002]] · [[ADR-0048]] · [[ADR-0009]] · [[ADR-0015]] · [[ADR-0042]] · [[SPIKE-004]]
+· [[OQ-062]] · [[OQ-063]]

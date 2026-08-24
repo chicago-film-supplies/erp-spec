@@ -343,6 +343,28 @@ checkOver(
     `is a comparison against a figure WE carry forward, never a derivation.`,
 );
 
+const rbPresent = first.added.filter((t: Txn) => "running_balance" in t).length;
+const rbNonNull = first.added.filter((t: Txn) => t.running_balance != null).length;
+checkOver(
+  "C4c",
+  "⚠️ `running_balance` EXISTS on the wire and is NULL in every row — present-but-empty",
+  first.added.length,
+  rbPresent > 0 && rbNonNull === 0,
+  `${rbPresent}/${first.added.length} rows carry the KEY, ${rbNonNull} carry a VALUE. ` +
+    `It appears only in example payloads on Plaid's own transactions reference — no entry in the ` +
+    `response-field list (read from the primary page 2026-08-24). ⇒ a per-row opening balance MIGHT ` +
+    `exist in production and is UNMEASURED; an existence check on this field passes while it is empty.`,
+);
+note(
+  `⚠️ it is on POSTED rows only: ${
+    first.added.filter((t: Txn) => !t.pending && "running_balance" in t).length
+  } of ` +
+    `${first.added.filter((t: Txn) => !t.pending).length} posted, ${
+      first.added.filter((t: Txn) => t.pending && "running_balance" in t).length
+    } of ` +
+    `${pendingFirst.length} pending — so even populated it would not cover the pending window.`,
+);
+
 // ── C1e–C1g / C3a–C3b: drive a pending→posted transition ────────────────────────────────────────
 
 head("Exit criteria 1 + 3 — driving a pending→posted transition");
@@ -381,13 +403,28 @@ if (!transition) throw new Error("no pending→posted transition after 5 refresh
 
 const noopTotal = rounds.reduce((s, r) => s + r.noop, 0);
 const modTotal = rounds.reduce((s, r) => s + r.modified, 0);
-checkOver(
+/**
+ * ⚠️ **C1i is an EXISTENCE claim, and that is why it cannot be a plain assertion.**
+ *
+ * "A modified row CAN be byte-identical" is established by observing it once (SPIKE-004/M3:
+ * 107 of 108) and is NOT refuted by a later run that happens not to see it. Whether the no-op batch
+ * arrives before or after the transition is up to the sandbox, and this check went red on exactly
+ * that — a run where the transition landed in the first refresh, so no modified rows were ever
+ * emitted to inspect.
+ *
+ * ⇒ zero modified rows means UNMEASURABLE THIS RUN, not "refuted". A universal claim ("every
+ * removed id was pending") is the opposite and stays a hard assertion — see C1e.
+ * A check that goes red on the sandbox's scheduling teaches whoever re-runs it to ignore red.
+ */
+check(
   "C1i",
   "⚠️ a `modified` entry is NOT evidence that anything changed — it can be byte-identical",
-  modTotal,
-  noopTotal > 0,
-  `${noopTotal}/${modTotal} modified rows across ${rounds.length} refresh(es) were byte-identical to ` +
-    `the copy we already held. Emitting a domain event per modified row would emit ${noopTotal} spurious ones.`,
+  modTotal === 0 ? "N/A" : (noopTotal > 0 ? "PASS" : "FAIL"),
+  modTotal === 0
+    ? `UNMEASURABLE THIS RUN: 0 modified rows arrived across ${rounds.length} refresh(es), so there ` +
+      `was nothing to compare. The claim is an EXISTENCE claim and rests on SPIKE-004/M3.`
+    : `${noopTotal}/${modTotal} modified rows across ${rounds.length} refresh(es) were byte-identical to ` +
+      `the copy we already held. Emitting a domain event per modified row would emit ${noopTotal} spurious ones.`,
 );
 checkOver(
   "C1j",
@@ -545,6 +582,90 @@ checkOver(
   [...acctB].filter((id) => acctA.has(id)).length === 0,
   `A=[${[...acctA].join(", ")}] B=[${[...acctB].join(", ")}] — 0 shared`,
 );
+
+// ── C5: are statements importable at all ───────────────────────────────────────────────────────
+
+head("Beyond the exit criteria — can a statement be imported from Plaid at all");
+
+/**
+ * ⚠️ Statements is a SEPARATE PRODUCT and its window is fixed at LINK TIME. `initial_products`
+ * must contain `statements` AND `options.statements` must carry `{start_date, end_date}` — omit the
+ * object and the token create fails outright with INVALID_FIELD. Plaid allows up to 2 years.
+ * ⇒ **the statement window is chosen when the Item is created, not when a reconciliation asks.**
+ */
+const STMT_WINDOW = { start_date: "2026-05-01", end_date: "2026-08-01" };
+const noObj = await fetch(`${BASE}/sandbox/public_token/create`, {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({
+    client_id: CLIENT_ID,
+    secret: SECRET,
+    institution_id: INSTITUTION,
+    initial_products: ["statements"],
+    options: { override_username: USER, override_password: "pass_good" },
+  }),
+}).then((r) => r.json());
+check(
+  "C5a",
+  "the statement WINDOW is fixed at link time — omitting it is a hard failure, not a default",
+  noObj.error_code === "INVALID_FIELD",
+  `initial_products=["statements"] with no options.statements → ${
+    noObj.error_code ?? "accepted?!"
+  }: ` +
+    `${String(noObj.error_message ?? "").slice(0, 90)}`,
+);
+
+const sPub = await plaid("/sandbox/public_token/create", {
+  institution_id: INSTITUTION,
+  initial_products: ["statements"],
+  options: { override_username: USER, override_password: "pass_good", statements: STMT_WINDOW },
+});
+const S = await plaid("/item/public_token/exchange", { public_token: sPub.public_token });
+const listed = await plaid("/statements/list", { access_token: S.access_token });
+const sDep = listed.accounts.find((a: Txn) => a.account_type === "depository");
+const stKeys = new Set<string>(sDep.statements.flatMap((x: Txn) => Object.keys(x)));
+checkOver(
+  "C5b",
+  "⭐ /statements/list is a STRUCTURED INDEX — enough for a GAP check with no PDF parsing at all",
+  sDep.statements.length,
+  !stKeys.has("closing_balance") && stKeys.has("statement_id"),
+  `${sDep.statements.length} statements over a ${STMT_WINDOW.start_date}…${STMT_WINDOW.end_date} window, ` +
+    `fields = {${
+      [...stKeys].sort().join(", ")
+    }}. ⇒ a recurring job can prove every MONTH is present ` +
+    `from this alone — but there is NO balance and NO amount here, so a dup/amount check needs the PDF.`,
+);
+
+const dl = await fetch(`${BASE}/statements/download`, {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({
+    client_id: CLIENT_ID,
+    secret: SECRET,
+    access_token: S.access_token,
+    statement_id: sDep.statements[0].statement_id,
+  }),
+});
+const pdf = new Uint8Array(await dl.arrayBuffer());
+const magic = new TextDecoder().decode(pdf.slice(0, 5));
+check(
+  "C5c",
+  "a statement is a PDF and nothing else — the closing balance is INSIDE it, not beside it",
+  magic === "%PDF-",
+  `content-type=${dl.headers.get("content-type")}, ${pdf.length} bytes, magic="${magic}", ` +
+    `plaid-content-hash=${String(dl.headers.get("plaid-content-hash")).slice(0, 16)}… ` +
+    `⇒ any tie-out is a PDF-extraction job (precedent: tax-rules-refresh-probe.ts + pdftotext).`,
+);
+check(
+  "C5d",
+  "the SANDBOX statement is a static sample and does not reconcile with the Item's own feed",
+  "N/A",
+  `UNMEASURABLE IN SANDBOX: the PDF renders dates as literal "XX/XX", its Balance column repeats ` +
+    `values, and its lines are unrelated to the ${first.added.length} transactions this Item served. ` +
+    `⇒ the MECHANISM is proven end to end; the tie-out itself still needs the production link. ` +
+    `A second, independent reason exit criterion 4 cannot close here.`,
+);
+await plaid("/item/remove", { access_token: S.access_token });
 
 // ── cleanup ─────────────────────────────────────────────────────────────────────────────────────
 

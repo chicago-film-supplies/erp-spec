@@ -16,7 +16,7 @@ is `deno task validate`'s judgement, not this file's.
 | Decisions (ADR) | 48 | 25 in force · 19 proposed |
 | Spikes | 13 | 2 open |
 | Requirements | 27 | 0 without a scenario |
-| Inbox | 139 | 113 unpromoted |
+| Inbox | 140 | 114 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
@@ -108,7 +108,7 @@ None.
 | `ADR-0045` | A stored jurisdiction records WHO asserted it and under what authority — not which rung of the precedence answered, which is a restatement of fields the document already holds | 2026-11-30 | — | `OQ-056` `OQ-057` |
 | `ADR-0046` | Adopt date-fns and @date-fns/tz as planned dependencies for every business datetime | 2026-11-01 | — | — |
 | `ADR-0047` | The client data model — one live transport replacing Firestore listeners, and an offline queue reconciled by three-way merge | 2026-11-15 | — | `OQ-043` `OQ-061` |
-| `ADR-0048` | The Plaid ingestion boundary — a store of record at the edge, CFS-minted identity, and delta-atomic application | 2026-11-30 | — | `OQ-062` `OQ-063` |
+| `ADR-0048` | The Plaid ingestion boundary — a MongoDB inbox at the edge that does not post, CFS-minted identity, and delta-atomic application | 2026-11-30 | — | `OQ-062` `OQ-063` |
 
 ## Spikes
 

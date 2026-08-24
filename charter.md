@@ -46,11 +46,25 @@ allocated to COGS against the job that caused it.
   for LLM-friendly ecommerce, plus NEAR AI and any other open standard for agentic search and
   purchase). ⚠️ **Nothing about what any of them actually requires is established** — the owner's
   instruction is that research sessions look into all of these, and every name here is a candidate
-  to read rather than a fact this repo holds. ⚠️ **Only the agentic half is a money path.** ⚠️ Every
-  feed schema in this area models a **purchasable retail unit**, and CFS rents equipment whose
-  availability is an interval computation (`ADR-0015`) rather than a stock number — so "price" and
-  "in stock" are commercial decisions before they are schema ones. Named in
-  `inbox/2026-08-24-owner-the-public-app-must-be-syndicated-to-shopping-feeds-and-legible-to-buying-agents.md`.
+  to read rather than a fact this repo holds. ⚠️ **Only the agentic half is a money path.** ⭐ **The
+  catalog is TWO populations and a feed fits one natively**: **retail sale items**, which CFS sells
+  today and is **expanding considerably** (owner, 2026-08-24), are the purchasable units every feed
+  schema models; **rental equipment** is priced per pricing factor with availability that is an
+  interval computation (`ADR-0015`) rather than a stock number, so "price" and "in stock" are
+  commercial decisions before they are schema ones. ⚠️ **The retail population is UNMEASURED** —
+  required-attribute coverage is where a catalog that "fits" turns out not to. Named in
+  `inbox/2026-08-24-owner-the-public-app-must-be-syndicated-to-shopping-feeds-and-legible-to-buying-agents.md`
+  and corrected by
+  `inbox/2026-08-24-owner-cfs-sells-retail-too-and-is-expanding-it-so-the-feed-mismatch-is-narrower-than-recorded.md`.
+- **Unattended online checkout for a RENTAL order where every item is in stock** (owner, 2026-08-24)
+  — the **eighth** public-app capability, and a **third** reading of "checkout" distinct from the
+  two the 2026-08-18 note flagged. ⚠️ **The availability gate is the whole difficulty and it is not
+  a stock check**: "all items in stock" is a predicate over a requested **window**, and `ADR-0015`
+  records that a per-day rollup **oversells** — so the gate must be the interval engine itself, or
+  the app confirms and takes money for an order it cannot fill. ⚠️ It takes money for a
+  **reservation**, which is a different obligation from retail checkout (`OQ-064`). ⭐ The owner
+  notes it is _"prob something we want an agent to be able to do"_ — **which is where the
+  syndication and agentic halves diverge in capability, not only in audience.**
 - **Card acceptance on the public app** (owner, 2026-08-24, `confidence: medium`) — **most likely
   Authorize.Net, because CFS banks at Chase and the merchant account is there**, with other payment
   methods of interest. ⭐ **The criterion outlives the candidate**: whatever is chosen must settle

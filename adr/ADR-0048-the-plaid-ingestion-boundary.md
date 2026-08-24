@@ -1,15 +1,26 @@
 ---
 id: ADR-0048
-headline: the Plaid ingestion boundary contract
+headline: the bank feed lands in Mongo and does not post
 title: >-
-  The Plaid ingestion boundary — a store of record at the edge, CFS-minted identity, and delta-atomic
-  application
+  The Plaid ingestion boundary — a MongoDB inbox at the edge that does not post, CFS-minted identity,
+  and delta-atomic application
 status: proposed
 date: 2026-08-24
 review_by: 2026-11-30
 deciders: [repo owner]
 contexts: [banking]
-relates_to: [ADR-0002, ADR-0009, ADR-0012, SPIKE-004, OQ-062, OQ-063]
+relates_to: [
+  ADR-0002,
+  ADR-0003,
+  ADR-0009,
+  ADR-0012,
+  ADR-0015,
+  ADR-0017,
+  ADR-0042,
+  SPIKE-004,
+  OQ-062,
+  OQ-063,
+]
 accounting_shaped: false
 not_accounting_reason: >-
   This decides how a foreign feed is READ and STORED at the edge — identity, atomicity, precision,
@@ -81,6 +92,23 @@ asserts:
     claim: >-
       A balance read is a CHECK FIGURE compared against an opening balance CFS carries forward,
       never a source the ledger derives from.
+  - id: D14
+    kind: decision
+    claim: >-
+      INGESTION DOES NOT POST. A bank transaction reaching the boundary store produces no
+      TigerBeetle transfer; only a MATCH does. The boundary store is a MongoDB inbox of facts
+      awaiting recognition, and it is deliberately outside the ledger.
+  - id: D15
+    kind: decision
+    claim: >-
+      Because TigerBeetle is append-only and Plaid is retractable, a retraction that arrives after
+      a match has posted is corrected by a REVERSING posting, never by amending or deleting a
+      transfer — and the reversal copies the keys of what it reverses.
+  - id: D16
+    kind: decision
+    claim: >-
+      Statement periods are reconciled on a recurring schedule from `/statements/list`, whose
+      structured index is sufficient to detect a MISSING period without parsing any PDF.
   - id: D13
     kind: decision
     claim: >-
@@ -113,8 +141,21 @@ asserts:
   - id: P5
     kind: premise
     claim: >-
-      Neither the balance endpoint nor the transaction feed carries an opening balance, so no
-      closing balance is derivable from Plaid alone.
+      No opening balance is POPULATED by Plaid in anything measured: the balance endpoint carries
+      none, and the transaction feed's `running_balance` field is present on every posted row and
+      null in every one.
+    source: "SPIKE-004"
+  - id: P7
+    kind: premise
+    claim: >-
+      Plaid's `pending` is a property of a BANK transaction and has no relationship to TigerBeetle's
+      two-phase pending transfer; no GL posting rule uses a pending transfer at all.
+    source: "ADR-0015"
+  - id: P8
+    kind: premise
+    claim: >-
+      Statements are retrievable from Plaid as bank-branded PDFs, indexed by a structured list that
+      carries a statement id and period but no balance and no amounts.
     source: "SPIKE-004"
   - id: P6
     kind: premise
@@ -129,11 +170,11 @@ superseded_by:
 > **In the context of** ADR-0002 sourcing the bank feed from Plaid and ADR-0009 fencing foreign
 > identifiers out of domain models, **facing** a feed that mints new ids on every re-link, deletes
 > rows without saying what they were, announces changes that are not changes, and quotes money as an
-> unscaled float, **we decided** that the boundary holds a verbatim store of record, mints CFS
-> identity itself, reconstructs correspondence by matching rather than by id, and applies a whole
-> delta atomically, **to achieve** a feed whose failures are loud at the edge instead of silent in
-> the reconciliation, **accepting** that the boundary store is a second copy of the bank's data that
-> we are now obliged to keep.
+> unscaled float, **we decided** that the feed lands in a verbatim MongoDB inbox that **does not
+> post**, that CFS mints its own identity and reconstructs correspondence by matching rather than by
+> id, and that a whole delta is applied atomically, **to achieve** a mutable, retractable feed held
+> safely outside an append-only ledger, **accepting** that the boundary store is a second copy of
+> the bank's data that we are now obliged to keep.
 
 ## Context
 
@@ -177,6 +218,55 @@ pending row and its posted successor _"aren't guaranteed to be in the same page"
 not exercise that** — every delta measured drained in one page — so it is a documented hazard this
 repo has NOT reproduced, and it is recorded that way rather than as a finding. A per-page apply that
 sees the addition without the removal double-counts the money.
+
+### ⭐ D14 and D15 — where this sits relative to TigerBeetle, and why the answer is "nowhere"
+
+**A bank transaction does not reach TigerBeetle on import.** It reaches it on a MATCH, through the
+`bank_transaction_matched` posting rule — which is still blocked on `OQ-063`. The boundary store is
+a **MongoDB inbox of ephemeral, retractable facts awaiting recognition**, and keeping it outside the
+ledger is forced by the two stores' opposite natures:
+
+|                  | Plaid feed                                  | TigerBeetle                                       |
+| ---------------- | ------------------------------------------- | ------------------------------------------------- |
+| mutability       | rows are **added, modified and REMOVED**    | transfers are **immutable and append-only**       |
+| identity         | ids do not survive a re-link (SPIKE-004/M1) | account id = GL code, deterministic and permanent |
+| what a row means | "the bank says money moved"                 | "CFS recognises a movement"                       |
+
+⇒ Ingesting straight to the ledger would mean a bank retraction demanding a transfer be unwritten,
+and **nothing in TigerBeetle can unwrite one.** D15 says the correction is a reversing posting, and
+that is not a new invention: `invoice_voided` and `settlement_reversed` already work this way, and
+the rule that a reversal **copies the keys of what it reverses** (so reports net to zero rather than
+losing one side) applies unchanged. If the original's period is closed, the reversal takes an
+accounting date in an OPEN period (ADR-0017).
+
+⚠️⚠️ **PLAID'S `pending` AND TIGERBEETLE'S PENDING TRANSFER ARE FALSE COGNATES, AND THIS IS THE ONE
+TO WRITE DOWN** (P7). A Plaid pending transaction is an unsettled _bank_ record. A TigerBeetle
+pending transfer is a two-phase reservation resolved by `post_pending`/`void_pending`. The words
+match and nothing else does — and the resemblance is seductive because both are "provisional, later
+resolved". **No GL posting rule uses a pending transfer**; two-phase appears only on the
+inventory-custody ledger (ADR-0015). ⇒ modelling a pending bank line as a pending GL transfer would
+put an unrecognised bank fact into the ledger with a resolution protocol that is not the bank's, and
+it would look right.
+
+⚠️ **The two-store commit protocol (ADR-0042) is NOT engaged by ingestion**, precisely because
+ingestion writes one store. It engages at the MATCH, which is `OQ-063`'s.
+
+### D16 — statements are importable, and the cheap half needs no PDF parsing
+
+Measured 2026-08-24: `/statements/list` returns a **structured index** per account —
+`{statement_id, year, month, date_posted}` — and `/statements/download` returns a **bank-branded
+PDF** and nothing else (P8). Two consequences that pull apart:
+
+- ✅ **A recurring job can prove no statement PERIOD is missing from `/statements/list` alone**,
+  with no parsing at all. That is the gap check, and it is nearly free.
+- ⚠️ **A balance or amount tie-out needs the PDF extracted**, because the list carries neither. The
+  repo already does exactly this shape for the depreciation corpus — `tax-rules-refresh-probe.ts`
+  pulls a publication and extracts it **locally** with `pdftotext` rather than trusting a fetch, and
+  that precedent applies here for the same reason.
+- ⚠️ **The statement WINDOW is fixed at LINK TIME** — `options.statements` must carry
+  `{start_date, end_date}` when the Item is created, and omitting it is a hard `INVALID_FIELD`, not
+  a default. Up to 2 years. ⇒ **a decision made once, at link, bounds every statement ever
+  retrievable from that Item.**
 
 ## Consequences
 
