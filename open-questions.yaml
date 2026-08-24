@@ -2694,6 +2694,40 @@ open_questions:
     decide_by: 2026-11-30
     blocks: []
     status: open
+    # ⚠️ PREREQUISITES, NOT BLOCKERS-OF. `blocks:` is what this question blocks downstream; these
+    # two lists are what must be settled BEFORE it can be answered. Owner, 2026-08-23: identity
+    # cannot be decided ahead of the entities it identifies, and **any new doc, collection or
+    # schema that gets discussed registers here.**
+    # ✅ `prerequisite_entities` is ENFORCED by gate 23 — an INCLUSIVE declaration, so a new
+    # `contexts/*/entities/*.yaml` fails the build until it is named here. An exclusion list would
+    # fail open, which is the whole reason this is the list it is.
+    prerequisite_questions:
+      - OQ-036 # how company, production and department are modelled — the org tree itself
+      - OQ-037 # is there an economic customer grouping too
+      - OQ-035 # is there a production-type classification
+      - OQ-038 # does CFS operate credit limits and holds
+      - OQ-039 # where each half of tax_profile attaches
+      - OQ-040 # is settlement point a ledger dimension
+      - OQ-043 # do the masters carry an event history — also forced by SPIKE-013's undo path
+      - OQ-001 # are legs first-class or derived — decides whether a leg HAS an identity
+      - OQ-002 # what groups a trip
+      - OQ-003 # is fulfillment mode per order or per destination
+      - OQ-007 # are collecting flags per leg
+      - OQ-049 # do the board and threads survive into v2 — threads, comments, and attachments
+      - OQ-051 # where the chat seam sits — decides whether CFS mints ids for messages at all
+      - OQ-014 # is an employee a record or a role — party identity, one human many roles
+      - HOT-002 # collecting flags: per leg or per destination
+      - HOT-007 # legs derived where the spec says recorded
+    prerequisite_entities:
+      - contexts/availability/entities/booking.yaml
+      - contexts/banking/entities/bank-transaction.yaml
+      - contexts/billing/entities/invoice-line.yaml
+      - contexts/fixed-assets/entities/asset.yaml
+      - contexts/fulfillment/entities/leg.yaml
+      - contexts/ledger/entities/posting.yaml
+      - contexts/ordering/entities/order.yaml
+      - contexts/procurement/entities/purchase-order.yaml
+      - contexts/tax/entities/tax-determination.yaml
     notes: >-
       Opened 2026-08-23. The owner is **inclined to accept the line-identity recommendation but
       wants it researched against the broader schema first**, and that is the right instinct — the
@@ -2709,18 +2743,21 @@ open_questions:
       identity across two versions of a document (the `SPIKE-013` three-way merge) and identity
       forever (an immutable posting). Neither is served by `uid` — a leaf uid repeats in **182 of
       995 orders, 18.3%** — nor by `path`, which is derived and changes on rename and on reparent.
-      ⚠️ **What has NOT been considered, and is the reason this is an OQ rather than a decision:**
-      whether one scheme suits every entity (a product master is not a line item); whether
-      `order.number` and `invoice.number` stay human-facing sequences beside the opaque id and who
-      mints them offline; what identity a **booking** carries, given it is one row per (order,
-      product, destination) and nothing here has looked at it; and how this interacts with
-      **`ADR-0009` — foreign identifiers never enter domain models**, which is adjacent and does not
-      decide it.
       ⚠️⚠️ **SKU must not become the product identity.** It is human-authored and mutable, and this
       codebase already carries the precedent one level down: `reuseMemberUids` reuses divider uids
       **BY NAME**, which is exactly what makes a path unstable across a rebuild. A SKU is a **label
       with a uniqueness constraint**; the product keeps an opaque immutable id. Recorded here
       because the owner named SKU as `crms_id`'s replacement, and the two roles are different.
+      ⚠️ **Why the prerequisite lists exist** (owner, 2026-08-23): identity cannot be settled ahead
+      of the entities it identifies. The questions above each decide whether something HAS an
+      identity, or how many things there are — `OQ-001` decides whether a leg is a record at all;
+      `OQ-036` decides whether a project is a node or an attribute; `OQ-014` decides whether one
+      human is one record. **A scheme chosen before those are answered is a scheme chosen for a
+      schema nobody has agreed to.**
+      ⚠️ **Images/attachments have no question of their own** and are currently a sub-clause of
+      `OQ-049` and `OQ-051`, which explicitly flag keeping them out of Uploadcare and deciding
+      attachments rather than inheriting them. **If attachments become first-class they need their
+      own entity and an entry here** — that is exactly the case gate 23 exists to catch.
       Evidence:
       `inbox/2026-08-23-owner-greenfield-ids-change-the-size-answer-but-not-the-binding-one-and-sku-as-identity-is-the-recorded-trap.md`
       and

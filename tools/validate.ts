@@ -3768,6 +3768,86 @@ for (const e of evts) {
   );
 }
 
+// ── gate 23: OQ-058's prerequisite entity list is INCLUSIVE ─────────────────
+/**
+ * Owner, 2026-08-23: _"any new doc, collection, schema discussed should register there as a
+ * pre req"_ — on `OQ-058` (what is identity for v2 domain entities).
+ *
+ * ⚠️ **The rule is a maintenance discipline, and this repo's own standard is that a stated
+ * guarantee nothing executes is not a guarantee.** A prerequisite list nobody is forced to
+ * update is a list that is wrong the first week and silently wrong thereafter — and it fails in
+ * the direction that matters: identity gets decided against a schema that has since grown.
+ *
+ * ── why INCLUSIVE and not an exclusion list ─────────────────────────────────────────────────
+ *
+ * An exclusion list ("these entities do not affect identity") fails OPEN: a new entity is absent
+ * from it and nothing notices. An inclusive declaration fails CLOSED: a new
+ * `contexts/<ctx>/entities/<name>.yaml` breaks the build until somebody names it, and naming it is the
+ * moment they have to think about whether it changes the answer. That is the workspace rule *an
+ * INCLUSIVE declaration fails closed; an EXCLUSION list fails open*, applied to a list rather
+ * than to a schema.
+ *
+ * ⚠️ **It checks BOTH directions**, because a rename is the case a one-way check misses: an
+ * entity file with no entry is a gap, and an entry naming no file is a stale citation — the same
+ * defect gate 11 exists for, one artifact over.
+ *
+ * ⚠️ **What it does NOT check**: that the entry is *considered*, only that it is *named*. Nothing
+ * can see whether someone thought about it. And it is scoped to `contexts/<ctx>/entities/` — the
+ * spec's own entity registry — so a "doc, collection or schema" discussed only in `inbox/` or in
+ * a spike is out of its reach by construction. **Green here means "every registered entity is
+ * named", never "every entity that exists is registered".**
+ */
+{
+  const oq58 = oqs.find((q) => q.id === "OQ-058") as
+    | { prerequisite_entities?: unknown; prerequisite_questions?: unknown }
+    | undefined;
+  if (!oq58) {
+    fail("23", "OQ-058 is missing — it owns the identity prerequisite list (gate 23)");
+  } else {
+    const declared = Array.isArray(oq58.prerequisite_entities)
+      ? oq58.prerequisite_entities.map(String)
+      : [];
+    if (declared.length === 0) {
+      fail(
+        "23",
+        "OQ-058 declares no `prerequisite_entities` — the list is INCLUSIVE, not optional",
+      );
+    }
+    const onDisk: string[] = [];
+    for (const ctx of CONTEXT_DIRS) {
+      const dir = `${ROOT}/contexts/${ctx}/entities`;
+      try {
+        for (const e of Deno.readDirSync(dir)) {
+          if (e.isFile && e.name.endsWith(".yaml") && !isTemplate(e.name)) {
+            onDisk.push(`contexts/${ctx}/entities/${e.name}`);
+          }
+        }
+      } catch { /* a context with no entities yet is not a finding */ }
+    }
+    const declaredSet = new Set(declared);
+    for (const f of onDisk.sort()) {
+      if (!declaredSet.has(f)) {
+        fail(
+          "23",
+          `${f} is not named in OQ-058's \`prerequisite_entities\` — identity cannot be decided ` +
+            `ahead of an entity it identifies, so a new entity registers there or the build stays red`,
+        );
+      }
+    }
+    const onDiskSet = new Set(onDisk);
+    for (const d of declared) {
+      if (!onDiskSet.has(d)) {
+        fail("23", `OQ-058 names \`${d}\` in \`prerequisite_entities\`, which does not exist`);
+      }
+    }
+    notes.push(
+      `gate 23: ${declared.length} declared / ${onDisk.length} registered entities; ` +
+        `NOT CHECKED — that a named entity was actually CONSIDERED, and anything discussed ` +
+        `outside contexts/*/entities/`,
+    );
+  }
+}
+
 // ── report ──────────────────────────────────────────────────────────────────
 const GATE_NAMES: Record<string, string> = {
   "1": "ids unique and well-formed",
