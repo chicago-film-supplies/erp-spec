@@ -293,6 +293,28 @@ transfer_field_budget:
     `reuseMemberUids` is called from exactly two files, both CRMS webhooks (api-cloudrun#556 retires
     them). A v2 that mints row ids has no rebuild to pair across.
 
+  # ⚠️ Added 2026-08-23, answering "can a path token be reversibly encoded into 8 bytes?"
+  interning_a_path_converges_on_the_minted_surrogate: >-
+    Measured over **28,157 items** across all prod orders and invoices
+    (`spikes/harness/path-encoding-probe.ts`, `deno task path-encoding`).
+    ⚠️ **Compression and interning are different, and only one is available.** A v4 uuid segment
+    carries ~122 bits of entropy, so reversibly encoding ONE of them in 8 bytes is impossible by the
+    pigeonhole principle — not merely hard. **Interning is not compression**: a dictionary gives each
+    distinct value a small integer and is reversible because the bits move into the dictionary.
+    ✅ **Per-segment interning DOES fit a u128 today**: 523 distinct product uids (10 bits), 4,753
+    distinct divider uids (13 bits), depth max 7 ⇒ **12 bytes**. It does not fit a u64.
+    ⚠️ **But the divider dictionary is UNBOUNDED and already 58% spent** — divider uids are
+    per-document uuids, so the set grows by ~1 per divider ever created, forever, and every
+    historical posting needs it to resolve. **4,753 of 8,192** at 13 bits. At an honest 20 bits of
+    headroom, depth 7 is **17.5 bytes — over a u128 as well.** A fixed segment width has a fuse.
+    ⭐ **Interning the WHOLE PATH is the same mechanism with one lookup instead of seven, and that
+    single integer IS the minted surrogate.** The two proposals converge, and whole-path interning
+    strictly dominates: one dictionary, no width fuse, fits `user_data_64` with room.
+    ⭐⭐ **Which shows size was never the binding constraint.** Interning a path string yields a
+    stable id FOR A PATH — but the path is the thing that moves, on rename and on reparent.
+    Interning the ROW yields a stable id FOR THE ROW. Identical storage, different referent, and only
+    the second survives a line being dragged between groups.
+
   # The finding that closed the other escape hatch.
   # ⚠️ Read the two entries together: erp-spec#3 offered `journal_entry_id` and `posting_rule` as
   # candidate evictions that "may make the shortfall disappear rather than force a choice", and

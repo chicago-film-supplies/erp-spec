@@ -555,7 +555,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (105 unpromoted of 131)" _note="no drops pending">
+      <outline text="Capture (106 unpromoted of 132)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -661,6 +661,7 @@
         <outline text="Owner rules the six realtime-replacement decisions in one sitting — one shared transport with ADR-0…" _note="inbox/2026-08-23-owner-rules-the-realtime-replacement-and-folds-offline-with-queued-writes-into-it.md"/>
         <outline text="v2 needs a staging environment fed by a sanitized one-way mirror of production" _note="inbox/2026-08-23-staging-needs-a-sanitized-prod-mirror.md"/>
         <outline text="Rule 8a survey for the ADR that closes SPIKE-008 — how six references source a tax jurisdiction and…" _note="inbox/2026-08-23-survey-how-six-references-source-a-tax-jurisdiction-and-what-substantiates-a-departure.md"/>
+        <outline text="What a minted line id costs across order/invoice CRUD and propagation — and why interning a path co…" _note="inbox/2026-08-23-what-a-minted-line-id-costs-and-why-path-interning-converges-on-it.md"/>
       </outline>
     </outline>
   </body>
