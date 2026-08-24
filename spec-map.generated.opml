@@ -555,7 +555,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (104 unpromoted of 130)" _note="no drops pending">
+      <outline text="Capture (105 unpromoted of 131)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -653,6 +653,7 @@
         <outline text="SPIKE-008 — the tax decision table already exists as data, the rate history matches the ordinance e…" _note="inbox/2026-08-22-spike-008-the-tax-decision-table-already-exists-as-data-and-the-jurisdiction-field-it-would-source-from-is-absent-or-wrong.md"/>
         <outline text="The booking lifecycle is dormant, so SPIKE-012's boundary cannot be chosen yet — the verdict that l…" _note="inbox/2026-08-22-the-booking-lifecycle-is-dormant-so-spike-012s-boundary-cannot-be-chosen-yet-and-the-verdict-that-looked-like-a-pass-rests-on-11-rows.md"/>
         <outline text="The tax model was rebuilt 2026-08-17 → 2026-08-22 and most of OQ-056 was already decided in api-clo…" _note="inbox/2026-08-22-the-tax-model-was-rebuilt-in-five-days-and-most-of-oq-056-was-already-decided-in-api-cloudrun.md"/>
+        <outline text="A hash of a derived path and a minted surrogate are not interchangeable — the transfer field budget…" _note="inbox/2026-08-23-a-hash-of-a-derived-path-is-not-a-minted-surrogate-and-the-budget-treats-them-as-equivalent.md"/>
         <outline text="Correction — save-on-focusout is a TRIGGER, not a payload: the write sends a whole-entity diff unde…" _note="inbox/2026-08-23-correction-the-per-field-save-is-a-trigger-not-a-payload-and-the-write-path-depends-on-the-listener.md"/>
         <outline text="Destination sourcing cannot distinguish &quot;delivered to Chicago&quot; from &quot;collected at our Chicago dock&quot;…" _note="inbox/2026-08-23-destination-sourcing-cannot-tell-delivered-to-chicago-from-collected-at-our-chicago-dock-and-the-lease-tax-predicate-is-use.md"/>
         <outline text="Owner: contacts will log in to view orders and invoices, place orders, and manage access control an…" _note="inbox/2026-08-23-owner-contacts-will-log-in-which-inverts-the-authorization-finding-recorded-hours-earlier.md"/>

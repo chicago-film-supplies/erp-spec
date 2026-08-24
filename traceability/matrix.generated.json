@@ -5,7 +5,7 @@
     "adrs": 45,
     "adrs_accepted": 25,
     "events": 38,
-    "inbox": 130,
+    "inbox": 131,
     "inbox_promoted": 26
   },
   "requirements": [
@@ -803,6 +803,7 @@
       "inbox/2026-08-22-spike-008-the-tax-decision-table-already-exists-as-data-and-the-jurisdiction-field-it-would-source-from-is-absent-or-wrong.md",
       "inbox/2026-08-22-the-booking-lifecycle-is-dormant-so-spike-012s-boundary-cannot-be-chosen-yet-and-the-verdict-that-looked-like-a-pass-rests-on-11-rows.md",
       "inbox/2026-08-22-the-tax-model-was-rebuilt-in-five-days-and-most-of-oq-056-was-already-decided-in-api-cloudrun.md",
+      "inbox/2026-08-23-a-hash-of-a-derived-path-is-not-a-minted-surrogate-and-the-budget-treats-them-as-equivalent.md",
       "inbox/2026-08-23-correction-the-per-field-save-is-a-trigger-not-a-payload-and-the-write-path-depends-on-the-listener.md",
       "inbox/2026-08-23-destination-sourcing-cannot-tell-delivered-to-chicago-from-collected-at-our-chicago-dock-and-the-lease-tax-predicate-is-use.md",
       "inbox/2026-08-23-owner-contacts-will-log-in-which-inverts-the-authorization-finding-recorded-hours-earlier.md",
