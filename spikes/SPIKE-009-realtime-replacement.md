@@ -337,10 +337,15 @@ A fine-grained cell update and a wholesale table re-render produce the **same sc
 second is what a naive socket client does. The test was inverted to check it can fail: replacing
 `reconcile` with a plain array assignment turns it red, which is the regression it exists for.
 
-⚠️ **NOT verified: the actual DOM painting in a browser.** No browser automation was available this
-session. The transport is proven by execution and the reactivity by assertion; a human loading
-`http://127.0.0.1:8791` and running `deno task slice-mutate` is what closes the last gap. **Recorded
-as unverified rather than implied.**
+✅ **VERIFIED IN A BROWSER — owner, 2026-08-23**: loaded `http://127.0.0.1:8791`, ran
+`deno task slice-mutate`, and the view updated as expected. ⇒ **criterion 1 is met end to end** —
+transport by execution, reactivity by assertion, and the DOM paint by observation.
+
+⚠️ **It is an OBSERVATION, not a re-runnable artifact**, and the difference is worth keeping: the
+probe and the store test both fail loudly on a regression, and this does not. `manager`'s Playwright
+setup can count network requests while asserting the DOM changed — that remains the regression net
+worth building, and it is the only realistic way to exercise reconnect, since the oplog cannot be
+raced.
 
 ### ⭐⭐ A test-infrastructure finding that outlives this spike
 
@@ -462,9 +467,9 @@ Rulings and their reasoning:
 **Three rest on this spike's measurements (R1, R2, R3) and three on owner rulings (R4, R5, R6); the
 ADR must label which is which** rather than let them read alike.
 
-- **Criterion 1's browser confirmation** — one human, one page load, one `deno task slice-mutate`.
-  ⭐ `manager` has a mature Playwright setup (`light`/`dark`/`smoke` projects, auth + fixture setup,
-  a route graph) which can assert the DOM changed **while counting network requests** — strictly
-  better than the manual step, and it is also the only realistic way to exercise reconnect, since
-  the oplog cannot be raced.
-- **The shared ADR**, once SPIKE-013 lands.
+- ✅ **Criterion 1's browser confirmation is DONE** (owner, 2026-08-23). ⭐ Still worth building as
+  a regression net: `manager`'s Playwright setup (`light`/`dark`/`smoke`, auth + fixture setup,
+  route graph) can assert the DOM changed **while counting network requests**, and it is the only
+  realistic way to exercise reconnect, since the oplog cannot be raced.
+- **The shared ADR**, once SPIKE-013 lands. ⇒ **all four exit criteria now carry evidence; the ADR
+  is the only thing between this spike and closed.**
