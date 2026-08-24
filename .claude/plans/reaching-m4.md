@@ -1,298 +1,223 @@
-# Reaching m4 — every hotspot is resolved; only the spikes remain
+# Reaching m4 — the spikes are externally blocked; the ACCEPTANCE QUEUE is the deadline
 
-> ## ⚠️ STATUS 2026-08-24 (compacted — every earlier block is folded in, not stacked)
->
-> ⭐⭐ **m4 IS DOWN TO TWO OPEN SPIKES, AND NEITHER IS DESK WORK.** `SPIKE-011` needs provisioning
-> and `SPIKE-012` needs a business process to go live. **There is nothing left in m4 that a session
-> at a keyboard can close on its own.** ⇒ the next unit of work is not a spike; it is `#6`
-> (requirements), `#35` (PSA) or the gate work.
->
-> **What landed 2026-08-24:**
->
-> | what                                                    | result                                                                                                   |
-> | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-> | **SPIKE-013 + SPIKE-009 → ADR-0047** (the shared ADR)   | both closed; 5 open spikes → 3                                                                           |
-> | **SPIKE-004 → ADR-0048** (the Plaid ingestion boundary) | closed against real sandbox traffic; 3 open spikes → **2**. `deno task plaid`, 22 checks, 20 pass, 2 N/A |
-> | `SPIKE-011` rescoped to size the whole ADR-0028 tier    | erp-spec#41 was closed 08-23 **before** its rescope was written — the guard was untracked                |
->
-> ⭐ **The findings worth carrying across a clear**, none of which came from reading:
->
-> 1. ⛔ **A v1 ABSENCE reasoned into a v2 constraint, for the fifth time.** The SPIKE-013 note read
->    _"the popover arbitrates the wrong axis — prod has one operator account."_ **v2 records an
->    actor** (`REQ-FUL-001`), and one operator account measures the staffing of an **unfinished**
->    app. What survives is the half that never needed v1: **the conflict surface is actor-vs-STATE**
->    — a domain argument, true at any staffing level under any actor model.
-> 2. ⭐ **SPIKE-004 found the same shape arriving from a THIRD-PARTY sandbox.** A sandbox answers
->    what the API DOES, never what the bank WILL SEND — executable, pinned and citable while the
->    production link is none of those. Two SPIKE-004 figures are labelled sandbox-only in their own
->    `of:` (backfill depth, balance behaviour), and `validate.ts` says so at the `plaid:` regex.
->    **Exit criterion 4 is reported UNMET rather than approximated.**
-> 3. ⚠️ **AN EMPTY POPULATION READS AS A PASS — twice this week, from opposite directions.** The
->    SPIKE-009 probe hung with zero output because `watch()` is lazy; a Solid reactivity test
->    measured nothing because Deno resolves the SSR build; and **the Plaid probe's first run
->    reported 13 of 17 checks PASSING against an empty feed** ("0/0 successors changed amount" is
->    true and measures nothing). ⇒ every population-ranging check now asserts the population.
-> 4. **The app cannot start offline** (`manager` has no service worker), and **the base does not
->    survive a reload** — `latestSnapshot` is an in-memory Map and the stash is written only on two
->    `onClick` sites. ⚠️ **One mutation survived the first sweep**: "re-pin the base on every boot"
->    makes `base === theirs`, so our edit applies _cleanly_ and silently overwrites the other
->    operator. **The test that closes it asserts a NON-EVENT** — that our write is never sent.
-> 5. ⚠️ **A CLOSED ISSUE READS AS DONE WORK.** erp-spec#41 was closed in the same pass that recorded
->    _"widen the scope before provisioning, not after"_ — and the widening was never written.
->    **Check the artifact, not the queue.**
->
-> ⭐ **NEW SCOPE, 2026-08-24, and it is not m4 work** — the owner added a **seventh** public-app
-> capability: **machine discoverability**. Two halves that are not one problem — **syndication**
-> (Google Shopping / Bing / DuckDuckGo product feeds, #53) and **agentic commerce** (OpenAI,
-> Anthropic, NEAR AI, open standards, #54) — plus **card acceptance most likely via Authorize.Net**
-> because CFS banks at Chase (`OQ-064`, #55). ⚠️ **Nothing is established about what any of those
-> parties requires**; both notes are `verified: false` and the owner's instruction is that research
-> sessions read the primary sources. ⚠️ **#54 is the highest fabrication-risk topic in the repo** —
-> new field, knowledge cutoff May 2026, heavily written-about by people guessing.
->
-> ⚠️ **The ~39 validate warnings are the CLOCK, not a regression** — `2026-08-08`/`08-09` inbox
-> notes crossing the 14-day unpromoted threshold. That is erp-spec#6's backlog surfacing, and it
-> grows every day nobody promotes.
-
-- **Date:** 2026-08-24
-- **Repo:** erp-spec · **everything is pushed**
-- **Open issues:** #3, #4, #6, #12, #17, #32, #35, #36, #37, #40, #42, #43, #44, #45, #46, #48, #49,
-  #50, #52, **#53 / #54 / #55 (new — public-app machine discoverability and payment acceptance,
-  owner 2026-08-24)** — **#51 closed by `ADR-0047`**
+**Date:** 2026-08-24 • **Repo:** erp-spec • **Status:** ⏳ in progress, and now on a clock
+**Origin:** m4 is the only milestone with an unmet machine-checkable criterion **Related:**
+`roadmap/milestones.yaml` m4 · `STATUS.generated.md` · issues #6, #35, #40, #44, #45, #52, #53, #54,
+#55 · `tools/validate.ts` gate 6
 
 ## START HERE
 
-**m0–m3 are met. m4 is the only milestone with an unmet machine-checkable criterion**, and it is now
-one thing:
+⭐⭐ **THE THING THIS DOC EXISTED TO SAY, AND SAID WRONG UNTIL 2026-08-24.** Every earlier revision
+led with _"only the spikes remain"_ and stated that m4 was down to one machine-checkable criterion.
+**Both were false.** m4 has three exit criteria and the binding one is the second:
 
-| criterion                                  | 2026-08-21   | now                       |
-| ------------------------------------------ | ------------ | ------------------------- |
-| every hotspot resolved                     | 4 of 20 open | ✅ **0 of 23 open — MET** |
-| every spike closed, naming the ADR it made | 7 of 12 open | **2 of 13 open**          |
+| m4 exit criterion                                  | state                                                           |
+| -------------------------------------------------- | --------------------------------------------------------------- |
+| every SPIKE closed, naming the ADR it produced     | **2 open — both blocked on the world, not on work** (see below) |
+| **no ADR remains `proposed` past its `review_by`** | ⛔ **19 proposed. The first four go red on 2026-10-02.**        |
+| every HOT resolved                                 | ✅ 0 open of 24                                                 |
 
-⚠️ **The denominator is 13, not 12** — `SPIKE-013` was opened 2026-08-23 and the count moved with
-it. ⭐ **The open count going UP was the correct outcome then**, not a slip: 013 was work inside 009
-and unnamed, and splitting it out made 009's ADR blocked _visibly_ instead of silently. Both closed
-2026-08-24 under one ADR, and `SPIKE-004` closed the same day.
+⚠️ **This is not a dashboard warning. `tools/validate.ts` gate 6 reads the REAL clock and FAILS**,
+and `.github/workflows/spec.yml` runs `deno task ci`. ⇒ **on 2026-10-02 every push to this repo goes
+red** and stays red until those ADRs are accepted, superseded, or their `review_by` is moved.
 
-### Where each remaining spike actually stands
+**Measured** with `SPEC_TODAY=<date> deno task validate` — the env var exists for exactly this:
 
-| spike                               | state         | what it needs                                                                                                                                                                                                              |
-| ----------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **011** Linode host → ADR-0013      | open          | ⛔ **needs PROVISIONING**, not desk work. Spend authorized, **rescope landed 08-24** (it had NOT landed when #41 was closed). The widened scope may exceed the spend already approved — settle that before buying anything |
-| **012** booking boundary → ADR-0015 | `in_progress` | ⛔ **blocked on a BUSINESS PROCESS** — manager check-in/out going live (#46). Not yours to unblock                                                                                                                         |
+| date           | proposed ADRs failing gate 6                           |
+| -------------- | ------------------------------------------------------ |
+| today          | 0                                                      |
+| **2026-10-02** | **4** — `ADR-0025`, `ADR-0027`, `ADR-0028`, `ADR-0029` |
+| 2026-10-16     | 5 — the above plus `ADR-0020`                          |
+| 2026-11-02     | 9                                                      |
+| 2026-11-16     | 16                                                     |
+| 2026-12-01     | **19 — all of them**                                   |
 
-⇒ ⭐⭐ **NEITHER remaining spike can be closed by a session at a keyboard.** 011 needs a host bought
-and a wait; 012 needs a business process to go live. **m4 is now waiting on the world, not on work**
-— so do not open this plan looking for a spike to close. Go to the ordered list below.
+⇒ **Re-derive this table rather than trusting it.** One command, and it is the only part of this doc
+about the future.
 
-### ✅ What closed 2026-08-22 / 08-23
+## The next unit of work: PREPARE THE DECISION BATCH
 
-- **SPIKE-008 → ADR-0045** (08-23), promoted into six `REQ-TAX-*` with 16 scenarios. ⭐ The
-  session's real output was a **correction**: an adversarial read falsified three of ADR-0045's four
-  decisions and inverted the evidence for the fourth — the two `chicago` overrides it rested on were
-  written by a migration script, not typed by an operator.
-- **SPIKE-009 criteria 1–4** (08-23) — evidence complete, ADR outstanding (#51).
-- **SPIKE-005 → ADR-0043.** Build the depreciation engine; there is nothing to buy (`macrs` returns
-  **zero** packages on npm _and_ JSR). Behind a **pure package boundary** the corpus can import,
-  computed **per taxpayer-year**, on **effective-dated rule data**. Corpus at 14/14, candidates
-  scored, and the annual refresh **executes** — `deno task dep-refresh` plus a scheduled workflow,
-  fired red both ways before being believed.
-- **OQ-053 → ADR-0044.** CFS is the **principal** on a PSA. Resolved HOT-017, open since 2026-08-17.
-- **HOT-018 → ADR-0041**, HOT-019 → ADR-0025, HOT-020 → ADR-0020, HOT-021 → ADR-0029, HOT-022 →
-  ADR-0042, HOT-023 → SPIKE-005.
+**Nothing is missing from those five but a decision.** `gate 19: 0 proposed and unsurveyed` — every
+accounting-shaped ADR already carries its six-reference survey. They are not blocked on research, on
+a spike, or on another ADR.
 
-### ⭐ THE RECURRING SHAPE — seven findings across 2026-08-22 and 08-23, ONE shape
+⚠️ **And this repo has already proved twice that the decision backlog is NOT blocked on the owner's
+availability — it is blocked on nobody having PREPARED the decisions.** `HOT-022` took one sentence
+to rule and unblocked two exit criteria, an ADR amendment and a new ADR. **`OQ-053` sat open five
+days phrased _"is CFS principal or agent"_ — a question asking the owner to do the accounting.
+Re-asked as _who signs, who insures, who eats the loss_, it was answered in one sitting and closed
+the last hotspot.** ⇒ **A question addressed to the wrong expertise looks like a question nobody has
+time for.**
 
-**Every substantive finding across both days was an ABSENCE READING AS A RESULT.** None was a wrong
-answer; each was a check that could not have failed, reporting success.
+**The deliverable is a decision brief the owner can rule on in one sitting**, one section per ADR:
+what it decides, **what has changed since it was drafted**, what accepting costs, what stays open,
+and a recommendation. ⚠️ **Rule 3 — accepting is NEVER Claude's.** Draft only.
 
-| finding           | the green that meant nothing                                                                             |
-| ----------------- | -------------------------------------------------------------------------------------------------------- |
-| SPIKE-012         | two boundaries "PASSED — no future-dated unit holds a transfer" **on 11 rows corpus-wide**               |
-| SPIKE-002         | no violation on a case its `TbState` **could not represent** (no expired state)                          |
-| SPIKE-002 again   | no violation on discovery, because **nothing modelled discovery at all**                                 |
-| SPIKE-005         | a coverage claim with **no coverage arm behind it**                                                      |
-| the refresh probe | 12/12 figures matching **from the wrong edition**, until an edition check was added                      |
-| SPIKE-009 (08-23) | a probe hanging with **zero output** — `watch()` is lazy, so the write it waited on had already happened |
-| SPIKE-009 (08-23) | a Solid reactivity test measuring **nothing**, because Deno resolves the non-reactive SSR build          |
+| ADR        | review_by  | decides                                           | note                                                                    |
+| ---------- | ---------- | ------------------------------------------------- | ----------------------------------------------------------------------- |
+| `ADR-0025` | 2026-10-01 | uncategorised receipts move to 4800 Other Income  | accounting-shaped, surveyed. **Not withdrawable** — see Decisions below |
+| `ADR-0027` | 2026-10-01 | retain Mapbox + Resend at the boundary            | states cost and rate limits as UNKNOWN, not benign                      |
+| `ADR-0028` | 2026-10-01 | the self-hosted tier — Gotenberg + Victoria       | ⛔ **the one you probably cannot just sign — see below**                |
+| `ADR-0029` | 2026-10-01 | the ledger records un-allocated facts             | accounting-shaped, surveyed                                             |
+| `ADR-0020` | 2026-10-15 | Xero history recast; product line from the master | ⚠️ **already went stale against `migration/field-map.yaml` once**       |
 
-⇒ **A failing arm is loud. A passing arm that matched almost nothing is indistinguishable from a
-working one.** Ask of every green check: **could this have failed? Over what population, over what
-state space?** And where the answer is "nothing would have caught it", **land the arm red first** —
-seven times across two days that is what turned a comfortable green into a real finding.
+⛔ **`ADR-0028` is the one with a real dependency, and it is now dated.** It puts nine containers on
+the `ADR-0013` Linode host, and **`SPIKE-011` — rescoped 2026-08-24 to size exactly that tier — is
+open and waiting on provisioning.** ⇒ **SPIKE-011 is no longer "blocked externally, not yours to
+unblock, ignore it". It is on the critical path for an October date.** If the host is not bought
+soon, ADR-0028 goes red with nothing prepared to fix it. ⚠️ The widened scope may also exceed the
+spend already approved — settle that **before** buying.
 
-⭐ **08-23 sharpened the rule: assert a POSITIVE COUNT.** Both of that day's instances were caught
-because the assertion was "this effect ran once" rather than "the other rows did not update" — the
-negative form passes against a runtime where **nothing** runs.
+⚠️ **The tempting non-answer is bumping `review_by`.** One line per ADR, and it makes gate 6 stop
+meaning anything — this repo's own rule about a check that reads green while matching nothing,
+inverted. If a date genuinely was wrong, move it **and say why in the same commit**.
 
-⚠️ **AND THE SCOPE VERSION OF THE SAME MISTAKE, corrected twice by the owner in one session.** §280F
-was scoped out on a fleet of two ("we do expect to acquire more vehicles"); four more facets were
-scoped out on populations of zero ("cover all valid gaap and usa tax cases"). **Measuring the
-population is the right test for "is this URGENT" and the WRONG test for "is this IN SCOPE" when the
-requirement is completeness.** The repo's footgun about not minting a branch before measuring its
-population is about not building machinery for branches nothing takes — **it does not license
-omitting a rule that law requires and a future asset will reach.** The two questions look identical
-and are answered by different people.
+### Where the two open spikes actually stand
 
-### ⚠️ The one thing that keeps causing the ADR churn
-
-**Four proposed ADRs rested on `ADR-0036`'s supersession of `ADR-0018` and nothing detected it.**
-That is **#40**, still open, and it now has four instances as a ready-made red-first population.
-**#44** is its narrower sibling: _"ADR-NNNN requires `<field>`"_ where the field never appears in
-that ADR's body — which is how ADR-0029 acquired a requirement it never made, in two artifacts at
-once.
+| spike                                 | state         | what it needs                                                                                                                                                              |
+| ------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **011** Linode host → `ADR-0013`      | open          | ⛔ **provisioning.** Spend authorized; rescope landed 2026-08-24 (it had NOT landed when #41 was closed). **Now gates `ADR-0028`'s October date** — this is the escalation |
+| **012** booking boundary → `ADR-0015` | `in_progress` | ⛔ **a BUSINESS PROCESS** — manager check-in/out going live (#46). Not yours to unblock, and no amount of authoring moves it                                               |
 
 ## Then, in order
 
-|       |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **1** | ✅ **DONE 2026-08-24 — SPIKE-013 + SPIKE-009 → `ADR-0047`** (the shared ADR, by owner ruling). Both closed; 5 open spikes → 3                                                                                                                                                                                                                                                                                                                                                                               |
-| **2** | ✅ **DONE 2026-08-24 — SPIKE-004 → `ADR-0048`** (the Plaid ingestion boundary), closed against real sandbox traffic. `deno task plaid`. ⚠️ **Exit criterion 4 is UNMET** — the statement tie-out needs the production link. `OQ-062` (secret naming) and `OQ-063` (what a bank line does to the ledger) minted                                                                                                                                                                                              |
-| **3** | ⛔ **NOTHING SPIKE-SHAPED IS LEFT.** 011 needs provisioning, 012 needs a business process. **Start at 4**                                                                                                                                                                                                                                                                                                                                                                                                   |
-| **4** | ⭐ **#6 — requirements, and this is now the top of the list.** `ordering`, `availability`, `banking`, `procurement` still have **zero**, and the ~39 validate warnings are this backlog surfacing and growing daily. ⚠️ **`banking` is the ripest**: `ADR-0048` is fresh, its 13 decisions are written implementation-free already, and rule 2 lets an ADR be a requirement's `source:` — but note the untravelled-path warning, an ADR-sourced requirement was mis-recorded the first time anyone tried it |
-| **5** | **#35 PSA, now much smaller than it reads.** ADR-0044 settled principal-vs-agent and the EOR finding means the cost path is already specified — PSA needs the **revenue side and a product line**, not a payroll path. Feeds #6                                                                                                                                                                                                                                                                             |
-| **6** | **#40 + #44** — the supersession-dependents gate and its citation-assertion sibling. Four ready-made instances to land red against                                                                                                                                                                                                                                                                                                                                                                          |
-| **7** | **#45** — ADR-0041's D4 is a procedure with nothing executing on it, and it is the half that removes the seasonal bias                                                                                                                                                                                                                                                                                                                                                                                      |
+|       |                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1** | ⭐ **The decision batch above.** Deadline-driven, unblocked, and it is what m4 criterion 2 needs. **Start here.**                                                                                                                                                                                                                                                                                                                                                           |
+| **2** | ⛔ **Get the Linode host bought** — or accept that `ADR-0028` cannot be decided by 2026-10-01 and move its date deliberately, with the reason recorded                                                                                                                                                                                                                                                                                                                      |
+| **3** | **#6 — requirements.** `ordering`, `availability`, `banking`, `procurement` still have **zero**; ~39 validate warnings are this backlog surfacing and growing daily. ⚠️ **`banking` is the ripest** — `ADR-0048`'s 16 decisions are already implementation-free, and rule 2 lets an ADR be a `source:`. ⚠️ But that path is barely travelled: the first ADR-sourced requirements recorded **no ADR at all** in the matrix. **Check `generate.ts` output, do not assume it** |
+| **4** | **#35 PSA, smaller than it reads.** `ADR-0044` settled principal-vs-agent and the EOR finding means the cost path is specified — PSA needs the **revenue side and a product line**, not a payroll path. Feeds #3                                                                                                                                                                                                                                                            |
+| **5** | **#40 + #44** — the supersession-dependents gate and its citation-assertion sibling. **Four ready-made instances to land red against**                                                                                                                                                                                                                                                                                                                                      |
+| **6** | **#52** — the census for target-state claims resting only on non-target evidence. ⭐ **Widen the predicate**: SPIKE-004 found the third-party-sandbox sibling of the v1 problem, so one rule over the `source:` prefix covers both                                                                                                                                                                                                                                          |
+| **7** | **#53 / #54 / #55** — public-app research (shopping feeds, agentic commerce, payment acceptance). ⚠️ **Owner said research SESSIONS**, and **#54 is the highest fabrication-risk topic in the repo**: new field, May 2026 cutoff, heavily written about by people guessing                                                                                                                                                                                                  |
+| **8** | **#45** — `ADR-0041`'s D4 is a procedure with nothing executing on it, and it is the half that removes the seasonal bias                                                                                                                                                                                                                                                                                                                                                    |
 
-⚠️ **The decision backlog is not blocked on the owner's availability — it is blocked on nobody
-having prepared the decisions.** ⭐ **2026-08-22 is the proof, twice over.** HOT-022 took one
-sentence to rule and unblocked two exit criteria, an ADR amendment and a new ADR. **OQ-053 had been
-open since 2026-08-17 phrased _"is CFS principal or agent"_ — a question that asks the owner to do
-the accounting. Re-asked as _who signs, who insures, who eats the loss_, it was answered in one
-sitting and closed the last hotspot.**
+## Decisions worth not re-litigating
 
-⇒ **A question addressed to the wrong expertise looks like a question nobody has time for.** Before
-concluding a decision is stalled, check whether it is asking its owner for something they actually
-hold.
+- **`ADR-0025` was NOT withdrawn**, which its own `resolution_shape` offered. **Five IMMUTABLE ADRs
+  cite it** (0029, 0031, 0034, 0035, 0038) and can never be updated, so withdrawal buys five
+  permanent citations pointing at a rejected decision. **Refused on measured cost.**
+- **`ledger/dimensions.yaml` did NOT move to `reporting/`** (#19): four immutable ADRs cite the path
+  and gate 11 checks citations resolve, so a move buys four permanent exemptions. Same shape, same
+  reason.
+- **`ADR-0041` did NOT answer `OQ-045`.** It takes the **arithmetic** half and leaves the
+  **judgement** half (a vendor who may or may not bill again). **Narrowing explicitly, with a
+  minimal-pair vector as the fence, beat answering both.**
+- **#18 fixed with a new field, not a status-aware gate 6.** Rejected: gating only the acceptance
+  transition would have left `ADR-0036`'s promise as a comment with nothing behind it.
+- **Gate 10n was NOT widened to check applicability** — every value in the refuted scenarios was
+  legally declared. Both halves landed later as gate 10p, against the posting RULE.
+- **Gate 18 is scoped to minted accounts, not all 143** (#37). Green means "every account this spec
+  minted has a home", never "every account has one".
+- **The vehicle absorption rate is NOT registered in `reporting/allocation-bases.yaml`** —
+  `ADR-0030` cites that file's **discipline**, not its registry.
+- **The `closes_adr` exclusion proposed in #39 was wrong and is not implemented.** `SPIKE-012`
+  declares `closes_adr: ADR-0015`, so it would have deleted `ADR-0015`'s only real blocker.
+  `tools/blockers_test.ts` asserts that exact row.
+- **`ADR-0048` took the INGESTION half only** and left what POSTS to `OQ-063`, because that is
+  accounting-shaped and owes a survey. Chart code 2500 and `bank_transaction_matched` **moved**
+  their block there rather than expiring it.
 
-## Two capabilities every remaining unit should use
+## Things to carry across a clear
+
+**One shape, and everything below is an instance of it: A CHECK THAT COULD NOT HAVE FAILED REPORTS
+SUCCESS, AND AN ABSENCE READS AS A RESULT.**
+
+- **Land every gate red first.** It is not ceremony — it is the only thing that finds the defects.
+  Ask of every green check: **could this have failed, over what population, over what state space?**
+- ⭐ **Assert a POSITIVE COUNT.** The negative form ("the other rows did not update") passes against
+  a runtime where **nothing** runs. Two 08-23 findings were caught only because the assertion
+  counted something.
+- ⭐ **Guard every population-ranging check with its population.** The Plaid probe reported **13 of
+  17 checks PASSING against an empty feed** — "0/0 successors changed amount" is true and measures
+  nothing. Three verdicts, not two: `N/A` is what a check returns when it genuinely cannot reach the
+  question, so an unmeasurable claim cannot hide inside a green run.
+- ⭐ **An EXISTENCE claim and a UNIVERSAL claim need different check semantics.** "It CAN be
+  byte-identical" is established by one observation and is **not refuted** by a later absence ⇒ zero
+  population is `N/A`, not `FAIL`. **A check that goes red on a vendor's scheduling teaches whoever
+  re-runs it to ignore red.**
+- ⚠️ **An INCLUSIVE declaration fails closed; an EXCLUSION list fails open.**
+- ⚠️ **A self-declared flag needs something that can falsify it**, and the falsifier should demand a
+  REASON rather than a verdict.
+- ⚠️ **A hand-written invariant is easy to get wrong in BOTH directions**, and neither error is
+  visible from the expression. Only a conforming/violating pair tells them apart.
+- ⚠️ **When you remove a wrong signal, ask what the absence will now be read as.**
+- **When a doc states a count, something must count it.**
+
+**On figures and their owners:**
+
+- ⭐ **TYPE THE FIGURE — gate 22 is the cheapest leverage here and is barely used.** Typing five
+  figures as `ADR-0020` `measurements:` immediately turned **four live files red** for quoting them
+  uncited. `HOT-018` existed _because_ one quantity had **three internally-consistent values in
+  three live files**. ⚠️ Gate 22 matches **EXACT strings**, so it cannot see a paraphrase —
+  `$688.00` is still loose across **seven** files (#43).
+- ⭐ **A measuring SPIKE owns a figure; a deciding ADR CITES it.** Landing `ADR-0047` with
+  re-declared figures made the gate report the _spike_ for restating the _ADR_ — ownership exactly
+  backwards.
+- ⚠️ **A CONTROL TOTAL KEYED TO THE NATURAL DOCUMENT TOTAL SILENTLY FORBIDS EVERY ENTRY THAT IS NOT
+  THAT TOTAL.** `control_total: bill.amount_minor` made CFS's own measured direction
+  **unrepresentable**. `vehicle_cost_absorbed` had already hit this and written the reason down
+  **two entries away in the same file**, and nothing connected them.
+- ⚠️ **MEASURED POPULATION ANSWERS "IS THIS URGENT", NOT "IS THIS IN SCOPE."** Corrected twice by
+  the owner in one day. The footgun about not minting a branch before measuring its population is
+  about machinery for branches nothing takes; **it does not license omitting a rule the law requires
+  and a future asset will reach.**
+
+**On staleness and citation:**
+
+- ⚠️ **AN ADR GOES STALE AGAINST THE MIGRATION SPEC THAT IMPLEMENTS IT, and nothing compares them.**
+  `ADR-0020` said "restate all" while `migration/field-map.yaml` had **already** encoded
+  derive-from-the-master in three places. **It had stopped tracking what the repo already did.**
+- ⚠️ **A SENTENCE THAT ACCURATELY QUOTES A SUPERSEDED CLAIM reads, out of context, as asserting it**
+  — how `ADR-0029` acquired a requirement it never made, in two artifacts (#44).
+- ⚠️ **A value one letter from a legal one, in a file no gate reads, is the cheapest way to be
+  wrong.** Ask which file the value you just typed is checked AGAINST.
+- ⚠️ **A CLOSED ISSUE READS AS DONE WORK.** #41 was closed in the same pass that recorded "widen the
+  scope before provisioning" — and the widening was never written. **Check the artifact, not the
+  queue.**
+
+**On evidence from outside the target system:**
+
+- ⚠️ **v1 answers WHAT IS, never WHAT MUST BE** — five instances, all caught by the owner.
+- ⭐ **AND ITS THIRD-PARTY SIBLING: A SANDBOX ANSWERS WHAT THE API DOES, NEVER WHAT THE INSTITUTION
+  WILL SEND.** Seductive for the same reason — executable, pinned and citable while production is
+  none of those. `validate.ts` carries the limit at the `plaid:` regex; two SPIKE-004 figures are
+  labelled sandbox-only in their own `of:`.
+- ⚠️ **DELEGATED RESEARCH WILL FABRICATE A QUOTABLE SOURCE, and it is not rare.** Every instance was
+  caught by demanding a **verbatim quote with a URL**. Make fabrication mechanically impossible
+  rather than discouraged: the tax-rule refresh proposes a **line number** into a locally extracted
+  primary source, and **a line number cannot be fabricated.**
+- ⚠️ **"PRESENT BUT WRONG" BEATS "ABSENT" AT PASSING EVERY EXISTENCE CHECK.** `running_balance` is a
+  key on every posted Plaid row and null in all of them. An existence check passes; the field is
+  empty; production behaviour is unmeasured.
+
+**Capabilities worth not rediscovering:**
 
 - `spikes/harness/corpus.ts` reads prod Firestore read-only under ADC — project hardcoded to
   `cfs-3100`, `--allow-net` narrowed so it cannot reach Xero or CRMS, write verbs unreachable by
   construction. **This retires "a full sweep needs a script rather than MCP paging".**
-- ⚠️ **The MCP `db_schema` enum is not a list of the collections.** It carries 35; there are **50**,
-  and it omits `credit-notes` and `settlements` — the second being 1,073 documents of cash
-  application. Anything scoped from it is scoped short.
-- ⚠️ **`--development` caps TigerBeetle's `createTransfers` at 253, not the documented 8189**
-  (measured 2026-08-18). **Every TB measurement in this repo before that date was taken on
-  `--development`.** `spikes/harness/_README.md` carries the caveat; SPIKE-011 owns the production
-  numbers.
-
-## Decisions worth not re-litigating
-
-_All six carried forward; the last two are new._
-
-- **#18 fixed with a new field, not a status-aware gate 6.** Rejected: gating only the acceptance
-  transition, which would have left ADR-0036's promise as a comment with nothing behind it.
-- **Gate 10n was deliberately NOT widened to check applicability** — every value in the refuted
-  scenarios was legally declared. Both halves landed later as gate 10p, against the posting RULE.
-- **`ledger/dimensions.yaml` did NOT move to `reporting/`**, which #19 proposed: four IMMUTABLE ADRs
-  cite the path and gate 11 checks citations resolve, so a move buys four PERMANENT exemptions.
-  **Refused on measured cost.**
-- **Gate 18 is scoped to minted accounts, not all 143** (#37). A green gate 18 means "every account
-  this spec minted has a home", never "every account has one".
-- **The vehicle absorption rate is NOT registered in `reporting/allocation-bases.yaml`.** ADR-0030
-  cites that file's **discipline**, not its registry.
-- **The `closes_adr` exclusion proposed in #39 was wrong and is not implemented.** `SPIKE-012`
-  declares `closes_adr: ADR-0015`, so the exclusion would have deleted ADR-0015's only real blocker.
-  **Status alone is correct.** `tools/blockers_test.ts` asserts that exact row.
-- ⚠️ **NEW — `ADR-0025` was NOT withdrawn**, which its own `resolution_shape` offered as a route.
-  **Five IMMUTABLE ADRs cite it** (0029, 0031, 0034, 0035, 0038) and can never be updated, so
-  withdrawal buys five permanent citations pointing at a rejected decision. **Same shape as the
-  refused `dimensions.yaml` move, and refused for the same measured reason.**
-- ⚠️ **NEW — `ADR-0041` did NOT answer `OQ-045`**, though they are one seam from two sides. It takes
-  the **arithmetic** half (a fully-billed run, a rate estimate error) and leaves the **judgement**
-  half (a vendor who may or may not bill again). **Narrowing explicitly, with a minimal-pair vector
-  as the fence, beat answering both** — one is arithmetic and the other is a judgement about a
-  vendor relationship.
-
-## Things to carry across the clear
-
-_The first thirteen are carried forward; this run earned three more, and they are the sharpest._
-
-- **Firing a gate red is not ceremony — it is the only thing that finds the defects.**
-- ⚠️ **An INCLUSIVE declaration fails closed; an EXCLUSION list fails open.**
-- ⚠️ **Scope a gate to what the spec is RESPONSIBLE for, then measure what it does not cover.** **A
-  noisy reporter is one nobody reads twice, which is the same outcome as no reporter.**
-- ⚠️ **A value one letter from a legal one, in a file no gate reads, is the cheapest way to be
-  wrong.** **Ask which file the value you just typed is checked AGAINST.**
-- ⚠️ **Two messages for one defect is how a gate teaches the wrong lesson at 2am.**
-- **When a doc states a count, something must count it.**
-- ⚠️ **A rule that exists and is not applied blocks work silently.**
-- ⚠️ **A self-declared flag needs something that can falsify it, and the falsifier should demand a
-  REASON rather than a verdict.**
-- ⚠️ **A correct conclusion reached by wrong reasoning is not a checked conclusion.**
-- **The `db_schema` enum is not the collection list** — 35 against 50.
-- ⚠️ **When you remove a wrong signal, ask what the absence will now be read as.**
-- ⚠️ **A hand-written invariant is easy to get wrong in BOTH directions, and neither error is
-  visible from the expression.** Only a conforming/violating pair tells them apart.
-- ⚠️ **A delegated research pass will fabricate a quotable source, and it is not rare.** **Every one
-  was caught by demanding a verbatim quote with a URL.**
-- ⭐ **NEW — TYPE THE FIGURE. Gate 22 is the cheapest leverage in this repo and it is barely used.**
-  Typing five figures as `ADR-0020` `measurements:` **immediately turned four live files red** for
-  quoting them with no owner. HOT-018 exists _because_ one quantity had **three different values in
-  three live files — 13.85/6.00, ~4.51, 12.20 — and every one was internally consistent
-  arithmetic.** A figure with an owner cannot do that. ⚠️ Gate 22 matches **EXACT strings only**, so
-  it cannot see a paraphrase — and `$688.00` is still loose across **seven** files (#43).
-- ⭐ **NEW — A CONTROL TOTAL KEYED TO THE NATURAL DOCUMENT TOTAL SILENTLY FORBIDS EVERY ENTRY THAT
-  IS NOT THE DOCUMENT TOTAL.** `control_total: bill.amount_minor` made CFS's own measured direction
-  **unrepresentable** — where the EOR bills below the accrual, the entry posts the _accrued_ amount
-  and the arithmetic cannot close. ⚠️ **`vehicle_cost_absorbed` had already hit this and written the
-  reason down in its own invariant** — _"Using `pool_minor` … would have made the over-absorbed case
-  unrepresentable"_ — **and nothing connected the two rules.** The same defect, the same fix, two
-  entries apart in one file.
-- ⭐ **NEW — AN ADR GOES STALE AGAINST THE MIGRATION SPEC THAT IMPLEMENTS IT, AND NOTHING COMPARES
-  THEM.** `ADR-0020` said "restate all" while `migration/field-map.yaml` had **already** encoded
-  derive-from-the-master in three places, including the sentence _"the authority the invoice line's
-  tracking denorm is dropped in favour of"_. **The ADR was not proposing something the repo had
-  declined to do — it had stopped tracking what the repo already did.** ⚠️ **And the companion:** a
-  sentence that _accurately quotes a superseded claim_ is indistinguishable, out of context, from
-  one asserting it — which is how `ADR-0029` acquired a requirement it never made, in two artifacts
-  at once (#44).
-
-- ⭐ **NEW — AN ABSENCE READS AS A RESULT, and it is the defect class of this whole session.** Five
-  times: a boundary passing on 11 rows, a model silent on a case it could not represent, a model
-  silent on a question it never asked, a coverage claim with no coverage arm, and 12 figures
-  matching from the wrong edition. **Ask of every green check: could this have failed, and over
-  what?**
-- ⭐ **NEW — MEASURED POPULATION ANSWERS "IS THIS URGENT", NOT "IS THIS IN SCOPE".** Corrected twice
-  by the owner in one day. The footgun about not minting a branch before measuring its population is
-  about machinery for branches nothing takes; **it does not license omitting a rule the law requires
-  and a future asset will reach.**
-- ⭐ **NEW — ASK THE OWNER FOR FACTS, NOT FOR CLASSIFICATIONS.** OQ-053 sat open for five days as
-  "is CFS principal or agent" and was answered in one sitting as "who signs, who insures, who eats
-  the loss". **A question addressed to the wrong expertise looks like a question nobody has time
-  for.**
-- ⭐ **NEW — A CONTROL TOTAL KEYED TO THE NATURAL DOCUMENT TOTAL SILENTLY FORBIDS EVERY ENTRY THAT
-  IS NOT THAT TOTAL**, and `vehicle_cost_absorbed` had already written the reason down two entries
-  away in the same file.
-- ⭐ **NEW — TYPE THE FIGURE.** Gate 22 is the cheapest leverage in this repo. Typing five figures
-  as `measurements:` turned four live files red for quoting them uncited. HOT-018 existed _because_
-  one quantity had three internally-consistent values in three files.
-- ⚠️ **NEW — AN ADR GOES STALE AGAINST THE MIGRATION SPEC THAT IMPLEMENTS IT.** `ADR-0020` said
-  "restate all" while `field-map.yaml` had already encoded derive-from-the-master in three places.
-  **The ADR had stopped tracking what the repo already did**, and nothing compares the two.
-- ⚠️ **NEW — A SENTENCE THAT ACCURATELY QUOTES A SUPERSEDED CLAIM reads, out of context, as
-  asserting it.** That is how ADR-0029 acquired a requirement it never made, in two artifacts (#44).
-- ⚠️ **NEW — DELEGATED RESEARCH WILL FABRICATE A FIGURE, so make fabrication mechanically impossible
-  rather than discouraged.** The tax-rule refresh proposes a **line number** into a locally
-  extracted primary source; **a line number cannot be fabricated.**
+- ⚠️ **The MCP `db_schema` enum is NOT the collection list** — it carries 35; there are **50**, and
+  it omits `credit-notes` and `settlements` (1,073 documents of cash application). Anything scoped
+  from it is scoped short.
+- ⚠️ **`--development` caps TigerBeetle's `createTransfers` at 253, not the documented 8189.**
+  **Every TB measurement here before 2026-08-18 was taken on `--development`.** `SPIKE-011` owns the
+  production numbers.
+- `deno task ci` reproduces the whole CI contract locally. ⚠️ **Never pipe it into `tail`/`head`** —
+  that masks the exit code.
 
 ## Context recommendation
 
-**CLEAR CONTEXT.** Nothing needed is in anyone's head. Every resolved hotspot's `measured:` field
-carries what was found and why; the ADRs carry the reasoning; the eleven open issues each carry a
-cold-pickup section; `STATUS.generated.md` reports the milestone state; and `deno task ci`
-reproduces the whole CI contract locally.
+**CLEAR CONTEXT.** The decision batch is executable from this doc, the five ADRs' own bodies, their
+cited surveys, and `CLAUDE.md`. Nothing needed is in anyone's head, and the context that produced
+this revision is full of Plaid sandbox internals the batch does not need.
 
-⚠️ **The two things not written down anywhere else** are in this file: that the ~39 validate
-warnings are the clock rather than a regression, and that **the reachable work is now the shared
-009+013 ADR, then `SPIKE-004`** — SPIKE-013's evidence is complete as of 2026-08-24, and `SPIKE-011`
-is gated on provisioning while `SPIKE-012` waits on a business process, so no amount of authoring
-moves either.
+⚠️ **The one thing written down nowhere else** is the START HERE table: **m4's binding criterion is
+the `review_by` cliff, not the spikes**, and it breaks CI on **2026-10-02**. Everything else —
+milestone state, hotspot reasoning, issue backlog — is in `STATUS.generated.md`, the ADRs, and the
+issues.
 
-⚠️ **This paragraph named SPIKE-002 and "008 or 009" until 2026-08-24; all three had closed or moved
-underneath it.** ⭐ **The recommendation itself is the thing that goes stale fastest in a plan
-doc**, because it is the only part written about the _future_ — so re-derive it from the spike front
-matter rather than trusting the sentence, and treat this footnote as the reason to.
+⚠️ **The recommendation is the part of a plan doc that goes stale fastest**, because it is the only
+part written about the future. This one named "the shared 009+013 ADR, then SPIKE-004" until
+2026-08-24, and both had closed by the time anyone read it. **Re-derive from
+`SPEC_TODAY=<date> deno task validate` and the spike front matter; treat this footnote as the reason
+to.**
