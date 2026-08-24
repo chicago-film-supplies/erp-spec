@@ -16,7 +16,7 @@ is `deno task validate`'s judgement, not this file's.
 | Decisions (ADR) | 45 | 25 in force · 16 proposed |
 | Spikes | 13 | 5 open |
 | Requirements | 27 | 0 without a scenario |
-| Inbox | 134 | 108 unpromoted |
+| Inbox | 135 | 109 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
@@ -41,7 +41,7 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-039` | `organizations.tax_profile` carries two different concepts in one enum — who owes (applie… | alex | 2027-01-15 | — |
 | `OQ-052` | What vehicle rate absorbs into 5900, over what normal-capacity denominator — and where do… | alex | 2027-01-31 | — |
 | `OQ-059` | Which CDN carries CFS images — Uploadcare re-evaluated against imgix and any other suitab… | alex | 2027-01-31 | — |
-| `OQ-060` | What does Quo own — is it the outbound channel for field photos alongside Resend, or inst… | alex | 2027-01-31 | — |
+| `OQ-060` | Is Quo the outbound channel for field photos alongside Resend or instead of it, and is th… | alex | 2027-01-31 | — |
 | `OQ-045` | When a vendor bills LESS than was accrued, what retires the residual left in `2010 Accrue… | alex | 2027-02-15 | — |
 | `OQ-048` | At what rate is a contributed (unpaid owner) shift costed in the IMPUTED labor view — the… | alex | 2027-03-15 | — |
 | `OQ-051` | Where is the seam between CFS and a chat system for comments and threads — CFS implements… | alex | 2027-03-31 | — |

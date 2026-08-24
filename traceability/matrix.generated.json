@@ -5,7 +5,7 @@
     "adrs": 45,
     "adrs_accepted": 25,
     "events": 38,
-    "inbox": 134,
+    "inbox": 135,
     "inbox_promoted": 26
   },
   "requirements": [
@@ -811,6 +811,7 @@
       "inbox/2026-08-23-owner-proposes-three-way-merge-replay-the-queue-against-both-base-and-fresh-and-diff.md",
       "inbox/2026-08-23-owner-rules-the-realtime-replacement-and-folds-offline-with-queued-writes-into-it.md",
       "inbox/2026-08-23-owner-the-image-manager-is-three-jobs-two-of-them-evidence-and-quo-is-a-new-boundary-with-a-contact-sync.md",
+      "inbox/2026-08-23-owner-the-quo-contact-sync-is-a-one-way-push-and-the-text-thread-may-be-the-transmission-record.md",
       "inbox/2026-08-23-staging-needs-a-sanitized-prod-mirror.md",
       "inbox/2026-08-23-survey-how-six-references-source-a-tax-jurisdiction-and-what-substantiates-a-departure.md",
       "inbox/2026-08-23-what-a-minted-line-id-costs-and-why-path-interning-converges-on-it.md"

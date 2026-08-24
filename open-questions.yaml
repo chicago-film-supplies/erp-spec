@@ -2801,32 +2801,48 @@ open_questions:
       gate 23 cannot see this until the entity file exists, and its note line says so.
 
   - id: OQ-060
-    headline: "what Quo owns, and who wins a contact conflict"
+    headline: "does the Quo text thread get stored"
     question: >-
-      What does Quo own — is it the outbound channel for field photos alongside Resend, or instead
-      of it — and in the contact sync, which side is authoritative when both have changed the same
-      contact?
+      Is Quo the outbound channel for field photos alongside Resend or instead of it, and is the
+      text thread stored — which turns on what the photos are FOR, since a photo proves you took a
+      picture and only the thread proves you told the customer.
     owner: alex
     decide_by: 2027-01-31
     blocks: []
     status: open
     notes: >-
-      Opened 2026-08-23 from owner input:
-      `inbox/2026-08-23-owner-the-image-manager-is-three-jobs-two-of-them-evidence-and-quo-is-a-new-boundary-with-a-contact-sync.md`.
-      ⚠️ **Quo appears NOWHERE in the spec or in v1** — verified 2026-08-23; the only matches for
-      `quo` across `charter.md`, `contexts/`, `adr/`, `roadmap/` and both product repos are the
-      phrase "status quo". It is a wholly new boundary arriving with two obligations.
-      **1 — outbound messaging.** Employees text delivery and trash-pickup photos to customer
-      contacts through it. ⚠️ **This overlaps `ADR-0027`'s Resend adoption**: CFS would hold two
-      outbound channels to the same customer contact, and whether there is **one messaging
-      abstraction or two** is undecided. A boundary service that duplicates an adopted one needs an
-      argument, not just a use case.
-      **2 — ⚠️⚠️ the contact sync, which is the sharp end.** *"contact crud should sync w/ quo"*,
-      and **sync is doing a lot of work in that sentence**: which side is authoritative, is it
-      bidirectional, and what happens when both sides change the same contact? ⭐ **That is the
-      three-way merge problem again, across a system boundary** — and unlike the in-document case
-      (`SPIKE-013`) there is **no shared base to diff against unless one is deliberately kept.**
-      ✅ **`ADR-0009` already governs the identifier half**: foreign identifiers never enter domain
-      models and an unresolvable id is a hard error rather than a null. A Quo contact id is a
-      foreign identifier and needs boundary translation with an explicit unmapped path — a
-      quarantine, not a null.
+      Opened 2026-08-23; **narrowed the same day by an owner ruling that dissolved its hardest
+      half.** Evidence:
+      `inbox/2026-08-23-owner-the-image-manager-is-three-jobs-two-of-them-evidence-and-quo-is-a-new-boundary-with-a-contact-sync.md`
+      and
+      `inbox/2026-08-23-owner-the-quo-contact-sync-is-a-one-way-push-and-the-text-thread-may-be-the-transmission-record.md`.
+      ✅ **ANSWERED — the contact sync is a ONE-WAY PUSH and manager is authoritative.** ⇒ no
+      bidirectional sync, no conflict, and **no cross-boundary three-way merge** — the framing this
+      question opened with does not apply, because there is only one writer. ⭐ **And the purpose is
+      smaller than the mechanism suggested**: *"just to make it easier for delivery workers to text
+      contacts they're on the way."* Quo is a **convenience surface for a field worker**, not a
+      system of record for customer relationships; scoping it as the latter would have been the
+      expensive mistake.
+      ✅ **`ADR-0009` shrinks accordingly** — CFS never reads identity back, so translation is
+      one-directional. ⭐ **And it may vanish entirely**: if Quo dedupes on phone number, CFS stores
+      **no Quo identifier at all** and the anticorruption obligation is satisfied by construction.
+      **Establish that before building a mapping table** — an unnecessary id mapping is a permanent
+      maintenance cost.
+      ⚠️ **STILL OPEN — 1: one outbound abstraction or two.** `ADR-0027` adopted Resend for
+      transactional email. Quo adds a second channel to the same customer contact, and a boundary
+      service that duplicates an adopted one needs an argument rather than a use case.
+      ⚠️ **STILL OPEN — 2: is the text thread stored.** Owner: *"i like the idea of storing the text
+      thread for posterity, though its likely more trouble than its worh, we should still consider
+      it."* ⭐ **The criterion is worth more than the default, and it is not about threads at all:
+      a photo in a CDN proves you took a picture; it does not prove you told the customer.** If jobs
+      2 and 3 exist to settle a later dispute — *"you never delivered it"*, *"the bins were not
+      emptied"* — then the transmission is half the proof and the thread IS the transmission record;
+      storing the photo without it keeps the weaker half of a pair. If the photos are a courtesy,
+      the "more trouble than it's worth" instinct is right. ⇒ **the question is not "is a thread
+      worth storing" but "what are the photos FOR"**, and ⚠️ **the dispute posture is UNMEASURED —
+      ask rather than assume**, trash pickups especially.
+      **Connects to `OQ-049`** (a Quo thread is a second thread family beside `threads`/`comments`,
+      and that question already flags attachments), **`OQ-051`** (a stored thread is a concrete
+      instance of the chat seam, arriving before the seam is decided) and **erp-spec#49** (if it is
+      evidence it inherits the retention duty, landing in the same argument as the photos and the
+      Gmail evidence picker).
