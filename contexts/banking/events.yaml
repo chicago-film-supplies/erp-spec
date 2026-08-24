@@ -3,8 +3,17 @@
 # Every event needs a producer and at least one consumer, or `terminal: true`.
 #
 # Feed is Plaid, one Chase account (ADR-0002). Plaid's model is a consumer-fintech model, not an
-# accounting bank feed — SPIKE-004 decides what it actually provides against what reconciliation
-# actually needs, so the `carries` lists below are provisional on that.
+# accounting bank feed.
+#
+# ✅ SPIKE-004 closed 2026-08-24 and ADR-0048 is the boundary contract. The `carries` lists below are
+# no longer provisional on the FEED — but note what that does and does not settle:
+#   - `bank_transaction_id` is CFS-minted and never a Plaid id. 0 of 108 Plaid ids survive a re-link
+#     (SPIKE-004/M1), so a foreign id could not have been a key even if ADR-0009 permitted one.
+#   - `external_ref` is the boundary translation table's handle, NOT a Plaid transaction_id in the
+#     event payload — same rule, same reason.
+#   - `posted_date` is the feed's `date`. ⚠️ It is NOT declared to be the accounting date: the feed
+#     carries two dates and `authorized_date` differs on 96 of 108 rows (SPIKE-004/M7). Which one
+#     the LEDGER uses is OQ-063, and EVT-BNK-002's `accounting_date` is still blocked on it.
 
 events:
   - id: EVT-BNK-001
@@ -16,7 +25,6 @@ events:
     consumers: [ledger]
     terminal: false
     carries: [bank_transaction_id, posted_date, amount_minor, direction, description, external_ref]
-    blocked_by: [SPIKE-004]
 
   - id: EVT-BNK-002
     name: BankTransactionMatched

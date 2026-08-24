@@ -2878,3 +2878,60 @@ open_questions:
       **Connects to `OQ-043`** (the master-data twin, and the question this was mistaken for), and
       to `SPIKE-013`'s shared ADR with `SPIKE-009`, which owns the boundary between what merges and
       what posts.
+
+  - id: OQ-062
+    headline: "the Plaid secret name fights the house convention"
+    question: >-
+      Should `PLAID_SECRET_SANDBOX` be renamed to `PLAID_SECRET`, letting the GCP project be the
+      environment discriminator as it is for every other secret?
+    owner: alex
+    decide_by: 2026-10-31
+    blocks: []
+    status: open
+    notes: >-
+      Opened 2026-08-24 out of `SPIKE-004` (what Plaid actually provides). Everywhere else in this
+      workspace the PROJECT is the environment — `cfs-3100` versus `cfs-dev-3100` — and a secret
+      name carries no environment suffix. `PLAID_CLIENT_ID` and `PLAID_SECRET_SANDBOX` were both
+      created in `cfs-dev-3100` on 2026-08-23 and neither exists in `cfs-3100`, which is correct;
+      the suffix is therefore redundant with the project it already lives in.
+      ⚠️ **Renaming a Secret Manager secret is destroy-and-recreate, not an edit** — so the cost of
+      this decision only rises from here, and it is at its floor right now: the value is a sandbox
+      key that nothing has consumed and no deployment references. ⭐ **The forcing event is the
+      production credential**, because that is when a second name has to be chosen and the split
+      becomes permanent. Decide before it exists, not after.
+      Cheap either way; recorded so it is decided rather than defaulted.
+
+  - id: OQ-063
+    headline: "what a bank line does to the ledger"
+    question: >-
+      May a PENDING bank transaction post at all; which of the feed's two dates is the accounting
+      date; and does an unmatched transaction rest in 2500 - Suspense?
+    owner: alex
+    decide_by: 2026-12-15
+    blocks: [] # the two blocked artifacts point HERE via `blocked_by`, which is the checked
+    # direction: `ledger/chart-of-accounts.yaml` code 2500 and the `bank_transaction_matched`
+    # posting rule. `blocks:` takes artifact ids only, so it cannot name either of them.
+    status: open
+    notes: >-
+      Opened 2026-08-24. **This is the half of `SPIKE-004` that the spike could not close and
+      `ADR-0048` deliberately did not take.** The spike established the FACTS — a pending row is
+      removed and replaced rather than mutated, `date` and `authorized_date` are distinct and the
+      latter is nullable, and a removed pending row can vanish with no successor. **What posts is a
+      different kind of question**, and rule 8a makes it accounting-shaped: it decides where
+      something posts and what an account means.
+      ⇒ **It owes the six-reference survey** — GAAP, Xero (the incumbent, and the migration delta),
+      SAP S/4HANA, NetSuite, Sage Intacct, Odoo — recorded in `inbox/` and dated **before** a
+      recommendation is made. Gate 19 will demand it of the ADR that answers this.
+      ⚠️ **2500's disposition is `undecided` on purpose and must stay that way until this closes.**
+      Its own `reason` is the argument: a suspense account is the balance-sheet form of the null
+      `ADR-0009` forbids, weighed against an unmatched transaction having to rest somewhere. ⭐ The
+      criterion is likely to matter more than the default, as it did for the credit-note survey —
+      ask what the *population* of unmatched transactions actually is before minting the account
+      that serves it, per this repo's own rule about minting a branch before measuring its
+      population.
+      ⚠️ **A companion question this ADR leaves open on purpose**: `ADR-0048`/D5 reconstructs
+      identity after a re-link by MATCHING, and the correct match key is not settled. That is an
+      ingestion question rather than an accounting one, so it is not folded in here — but whoever
+      picks up either should read the other.
+      Connects to `ADR-0048` (the ingestion boundary), `ADR-0002` (Plaid is the bank feed) and
+      `ADR-0009` (no foreign ids in domain models).

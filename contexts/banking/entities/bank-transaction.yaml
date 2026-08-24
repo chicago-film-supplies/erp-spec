@@ -2,11 +2,23 @@
 entity: BankTransaction
 description: >-
   A translated bank line. The Plaid identifier lives in the boundary translation table, NOT here
-  (ADR-0009).
+  (ADR-0009, ADR-0048). ⚠️ The VERBATIM Plaid row lives in the boundary store of record alongside
+  it (ADR-0048/D1) — a removed row carries nothing to reverse, so nothing else can reconstruct it.
 fields:
-  bank_transaction_id: { type: uuid, required: true, note: "ours, not Plaid's" }
+  bank_transaction_id:
+    type: uuid
+    required: true
+    note: >-
+      Ours, not Plaid's — and ADR-0048/D2 is why it has to be. 0 of 108 Plaid transaction ids
+      survive a re-link (SPIKE-004/M1), so a Plaid id cannot be a key at all.
   amount_minor: { type: int64, required: true }
   posted_on: { type: date, required: true }
-  cleared: { type: bool, required: true, note: "pending vs posted. SPIKE-004" }
+  cleared:
+    type: bool
+    required: true
+    note: >-
+      Pending vs posted. SPIKE-004 established that the transition is a REMOVE plus an ADD with a new
+      Plaid id, joined by `pending_transaction_id` — never a mutation — and ADR-0048/D3 folds the
+      pair into ONE bank transaction here. What `cleared` means to the LEDGER is OQ-063.
   description_raw: { type: string, required: true }
   match_state: { type: enum, values: [unmatched, matched, quarantined], required: true }

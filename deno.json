@@ -13,7 +13,7 @@
     "gen": "deno run --allow-read --allow-write tools/generate.ts",
     "ingest": "deno run --allow-read --allow-write tools/ingest.ts",
     "view": "deno run --allow-read --allow-run --allow-net --allow-env=SPEC_TODAY tools/view.ts",
-    "fetch-llms-docs": "deno run --allow-read=.claude/docs --allow-write=.claude/docs --allow-net=docs.deno.com,docs.tigerbeetle.com,duckdb.org,hono.dev,quint.sh,www.mongodb.com,zod.dev tools/fetch-llms-docs.ts"
+    "fetch-llms-docs": "deno run --allow-read=.claude/docs --allow-write=.claude/docs --allow-net=docs.deno.com,docs.tigerbeetle.com,duckdb.org,hono.dev,plaid.com,quint.sh,www.mongodb.com,zod.dev tools/fetch-llms-docs.ts"
   },
   "imports": {
     "@std/yaml": "jsr:@std/yaml@^1.0.5",

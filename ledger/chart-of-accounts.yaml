@@ -691,14 +691,17 @@ accounts:
     class: liability
     normal_balance: credit
     disposition: undecided
-    blocked_by: [SPIKE-004]
+    blocked_by: [OQ-063]
     status_live: Active
     reason: >-
       A suspense account is the balance-sheet form of the null ADR-0009 forbids — "we could not
       resolve this, so it went somewhere". Against that, an unmatched bank transaction has to rest
-      somewhere while it is unmatched, and SPIKE-004 is what establishes whether Plaid's pending/
-      posted lifecycle produces such a population at all. Deciding either way before that spike
-      runs would be guessing.
+      somewhere while it is unmatched.
+      ⭐ **SPIKE-004 closed 2026-08-24 and it did NOT settle this.** It established that the
+      population exists — a pending row is removed and replaced rather than mutated, and one can
+      vanish with no successor at all — but where an unmatched transaction RESTS is accounting-shaped
+      under rule 8a and owes the six-reference survey. ⇒ the block moves to OQ-063 rather than
+      expiring; ADR-0048 deliberately took the ingestion half only.
     source: "api:2026-08-09:db_chart_of_accounts_query"
 
   - code: 2510

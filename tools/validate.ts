@@ -3341,11 +3341,27 @@ for (const e of evts) {
   const G = "21";
   const KINDS = ["decision", "premise"];
   /** The same provenance forms `source:` takes everywhere else in this repo (gate 10d, rule 1). */
+  /**
+   * ⚠️ **`plaid:` is a SANDBOX read, and that is a limit on what it can source** (added 2026-08-24
+   * for SPIKE-004). The other third-party prefixes — `xero:`, `wrapbook:` — read a live tenant
+   * holding CFS's real data, so they measure the corpus. Plaid's sandbox holds synthetic data at a
+   * fake institution, so it measures **the API's behaviour and nothing about the bank**: the shape
+   * of a delta, what a `removed` entry carries, whether an id survives a re-link.
+   *
+   * ⇒ This is the third-party sibling of _v1 answers what is, never what must be_. **A sandbox
+   * answers what the API DOES, never what the institution WILL SEND** — and it is seductive for the
+   * same reason v1 is, being executable, pinned and citable while the production link is none of
+   * those. SPIKE-004/M8 and M9 are labelled in their own `of:` for exactly this reason: a seeded
+   * balance and a seeded backfill depth are facts about the sandbox, not about Chase.
+   *
+   * Nothing executes on that distinction, and saying so is the point — it is the same stated limit
+   * gate 21 carries about reasoning it cannot see.
+   */
   const SOURCE_FORM =
-    /^((api|code|xero|wrapbook):\d{4}-\d{2}-\d{2}:|ADR-\d{4}|inbox\/\d{4}-\d{2}-\d{2}|OQ-\d{3}|HOT-\d{3}|SPIKE-\d{3})/;
+    /^((api|code|xero|wrapbook|plaid):\d{4}-\d{2}-\d{2}:|ADR-\d{4}|inbox\/\d{4}-\d{2}-\d{2}|OQ-\d{3}|HOT-\d{3}|SPIKE-\d{3})/;
   /** The date inside a pinned `api:`/`code:` source, or null for an id/inbox reference. */
   const sourceDate = (src: string): string | null =>
-    src.match(/^(?:api|code|xero|wrapbook):(\d{4}-\d{2}-\d{2}):/)?.[1] ?? null;
+    src.match(/^(?:api|code|xero|wrapbook|plaid):(\d{4}-\d{2}-\d{2}):/)?.[1] ?? null;
 
   /**
    * ⚠️ **`as_of` is NOT a duplicate of the source date, and the difference is the whole point**
@@ -3551,7 +3567,7 @@ for (const e of evts) {
    * declared-empty `measurements` beside one is a contradiction the gate can see. It cannot see a
    * bare number in prose, and that is stated rather than implied.
    */
-  const PIN_IN_PROSE = /\b(api|code|xero|wrapbook):\d{4}-\d{2}-\d{2}:/;
+  const PIN_IN_PROSE = /\b(api|code|xero|wrapbook|plaid):\d{4}-\d{2}-\d{2}:/;
   for (const sp of spikes) {
     const ms = Array.isArray(sp.measurements) ? sp.measurements as Record<string, unknown>[] : null;
     if (sp.measurements !== undefined && !ms) {

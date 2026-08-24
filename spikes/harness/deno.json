@@ -88,6 +88,8 @@
     "oq-server": "deno run --allow-read --allow-net offline-queue/server.ts",
     "//oq-browser": "SPIKE-013 criteria 1, 3 and 7 — the halves a Deno fake cannot stand in for: durability across a RELOAD, a rejected replay with the operator absent, and a 4 MB blob. Needs `deno task oq-server` running.",
     "oq-browser": "deno test --allow-read --allow-env --allow-net --allow-run --allow-sys --allow-write --allow-ffi offline-queue/browser_test.ts",
+    "//plaid": "SPIKE-004 — the Plaid feed's SHAPE, against a real sandbox Item. --allow-net is narrowed to sandbox.plaid.com, so the probe CANNOT reach production.plaid.com; there is no env knob to point it there. Credentials come from Secret Manager (cfs-dev-3100) via gcloud, or from PLAID_CLIENT_ID / PLAID_SECRET_SANDBOX if already exported. It CREATES and then REMOVES two sandbox Items; nothing it touches is real.",
+    "plaid": "deno run --allow-read --allow-env --allow-run=gcloud --allow-net=sandbox.plaid.com plaid-probe.ts",
     "posting-keys": "deno run --allow-read --allow-env --allow-sys --allow-net=firestore.googleapis.com,oauth2.googleapis.com,accounts.google.com,www.googleapis.com,metadata.google.internal posting-key-width-probe.ts"
   },
 

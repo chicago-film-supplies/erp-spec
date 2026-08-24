@@ -58,7 +58,7 @@
           <outline text="[object Object]"/>
         </outline>
       </outline>
-      <outline text="Open questions (20 of 61 still open)" _note="The bottleneck. Each blocks what is listed under it.">
+      <outline text="Open questions (22 of 63 still open)" _note="The bottleneck. Each blocks what is listed under it.">
         <outline text="OQ-001 — Are fulfillment legs first-class recorded events with their own identity, or derived from the order…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-007"/>
           <outline text="blocks ADR-0011"/>
@@ -209,6 +209,8 @@
         <outline text="OQ-059 — Which CDN carries CFS images — Uploadcare re-evaluated against imgix and any other suitable contend…" _note="owner: alex · decide by: 2027-01-31"/>
         <outline text="OQ-060 — Is Quo the outbound channel for field photos alongside Resend or instead of it, and is the text thr…" _note="owner: alex · decide by: 2027-01-31"/>
         <outline text="OQ-061 — Once a merge or an ordinary edit commits, is the prior value of an AUTHORED, NOT-YET-POSTED field r…" _note="owner: alex · decide by: 2027-01-31"/>
+        <outline text="OQ-062 — Should `PLAID_SECRET_SANDBOX` be renamed to `PLAID_SECRET`, letting the GCP project be the environm…" _note="owner: alex · decide by: 2026-10-31"/>
+        <outline text="OQ-063 — May a PENDING bank transaction post at all; which of the feed's two dates is the accounting date; a…" _note="owner: alex · decide by: 2026-12-15"/>
       </outline>
       <outline text="Conflicts (0 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labor) or an own long-haul run (labor-bearing)? T…" _note="Decides whether a trucked fulfillment absorbs labor cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
@@ -287,7 +289,7 @@
         </outline>
         <outline text="HOT-024 — Two live, mutable statements about whether CFS still collects in Paxton contradict each other. **Th…" _note="⭐ **It is the case that decides what a permitted override target IS**, and it is why `ADR-0045` withdrew a decision that would have keyed the target set on live registrations. That rule would have made `paxton` newly assertable again — reversing a deliberate closure — while deleting `no_nexus`, which is deliberately offered and is **not** a registration at all. **Both non-trivial members come out wrong**, and the reason is that &quot;registered&quot; and &quot;assertable&quot; are different predicates that happen to coincide on the easy members. ⚠️ **And the ambiguity is not free while it stands.** `deriveJurisdiction`'s city table omits Paxton, so no address derives there; only a stored value reaches it. But `findTaxFor` will still price a `paxton` line at 6.25% today, because the window is open. ⇒ **the catalog would collect a tax the UI says CFS no longer collects**, and nothing fails. ⭐ **The cheap resolution is the one the convention already names**: if CFS is deregistered, write the 0% successor and the two statements agree. If CFS is still registered, the UI is wrong. **Either way the fix is one write, and the value of the hotspot is that nobody has decided which.**"/>
       </outline>
-      <outline text="Decisions (25 in force, 18 proposed)">
+      <outline text="Decisions (25 in force, 19 proposed)">
         <outline text="In force (25)">
           <outline text="ADR-0001 — Replace Xero with an in-house ledger" _note="**In the context of** owning the order-to-invoice path but renting the ledger, **facing** a tracking-dimension defect that Xero silently absorbs and a costing model Xero cannot express, **we decided** to build the general ledger in-house, **to achieve** dimensional postings that cannot be null and a labour-absorption model we control, **accepting** that a large amount of unglamorous accounting surface area becomes ours to build and keep correct."/>
           <outline text="ADR-0002 — Bank feed sourced from Plaid, single Chase account" _note="**In the context of** needing bank transactions now that Xero's feed goes away, **facing** one bank and one account, **we decided** to source the feed from Plaid, **to achieve** a working feed without a bank-specific integration, **accepting** that Plaid's transaction model is a consumer-fintech model, not an accounting bank feed."/>
@@ -315,7 +317,7 @@
           <outline text="ADR-0037 — An id carries meaning where it is used — a headline on every id, and addressable claims inside a decision" _note="**In the context of** a spec whose authority is prose, **facing** a measured 22:1 mismatch between what is cited (a document) and what is claimed (about twenty statements inside it), **we decided** that an ADR additionally asserts individually addressable claims, typed as decision or premise, **to achieve** corrections that can be swept and premises that can go stale without touching a frozen decision, **accepting** a second surface on every ADR and a convention that only pays off as it is adopted."/>
           <outline text="ADR-0038 — Labor with no causal order is not COGS — 5801 is not created and 6600 Wages narrows instead" _note="**In the context of** but-for attribution putting a guaranteed day onto the order that caused the hire, **facing** the consequence that labor no order caused has no revenue it is applicable to, **we decided** that such labor is operating expense and stays in `6600 - Wages` rather than reaching a COGS account, **to achieve** a cost-of-revenue line that contains only costs of revenue, **accepting** that ADR-0019's `5801` is not created and that a superficially identical vehicle account deliberately does not follow."/>
         </outline>
-        <outline text="Proposed (18)">
+        <outline text="Proposed (19)">
           <outline text="ADR-0015 — Inventory reservations are TigerBeetle pending transfers, over the operational window only" _note="review by: 2026-11-01 · **In the context of** wanting order state derivable and oversell prevented in the database, **facing** a balance model with no time dimension and an availability question that is entirely about time, **we decided** to model reservations as two-phase transfers over the operational window only, **to achieve** custody oversell that is unrepresentable and a fulfillment state that is derived, **accepting** that future-dated booking conflicts stay with the interval engine.">
             <outline text="blocked on HOT-022"/>
             <outline text="blocked on SPIKE-002"/>
@@ -404,9 +406,14 @@
             <outline text="blocked on OQ-043"/>
             <outline text="blocked on OQ-061"/>
           </outline>
+          <outline text="ADR-0048 — The Plaid ingestion boundary — a store of record at the edge, CFS-minted identity, and delta-atomic application" _note="review by: 2026-11-30 · **In the context of** ADR-0002 sourcing the bank feed from Plaid and ADR-0009 fencing foreign identifiers out of domain models, **facing** a feed that mints new ids on every re-link, deletes rows without saying what they were, announces changes that are not changes, and quotes money as an unscaled float, **we decided** that the boundary holds a verbatim store of record, mints CFS identity itself, reconstructs correspondence by matching rather than by id, and applies a whole delta atomically, **to achieve** a feed whose failures are loud at the edge instead of silent in the reconciliation, **accepting** that the boundary store is a second copy of the bank's data that we are now obliged to keep.">
+            <outline text="blocked on SPIKE-004"/>
+            <outline text="blocked on OQ-062"/>
+            <outline text="blocked on OQ-063"/>
+          </outline>
         </outline>
       </outline>
-      <outline text="Spikes (3 open)">
+      <outline text="Spikes (2 open)">
         <outline text="SPIKE-001 — Does the TigerBeetle client load and run under Deno via node-api compatibility?" _note="timebox: 2 days · closes: ADR-0023 · closed">
           <outline text="A Deno process creates accounts and posts a two-phase transfer against a real TigerBeetle cluster."/>
           <outline text="The same code path runs under `deno test` and under `deno compile`."/>
@@ -422,7 +429,7 @@
           <outline text="A demonstrated history load whose accounting dates precede their posting timestamps by years."/>
           <outline text="Confirmation that live posting resumes correctly after an import batch."/>
         </outline>
-        <outline text="SPIKE-004 — What does Plaid actually provide, and what does bank reconciliation actually need?" _note="timebox: 3 days · closes: a new ADR · open">
+        <outline text="SPIKE-004 — What does Plaid actually provide, and what does bank reconciliation actually need?" _note="timebox: 3 days · closes: ADR-0048 · closed">
           <outline text="Pending vs posted semantics documented, including whether a pending transaction's id survives posting."/>
           <outline text="Backfill window established — how far back history reaches on first link."/>
           <outline text="Transaction id stability confirmed or refuted across updates and re-links."/>

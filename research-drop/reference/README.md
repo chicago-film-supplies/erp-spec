@@ -28,7 +28,7 @@ not.
 ## The stack
 
 **Upstream coverage varies, and it is worth knowing which kind you are getting before you go
-looking.** All statuses probed 2026-08-09.
+looking.** All statuses probed 2026-08-09, except Plaid (2026-08-24).
 
 | Tool                          | Role in CFS                                               | Cached as                         | Upstream coverage                                                                     |
 | ----------------------------- | --------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------- |
@@ -39,6 +39,7 @@ looking.** All statuses probed 2026-08-09.
 | [MongoDB](mongodb.md)         | Documents + masterfiles (orders, invoices, items tree)    | `mongodb.txt`                     | **index only** — `llms-full.txt` 404s                                                 |
 | [DuckDB](duckdb.md)           | Read side over Parquet — dimensional reporting            | `duckdb.txt`                      | **index only** — `llms-full.txt` 404s                                                 |
 | [Quint](quint.md)             | Formal specs (modern path for `formal/`)                  | `quint.txt`                       | **index only** — `llms-full.txt` 404s; but see below                                  |
+| [Plaid](plaid.md)             | The bank feed, one Chase account (ADR-0002)               | `plaid.txt`                       | **full** — `plaid.com/docs/llms-full.txt`, 6.3 MB (added 2026-08-24)                  |
 | [Valkey](valkey.md)           | Job queues (ADR-0012); cache / socket fan-out undecided   | —                                 | **none** — no `llms.txt` (404)                                                        |
 | [Caddy](caddy.md)             | Reverse proxy / auto-HTTPS front (ADR-0013)               | —                                 | **none** — no `llms.txt` (404)                                                        |
 

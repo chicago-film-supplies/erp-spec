@@ -1004,7 +1004,7 @@ rules:
 
   - id: bank_transaction_matched
     status: blocked
-    blocked_by: [SPIKE-004]
+    blocked_by: [OQ-063]
     trigger:
       event: EVT-BNK-002
       source_document: bank_transaction
@@ -1015,13 +1015,20 @@ rules:
       - "Dr/Cr the cash account for the instrument, against the posting the transaction matched."
     unknown:
       - >-
-          **SPIKE-004** — what Plaid actually provides. Pending-versus-posted semantics decide which
-          date is the accounting date and whether a pending row may post at all; transaction-id
-          stability decides whether match state can be keyed on it without corrupting silently. Plaid
-          is a consumer-fintech product, not an accounting bank feed, and the gap is the deliverable.
+          **OQ-063** — whether a PENDING row may post at all, and which of the feed's two dates is the
+          accounting date. **SPIKE-004 closed 2026-08-24 and supplied the facts without taking the
+          decision**: a pending row is removed and replaced by a new id rather than mutated
+          (SPIKE-004/M4), `date` and `authorized_date` are distinct in 96 of 108 rows and
+          `authorized_date` is nullable (SPIKE-004/M7). What POSTS is accounting-shaped under rule 8a
+          and owes the six-reference survey, so the block moved rather than expiring.
       - >-
-          Whether an unmatched transaction rests in **2500 Suspense** is the same spike's question —
-          which is why 2500's disposition in the chart of accounts is `undecided` rather than a guess.
+          Whether an unmatched transaction rests in **2500 - Suspense** is the same question — which is
+          why 2500's disposition in the chart of accounts is `undecided` rather than a guess.
+      - >-
+          ⭐ **What SPIKE-004 DID settle is that match state cannot be keyed on a Plaid identifier at
+          all** — 0 of 108 transaction ids survive a re-link (SPIKE-004/M1). ADR-0048 mints CFS
+          identity at the boundary and reconstructs correspondence by matching, so this rule's
+          `source_document` is a CFS bank transaction and never a Plaid row.
     relates_to: [ADR-0002, ADR-0009]
 
   - id: asset_acquired

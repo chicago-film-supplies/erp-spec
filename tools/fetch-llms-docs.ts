@@ -37,6 +37,10 @@ const SOURCES: Source[] = [
   },
   { url: "https://hono.dev/llms-full.txt", file: "hono-full.txt" },
   { url: "https://zod.dev/llms-full.txt", file: "zod.txt" },
+  // Plaid — 6.4 MB, the biggest dump here by an order of magnitude, and worth it: the reconciliation
+  // semantics SPIKE-004 needed (pending→posted as removed+added, the cursor contract, the per-Item
+  // rate limits) are prose in the product guides, not fields in the API reference.
+  { url: "https://plaid.com/docs/llms-full.txt", file: "plaid.txt" },
   // Deno publishes an llms-full.txt too, but it is ~2.5 MB; the agent guide is the useful slice.
   { url: "https://docs.deno.com/llms-full-guide.txt", file: "deno.txt" },
   // Link indexes — upstream publishes no full-text dump (llms-full.txt 404s on all three).

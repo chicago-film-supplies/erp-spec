@@ -12,6 +12,9 @@ Two kinds live here, and the second arrived later:
 - **Corpus measurements** — `allocation-basis-probe.ts` (`deno task allocation`), evidence for
   ADR-0031. Read-only `db_*` queries against the prod CFS API, aggregated locally; the token comes
   from `CFS_API_TOKEN` and is never in this repo. These need no `node_modules` and no staging.
+- **Third-party API probes** — `plaid-probe.ts` (`deno task plaid`), SPIKE-004. Drives a real
+  third-party sandbox and asserts what its API actually does. Also needs no `node_modules`; see the
+  Plaid section below for the fence and for what a sandbox cannot answer.
 
 The underscore prefix on this file keeps it out of `validate.ts`, which walks `spikes/` recursively
 and requires front matter on every `.md` it finds.
@@ -207,3 +210,34 @@ mkdir -p .data/mongo-2sc
 
 `.bin/` (compiled binaries) and `.data/` (cluster files, RDB/AOF, downloaded archives) are
 gitignored.
+
+## SPIKE-004 — Plaid needs NO local server, and no `node_modules`
+
+`deno task plaid`. Plain `fetch` against `sandbox.plaid.com`; credentials come from Secret Manager
+on `cfs-dev-3100` via `gcloud` (or from `PLAID_CLIENT_ID` / `PLAID_SECRET_SANDBOX` if exported). It
+creates two sandbox Items, drives a pending→posted transition, and **removes both** before exiting.
+
+⭐ **`--allow-net` is narrowed to `sandbox.plaid.com`, and there is no env knob to point it at
+production.** Same reasoning as `corpus.ts`'s Google-hosts fence: a measurement harness that _could_
+reach a live tenant is a hazard regardless of what its code says today. CFS has no production Plaid
+credential and no live Item, so this fence costs nothing to keep and would be awkward to add later.
+
+⚠️ **`/transactions/refresh` is capped at 2 per minute PER ITEM** (120/hour, 2,880/day) — the
+per-Item column of Plaid's rate-limit table, not the roomy per-client one. Driving a transition
+takes several refreshes on one Item, so a 429 is expected traffic and is waited out with a 35s
+backoff. The run takes ~1–2 minutes for that reason, not because anything is slow.
+
+⚠️ **A SANDBOX ANSWERS WHAT THE API DOES, NEVER WHAT THE BANK WILL SEND** — the third-party sibling
+of _v1 answers what is, never what must be_, and it is seductive for the same reason: executable,
+pinned and citable while the production link is none of those. Two figures here are **sandbox facts
+and are labelled as such in their own `of:`** — the backfill depth (production depth is
+`transactions.days_requested`, a parameter we choose) and the balance behaviour (sandbox balances
+are seeded constants, which is why SPIKE-004 exit criterion 4 is reported UNMET rather than
+approximated). `validate.ts` accepts a `plaid:` source pin and says the same thing at the regex.
+
+⭐ **Every check that ranges over a population asserts the population is non-empty**, through the
+`checkOver` helper, and that helper exists because the first run needed it: the first
+`/transactions/sync` returned nothing and **13 of 17 checks reported PASS against an empty feed**.
+"0/0 successors changed amount" is true and measures nothing. Three verdicts, not two — `N/A` is
+what a check returns when sandbox genuinely cannot reach the question, so an unmeasurable claim
+cannot hide inside a green run.

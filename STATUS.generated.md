@@ -11,10 +11,10 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 20 open | 41 answered of 61 · **0 with no owner or no decide-by** |
+| Open questions | 22 open | 41 answered of 63 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 24 | 0 open |
-| Decisions (ADR) | 47 | 25 in force · 18 proposed |
-| Spikes | 13 | 3 open |
+| Decisions (ADR) | 48 | 25 in force · 19 proposed |
+| Spikes | 13 | 2 open |
 | Requirements | 27 | 0 without a scenario |
 | Inbox | 137 | 111 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
@@ -22,12 +22,13 @@ is `deno task validate`'s judgement, not this file's.
 
 ## The bottleneck: undecided questions
 
-**20 of 61 still open**, soonest decide-by first.
+**22 of 63 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
 | `OQ-030` | Does CFS introduce a forced-call (short-turnaround) premium, and if so what is the turnar… | alex | 2026-10-15 | `REQ-LED` |
 | `OQ-035` | Does CFS introduce a production-type classification — `studio | indie | corporate/commerc… | alex | 2026-10-15 | — |
+| `OQ-062` | Should `PLAID_SECRET_SANDBOX` be renamed to `PLAID_SECRET`, letting the GCP project be th… | alex | 2026-10-31 | — |
 | `OQ-054` | As CFS acquires more vehicles, will any be rated at or below 6,000 lb gross vehicle weigh… | alex | 2026-11-15 | `SPIKE-005` |
 | `OQ-058` | What is the identity scheme for v2 domain entities — is it one opaque minted id per row e… | alex | 2026-11-30 | — |
 | `OQ-033` | Once the shipping specs are populated, which physical basis becomes allocation basis v2 —… | alex | 2026-12-15 | `ADR-0031` |
@@ -38,6 +39,7 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-055` | On a production service agreement, must the client fund before the crew is paid, or is ad… | alex | 2026-12-15 | — |
 | `OQ-056` | What remains after 2026-08-22's answers and corrections, and it is machinery rather than… | alex | 2026-12-15 | — |
 | `OQ-057` | Has CFS made the ASC 606-10-32-2A accounting policy election to exclude collected sales a… | alex | 2026-12-15 | — |
+| `OQ-063` | May a PENDING bank transaction post at all; which of the feed's two dates is the accounti… | alex | 2026-12-15 | — |
 | `OQ-039` | `organizations.tax_profile` carries two different concepts in one enum — who owes (applie… | alex | 2027-01-15 | — |
 | `OQ-052` | What vehicle rate absorbs into 5900, over what normal-capacity denominator — and where do… | alex | 2027-01-31 | — |
 | `OQ-059` | Which CDN carries CFS images — Uploadcare re-evaluated against imgix and any other suitab… | alex | 2027-01-31 | — |
@@ -83,7 +85,7 @@ None.
 - `ADR-0037` — An id carries meaning where it is used — a headline on every id, and addressable claims inside a decision
 - `ADR-0038` — Labor with no causal order is not COGS — 5801 is not created and 6600 Wages narrows instead
 
-### Proposed (18)
+### Proposed (19)
 
 | ADR | Title | Review by | Supersedes on acceptance | Blocked on |
 |---|---|---|---|---|
@@ -105,6 +107,7 @@ None.
 | `ADR-0045` | A stored jurisdiction records WHO asserted it and under what authority — not which rung of the precedence answered, which is a restatement of fields the document already holds | 2026-11-30 | — | `OQ-056` `OQ-057` |
 | `ADR-0046` | Adopt date-fns and @date-fns/tz as planned dependencies for every business datetime | 2026-11-01 | — | — |
 | `ADR-0047` | The client data model — one live transport replacing Firestore listeners, and an offline queue reconciled by three-way merge | 2026-11-15 | — | `OQ-043` `OQ-061` |
+| `ADR-0048` | The Plaid ingestion boundary — a store of record at the edge, CFS-minted identity, and delta-atomic application | 2026-11-30 | — | `OQ-062` `OQ-063` |
 
 ## Spikes
 
@@ -113,7 +116,7 @@ None.
 | `SPIKE-001` | Does the TigerBeetle client load and run under Deno via node-api compatibility? | 2 days | `ADR-0023` | closed |
 | `SPIKE-002` | What commit protocol keeps a MongoDB document write and a TigerBeetle posting c… | 1 week | `ADR-0042` | closed |
 | `SPIKE-003` | How does TigerBeetle's timestamp behave when loading history, and what are the… | 3 days | `ADR-0039` | closed |
-| `SPIKE-004` | What does Plaid actually provide, and what does bank reconciliation actually ne… | 3 days | _new ADR_ | open |
+| `SPIKE-004` | What does Plaid actually provide, and what does bank reconciliation actually ne… | 3 days | `ADR-0048` | closed |
 | `SPIKE-005` | Hand-roll the depreciation engine, or adopt a library? | 1 week | `ADR-0043` | closed |
 | `SPIKE-006` | How lossy is translating JSON Schema 2020-12 to MongoDB's `$jsonSchema`, and wh… | 2 days | `ADR-0040` | closed |
 | `SPIKE-007` | Which access path reaches DuckDB from Deno — the native addon or WASM — and can… | 2 days | `ADR-0024` | closed |
@@ -145,7 +148,7 @@ it is counted separately on purpose, and a milestone is not done because its che
 
 | Milestone | Criterion | Check | Measured |
 |---|---|---|---|
-| `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 13 spikes, 3 open, 0 closed without naming an ADR |
+| `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 13 spikes, 2 open, 0 closed without naming an ADR |
 
 ## Coverage gaps
 
