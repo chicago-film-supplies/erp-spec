@@ -2762,3 +2762,71 @@ open_questions:
       `inbox/2026-08-23-owner-greenfield-ids-change-the-size-answer-but-not-the-binding-one-and-sku-as-identity-is-the-recorded-trap.md`
       and
       `inbox/2026-08-23-what-a-minted-line-id-costs-and-why-path-interning-converges-on-it.md`.
+
+  - id: OQ-059
+    headline: "which CDN, and is evidence stored apart from imagery"
+    question: >-
+      Which CDN carries CFS images — Uploadcare re-evaluated against imgix and any other suitable
+      contender — and are the two evidentiary jobs (delivery photos, trash-pickup photos) stored
+      apart from public webapp imagery, given that evidence has retention duties a reaper fights?
+    owner: alex
+    decide_by: 2027-01-31
+    blocks: []
+    status: open
+    notes: >-
+      Opened 2026-08-23 from owner input:
+      `inbox/2026-08-23-owner-the-image-manager-is-three-jobs-two-of-them-evidence-and-quo-is-a-new-boundary-with-a-contact-sync.md`.
+      ⚠️ **There is no ADR adopting a CDN for v2.** `ADR-0027` adopted Mapbox and Resend at the
+      boundary, `ADR-0028` the self-hosted tier. Uploadcare survives in the spec only as
+      `migration/field-map.yaml` collections and a warning inside `OQ-049`.
+      ⭐ **The residual requirement is much smaller than the vendor** — owner: *"most of what i
+      thought i wanted out of uploadcare i ended up not using"*. CFS rolled its own image element,
+      is rolling its own uploader, and rolled its own background removal
+      (`code:2026-08-23:api-cloudrun@bbb791af:src/lib/bgRemove.ts`). **What is needed is signed
+      uploads and a custom domain**, with smart focus/crop the one remaining feature of interest.
+      ⇒ **switching cost is low precisely because so little is used**, which is a migration-cost
+      argument rather than a loyalty one.
+      ⚠️⚠️ **The sharper half of this question is not the vendor.** Two of the three jobs are
+      **evidence, not decoration**: photos of what was delivered and set up, and photos of trash
+      pickups, both texted to customer contacts. They are proof of delivery and proof of condition,
+      captured in the field and attached to a leg or trip. **Evidence has retention and immutability
+      duties that a CDN with a reaper actively fights** — and the repo already learned this one
+      artifact over: *"keep it OUT of a store that has a reaper — `uploadcare-sweep` deletes orphaned
+      CDN files"*
+      (`inbox/2026-08-22-design-input-the-gmail-evidence-picker-store-raw-mime-hash-it-verify-dkim-at-capture-and-keep-it-out-of-the-reaper.md`).
+      Pulls through to erp-spec#49. ⇒ **a single image manager spanning all three jobs is a category
+      error unless the evidence half is separated at the storage layer** — one is a replaceable
+      asset, the other is a record.
+      ⚠️ **If images become first-class they need an entity and an `OQ-058` prerequisite entry** —
+      gate 23 cannot see this until the entity file exists, and its note line says so.
+
+  - id: OQ-060
+    headline: "what Quo owns, and who wins a contact conflict"
+    question: >-
+      What does Quo own — is it the outbound channel for field photos alongside Resend, or instead
+      of it — and in the contact sync, which side is authoritative when both have changed the same
+      contact?
+    owner: alex
+    decide_by: 2027-01-31
+    blocks: []
+    status: open
+    notes: >-
+      Opened 2026-08-23 from owner input:
+      `inbox/2026-08-23-owner-the-image-manager-is-three-jobs-two-of-them-evidence-and-quo-is-a-new-boundary-with-a-contact-sync.md`.
+      ⚠️ **Quo appears NOWHERE in the spec or in v1** — verified 2026-08-23; the only matches for
+      `quo` across `charter.md`, `contexts/`, `adr/`, `roadmap/` and both product repos are the
+      phrase "status quo". It is a wholly new boundary arriving with two obligations.
+      **1 — outbound messaging.** Employees text delivery and trash-pickup photos to customer
+      contacts through it. ⚠️ **This overlaps `ADR-0027`'s Resend adoption**: CFS would hold two
+      outbound channels to the same customer contact, and whether there is **one messaging
+      abstraction or two** is undecided. A boundary service that duplicates an adopted one needs an
+      argument, not just a use case.
+      **2 — ⚠️⚠️ the contact sync, which is the sharp end.** *"contact crud should sync w/ quo"*,
+      and **sync is doing a lot of work in that sentence**: which side is authoritative, is it
+      bidirectional, and what happens when both sides change the same contact? ⭐ **That is the
+      three-way merge problem again, across a system boundary** — and unlike the in-document case
+      (`SPIKE-013`) there is **no shared base to diff against unless one is deliberately kept.**
+      ✅ **`ADR-0009` already governs the identifier half**: foreign identifiers never enter domain
+      models and an unresolvable id is a hard error rather than a null. A Quo contact id is a
+      foreign identifier and needs boundary translation with an explicit unmapped path — a
+      quarantine, not a null.

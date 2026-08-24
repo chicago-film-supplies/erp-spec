@@ -11,18 +11,18 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 17 open | 41 answered of 58 · **0 with no owner or no decide-by** |
+| Open questions | 19 open | 41 answered of 60 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 24 | 0 open |
 | Decisions (ADR) | 45 | 25 in force · 16 proposed |
 | Spikes | 13 | 5 open |
 | Requirements | 27 | 0 without a scenario |
-| Inbox | 133 | 107 unpromoted |
+| Inbox | 134 | 108 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
 ## The bottleneck: undecided questions
 
-**17 of 58 still open**, soonest decide-by first.
+**19 of 60 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
@@ -40,6 +40,8 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-057` | Has CFS made the ASC 606-10-32-2A accounting policy election to exclude collected sales a… | alex | 2026-12-15 | — |
 | `OQ-039` | `organizations.tax_profile` carries two different concepts in one enum — who owes (applie… | alex | 2027-01-15 | — |
 | `OQ-052` | What vehicle rate absorbs into 5900, over what normal-capacity denominator — and where do… | alex | 2027-01-31 | — |
+| `OQ-059` | Which CDN carries CFS images — Uploadcare re-evaluated against imgix and any other suitab… | alex | 2027-01-31 | — |
+| `OQ-060` | What does Quo own — is it the outbound channel for field photos alongside Resend, or inst… | alex | 2027-01-31 | — |
 | `OQ-045` | When a vendor bills LESS than was accrued, what retires the residual left in `2010 Accrue… | alex | 2027-02-15 | — |
 | `OQ-048` | At what rate is a contributed (unpaid owner) shift costed in the IMPUTED labor view — the… | alex | 2027-03-15 | — |
 | `OQ-051` | Where is the seam between CFS and a chat system for comments and threads — CFS implements… | alex | 2027-03-31 | — |

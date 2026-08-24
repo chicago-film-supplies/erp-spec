@@ -18,6 +18,7 @@ exit_criteria:
   - The conflicts a same-field author/timestamp popover CANNOT arbitrate are enumerated from the live corpus with a count for each, not asserted as a list.
   - Whether the undo path requires OQ-043's document event history is answered yes or no, with what breaks if it is no.
   - The offline/pending/synced state is shown to be derivable at every save-on-focusout site — the absence of an error is currently the only feedback, so this is the load-bearing half.
+  - A field photo captured offline survives and uploads on reconnect — blobs are not field writes, and a queue that treats `qty: 2` and a 4 MB JPEG identically has not been designed for the second.
 closes_adr: new
 status: open
 ---
@@ -73,6 +74,23 @@ burst can time out or phantom-500 _after_ Firestore committed).
 ⭐ **This is why the shared ADR is right.** The write path's recovery is _defined in terms of_ the
 listener, so "what replaces the listener" and "what happens offline" are one decision seen from two
 sides — which neither side knew when the ruling was made.
+
+## ⚠️ Scope addition, 2026-08-23 — the queue must carry BLOBS, not only field writes
+
+Owner input
+(`inbox/2026-08-23-owner-the-image-manager-is-three-jobs-two-of-them-evidence-and-quo-is-a-new-boundary-with-a-contact-sync.md`):
+employees photograph what was delivered and set up, and trash pickups, and text them to customer
+contacts. ⇒ **field photos are captured exactly where the signal is worst** — a delivery, a location
+— which is this spike's "manager out on location" case.
+
+⚠️ **But everything above designs the queue for FIELD WRITES**: small, coalescible by
+`(document, field path)`, replayed as diffs. **A photo is a blob** — megabytes, not coalescible, and
+its idempotency story is upload-level rather than field-level. A 4 MB JPEG and `qty: 2` are the same
+object to the queue as specified, and they should not be.
+
+⇒ Exit criterion added. ⭐ **And the storage question is `OQ-059`'s, not this spike's**: two of the
+three image jobs are **evidence** with retention duties that a CDN reaper fights, so where the blob
+lands is a separate decision from whether the queue can carry it.
 
 ## ⭐⭐ Finding 2, 2026-08-23 — the architecture is a THREE-WAY MERGE, and its key is measured
 
