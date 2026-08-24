@@ -1,18 +1,34 @@
 # Reaching m4 — every hotspot is resolved; only the spikes remain
 
-> ## ⚠️ STATUS 2026-08-23 (compacted — the 08-22 and earlier blocks are folded in, not stacked)
+> ## ⚠️ STATUS 2026-08-24 (compacted — 08-23 and earlier are folded in, not stacked)
 >
 > ⭐ **ALL 23 HOTSPOTS RESOLVED, and m4 is down to ONE machine-checkable criterion in the whole
-> spec**: `spikes_closed_with_adr`. `main` is CI-green — `deno task ci` all 5 steps, `validate` **0
-> failures**. Everything committed and pushed.
+> spec**: `spikes_closed_with_adr`. `validate` is **0 failures**.
 >
-> ⚠️ **The ~25 validate warnings are the CLOCK, not a regression** — `2026-08-08`/`08-09` inbox
+> ⚠️⚠️ **THE 08-23 PLAN'S RANKING IS DEAD, AND THAT IS THE FIRST THING TO KNOW.** It put
+> _"SPIKE-009's ADR"_ at #1 as _"the nearest close… pure desk work"_. **The owner's ruling the same
+> day made that impossible**: `SPIKE-009` and `SPIKE-013` name the SAME new ADR, so 009's ADR cannot
+> be drafted until 013 reports. A session picking this plan up cold would have started on a blocked
+> item. ⇒ **the ordering table below is rewritten, not annotated.**
+>
+> **Spikes: 13 total, 5 not closed** — `SPIKE-013` (offline queued writes) was opened 2026-08-23 out
+> of the SPIKE-009 ADR interview, and the 08-23 block predates it. Two closed that week —
+> `SPIKE-008` → `ADR-0045`, `SPIKE-005` → `ADR-0043`.
+>
+> ⭐ **SPIKE-013 is the only open spike on the critical path with no external blocker, and closing
+> it closes TWO.** 004 is blocked on nothing either but is a leaf; 011 needs provisioning; 012 is
+> blocked on a business process that is not ours to start.
+>
+> **Housekeeping landed 2026-08-24**, both items from a stale-artifact review rather than from new
+> work: `SPIKE-011` rescoped to size the whole ADR-0028 tier (erp-spec#41 was **closed 08-23 before
+> its rescope was written**, and the spend is now authorized — so the guard against buying the wrong
+> answer was untracked); and `SPIKE-004`'s _"blocked on credentials"_ corrected against
+> `gcloud secrets list` — `PLAID_CLIENT_ID` / `PLAID_SECRET_SANDBOX` landed in `cfs-dev-3100` on
+> 08-23.
+>
+> ⚠️ **The ~39 validate warnings are the CLOCK, not a regression** — `2026-08-08`/`08-09` inbox
 > notes crossing the 14-day unpromoted threshold. That is erp-spec#6's backlog surfacing, and it
 > grows every day nobody promotes.
->
-> **Spikes: 12 total, 4 not closed.** Two closed this week — `SPIKE-008` → `ADR-0045`, `SPIKE-005` →
-> `ADR-0043` — and `SPIKE-009` moved `open` → `in_progress` with **all four exit criteria now
-> carrying evidence**.
 >
 > ⭐⭐ **The pattern that has now bitten three times, and it is the one to carry across a clear: a
 > finding measured accurately against the CURRENT system, generalised into a claim about the TARGET
@@ -22,13 +38,16 @@
 > (erp-spec#50). **The v1 code is the wrong oracle for a target-state question, and it is seductive
 > precisely because it is executable.**
 >
-> ⭐ **And its sibling, from 2026-08-23's second half: an ABSENCE READS AS A RESULT.** The
-> `SPIKE-009` probe hung with zero output because `watch()` is lazy and the write it waited on had
-> already happened; a Solid reactivity test measured **nothing at all** because Deno resolves the
-> non-reactive SSR build. Neither was found by reading. **Both were found by asserting a positive
-> count and watching it stay at zero.**
+> ⭐ **And its sibling: an ABSENCE READS AS A RESULT.** The `SPIKE-009` probe hung with zero output
+> because `watch()` is lazy and the write it waited on had already happened; a Solid reactivity test
+> measured **nothing at all** because Deno resolves the non-reactive SSR build. Neither was found by
+> reading. **Both were found by asserting a positive count and watching it stay at zero.**
+>
+> ⚠️ **A third sibling, found by this review: a CLOSED ISSUE READS AS DONE WORK.** erp-spec#41 was
+> closed in the same pass that recorded _"widen the scope before provisioning, not after"_ — and the
+> widening was never written. **Check the artifact, not the queue.**
 
-- **Date:** 2026-08-23
+- **Date:** 2026-08-24
 - **Repo:** erp-spec · **everything is pushed**
 - **Open issues:** #3, #4, #6, #12, #17, #32, #35, #36, #37, #40, #42, #43, #44, #45, #46, #48, #49,
   #50, **#51 (new — SPIKE-009's ADR)**
@@ -41,19 +60,25 @@ one thing:
 | criterion                                  | 2026-08-21   | now                       |
 | ------------------------------------------ | ------------ | ------------------------- |
 | every hotspot resolved                     | 4 of 20 open | ✅ **0 of 23 open — MET** |
-| every spike closed, naming the ADR it made | 7 of 12 open | **4 of 12 open**          |
+| every spike closed, naming the ADR it made | 7 of 12 open | **5 of 13 open**          |
+
+⚠️ **5 of 13, not 4 of 12** — `SPIKE-013` was opened 2026-08-23 and the denominator moved with it.
+⭐ **The open count going UP is the correct outcome here**, not a slip: 013 is work that was inside
+009 and unnamed, and splitting it out is what made 009's ADR blocked _visibly_ instead of silently.
 
 ### Where each remaining spike actually stands
 
-| spike                                    | state         | what it needs                                                                                                                                                                                                                                                                                 |
-| ---------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **009** Firestore listeners → new        | `in_progress` | ⭐ **all four criteria have evidence — only the ADR remains** (#51). Four decisions to make, not one; they are enumerated in the issue                                                                                                                                                        |
-| **004** Plaid → new                      | open          | **unblocked** — `PLAID_CLIENT_ID` / `PLAID_SECRET_SANDBOX` are in dev Secret Manager and imported into dev TF state. ⚠️ prod plan still shows 2 creates, and the `_SANDBOX` suffix fights the house convention — renaming is destroy-and-recreate, so **decide before any real value exists** |
-| **011** TigerBeetle on Linode → ADR-0013 | open          | spend authorized and the rescope landed (#41 closed) — but it is provisioning plus a wait, and macOS numbers do not transfer                                                                                                                                                                  |
-| **012** booking boundary → ADR-0015      | `in_progress` | ⛔ **blocked on a BUSINESS PROCESS** — manager check-in/out going live (#46). Not yours to unblock                                                                                                                                                                                            |
+| spike                               | state         | what it needs                                                                                                                                                                                                                                                                     |
+| ----------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **013** offline queued writes → new | open          | ⭐⭐ **nothing external.** The only open spike on the critical path that is startable today, and closing it closes TWO. 7 exit criteria; only #4 (enumerate the conflict surface from the corpus) fits the existing probe pattern — the rest need a queue prototype               |
+| **009** Firestore listeners → new   | `in_progress` | ⛔ **blocked on 013.** All four criteria have evidence (#51); the ADR is shared with 013 by owner ruling, so it cannot be drafted first. **A session that writes two ADRs here has misread the ruling**                                                                           |
+| **004** Plaid → new                 | open          | **nothing** — `PLAID_CLIENT_ID` / `PLAID_SECRET_SANDBOX` verified present in `cfs-dev-3100`, created 08-23. The cheapest close in the repo. ⚠️ the `_SANDBOX` suffix fights the house convention and renaming is destroy-and-recreate, so **decide before any real value exists** |
+| **011** Linode host → ADR-0013      | open          | spend authorized, **rescope landed 08-24** (it had NOT landed when #41 was closed). Now provisioning plus a wait — and the widened scope may exceed the spend already approved, which is a question to settle before buying anything                                              |
+| **012** booking boundary → ADR-0015 | `in_progress` | ⛔ **blocked on a BUSINESS PROCESS** — manager check-in/out going live (#46). Not yours to unblock                                                                                                                                                                                |
 
-⇒ **009's ADR is the shortest path to closing m4**, and it is desk work with the evidence already
-gathered. 004 is the next self-contained one.
+⇒ **013 is the shortest path to closing m4, and it is no longer desk work.** It moves the count by
+two where nothing else moves it by more than one. **004 is the fallback if 013's prototype stalls**
+— self-contained, 3-day timebox, nothing depends on it.
 
 ### ✅ What closed 2026-08-22 / 08-23
 
@@ -114,14 +139,15 @@ once.
 
 ## Then, in order
 
-|       |                                                                                                                                                                                                                                                                                                                                |
-| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **1** | **SPIKE-009's ADR (#51).** The nearest close, and the only remaining m4 blocker that is pure desk work. Four decisions with evidence behind each: what the client persists on reconnect, how the resume-failure path gets an injectable seam, which collections enable pre/post images, and where the lazy-`watch()` fix lives |
-| **2** | **SPIKE-004 against the Plaid sandbox.** Self-contained, credentials in place. Settle the `_SANDBOX` naming before any real value exists                                                                                                                                                                                       |
-| **3** | **#6 — requirements.** `ordering`, `availability`, `banking`, `procurement` still have **zero**, and the ~25 validate warnings are this backlog surfacing and growing daily                                                                                                                                                    |
-| **4** | **#35 PSA, now much smaller than it reads.** ADR-0044 settled principal-vs-agent and the EOR finding means the cost path is already specified — PSA needs the **revenue side and a product line**, not a payroll path. Feeds #6                                                                                                |
-| **5** | **#40 + #44** — the supersession-dependents gate and its citation-assertion sibling. Four ready-made instances to land red against                                                                                                                                                                                             |
-| **6** | **#45** — ADR-0041's D4 is a procedure with nothing executing on it, and it is the half that removes the seasonal bias                                                                                                                                                                                                         |
+|       |                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1** | **SPIKE-013 (offline queued writes).** ⭐ The only m4 blocker that is startable today, and it closes two spikes. **Measure before you build**: criterion 4 enumerates the conflict surface from the live corpus and is the criterion most likely to change the design, so it de-risks the prototype's scope. `deno task merge-key` already landed the key finding — `(uid, k-th occurrence)`, because a leaf uid repeats in **18.3%** of orders |
+| **2** | **The shared ADR — 009 + 013 in ONE document, by owner ruling.** Six decisions: R1–R3 rest on SPIKE-009's measurements, R4–R6 on owner rulings, and **the ADR must label which is which** rather than let them read alike. Closes both spikes and takes m4 from 5 open to 3                                                                                                                                                                     |
+| **3** | **SPIKE-004 against the Plaid sandbox.** Self-contained, credentials verified in place, nothing depends on it. The fallback if 013 stalls. Settle the `_SANDBOX` naming before any real value exists                                                                                                                                                                                                                                            |
+| **4** | **#6 — requirements.** `ordering`, `availability`, `banking`, `procurement` still have **zero**, and the ~25 validate warnings are this backlog surfacing and growing daily                                                                                                                                                                                                                                                                     |
+| **5** | **#35 PSA, now much smaller than it reads.** ADR-0044 settled principal-vs-agent and the EOR finding means the cost path is already specified — PSA needs the **revenue side and a product line**, not a payroll path. Feeds #6                                                                                                                                                                                                                 |
+| **6** | **#40 + #44** — the supersession-dependents gate and its citation-assertion sibling. Four ready-made instances to land red against                                                                                                                                                                                                                                                                                                              |
+| **7** | **#45** — ADR-0041's D4 is a procedure with nothing executing on it, and it is the half that removes the seasonal bias                                                                                                                                                                                                                                                                                                                          |
 
 ⚠️ **The decision backlog is not blocked on the owner's availability — it is blocked on nobody
 having prepared the decisions.** ⭐ **2026-08-22 is the proof, twice over.** HOT-022 took one
@@ -254,7 +280,12 @@ carries what was found and why; the ADRs carry the reasoning; the eleven open is
 cold-pickup section; `STATUS.generated.md` reports the milestone state; and `deno task ci`
 reproduces the whole CI contract locally.
 
-⚠️ **The two things not written down anywhere else** are in this file: that the 17 validate warnings
-are the clock rather than a regression, and that **the reachable work is now SPIKE-002's harness
-(#47), then 008 or 009** — the other three spikes are gated on money, credentials or the business
-and no amount of authoring moves them.
+⚠️ **The two things not written down anywhere else** are in this file: that the ~39 validate
+warnings are the clock rather than a regression, and that **the reachable work is now `SPIKE-013`,
+then the shared 009+013 ADR, then `SPIKE-004`** — `SPIKE-011` is gated on provisioning and
+`SPIKE-012` on a business process, and no amount of authoring moves either.
+
+⚠️ **This paragraph named SPIKE-002 and "008 or 009" until 2026-08-24; all three had closed or moved
+underneath it.** ⭐ **The recommendation itself is the thing that goes stale fastest in a plan
+doc**, because it is the only part written about the _future_ — so re-derive it from the spike front
+matter rather than trusting the sentence, and treat this footnote as the reason to.

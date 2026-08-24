@@ -453,10 +453,11 @@
           <outline text="If the client fails under Deno, the failure is characterised precisely enough to pick between another library and a sidecar."/>
         </outline>
         <outline text="SPIKE-011 — Does TigerBeetle meet its durability and latency expectations on Linode block storage, or does it r…" _note="timebox: 3 days · closes: ADR-0013 · open">
-          <outline text="Measured transfer throughput and latency percentiles on each storage option, as numbers."/>
-          <outline text="A statement of whether block storage honours the durability assumptions TigerBeetle relies on."/>
-          <outline text="The replica count and instance shape the chosen option implies, with monthly cost."/>
-          <outline text="If block storage is unsuitable, the alternative is named and priced before ADR-0013 is accepted."/>
+          <outline text="Measured transfer throughput and latency percentiles on each storage option, as numbers, taken on a production-default cluster — NOT `--development`, which caps createTransfers at 253 against 8189."/>
+          <outline text="A statement of whether block storage honours the durability assumptions TigerBeetle relies on, from the direct-I/O and fsync path verified explicitly rather than inferred from throughput looking fine."/>
+          <outline text="The whole tier sized together as a table, one row per process — the nine Victoria-stack containers, the OpenTelemetry collector, Gotenberg, Caddy, the Deno application, MongoDB, Valkey and TigerBeetle — each carrying a memory and CPU figure that is measured or cited, never estimated."/>
+          <outline text="The replica count and instance shape that sum implies, with monthly cost."/>
+          <outline text="If block storage is unsuitable, the alternative is named and priced — and what that does to ADR-0013, which is accepted and frozen and can therefore no longer be gated by this spike."/>
         </outline>
         <outline text="SPIKE-012 — At which fulfillment moment does a booking become a TigerBeetle pending transfer, and how much of o…" _note="timebox: 1 week · closes: ADR-0015 · in_progress">
           <outline text="A boundary chosen, with the transitions on each side enumerated."/>
