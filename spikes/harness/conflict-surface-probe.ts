@@ -2,32 +2,30 @@
  * SPIKE-013 criterion 4 — the conflicts a same-field author/timestamp popover CANNOT arbitrate,
  * counted from the live corpus rather than imagined.
  *
- * ⚠️⚠️ **THE FIRST THING THIS PROBE MEASURES IS WHETHER THE CRITERION IS ANSWERABLE AT ALL, AND
- * HALF OF IT IS NOT.** A popover arbitrates ACTOR vs ACTOR: two people moved the same field, here
- * are their names and times, pick one. Counting how often that happens needs a corpus with two
- * people in it. **Prod has ONE operator account** (`users`, admin, not deleted) — so every
- * actor-vs-actor class has a corpus count of exactly 0, and **0 here means "unobservable", never
- * "does not happen"**. That is SPIKE-012's trap verbatim: two boundaries reported PASSES on 11
- * rows, and an unexercised branch is a claim rather than a capability.
+ * ⚠️⚠️ **WHAT THIS PROBE IS A FIGURE OF, BEFORE ANY NUMBER IN IT IS USED.** Every count here is a
+ * measurement of the **v1 migration corpus**. v1 is **UNFINISHED**, and this probe is not evidence
+ * about what v2 must do. It was written once in the other direction and the owner caught it: an
+ * earlier version reported "orders carry no author" as though it constrained v2's conflict UI.
+ * **It does not.** `REQ-FUL-001` already requires v2 to record the acting crew member, and
+ * `REQ-FUL-002` exists precisely to distinguish "no actor" from "an actor nobody wrote down".
+ * ⇒ **v1's missing author is a v1 gap** (api-cloudrun#407 is the open issue to close it), not a
+ * fact about the system being specified.
  *
- * ⭐ **The reframing that makes the criterion answerable, and it is the probe's main output.** The
- * conflicts a popover cannot arbitrate are mostly NOT actor-vs-actor. They are **actor vs STATE**:
- * the invoice was paid while you were offline, the row your edit addressed is gone, the tax rate
- * moved, the field is derived and must be recomputed rather than chosen, the posting is immutable.
- * ⇒ **the second party is the SYSTEM, not a second person** — and a single-actor corpus counts
- * those exactly, because they need no concurrency to exist.
+ * ⭐ **What the probe IS for**, and it is worth more than the thing it was misread as: the conflict
+ * classes a same-field author/timestamp popover cannot arbitrate are mostly **not actor-vs-actor**.
+ * They are **actor vs STATE** — the invoice was paid while you were offline, the row your edit
+ * addressed is gone, the rate moved, the field is derived, the posting is immutable. ⇒ **the second
+ * party is the SYSTEM, not a second person.**
  *
- * So the classes below split in two, and the split is reported rather than blurred:
+ * ⚠️ **And that reframing is a DOMAIN argument, not a corpus one.** Invoices get paid, rows get
+ * deleted, rates change, totals are derived and postings are immutable in **any** version — which
+ * is exactly why the conclusion survives while the author finding did not. **The counts below size
+ * the MIGRATION CORPUS for each class. They do not predict how often a v2 operator meets one.**
  *
- *   - **countable** (A–F) — the population in which each class APPLIES, from prod today.
- *   - **structurally unmeasurable** (G) — needs ≥2 actors, and prod has 1. Named with its reason,
- *     never given a zero that would read as a pass.
- *
- * ⚠️ **A population is not a frequency.** Every count here answers "how many documents could hit
- * this class", not "how often it happened" — the corpus holds current state, not an edit history,
- * so concurrency itself leaves no trace to count. Stated at the top of the output too, because a
- * number that travels without its denominator's meaning is how the 18.3% figure nearly became a
- * merge key.
+ * ⛔ **Concurrency itself is unmeasurable here, twice over.** The corpus holds current state and no
+ * edit history, so a collision leaves no trace; and prod has one operator account because v1 is a
+ * single-operator app that is not finished. **Neither fact bounds v2**, whose actor model is a
+ * requirement rather than an observation, and which is getting a public client app besides.
  *
  * Read-only prod Firestore under ADC. No writes, and `--allow-net` is narrowed so it cannot reach
  * Xero or CRMS.
@@ -119,11 +117,15 @@ console.log(
     `${destinationDocs.length} destinations · ${orgs.length} organizations`,
 );
 console.log(
-  `\n⚠️ every figure below is a POPULATION IN WHICH A CLASS APPLIES, not an observed frequency.`,
+  `\n⚠️ THIS IS A MEASUREMENT OF THE v1 MIGRATION CORPUS. v1 is UNFINISHED and is not the model.`,
 );
 console.log(
-  `   the corpus holds current state and no edit history, so concurrency leaves no trace to count.\n`,
+  `   Every figure sizes a class within HISTORY. None of them says what v2 must do, and none`,
 );
+console.log(
+  `   predicts how often a v2 operator meets one. The corpus also holds no edit history, so`,
+);
+console.log(`   concurrency leaves no trace to count even within v1.\n`);
 
 // ── class 0 — what the popover has to show, and whether it exists ────────────────────────────────
 
@@ -147,7 +149,7 @@ for (const o of orders) {
   }
 }
 
-console.log(`### Class 0 — the popover's own inputs: does an author even exist?\n`);
+console.log(`### Class 0 — authorship IN THE MIGRATION CORPUS (a v1 fact, not a v2 constraint)\n`);
 console.log(`  live operator accounts in prod:      ${pad(liveUsers.length)}`);
 console.log(
   `  orders carrying created_by:          ${pad(ordWithCreatedBy.length)}  ${
@@ -155,7 +157,7 @@ console.log(
   }`,
 );
 console.log(`    ...of which a LIVE HUMAN account:  ${pad(ordCreatedByHuman.length)}`);
-console.log(`  orders carrying updated_by:          ${pad(0)}  — THE FIELD DOES NOT EXIST`);
+console.log(`  orders carrying updated_by:          ${pad(0)}  — the field does not exist in v1`);
 console.log(
   `  invoices carrying updated_by:        ${pad(invWithUpdatedBy.length)}  ${
     pct(invWithUpdatedBy.length, invoices.length)
@@ -166,6 +168,23 @@ console.log(`\n  distinct ActorRef names across orders + invoices, by occurrence
 for (const [n, c] of [...actorNames].sort((a, b) => b[1] - a[1]).slice(0, 10)) {
   console.log(`    ${pad(c, 6)}  ${n}${humanUids.has(n) ? "" : "   (not a live user account)"}`);
 }
+console.log(
+  `\n  ⛔ THIS SAYS NOTHING ABOUT v2's CONFLICT UI, and an earlier version of this probe said it`,
+);
+console.log(
+  `     did. v2 RECORDS AN ACTOR — REQ-FUL-001 requires it, and REQ-FUL-002 exists to keep`,
+);
+console.log(
+  `     "no actor" distinguishable from "an actor nobody wrote down". v1's missing author is a`,
+);
+console.log(`     v1 gap with an open issue against it (api-cloudrun#407).`);
+console.log(
+  `\n  ⇒ what it IS: the authorship a MIGRATION inherits. Historical documents arrive carrying`,
+);
+console.log(
+  `     what is shown above, so a v2 surface that displays an author has to render that`,
+);
+console.log(`     honestly for imported rows rather than invent one.`);
 
 // ── class A — terminal state: refuse the merge, do not resolve it ────────────────────────────────
 
@@ -489,12 +508,21 @@ console.log(`  units currently out:                 ${pad(unitsOut, 6)}`);
 console.log(`    ...from the import cohort:         ${pad(unitsOutImport, 6)}`);
 console.log(`    ...NATIVELY booked out:            ${pad(unitsOutLive, 6)}`);
 console.log(
-  `\n  ⚠️ THE UN-SPLIT TOTAL IS A FIGURE OF THE IMPORT, NOT OF THE WAREHOUSE. SPIKE-012 measured`,
+  `\n  ⛔ NEITHER LINE IS USABLE, AND THE "NATIVE" ONE IS THE TRAP. The un-split total is a figure`,
 );
 console.log(
-  `     the same trap: the import wrote terminal counters only, so \`out\` is populated on rows`,
+  `     of the IMPORT — it wrote terminal counters only, so \`out\` sits on rows whose orders are`,
 );
-console.log(`     whose orders are stored \`complete\`. Use the NATIVE line, not the total.`);
+console.log(
+  `     stored \`complete\` (SPIKE-012). But the residue is a figure of a DORMANT SUBSYSTEM: the`,
+);
+console.log(
+  `     manager's check-in/check-out process is not live, and \`prepped\` stood at 11 rows`,
+);
+console.log(
+  `     corpus-wide when SPIKE-012 measured it. ⇒ class F's KIND is a domain fact and stands;`,
+);
+console.log(`     its COUNT is withdrawn. Printed here only so the withdrawal is visible.`);
 console.log(
   `\n  ⇒ "undo reverses a ledger entry with a new entry; it does not recall a van that already`,
 );
@@ -504,41 +532,41 @@ console.log(
 
 // ── class G — the actor-vs-actor classes, and why they have no number ────────────────────────────
 
-console.log(`\n### ⛔ Class G — actor vs actor: STRUCTURALLY UNMEASURABLE on this corpus\n`);
-console.log(`  live operator accounts:              ${pad(liveUsers.length)}`);
+console.log(`\n### ⛔ Class G — actor vs actor: NOT MEASURABLE HERE, AND NOT THE QUESTION\n`);
+console.log(`  live operator accounts in prod:      ${pad(liveUsers.length)}`);
 console.log(
-  `\n  A popover arbitrates two PEOPLE. With ${liveUsers.length} operator account in prod, the`,
-);
-console.log(`  same-field two-author collision cannot occur, so its corpus count is 0 —`);
-console.log(`  and 0 here means UNOBSERVABLE, not "does not happen".`);
-console.log(
-  `\n  ⚠️ Do not read this as "the popover is unnecessary". That is the absence-to-absence`,
+  `\n  Two independent reasons this class has no number, and the second matters more:`,
 );
 console.log(
-  `     error this repo has now made four times: v1 answers WHAT IS, never WHAT MUST BE.`,
+  `\n  1. v1 keeps current state and no edit history, so a collision leaves no trace even where`,
+);
+console.log(`     one occurred.`);
+console.log(
+  `  2. ⛔ v1 IS A SINGLE-OPERATOR APP THAT IS NOT FINISHED. Counting collisions in it would`,
 );
 console.log(
-  `     A PUBLIC CLIENT APP IS IN SCOPE (owner, 2026-08-18 and 2026-08-23), so the actor`,
-);
-console.log(`     count is known to be rising — this figure is a floor with a date on it.`);
-console.log(`\n  ⭐ And ONE ACCOUNT IS NOT ONE PERSON, which cuts the other way and is sharper:`);
-console.log(
-  `     if several humans share the single admin login, the popover cannot name who made`,
+  `     measure the staffing of an unfinished system, which is not a fact about v2 at all.`,
 );
 console.log(
-  `     the competing edit even in principle — the corpus cannot tell the two apart, and`,
+  `\n  ⇒ v2's actor model is a REQUIREMENT, not an observation — and a public client app is in`,
 );
-console.log(`     neither can the design. Whether they do is an owner question, not a query.`);
+console.log(
+  `     scope besides, so the actor count is set by the design rather than read off v1.`,
+);
+console.log(
+  `\n  ⚠️ Do NOT read a low number here as "concurrent editing is rare" or as "the popover is`,
+);
+console.log(
+  `     unnecessary". That is the absence-to-absence error, and this probe has already made it`,
+);
+console.log(`     once (see the header).`);
 
 // ── the verdict ──────────────────────────────────────────────────────────────────────────────────
 
 console.log(`\n### Verdict\n`);
-console.log(`  Countable classes (A–F) all have a non-trivial population TODAY, with ONE actor.`);
-console.log(`  ⇒ the conflict surface is dominated by actor-vs-STATE, which needs no concurrency`);
-console.log(
-  `    to exist and which a same-field author/timestamp popover cannot arbitrate at all.`,
-);
-console.log(
-  `  ⇒ criterion 4 is ANSWERED for the classes that admit a count, and its actor-vs-actor`,
-);
-console.log(`    half is reported as unmeasurable with its reason rather than given a zero.\n`);
+console.log(`  Classes A–F are DOMAIN kinds, not corpus artifacts: invoices get paid, rows get`);
+console.log(`  deleted, rates move, totals are derived and postings are immutable in any version.`);
+console.log(`  ⇒ a same-field author/timestamp popover cannot arbitrate ANY of them, whatever the`);
+console.log(`    actor model is — which is why this conclusion survives while Class 0's did not.`);
+console.log(`  ⇒ the counts beside each class size the MIGRATION CORPUS. They are not a forecast,`);
+console.log(`    and they are not a design input.\n`);
