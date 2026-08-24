@@ -225,6 +225,72 @@ other.
 - ⇒ **Criterion 4 is met** for the classes that admit a count, with the actor-vs-actor half reported
   as unmeasurable and reasoned rather than scored zero.
 
+## ⭐⭐⭐ Finding 4, 2026-08-24 — criterion 5 answered NO, and the question named the wrong artifact
+
+Source-read of `code:2026-08-24:manager@9504a1e:src/primitives/createEntityCache.ts`,
+`src/types/store.ts`, `src/components/RecoveryLayer.tsx`, `src/components/StatusBar.tsx`.
+
+### The answer: NO — and OQ-043 could not have answered it either way
+
+⚠️ **`OQ-043` is about a DIFFERENT SET OF COLLECTIONS.** It asks whether the **product and
+organization masters** carry an event history so a past _classification_ is recoverable. This
+spike's undo path is about **orders and invoices**. The two are disjoint, so deciding OQ-043 in
+either direction leaves this criterion exactly where it was.
+
+⇒ ⚠️ **The earlier note in this file — _"whether the masters get one is `OQ-043`, still open. The
+undo path depends on it"_ — conflated a master-data question with a transactional-document one.**
+Corrected here rather than by editing it away; it is the kind of adjacency that reads right.
+
+### Undo splits in two, and only one half needs anything
+
+- ⭐ **Undo WITHIN an unresolved merge is FREE.** `base`, `ours` and `theirs` are all in hand by
+  construction while the merge is open, so reversing a resolution choice is re-deriving from the
+  same three inputs. **No history, no new storage, no decision.** This is the common case.
+- ⚠️ **Undo AFTER the merge commits needs something, and it is still not OQ-043's history.** Once
+  committed the base is discarded and nothing holds the pre-merge value.
+
+**What breaks if the answer stays no**, precisely — and the split is not where it looks:
+
+| field family                 | recoverable?                                                                                                                                                 |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| anything that **posted**     | ✅ **the ledger IS the history.** A posting is immutable and reversed by a further posting, so the prior state is reconstructible from the journal           |
+| **authored, not yet posted** | ⛔ **nothing holds the prior value.** Subject, reference, notes, dates, quantities, a discount rate before it posts — the operator's only recourse is memory |
+
+⇒ **The gap is exactly "authored, not yet posted"**, and it is narrower than "orders and invoices
+have no event history" suggests. Whether to close it is a real decision, it is **not** OQ-043's, and
+it is now **`OQ-061` (can a committed field edit be undone)**.
+
+### ⭐⭐ The obligation that outranks the undo question, and it was measured on the way
+
+**The three-way merge's base does not survive the event most likely to happen during a long
+disconnect.** Three facts, each read rather than assumed:
+
+1. **The base is IN-MEMORY ONLY.** `latestSnapshot` lives in `updateStates`, a plain `Map` in the
+   factory closure. A reload or a tab close loses it.
+2. **The stash does not carry it.** `PendingUpdateRecord` persists `fields` (the dirty values —
+   `ours`) and `baseVersion: number | null`, and the type's own comment calls that number
+   **"display-only — retry diffs against the fresh snapshot, so the normal 409 path handles real
+   conflicts."** ⇒ **the persisted format is the TWO-WAY version gate, stated in the type.**
+3. ⚠️⚠️ **The stash is written only when a HUMAN CLICKS A BUTTON.** `stashPending` has exactly two
+   callers, both `onClick` — `RecoveryLayer.tsx:81` and `StatusBar.tsx:109`. There is **no**
+   automatic stash on save failure, on unload, or on going offline.
+
+⇒ ⚠️⚠️ **A reload during a disconnect therefore loses BOTH the base and, unless somebody clicked,
+the queue.** Design obligation 1 must read **"pin AND PERSIST the base"** — pinning an in-memory
+object against mutation does not survive the process that holds it.
+
+⭐ **This sharpens "the queue extends the existing machinery" into something specific.** What exists
+is **operator-triggered save-failure recovery**, not an automatic queue. Extending it is right; the
+extension is the automatic half, and that half is where the work is.
+
+### ⚠️ Groundwork for criterion 6 — there is no offline signal to derive state FROM
+
+**Zero occurrences of `navigator.onLine`, `addEventListener("offline")`, `"online"` or
+`beforeunload` anywhere in `manager/src`** (the single `visibilitychange` is the logger's flush). ⇒
+criterion 6's _"the offline/pending/synced state is derivable at every save-on-focusout site"_
+starts from **no offline detection at all**, not from a signal that needs plumbing. Recorded here so
+the criterion is costed against the real starting point.
+
 ## What is already known, and did not come from here
 
 Three things were established during `SPIKE-009` and should not be re-derived:

@@ -11,7 +11,7 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 19 open | 41 answered of 60 · **0 with no owner or no decide-by** |
+| Open questions | 20 open | 41 answered of 61 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 24 | 0 open |
 | Decisions (ADR) | 45 | 25 in force · 16 proposed |
 | Spikes | 13 | 5 open |
@@ -22,7 +22,7 @@ is `deno task validate`'s judgement, not this file's.
 
 ## The bottleneck: undecided questions
 
-**19 of 60 still open**, soonest decide-by first.
+**20 of 61 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
@@ -42,6 +42,7 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-052` | What vehicle rate absorbs into 5900, over what normal-capacity denominator — and where do… | alex | 2027-01-31 | — |
 | `OQ-059` | Which CDN carries CFS images — Uploadcare re-evaluated against imgix and any other suitab… | alex | 2027-01-31 | — |
 | `OQ-060` | Is Quo the outbound channel for field photos alongside Resend or instead of it, and is th… | alex | 2027-01-31 | — |
+| `OQ-061` | Once a merge or an ordinary edit commits, is the prior value of an AUTHORED, NOT-YET-POST… | alex | 2027-01-31 | — |
 | `OQ-045` | When a vendor bills LESS than was accrued, what retires the residual left in `2010 Accrue… | alex | 2027-02-15 | — |
 | `OQ-048` | At what rate is a contributed (unpaid owner) shift costed in the IMPUTED labor view — the… | alex | 2027-03-15 | — |
 | `OQ-051` | Where is the seam between CFS and a chat system for comments and threads — CFS implements… | alex | 2027-03-31 | — |

@@ -58,7 +58,7 @@
           <outline text="[object Object]"/>
         </outline>
       </outline>
-      <outline text="Open questions (19 of 60 still open)" _note="The bottleneck. Each blocks what is listed under it.">
+      <outline text="Open questions (20 of 61 still open)" _note="The bottleneck. Each blocks what is listed under it.">
         <outline text="OQ-001 — Are fulfillment legs first-class recorded events with their own identity, or derived from the order…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-007"/>
           <outline text="blocks ADR-0011"/>
@@ -208,6 +208,7 @@
         <outline text="OQ-058 — What is the identity scheme for v2 domain entities — is it one opaque minted id per row everywhere,…" _note="owner: alex · decide by: 2026-11-30"/>
         <outline text="OQ-059 — Which CDN carries CFS images — Uploadcare re-evaluated against imgix and any other suitable contend…" _note="owner: alex · decide by: 2027-01-31"/>
         <outline text="OQ-060 — Is Quo the outbound channel for field photos alongside Resend or instead of it, and is the text thr…" _note="owner: alex · decide by: 2027-01-31"/>
+        <outline text="OQ-061 — Once a merge or an ordinary edit commits, is the prior value of an AUTHORED, NOT-YET-POSTED field r…" _note="owner: alex · decide by: 2027-01-31"/>
       </outline>
       <outline text="Conflicts (0 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labor) or an own long-haul run (labor-bearing)? T…" _note="Decides whether a trucked fulfillment absorbs labor cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">

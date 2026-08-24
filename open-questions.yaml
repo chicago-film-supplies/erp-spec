@@ -2846,3 +2846,34 @@ open_questions:
       instance of the chat seam, arriving before the seam is decided) and **erp-spec#49** (if it is
       evidence it inherits the retention duty, landing in the same argument as the photos and the
       Gmail evidence picker).
+
+  - id: OQ-061
+    headline: "can a committed field edit be undone"
+    question: >-
+      Once a merge or an ordinary edit commits, is the prior value of an AUTHORED, NOT-YET-POSTED
+      field recoverable — and if so, from what, given that the ledger already recovers everything
+      that posted and nothing holds the rest?
+    owner: alex
+    decide_by: 2027-01-31
+    blocks: []
+    status: open
+    notes: >-
+      Opened 2026-08-24 out of `SPIKE-013` exit criterion 5, which asked whether the undo path
+      requires `OQ-043`'s event history and is answered **no**. Full working: SPIKE-013 Finding 4.
+      ⚠️ **`OQ-043` is a MASTER-DATA question and cannot answer this one.** It asks whether the
+      **product and organization** masters carry an event history so a past classification is
+      recoverable; this asks about **orders and invoices**. The two sets are disjoint, and the
+      adjacency is close enough that SPIKE-013 conflated them before the collections were checked.
+      ⭐ **The gap is much narrower than "documents have no history".** Undo inside an unresolved
+      three-way merge is FREE — `base`, `ours` and `theirs` are all in hand by construction. And
+      anything that **posted** is recoverable from the ledger, which is append-only and reverses by
+      further posting. ⇒ what is left is exactly **authored, not yet posted**: subject, reference,
+      notes, dates, quantities, a discount rate before it reaches a journal. **Nothing holds those
+      prior values, and the operator's only recourse is memory.**
+      ⚠️ **Do not answer it with "add an event history to every document"** before the population is
+      measured. That is the expensive shape, and this repo's own rule is to measure a population
+      before minting the branch that serves it. The cheap end is a bounded undo window on the client
+      — the merge's own base, kept a while longer — and it may cover the whole real need.
+      **Connects to `OQ-043`** (the master-data twin, and the question this was mistaken for), and
+      to `SPIKE-013`'s shared ADR with `SPIKE-009`, which owns the boundary between what merges and
+      what posts.
