@@ -27,8 +27,8 @@
  * @module
  */
 /// <reference lib="dom" />
-import { chromium } from "npm:playwright@1.61.0";
-import { assert, assertEquals } from "jsr:@std/assert@1.0.8";
+import { chromium } from "npm:playwright@1.62.1";
+import { assert, assertEquals } from "jsr:@std/assert@1.0.19";
 
 const URL_ = "http://127.0.0.1:8793/";
 

@@ -18,7 +18,7 @@
  */
 import { createRenderEffect, createRoot } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
-import { assertEquals } from "jsr:@std/assert@1.0.8";
+import { assertEquals } from "jsr:@std/assert@1.0.19";
 
 /**
  * ⚠️ `createEffect` was tried first and never ran: outside a renderer nothing flushes Solid's

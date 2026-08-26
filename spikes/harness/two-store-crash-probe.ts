@@ -216,7 +216,11 @@ console.log(
   const pStatus = await post(client, lib.id(), tid, A, B);
   check(
     "posting long after the reserve still succeeds — nothing expired",
-    pStatus === OK && pStatus !== EXPIRED,
+    // ⚠️ EXPIRED is tested FIRST on purpose, and the order is not cosmetic: `OK` is declared as a
+    // literal (`0xffffffff`), so putting `pStatus === OK` first narrows `pStatus` to that literal
+    // and TS then rejects `!== EXPIRED` as a comparison with no overlap (TS2367). Testing the raw
+    // status against EXPIRED before narrowing keeps BOTH halves live and type-checkable.
+    pStatus !== EXPIRED && pStatus === OK,
     `⚠️ ASSERTED BECAUSE IT ASSERTS THAT NOTHING HAPPENED, which is the case most likely to be skipped. A timeout accidentally set non-zero is the regression expiring_timeout proves is unsafe, and nothing else would catch it`,
   );
   await clearIntent(intents, op);

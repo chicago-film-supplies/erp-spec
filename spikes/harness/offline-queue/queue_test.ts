@@ -10,7 +10,7 @@
  *
  * @module
  */
-import { assert, assertEquals, assertThrows } from "jsr:@std/assert@1.0.8";
+import { assert, assertEquals, assertThrows } from "jsr:@std/assert@1.0.19";
 import {
   create,
   emptyState,

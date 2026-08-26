@@ -16,10 +16,10 @@
 // store so only genuinely-changed fields notify. Without it every frame replaces every row object
 // and the whole table re-renders, which would look identical in a screenshot and would have
 // thrown away the property the criterion is about.
-import { render } from "https://esm.sh/solid-js@1.9.12/web";
-import html from "https://esm.sh/solid-js@1.9.12/html";
-import { createSignal, For } from "https://esm.sh/solid-js@1.9.12";
-import { createStore, reconcile } from "https://esm.sh/solid-js@1.9.12/store";
+import { render } from "https://esm.sh/solid-js@1.9.15/web";
+import html from "https://esm.sh/solid-js@1.9.15/html";
+import { createSignal, For } from "https://esm.sh/solid-js@1.9.15";
+import { createStore, reconcile } from "https://esm.sh/solid-js@1.9.15/store";
 
 const [state, setState] = createStore({ rows: [] });
 const [status, setStatus] = createSignal("connecting");

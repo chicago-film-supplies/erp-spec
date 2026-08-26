@@ -27,6 +27,17 @@ export const F_PENDING = 2, F_POST = 4, F_VOID = 8;
 export const OK = 0xffffffff;
 export const ALREADY_POSTED = 33, ALREADY_VOIDED = 34, EXPIRED = 35;
 
+/** The intent record, exactly as `writeIntent` writes it. */
+export type Intent = {
+  _id: string;
+  transfer_id: string;
+  state: "open" | "cleared";
+  opened_at: Date;
+};
+
+/** The document whose durability the two-store commit is protecting. */
+export type Doc = { _id: string; committed: boolean };
+
 export async function tb() {
   const lib = await import("tigerbeetle-node");
   return { lib, client: lib.createClient({ cluster_id: 0n, replica_addresses: [TB_PORT] }) };
@@ -35,7 +46,17 @@ export async function mongo() {
   const c = new MongoClient(MONGO_URL);
   await c.connect();
   const db = c.db("two_store_commit");
-  return { c, intents: db.collection("intents"), docs: db.collection("docs") };
+  // ⚠️ These generics are load-bearing under `mongodb@7`. Both collections key on the opId — a
+  // STRING ("op-6"), not an ObjectId — and driver 7 tightened `Filter<TSchema>._id` to
+  // `InferIdType<TSchema>`, which defaults to `ObjectId` on an untyped `Document`. Without them,
+  // every `findOne({ _id: opId })` is a type error; driver 6 accepted the string silently.
+  // The shapes are the ones `writeIntent` / `writeDoc` below actually insert — state that once
+  // here rather than casting at each read, so a field rename is a compile error and not a `null`.
+  return {
+    c,
+    intents: db.collection<Intent>("intents"),
+    docs: db.collection<Doc>("docs"),
+  };
 }
 
 const blankTransfer = (id: bigint, debit: bigint, credit: bigint, amount: bigint) => ({

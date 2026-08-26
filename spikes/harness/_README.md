@@ -78,14 +78,14 @@ a measurement, so the staging is load-bearing rather than tidiness.
 | Deno                  | 2.9.2          | `aarch64-apple-darwin`                                            |
 | `tigerbeetle-node`    | 0.17.9         | client and server ship in lockstep — pin both                     |
 | TigerBeetle server    | 0.17.9         | `tigerbeetle-universal-macos.zip` release asset, no container     |
-| `@duckdb/node-api`    | 1.5.5-r.3      | DuckDB v1.5.5                                                     |
+| `@duckdb/node-api`    | 1.5.5-r.4      | DuckDB v1.5.5                                                     |
 | `@duckdb/duckdb-wasm` | 1.33.1-dev57.0 |                                                                   |
-| `bullmq`              | 6.0.9          |                                                                   |
+| `bullmq`              | 6.2.2          |                                                                   |
 | `ioredis`             | 6.0.0          |                                                                   |
-| `msgpackr`            | 2.0.5          | transitive via bullmq; pinned so the probe can import it directly |
-| `mongodb`             | 6.20.0         | SPIKE-006 and SPIKE-009; must track `core/deno.json`              |
+| `msgpackr`            | 2.0.6          | transitive via bullmq; pinned so the probe can import it directly |
+| `mongodb`             | 7.6.0          | SPIKE-006 and SPIKE-009; must track `core/deno.json`              |
 | mongod                | 8.0.4          | macOS arm64 tarball; `--fork` is refused by 8.3.x                 |
-| `solid-js`            | 1.9.12         | tracks `manager/package.json`; **browser build only** — see below |
+| `solid-js`            | 1.9.15         | tracks `manager/package.json`; **browser build only** — see below |
 
 `deno.lock` is gitignored repo-wide, so **`deno.json` is the lockfile** — every npm specifier is an
 exact version, never a caret range.

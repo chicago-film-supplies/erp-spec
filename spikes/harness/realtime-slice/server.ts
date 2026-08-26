@@ -21,7 +21,7 @@
  * @module
  */
 
-import { Hono } from "jsr:@hono/hono@4.6.14";
+import { Hono } from "jsr:@hono/hono@4.13.4";
 import { MongoClient } from "mongodb";
 
 const URI = "mongodb://127.0.0.1:27079/?directConnection=true";

@@ -5,27 +5,27 @@
 
   "//": "Exact pins, no caret ranges. deno.lock is gitignored repo-wide, so this file IS the lockfile.",
   "imports": {
-    "firebase-admin/app": "npm:firebase-admin@14.2.0/app",
-    "firebase-admin/firestore": "npm:firebase-admin@14.2.0/firestore",
+    "firebase-admin/app": "npm:firebase-admin@14.3.0/app",
+    "firebase-admin/firestore": "npm:firebase-admin@14.3.0/firestore",
     "@std/yaml": "jsr:@std/yaml@^1.0.5",
     "tigerbeetle-node": "npm:tigerbeetle-node@0.17.9",
-    "@duckdb/node-api": "npm:@duckdb/node-api@1.5.5-r.3",
+    "@duckdb/node-api": "npm:@duckdb/node-api@1.5.5-r.4",
     "@duckdb/duckdb-wasm": "npm:@duckdb/duckdb-wasm@1.33.1-dev57.0",
-    "bullmq": "npm:bullmq@6.0.9",
+    "bullmq": "npm:bullmq@6.2.2",
     "ioredis": "npm:ioredis@6.0.0",
-    "msgpackr": "npm:msgpackr@2.0.5",
+    "msgpackr": "npm:msgpackr@2.0.6",
     "msgpackr-extract": "npm:msgpackr-extract@3.0.4",
 
     "//core-pins": "SPIKE-006 imports the real @cfs/core schemas. These three MUST track core/deno.json — a version skew resolves a second Zod instance and every instanceof check silently fails.",
-    "mongodb": "npm:mongodb@6.20.0",
-    "bson": "npm:bson@6.10.4",
-    "zod": "npm:zod@4.3.6",
-    "date-fns": "npm:date-fns@4.1.0",
-    "@date-fns/tz": "npm:@date-fns/tz@1.4.1",
+    "mongodb": "npm:mongodb@7.6.0",
+    "bson": "npm:bson@7.3.2",
+    "zod": "npm:zod@4.4.3",
+    "date-fns": "npm:date-fns@4.4.0",
+    "@date-fns/tz": "npm:@date-fns/tz@1.5.0",
 
     "//solid": "SPIKE-009 criterion 1. Version tracks manager/package.json (^1.9.12) — the slice measures the CURRENT client library. ⚠️ `?target=es2022` IS LOAD-BEARING AND MUST NOT BE DROPPED. Solid ships a reactive browser build and a non-reactive SSR build, and there are TWO independent ways to silently get the SSR one under Deno: `npm:solid-js` honours an explicit `deno` export condition pointing at dist/server.js, and esm.sh serves Deno the same SSR build unless a browser target is forced. In the SSR build createEffect NEVER RUNS and createRenderEffect runs once — so a reactivity test written the obvious way measures NOTHING and reports success. Same class as the Zod double-instance note above: one library, two copies, and every check silently agrees.",
-    "solid-js": "https://esm.sh/solid-js@1.9.12?target=es2022",
-    "solid-js/store": "https://esm.sh/solid-js@1.9.12/store?target=es2022"
+    "solid-js": "https://esm.sh/solid-js@1.9.15?target=es2022",
+    "solid-js/store": "https://esm.sh/solid-js@1.9.15/store?target=es2022"
   },
 
   "//nodeModulesDir": "Node-API addons need a real node_modules tree on disk; Deno's default global npm cache does not give the dlopen'ing addon a sibling directory to resolve against.",

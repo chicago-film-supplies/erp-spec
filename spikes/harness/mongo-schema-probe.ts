@@ -32,7 +32,7 @@
  */
 
 import { z } from "zod";
-import { MongoClient } from "npm:mongodb@6.20.0";
+import { MongoClient } from "npm:mongodb@7.6.0";
 
 // The REAL schemas. Cross-repo relative imports, deliberately: this measures @cfs/core as it
 // stands, not a toy restatement of it.
@@ -1256,7 +1256,7 @@ async function main() {
   }
 
   // E2. `bsonType:"long"` and a JS number. The money question.
-  const { Long, Double, Int32 } = await import("npm:bson@6.10.4");
+  const { Long, Double, Int32 } = await import("npm:bson@7.3.2");
   await db.createCollection("e2", {
     validator: { $jsonSchema: { bsonType: "object", properties: { cents: { bsonType: "long" } } } },
   });

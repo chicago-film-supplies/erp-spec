@@ -45,7 +45,7 @@ jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: denoland/setup-deno@v2
         with:
@@ -84,5 +84,5 @@ jobs:
           else
             gh issue create --repo "$GITHUB_REPOSITORY" \
               --title "Tax rule refresh: the depreciation corpus needs reconciling against a new publication" \
-              --label ledger --body "$body"
+              --label "area:ledger,kind:research" --body "$body"
           fi
