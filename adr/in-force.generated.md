@@ -94,6 +94,12 @@ Accepted and not superseded, as of the last `deno task gen`.
 
 > **In the context of** bringing crew cost into COGS against the job that caused it, **facing** an employer of record that itemises wages per person and per day but prices employer burden per payroll RUN, **we decided** to cost labor as **normal costing** — wages actual, burden apportioned — **to achieve** a per-shift cost that reconciles to the invoice CFS actually pays, **accepting** a rate variance that is systematic rather than random and owes a period-close true-up. ⚠️ **This summary read "we decided to cost labor at actual and let absorption measure utilisation" until 2026-08-17**, when the Wrapbook exports measured otherwise (OQ-050, HOT-016). The title said the same and both were left behind by an amendment that corrected only the body.
 
+## [ADR-0020](ADR-0020-xero-history-is-recast.md) — Xero history is recast, and the product line is derived from the master rather than assigned to the line
+
+**Contexts:** ledger, billing · **Decided:** 2026-08-09
+
+> **In the context of** migrating invoice history whose product-line classification lives in a line denorm the migration drops, **facing** a product master that already carries the assignment and a residue of custom lines with no master to carry it, **we decided** to derive the product line from the master and to record an explicit null where there is nothing to derive from, **to achieve** a recast history that invents no classification and whose gap is one countable row, **accepting** that v2's tracking-sliced view of closed periods will differ from Xero's by $231,796.26.
+
 ## [ADR-0021](ADR-0021-charge-product-canonicalization.md) — Item type determines the revenue account; duplicate charge products are canonicalized
 
 **Contexts:** ledger, billing · **Decided:** 2026-08-09
@@ -118,11 +124,29 @@ Accepted and not superseded, as of the last `deno task gen`.
 
 > **In the context of** sealed-period Parquet as the closed-period reporting authority (ADR-0017), **facing** a choice between the native DuckDB addon, WASM in the API process, and WASM in the browser, **we decided** to reach DuckDB natively and server-side and to reject client-side reporting, **to achieve** exact integer reporting over an artifact the server controls, **accepting** that reporting stays an API surface we have to build.
 
+## [ADR-0025](ADR-0025-non-operating-receipts-move-account.md) — A receipt that is not a categorised sale moves to 4800 Other Income rather than taking a null on an operating revenue account
+
+**Contexts:** ledger, billing · **Decided:** 2026-08-09
+
+> **In the context of** a chart holding receipts that are not sales at all — interest, cashback, vendor refunds — alongside genuine sales that map to no tracked product line, **facing** a reporting taxonomy that ADR-0036 removed from postings entirely, **we decided** that the difference between the two is carried by the ACCOUNT rather than by a value on the posting, **to achieve** a P&L where a non-operating receipt is visible on the face of the statement rather than inside a dimension nobody reads, **accepting** that revenue mix changes shape when the history is recoded.
+
 ## [ADR-0026](ADR-0026-tax-basis-is-a-non-posting-derived-book.md) — The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time
 
 **Contexts:** fixed-assets, ledger, tax · **Decided:** 2026-08-09
 
 > **In the context of** a fixed-asset register that must produce a full P&L _and balance sheet_ on both a GAAP and a tax basis across years, **facing** a fleet where a §179 election expenses an asset in year 1 that GAAP carries for 5, 10 or 20, **we decided** that only the GAAP book posts to the general ledger and the tax book is derived at report time from the register's per-book schedules, **to achieve** two complete sets of statements without a second write path, **accepting** that the tax book has no double-entry enforcement of its own and is only as good as its derivation.
+
+## [ADR-0027](ADR-0027-retain-mapbox-and-resend-at-the-boundary.md) — Retain Mapbox for geocoding and Resend for transactional email, at the boundary
+
+**Contexts:** fulfillment, ordering, billing · **Decided:** 2026-08-09
+
+> **In the context of** a rebuild that replaces the ledger, the datastore and the host, **facing** two external services that already work and are not the reason for the rebuild, **we decided** to retain Mapbox for geocoding and Resend for transactional email as boundary services with no domain footprint, **to achieve** a smaller cutover surface, **accepting** two live third-party dependencies that every test must be prevented from reaching.
+
+## [ADR-0029](ADR-0029-the-ledger-records-unallocated-facts.md) — The ledger records un-allocated facts; allocation is a specified reporting act
+
+**Contexts:** ledger, billing, fulfillment · **Decided:** 2026-08-09
+
+> **In the context of** labor and vehicle costs arriving in the ledger for the first time, **facing** a choice about whether a delivery's cost is posted to the goods it delivered or to delivery itself, **we decided** that the ledger records costs and revenues at the grain they occurred and never allocates, and that allocation happens once, in a specified report, **to achieve** a record that can answer questions nobody has asked yet, **accepting** that the un-allocated view shows the largest tracked product line running at a structural loss and must never be read as a managed P&L.
 
 ## [ADR-0030](ADR-0030-vehicle-cost-moves-into-cogs.md) — Vehicle cost moves from operating expense into COGS, absorbed and unabsorbed
 
@@ -159,11 +183,7 @@ Accepted and not superseded, as of the last `deno task gen`.
 | ADR | Title | Review by | Supersedes on acceptance | Blocked on |
 |---|---|---|---|---|
 | [ADR-0015](ADR-0015-reservations-as-pending-transfers.md) | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-11-01 | — | `SPIKE-012` |
-| [ADR-0020](ADR-0020-xero-history-is-recast.md) | Xero history is recast, and the product line is derived from the master rather than assigned to the line | 2026-10-15 | — | — |
-| [ADR-0025](ADR-0025-non-operating-receipts-move-account.md) | A receipt that is not a categorised sale moves to 4800 Other Income rather than taking a null on an operating revenue account | 2026-10-01 | — | — |
-| [ADR-0027](ADR-0027-retain-mapbox-and-resend-at-the-boundary.md) | Retain Mapbox for geocoding and Resend for transactional email, at the boundary | 2026-10-01 | — | — |
 | [ADR-0028](ADR-0028-self-hosted-tier-gotenberg-and-victoria.md) | The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability | 2026-10-01 | — | `SPIKE-011` |
-| [ADR-0029](ADR-0029-the-ledger-records-unallocated-facts.md) | The ledger records un-allocated facts; allocation is a specified reporting act | 2026-10-01 | — | — |
 | [ADR-0031](ADR-0031-allocation-basis-is-goods-revenue-on-the-causal-order.md) | The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy | 2026-11-01 | — | `OQ-033` |
 | [ADR-0032](ADR-0032-the-customer-tree-is-a-liability-tree.md) | The organization tree is a liability tree; projects and settlement points are addressing beneath it | 2026-11-15 | — | `OQ-035` `OQ-038` `OQ-039` |
 | [ADR-0033](ADR-0033-ar-addressing-is-header-only-and-credit-sits-at-the-settlement-point.md) | A document is addressed to exactly one node by a level-tagged reference, and unallocated credit sits at the settlement point | 2026-11-15 | — | `OQ-030` `OQ-038` `OQ-040` |

@@ -13,7 +13,7 @@ is `deno task validate`'s judgement, not this file's.
 |---|---:|---|
 | Open questions | 23 open | 41 answered of 64 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 24 | 0 open |
-| Decisions (ADR) | 48 | 25 in force · 19 proposed |
+| Decisions (ADR) | 48 | 29 in force · 15 proposed |
 | Spikes | 13 | 2 open |
 | Requirements | 27 | 0 without a scenario |
 | Inbox | 140 | 114 unpromoted |
@@ -58,7 +58,7 @@ None.
 
 ## Decisions
 
-### In force (25)
+### In force (29)
 
 - `ADR-0001` — Replace Xero with an in-house ledger
 - `ADR-0002` — Bank feed sourced from Plaid, single Chase account
@@ -75,27 +75,27 @@ None.
 - `ADR-0016` — Quint replaces TLA+ for the formal specs
 - `ADR-0017` — Reporting authority is split by period state
 - `ADR-0019` — Labor costing is NORMAL costing — wages actual per person, burden apportioned per run — and absorption measures utilisation together with rate variance
+- `ADR-0020` — Xero history is recast, and the product line is derived from the master rather than assigned to the line
 - `ADR-0021` — Item type determines the revenue account; duplicate charge products are canonicalized
 - `ADR-0022` — Invoice status decomposes into two derived projections
 - `ADR-0023` — Native Node-API addons load under Deno; the deployment unit is a self-extracting compiled binary
 - `ADR-0024` — DuckDB is reached natively and server-side; client-side reporting is rejected
+- `ADR-0025` — A receipt that is not a categorised sale moves to 4800 Other Income rather than taking a null on an operating revenue account
 - `ADR-0026` — The general ledger is the GAAP book; the tax basis is a non-posting book derived at report time
+- `ADR-0027` — Retain Mapbox for geocoding and Resend for transactional email, at the boundary
+- `ADR-0029` — The ledger records un-allocated facts; allocation is a specified reporting act
 - `ADR-0030` — Vehicle cost moves from operating expense into COGS, absorbed and unabsorbed
 - `ADR-0034` — An accepted ADR is a historical record of the decision as taken; corrections live outside it and superseding is reserved for re-deciding
 - `ADR-0036` — The ledger carries keys, not classifications — product line is derived at report time
 - `ADR-0037` — An id carries meaning where it is used — a headline on every id, and addressable claims inside a decision
 - `ADR-0038` — Labor with no causal order is not COGS — 5801 is not created and 6600 Wages narrows instead
 
-### Proposed (19)
+### Proposed (15)
 
 | ADR | Title | Review by | Supersedes on acceptance | Blocked on |
 |---|---|---|---|---|
 | `ADR-0015` | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-11-01 | — | `SPIKE-012` |
-| `ADR-0020` | Xero history is recast, and the product line is derived from the master rather than assigned to the line | 2026-10-15 | — | — |
-| `ADR-0025` | A receipt that is not a categorised sale moves to 4800 Other Income rather than taking a null on an operating revenue account | 2026-10-01 | — | — |
-| `ADR-0027` | Retain Mapbox for geocoding and Resend for transactional email, at the boundary | 2026-10-01 | — | — |
 | `ADR-0028` | The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability | 2026-10-01 | — | `SPIKE-011` |
-| `ADR-0029` | The ledger records un-allocated facts; allocation is a specified reporting act | 2026-10-01 | — | — |
 | `ADR-0031` | The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy | 2026-11-01 | — | `OQ-033` |
 | `ADR-0032` | The organization tree is a liability tree; projects and settlement points are addressing beneath it | 2026-11-15 | — | `OQ-035` `OQ-038` `OQ-039` |
 | `ADR-0033` | A document is addressed to exactly one node by a level-tagged reference, and unallocated credit sits at the settlement point | 2026-11-15 | — | `OQ-030` `OQ-038` `OQ-040` |

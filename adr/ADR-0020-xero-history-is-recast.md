@@ -4,7 +4,7 @@ headline: Xero history is recast, not restated
 title: >-
   Xero history is recast, and the product line is derived from the master rather than assigned to
   the line
-status: proposed
+status: accepted
 date: 2026-08-09
 review_by: 2026-10-15
 deciders: [repo owner]
@@ -100,6 +100,8 @@ asserts:
     source: "inbox/2026-08-20-survey-it-is-a-recast-not-a-restatement-and-the-migration-delta-is-231796-in-lines-untracked-by-both-systems.md"
 supersedes:
 superseded_by:
+frozen_sha256: 92f68439cf2cffd5a27635b464f2ea60aac1d029c2536c2c16374f0c649b8d92
+frozen_asserts_sha256: 50c88bc2cc290bd42702df9498b9087e5a00aaf0930b8f881c73a0e34ff41961
 ---
 
 > **In the context of** migrating invoice history whose product-line classification lives in a line

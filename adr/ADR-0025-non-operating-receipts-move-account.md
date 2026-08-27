@@ -4,7 +4,7 @@ headline: a non-operating receipt moves account
 title: >-
   A receipt that is not a categorised sale moves to 4800 Other Income rather than taking a null on
   an operating revenue account
-status: proposed
+status: accepted
 date: 2026-08-09
 review_by: 2026-10-01
 deciders: [repo owner]
@@ -60,6 +60,8 @@ asserts:
     source: "ADR-0036"
 supersedes:
 superseded_by:
+frozen_sha256: 720f105e6180ef85cf77b56c7d62a6ff466136554c8678ff2450de8c6485b09f
+frozen_asserts_sha256: fd1640c2ca6dcb929a535aa2f70f142d43e22444579fd3ce3e952667cd55b5cd
 ---
 
 > **In the context of** a chart holding receipts that are not sales at all — interest, cashback,

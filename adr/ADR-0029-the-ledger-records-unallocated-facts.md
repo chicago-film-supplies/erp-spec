@@ -2,7 +2,7 @@
 id: ADR-0029
 headline: the ledger does not allocate
 title: The ledger records un-allocated facts; allocation is a specified reporting act
-status: proposed
+status: accepted
 date: 2026-08-09
 review_by: 2026-10-01
 deciders: [repo owner]
@@ -24,6 +24,7 @@ survey:
   - inbox/2026-08-20-survey-nobody-keeps-allocations-out-of-the-ledger-they-keep-them-out-of-the-statements.md
 supersedes:
 superseded_by:
+frozen_sha256: 3adb98ab8e3406340fbead1395429930edb8874003b762685aa3439ed4c464a1
 ---
 
 > **In the context of** labor and vehicle costs arriving in the ledger for the first time,

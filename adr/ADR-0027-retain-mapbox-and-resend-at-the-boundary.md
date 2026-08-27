@@ -2,7 +2,7 @@
 id: ADR-0027
 headline: keep Mapbox and Resend at the boundary
 title: Retain Mapbox for geocoding and Resend for transactional email, at the boundary
-status: proposed
+status: accepted
 date: 2026-08-09
 review_by: 2026-10-01
 deciders: [repo owner]
@@ -57,6 +57,8 @@ asserts:
     source: "inbox/2026-08-18-online-request-volume-and-the-mapbox-population-measured-so-adr-0027s-stated-unknown-is-closed.md"
 supersedes:
 superseded_by:
+frozen_sha256: d35890a0f617d99f9a5080d2191a5f84ce97694edb3a80435fd183ac35fe8ef9
+frozen_asserts_sha256: 00fec5569b9fde23130ef8c5921d790c58526e59783eabf9ba3cd6f031606b64
 ---
 
 > **In the context of** a rebuild that replaces the ledger, the datastore and the host, **facing**
