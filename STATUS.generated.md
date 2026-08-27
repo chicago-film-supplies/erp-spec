@@ -11,18 +11,18 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 23 open | 41 answered of 64 · **0 with no owner or no decide-by** |
+| Open questions | 24 open | 41 answered of 65 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 24 | 0 open |
 | Decisions (ADR) | 48 | 29 in force · 15 proposed |
 | Spikes | 13 | 2 open |
 | Requirements | 27 | 0 without a scenario |
-| Inbox | 140 | 114 unpromoted |
+| Inbox | 141 | 115 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
 ## The bottleneck: undecided questions
 
-**23 of 64 still open**, soonest decide-by first.
+**24 of 65 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
@@ -46,6 +46,7 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-060` | Is Quo the outbound channel for field photos alongside Resend or instead of it, and is th… | alex | 2027-01-31 | — |
 | `OQ-061` | Once a merge or an ordinary edit commits, is the prior value of an AUTHORED, NOT-YET-POST… | alex | 2027-01-31 | — |
 | `OQ-064` | Which processor does the public app take card payments through, and is more than one paym… | alex | 2027-01-31 | — |
+| `OQ-065` | What is the numbering scheme for orders and invoices — at which lifecycle act is the numb… | alex | 2027-01-31 | — |
 | `OQ-045` | When a vendor bills LESS than was accrued, what retires the residual left in `2010 Accrue… | alex | 2027-02-15 | — |
 | `OQ-048` | At what rate is a contributed (unpaid owner) shift costed in the IMPUTED labor view — the… | alex | 2027-03-15 | — |
 | `OQ-051` | Where is the seam between CFS and a chat system for comments and threads — CFS implements… | alex | 2027-03-31 | — |

@@ -2970,3 +2970,58 @@ open_questions:
       is almost certainly an EXISTING path that would be recorded rather than added.
       Connects to `ADR-0048` (the ingestion boundary the settlement batch arrives through) and to
       `inbox/2026-08-24-owner-authorize-net-is-the-likely-card-processor-because-cfs-banks-at-chase.md`.
+
+  - id: OQ-065
+    headline: "the order and invoice numbering scheme"
+    question: >-
+      What is the numbering scheme for orders and invoices — at which lifecycle act is the number
+      minted, is it guaranteed gapless, and which clock does "sortable" mean?
+    owner: alex
+    decide_by: 2027-01-31
+    blocks: []
+    status: open
+    notes: >-
+      Opened 2026-08-26 out of the owner's ruling: _"id also like to reconsider sequntial no gap
+      order and invoice numbers, i wan them to be human readable, short and sortable, i dont think
+      the contention/hot doc is huge problem, but think we should at least research alternatives and
+      consider them"_. Survey:
+      `inbox/2026-08-26-survey-gapless-numbering-attaches-to-the-posting-act-not-the-draft-and-cfs-stopped-gapping-two-years-ago.md`.
+      ⭐ **The measurement moved the question, so read it before deciding.** CFS's invoice sequence
+      is **already effectively gapless in current practice** — 180 absent numbers across the whole
+      1194–2395 range (14.98%), but **2 in the most recent 396 (0.51%)**, and 0 duplicates in either
+      collection. The gapping is inherited, not ongoing. ⇒ "make it gapless" is writing down a
+      property the system has drifted into, not repairing a broken one.
+      ⭐⭐ **The sharp half is not the format, it is WHEN THE NUMBER IS MINTED.** Every surveyed
+      system that guarantees gaplessness attaches it to the **posting act**, never to the draft —
+      NetSuite's GL audit number is assigned only after a transaction posts, Oracle's asynchronously
+      at the fiscal document, and Odoo's documented gaps come from numbering a draft that is later
+      deleted. **A number minted at ISSUE rather than at CREATE is gapless nearly for free**, because
+      nothing numbered is later discarded. This repo already has the vocabulary: `ADR-0022`
+      decomposed invoice status and `ADR-0014` derives lifecycle rather than assigning it.
+      ⚠️ **"Sortable" is ambiguous and the ambiguity IS a decision.** **173 of 1,021 adjacent invoice
+      pairs (16.94%) are already inverted** — a higher number carrying an earlier `date`, worst gap
+      408 days — because `invoice.date` is the accounting date an operator may back-date while the
+      number tracks creation order. **One monotonic sequence cannot sort by both clocks**, and the
+      incumbent silently chose creation order. `CLAUDE.md` rule 8 is the same distinction.
+      ⚠️ **NOBODY makes the human-readable number the gapless one.** NetSuite carries three numbers —
+      an internal gapless transaction number, an overridable document number, and a gapless GL audit
+      number — and the one people read is the one it declines to guarantee. Departing from that is a
+      claim that needs an argument.
+      ✅ **The contention worry is measurably not a worry** — peak 1.26 invoices/day in 2025. But the
+      cost that survives is not throughput: Oracle's gapless path puts the document in a
+      **`Processing` status** while an async job mints the number, so the price is that a document
+      does not get its number synchronously.
+      ✅ **No numbering mandate was FOUND for CFS.** The Illinois Department of Revenue's own records
+      guidance enumerates required records and contains no sequential- or gapless-numbering
+      requirement. ⚠️ That is a read of the Department's guidance page, **not** an exhaustive read of
+      86 Ill. Adm. Code Subpart H — "none found" is weaker than "none exists". ⇒ gaplessness is a
+      **control CFS may choose**, not a law it must satisfy.
+      ⚠️ **Accounting-shaped under rule 8a**, and the survey above is what the answering ADR cites.
+      ⚠️ **A format change is a different act from a counter carry-forward.**
+      `migration/field-map.yaml` already commits that the migration carries each counter's
+      high-water mark forward, because an invoice number is known to Xero, to CRMS and to
+      **customers**. Changing the SHAPE is unpriced, and today `InvoiceNumber` is also Xero's
+      idempotency key for `POST /Invoices`.
+      Sits inside `OQ-058` (identity for v2 domain entities), which already asks what happens to the
+      business identifiers people use to refer to things — this is the numbering half, and it is
+      separable from opaque-id policy for every entity.

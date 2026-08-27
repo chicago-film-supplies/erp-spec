@@ -5,7 +5,7 @@
     "adrs": 48,
     "adrs_accepted": 29,
     "events": 38,
-    "inbox": 140,
+    "inbox": 141,
     "inbox_promoted": 26
   },
   "requirements": [
@@ -819,7 +819,8 @@
       "inbox/2026-08-24-owner-cfs-sells-retail-too-and-is-expanding-it-so-the-feed-mismatch-is-narrower-than-recorded.md",
       "inbox/2026-08-24-owner-rules-the-notification-surface-shell-in-scope-dismissal-archives-one-typed-surface-and-nothing-blocks.md",
       "inbox/2026-08-24-owner-the-conflict-popover-is-the-wrong-shape-it-is-a-global-notifications-surface.md",
-      "inbox/2026-08-24-owner-the-public-app-must-be-syndicated-to-shopping-feeds-and-legible-to-buying-agents.md"
+      "inbox/2026-08-24-owner-the-public-app-must-be-syndicated-to-shopping-feeds-and-legible-to-buying-agents.md",
+      "inbox/2026-08-26-survey-gapless-numbering-attaches-to-the-posting-act-not-the-draft-and-cfs-stopped-gapping-two-years-ago.md"
     ]
   }
 }
