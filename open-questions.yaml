@@ -3022,6 +3022,18 @@ open_questions:
       high-water mark forward, because an invoice number is known to Xero, to CRMS and to
       **customers**. Changing the SHAPE is unpriced, and today `InvoiceNumber` is also Xero's
       idempotency key for `POST /Invoices`.
+      ⭐⭐ **There is a DATED forcing function, and it is not gaplessness.** Orders run `1…1009` and
+      invoices run `1194…2395`: **185 numbers of headroom at an organic rate of 0.97/day, so the two
+      sequences collide in ~190 days.** After that a bare 4-digit number names both an order and an
+      invoice, and nothing in the format says which. ⇒ **the strongest argument in the whole survey
+      is for a PREFIX** (`INV-` / `ORD-`), which is exactly what Sage Intacct's grammar and
+      NetSuite's `Prefix` field exist to provide — and it trades directly against "short", which is
+      a far more concrete trade than gaplessness.
+      ⚠️ **~190 days is an order of magnitude, not a date.** The first measurement said ~40 days
+      because `orders.created_at` is the CFS WRITE timestamp and **793 of 999 orders were written on
+      2026-01-24**, the CRMS import cohort — an import rate wearing a business rate's clothes. The
+      probe now excludes bulk-write days and reports the exclusion. The surviving rate is still
+      post-import and **pre-cutover**, and the mix changes at cutover.
       Sits inside `OQ-058` (identity for v2 domain entities), which already asks what happens to the
       business identifiers people use to refer to things — this is the numbering half, and it is
       separable from opaque-id policy for every entity.

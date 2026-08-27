@@ -272,3 +272,44 @@ is consistent with numbering closer to the issue act.
   to the business identifiers (SKU, order number, invoice number) that people actually use to refer
   to things"_. **This is the numbering half of that question, and it is separable** — a scheme can
   be chosen without settling opaque-id policy for every entity.
+
+## 6. Appended the same day — the two sequences COLLIDE, and it is a dated event
+
+Measured after the sections above, with the same probe.
+
+|                      |                 |
+| -------------------- | --------------: |
+| highest order number |        **1009** |
+| invoice range floor  |        **1194** |
+| headroom             | **185 numbers** |
+| organic order rate   |    **0.97/day** |
+| ⇒ collision in       |   **~190 days** |
+
+⇒ **In roughly six months an order number and an invoice number will name the same integer**, and
+today's bare 4-digit number stops identifying which document it is. Orders run `1…1009`; invoices
+run `1194…2395`; they have never overlapped, and there is nothing preventing it — only the head
+start.
+
+⭐ **This is an argument the survey did not go looking for and it is the strongest one for a
+PREFIX.** `INV-` / `ORD-` is what Sage Intacct's grammar and NetSuite's `Prefix` field both exist to
+provide, and it costs one or two characters against a defect that is otherwise permanent and silent.
+⚠️ It also **weakens "short"** — which is the real trade the owner is being asked to make, and it is
+a much more concrete trade than gaplessness.
+
+### ⚠️⚠️ The first run of this measurement said ~40 DAYS, and it was wrong
+
+`orders.created_at` is the **CFS write timestamp, not the order date.** **793 of 999 orders carry
+`created_at` = 2026-01-24** — the CRMS import cohort, a population this repo has already named
+elsewhere (`SPIKE-013`'s conflict-surface probe reports a figure OF that same cohort). Dividing 999
+orders by the 214-day span gave **4.67/day**, which is an **import rate wearing a business rate's
+clothes**, ~5× too fast.
+
+The probe now excludes any single day holding >10% of the corpus and **reports the exclusion rather
+than applying it silently** — a silent filter is the thing that made the first number believable.
+
+⇒ **"Before using a number, ask what it is a figure OF"** (`CLAUDE.md`). The answer here was **"a
+migration"**, not "a month of trading", and nothing about the figure's shape said so.
+
+⚠️ **And the surviving 0.97/day is still POST-IMPORT and PRE-CUTOVER.** 100% of prod orders carry a
+`crms_id`, and that share only falls from cutover onward — so the mix that produces this rate is
+about to change. **Treat ~190 days as an order of magnitude, not a date.**

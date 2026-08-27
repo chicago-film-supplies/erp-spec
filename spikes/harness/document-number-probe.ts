@@ -152,7 +152,7 @@ function report(label: string, docs: Doc<Numbered>[], withDates: boolean) {
   );
 }
 
-const orders = await pageAll<Numbered>("orders", ["number", "status"]);
+const orders = await pageAll<Numbered>("orders", ["number", "status", "created_at"]);
 const invoices = await pageAll<Numbered>("invoices", ["number", "date", "status"]);
 
 // ⚠️ UTC, and labelled as such deliberately. This repo canonicalizes business datetimes to Chicago
@@ -163,6 +163,73 @@ console.log(
 );
 report("orders", orders, false);
 report("invoices", invoices, true);
+
+// ── the two sequences are converging, and a bare integer stops identifying which is which ──
+//
+// Orders run 1…N and invoices start at 1194. They do not overlap TODAY. Nothing stops them: the
+// order counter is climbing toward the invoice floor, and on the day it crosses, `1200` names both
+// an order and an invoice. A readability defect that arrives on a date is worth dating.
+//
+// ⚠️⚠️ **`created_at` IS THE CFS WRITE TIMESTAMP, NOT THE ORDER DATE, and taking it for the latter
+// is how the first run of this block reported a collision in ~40 DAYS.** 793 of 999 orders carry
+// `created_at` = 2026-01-24 — the CRMS import cohort, already named as a population elsewhere in
+// this repo (SPIKE-013's conflict-surface probe reports a figure OF that same cohort). Dividing 999
+// orders by the 214-day span gave 4.67/day, which is an IMPORT rate wearing a business rate's
+// clothes and is ~5x too fast.
+//
+// ⇒ The burst day is excluded and the exclusion is REPORTED, not silent. "Before using a number,
+// ask what it is a figure OF" (`CLAUDE.md`), and the answer here was "a migration", not "a month of
+// trading".
+{
+  const rows = orders
+    .map((d) => ({
+      n: d.number,
+      t: (d as { created_at?: { _seconds?: number } }).created_at?._seconds,
+    }))
+    .filter((r): r is { n: number; t: number } =>
+      typeof r.n === "number" && typeof r.t === "number"
+    );
+  const day = (t: number) => new Date(t * 1000).toISOString().slice(0, 10);
+  const byDay = new Map<string, number>();
+  for (const r of rows) byDay.set(day(r.t), (byDay.get(day(r.t)) ?? 0) + 1);
+  // A single day holding a large share of the corpus is a bulk write, not a day of trading.
+  const bulk = [...byDay.entries()].filter(([, c]) => c > rows.length * 0.1);
+  const bulkDays = new Set(bulk.map(([d]) => d));
+  const organic = rows.filter((r) => !bulkDays.has(day(r.t)));
+
+  const oMax = Math.max(...orders.map((d) => d.number ?? 0));
+  const iMin = 1194; // the invoice range floor, measured above
+  console.log(`\n── order/invoice number collision ─────────────────────────`);
+  console.log(`  highest order number   ${oMax}`);
+  console.log(`  invoice range floor    ${iMin}`);
+  console.log(`  headroom               ${iMin - oMax} numbers`);
+  for (const [d, c] of bulk) {
+    console.log(
+      `  ⚠️ BULK WRITE EXCLUDED  ${d}: ${c} orders (${
+        (c / rows.length * 100).toFixed(1)
+      }% in one day)`,
+    );
+  }
+  if (organic.length < 2) {
+    console.log(`  ⚠️ rate UNMEASURABLE — nothing left after excluding bulk writes`);
+  } else {
+    const ts = organic.map((r) => r.t).sort((a, b) => a - b);
+    const days = (ts[ts.length - 1] - ts[0]) / 86_400;
+    const perDay = organic.length / days;
+    console.log(
+      `  organic order rate     ${perDay.toFixed(2)}/day over ${
+        days.toFixed(0)
+      } days (${organic.length} orders, bulk excluded)`,
+    );
+    console.log(
+      `  ⇒ collision in         ~${Math.round((iMin - oMax) / perDay)} days at that rate`,
+    );
+    console.log(
+      `  ⚠️ that rate is POST-IMPORT and PRE-CUTOVER — CRMS still supplies every order, and the`,
+    );
+    console.log(`     mix changes at cutover, so treat it as an order of magnitude, not a date.`);
+  }
+}
 
 console.log(`
 ⚠️ ABSENT-FROM-CFS is not "never issued". Xero frees an InvoiceNumber when its holder is VOIDED or
