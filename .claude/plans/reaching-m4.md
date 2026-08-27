@@ -36,7 +36,20 @@ red** and stays red until those ADRs are accepted, superseded, or their `review_
 ⇒ **Re-derive this table rather than trusting it.** One command, and it is the only part of this doc
 about the future.
 
-## ✅ The batch is PREPARED — 2026-08-24. The next unit of work is the OWNER'S RULING
+## ✅ RULED 2026-08-26 — four accepted, and the October cliff is now ONE ADR and ONE PURCHASE
+
+Owner: _"accept 25, 27, 29, 20"_ (`691b578`). `ADR-0028` stays `proposed` on purpose.
+
+| date       | proposed ADRs failing gate 6 | was |
+| ---------- | ---------------------------- | --- |
+| 2026-10-02 | **1** — `ADR-0028` alone     | 4   |
+| 2026-11-02 | **5**                        | 9   |
+
+⇒ **The whole October deadline is now: buy the Linode host in time for `SPIKE-011` to land, or move
+`ADR-0028`'s `review_by` deliberately with the reason in the same commit.** Nothing else on
+criterion 2 is authoring work before November.
+
+<details><summary>How the batch was prepared (kept for the pattern, not the queue)</summary>
 
 **The brief is a comment on #56**: one section per ADR — what it decides, what changed since it was
 drafted, what accepting costs, what stays open, and a recommendation. Four of the five need a
@@ -55,9 +68,14 @@ body freezes at acceptance and none of it could have been written afterwards:
 
 ### The batch's own leftovers, for whoever picks this up next
 
-- ⭐ **`ADR-0029`'s figures foreclose at acceptance.** It quotes ~12 in prose and types **none**.
-  `measurements:` freezes under its own hash and **cannot be added afterwards** — that is why
-  `ADR-0019` and `ADR-0030` are `as_of`-exempt. Its activity-line figures (`$144,975.00`,
+- ⭐ **`ADR-0029`'s figures are still untyped — and they did NOT foreclose at acceptance.** ⚠️ **The
+  brief claimed they did, and that was wrong.** Gate 21 `continue`s past the freeze when an ADR
+  carries neither block, so an accepted `ADR-0029` can still gain `measurements:` with a
+  `frozen_asserts_sha256` written in the same commit. The `ADR-0019`/`ADR-0030` precedent is about
+  blocks that were **already frozen** — the opposite case. ⇒ **the deadline was imaginary, and an
+  imaginary deadline pushes toward a hasty yes.** ⚠️ **`ADR-0020`, `ADR-0025` and `ADR-0027` ARE
+  frozen this way**: their blocks existed at acceptance, so nothing may be added. **The distinction
+  is whether a block was there, not the status.** Its activity-line figures (`$144,975.00`,
   `$39,665.00`, `8.45%`, `2.31%`, `22.2%`, `1.98%`) are **owned by nobody** and already quoted
   across **four mutable files**, so typing them binds those files through gate 22. ⚠️ **Do NOT type
   `13.79%` or `$236,487.75` — `ADR-0030/M2` owns both**, and gate 22 now fails on a second claimant.
@@ -65,9 +83,11 @@ body freezes at acceptance and none of it could have been written afterwards:
   that a tracking category was on no externally filed document. The whole `$231,796.26` consequence
   is contingent on it, and falsifying it makes an ASC 205-10-50-1 disclosure owed.
 
+</details>
+
 ---
 
-**Nothing is missing from those five but a decision.** `gate 19: 0 proposed and unsurveyed` — every
+**Nothing was missing from those five but a decision.** `gate 19: 0 proposed and unsurveyed` — every
 accounting-shaped ADR already carries its six-reference survey. They are not blocked on research, on
 a spike, or on another ADR.
 
