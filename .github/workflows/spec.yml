@@ -5,6 +5,26 @@ on:
     branches: [main]
   pull_request:
 
+# Least privilege, stated HERE rather than inherited.
+#
+# This job only reads: checkout, then `deno task ci` (fmt --check, validate, and
+# a staleness diff over the generated files). It writes nothing back.
+#
+# ⚠️ Declared explicitly because the alternative is depending on a REPO SETTING.
+# With no `permissions:` block a workflow inherits `default_workflow_permissions`,
+# which was `write` until 2026-08-29 — so this job held a write-capable
+# GITHUB_TOKEN it never used, and its privilege level was invisible in the file
+# that defines it. The setting is now `read`, but a setting can be flipped back
+# from a web form by someone who will never open this file. An explicit block
+# cannot be.
+#
+# Contrast `tax-rules-refresh.yml`, which legitimately needs `issues: write` and
+# says so. An explicit block still ELEVATES above a read-only default, so
+# tightening the repo default costs that workflow nothing — which is precisely
+# why stating the requirement in the workflow is the robust place for it.
+permissions:
+  contents: read
+
 # Per-PR group so a superseded push stops paying for a verdict nobody will read.
 # GitHub bills a whole minute per job, so run COUNT is the cost here, not
 # duration — a run that a newer push has already invalidated is a billed minute
