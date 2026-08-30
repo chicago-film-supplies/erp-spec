@@ -3034,6 +3034,33 @@ open_questions:
       2026-01-24**, the CRMS import cohort — an import rate wearing a business rate's clothes. The
       probe now excludes bulk-write days and reports the exclusion. The surviving rate is still
       post-import and **pre-cutover**, and the mix changes at cutover.
+      ✅ **PARTIALLY RULED 2026-08-29 — the FORMAT half is answered and the CLOCK half is not.**
+      Owner: orders and invoices are deliberately different number sets (_"not all orders convert,
+      some will have multiple invoices"_); **the stored value is an INTEGER, not a prefixed string**,
+      and the prefix becomes a **display function** applied where needed; and `products`,
+      `organizations` and `transactions` need human numbers too, also integers.
+      `inbox/2026-08-29-owner-numbers-stay-integers-and-the-prefix-is-a-display-function-and-four-more-entities-need-one.md`.
+      ⇒ **What remains open is the sharper half and it is untouched by that ruling**: at which
+      lifecycle act the number is minted, whether it is guaranteed gapless, and **which clock
+      "sortable" means** — 173 of 1,021 adjacent invoice pairs are still inverted against `date`.
+      ⭐⭐ **And the measurement that justifies the display-function ruling: range separation was
+      never doing the work.** Six collections carry a human `number` and **10 of 15 pairs ALREADY
+      overlap** — `1000` is simultaneously a valid order, transaction, fulfillment and booking
+      number. Four are own sequences (`orders` 1…1012, `invoices` 1194…2395, `transactions` 1…1127
+      and **gapless**, `credit-notes` 1007…1026); **`fulfillments` and `bookings` BORROW their
+      order's number** (1002/1002 and 719/719 contained), as `quotes.order_number` does by name.
+      ⭐ **That borrowing is an unstated rule already in production and worth making deliberate**: a
+      document in an order's family wears the order's number instead of minting a sequence, so **the
+      number of sequences is the number of ROOTS, not of entities.**
+      ⚠️ **The display-function proposal does not solve INPUT.** A formatter that runs on output
+      cannot disambiguate an operator typing `1200` into a search box, or an internal note saying
+      "see 1200". ⇒ the format function needs a **parse** partner, and the open decision is **which
+      surfaces are required to carry the qualifier** — not whether to prefix. ⚠️ The type→prefix map
+      needs exactly one owner; this repo has been bitten twice by a registry with a second copy.
+      ⚠️ **`products` already carries `xero_code` on 567 of 568 scanned**, so minting a product
+      number creates a SECOND human identifier for one thing — settle what it is for before minting.
+      ✅ `products` and `organizations` carry no counter at all, so unlike orders and invoices they
+      have **no high-water mark to carry forward** and can start anywhere.
       Sits inside `OQ-058` (identity for v2 domain entities), which already asks what happens to the
       business identifiers people use to refer to things — this is the numbering half, and it is
       separable from opaque-id policy for every entity.

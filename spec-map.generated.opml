@@ -565,7 +565,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (115 unpromoted of 141)" _note="no drops pending">
+      <outline text="Capture (116 unpromoted of 142)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -681,6 +681,7 @@
         <outline text="Owner rules the conflict popover the wrong shape — resolution belongs in a global notifications men…" _note="inbox/2026-08-24-owner-the-conflict-popover-is-the-wrong-shape-it-is-a-global-notifications-surface.md"/>
         <outline text="Owner — the public app must be discoverable by MACHINES, not only by people: a product feed conform…" _note="inbox/2026-08-24-owner-the-public-app-must-be-syndicated-to-shopping-feeds-and-legible-to-buying-agents.md"/>
         <outline text="Rule 8a survey on document numbering — every system that guarantees gaplessness attaches it to the…" _note="inbox/2026-08-26-survey-gapless-numbering-attaches-to-the-posting-act-not-the-draft-and-cfs-stopped-gapping-two-years-ago.md"/>
+        <outline text="Owner rules the stored number stays an INTEGER and the prefix becomes a display function — orders a…" _note="inbox/2026-08-29-owner-numbers-stay-integers-and-the-prefix-is-a-display-function-and-four-more-entities-need-one.md"/>
       </outline>
     </outline>
   </body>

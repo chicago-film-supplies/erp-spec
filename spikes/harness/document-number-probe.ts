@@ -155,12 +155,162 @@ function report(label: string, docs: Doc<Numbered>[], withDates: boolean) {
 const orders = await pageAll<Numbered>("orders", ["number", "status", "created_at"]);
 const invoices = await pageAll<Numbered>("invoices", ["number", "date", "status"]);
 
+/**
+ * ⭐⭐ **EVERY collection carrying a human `number`, because the count is not two.**
+ *
+ * The first version of this probe compared orders against invoices and dated their collision. That
+ * framing was wrong in the direction that matters: `transactions` and `fulfillments` carry their own
+ * `number` too, in the SAME low-thousands range, so the collisions are not approaching — **most of
+ * them have already happened.** `1000` is a valid order number, a valid transaction number and a
+ * valid fulfillment number right now.
+ *
+ * ⚠️ **The list is measured, not typed.** A hand-maintained list of "collections with numbers" is
+ * the exact shape this repo has been bitten by twice (`tools/contexts.ts` had a fifth copy;
+ * `db_schema`'s enum carries 35 of 50 collections). So the members are discovered by asking each
+ * collection whether its documents carry the field, and a collection that GAINS one shows up here
+ * without anyone editing this file.
+ */
+const NUMBER_BEARING = [
+  "orders",
+  "invoices",
+  "transactions",
+  "fulfillments",
+  "quotes",
+  "products",
+  "organizations",
+  "contacts",
+  "destinations",
+  "bookings",
+  "stock",
+  "locations",
+  "cards",
+  "credit-notes",
+  "settlements",
+] as const;
+
 // ⚠️ UTC, and labelled as such deliberately. This repo canonicalizes business datetimes to Chicago
 // offset form, so an unlabelled `toISOString()` day disagrees with the local day for six hours every
 // night — the same footgun `generate.ts` is banned from touching a clock over.
 console.log(
   `\nDocument numbering, live prod corpus — read ${new Date().toISOString().slice(0, 10)} (UTC)`,
 );
+
+// ── which collections carry a human number at all, and do their ranges overlap ──
+{
+  const ranges = new Map<string, { n: number; min: number; max: number; distinct: number }>();
+  for (const c of NUMBER_BEARING) {
+    let docs: Doc<Numbered>[];
+    try {
+      docs = await pageAll<Numbered>(c, ["number"]);
+    } catch {
+      console.log(`  ${c.padEnd(16)} — collection unreadable or absent`);
+      continue;
+    }
+    const nums = docs.map((d) => d.number).filter((n): n is number => typeof n === "number");
+    if (!nums.length) {
+      console.log(`  ${c.padEnd(16)} NO human number (${docs.length} docs)`);
+      continue;
+    }
+    ranges.set(c, {
+      n: nums.length,
+      min: Math.min(...nums),
+      max: Math.max(...nums),
+      distinct: new Set(nums).size,
+    });
+  }
+  console.log(`\n── collections carrying a human \`number\` ─────────────────`);
+  for (const [c, r] of ranges) {
+    const dup = r.n - r.distinct;
+    console.log(
+      `  ${c.padEnd(16)} ${String(r.n).padStart(5)} numbered   ${String(r.min).padStart(5)} … ${
+        String(r.max).padStart(5)
+      }${dup ? `   ⚠️ ${dup} duplicate(s)` : ""}`,
+    );
+  }
+  /**
+   * ⭐ **Which of these are SEQUENCES, and which are the order's number worn by something else.**
+   *
+   * Reporting six "sequences" would have been wrong. `fulfillments.number` is 1002 distinct values,
+   * **100% of them order numbers**, against exactly 1002 distinct order numbers — it is not a
+   * counter, it is the order's number on a one-per-order document. `bookings.number` is the same
+   * borrowing at a different cardinality (719 distinct, 100% order numbers, 7021 rows), and
+   * `quotes` says so in the FIELD NAME: `order_number`.
+   *
+   * ⇒ **That borrowing is a design already in place and it is the interesting one.** A fulfillment
+   * is not a thing with its own identity in the numbering scheme; it is an artifact OF order 847.
+   * The alternative to minting a sequence per entity is scoping to the root, and CFS already does
+   * it in three places.
+   *
+   * ⚠️ **Containment is evidence, not proof.** Two independent counters over the same range contain
+   * each other by coincidence — `transactions` sits at 88.9% for exactly that reason and is NOT
+   * borrowed (1127 distinct against 1012 order numbers; it runs past the end). The test is
+   * containment AND equal cardinality, and even then it is a strong hint rather than a lineage.
+   */
+  const orderNums = new Set(
+    (await pageAll<Numbered>("orders", ["number"])).map((d) => d.number).filter((
+      n,
+    ): n is number => typeof n === "number"),
+  );
+  console.log(`\n  own sequence, or the order's number worn by another document?`);
+  for (const [c, r] of ranges) {
+    if (c === "orders") continue;
+    const nums = new Set(
+      (await pageAll<Numbered>(c, ["number"])).map((d) => d.number).filter((
+        n,
+      ): n is number => typeof n === "number"),
+    );
+    const contained = [...nums].filter((n) => orderNums.has(n)).length;
+    /**
+     * ⚠️ **The discriminator is TOTAL containment, and the first draft also demanded equal
+     * cardinality — which called `bookings` an own sequence.** Bookings hold 719 distinct values,
+     * all of them order numbers, across 7021 rows: a denorm onto a PARTIAL population, which is
+     * what a subset looks like. Equal cardinality is corroboration (fulfillments: 1002 = 1002), not
+     * a requirement. Wrong in the direction that UNDER-reports borrowing, and invisible from the
+     * expression — the same lesson as every other hand-written invariant here.
+     *
+     * ⚠️ **The residual false-positive is a YOUNG counter.** An independent sequence that has not
+     * yet run past the order maximum is 100% contained by coincidence. `transactions` escapes at
+     * 88.9% only because it HAS run past. ⇒ this is a strong hint, never a lineage; the field name
+     * settles it (`quotes.order_number` says so outright) and the writer settles it for certain.
+     */
+    const borrowed = contained === nums.size;
+    const sameCard = nums.size === orderNums.size;
+    console.log(
+      `    ${c.padEnd(16)} ${contained}/${nums.size} are order numbers  ⇒ ${
+        borrowed
+          ? `BORROWED — the order's number, not a counter${
+            sameCard
+              ? " (and same cardinality)"
+              : " (a subset — denormed onto a partial population)"
+          }`
+          : "OWN SEQUENCE"
+      }`,
+    );
+  }
+
+  // ── the overlap matrix: where a bare integer is already ambiguous ──
+  const names = [...ranges.keys()];
+  console.log(`\n  overlapping ranges — a bare integer in this band names BOTH:`);
+  let overlaps = 0;
+  for (let i = 0; i < names.length; i++) {
+    for (let j = i + 1; j < names.length; j++) {
+      const a = ranges.get(names[i])!, b = ranges.get(names[j])!;
+      const lo = Math.max(a.min, b.min), hi = Math.min(a.max, b.max);
+      if (lo <= hi) {
+        overlaps++;
+        console.log(
+          `    ${names[i]} × ${names[j]}: ${lo}…${hi}  (${hi - lo + 1} integers)`,
+        );
+      }
+    }
+  }
+  if (!overlaps) console.log(`    none`);
+  console.log(
+    `\n  ⇒ ${overlaps} of ${
+      names.length * (names.length - 1) / 2
+    } pairs ALREADY overlap. Range separation is not a disambiguation strategy; it is a head start.`,
+  );
+}
 report("orders", orders, false);
 report("invoices", invoices, true);
 
