@@ -14,7 +14,7 @@ verified: true
 triage_count: 0
 ---
 
-`contexts/procurement/context.md` reasons from *"CFS's current system holds only the third [stage]"*
+`contexts/procurement/context.md` reasons from _"CFS's current system holds only the third [stage]"_
 — the dated vendor invoice, with no commitment and no accrual. **That claim is still true and should
 not be edited.** What changed is that the third stage is now a modelled thing in v1 rather than a
 side effect of Xero, so the v1→v2 mapping for a vendor is real data instead of a hypothesis. Same
@@ -22,9 +22,9 @@ shape as `erp-spec#60`, where v1's organization tree turned out to be real.
 
 ## What v1 acquired
 
-- **A `suppliers` collection** — `uid` / `name` / `active` / `xero_id`, operator-created, soft-deleted
-  by `active: false`. Uniqueness is `name`, case-folded, over the WHOLE collection including inactive
-  rows.
+- **A `suppliers` collection** — `uid` / `name` / `active` / `xero_id`, operator-created,
+  soft-deleted by `active: false`. Uniqueness is `name`, case-folded, over the WHOLE collection
+  including inactive rows.
 - **`Movement.supplier`** — a point-in-time `{uid, name}` snapshot on the movement, deliberately NOT
   cascaded on a supplier rename, because a movement is an immutable historical record.
 - **A CFS-authored ACCPAY path** — a `purchase` movement posts a bill to that supplier's Xero
@@ -36,7 +36,7 @@ shape as `erp-spec#60`, where v1's organization tree turned out to be real.
 1. 🔴 **The vendor identity is CFS-native and the external id is nullable and self-healing.**
    `xero_id` starts `null` and is resolved on first push (search Xero by exact name, adopt or
    create, write back). v2 should not assume a vendor is born with its external identity — the
-   ordering is *record the vendor, then reconcile it outward*, which survives replacing Xero.
+   ordering is _record the vendor, then reconcile it outward_, which survives replacing Xero.
 2. ⚠️ **A rate is not an amount, and a rate is not a total.** A retail purchase line must carry the
    real unit count, which forces the unit price to be a 4dp rate, and `q × round4(total ÷ q)` cannot
    reproduce an arbitrary total. Bounded by `q ÷ 20,000 + $0.005` — TWO roundings, not one. Measured
