@@ -3,6 +3,9 @@
 deno.lock
 .claude/settings.local.json
 
+# Agent worktrees — a checkout, never content.
+.claude/worktrees/
+
 # Spike harness (spikes/harness/) — measurement code, not spec, not the target system.
 # Its npm pins are exact in deno.json precisely because deno.lock is ignored above.
 node_modules/
