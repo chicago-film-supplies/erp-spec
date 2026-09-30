@@ -32,6 +32,8 @@
   },
   "permissions": {
     "allow": [
+      "mcp__cfs-api",
+      "mcp__cfs-api-prod",
       "WebFetch(domain:caddyserver.com)",
       "WebFetch(domain:docs.tigerbeetle.com)",
       "WebFetch(domain:duckdb.org)",
