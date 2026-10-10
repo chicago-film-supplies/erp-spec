@@ -5,7 +5,7 @@
     "adrs": 55,
     "adrs_accepted": 29,
     "events": 38,
-    "inbox": 159,
+    "inbox": 160,
     "inbox_promoted": 35
   },
   "requirements": [
@@ -1029,6 +1029,7 @@
       "inbox/2026-10-07-survey-v1-split-a-purchase-into-ordered-received-billed-and-paid-and-a-receipt-quantity-is-a-co-written-bucket.md",
       "inbox/2026-10-09-correction-seven-accepted-adrs-cite-a-replaced-store-as-a-premise-and-their-decisions-stand.md",
       "inbox/2026-10-09-owner-a-new-ops-context-owns-observability-alerting-and-verification.md",
+      "inbox/2026-10-09-owner-rules-one-parquet-file-per-table-per-day-and-no-compaction.md",
       "inbox/2026-10-09-research-postgres-immutability-is-prevent-plus-detect-and-only-an-external-anchor-survives-a-superuser.md"
     ]
   }
