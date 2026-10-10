@@ -33,8 +33,8 @@ The kit remains interesting if containerised Quint work starts — it is not a s
 ## Version (checked 2026-10-09)
 
 - npm `@informalsystems/quint` **0.33.0** is the latest (`npm view`, 2026-10-09). The recorded
-  `formal/` runs used **0.32.0** (`formal/README.md`). Nothing pins it yet — every run is an
-  unpinned `npx`, which is erp-spec#69.
+  `formal/` runs used **0.32.0**, and that is the pin: `formal/expectations.yaml` owns it and
+  `deno task formal` runs exactly that version (erp-spec#69).
 - `quint verify` needs **Java 21** for Apalache, which it downloads on first use.
 
 ## CLI
@@ -62,8 +62,8 @@ The kit remains interesting if containerised Quint work starts — it is not a s
 
 ## Decision status
 
-- Quint is decided ([[ADR-0016]], accepted). The open work is running it in CI rather than by hand —
-  erp-spec#69.
+- Quint is decided ([[ADR-0016]], accepted), and runs in CI: `deno task formal` in the `formal`
+  workflow checks every module against `formal/expectations.yaml`.
 
 Cross-refs: [[SPIKE-002]] · `formal/two-store-commit.qnt` · `formal/period-close.qnt` · [[ADR-0016]]
 · [[ADR-0054]]

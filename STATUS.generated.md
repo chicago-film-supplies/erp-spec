@@ -155,7 +155,7 @@ it is counted separately on purpose, and a milestone is not done because its che
 | `m2` | Context map and glossary v1 | `m1` | 2 | — | 1 | — |
 | `m3` | Ledger core | `m2` | 5 | — | — | — |
 | `m4` | All spikes closed by ADR | `m3` | 0 | 2 | — | 1 |
-| `m5` | Formal specs checking clean | `m4` | 1 | — | 2 | — |
+| `m5` | Formal specs checking clean | `m4` | 3 | — | — | — |
 | `m6` | Migration field map complete | `m2` | 1 | — | 3 | — |
 | `m7` | Walking skeleton defined | `m3` `m5` `m6` | 0 | — | 3 | — |
 | `spec-v1` | Tag spec-v1 | `m0` `m1` `m2` `m3` `m4` `m5` `m6` `m7` | 1 | — | 3 | 1 |

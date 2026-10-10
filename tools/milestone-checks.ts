@@ -82,7 +82,12 @@ interface World {
   vectorsByRule: Map<string, string[]>;
   dimensions: { id?: string; values?: unknown[] }[];
   formalSpecs: string[];
-  formalReadme: string;
+  /** `.qnt` file → the module names declared in it. */
+  formalModules: Record<string, string[]>;
+  /** `formal/expectations.yaml` → `specs:` — what each module must do (erp-spec#69). */
+  formalExpectations: (Declared & { modules: { name: string; expect: string }[] })[];
+  /** `.github/workflows/formal.yml`, or "" — the job that executes the expectations. */
+  formalWorkflow: string;
   milestones: RawMilestone[];
   /** Posting rules that are in scope, unblocked and simply not written yet (erp-spec#5). */
   unwrittenRules: number;
@@ -108,6 +113,7 @@ export interface MappedCollection {
 export const TERMINAL_DISPOSITIONS = new Set(["drop", "quarantine"]);
 
 import { CONTEXTS } from "./contexts.ts";
+import { type Declared, modulesIn, reconcile } from "./formal-predicates.ts";
 
 async function readYaml<T>(p: string): Promise<T | null> {
   try {
@@ -200,14 +206,19 @@ async function loadWorld(root: string): Promise<World> {
   } catch { /* absent */ }
 
   const formalSpecs: string[] = [];
+  const formalModules: Record<string, string[]> = {};
   try {
     for await (const e of walk(`${root}/formal`, { exts: [".qnt"], includeDirs: false })) {
       formalSpecs.push(basename(e.path));
+      formalModules[basename(e.path)] = modulesIn(await Deno.readTextFile(e.path));
     }
   } catch { /* absent */ }
-  let formalReadme = "";
+  const formalExpectations =
+    (await readYaml<{ specs?: World["formalExpectations"] }>(`${root}/formal/expectations.yaml`))
+      ?.specs ?? [];
+  let formalWorkflow = "";
   try {
-    formalReadme = await Deno.readTextFile(`${root}/formal/README.md`);
+    formalWorkflow = await Deno.readTextFile(`${root}/.github/workflows/formal.yml`);
   } catch { /* absent */ }
 
   const milestones =
@@ -237,7 +248,9 @@ async function loadWorld(root: string): Promise<World> {
     vectorsByRule,
     dimensions: dims,
     formalSpecs,
-    formalReadme,
+    formalModules,
+    formalExpectations,
+    formalWorkflow,
     milestones,
     unwrittenRules: (pr?.unwritten ?? []).length,
     liveInventory,
@@ -247,6 +260,21 @@ async function loadWorld(root: string): Promise<World> {
 
 const unset = (v: unknown) =>
   v === undefined || v === null || v === "" || String(v).trim() === "TBD";
+
+/** A protocol module is declared `expect: hold`, beside at least one `fail` companion in its file. */
+const declaredToHold = (w: World, module: string): { ok: boolean; detail: string } => {
+  const spec = w.formalExpectations.find((s) => s.modules.some((m) => m.name === module));
+  const m = spec?.modules.find((x) => x.name === module);
+  const companions = spec?.modules.filter((x) => x.expect === "fail").length ?? 0;
+  const onDisk = spec ? (w.formalModules[spec.file] ?? []).includes(module) : false;
+  return {
+    ok: m?.expect === "hold" && companions > 0 && onDisk,
+    detail: m
+      ? `${module}: declared ${m.expect}, ${companions} fail companion(s)` +
+        (onDisk ? "" : ", NOT FOUND in formal/")
+      : `${module}: not declared in formal/expectations.yaml`,
+  };
+};
 
 /**
  * The registry. A criterion names one of these, or declares itself `prose_only`.
@@ -544,17 +572,20 @@ export const CHECKS: Record<string, Check> = {
   },
 
   // ── m5 ──
-  // ⚠️ This does NOT run a model checker. It asserts each `.qnt` exists and that `formal/README.md`
-  // records an outcome for it — so a deleted spec, a renamed one, or a run nobody wrote down all
-  // fail. Whether the model actually checks clean is decided by running Apalache, and the README's
-  // table is that record. Named for what it verifies, not for what the criterion says.
-  formal_specs_present_and_recorded: (w) => {
-    const missing = w.formalSpecs.filter((f) => !w.formalReadme.includes(f));
-    const hasOutcome = /NoError|no violation/.test(w.formalReadme);
+  // ⚠️ None of these runs a model checker — validate stays npm-free. They check the DECLARATION
+  // (`formal/expectations.yaml`) and that the job executing it exists; `deno task formal`, in the
+  // `formal` workflow, is what makes the declaration true or turns CI red. Until 2026-10-09 the
+  // first two were `prose_only` and the third read a hand-copied table in formal/README.md, which
+  // is a record of a run, not a run (erp-spec#69).
+  two_store_commit_declared_to_hold: (w) => declaredToHold(w, "two_store_commit"),
+  period_close_declared_to_hold: (w) => declaredToHold(w, "period_close"),
+  formal_specs_declared_and_run_in_ci: (w) => {
+    const problems = reconcile(w.formalExpectations, w.formalModules);
+    const runs = /deno task formal/.test(w.formalWorkflow);
     return {
-      ok: w.formalSpecs.length > 0 && missing.length === 0 && hasOutcome,
-      detail:
-        `${w.formalSpecs.length} .qnt specs, ${missing.length} unrecorded in formal/README.md`,
+      ok: w.formalSpecs.length > 0 && problems.length === 0 && runs,
+      detail: `${w.formalSpecs.length} .qnt specs, ${problems.length} undeclared or mismatched` +
+        (runs ? "" : "; .github/workflows/formal.yml does not run `deno task formal`"),
     };
   },
 

@@ -114,16 +114,20 @@ milestones:
     depends_on: [m4]
     exit_criteria:
       - text: two-store-commit.qnt model checks clean against its three failure questions.
-        prose_only: true
-        reason: >-
-          Deciding it means running Apalache, which validate.ts will not do — it must stay fast,
-          hermetic and dependency-free. The evidence is the recorded run in formal/README.md, and
-          `formal_specs_present_and_recorded` checks that the record exists, not that it is true.
+        check: two_store_commit_declared_to_hold
+        # `prose_only` until 2026-10-09 (erp-spec#69). The check reads the DECLARATION in
+        # formal/expectations.yaml; `deno task formal` in the `formal` workflow executes it and goes
+        # red if the module does not hold or a companion does not fail. validate stays npm-free.
+        # ⚠️ Retire this criterion once ADR-0049 (PostgreSQL is the one system of record) is
+        # accepted — there is no second store to commit across. Until then ADR-0003 is in force.
       - text: period-close.qnt model checks clean, including the back-dated-posting-into-closed-period case.
-        prose_only: true
-        reason: Same — the model checker is the oracle, and it is not run from here.
-      - text: Both specs have been run, not merely written — with the model-checker output recorded.
-        check: formal_specs_present_and_recorded
+        check: period_close_declared_to_hold
+        # `prose_only` until 2026-10-09. The back-dated case is now a named `run` test
+        # (`backdatedPostingIntoOpenPeriodLandsTest`), not only a reachable state of the search.
+      - text: Every spec is run in CI, not merely written — each module's required outcome declared, and every fail-closed companion asserted to fail.
+        check: formal_specs_declared_and_run_in_ci
+        # Was "with the model-checker output recorded", checked against a hand-copied table in
+        # formal/README.md. A record of a run is not a run.
 
   - id: m6
     title: Migration field map complete

@@ -11,6 +11,29 @@ deleted rather than ported — nothing was sunk.
 | `two-store-commit.qnt` | Can a MongoDB write and a TigerBeetle posting disagree across crash and retry? |
 | `period-close.qnt`     | Can a posting land in a closed period?                                         |
 
+⚠️ **`two-store-commit.qnt` loses its subject under ADR-0049** (PostgreSQL is the one system of
+record, proposed 2026-10-09): one store, so no cross-store commit. It stays — ADR-0023 (accepted)
+cites it, and ADR-0003 is in force until ADR-0049 is accepted — and is marked superseded here at
+that acceptance, when m5's two-store criterion retires with it.
+
+## Checked in CI — `deno task formal`
+
+**`formal/expectations.yaml` is the record of what each module must do**, and the `formal` workflow
+(`.github/workflows/formal.yml`) executes it on every change under `formal/`. Per module it runs
+`quint test`, `quint run` (20,000 × 20) and `quint verify` (Apalache), and fails unless each outcome
+matches — a `hold` module finds no violation, a `fail` companion finds one, and the test count is
+exact. It fails closed on a module or `.qnt` file the expectations do not name. Quint is pinned
+there (0.32.0).
+
+```sh
+deno task formal              # everything; verify needs Java 21
+deno task formal --no-verify  # tests + simulation only
+```
+
+**Landed red 2026-10-09**: adding the re-check to `validate_then_commit` turned its test, run and
+verify all red; a misspelt module name and a wrong test count each failed it. Until then CI only
+checked that a result had been copied into the table below.
+
 ## Every spec has a fail-closed companion
 
 Each file holds **two** modules: the protocol, whose invariant must hold, and a deliberately-wrong
@@ -23,7 +46,11 @@ tighter than `or`. The assignment silently kept the old value and the `or` becam
 boolean, so the violation counter could never be set. Only the companion's failure to fail exposed
 it. A single-module spec would have reported "no violation found" and been believed.
 
-## Status — run 2026-08-09, quint 0.32.0. Re-run 2026-08-09, reproduced.
+## Recorded runs before CI — 2026-08-09 and 2026-08-22, quint 0.32.0
+
+History, kept for the timings and for what each companion found. **No longer updated by hand** — the
+CI run is the record now. All seven outcomes reproduced again under `deno task formal` on
+2026-10-09.
 
 Both **simulated** (randomised, 20,000 traces × 20 steps) and **verified** (Apalache symbolic
 bounded model checking, default 10 steps, Java 21).
@@ -86,25 +113,18 @@ more steps than the bound is not found. Raising `--max-steps` is the lever.
   fix is a re-check at commit, and `refuse` exists so a posting whose period closed is refused
   rather than silently dropped or silently landed.
 
-## Running
-
-Quint is not vendored. Requires Java for `verify`.
+## Running a single module by hand
 
 ```sh
-npx @informalsystems/quint typecheck formal/period-close.qnt
-
-# randomised simulation — fast, not exhaustive
-npx @informalsystems/quint run formal/period-close.qnt \
+npx @informalsystems/quint@0.32.0 typecheck formal/period-close.qnt
+npx @informalsystems/quint@0.32.0 test formal/period-close.qnt --main=period_close
+npx @informalsystems/quint@0.32.0 run formal/period-close.qnt \
   --main=period_close --invariant=inv --max-samples=20000 --max-steps=20
-
-# symbolic bounded model checking via Apalache — slower, exhaustive to the step bound
-npx @informalsystems/quint verify formal/period-close.qnt \
+npx @informalsystems/quint@0.32.0 verify formal/period-close.qnt \
   --main=period_close --invariant=inv
 ```
 
-Swap `--main` for a companion module (`naive_sweeper`, `expiring_timeout`, `undiscoverable_orphan`,
-`validate_then_commit`) and the run must report a violation. `two_store_commit`, `intent_first` and
-`period_close` must hold.
+Which modules must hold and which must fail is in `expectations.yaml`, not here.
 
 ⚠️ **Two of the three failing companions describe defects that were UNREPRESENTABLE before they were
 written** — `two_store_commit` has no expired state and no notion of discovery, so it reported no
@@ -117,8 +137,10 @@ ever passes, the spec is broken — not the protocol.**
 ## Not yet done
 
 - **ITF trace replay against the implementation.** This is the property ADR-0016 was chosen for and
-  it is not built. Nothing yet consumes the ITF output.
-- **The sidecar hop.** ADR-0004 says a Go ledger sidecar (should SPIKE-001 force one) adds a network
-  hop that `two-store-commit` must model. It is modelled without that hop today.
+  it is not built. Nothing yet consumes the ITF output. ADR-0054's layers 3 and 4.
+- **Coverage per action** (ADR-0054 D3). A run that never fires an action still reports no
+  violation; `deno task formal` does not measure it.
+- **The sidecar hop** — moot. It existed for a Go ledger sidecar should the TigerBeetle client fail
+  under Deno; ADR-0053 (no native addons, proposed) removes that trigger.
 - `two-store-commit` models **one** operation. Concurrent operations against the same account are
   out of scope of the current model.

@@ -1,0 +1,70 @@
+# The Quint specs, run rather than recorded (erp-spec#69; owner ruling 2026-10-09,
+# inbox/2026-10-09-owner-quint-specs-run-in-ci-as-a-separate-job.md; ADR-0054 D3).
+#
+# Until this existed, CI checked only that each `.qnt` file existed and that formal/README.md had a
+# hand-copied result in it — a stated guarantee nothing executed. `deno task formal` now typechecks,
+# tests, simulates and model-checks every module and fails unless each does what
+# formal/expectations.yaml declares, including every fail-closed companion actually FAILING.
+#
+# ⚠️ **Separate from `spec.yml` on purpose.** That job runs `deno task ci`, which is npm-free and
+# network-free by design. This one needs Quint from npm and Apalache, a JVM download — the same
+# split `tax-rules-refresh.yml` makes.
+#
+# ⚠️ **Path-filtered.** It costs about a minute and a JVM; a spec that did not change cannot change
+# its outcome under a pinned Quint. The pin lives in formal/expectations.yaml, which is in the
+# filter, so a version bump re-runs everything.
+
+name: formal
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "formal/**"
+      - "tools/formal*.ts"
+      - ".github/workflows/formal.yml"
+      - "deno.json"
+  pull_request:
+    paths:
+      - "formal/**"
+      - "tools/formal*.ts"
+      - ".github/workflows/formal.yml"
+      - "deno.json"
+  workflow_dispatch:
+
+# Reads only. Stated here rather than inherited — see spec.yml for why.
+permissions:
+  contents: read
+
+# Same shape as spec.yml: per-PR on a PR, per-SHA on a push, so a push to main is never cancelled.
+concurrency:
+  group: formal-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  formal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      # Apalache (`quint verify`) runs on the JVM; 21 is what the recorded runs used.
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      # Quint downloads Apalache into ~/.quint on first `verify`. Keyed on expectations.yaml, which
+      # holds the Quint pin, so a bump fetches fresh rather than reusing a mismatched Apalache.
+      - uses: actions/cache@v6
+        with:
+          path: |
+            ~/.quint
+            ~/.npm/_npx
+          key: quint-${{ runner.os }}-${{ hashFiles('formal/expectations.yaml') }}
+
+      - name: Run every Quint module against formal/expectations.yaml
+        run: deno task formal

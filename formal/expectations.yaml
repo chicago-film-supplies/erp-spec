@@ -1,0 +1,33 @@
+# What every Quint module in formal/ must do when checked — THE record of it (erp-spec#69).
+#
+# `deno task formal` (tools/formal.ts) runs each module and fails unless the outcome matches. The
+# `formal` workflow runs it in CI, separate from `spec.yml` so `deno task validate` stays npm-free.
+#
+#   expect: hold  — `quint run` and `quint verify` both find no violation of `invariant`.
+#   expect: fail  — both find one. A fail-closed companion: if it ever passes, the MODEL is broken,
+#                   not the protocol (formal/README.md). ADR-0054 D3 makes this a rule.
+#   tests:        — the exact number of `run …Test` declarations `quint test` must pass. Exact, so
+#                   a test that is renamed out of the `Test` suffix or deleted is a failure rather
+#                   than a quieter green.
+#
+# ⚠️ FAILS CLOSED. A module found in a `.qnt` file and not listed here is a failure, and so is a
+# `.qnt` file with no `fail` companion. A new module is unaccounted-for until someone states what it
+# must do.
+#
+# Replaces the hand-copied results table in formal/README.md as the record of what must hold.
+
+quint: 0.32.0 # the version the 2026-08-09 and 2026-08-22 runs were recorded with
+
+specs:
+  - file: two-store-commit.qnt
+    modules:
+      - { name: two_store_commit, invariant: inv, expect: hold, tests: 0 }
+      - { name: naive_sweeper, invariant: inv, expect: fail, tests: 0 }
+      - { name: expiring_timeout, invariant: inv, expect: fail, tests: 0 }
+      - { name: undiscoverable_orphan, invariant: inv, expect: fail, tests: 0 }
+      - { name: intent_first, invariant: inv, expect: hold, tests: 0 }
+
+  - file: period-close.qnt
+    modules:
+      - { name: period_close, invariant: inv, expect: hold, tests: 4 }
+      - { name: validate_then_commit, invariant: inv, expect: fail, tests: 1 }
