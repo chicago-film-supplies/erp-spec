@@ -36,7 +36,7 @@ premise correction for seven accepted ADRs
 (`inbox/2026-10-09-correction-seven-accepted-adrs-cite-a-replaced-store-as-a-premise-and-their-decisions-stand.md`),
 with `ADR-0049` added to their `relates_to`; ADR-0028 `review_by` moved to 2026-12-15.
 
-## Phase 2 — proposed ADRs that rest on a replaced store
+## Phase 2 — proposed ADRs that rest on a replaced store (#63 owner decisions, #64 rewording)
 
 Launch from: `erp-spec/`. Skills: none beyond this repo's `CLAUDE.md`.
 
@@ -59,7 +59,7 @@ Launch from: `erp-spec/`. Skills: none beyond this repo's `CLAUDE.md`.
 - **ADR-0028, ADR-0031** — citations of ADR-0017's sealed artifact and SPIKE-011's TigerBeetle
   sizing.
 
-## Phase 3 — structured spec
+## Phase 3 — structured spec (3a #64, 3b #65)
 
 Launch from: `erp-spec/`. **3a can run now; 3b waits for ADR-0049/0051 acceptance.**
 
@@ -99,7 +99,7 @@ Launch from: `erp-spec/`. **3a can run now; 3b waits for ADR-0049/0051 acceptanc
   TigerBeetle semantics — renaming touches gates 10g/10h/10i/10m and `milestone-checks.ts:375`.
   Decide whether it is worth it; keeping it is defensible.
 
-## Phase 4 — machinery
+## Phase 4 — machinery (`ops` #68, Quint CI #69, retirement #70)
 
 Launch from: `erp-spec/`.
 
@@ -129,7 +129,7 @@ Launch from: `erp-spec/`.
   11 cites them); mark them retired in `spikes/harness/_README.md`. `tools/validate.ts:1563` (gate
   10m comment) cites TigerBeetle.
 
-## Phase 5 — `ops` requirements
+## Phase 5 — `ops` requirements (#68)
 
 Launch from: `erp-spec/`. Source notes:
 `inbox/2026-10-09-gap-the-spec-names-an-observability-stack-and-no-signal-it-must-carry.md`,
@@ -137,12 +137,12 @@ ADR-0054. Quiet-failure liveness, worker/cron liveness, slot lag and retained WA
 gateway liveness, queue depth and age, conformance failures, external dead-man's switch, v2 log
 retention and PII rules. Each REQ needs a `.feature` scenario (gate 3).
 
-## Phase 6 — SPIKE-014
+## Phase 6 — SPIKE-014 (#67)
 
 Launch from: `erp-spec/` (harness in `spikes/harness/pg/`). Needs a local PostgreSQL. Reads v1 via
 the read-only `cfs-api-prod` MCP tools only.
 
-## Phase 7 — acceptance (owner)
+## Phase 7 — acceptance (owner; ADR-0051 survey #66)
 
 - ADR-0051's six-reference survey into `inbox/` first (gate 19 fails acceptance without it).
 - At each acceptance, three fields move together: `supersedes_on_acceptance` → `supersedes`; on the
