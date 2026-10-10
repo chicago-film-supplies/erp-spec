@@ -3127,7 +3127,7 @@ open_questions:
   - id: OQ-069
     headline: "PostgreSQL hosting, backup and failover"
     question: >-
-      Is PostgreSQL run self-managed on a Linode VM or as Linode's managed database, and what are the
+      PostgreSQL is self-managed on a Linode VM by default (owner, 2026-10-09). What are the
       recovery point and recovery time objectives, the backup tool and the failover arrangement?
     owner: alex
     decide_by: 2026-12-15
@@ -3138,6 +3138,11 @@ open_questions:
       database may not permit logical-replication slots, custom roles or triggers the way ADR-0049
       needs — check before choosing. SPIKE-011 sizes the host and is rescoped from TigerBeetle's
       direct-I/O criteria to PostgreSQL.
+      **Narrowed 2026-10-09: self-managed is the default**, and managed needs a compelling reason
+      (`inbox/2026-10-09-owner-rules-postgres-is-self-hosted-by-default-and-managed-needs-a-compelling-reason.md`).
+      What remains is self-managed operation: a backup and point-in-time-recovery tool writing to
+      object storage (pgBackRest and WAL-G are the candidates, neither evaluated), and failover — a
+      streaming replica promoted by hand versus an automated manager such as Patroni.
 
   - id: OQ-070
     headline: "reservation as custody phase or movement count"

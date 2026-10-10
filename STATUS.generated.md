@@ -16,7 +16,7 @@ is `deno task validate`'s judgement, not this file's.
 | Decisions (ADR) | 55 | 29 in force · 20 proposed |
 | Spikes | 14 | 3 open |
 | Requirements | 38 | 0 without a scenario |
-| Inbox | 157 | 124 unpromoted |
+| Inbox | 158 | 124 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
@@ -42,7 +42,7 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-063` | May a PENDING bank transaction post at all; which of the feed's two dates is the accounti… | alex | 2026-12-15 | — |
 | `OQ-066` | Which mechanism makes the PostgreSQL event store append-only — an INSERT-only grant to th… | alex | 2026-12-15 | `ADR-0049` |
 | `OQ-067` | How do committed changes reach subscribed clients live — a read-model row per document pl… | alex | 2026-12-15 | `ADR-0047` |
-| `OQ-069` | Is PostgreSQL run self-managed on a Linode VM or as Linode's managed database, and what a… | alex | 2026-12-15 | `SPIKE-011` |
+| `OQ-069` | PostgreSQL is self-managed on a Linode VM by default (owner, 2026-10-09). What are the re… | alex | 2026-12-15 | `SPIKE-011` |
 | `OQ-070` | Under PostgreSQL, does reserving units for an in-progress fulfillment move them into a `c… | alex | 2026-12-15 | `ADR-0055` |
 | `OQ-071` | Under PostgreSQL, which rules does the database carry and by which mechanism — column typ… | alex | 2026-12-15 | `ADR-0040` |
 | `OQ-072` | How long does v2 keep operational logs, what personal data may a log line carry, and how… | alex | 2026-12-15 | — |
