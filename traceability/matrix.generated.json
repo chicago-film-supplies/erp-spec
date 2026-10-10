@@ -5,7 +5,7 @@
     "adrs": 55,
     "adrs_accepted": 29,
     "events": 38,
-    "inbox": 155,
+    "inbox": 156,
     "inbox_promoted": 32
   },
   "requirements": [
@@ -824,6 +824,7 @@
       "inbox/2026-08-29-owner-numbers-stay-integers-and-the-prefix-is-a-display-function-and-four-more-entities-need-one.md",
       "inbox/2026-08-31-survey-v1-now-has-a-real-suppliers-collection-and-a-cfs-authored-accpay-path.md",
       "inbox/2026-09-19-owner-fifo-is-the-costing-method-and-the-spec-has-no-inventory-costing-layer-at-all.md",
+      "inbox/2026-10-06-finding-a-reimbursed-expense-claim-is-not-a-vendor-bill-and-v1-just-met-the-first-one.md",
       "inbox/2026-10-07-survey-v1-settled-the-serialized-unit-model-that-adr-0015-leaves-out-of-scope.md",
       "inbox/2026-10-07-survey-v1-split-a-purchase-into-ordered-received-billed-and-paid-and-a-receipt-quantity-is-a-co-written-bucket.md",
       "inbox/2026-10-09-correction-seven-accepted-adrs-cite-a-replaced-store-as-a-premise-and-their-decisions-stand.md",
