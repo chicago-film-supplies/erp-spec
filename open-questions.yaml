@@ -3216,7 +3216,12 @@ open_questions:
     owner: alex
     decide_by: 2026-12-15
     blocks: []
-    status: open
+    status: answered
+    answer: >-
+      Break-glass only (owner, 2026-10-09). No day-to-day login is a superuser; migrations run as the
+      owner role under the event trigger; the superuser credential is for emergencies. Every
+      superuser session is logged off-host as it happens (REQ-OPS-012). Where the credential is
+      stored and whether a login pages are still open.
     notes: >-
       Opened 2026-10-09 when OQ-066 was answered. Self-hosting (owner, 2026-10-09) means CFS holds a
       real superuser. The hash chain anchored in a compliance-locked bucket DETECTS what a superuser

@@ -11,18 +11,18 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 31 open | 42 answered of 73 · **0 with no owner or no decide-by** |
+| Open questions | 30 open | 43 answered of 73 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 25 | 1 open |
 | Decisions (ADR) | 55 | 29 in force · 20 proposed |
 | Spikes | 14 | 3 open |
-| Requirements | 38 | 0 without a scenario |
-| Inbox | 160 | 125 unpromoted |
+| Requirements | 39 | 0 without a scenario |
+| Inbox | 161 | 125 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
 ## The bottleneck: undecided questions
 
-**31 of 73 still open**, soonest decide-by first.
+**30 of 73 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
@@ -45,7 +45,6 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-070` | Under PostgreSQL, does reserving units for an in-progress fulfillment move them into a `c… | alex | 2026-12-15 | `ADR-0055` |
 | `OQ-071` | Under PostgreSQL, which rules does the database carry and by which mechanism — column typ… | alex | 2026-12-15 | `ADR-0040` |
 | `OQ-072` | How long does v2 keep operational logs, what personal data may a log line carry, and how… | alex | 2026-12-15 | — |
-| `OQ-073` | Every database-level guard on the event store yields to a superuser. Is there a login tha… | alex | 2026-12-15 | — |
 | `OQ-039` | `organizations.tax_profile` carries two different concepts in one enum — who owes (applie… | alex | 2027-01-15 | — |
 | `OQ-052` | What vehicle rate absorbs into 5900, over what normal-capacity denominator — and where do… | alex | 2027-01-31 | — |
 | `OQ-059` | Which CDN carries CFS images — Uploadcare re-evaluated against imgix and any other suitab… | alex | 2027-01-31 | — |

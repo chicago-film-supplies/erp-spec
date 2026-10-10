@@ -61,3 +61,17 @@ Feature: A failure is announced by something other than the thing that failed
     Given the monitoring system runs on the host it monitors
     When that host becomes unreachable
     Then an alert is raised through a path that depends on neither the monitoring system nor the host
+
+  @REQ-OPS-012
+  Scenario: A break-glass superuser session is recorded off the host as it happens
+    Given no day-to-day login holds superuser authority
+    When the emergency superuser credential is used to open a session
+    Then the session's start, identity and each statement are recorded off the host as they occur
+    And the session cannot alter what has already been recorded
+
+  @REQ-OPS-012
+  Scenario: Switching logging off mid-session is itself visible
+    Given a superuser session that disables logging partway through
+    When the session ends
+    Then its record shows a start with no matching end
+    And that gap is detected

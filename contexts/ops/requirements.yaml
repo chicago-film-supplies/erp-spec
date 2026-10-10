@@ -197,3 +197,23 @@ requirements:
     verification_method: test
     status: draft
     relates_to: [REQ-OPS-001]
+
+  - id: REQ-OPS-012
+    statement: >-
+      Every session with the authority to bypass the event store's database guards shall be
+      recorded — its start and end, the identity behind it, and every statement it ran — in a store
+      that the session itself cannot alter, delivered as the session happens; and a session whose
+      record stops before the session ends shall be detectable.
+    rationale: >-
+      Owner ruling 2026-10-09 (OQ-073): the superuser is break-glass only, with good logging on
+      every use. Every guard on the event store yields to that authority (OQ-066), so the record is
+      what makes using it accountable. "As the session happens" because a superuser can turn
+      logging off mid-session, and pgaudit's own README says superusers cannot be reliably audited:
+      what already left the host survives, and a record that ends before the session did is the
+      signal that logging was switched off. The anchored hash chain catches what such a session
+      did to the event store; this catches the session.
+    source: inbox/2026-10-09-owner-rules-superuser-is-break-glass-only-and-every-use-is-logged.md
+    priority: must
+    verification_method: demonstration
+    status: draft
+    relates_to: [REQ-OPS-006, REQ-OPS-008]
