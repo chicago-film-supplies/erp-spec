@@ -17,6 +17,12 @@ closes_adr: ADR-0042
 status: closed
 ---
 
+> ⚠️ **2026-10-09: the ADR this spike closed is rejected.** ADR-0049 (PostgreSQL is the one system
+> of record) removes the second store, and the owner rejected ADR-0042 (the sweeper is the sole
+> resolver) and ADR-0015 (reservations are pending transfers) the same day. The results below stand
+> as a record of the two-store design. SPIKE-014 reruns this spike's failure cases against one
+> store.
+
 ## Partial result — 2026-08-22. Criterion 1 MET; a new failure mode found on the way
 
 ### Criterion 1 — VERIFIED, not believed

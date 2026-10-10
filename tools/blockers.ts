@@ -21,8 +21,8 @@
  * ⚠️ **erp-spec#39 also proposed excluding "the spike named by the ADR's own `closes_adr`", and
  * that is WRONG.** It was reasoned from ADR-0039/SPIKE-003, where the spike is closed — but a spike
  * that is still OPEN and names the ADR it will produce is precisely that ADR's blocker.
- * `SPIKE-012` (open) declares `closes_adr: ADR-0015`, so the exclusion would have deleted ADR-0015's
- * only real blocker while looking like a tidy-up. **Status alone is correct and sufficient**, and
+ * `SPIKE-012` (open) declared `closes_adr: ADR-0015` (ADR-0055 since 2026-10-09), so the exclusion
+ * would have deleted that ADR's only real blocker while looking like a tidy-up. **Status alone is correct and sufficient**, and
  * the closed case is already covered by it.
  *
  * Kept separate from `generate.ts` for the same reason `ci-predicates.ts` is separate from `ci.ts`:

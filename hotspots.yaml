@@ -1208,6 +1208,15 @@ hotspots:
     blocks: [ADR-0015, SPIKE-002]
     status: resolved
     resolved_by: ADR-0042
+    resolution_note: >-
+      **2026-10-09: the resolver is rejected and the question is moot.** The owner rejected both
+      ADR-0042 (the sweeper is the sole resolver) and ADR-0015 (reservations are pending transfers)
+      under ADR-0049 (PostgreSQL is the one system of record): a reservation now commits in the same
+      transaction as its document, so no pending transfer can be orphaned or expired. `resolved_by`
+      still names ADR-0042 because that is what resolved it at the time. ADR-0055 (what a reservation
+      is under PostgreSQL) carries what survives. The method lesson stands: the failing modules were
+      found by adding unrepresentable state.
+      Source: `inbox/2026-10-09-owner-rejects-adr-0015-and-adr-0042-and-asks-for-both-reservation-models-drafted.md`.
     measured: >-
       **RULED BY THE OWNER 2026-08-22: `timeout = 0`, the sweeper is the sole resolver.** Recorded as
       ADR-0042 (`proposed`), and ADR-0015's compensation bullet is AMENDED rather than superseded —

@@ -11,18 +11,18 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 28 open | 41 answered of 69 · **0 with no owner or no decide-by** |
+| Open questions | 29 open | 41 answered of 70 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 25 | 1 open |
-| Decisions (ADR) | 54 | 29 in force · 21 proposed |
+| Decisions (ADR) | 55 | 29 in force · 20 proposed |
 | Spikes | 14 | 3 open |
 | Requirements | 27 | 0 without a scenario |
-| Inbox | 154 | 123 unpromoted |
+| Inbox | 155 | 123 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
 ## The bottleneck: undecided questions
 
-**28 of 69 still open**, soonest decide-by first.
+**29 of 70 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
@@ -43,6 +43,7 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-066` | Which mechanism makes the PostgreSQL event store append-only — an INSERT-only grant to th… | alex | 2026-12-15 | `ADR-0049` |
 | `OQ-067` | How do committed changes reach subscribed clients live — a read-model row per document pl… | alex | 2026-12-15 | `ADR-0047` |
 | `OQ-069` | Is PostgreSQL run self-managed on a Linode VM or as Linode's managed database, and what a… | alex | 2026-12-15 | `SPIKE-011` |
+| `OQ-070` | Under PostgreSQL, does reserving units for an in-progress fulfillment move them into a `c… | alex | 2026-12-15 | `ADR-0055` |
 | `OQ-039` | `organizations.tax_profile` carries two different concepts in one enum — who owes (applie… | alex | 2027-01-15 | — |
 | `OQ-052` | What vehicle rate absorbs into 5900, over what normal-capacity denominator — and where do… | alex | 2027-01-31 | — |
 | `OQ-059` | Which CDN carries CFS images — Uploadcare re-evaluated against imgix and any other suitab… | alex | 2027-01-31 | — |
@@ -97,11 +98,10 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 - `ADR-0037` — An id carries meaning where it is used — a headline on every id, and addressable claims inside a decision
 - `ADR-0038` — Labor with no causal order is not COGS — 5801 is not created and 6600 Wages narrows instead
 
-### Proposed (21)
+### Proposed (20)
 
 | ADR | Title | Review by | Supersedes on acceptance | Blocked on |
 |---|---|---|---|---|
-| `ADR-0015` | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-11-01 | — | `SPIKE-012` |
 | `ADR-0028` | The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability | 2026-12-15 | — | `SPIKE-011` `OQ-069` |
 | `ADR-0031` | The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy | 2026-11-01 | — | `OQ-033` |
 | `ADR-0032` | The organization tree is a liability tree; projects and settlement points are addressing beneath it | 2026-11-15 | — | `OQ-035` `OQ-038` `OQ-039` |
@@ -109,7 +109,6 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | `ADR-0039` | Historical ledger entries load as ordinary postings with cluster-assigned timestamps; the TigerBeetle `imported` flag is refused | 2026-11-15 | — | — |
 | `ADR-0040` | The Zod schema is the sole authority and the MongoDB validator is generated from it one-way, with every rule the validator cannot carry named in a registry CI walks | 2026-11-15 | — | — |
 | `ADR-0041` | The labor rate variance posts as its own fact keyed to causal orders, and the plan burden rate is re-derived from each observed run | 2026-11-01 | — | `OQ-045` |
-| `ADR-0042` | An orphaned pending transfer is resolved only by the application sweeper, which needs an intent record written before the reserve | 2026-11-15 | — | — |
 | `ADR-0043` | The depreciation engine is hand-rolled behind a package boundary, computed per taxpayer-year, with the year's rules as versioned data | 2026-11-15 | — | `OQ-054` |
 | `ADR-0044` | CFS is the principal on a production service agreement, so the client's budget is revenue and the crew cost is CFS's cost | 2026-11-30 | — | — |
 | `ADR-0045` | A stored jurisdiction records WHO asserted it and under what authority — not which rung of the precedence answered, which is a restatement of fields the document already holds | 2026-11-30 | — | `OQ-056` `OQ-057` |
@@ -122,6 +121,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | `ADR-0052` | DuckDB leaves the runtime; Parquet survives as an append-only change-feed sink, keeping ADR-0024's encoding rules | 2026-12-15 | `ADR-0024` | `SPIKE-014` |
 | `ADR-0053` | The v2 runtime carries no Node-API native addons, so the deployment unit is an ordinary compiled binary | 2026-12-15 | `ADR-0023` | `SPIKE-014` |
 | `ADR-0054` | v2 is verified in five layers — Quint tests, property tests, model-based tests, trace validation and runtime monitors — with each formal spec an oracle written independently of the code | 2026-12-15 | — | `SPIKE-014` |
+| `ADR-0055` | A reservation commits with the document that causes it, future bookings stay intervals, and a serialized product reserves a quantity with optional named units | 2026-12-15 | — | `SPIKE-012` `SPIKE-014` `OQ-070` |
 
 ## Spikes
 
@@ -138,7 +138,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | `SPIKE-009` | What replaces Firestore real-time listeners — MongoDB change streams plus a soc… | 1 week | `ADR-0047` | closed |
 | `SPIKE-010` | Does a production-grade Valkey queue client run under Deno, and can it express… | 3 days | `ADR-0012` | closed |
 | `SPIKE-011` | Does TigerBeetle meet its durability and latency expectations on Linode block s… | 3 days | `ADR-0013` | open |
-| `SPIKE-012` | At which fulfillment moment does a booking become a TigerBeetle pending transfe… | 1 week | `ADR-0015` | in_progress |
+| `SPIKE-012` | At which fulfillment moment does a booking first affect custody, and how much o… | 1 week | `ADR-0055` | in_progress |
 | `SPIKE-013` | What does offline with queued writes actually cost, given that most fields save… | 1 week | `ADR-0047` | closed |
 | `SPIKE-014` | Does one PostgreSQL database carry CFS's documents, ledger, event store, queues… | 5 days | `ADR-0049` | open |
 

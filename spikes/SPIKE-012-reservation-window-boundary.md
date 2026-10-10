@@ -1,9 +1,11 @@
 ---
 id: SPIKE-012
-headline: when a booking becomes a pending transfer
+headline: when a booking first affects custody
 question: >-
-  At which fulfillment moment does a booking become a TigerBeetle pending transfer, and how much of
-  order status is derivable once that boundary is fixed?
+  At which fulfillment moment does a booking first affect custody, and how much of order status is
+  derivable once that boundary is fixed? (Asked of a TigerBeetle pending transfer until 2026-10-09;
+  ADR-0015 is rejected and the spike now closes ADR-0055, whose OQ-070 decides whether a reservation
+  is a custody phase at all.)
 timebox: 1 week
 method: >-
   Take the real order lifecycle and mark, for each transition, whether it has an inventory or ledger
@@ -58,7 +60,7 @@ measurements:
       orders, 23,409 units still `out`) is entirely the 2026-01-24 import cohort.
     as_of: 2026-08-22
     source: "code:2026-08-22:erp-spec@26bf708:spikes/harness/booking-boundary-probe.ts"
-closes_adr: ADR-0015
+closes_adr: ADR-0055
 status: in_progress
 ---
 

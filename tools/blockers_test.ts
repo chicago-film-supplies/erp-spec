@@ -100,7 +100,8 @@ Deno.test("adrBlockers — preserves declaration order and drops only the termin
 
 Deno.test("adrBlockers — a spike that will CLOSE this ADR still blocks it while open", () => {
   // ⚠️ erp-spec#39 proposed excluding "the spike named by the ADR's own closes_adr". SPIKE-012 is
-  // open and declares `closes_adr: ADR-0015`; excluding it would delete ADR-0015's only blocker.
+  // open and declares `closes_adr: ADR-0055` (ADR-0015 until 2026-10-09); excluding it would delete
+  // that ADR's only blocker.
   const index = idx({ "SPIKE-002": { status: "open" }, "SPIKE-012": { status: "open" } });
   const b = adrBlockers({ relates_to: ["SPIKE-002", "SPIKE-012"] }, index);
   assertEquals(b.ids, ["SPIKE-002", "SPIKE-012"]);

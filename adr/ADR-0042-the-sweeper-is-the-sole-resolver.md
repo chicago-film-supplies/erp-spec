@@ -4,12 +4,12 @@ headline: the sweeper is the sole resolver
 title: >-
   An orphaned pending transfer is resolved only by the application sweeper, which needs an intent
   record written before the reserve
-status: proposed
+status: rejected
 date: 2026-08-22
 review_by: 2026-11-15
 deciders: [repo owner]
 contexts: [ledger, availability, fulfillment]
-relates_to: [ADR-0003, ADR-0015, ADR-0017, HOT-022, SPIKE-002, SPIKE-001]
+relates_to: [ADR-0003, ADR-0015, ADR-0017, HOT-022, SPIKE-002, SPIKE-001, ADR-0049]
 accounting_shaped: false
 asserts:
   - id: D1
@@ -60,6 +60,21 @@ asserts:
 supersedes:
 superseded_by:
 ---
+
+> ## ❌ REJECTED 2026-10-09 by the owner — its subject is gone, not its reasoning
+>
+> Every decision here (D1–D4) and every premise (P1–P3) is about a TigerBeetle pending transfer
+> orphaned between two stores. **ADR-0049 (PostgreSQL is the one system of record) removes the
+> second store**, so the reservation and the document it explains commit in one transaction and
+> there is no orphan to find, claim or resolve. Rejected rather than superseded: nothing replaces
+> the sweeper, because nothing needs one.
+>
+> **What carries over is the method, not the mechanism**: a model that cannot represent a failure
+> reports no violation, and `expiring_timeout` / `undiscoverable_orphan` were found by adding the
+> missing state. HOT-022 records the rejection. If ADR-0049 is itself rejected, this ADR is the
+> starting point for the two-store design again.
+>
+> Left in place as the record of a proposal that was made.
 
 > **In the context of** a two-store commit whose pending transfer can be orphaned by a crash,
 > **facing** a ledger that expires such transfers blindly and cannot enumerate them at all, **we

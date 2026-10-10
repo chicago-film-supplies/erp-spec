@@ -182,7 +182,6 @@ Accepted and not superseded, as of the last `deno task gen`.
 
 | ADR | Title | Review by | Supersedes on acceptance | Blocked on |
 |---|---|---|---|---|
-| [ADR-0015](ADR-0015-reservations-as-pending-transfers.md) | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-11-01 | — | `SPIKE-012` |
 | [ADR-0028](ADR-0028-self-hosted-tier-gotenberg-and-victoria.md) | The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability | 2026-12-15 | — | `SPIKE-011` `OQ-069` |
 | [ADR-0031](ADR-0031-allocation-basis-is-goods-revenue-on-the-causal-order.md) | The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy | 2026-11-01 | — | `OQ-033` |
 | [ADR-0032](ADR-0032-the-customer-tree-is-a-liability-tree.md) | The organization tree is a liability tree; projects and settlement points are addressing beneath it | 2026-11-15 | — | `OQ-035` `OQ-038` `OQ-039` |
@@ -190,7 +189,6 @@ Accepted and not superseded, as of the last `deno task gen`.
 | [ADR-0039](ADR-0039-history-loads-as-ordinary-postings-not-imported-transfers.md) | Historical ledger entries load as ordinary postings with cluster-assigned timestamps; the TigerBeetle `imported` flag is refused | 2026-11-15 | — | — |
 | [ADR-0040](ADR-0040-zod-is-the-schema-authority-and-the-mongo-validator-is-generated.md) | The Zod schema is the sole authority and the MongoDB validator is generated from it one-way, with every rule the validator cannot carry named in a registry CI walks | 2026-11-15 | — | — |
 | [ADR-0041](ADR-0041-the-labor-variance-posts-as-a-keyed-fact.md) | The labor rate variance posts as its own fact keyed to causal orders, and the plan burden rate is re-derived from each observed run | 2026-11-01 | — | `OQ-045` |
-| [ADR-0042](ADR-0042-the-sweeper-is-the-sole-resolver.md) | An orphaned pending transfer is resolved only by the application sweeper, which needs an intent record written before the reserve | 2026-11-15 | — | — |
 | [ADR-0043](ADR-0043-the-depreciation-engine-is-built-and-packaged.md) | The depreciation engine is hand-rolled behind a package boundary, computed per taxpayer-year, with the year's rules as versioned data | 2026-11-15 | — | `OQ-054` |
 | [ADR-0044](ADR-0044-cfs-is-principal-on-a-psa.md) | CFS is the principal on a production service agreement, so the client's budget is revenue and the crew cost is CFS's cost | 2026-11-30 | — | — |
 | [ADR-0045](ADR-0045-a-stored-jurisdiction-records-who-asserted-it.md) | A stored jurisdiction records WHO asserted it and under what authority — not which rung of the precedence answered, which is a restatement of fields the document already holds | 2026-11-30 | — | `OQ-056` `OQ-057` |
@@ -203,3 +201,4 @@ Accepted and not superseded, as of the last `deno task gen`.
 | [ADR-0052](ADR-0052-duckdb-leaves-parquet-is-a-change-feed-sink.md) | DuckDB leaves the runtime; Parquet survives as an append-only change-feed sink, keeping ADR-0024's encoding rules | 2026-12-15 | ADR-0024 | `SPIKE-014` |
 | [ADR-0053](ADR-0053-no-native-addons-in-the-runtime.md) | The v2 runtime carries no Node-API native addons, so the deployment unit is an ordinary compiled binary | 2026-12-15 | ADR-0023 | `SPIKE-014` |
 | [ADR-0054](ADR-0054-five-verification-layers-with-the-spec-as-an-independent-oracle.md) | v2 is verified in five layers — Quint tests, property tests, model-based tests, trace validation and runtime monitors — with each formal spec an oracle written independently of the code | 2026-12-15 | — | `SPIKE-014` |
+| [ADR-0055](ADR-0055-what-a-reservation-is-under-postgresql.md) | A reservation commits with the document that causes it, future bookings stay intervals, and a serialized product reserves a quantity with optional named units | 2026-12-15 | — | `SPIKE-012` `SPIKE-014` `OQ-070` |

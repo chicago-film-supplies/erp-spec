@@ -2,16 +2,30 @@
 id: ADR-0015
 headline: reservations are pending transfers
 title: Inventory reservations are TigerBeetle pending transfers, over the operational window only
-status: proposed
+status: rejected
 date: 2026-08-09
 review_by: 2026-11-01
 deciders: [repo owner]
 contexts: [availability, fulfillment, ordering]
-relates_to: [ADR-0003, ADR-0014, ADR-0042, HOT-022, SPIKE-002, SPIKE-012]
+relates_to: [ADR-0003, ADR-0014, ADR-0042, HOT-022, SPIKE-002, SPIKE-012, ADR-0049, ADR-0055]
 accounting_shaped: false
 supersedes:
 superseded_by:
 ---
+
+> ## ❌ REJECTED 2026-10-09 by the owner — re-decided as ADR-0055, not ported
+>
+> The decision here is a TigerBeetle mechanism: a reservation IS a two-phase pending transfer.
+> **ADR-0049 (PostgreSQL is the one system of record) removes TigerBeetle**, so there is no pending
+> transfer to map onto. Porting the shape would carry its costs (the orphan, the timeout, the
+> sweeper of ADR-0042, itself rejected the same day) into a store that does not have them.
+>
+> **What survives, and moves to ADR-0055 (what a reservation is under PostgreSQL):** future-dated
+> bookings are interval records, never balance; a per-day rollup oversells; custody oversell must be
+> refused by the database; fulfillment state is derived (ADR-0014). SPIKE-012's v1 measurements
+> survive and it now closes ADR-0055. The serialized-unit scope this ADR left out is decided there.
+>
+> Left in place as the record of a proposal that was made.
 
 > **In the context of** wanting order state derivable and oversell prevented in the database,
 > **facing** a balance model with no time dimension and an availability question that is entirely

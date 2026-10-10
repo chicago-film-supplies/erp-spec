@@ -3138,3 +3138,21 @@ open_questions:
       database may not permit logical-replication slots, custom roles or triggers the way ADR-0049
       needs — check before choosing. SPIKE-011 sizes the host and is rescoped from TigerBeetle's
       direct-I/O criteria to PostgreSQL.
+
+  - id: OQ-070
+    headline: "reservation as custody phase or movement count"
+    question: >-
+      Under PostgreSQL, does reserving units for an in-progress fulfillment move them into a
+      `committed` phase on the product's custody balance (so a second pick of the last unit is
+      refused), or is a reservation only a per-booking progress count derived from movements, with
+      custody touched at check-out alone?
+    owner: alex
+    decide_by: 2026-12-15
+    blocks: [ADR-0055]
+    status: open
+    notes: >-
+      Opened 2026-10-09 when the owner rejected ADR-0015 and asked for both models drafted and
+      decided at review. Option A keeps ADR-0015's concurrent-pick property and needs a rule for an
+      abandoned reservation; option B is smaller and surfaces the conflict at check-out. SPIKE-012's
+      boundary measurements bear on it; the manager's check-in/check-out lifecycle was not live when
+      they were taken (SPIKE-012 M3).
