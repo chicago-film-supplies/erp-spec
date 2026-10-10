@@ -645,7 +645,7 @@
           <outline text="REQ-OPS-012 — Every session with the authority to bypass the event store's database guards shall be recorded — it…"/>
         </outline>
       </outline>
-      <outline text="Capture (127 unpromoted of 163)" _note="no drops pending">
+      <outline text="Capture (128 unpromoted of 164)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -771,6 +771,7 @@
         <outline text="Owner rules a new `ops` bounded context to own observability, alerting and verification requirement…" _note="inbox/2026-10-09-owner-a-new-ops-context-owns-observability-alerting-and-verification.md"/>
         <outline text="Owner adds UVerify beside Reeve as a candidate public anchor — it anchors hashes rather than record…" _note="inbox/2026-10-09-owner-adds-uverify-as-a-second-cardano-anchor-candidate.md"/>
         <outline text="Owner rules the change-feed archive writes one Parquet file per table per day and never compacts" _note="inbox/2026-10-09-owner-rules-one-parquet-file-per-table-per-day-and-no-compaction.md"/>
+        <outline text="Owner rules a closed period is sealed by a Merkle root over the period's events, so one posting can…" _note="inbox/2026-10-09-owner-rules-the-period-seal-is-a-merkle-root-over-the-periods-events.md"/>
         <outline text="Owner skips OpenTimestamps as a second anchor and keeps the Cardano Foundation's Reeve as a candida…" _note="inbox/2026-10-09-owner-skips-opentimestamps-and-keeps-cardano-reeve-as-a-future-public-anchor.md"/>
         <outline text="PostgreSQL immutability is prevent-in-the-database plus detect-outside-it — grants, ALWAYS triggers…" _note="inbox/2026-10-09-research-postgres-immutability-is-prevent-plus-detect-and-only-an-external-anchor-survives-a-superuser.md"/>
       </outline>

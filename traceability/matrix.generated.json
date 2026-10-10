@@ -5,7 +5,7 @@
     "adrs": 55,
     "adrs_accepted": 29,
     "events": 38,
-    "inbox": 163,
+    "inbox": 164,
     "inbox_promoted": 36
   },
   "requirements": [
@@ -1048,6 +1048,7 @@
       "inbox/2026-10-09-owner-a-new-ops-context-owns-observability-alerting-and-verification.md",
       "inbox/2026-10-09-owner-adds-uverify-as-a-second-cardano-anchor-candidate.md",
       "inbox/2026-10-09-owner-rules-one-parquet-file-per-table-per-day-and-no-compaction.md",
+      "inbox/2026-10-09-owner-rules-the-period-seal-is-a-merkle-root-over-the-periods-events.md",
       "inbox/2026-10-09-owner-skips-opentimestamps-and-keeps-cardano-reeve-as-a-future-public-anchor.md",
       "inbox/2026-10-09-research-postgres-immutability-is-prevent-plus-detect-and-only-an-external-anchor-survives-a-superuser.md"
     ]

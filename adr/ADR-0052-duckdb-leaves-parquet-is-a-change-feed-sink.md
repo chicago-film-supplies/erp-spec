@@ -69,11 +69,11 @@ superseded_by:
   what and when, readable by any engine. Its row shape (LSN, commit time, operation, before/after,
   actor, request id) is SPIKE-014 work. The hashing was ruled by the owner on 2026-10-09: a per-file
   hash as written, a canonical-row hash, the range of changes each file covers, daily manifests
-  chained and written back into PostgreSQL, a period sealed by one hash over its daily manifests,
-  all in a compliance-locked bucket with ten-year retention. One file per table per day, never
-  compacted
+  chained and written back into PostgreSQL, a period sealed by a Merkle root over its events, all in
+  a compliance-locked bucket with ten-year retention. One file per table per day, never compacted
   (`inbox/2026-10-09-owner-accepts-prevent-chain-anchor-immutability-and-a-verifiable-parquet-archive-with-ten-year-retention.md`,
-  `inbox/2026-10-09-owner-rules-one-parquet-file-per-table-per-day-and-no-compaction.md`).
+  `inbox/2026-10-09-owner-rules-one-parquet-file-per-table-per-day-and-no-compaction.md`,
+  `inbox/2026-10-09-owner-rules-the-period-seal-is-a-merkle-root-over-the-periods-events.md`).
 - **It needs a durable, ordered consumer.** A logical-replication consumer that stops retains WAL
   (ADR-0049 Consequences).
 - **Offline analysis is anyone's engine.** DuckDB on a laptop reading the archive is fine; it is a
