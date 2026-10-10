@@ -18,7 +18,21 @@ accepted • **Origin:** owner ruling
 > - ⚠️ **#70 said "sequenced after ADR-0049 acceptance, except quint.md"; this session did it
 >   anyway**, worded as "being replaced, still in force" so nothing claims an acceptance. One commit
 >   (91b1af2), revertable on its own if the owner disagrees.
-> - **The formal workflow has not run on GitHub yet** — only locally. First push is its first run.
+> - **Pushed and green** (e370ae6): `spec` and `formal` both pass on GitHub. #68 and #69 closed; #70
+>   left open for the post-acceptance wording.
+> - **Owner rulings after phase 5** (all in `inbox/2026-10-09-owner-*`): event-store immutability is
+>   prevent (NOLOGIN owner, INSERT-only app role, ENABLE ALWAYS triggers, DDL-blocking event
+>   trigger) + one head-locked hash chain + daily anchors in a COMPLIANCE-locked Akamai bucket,
+>   **ten-year retention** — OQ-066 answered. Parquet archive: per-file + canonical-row hashes, LSN
+>   ranges, daily manifest chain written back to Postgres, one file per table per day, no
+>   compaction, **period seal = Merkle root over the period's events** (ADR-0052 amended).
+>   Self-hosted Postgres by default (OQ-069 narrowed to backup and failover). Superuser is
+>   break-glass only, every session logged off-host — OQ-073 answered, REQ-OPS-012. Public anchors
+>   (Reeve, UVerify) deferred; OpenTimestamps skipped. Evidence:
+>   `inbox/2026-10-09-research-postgres-immutability-is-prevent-plus-detect-and-only-an-external-anchor-survives-a-superuser.md`.
+> - **Still owed to ADR-0049 before acceptance:** a table of what TigerBeetle guaranteed and what
+>   compensates — idempotency (unique journal-entry id), concurrent last-unit custody, and commit
+>   order have no SPIKE-014 criterion yet; immutability is now answered.
 > - **Still waiting on ADR-0049 acceptance:** mark `two-store-commit.qnt` superseded in
 >   `formal/README.md`; retire m5's two-store criterion. Plus everything in 3b and 7.
 > - **Left over, not done:** ADR-0040's filename still says `mongo-validator` (a rename breaks
