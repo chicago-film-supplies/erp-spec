@@ -3064,3 +3064,77 @@ open_questions:
       Sits inside `OQ-058` (identity for v2 domain entities), which already asks what happens to the
       business identifiers people use to refer to things — this is the numbering half, and it is
       separable from opaque-id policy for every entity.
+      ⚠️ **ADR-0049 (2026-10-09, proposed) moves the store to PostgreSQL, and its sequences are NOT
+      gapless** — `nextval` is not rolled back with its transaction, so a number minted from a
+      sequence gaps on every rollback. A gapless number needs a counter row updated inside the
+      posting transaction, which serializes writers on that row. Minting at ISSUE rather than at
+      CREATE keeps that contention to the posting act.
+
+  - id: OQ-066
+    headline: "how the database enforces an append-only event store"
+    question: >-
+      Which mechanism makes the PostgreSQL event store append-only — an INSERT-only grant to the
+      application role, a trigger rejecting UPDATE and DELETE, a hash chain over the rows, or a
+      combination — and who may hold a role that bypasses it?
+    owner: alex
+    decide_by: 2026-12-15
+    blocks: [ADR-0049]
+    status: open
+    notes: >-
+      Opened 2026-10-09 by ADR-0049 D3. Grants and triggers PREVENT; a hash chain only DETECTS, but
+      it is the one that survives a superuser or a migration — the weakness ADR-0049 accepts.
+      SPIKE-014 shows the prevention failing for the application role. Prior art in v1: the
+      movement journal and `replayOrder` (core beta.645), which detect by replay rather than by
+      hash.
+
+  - id: OQ-067
+    headline: "the live transport to clients under PostgreSQL"
+    question: >-
+      How do committed changes reach subscribed clients live — a read-model row per document plus
+      NOTIFY fanned out by a gateway in the API process, logical decoding, or an existing product —
+      and what does a client resume from after a disconnect?
+    owner: alex
+    decide_by: 2026-12-15
+    blocks: [ADR-0047]
+    status: open
+    notes: >-
+      Opened 2026-10-09. ADR-0047's D1 (client persists the change-stream resume token) and D3
+      (pre/post images) are MongoDB change-stream features and must be re-expressed. The reopening
+      note's shape: `read_models (collection, id, version, body)` updated in the write transaction,
+      `NOTIFY {collection,id,version}`, query subscriptions re-run and diffed by id, resume per
+      document `version`. Hand-rolled was preferred there over ElectricSQL, Supabase Realtime and
+      Zero; that preference is not yet a decision.
+      Source: `inbox/2026-10-09-owner-reopens-storage-postgres-as-the-one-system-of-record-and-duckdb-is-dropped.md`.
+
+  - id: OQ-068
+    headline: "how staging stays a live replica of prod"
+    question: >-
+      How does staging stay a live replica of prod while also accepting its own writes — and when a
+      staging write conflicts with an incoming prod change, does staging rebuild its projections from
+      events, or accept prod-wins drift and re-seed?
+    owner: alex
+    decide_by: 2027-01-31
+    blocks: []
+    status: open
+    notes: >-
+      Opened 2026-10-09. The owner requires a live prod replica for staging (v1 has one:
+      `api-cloudrun/src/services/devReplica.ts`, prod-wins with a newer-wins guard). A physical
+      replica is read-only; native logical replication stops on the first conflicting staging
+      write. The reopening note's shape: seed by backup restore, tail the change feed with
+      prod-wins upserts and a skip list, UUIDv7 ids so staging-written events never collide with
+      prod's.
+
+  - id: OQ-069
+    headline: "PostgreSQL hosting, backup and failover"
+    question: >-
+      Is PostgreSQL run self-managed on a Linode VM or as Linode's managed database, and what are the
+      recovery point and recovery time objectives, the backup tool and the failover arrangement?
+    owner: alex
+    decide_by: 2026-12-15
+    blocks: [SPIKE-011]
+    status: open
+    notes: >-
+      Opened 2026-10-09. ADR-0013 (self-host on Linode) stands; both options are on Linode. A managed
+      database may not permit logical-replication slots, custom roles or triggers the way ADR-0049
+      needs — check before choosing. SPIKE-011 sizes the host and is rescoped from TigerBeetle's
+      direct-I/O criteria to PostgreSQL.

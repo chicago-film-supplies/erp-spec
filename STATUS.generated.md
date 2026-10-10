@@ -11,18 +11,18 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 24 open | 41 answered of 65 · **0 with no owner or no decide-by** |
-| Conflicts (HOT) | 24 | 0 open |
-| Decisions (ADR) | 48 | 29 in force · 15 proposed |
-| Spikes | 13 | 2 open |
+| Open questions | 28 open | 41 answered of 69 · **0 with no owner or no decide-by** |
+| Conflicts (HOT) | 25 | 1 open |
+| Decisions (ADR) | 54 | 29 in force · 21 proposed |
+| Spikes | 14 | 3 open |
 | Requirements | 27 | 0 without a scenario |
-| Inbox | 143 | 117 unpromoted |
+| Inbox | 155 | 124 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
 ## The bottleneck: undecided questions
 
-**24 of 65 still open**, soonest decide-by first.
+**28 of 69 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
@@ -40,6 +40,9 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-056` | What remains after 2026-08-22's answers and corrections, and it is machinery rather than… | alex | 2026-12-15 | — |
 | `OQ-057` | Has CFS made the ASC 606-10-32-2A accounting policy election to exclude collected sales a… | alex | 2026-12-15 | — |
 | `OQ-063` | May a PENDING bank transaction post at all; which of the feed's two dates is the accounti… | alex | 2026-12-15 | — |
+| `OQ-066` | Which mechanism makes the PostgreSQL event store append-only — an INSERT-only grant to th… | alex | 2026-12-15 | `ADR-0049` |
+| `OQ-067` | How do committed changes reach subscribed clients live — a read-model row per document pl… | alex | 2026-12-15 | `ADR-0047` |
+| `OQ-069` | Is PostgreSQL run self-managed on a Linode VM or as Linode's managed database, and what a… | alex | 2026-12-15 | `SPIKE-011` |
 | `OQ-039` | `organizations.tax_profile` carries two different concepts in one enum — who owes (applie… | alex | 2027-01-15 | — |
 | `OQ-052` | What vehicle rate absorbs into 5900, over what normal-capacity denominator — and where do… | alex | 2027-01-31 | — |
 | `OQ-059` | Which CDN carries CFS images — Uploadcare re-evaluated against imgix and any other suitab… | alex | 2027-01-31 | — |
@@ -47,6 +50,7 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-061` | Once a merge or an ordinary edit commits, is the prior value of an AUTHORED, NOT-YET-POST… | alex | 2027-01-31 | — |
 | `OQ-064` | Which processor does the public app take card payments through, and is more than one paym… | alex | 2027-01-31 | — |
 | `OQ-065` | What is the numbering scheme for orders and invoices — at which lifecycle act is the numb… | alex | 2027-01-31 | — |
+| `OQ-068` | How does staging stay a live replica of prod while also accepting its own writes — and wh… | alex | 2027-01-31 | — |
 | `OQ-045` | When a vendor bills LESS than was accrued, what retires the residual left in `2010 Accrue… | alex | 2027-02-15 | — |
 | `OQ-048` | At what rate is a contributed (unpaid owner) shift costed in the IMPUTED labor view — the… | alex | 2027-03-15 | — |
 | `OQ-051` | Where is the seam between CFS and a chat system for comments and threads — CFS implements… | alex | 2027-03-31 | — |
@@ -55,7 +59,9 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 
 ## Open conflicts
 
-None.
+| HOT | Statement | Blocks |
+|---|---|---|
+| `HOT-025` | Five in-force ADRs name MongoDB, TigerBeetle, Valkey and DuckDB as the target stack — ADR-0003 (Mongo for doc… | — |
 
 ## Decisions
 
@@ -91,12 +97,12 @@ None.
 - `ADR-0037` — An id carries meaning where it is used — a headline on every id, and addressable claims inside a decision
 - `ADR-0038` — Labor with no causal order is not COGS — 5801 is not created and 6600 Wages narrows instead
 
-### Proposed (15)
+### Proposed (21)
 
 | ADR | Title | Review by | Supersedes on acceptance | Blocked on |
 |---|---|---|---|---|
 | `ADR-0015` | Inventory reservations are TigerBeetle pending transfers, over the operational window only | 2026-11-01 | — | `SPIKE-012` |
-| `ADR-0028` | The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability | 2026-10-01 | — | `SPIKE-011` |
+| `ADR-0028` | The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability | 2026-12-15 | — | `SPIKE-011` `OQ-069` |
 | `ADR-0031` | The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy | 2026-11-01 | — | `OQ-033` |
 | `ADR-0032` | The organization tree is a liability tree; projects and settlement points are addressing beneath it | 2026-11-15 | — | `OQ-035` `OQ-038` `OQ-039` |
 | `ADR-0033` | A document is addressed to exactly one node by a level-tagged reference, and unallocated credit sits at the settlement point | 2026-11-15 | — | `OQ-030` `OQ-038` `OQ-040` |
@@ -110,6 +116,12 @@ None.
 | `ADR-0046` | Adopt date-fns and @date-fns/tz as planned dependencies for every business datetime | 2026-11-01 | — | — |
 | `ADR-0047` | The client data model — one live transport replacing Firestore listeners, and an offline queue reconciled by three-way merge | 2026-11-15 | — | `OQ-043` `OQ-061` |
 | `ADR-0048` | The Plaid ingestion boundary — a MongoDB inbox at the edge that does not post, CFS-minted identity, and delta-atomic application | 2026-11-30 | — | `OQ-062` `OQ-063` |
+| `ADR-0049` | PostgreSQL is the one system of record — documents, ledger, event store, queues and reporting in one transactional database | 2026-12-15 | `ADR-0003` | `SPIKE-011` `SPIKE-014` `HOT-025` `OQ-065` `OQ-066` `OQ-067` `OQ-068` `OQ-069` |
+| `ADR-0050` | Work queues are PostgreSQL tables, enqueued in the transaction that causes the work and claimed with SKIP LOCKED | 2026-12-15 | `ADR-0012` | `SPIKE-014` |
+| `ADR-0051` | The PostgreSQL ledger is the reporting authority for open and closed periods alike; a closed period is protected by the database and a closing hash | 2026-12-15 | `ADR-0017` | `OQ-051` `OQ-056` **rule 8a survey** |
+| `ADR-0052` | DuckDB leaves the runtime; Parquet survives as an append-only change-feed sink, keeping ADR-0024's encoding rules | 2026-12-15 | `ADR-0024` | `SPIKE-014` |
+| `ADR-0053` | The v2 runtime carries no Node-API native addons, so the deployment unit is an ordinary compiled binary | 2026-12-15 | `ADR-0023` | `SPIKE-014` |
+| `ADR-0054` | v2 is verified in five layers — Quint tests, property tests, model-based tests, trace validation and runtime monitors — with each formal spec an oracle written independently of the code | 2026-12-15 | — | `SPIKE-014` |
 
 ## Spikes
 
@@ -128,6 +140,7 @@ None.
 | `SPIKE-011` | Does TigerBeetle meet its durability and latency expectations on Linode block s… | 3 days | `ADR-0013` | open |
 | `SPIKE-012` | At which fulfillment moment does a booking become a TigerBeetle pending transfe… | 1 week | `ADR-0015` | in_progress |
 | `SPIKE-013` | What does offline with queued writes actually cost, given that most fields save… | 1 week | `ADR-0047` | closed |
+| `SPIKE-014` | Does one PostgreSQL database carry CFS's documents, ledger, event store, queues… | 5 days | `ADR-0049` | open |
 
 ## Roadmap
 
@@ -140,17 +153,18 @@ it is counted separately on purpose, and a milestone is not done because its che
 | `m1` | Big-picture event storm | `m0` | 1 | — | 2 | — |
 | `m2` | Context map and glossary v1 | `m1` | 2 | — | 1 | — |
 | `m3` | Ledger core | `m2` | 5 | — | — | — |
-| `m4` | All spikes closed by ADR | `m3` | 1 | 1 | — | 1 |
+| `m4` | All spikes closed by ADR | `m3` | 0 | 2 | — | 1 |
 | `m5` | Formal specs checking clean | `m4` | 1 | — | 2 | — |
 | `m6` | Migration field map complete | `m2` | 1 | — | 3 | — |
 | `m7` | Walking skeleton defined | `m3` `m5` `m6` | 0 | — | 3 | — |
 | `spec-v1` | Tag spec-v1 | `m0` `m1` `m2` `m3` `m4` `m5` `m6` `m7` | 1 | — | 3 | 1 |
 
-### Machine-checkable criteria not yet met (1)
+### Machine-checkable criteria not yet met (2)
 
 | Milestone | Criterion | Check | Measured |
 |---|---|---|---|
-| `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 13 spikes, 2 open, 0 closed without naming an ADR |
+| `m4` | Every SPIKE- has status closed and names the ADR it produced. | `spikes_closed_with_adr` | 14 spikes, 3 open, 0 closed without naming an ADR |
+| `m4` | Every HOT- is resolved or has an ADR that consciously defers it with… | `hotspots_resolved` | 25 hotspots, 1 unresolved |
 
 ## Coverage gaps
 

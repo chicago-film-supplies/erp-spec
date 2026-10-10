@@ -1409,3 +1409,21 @@ hotspots:
       Source:
       `inbox/2026-08-23-owner-states-the-whole-jurisdiction-model-paxton-is-retired-and-the-org-level-only-inits.md`
     resolved_by: ADR-0045
+
+  - id: HOT-025
+    headline: "the in-force storage ADRs contradict the owner's ruling"
+    statement: >-
+      Five in-force ADRs name MongoDB, TigerBeetle, Valkey and DuckDB as the target stack — ADR-0003
+      (Mongo for documents, TigerBeetle for the ledger), ADR-0012 (Valkey queues), ADR-0017 (reporting
+      authority by period state), ADR-0023 (native addons, one binary) and ADR-0024 (DuckDB
+      server-side). The owner ruled on 2026-10-09 that PostgreSQL replaces all four.
+    contexts: [ledger, ordering, billing, fulfillment, availability]
+    why_it_matters: >-
+      `adr/in-force.generated.md` and STATUS will keep reporting the replaced stack as decided until
+      the superseders are accepted, and new spec work written against the in-force set will be
+      written against the wrong stack. Each superseder carries `supersedes_on_acceptance` for exactly
+      one target, because gate 6 allows one: ADR-0049→0003, ADR-0050→0012, ADR-0051→0017,
+      ADR-0052→0024, ADR-0053→0023.
+    artifacts:
+      - inbox/2026-10-09-owner-rules-postgres-is-the-one-system-of-record-replacing-mongo-tigerbeetle-valkey-and-duckdb.md
+    status: open

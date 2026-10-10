@@ -6,7 +6,7 @@ status: accepted
 date: 2026-08-09
 deciders: [repo owner]
 contexts: [fixed-assets, ledger, tax]
-relates_to: [ADR-0007, ADR-0017, ADR-0018, SPIKE-005, OQ-027, OQ-029, HOT-013]
+relates_to: [ADR-0007, ADR-0017, ADR-0018, SPIKE-005, OQ-027, OQ-029, HOT-013, ADR-0049]
 accounting_shaped: true
 survey_exemption: >-
   ⚠️ **The clearest of the six, and the least comfortable.** Accepted 2026-08-09 — the same day the

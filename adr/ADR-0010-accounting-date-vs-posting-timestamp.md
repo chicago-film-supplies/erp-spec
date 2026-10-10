@@ -6,7 +6,7 @@ status: accepted
 date: 2026-08-08
 deciders: [repo owner]
 contexts: [ledger]
-relates_to: [HOT-005, OQ-009, SPIKE-003]
+relates_to: [HOT-005, OQ-009, SPIKE-003, ADR-0049]
 accounting_shaped: true
 survey_exemption: >-
   Accepted 2026-08-08, before rule 8a existed (owner, 2026-08-09). It is accounting POLICY — which

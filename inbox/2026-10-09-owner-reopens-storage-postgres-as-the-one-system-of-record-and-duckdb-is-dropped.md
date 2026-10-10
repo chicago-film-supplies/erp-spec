@@ -11,18 +11,31 @@ source: >-
   same day against prod VictoriaMetrics and VictoriaTraces (30-day window). Transcript:
   `research-drop/2026-10-09-storage-reopened-postgres-as-one-system-of-record.md`.
 confidence: medium
-promotes_to: []
+promotes_to: [
+  ADR-0049,
+  ADR-0050,
+  ADR-0051,
+  ADR-0052,
+  ADR-0053,
+  SPIKE-014,
+  OQ-066,
+  OQ-067,
+  OQ-068,
+  OQ-069,
+  HOT-025,
+]
 verified: true
 triage_count: 0
 ---
 
 ## What the owner stated
 
-- **Reopen most past storage decisions.** Requirements that stand: live streaming to clients; real-time
-  accurate stock availability; a replayable, ideally immutable, event store for anything inventory,
-  custody or money related; open source over vendor lock-in; self-hosted on Linode (ADR-0013 stands).
-- **"I liked TigerBeetle and am afraid we're forcing it."** Also concerned about the number of storage
-  sites (today's spec: MongoDB + TigerBeetle + Valkey + Parquet/DuckDB + Typesense).
+- **Reopen most past storage decisions.** Requirements that stand: live streaming to clients;
+  real-time accurate stock availability; a replayable, ideally immutable, event store for anything
+  inventory, custody or money related; open source over vendor lock-in; self-hosted on Linode
+  (ADR-0013 stands).
+- **"I liked TigerBeetle and am afraid we're forcing it."** Also concerned about the number of
+  storage sites (today's spec: MongoDB + TigerBeetle + Valkey + Parquet/DuckDB + Typesense).
 - **Typesense stays.**
 - **Drop DuckDB; keep Parquet as change-feed sinks.**
 - **A live replica of prod for a staging environment is still required** (v1 has one: prod → dev
@@ -79,15 +92,18 @@ triage_count: 0
 - **Change feed (logical replication slot) as the one durable, ordered outbound path.** Sinks:
   - **Typesense**, replacing the Eventarc → `/tasks/sync-typesense` path (about 2.4M
     `/eventarc/firestore` calls in 30 days);
-  - **Parquet**, as an append-only change log (`lsn, commit_ts, table, op, pk, before, after,
-    actor, request_id`), partitioned by table and day in Linode Object Storage, compacted and
-    hashed daily. This doubles as the **audit stream** for documents that are not event-sourced.
-    The actor travels via `pg_logical_emit_message`, and audited tables need `REPLICA IDENTITY FULL`;
+  - **Parquet**, as an append-only change log
+    (`lsn, commit_ts, table, op, pk, before, after,
+    actor, request_id`), partitioned by table
+    and day in Linode Object Storage, compacted and hashed daily. This doubles as the **audit
+    stream** for documents that are not event-sourced. The actor travels via
+    `pg_logical_emit_message`, and audited tables need `REPLICA IDENTITY FULL`;
   - **staging.**
   - Risk to monitor: a dead consumer retains WAL until the disk fills. Needs
     `max_slot_wal_keep_size` and an alert on slot lag.
 - **Event store vs change feed are not the same thing.**
-  - The event store is the domain FACTS, written deliberately by the app, and is the source of truth.
+  - The event store is the domain FACTS, written deliberately by the app, and is the source of
+    truth.
   - The change feed is the PHYSICAL row changes, derived from the WAL, and is how every change
     (events included) reaches other systems.
 - **Staging replica.**
@@ -113,7 +129,7 @@ ADR-0003, ADR-0012, ADR-0015, ADR-0017, ADR-0023 (at least its DuckDB/TigerBeetl
 ADR-0024 and ADR-0042. ADR-0047's D1/D2 (resume token, silent resync) carry over keyed per document.
 `formal/two-store-commit` becomes moot.
 
-Suggested next step: a spike porting `core/src/utils/stock.ts`, a posting table with the zero-sum and
-non-negative constraints, a `NOTIFY` gateway feeding a `createEntityCache` port, and one heavy prod
-order replayed end to end. Run SPIKE-002's failure cases against it, and kill the LISTEN connection
-mid-write to check that clients converge.
+Suggested next step: a spike porting `core/src/utils/stock.ts`, a posting table with the zero-sum
+and non-negative constraints, a `NOTIFY` gateway feeding a `createEntityCache` port, and one heavy
+prod order replayed end to end. Run SPIKE-002's failure cases against it, and kill the LISTEN
+connection mid-write to check that clients converge.

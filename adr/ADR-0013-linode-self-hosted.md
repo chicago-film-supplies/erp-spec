@@ -6,7 +6,7 @@ status: accepted
 date: 2026-08-09
 deciders: [repo owner]
 contexts: [ledger, ordering, billing, fulfillment]
-relates_to: [ADR-0003, ADR-0004, ADR-0012, SPIKE-011]
+relates_to: [ADR-0003, ADR-0004, ADR-0012, SPIKE-011, ADR-0049]
 accounting_shaped: false
 supersedes:
 superseded_by:

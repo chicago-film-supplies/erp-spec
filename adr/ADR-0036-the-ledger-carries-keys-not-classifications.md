@@ -16,6 +16,7 @@ relates_to: [
   HOT-013,
   HOT-014,
   REQ-LED-001,
+  ADR-0049,
 ]
 accounting_shaped: true
 survey_exemption: >-

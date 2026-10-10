@@ -4,10 +4,10 @@ headline: self-hosted rendering and observability
 title: The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability
 status: proposed
 date: 2026-08-09
-review_by: 2026-10-01
+review_by: 2026-12-15
 deciders: [repo owner]
 contexts: [billing, ledger]
-relates_to: [ADR-0013, ADR-0017, ADR-0023, ADR-0027, SPIKE-011]
+relates_to: [ADR-0013, ADR-0017, ADR-0023, ADR-0027, SPIKE-011, ADR-0049, ADR-0054, OQ-069]
 accounting_shaped: false
 supersedes:
 superseded_by:

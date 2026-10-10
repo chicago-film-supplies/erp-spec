@@ -6,7 +6,7 @@ status: accepted
 date: 2026-08-09
 deciders: [repo owner]
 contexts: [billing, ledger]
-relates_to: [HOT-009, ADR-0014, ADR-0017]
+relates_to: [HOT-009, ADR-0014, ADR-0017, ADR-0049]
 accounting_shaped: false
 supersedes:
 superseded_by:

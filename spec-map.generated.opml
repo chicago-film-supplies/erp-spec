@@ -58,7 +58,7 @@
           <outline text="[object Object]"/>
         </outline>
       </outline>
-      <outline text="Open questions (24 of 65 still open)" _note="The bottleneck. Each blocks what is listed under it.">
+      <outline text="Open questions (28 of 69 still open)" _note="The bottleneck. Each blocks what is listed under it.">
         <outline text="OQ-001 — Are fulfillment legs first-class recorded events with their own identity, or derived from the order…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-007"/>
           <outline text="blocks ADR-0011"/>
@@ -213,8 +213,18 @@
         <outline text="OQ-063 — May a PENDING bank transaction post at all; which of the feed's two dates is the accounting date; a…" _note="owner: alex · decide by: 2026-12-15"/>
         <outline text="OQ-064 — Which processor does the public app take card payments through, and is more than one payment method…" _note="owner: alex · decide by: 2027-01-31"/>
         <outline text="OQ-065 — What is the numbering scheme for orders and invoices — at which lifecycle act is the number minted,…" _note="owner: alex · decide by: 2027-01-31"/>
+        <outline text="OQ-066 — Which mechanism makes the PostgreSQL event store append-only — an INSERT-only grant to the applicat…" _note="owner: alex · decide by: 2026-12-15">
+          <outline text="blocks ADR-0049"/>
+        </outline>
+        <outline text="OQ-067 — How do committed changes reach subscribed clients live — a read-model row per document plus NOTIFY…" _note="owner: alex · decide by: 2026-12-15">
+          <outline text="blocks ADR-0047"/>
+        </outline>
+        <outline text="OQ-068 — How does staging stay a live replica of prod while also accepting its own writes — and when a stagi…" _note="owner: alex · decide by: 2027-01-31"/>
+        <outline text="OQ-069 — Is PostgreSQL run self-managed on a Linode VM or as Linode's managed database, and what are the rec…" _note="owner: alex · decide by: 2026-12-15">
+          <outline text="blocks SPIKE-011"/>
+        </outline>
       </outline>
-      <outline text="Conflicts (0 open)">
+      <outline text="Conflicts (1 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labor) or an own long-haul run (labor-bearing)? T…" _note="Decides whether a trucked fulfillment absorbs labor cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
           <outline text="blocks OQ-010"/>
           <outline text="blocks ADR-0011"/>
@@ -290,8 +300,9 @@
           <outline text="blocks SPIKE-005"/>
         </outline>
         <outline text="HOT-024 — Two live, mutable statements about whether CFS still collects in Paxton contradict each other. **Th…" _note="⭐ **It is the case that decides what a permitted override target IS**, and it is why `ADR-0045` withdrew a decision that would have keyed the target set on live registrations. That rule would have made `paxton` newly assertable again — reversing a deliberate closure — while deleting `no_nexus`, which is deliberately offered and is **not** a registration at all. **Both non-trivial members come out wrong**, and the reason is that &quot;registered&quot; and &quot;assertable&quot; are different predicates that happen to coincide on the easy members. ⚠️ **And the ambiguity is not free while it stands.** `deriveJurisdiction`'s city table omits Paxton, so no address derives there; only a stored value reaches it. But `findTaxFor` will still price a `paxton` line at 6.25% today, because the window is open. ⇒ **the catalog would collect a tax the UI says CFS no longer collects**, and nothing fails. ⭐ **The cheap resolution is the one the convention already names**: if CFS is deregistered, write the 0% successor and the two statements agree. If CFS is still registered, the UI is wrong. **Either way the fix is one write, and the value of the hotspot is that nobody has decided which.**"/>
+        <outline text="HOT-025 — Five in-force ADRs name MongoDB, TigerBeetle, Valkey and DuckDB as the target stack — ADR-0003 (Mon…" _note="`adr/in-force.generated.md` and STATUS will keep reporting the replaced stack as decided until the superseders are accepted, and new spec work written against the in-force set will be written against the wrong stack. Each superseder carries `supersedes_on_acceptance` for exactly one target, because gate 6 allows one: ADR-0049→0003, ADR-0050→0012, ADR-0051→0017, ADR-0052→0024, ADR-0053→0023."/>
       </outline>
-      <outline text="Decisions (29 in force, 15 proposed)">
+      <outline text="Decisions (29 in force, 21 proposed)">
         <outline text="In force (29)">
           <outline text="ADR-0001 — Replace Xero with an in-house ledger" _note="**In the context of** owning the order-to-invoice path but renting the ledger, **facing** a tracking-dimension defect that Xero silently absorbs and a costing model Xero cannot express, **we decided** to build the general ledger in-house, **to achieve** dimensional postings that cannot be null and a labour-absorption model we control, **accepting** that a large amount of unglamorous accounting surface area becomes ours to build and keep correct."/>
           <outline text="ADR-0002 — Bank feed sourced from Plaid, single Chase account" _note="**In the context of** needing bank transactions now that Xero's feed goes away, **facing** one bank and one account, **we decided** to source the feed from Plaid, **to achieve** a working feed without a bank-specific integration, **accepting** that Plaid's transaction model is a consumer-fintech model, not an accounting bank feed."/>
@@ -323,14 +334,15 @@
           <outline text="ADR-0037 — An id carries meaning where it is used — a headline on every id, and addressable claims inside a decision" _note="**In the context of** a spec whose authority is prose, **facing** a measured 22:1 mismatch between what is cited (a document) and what is claimed (about twenty statements inside it), **we decided** that an ADR additionally asserts individually addressable claims, typed as decision or premise, **to achieve** corrections that can be swept and premises that can go stale without touching a frozen decision, **accepting** a second surface on every ADR and a convention that only pays off as it is adopted."/>
           <outline text="ADR-0038 — Labor with no causal order is not COGS — 5801 is not created and 6600 Wages narrows instead" _note="**In the context of** but-for attribution putting a guaranteed day onto the order that caused the hire, **facing** the consequence that labor no order caused has no revenue it is applicable to, **we decided** that such labor is operating expense and stays in `6600 - Wages` rather than reaching a COGS account, **to achieve** a cost-of-revenue line that contains only costs of revenue, **accepting** that ADR-0019's `5801` is not created and that a superficially identical vehicle account deliberately does not follow."/>
         </outline>
-        <outline text="Proposed (15)">
+        <outline text="Proposed (21)">
           <outline text="ADR-0015 — Inventory reservations are TigerBeetle pending transfers, over the operational window only" _note="review by: 2026-11-01 · **In the context of** wanting order state derivable and oversell prevented in the database, **facing** a balance model with no time dimension and an availability question that is entirely about time, **we decided** to model reservations as two-phase transfers over the operational window only, **to achieve** custody oversell that is unrepresentable and a fulfillment state that is derived, **accepting** that future-dated booking conflicts stay with the interval engine.">
             <outline text="blocked on HOT-022"/>
             <outline text="blocked on SPIKE-002"/>
             <outline text="blocked on SPIKE-012"/>
           </outline>
-          <outline text="ADR-0028 — The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability" _note="review by: 2026-10-01 · **In the context of** ADR-0013 moving the system onto a host CFS operates, **facing** two service groups already running as containers, **we decided** to retain Gotenberg for document rendering and the full VictoriaMetrics stack for observability on that same host, **to achieve** one deployment unit and no new vendors, **accepting** that CFS is on the hook when either is down and that both fail quiet rather than loud.">
+          <outline text="ADR-0028 — The self-hosted service tier — Gotenberg for rendering, the Victoria stack for observability" _note="review by: 2026-12-15 · **In the context of** ADR-0013 moving the system onto a host CFS operates, **facing** two service groups already running as containers, **we decided** to retain Gotenberg for document rendering and the full VictoriaMetrics stack for observability on that same host, **to achieve** one deployment unit and no new vendors, **accepting** that CFS is on the hook when either is down and that both fail quiet rather than loud.">
             <outline text="blocked on SPIKE-011"/>
+            <outline text="blocked on OQ-069"/>
           </outline>
           <outline text="ADR-0031 — The official product-line P&amp;L allocates by goods revenue on the causal order, declared as a proxy" _note="review by: 2026-11-01 · **In the context of** ADR-0029 promising exactly one official allocation and not saying what it is, **facing** three candidate bases that reassign up to a third of the largest product line's revenue between them, **we decided** to allocate by goods revenue on the causal order and to record in the report that this is a proxy rather than a cost driver, **to achieve** one reproducible margin per product line, **accepting** that the basis is the weakest tier in the standard criterion and stays that way until the shipping specs are populated.">
             <outline text="blocked on OQ-006"/>
@@ -399,9 +411,45 @@
             <outline text="blocked on OQ-062"/>
             <outline text="blocked on OQ-063"/>
           </outline>
+          <outline text="ADR-0049 — PostgreSQL is the one system of record — documents, ledger, event store, queues and reporting in one transactional database" _note="review by: 2026-12-15 · **In the context of** a two-store design whose integrity cost appears throughout the spec, **facing** an owner ruling that one open-source database should hold every record, **we decided** to make PostgreSQL the one system of record, with events committed in the same transaction as the documents they explain, **to achieve** atomic writes with no cross-store protocol and a ledger that can be queried by accounting date, **accepting** that ledger invariants become database constraints that a superuser or a migration can bypass, where TigerBeetle's could not be.">
+            <outline text="blocked on SPIKE-002"/>
+            <outline text="blocked on SPIKE-011"/>
+            <outline text="blocked on SPIKE-014"/>
+            <outline text="blocked on HOT-005"/>
+            <outline text="blocked on HOT-022"/>
+            <outline text="blocked on HOT-025"/>
+            <outline text="blocked on OQ-065"/>
+            <outline text="blocked on OQ-066"/>
+            <outline text="blocked on OQ-067"/>
+            <outline text="blocked on OQ-068"/>
+            <outline text="blocked on OQ-069"/>
+          </outline>
+          <outline text="ADR-0050 — Work queues are PostgreSQL tables, enqueued in the transaction that causes the work and claimed with SKIP LOCKED" _note="review by: 2026-12-15 · **In the context of** one transactional system of record (ADR-0049), **facing** a queue decision whose only argument against the database was that the database was two stores, **we decided** to keep work queues in PostgreSQL, enqueued in the transaction that causes the work, **to achieve** enqueue that cannot be lost or orphaned relative to its cause, **accepting** that queue load shares the database with everything else.">
+            <outline text="blocked on SPIKE-010"/>
+            <outline text="blocked on SPIKE-014"/>
+          </outline>
+          <outline text="ADR-0051 — The PostgreSQL ledger is the reporting authority for open and closed periods alike; a closed period is protected by the database and a closing hash" _note="review by: 2026-12-15 · **In the context of** a ledger that now lives in a queryable database (ADR-0049), **facing** a reporting split that existed only because the old ledger could not be queried by accounting date, **we decided** that the one ledger answers every period and that the database itself refuses postings into a closed period, **to achieve** one source for every figure with closed-period figures that cannot drift, **accepting** that &quot;cannot drift&quot; now rests on a constraint and a hash rather than on an immutable file.">
+            <outline text="blocked on HOT-005"/>
+            <outline text="blocked on OQ-009"/>
+            <outline text="blocked on OQ-051"/>
+            <outline text="blocked on OQ-056"/>
+          </outline>
+          <outline text="ADR-0052 — DuckDB leaves the runtime; Parquet survives as an append-only change-feed sink, keeping ADR-0024's encoding rules" _note="review by: 2026-12-15 · **In the context of** one ledger answering every period (ADR-0051), **facing** a reporting engine whose job no longer exists, **we decided** to drop DuckDB from the runtime and keep Parquet only as an append-only change-feed sink, **to achieve** one fewer engine with the archive and audit value intact, **accepting** that offline analysis is done with whatever engine reads Parquet, outside the system.">
+            <outline text="blocked on SPIKE-007"/>
+            <outline text="blocked on SPIKE-014"/>
+          </outline>
+          <outline text="ADR-0053 — The v2 runtime carries no Node-API native addons, so the deployment unit is an ordinary compiled binary" _note="review by: 2026-12-15 · **In the context of** a stack that no longer includes TigerBeetle, DuckDB or Valkey (ADR-0049), **facing** a deployment rule that existed only to load their native addons, **we decided** that the runtime carries no native addons at all, **to achieve** a smaller binary with no extraction step and no flag whose necessity nothing type-checks, **accepting** that a driver feature available only natively is out of reach.">
+            <outline text="blocked on SPIKE-001"/>
+            <outline text="blocked on SPIKE-007"/>
+            <outline text="blocked on SPIKE-010"/>
+            <outline text="blocked on SPIKE-014"/>
+          </outline>
+          <outline text="ADR-0054 — v2 is verified in five layers — Quint tests, property tests, model-based tests, trace validation and runtime monitors — with each formal spec an oracle written independently of the code" _note="review by: 2026-12-15 · **In the context of** formal specs that nothing executes and an implementation that does not yet exist, **facing** the risk that a green spec and a green test suite describe different systems, **we decided** on five verification layers with each spec an oracle written independently of the code, **to achieve** a measurable answer to &quot;does the code do what the spec says&quot;, **accepting** that every layer is work to build and that the specs become load-bearing artifacts to maintain.">
+            <outline text="blocked on SPIKE-014"/>
+          </outline>
         </outline>
       </outline>
-      <outline text="Spikes (2 open)">
+      <outline text="Spikes (3 open)">
         <outline text="SPIKE-001 — Does the TigerBeetle client load and run under Deno via node-api compatibility?" _note="timebox: 2 days · closes: ADR-0023 · closed">
           <outline text="A Deno process creates accounts and posts a two-phase transfer against a real TigerBeetle cluster."/>
           <outline text="The same code path runs under `deno test` and under `deno compile`."/>
@@ -478,6 +526,17 @@
           <outline text="Whether the undo path requires OQ-043's document event history is answered yes or no, with what breaks if it is no."/>
           <outline text="The offline/pending/synced state is shown to be derivable at every save-on-focusout site — the absence of an error is currently the only feedback, so this is the load-bearing half."/>
           <outline text="[object Object]"/>
+        </outline>
+        <outline text="SPIKE-014 — Does one PostgreSQL database carry CFS's documents, ledger, event store, queues, live transport and…" _note="timebox: 5 days · closes: ADR-0049 · open">
+          <outline text="A pure TypeScript/JavaScript PostgreSQL driver runs under `deno run`, `deno test` and `deno compile`, and supports transactions, LISTEN/NOTIFY, COPY and the logical-replication protocol — or the missing capability is named (ADR-0053)."/>
+          <outline text="An unbalanced journal entry fails to commit, and an UPDATE or DELETE on the event table fails for the application role; both are shown failing, not only passing."/>
+          <outline text="A posting dated in a closed period is refused at commit when the period closes between validation and commit (the race `validate_then_commit` models)."/>
+          <outline text="SIGKILL at each step of an order write leaves no document without its events and no events without their document, across every crash point SPIKE-002 enumerated."/>
+          <outline text="A job enqueued in a transaction that rolls back is never claimed, and two workers never process the same entity concurrently."/>
+          <outline text="Clients converge after the LISTEN connection is killed mid-write: every subscribed document reaches its committed version."/>
+          <outline text="The change-feed consumer writes an ordered Parquet log with money as INT64 and identifiers exact, and a stopped consumer's retained WAL is measured and capped."/>
+          <outline text="One heavy prod order replayed end to end, with its p95 write latency measured against v1's (ADR-0049 M3)."/>
+          <outline text="The event table replays through `period-close.qnt`, and a deliberately illegal event fails the replay."/>
         </outline>
       </outline>
       <outline text="Contexts (9)">
@@ -565,7 +624,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (117 unpromoted of 143)" _note="no drops pending">
+      <outline text="Capture (124 unpromoted of 155)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -683,6 +742,13 @@
         <outline text="Rule 8a survey on document numbering — every system that guarantees gaplessness attaches it to the…" _note="inbox/2026-08-26-survey-gapless-numbering-attaches-to-the-posting-act-not-the-draft-and-cfs-stopped-gapping-two-years-ago.md"/>
         <outline text="Owner rules the stored number stays an INTEGER and the prefix becomes a display function — orders a…" _note="inbox/2026-08-29-owner-numbers-stay-integers-and-the-prefix-is-a-display-function-and-four-more-entities-need-one.md"/>
         <outline text="v1 now has a real `suppliers` collection and a CFS-authored ACCPAY path — procurement's &quot;CFS holds…" _note="inbox/2026-08-31-survey-v1-now-has-a-real-suppliers-collection-and-a-cfs-authored-accpay-path.md"/>
+        <outline text="Owner rules FIFO for both inventory relief and asset disposition — and the spec has no inventory co…" _note="inbox/2026-09-19-owner-fifo-is-the-costing-method-and-the-spec-has-no-inventory-costing-layer-at-all.md"/>
+        <outline text="A bill whose payee is a person and whose lines span several vendors is an expense claim, not a vend…" _note="inbox/2026-10-06-finding-a-reimbursed-expense-claim-is-not-a-vendor-bill-and-v1-just-met-the-first-one.md"/>
+        <outline text="v1 settled the serialized-unit model that ADR-0015 leaves out of scope — a roster per product, per-…" _note="inbox/2026-10-07-survey-v1-settled-the-serialized-unit-model-that-adr-0015-leaves-out-of-scope.md"/>
+        <outline text="v1 split a purchase into ordered, received, billed and paid on 2026-10-06 — a receipt is a movement…" _note="inbox/2026-10-07-survey-v1-split-a-purchase-into-ordered-received-billed-and-paid-and-a-receipt-quantity-is-a-co-written-bucket.md"/>
+        <outline text="Seven accepted ADRs keep their decisions under the PostgreSQL ruling but cite a replaced store as a…" _note="inbox/2026-10-09-correction-seven-accepted-adrs-cite-a-replaced-store-as-a-premise-and-their-decisions-stand.md"/>
+        <outline text="The spec adopts an observability stack and names no signal it must carry — quiet failures, the Post…" _note="inbox/2026-10-09-gap-the-spec-names-an-observability-stack-and-no-signal-it-must-carry.md"/>
+        <outline text="Owner rules a new `ops` bounded context to own observability, alerting and verification requirement…" _note="inbox/2026-10-09-owner-a-new-ops-context-owns-observability-alerting-and-verification.md"/>
       </outline>
     </outline>
   </body>
