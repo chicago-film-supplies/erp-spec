@@ -59,8 +59,10 @@ milestones:
     title: Context map and glossary v1
     depends_on: [m1]
     exit_criteria:
-      - text: All nine contexts have a context.md stating their responsibility and their boundary.
-        # Was "eight". OQ-020 made procurement the ninth bounded context on 2026-08-09, and this
+      - text: All ten contexts have a context.md stating their responsibility and their boundary.
+        # Was "nine" until the owner ruled `ops` the tenth on 2026-10-09
+        # (inbox/2026-10-09-owner-a-new-ops-context-owns-observability-alerting-and-verification.md).
+        # Was "eight" before that. OQ-020 made procurement the ninth bounded context on 2026-08-09, and this
         # criterion read MET at the time — editing a met criterion is the honest cost of accepting
         # a ninth context, and it was named as such in the decision rather than discovered later.
         # The checker counts `tools/contexts.ts`, so the number in this text is prose and the

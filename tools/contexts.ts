@@ -36,6 +36,7 @@ export const CONTEXT_CODE_OF: Record<string, string> = {
   banking: "BNK",
   tax: "TAX",
   procurement: "PRO",
+  ops: "OPS",
 };
 
 /** Context directory names, in the order STATUS and the spec map present them. */

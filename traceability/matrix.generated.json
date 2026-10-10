@@ -703,7 +703,8 @@
       "ordering",
       "availability",
       "banking",
-      "procurement"
+      "procurement",
+      "ops"
     ],
     "inbox_unpromoted": [
       "inbox/2026-08-08-addresses-unvalidated.md",

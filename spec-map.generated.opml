@@ -544,7 +544,7 @@
           <outline text="The event table replays through `period-close.qnt`, and a deliberately illegal event fails the replay."/>
         </outline>
       </outline>
-      <outline text="Contexts (9)">
+      <outline text="Contexts (10)">
         <outline text="ledger (LED)" _note="1 requirement(s) · 2 event(s)">
           <outline text="REQ-LED-001 — Every posting shall DECLARE its causal order — either the order or orders that caused it, or an exp…"/>
           <outline text="EVT-LED-001 — JournalEntryPosted" _note="ledger → banking"/>
@@ -628,6 +628,7 @@
           <outline text="EVT-PRO-002 — ObligationAccrued" _note="procurement → ledger"/>
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
+        <outline text="ops (OPS)" _note="0 requirement(s) · 0 event(s)"/>
       </outline>
       <outline text="Capture (124 unpromoted of 156)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>

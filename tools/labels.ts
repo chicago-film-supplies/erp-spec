@@ -58,10 +58,14 @@ const colour = (name: string): string => {
   return `${ch()}${ch()}${ch()}`;
 };
 
+// ⚠️ Every domain label carries the `area:` prefix. The labels were renamed into that namespace on
+// 2026-08-24 (cfs-issues skill) and this file kept emitting the bare names, so `--apply` would have
+// re-created the whole pre-rename set beside the live one. Found 2026-10-09 by the first `--apply`
+// after the rename, when the `ops` context was added.
 const labels = new Map<string, string>();
-for (const c of CONTEXTS) labels.set(c, `Bounded context: ${c}`);
+for (const c of CONTEXTS) labels.set(`area:${c}`, `Bounded context: ${c}`);
 for (const a of await areas()) {
-  if (!labels.has(a)) labels.set(a, `Spec area: ${a}/`);
+  if (!labels.has(`area:${a}`)) labels.set(`area:${a}`, `Spec area: ${a}/`);
 }
 // ⚠️ Descriptions stay short and ASCII. `gh label create` rejected the first draft of this one
 // silently enough that the label simply did not appear while 15 siblings did — so the failure is

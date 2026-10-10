@@ -10,6 +10,7 @@
  *   3. Idempotent. Re-running produces no duplicates, even if `status` is reset by hand.
  */
 import { parse as parseYaml } from "@std/yaml";
+import { CONTEXT_DIRS } from "./contexts.ts";
 import { ymdUTC } from "./dates.ts";
 
 const ROOT = new URL("..", import.meta.url).pathname.replace(/\/$/, "");
@@ -147,17 +148,7 @@ for (const name of drops) {
     return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : name.slice(0, 10);
   })();
   const topics = Array.isArray(parsed.fm.topics) ? parsed.fm.topics.map(String) : [];
-  // topics -> context dirs, only where they actually resolve
-  const CONTEXT_DIRS = new Set([
-    "ledger",
-    "fulfillment",
-    "billing",
-    "fixed-assets",
-    "ordering",
-    "availability",
-    "banking",
-    "tax",
-  ]);
+  // topics -> context dirs, only where they actually resolve (the registry, never a local copy)
   const contexts = topics.filter((t) => CONTEXT_DIRS.has(t));
 
   // body line numbers are offset by the front matter, so `#L<line>` points at the real line

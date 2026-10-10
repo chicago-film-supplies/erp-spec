@@ -1,0 +1,9 @@
+# Domain events for OPS.
+#
+# Every event needs a producer and at least one consumer, or `terminal: true`.
+#
+# Empty on purpose. Ops consumes every context's events and produces alerts to a human, which are
+# not domain events. Whether ADR-0054's verification events belong here or are log records outside
+# the event model is open (see context.md § Open); nothing is minted until that is decided.
+
+events: []

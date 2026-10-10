@@ -1,0 +1,15 @@
+# Requirements for OPS. Nothing lands here directly — everything is promoted from inbox/.
+#
+# Required per requirement: id, statement, rationale, source, priority, verification_method, status.
+# verification_method: inspection | analysis | demonstration | test
+# priority: must | should | could
+# status: draft | agreed | superseded
+#
+# Statements are implementation-free. "The system shall record the acting crew member on every
+# leg" — not "add an actor_id column".
+#
+# Empty until plan phase 5 (erp-spec#68) promotes the signals from
+# inbox/2026-10-09-gap-the-spec-names-an-observability-stack-and-no-signal-it-must-carry.md.
+# Each REQ needs a .feature scenario (gate 3).
+
+requirements: []

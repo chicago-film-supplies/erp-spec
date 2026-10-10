@@ -169,6 +169,6 @@ it is counted separately on purpose, and a milestone is not done because its che
 
 ## Coverage gaps
 
-- Contexts with no requirements yet: `ordering`, `availability`, `banking`, `procurement`
+- Contexts with no requirements yet: `ordering`, `availability`, `banking`, `procurement`, `ops`
 - Requirements with no Gherkin scenario: none
 - Glossary terms still `TODO`: none

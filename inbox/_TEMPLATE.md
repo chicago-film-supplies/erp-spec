@@ -1,7 +1,7 @@
 ---
 kind: finding # finding | idea | question | constraint | research | decision
 title:
-contexts: [] # LED FUL BIL FA ORD AVL BNK TAX -> directory names under contexts/
+contexts: [] # LED FUL BIL FA ORD AVL BNK TAX PRO OPS -> directory names under contexts/ (registry: tools/contexts.ts)
 source: # where this came from: a person, a session, a verification query
 confidence: medium # high | medium | low
 promotes_to: [] # filled at triage: the REQ/ADR/HOT/OQ ids this became

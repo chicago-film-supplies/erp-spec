@@ -150,7 +150,7 @@ the rearrangement. Edit the YAML, regenerate the map.
 | `traceability/`            | Generated only.                                                              |
 
 Context codes: `LED` ledger · `FUL` fulfillment · `BIL` billing · `FA` fixed-assets · `ORD` ordering
-· `AVL` availability · `BNK` banking · `TAX` tax · `PRO` procurement.
+· `AVL` availability · `BNK` banking · `TAX` tax · `PRO` procurement · `OPS` ops.
 
 ## Generated files — never hand-edit
 
