@@ -11,18 +11,18 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 30 open | 41 answered of 71 · **0 with no owner or no decide-by** |
+| Open questions | 31 open | 41 answered of 72 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 25 | 1 open |
 | Decisions (ADR) | 55 | 29 in force · 20 proposed |
 | Spikes | 14 | 3 open |
-| Requirements | 27 | 0 without a scenario |
-| Inbox | 156 | 124 unpromoted |
+| Requirements | 38 | 0 without a scenario |
+| Inbox | 156 | 123 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
 ## The bottleneck: undecided questions
 
-**30 of 71 still open**, soonest decide-by first.
+**31 of 72 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
@@ -45,6 +45,7 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-069` | Is PostgreSQL run self-managed on a Linode VM or as Linode's managed database, and what a… | alex | 2026-12-15 | `SPIKE-011` |
 | `OQ-070` | Under PostgreSQL, does reserving units for an in-progress fulfillment move them into a `c… | alex | 2026-12-15 | `ADR-0055` |
 | `OQ-071` | Under PostgreSQL, which rules does the database carry and by which mechanism — column typ… | alex | 2026-12-15 | `ADR-0040` |
+| `OQ-072` | How long does v2 keep operational logs, what personal data may a log line carry, and how… | alex | 2026-12-15 | — |
 | `OQ-039` | `organizations.tax_profile` carries two different concepts in one enum — who owes (applie… | alex | 2027-01-15 | — |
 | `OQ-052` | What vehicle rate absorbs into 5900, over what normal-capacity denominator — and where do… | alex | 2027-01-31 | — |
 | `OQ-059` | Which CDN carries CFS images — Uploadcare re-evaluated against imgix and any other suitab… | alex | 2027-01-31 | — |
@@ -169,6 +170,6 @@ it is counted separately on purpose, and a milestone is not done because its che
 
 ## Coverage gaps
 
-- Contexts with no requirements yet: `ordering`, `availability`, `banking`, `procurement`, `ops`
+- Contexts with no requirements yet: `ordering`, `availability`, `banking`, `procurement`
 - Requirements with no Gherkin scenario: none
 - Glossary terms still `TODO`: none

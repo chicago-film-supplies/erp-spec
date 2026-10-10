@@ -8,8 +8,192 @@
 # Statements are implementation-free. "The system shall record the acting crew member on every
 # leg" — not "add an actor_id column".
 #
-# Empty until plan phase 5 (erp-spec#68) promotes the signals from
-# inbox/2026-10-09-gap-the-spec-names-an-observability-stack-and-no-signal-it-must-carry.md.
-# Each REQ needs a .feature scenario (gate 3).
+# Two groups. 001–006 are the signals the spec already said were needed and nothing required
+# (inbox gap note, 2026-10-09). 007–011 are ADR-0054's verification layers 2–5, which its own
+# Consequences place here: "the other four become implementation-free requirements in the new `ops`
+# context". Layer 1 (`quint test`) lives in this repo and is executed by `deno task formal`, so it
+# needs no requirement.
+#
+# ⚠️ Every statement names a SIGNAL or a PROPERTY, never a backend, metric name or query. ADR-0028
+# (self-hosted rendering and observability) rules that the app never names the backend.
+#
+# ⚠️ Not here, deliberately: log retention and PII rules. v1's 90-day retention and redaction tiers
+# are v1's choices, not constraints, and choosing v2's is a decision — OQ-072 (v2 log retention and
+# PII rules).
 
-requirements: []
+requirements:
+  - id: REQ-OPS-001
+    statement: >-
+      Every dependency that can fail by returning a plausible result instead of an error shall have
+      a liveness signal that is not produced by the dependency itself, and the loss of that signal
+      shall raise an alert.
+    rationale: >-
+      ADR-0028 names two that fail quiet: the renderer returns a placeholder PDF when unconfigured,
+      so an environment can render nothing and look healthy; and a missing telemetry collector drops
+      telemetry silently — "the thing that has gone missing is the thing that would have told you".
+      A self-reported heartbeat cannot catch either, because a component that is misconfigured
+      rather than down reports itself healthy. Stated as a class rather than a list of two, so a
+      third quiet dependency is covered without a new requirement.
+    source: inbox/2026-10-09-gap-the-spec-names-an-observability-stack-and-no-signal-it-must-carry.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [ADR-0028]
+
+  - id: REQ-OPS-002
+    statement: >-
+      Every background worker and every scheduled job shall produce a liveness signal, and a worker
+      that is not running or a scheduled job that misses its expected run shall raise an alert
+      without waiting for its absence to be noticed downstream.
+    rationale: >-
+      ADR-0012 and ADR-0013 both record it as a consequence of leaving managed queues and
+      schedulers: a queue paused out-of-band in v1 swallowed enqueues for seven weeks unnoticed, and
+      a repeatable job whose worker died fails silently where Cloud Scheduler failed visibly.
+      ADR-0050 moves the queue into PostgreSQL and keeps the obligation. A missed run is an absence,
+      and an absence produces no log line — the signal has to be an expectation that goes unmet.
+    source: inbox/2026-10-09-gap-the-spec-names-an-observability-stack-and-no-signal-it-must-carry.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [ADR-0012, ADR-0013, ADR-0050, REQ-OPS-005]
+
+  - id: REQ-OPS-003
+    statement: >-
+      The lag of every change-feed consumer, and the storage the database retains on its behalf,
+      shall be measured continuously and shall raise an alert while the retained storage is still
+      far enough below exhaustion to act.
+    rationale: >-
+      ADR-0049 and ADR-0052 make the change feed a durable, ordered consumer of the database's
+      replication stream. A consumer that stops does not lose data — the database keeps everything
+      it has not confirmed — so the failure arrives later and elsewhere, as a full disk on the system
+      of record. The alert has to fire on the trend, not on the outage it causes.
+    source: inbox/2026-10-09-gap-the-spec-names-an-observability-stack-and-no-signal-it-must-carry.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [ADR-0049, ADR-0052]
+
+  - id: REQ-OPS-004
+    statement: >-
+      The loss of the channel that carries live updates from the system of record to clients shall
+      be detected on the server side and shall raise an alert.
+    rationale: >-
+      A dead live-update connection leaves every client showing stale data that looks current, and
+      no client error is raised because nothing failed from the client's point of view. Whatever
+      transport OQ-067 (the live transport to clients under PostgreSQL) picks, its liveness is an
+      ops signal. ⚠️ What a CLIENT shows while disconnected is ADR-0047's (client live and offline
+      model), not this requirement's — ops owns knowing, not rendering.
+    source: inbox/2026-10-09-gap-the-spec-names-an-observability-stack-and-no-signal-it-must-carry.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [ADR-0047, OQ-067]
+
+  - id: REQ-OPS-005
+    statement: >-
+      The depth of every work queue and the age of its oldest unclaimed job shall be measured, and a
+      job older than its queue's stated tolerance shall raise an alert.
+    rationale: >-
+      ADR-0050 makes queue depth and job age alerted signals. Age, not only depth: a queue that
+      holds one job forever is shallow and broken. "Its queue's stated tolerance" makes each queue
+      declare one, because a nightly sweep and an invoice email do not share an acceptable delay.
+    source: adr/ADR-0050-work-queues-live-in-postgresql.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [REQ-OPS-002]
+
+  - id: REQ-OPS-006
+    statement: >-
+      The failure of the monitoring system itself, including the loss of the host it runs on, shall
+      raise an alert through a path that depends on neither that system nor that host.
+    rationale: >-
+      ADR-0028 runs the observability stack on the host it monitors, so a host outage silences the
+      alerting with it — the most complete outage is the one that produces no alert. Every other
+      requirement here is only as good as this one. Where the external watcher runs is not decided
+      (`contexts/ops/context.md` § Open).
+    source: inbox/2026-10-09-gap-the-spec-names-an-observability-stack-and-no-signal-it-must-carry.md
+    priority: must
+    verification_method: demonstration
+    status: draft
+    relates_to: [ADR-0028, ADR-0013]
+
+  - id: REQ-OPS-007
+    statement: >-
+      Recorded runs shall be validated against the formal specs' transitions — committed state from
+      the event store, request handling including refusals from verification records — and an
+      observed event with no matching transition shall be a failure that raises an alert.
+    rationale: >-
+      ADR-0054 D4 and D5. Fails closed: an event the spec cannot explain is a failure, never a
+      skip, because "unmodelled" and "conforming" are indistinguishable once skipped. Two sources
+      because they answer two questions — the event store never sees a refusal, and a refusal that
+      should have been an acceptance is a defect.
+    source: adr/ADR-0054-five-verification-layers-with-the-spec-as-an-independent-oracle.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [ADR-0016, REQ-OPS-008]
+
+  - id: REQ-OPS-008
+    statement: >-
+      Verification records shall carry no personal data, a per-entity sequence number and a
+      per-entity version, and shall be produced by the commit of the fact they record, so that no
+      crash can lose one and no rolled-back write can produce one.
+    rationale: >-
+      ADR-0054 D6. PII-free so retention and erasure rules never reach them; sequenced so a missing
+      record is visible as a gap rather than as silence; versioned so order is total per entity; and
+      emitted from the commit because a record written beside it, by application code, can disagree
+      with what committed — the exact failure trace validation exists to catch.
+    source: adr/ADR-0054-five-verification-layers-with-the-spec-as-an-independent-oracle.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [REQ-OPS-007]
+
+  - id: REQ-OPS-009
+    statement: >-
+      Action sequences generated from each formal spec shall be driven against the real system on a
+      disposable database, with state compared to the spec's after every step; and every such check
+      shall have a deliberately broken companion that must fail, and shall report how often each
+      spec action was exercised.
+    rationale: >-
+      ADR-0054 D1 layer 3 and D3. The companion is `formal/`'s precedent: the first run of
+      `validate_then_commit` passed because of a parse bug in the model, and only the companion's
+      failure to fail exposed it. Coverage per action because a run that never fires an action still
+      reports no violation.
+    source: adr/ADR-0054-five-verification-layers-with-the-spec-as-an-independent-oracle.md
+    priority: should
+    verification_method: test
+    status: draft
+    relates_to: [REQ-OPS-007]
+
+  - id: REQ-OPS-010
+    statement: >-
+      Property tests over generated inputs shall be seeded and reproducible from the seed they
+      report, and shall report how often each branch of the property was exercised.
+    rationale: >-
+      ADR-0054 D1 layer 2 and its Consequences. Reproducible because a failure that cannot be
+      replayed cannot be fixed with confidence; branch counts for the same reason as REQ-OPS-009's
+      action coverage — a generator that never reaches a branch makes that branch's property
+      vacuously true. The workspace money sweeps are the precedent.
+    source: adr/ADR-0054-five-verification-layers-with-the-spec-as-an-independent-oracle.md
+    priority: should
+    verification_method: inspection
+    status: draft
+    relates_to: [REQ-OPS-009]
+
+  - id: REQ-OPS-011
+    statement: >-
+      Invariants shall be checked against live state and a violation shall raise an alert; a
+      divergence the domain permits shall be checked against its stated set of explanations, never
+      asserted away by a simpler invariant.
+    rationale: >-
+      ADR-0054 D1 layer 5 and its Consequences: "naive invariants are wrong". Negative availability
+      is a preserved shortage signal, not a bug, and an invoice or fulfillment legitimately differs
+      from its order. A monitor that asserts `>= 0` or equality pages on correct behavior, and a
+      monitor that pages on correct behavior is muted — after which it catches nothing.
+    source: adr/ADR-0054-five-verification-layers-with-the-spec-as-an-independent-oracle.md
+    priority: must
+    verification_method: test
+    status: draft
+    relates_to: [REQ-OPS-001]

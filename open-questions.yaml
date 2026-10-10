@@ -3176,3 +3176,22 @@ open_questions:
       must be checked by something written against the stored data, not by a fixed point of
       `computeItemPaths`. Whether a JSON-schema check needs an extension (and whether Linode's
       managed offering permits it) ties to OQ-069.
+
+  - id: OQ-072
+    headline: "v2 log retention and PII rules"
+    question: >-
+      How long does v2 keep operational logs, what personal data may a log line carry, and how is a
+      line that carries it redacted or erased on request?
+    owner: alex
+    decide_by: 2026-12-15
+    blocks: []
+    status: open
+    notes: >-
+      Opened 2026-10-09 with the `ops` context (erp-spec#68). The spec states no retention and no
+      PII rule for logs
+      (`inbox/2026-10-09-gap-the-spec-names-an-observability-stack-and-no-signal-it-must-carry.md`).
+      v1 keeps 90 days with redaction tiers; those are v1's choices, not constraints, so they are
+      evidence of what has worked rather than a default to carry. Verification records are already
+      PII-free by REQ-OPS-008 (ADR-0054 D6), precisely so this answer never reaches them. Customers
+      logging in (CLAUDE.md, owner 2026-08-23) raises the stakes: a customer-facing request log
+      carries their identity by default.

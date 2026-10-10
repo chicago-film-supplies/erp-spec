@@ -9,7 +9,7 @@ source: >-
   `adr/ADR-0013-linode-self-hosted.md`, `research-drop/reference/victoria.md` and every
   `contexts/*/requirements.yaml` at erp-spec@0c3c21f.
 confidence: high
-promotes_to: []
+promotes_to: [REQ-OPS-001, REQ-OPS-002, REQ-OPS-003, REQ-OPS-004, REQ-OPS-006, OQ-072]
 verified: true
 triage_count: 0
 ---

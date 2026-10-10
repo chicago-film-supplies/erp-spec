@@ -58,7 +58,7 @@
           <outline text="[object Object]"/>
         </outline>
       </outline>
-      <outline text="Open questions (30 of 71 still open)" _note="The bottleneck. Each blocks what is listed under it.">
+      <outline text="Open questions (31 of 72 still open)" _note="The bottleneck. Each blocks what is listed under it.">
         <outline text="OQ-001 — Are fulfillment legs first-class recorded events with their own identity, or derived from the order…" _note="owner: alex · decide by: 2026-08-09">
           <outline text="blocks HOT-007"/>
           <outline text="blocks ADR-0011"/>
@@ -229,6 +229,7 @@
         <outline text="OQ-071 — Under PostgreSQL, which rules does the database carry and by which mechanism — column types, `CHECK…" _note="owner: alex · decide by: 2026-12-15">
           <outline text="blocks ADR-0040"/>
         </outline>
+        <outline text="OQ-072 — How long does v2 keep operational logs, what personal data may a log line carry, and how is a line…" _note="owner: alex · decide by: 2026-12-15"/>
       </outline>
       <outline text="Conflicts (1 open)">
         <outline text="HOT-001 — Does `Trucking` mean third-party freight (no wage labor) or an own long-haul run (labor-bearing)? T…" _note="Decides whether a trucked fulfillment absorbs labor cost at all, and therefore whether `trucked` is a fulfillment mode that generates a shift.">
@@ -628,9 +629,21 @@
           <outline text="EVT-PRO-002 — ObligationAccrued" _note="procurement → ledger"/>
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
-        <outline text="ops (OPS)" _note="0 requirement(s) · 0 event(s)"/>
+        <outline text="ops (OPS)" _note="11 requirement(s) · 0 event(s)">
+          <outline text="REQ-OPS-001 — Every dependency that can fail by returning a plausible result instead of an error shall have a liv…"/>
+          <outline text="REQ-OPS-002 — Every background worker and every scheduled job shall produce a liveness signal, and a worker that…"/>
+          <outline text="REQ-OPS-003 — The lag of every change-feed consumer, and the storage the database retains on its behalf, shall be…"/>
+          <outline text="REQ-OPS-004 — The loss of the channel that carries live updates from the system of record to clients shall be det…"/>
+          <outline text="REQ-OPS-005 — The depth of every work queue and the age of its oldest unclaimed job shall be measured, and a job…"/>
+          <outline text="REQ-OPS-006 — The failure of the monitoring system itself, including the loss of the host it runs on, shall raise…"/>
+          <outline text="REQ-OPS-007 — Recorded runs shall be validated against the formal specs' transitions — committed state from the e…"/>
+          <outline text="REQ-OPS-008 — Verification records shall carry no personal data, a per-entity sequence number and a per-entity ve…"/>
+          <outline text="REQ-OPS-009 — Action sequences generated from each formal spec shall be driven against the real system on a dispo…"/>
+          <outline text="REQ-OPS-010 — Property tests over generated inputs shall be seeded and reproducible from the seed they report, an…"/>
+          <outline text="REQ-OPS-011 — Invariants shall be checked against live state and a violation shall raise an alert; a divergence t…"/>
+        </outline>
       </outline>
-      <outline text="Capture (124 unpromoted of 156)" _note="no drops pending">
+      <outline text="Capture (123 unpromoted of 156)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -753,7 +766,6 @@
         <outline text="v1 settled the serialized-unit model that ADR-0015 leaves out of scope — a roster per product, per-…" _note="inbox/2026-10-07-survey-v1-settled-the-serialized-unit-model-that-adr-0015-leaves-out-of-scope.md"/>
         <outline text="v1 split a purchase into ordered, received, billed and paid on 2026-10-06 — a receipt is a movement…" _note="inbox/2026-10-07-survey-v1-split-a-purchase-into-ordered-received-billed-and-paid-and-a-receipt-quantity-is-a-co-written-bucket.md"/>
         <outline text="Seven accepted ADRs keep their decisions under the PostgreSQL ruling but cite a replaced store as a…" _note="inbox/2026-10-09-correction-seven-accepted-adrs-cite-a-replaced-store-as-a-premise-and-their-decisions-stand.md"/>
-        <outline text="The spec adopts an observability stack and names no signal it must carry — quiet failures, the Post…" _note="inbox/2026-10-09-gap-the-spec-names-an-observability-stack-and-no-signal-it-must-carry.md"/>
         <outline text="Owner rules a new `ops` bounded context to own observability, alerting and verification requirement…" _note="inbox/2026-10-09-owner-a-new-ops-context-owns-observability-alerting-and-verification.md"/>
       </outline>
     </outline>
