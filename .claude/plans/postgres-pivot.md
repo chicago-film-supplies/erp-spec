@@ -1,9 +1,26 @@
 # The PostgreSQL pivot — every artifact the ruling touches, and the order to move them
 
-**Date:** 2026-10-09 • **Repo:** erp-spec • **Status:** ⏳ phase 1 done — decisions drafted, nothing
+**Date:** 2026-10-09 • **Repo:** erp-spec • **Status:** ⏳ phases 1, 2 and 3a done — nothing
 accepted • **Origin:** owner ruling
 `inbox/2026-10-09-owner-rules-postgres-is-the-one-system-of-record-replacing-mongo-tigerbeetle-valkey-and-duckdb.md`
 • **Related:** ADR-0049 to ADR-0054, SPIKE-014, OQ-066 to OQ-069, HOT-025
+
+> ## ⚠️ STATUS UPDATE 2026-10-09 (second session)
+>
+> - **Phase 2 done.** Owner rejected ADR-0015 and ADR-0042 (3ff7b14,
+>   `inbox/2026-10-09-owner-rejects-adr-0015-and-adr-0042-and-asks-for-both-reservation-models-drafted.md`).
+>   ADR-0055 (what a reservation is under PostgreSQL, proposed) carries what survives; custody phase
+>   versus movement count is **OQ-070**, drafted both ways at the owner's request. Serialized
+>   products reserve a quantity with optional named units (D4). HOT-022 has a resolution note;
+>   SPIKE-012 closes ADR-0055. ADR-0039/0040/0046/0047/0048/0028/0031 reworded (9a3ca12); ADR-0040's
+>   database mechanism is now **OQ-071**.
+> - **Phase 3a done** (9a3ca12): EVT-FUL-004/005/007 carry `commitment_ref` + `unit_refs`, and
+>   004/007 are `blocked_by: OQ-070` (they exist only under option A).
+> - **Left over from 2/3a, not done:** ADR-0040's filename still says `mongo-validator` (a rename
+>   breaks citations); glossary entries for `transfer`, `projection`, `sealed artifact`,
+>   `close record` and `reservation` not added (`reservation` waits on OQ-070).
+> - **Next:** phase 4 (runnable now) or 3b (waits on ADR-0051 acceptance). Close #63/#64 once
+>   pushed.
 
 ## START HERE
 
@@ -36,7 +53,7 @@ premise correction for seven accepted ADRs
 (`inbox/2026-10-09-correction-seven-accepted-adrs-cite-a-replaced-store-as-a-premise-and-their-decisions-stand.md`),
 with `ADR-0049` added to their `relates_to`; ADR-0028 `review_by` moved to 2026-12-15.
 
-## Phase 2 — proposed ADRs that rest on a replaced store (#63 owner decisions, #64 rewording)
+## Phase 2 — proposed ADRs that rest on a replaced store (#63 owner decisions, #64 rewording) ✅ 2026-10-09
 
 Launch from: `erp-spec/`. Skills: none beyond this repo's `CLAUDE.md`.
 
@@ -63,7 +80,7 @@ Launch from: `erp-spec/`. Skills: none beyond this repo's `CLAUDE.md`.
 
 Launch from: `erp-spec/`. **3a can run now; 3b waits for ADR-0049/0051 acceptance.**
 
-**3a — store-agnostic rewording (requirements must be implementation-free anyway):**
+**3a — store-agnostic rewording (requirements must be implementation-free anyway):** ✅ 2026-10-09
 
 - `contexts/fulfillment/events.yaml` — header and EVT-FUL-004/005/007 (`pending_transfer_ref`,
   `posted_transfer_ref`, `voided_transfer_ref`; "the pending transfer POSTED/VOIDED").
