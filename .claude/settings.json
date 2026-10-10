@@ -41,7 +41,8 @@
       "WebFetch(domain:mongodb.com)",
       "WebFetch(domain:quint.sh)",
       "WebFetch(domain:valkey.io)",
-      "WebFetch(domain:www.mongodb.com)"
+      "WebFetch(domain:www.mongodb.com)",
+      "WebFetch(domain:www.postgresql.org)"
     ]
   }
 }

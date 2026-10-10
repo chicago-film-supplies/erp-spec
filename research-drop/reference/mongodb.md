@@ -1,5 +1,10 @@
 # MongoDB
 
+> ⚠️ **Being replaced — read [postgres.md](postgres.md) first.** [[ADR-0049]] (proposed, 2026-10-09)
+> takes MongoDB out of the target stack; documents become `jsonb` in PostgreSQL. Nothing is
+> accepted, so [[ADR-0003]] is still in force ([[HOT-025]]). This note stays as evidence for the
+> closed spikes that cite it. The `$jsonSchema` question below is succeeded by [[OQ-071]].
+
 Documents + masterfiles ([[ADR-0003]]): orders and invoices are deeply nested with an items tree —
 the shape that drove the Firestore design and still fits a document store.
 

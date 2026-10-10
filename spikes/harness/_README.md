@@ -16,6 +16,24 @@ Two kinds live here, and the second arrived later:
   third-party sandbox and asserts what its API actually does. Also needs no `node_modules`; see the
   Plaid section below for the fence and for what a sandbox cannot answer.
 
+> ⚠️ **Store probes being retired, 2026-10-09.** ADR-0049 (PostgreSQL is the one system of record)
+> and its siblings (all `proposed`) take MongoDB, TigerBeetle, Valkey and DuckDB out of the target
+> stack. These probes are **kept, not deleted** — closed spikes and accepted ADRs cite them as
+> evidence (gate 11) — but they measure a stack v2 no longer plans to run, so do not extend them:
+>
+> - **TigerBeetle** — `tb-probe.ts`, `tb-probe_test.ts`, `probe-tb.ts`, `entry-tb.ts`,
+>   `tb-import-probe.ts`, `tb-field-budget_test.ts` (retires with erp-spec#65),
+>   `path-encoding-probe.ts`.
+> - **MongoDB** — `mongo-schema-probe.ts`, `change-stream-probe.ts`, `realtime-slice/`.
+> - **Two-store commit** — `two-store-crash-probe.ts`, `two-store-lib.ts`, `two-store-writer.ts`.
+> - **Valkey** — `valkey-queue-probe.ts`, `probe-queue.ts`, `entry-queue.ts`.
+> - **DuckDB** — `duckdb-probe.ts`, `duckdb-wasm-probe.ts`, `probe-duckdb.ts`, `entry-duckdb.ts`.
+> - **The native-addon matrix** — `matrix.ts`, `napi-probe.ts`, `napi-probe_test.ts`. ADR-0053 (no
+>   native addons) retires it; its replacement measures the PostgreSQL driver.
+>
+> The corpus measurements, `offline-queue/` (pure merge algebra, ADR-0047's store-agnostic half) and
+> the Plaid probe stay live. SPIKE-014's probes go under `pg/`.
+
 The underscore prefix on this file keeps it out of `validate.ts`, which walks `spikes/` recursively
 and requires front matter on every `.md` it finds.
 

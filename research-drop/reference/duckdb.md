@@ -1,5 +1,10 @@
 # DuckDB
 
+> ⚠️ **Being replaced — read [postgres.md](postgres.md) first.** [[ADR-0052]] (proposed, 2026-10-09)
+> takes DuckDB out of the runtime; reporting is SQL in PostgreSQL. **The Parquet half survives** as
+> an append-only change-feed sink, and ADR-0024's encoding rules carry over. Nothing is accepted, so
+> [[ADR-0017]] and [[ADR-0024]] are still in force ([[HOT-025]]).
+
 **Sealed periods and ad-hoc analysis** ([[ADR-0017]]): a closed period's Parquet file is the
 reporting authority, queried by accounting date — the thing TigerBeetle structurally cannot do. Open
 periods are read live from MongoDB, not from here.

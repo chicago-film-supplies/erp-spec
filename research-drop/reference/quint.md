@@ -1,8 +1,10 @@
 # Quint
 
 Executable specification language on the same foundation as TLA+ (Lamport's temporal logic of
-actions), with modern syntax and a real CLI. The candidate modern path for the `formal/` specs
-(`two-store-commit.qnt`, `period-close.qnt`). The `.tla` stubs they replaced were never executed.
+actions), with modern syntax and a real CLI. **Adopted by [[ADR-0016]]** (accepted): every spec in
+`formal/` is Quint (`two-store-commit.qnt`, `period-close.qnt`), and the `.tla` stubs they replaced
+were deleted unexecuted. [[ADR-0054]] (proposed) makes the specs the oracle for v2's verification
+layers.
 
 ## Canonical docs
 
@@ -28,34 +30,40 @@ exist. Source: `api:2026-08-09:github-trees:quint-co/quint@main` (970 paths, `sk
 `quint`) and `api:2026-08-09:github-trees:quint-co/quint-llm-kit@main` (0 paths under `skills/`).
 The kit remains interesting if containerised Quint work starts — it is not a skills source.
 
-## Version (checked 2026-08-09)
+## Version (checked 2026-10-09)
 
-- Docs last updated 2026-06-15. Confirm locally with `quint --version`.
+- npm `@informalsystems/quint` **0.33.0** is the latest (`npm view`, 2026-10-09). The recorded
+  `formal/` runs used **0.32.0** (`formal/README.md`). Nothing pins it yet — every run is an
+  unpinned `npx`, which is erp-spec#69.
+- `quint verify` needs **Java 21** for Apalache, which it downloads on first use.
 
 ## CLI
 
 - `quint typecheck` — type verification.
-- `quint run` — simulator; random-explore executions of the spec.
-- `quint test` — model-based tests.
-- `quint verify` — model checking, backed by **Apalache**.
+- `quint run` — the simulator: random executions of the spec, checking an invariant on each.
+- `quint test` — runs the `run` declarations **written inside a `.qnt` file**: unit tests of the
+  spec, by the spec. ⚠️ **It is not model-based testing.** Model-based testing drives the
+  _implementation_ from the spec and compares, which is a separate layer ([[ADR-0054]] D1, layer 3)
+  with its own tooling. This note conflated the two until 2026-10-09.
+- `quint verify` — bounded model checking, backed by **Apalache**.
 
 ## CFS-specific gotchas / fit
 
-- **Same checker underneath.** Quint transpiles to TLA+ and drives Apalache, so adopting Quint does
-  **not** abandon the TLA+ toolchain in `formal/` — it is a nicer front end to the same
-  verification.
-- **The `formal/` rule holds either way:** "a spec that has never been model-checked is prose with
-  angle brackets." Milestone `m5`'s exit criterion is a **recorded checker run**, not a written
-  spec. `quint verify` is what produces that artifact.
-- **`run`/`test` give executable exploration TLA+ lacks** — useful for enumerating the crash/retry
-  interleavings in [[SPIKE-002]] before committing to a full `verify`.
-- If a Go sidecar lands ([[ADR-0004]]), the extra network hop belongs in the model — Quint spec and
-  TLA+ spec alike.
+- **Apalache underneath.** `quint verify` hands the spec to Apalache, the symbolic model checker
+  from the TLA+ ecosystem. Bounded: a violation needing more steps than `--max-steps` is not found.
+- **The `formal/` rule:** "a spec that has never been model-checked is prose with angle brackets."
+  Milestone `m5`'s exit criterion is a **recorded checker run**, not a written spec.
+- **Every spec carries a fail-closed companion** that must FAIL (`formal/README.md`); [[ADR-0054]]
+  D3 makes that a rule for every model-based and trace check too. A run in which the companion
+  passes is a broken model, not a safe protocol.
+- **`two-store-commit.qnt` loses its subject under [[ADR-0049]]** (one store, no cross-store
+  commit). It stays while [[ADR-0023]] (accepted) cites it, and is marked superseded in
+  `formal/README.md` once ADR-0049 is accepted.
 
 ## Decision status
 
-- `formal/` uses TLA+ today (run via `tla2tools.jar`). Introducing Quint is **not yet ADR'd** — open
-  one before migrating the specs, so the choice is recorded rather than drifted into.
+- Quint is decided ([[ADR-0016]], accepted). The open work is running it in CI rather than by hand —
+  erp-spec#69.
 
-Cross-refs: [[SPIKE-002]] · `formal/two-store-commit.qnt` · `formal/period-close.qnt` · [[ADR-0004]]
-· [[ADR-0016]]
+Cross-refs: [[SPIKE-002]] · `formal/two-store-commit.qnt` · `formal/period-close.qnt` · [[ADR-0016]]
+· [[ADR-0054]]

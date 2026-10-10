@@ -1,5 +1,10 @@
 # Valkey
 
+> ⚠️ **Being replaced — read [postgres.md](postgres.md) first.** [[ADR-0050]] (proposed, 2026-10-09)
+> moves work queues into PostgreSQL and takes Valkey out of the target stack entirely; its cache and
+> pub/sub roles were never adopted. Nothing is accepted, so [[ADR-0012]] is still in force
+> ([[HOT-025]]). This note stays as evidence for SPIKE-010.
+
 In-memory store (queues / cache / pub-sub / streams) — the BSD-licensed, Linux-Foundation fork of
 Redis, protocol-compatible with it. **Adopted for job queues by [[ADR-0012]]** (proposed,
 2026-08-09). Its other roles, including the socket / real-time layer that replaces Firestore

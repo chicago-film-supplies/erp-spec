@@ -1,5 +1,11 @@
 # TigerBeetle
 
+> ⚠️ **Being replaced — read [postgres.md](postgres.md) first.** [[ADR-0049]] (proposed, 2026-10-09)
+> takes TigerBeetle out of the target stack; the ledger becomes PostgreSQL tables with balance
+> enforced at commit. Nothing is accepted, so [[ADR-0003]] is still in force ([[HOT-025]]). This
+> note stays as evidence for the closed spikes and accepted ADRs that cite it. The transfer field
+> budget (`ledger/tigerbeetle-accounts.yaml`) retires with ADR-0051's redesign (erp-spec#65).
+
 The ledger store ([[ADR-0003]]): double-entry enforced _in the database_, not in application code.
 Everything balance-bearing lives here; nested business documents do not (that is Mongo).
 

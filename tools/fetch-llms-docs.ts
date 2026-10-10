@@ -25,16 +25,16 @@ type Source = {
 
 /**
  * Verified 2026-08-09 by HTTP probe; sizes are the measured response bodies.
- * Sources with no `llms.txt` at all (Valkey, Caddy) are absent by design — for those the
+ * Sources with no `llms.txt` at all (PostgreSQL, Caddy) are absent by design — for those the
  * curated note in `research-drop/reference/` is the whole source.
+ *
+ * TigerBeetle, MongoDB and DuckDB were dropped 2026-10-09: ADR-0049 and its siblings take them out
+ * of the target stack, so their dumps fed nothing new. Their curated notes stay as evidence. The
+ * HTML-to-text transform went with TigerBeetle, the only source that needed it; `transform` stays
+ * on the type for the next one.
  */
 const SOURCES: Source[] = [
   // Full reference dumps.
-  {
-    url: "https://docs.tigerbeetle.com/single-page/",
-    file: "tigerbeetle.txt",
-    transform: htmlToText,
-  },
   { url: "https://hono.dev/llms-full.txt", file: "hono-full.txt" },
   { url: "https://zod.dev/llms-full.txt", file: "zod.txt" },
   // Plaid — 6.4 MB, the biggest dump here by an order of magnitude, and worth it: the reconciliation
@@ -43,55 +43,10 @@ const SOURCES: Source[] = [
   { url: "https://plaid.com/docs/llms-full.txt", file: "plaid.txt" },
   // Deno publishes an llms-full.txt too, but it is ~2.5 MB; the agent guide is the useful slice.
   { url: "https://docs.deno.com/llms-full-guide.txt", file: "deno.txt" },
-  // Link indexes — upstream publishes no full-text dump (llms-full.txt 404s on all three).
-  { url: "https://www.mongodb.com/docs/llms.txt", file: "mongodb.txt" },
+  // Link indexes — upstream publishes no full-text dump.
   { url: "https://hono.dev/llms.txt", file: "hono-index.txt" },
   { url: "https://quint.sh/llms.txt", file: "quint.txt" },
-  { url: "https://duckdb.org/llms.txt", file: "duckdb.txt" },
 ];
-
-/**
- * TigerBeetle publishes no `llms.txt` (404 as of 2026-08-09); its single-page dump is HTML.
- * Reduce it to markdown-ish text, preserving the structure that makes it navigable — headings
- * to find a section, fenced blocks so client code survives readable.
- */
-function htmlToText(html: string): string {
-  let s = html
-    .replace(/<(script|style|nav|header|footer|svg)\b[^>]*>[\s\S]*?<\/\1>/gi, "")
-    .replace(
-      /<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1>/gi,
-      (_m, lvl: string, inner: string) => `\n\n${"#".repeat(Number(lvl))} ${strip(inner).trim()}\n`,
-    )
-    .replace(
-      /<pre\b[^>]*>([\s\S]*?)<\/pre>/gi,
-      (_m, inner: string) => `\n\`\`\`\n${unescapeEntities(strip(inner)).trim()}\n\`\`\`\n`,
-    )
-    .replace(/<li\b[^>]*>/gi, "\n- ")
-    .replace(/<\/(p|div|tr|table|ul|ol)>/gi, "\n");
-
-  s = unescapeEntities(strip(s));
-  return s
-    .replace(/[ \t]+/g, " ")
-    .replace(/\n[ \t]+/g, "\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim() + "\n";
-}
-
-const strip = (s: string) => s.replace(/<[^>]+>/g, "");
-
-const ENTITIES: Record<string, string> = {
-  amp: "&",
-  lt: "<",
-  gt: ">",
-  quot: '"',
-  apos: "'",
-  nbsp: " ",
-};
-const unescapeEntities = (s: string) =>
-  s
-    .replace(/&#(\d+);/g, (_m, d: string) => String.fromCodePoint(Number(d)))
-    .replace(/&#x([0-9a-f]+);/gi, (_m, h: string) => String.fromCodePoint(parseInt(h, 16)))
-    .replace(/&([a-z]+);/gi, (m, name: string) => ENTITIES[name.toLowerCase()] ?? m);
 
 /**
  * Fail loudly on a missing --allow-net host instead of silently never fetching that file.

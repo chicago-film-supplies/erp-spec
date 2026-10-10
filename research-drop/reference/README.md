@@ -1,9 +1,9 @@
 # Stack reference — for Claude Code
 
-Curated, Claude-facing reference notes for the target stack (Deno/Hono · MongoDB · TigerBeetle ·
-DuckDB · Quint · Zod · Caddy). Read the relevant file **before** writing spec, entities, or features
-that touch that tool — each one carries the project-specific traps that generic upstream docs do
-not.
+Curated, Claude-facing reference notes for the target stack (Deno/Hono · PostgreSQL · Zod · Quint ·
+Caddy · Plaid · Gotenberg · Victoria), plus the notes for the stores ADR-0049 replaces, kept as
+evidence. Read the relevant file **before** writing spec, entities, or features that touch that tool
+— each one carries the project-specific traps that generic upstream docs do not.
 
 ## What this directory is — and is not
 
@@ -28,27 +28,37 @@ not.
 ## The stack
 
 **Upstream coverage varies, and it is worth knowing which kind you are getting before you go
-looking.** All statuses probed 2026-08-09, except Plaid (2026-08-24).
+looking.** Probed 2026-08-09, except Plaid (2026-08-24) and PostgreSQL (2026-10-09). Notes not
+listed here (date-fns, Gotenberg, Mapbox, Resend, Victoria) have no cached dump.
 
-| Tool                          | Role in CFS                                               | Cached as                         | Upstream coverage                                                                     |
-| ----------------------------- | --------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------- |
-| [TigerBeetle](tigerbeetle.md) | The ledger — double-entry enforced in the DB              | `tigerbeetle.txt`                 | **full** — no `llms.txt` (404); single-page HTML dump, converted                      |
-| [Hono](hono.md)               | HTTP framework on Deno                                    | `hono-full.txt`, `hono-index.txt` | **full** — `hono.dev/llms-full.txt`                                                   |
-| [Zod](zod.md)                 | Boundary validation + the app-enforced half of the schema | `zod.txt`                         | **full** — `zod.dev/llms-full.txt`                                                    |
-| [Deno](deno.md)               | Runtime for the API; shared TS types with clients         | `deno.txt`                        | **guide** — `llms-full-guide.txt`; the 2.5 MB `llms-full.txt` is skipped as too large |
-| [MongoDB](mongodb.md)         | Documents + masterfiles (orders, invoices, items tree)    | `mongodb.txt`                     | **index only** — `llms-full.txt` 404s                                                 |
-| [DuckDB](duckdb.md)           | Read side over Parquet — dimensional reporting            | `duckdb.txt`                      | **index only** — `llms-full.txt` 404s                                                 |
-| [Quint](quint.md)             | Formal specs (modern path for `formal/`)                  | `quint.txt`                       | **index only** — `llms-full.txt` 404s; but see below                                  |
-| [Plaid](plaid.md)             | The bank feed, one Chase account (ADR-0002)               | `plaid.txt`                       | **full** — `plaid.com/docs/llms-full.txt`, 6.3 MB (added 2026-08-24)                  |
-| [Valkey](valkey.md)           | Job queues (ADR-0012); cache / socket fan-out undecided   | —                                 | **none** — no `llms.txt` (404)                                                        |
-| [Caddy](caddy.md)             | Reverse proxy / auto-HTTPS front (ADR-0013)               | —                                 | **none** — no `llms.txt` (404)                                                        |
+| Tool                      | Role in CFS                                               | Cached as                         | Upstream coverage                                                                     |
+| ------------------------- | --------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------- |
+| [PostgreSQL](postgres.md) | The one system of record (ADR-0049, proposed)             | —                                 | **none** — no `llms.txt` (404)                                                        |
+| [Hono](hono.md)           | HTTP framework on Deno                                    | `hono-full.txt`, `hono-index.txt` | **full** — `hono.dev/llms-full.txt`                                                   |
+| [Zod](zod.md)             | Boundary validation + the app-enforced half of the schema | `zod.txt`                         | **full** — `zod.dev/llms-full.txt`                                                    |
+| [Deno](deno.md)           | Runtime for the API; shared TS types with clients         | `deno.txt`                        | **guide** — `llms-full-guide.txt`; the 2.5 MB `llms-full.txt` is skipped as too large |
+| [Quint](quint.md)         | Formal specs in `formal/` (ADR-0016)                      | `quint.txt`                       | **index only** — `llms-full.txt` 404s; but see below                                  |
+| [Plaid](plaid.md)         | The bank feed, one Chase account (ADR-0002)               | `plaid.txt`                       | **full** — `plaid.com/docs/llms-full.txt`, 6.3 MB (added 2026-08-24)                  |
+| [Caddy](caddy.md)         | Reverse proxy / auto-HTTPS front (ADR-0013)               | —                                 | **none** — no `llms.txt` (404)                                                        |
+
+**Being replaced** — ADR-0049 and its siblings (proposed, 2026-10-09) take these out of the target
+stack. Each note opens with a banner saying so. Their dumps are no longer fetched (2026-10-09); the
+notes stay because closed spikes and accepted ADRs cite them. Nothing is accepted, so their ADRs are
+still in force (HOT-025).
+
+| Tool                          | Role it had                                 | Replaced by                                     |
+| ----------------------------- | ------------------------------------------- | ----------------------------------------------- |
+| [TigerBeetle](tigerbeetle.md) | The ledger (ADR-0003)                       | PostgreSQL tables (ADR-0049)                    |
+| [MongoDB](mongodb.md)         | Documents + masterfiles (ADR-0003)          | PostgreSQL `jsonb` (ADR-0049)                   |
+| [DuckDB](duckdb.md)           | Sealed-period reads over Parquet (ADR-0017) | SQL in PostgreSQL; Parquet as a sink (ADR-0052) |
+| [Valkey](valkey.md)           | Job queues (ADR-0012)                       | a PostgreSQL queue table (ADR-0050)             |
 
 An **index only** cache is a routing table, not reference content — follow one of its links with
 WebFetch. For **none**, the curated note is the whole source.
 
 ## Version pins
 
-Every file states the version checked **2026-08-09**. Re-verify the version and the `llms.txt` URL
+Every file states the version it checked and the date. Re-verify the version and the `llms.txt` URL
 when you next touch that tool — pins go stale silently.
 
 ## Note on Quint

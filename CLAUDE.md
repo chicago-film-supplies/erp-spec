@@ -86,7 +86,8 @@ Never reused, never renumbered — including after deletion.
 | Spike         | `SPIKE-<3d>`     | `SPIKE-001`   |
 
 Context codes: `LED` ledger · `FUL` fulfillment · `BIL` billing · `FA` fixed-assets · `ORD` ordering
-· `AVL` availability · `BNK` banking · `TAX` tax.
+· `AVL` availability · `BNK` banking · `TAX` tax · `PRO` procurement · `OPS` ops.
+`tools/contexts.ts` is the registry; this line is a copy of it.
 
 ## Generated files
 
@@ -141,9 +142,11 @@ Two bugs have already come from the second half of that rule: YAML parses an unq
    filename keeps that filename's spelling, because those files are never renamed.
 10. **Before writing spec that touches a stack tool, read its note in `research-drop/reference/`**,
     then the cached upstream dump in `.claude/docs/` if you need the mechanics. Curated,
-    Claude-facing references for the target stack (Deno, Hono, Zod, MongoDB, TigerBeetle, DuckDB,
-    Quint, Valkey, Caddy): the project-specific traps, cross-linked to the ADRs and spikes. Not
-    spec, not ingested, not validated — see `research-drop/reference/README.md`.
+    Claude-facing references for the target stack (Deno, Hono, Zod, PostgreSQL, Quint, Caddy, Plaid,
+    and the rest the README lists): the project-specific traps, cross-linked to the ADRs and spikes.
+    Not spec, not ingested, not validated — see `research-drop/reference/README.md`. The notes for
+    the stores ADR-0049 (PostgreSQL is the one system of record) replaces — MongoDB, TigerBeetle,
+    DuckDB, Valkey — stay as evidence and open with a banner saying so.
 
 ## LLM reference docs
 
@@ -159,10 +162,13 @@ is exactly what rots: `api-cloudrun/CLAUDE.md` still instructs the model to read
 
 Not every tool has an upstream dump, and the difference is worth knowing before you go looking:
 
-- **Full reference** — TigerBeetle, Hono, Zod. Read the cached file; grep it by heading.
-- **Link index only** — MongoDB, DuckDB, Quint (`llms-full.txt` 404s on all three, checked
-  2026-08-09). The cached file is a routing table; follow a link with WebFetch for the content.
-- **Nothing upstream** — Valkey, Caddy publish no `llms.txt` at all. The curated note is the source.
+- **Full reference** — Hono, Zod, Plaid; Deno's agent guide. Read the cached file; grep it by
+  heading.
+- **Link index only** — Quint (`llms-full.txt` 404s, checked 2026-08-09). The cached file is a
+  routing table; follow a link with WebFetch for the content.
+- **Nothing upstream** — PostgreSQL (404, checked 2026-10-09) and Caddy publish no `llms.txt` at
+  all. The curated note is the source.
+- The replaced stores' dumps stopped being fetched on 2026-10-09; their notes remain.
 - **Quint** also ships official agent skills, enabled as a plugin in `.claude/settings.json` — those
   beat both halves for authoring `.qnt`.
 
@@ -325,6 +331,12 @@ The first two are already enforced in the `~/cfs` workspace. All five are load-b
     is not in CI, and that is a stated limit**: CI runs `deno task validate`, which has no npm
     dependencies by design, and the ground truth is an unvendored package. The harness is where
     claims about third-party APIs get executed; `deno task tb-budget`.
+
+  ⚠️ **Both pointers retire with TigerBeetle; the rule does not.** Under ADR-0049 (proposed) the
+  budget file and its test go with the ADR-0051 redesign (erp-spec#65). A claim about what
+  PostgreSQL or its Deno driver does — a `NOTIFY` payload limit, what logical replication emits,
+  which features a pure driver covers — gets the same treatment: one owner in the structured spec,
+  and a probe under `spikes/harness/` that fails closed (SPIKE-014).
 
 ## Accounting decisions: survey before deciding
 
