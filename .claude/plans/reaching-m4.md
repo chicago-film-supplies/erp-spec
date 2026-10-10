@@ -1,10 +1,35 @@
 # Reaching m4 — the spikes are externally blocked; the ACCEPTANCE QUEUE is the deadline
 
-**Date:** 2026-08-24 • **Repo:** erp-spec • **Status:** ⏳ in progress — **the decision batch is
-PREPARED and the ball is with the owner** **Origin:** m4 is the only milestone with an unmet
-machine-checkable criterion **Related:** `roadmap/milestones.yaml` m4 · `STATUS.generated.md` ·
-issues **#56 (the batch — the brief is a comment on it)**, #57, #6, #35, #40, #42, #43, #44, #45,
-#52, #53, #54, #55 · `tools/validate.ts` gate 6
+**Date:** 2026-08-24 • **Repo:** erp-spec • **Status:** ⏳ in progress — **the PostgreSQL pivot
+(2026-10-09) re-opened m4 on two criteria; both now wait on owner acceptance** **Origin:** m4 is the
+only milestone with an unmet machine-checkable criterion **Related:** `roadmap/milestones.yaml` m4 ·
+`STATUS.generated.md` · issues **#56 (the batch — the brief is a comment on it)**, #57, #6, #35,
+#40, #42, #43, #44, #45, #52, #53, #54, #55 · `tools/validate.ts` gate 6
+
+> ## ⚠️ STATUS UPDATE 2026-10-09 — the PostgreSQL pivot changes two of m4's three criteria
+>
+> **Done:**
+>
+> - Owner ruled PostgreSQL the one system of record (replacing MongoDB, TigerBeetle, Valkey,
+>   DuckDB). Phase 1 landed in `2635514`: ADR-0049…0054 (all `proposed`), SPIKE-014, OQ-066…069,
+>   HOT-025. The pivot has its own plan: `.claude/plans/postgres-pivot.md`, issues #63–#70.
+> - **`ADR-0028`'s `review_by` moved 2026-10-01 → 2026-12-15, with the reason in the same commit**
+>   (item 2 below): its blocker `SPIKE-011` is rescoped from TigerBeetle storage to PostgreSQL
+>   hosting (OQ-069). Main had been red on gate 6 since 2026-10-02; it is green again.
+> - Three committed notes that failed `deno fmt --check` were formatted (`02eed16`), so the `spec`
+>   check's Formatting step is green too.
+>
+> **What changed on m4:**
+>
+> | criterion                          | before          | now                                                                                                           |
+> | ---------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------- |
+> | every SPIKE closed                 | 2 open          | **3 open** — `SPIKE-014` added; `SPIKE-011` rescoped; `SPIKE-012`'s framing (pending transfers) is moot (#63) |
+> | no ADR `proposed` past `review_by` | 1 failing       | **0 today.** `SPEC_TODAY`: 2026-10-16 → 2, 2026-11-02 → 7, 2026-11-16 → 15, 2026-12-01 → 19, 2026-12-16 → 38  |
+> | every HOT resolved                 | ✅ 0 of 24 open | ⛔ **HOT-025 open** — in-force storage ADRs contradict the ruling until ADR-0049…0053 are accepted            |
+>
+> **Remaining:** acceptance of ADR-0049…0053 (owner), gated by SPIKE-014 (#67) and ADR-0051's survey
+> (#66). The six pivot ADRs sit at `review_by: 2026-12-15`, after the 2026-12-01 cliff, which is why
+> 2026-12-16 jumps to 38. The "Then, in order" table below predates the pivot; item 2 is done.
 
 ## START HERE
 
@@ -265,9 +290,13 @@ SUCCESS, AND AN ABSENCE READS AS A RESULT.**
 
 ## Context recommendation
 
-**CLEAR CONTEXT.** The decision batch is executable from this doc, the five ADRs' own bodies, their
-cited surveys, and `CLAUDE.md`. Nothing needed is in anyone's head, and the context that produced
-this revision is full of Plaid sandbox internals the batch does not need.
+**CLEAR CONTEXT, and read `.claude/plans/postgres-pivot.md` first** (2026-10-09). m4 now closes
+through the pivot's acceptance: SPIKE-014, ADR-0051's survey, then the owner accepting ADR-0049…0053
+resolves HOT-025. The older text below is kept for the batch's history.
+
+The decision batch is executable from this doc, the five ADRs' own bodies, their cited surveys, and
+`CLAUDE.md`. Nothing needed is in anyone's head, and the context that produced this revision is full
+of Plaid sandbox internals the batch does not need.
 
 ⚠️ **The one thing written down nowhere else** is the START HERE table: **m4's binding criterion is
 the `review_by` cliff, not the spikes**, and it breaks CI on **2026-10-02**. Everything else —
