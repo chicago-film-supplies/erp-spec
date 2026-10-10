@@ -8,8 +8,9 @@ Replaces the Firestore-backed CFS API, **Xero**, and **asset.accountant**. Keeps
 employer of record for payroll — labor _scheduling_ moves in-house, which is what makes COGS labor
 allocation possible.
 
-Target stack: Deno/Hono API · MongoDB (documents) · TigerBeetle (ledger) · DuckDB over Parquet (read
-side) · SolidJS clients.
+Target stack: Deno/Hono API · PostgreSQL (documents, ledger, queues, reporting — ADR-0049, proposed)
+· SolidJS clients. The in-force ADRs still name MongoDB, TigerBeetle, Valkey and DuckDB until the
+superseders are accepted (HOT-025).
 
 ---
 
@@ -143,13 +144,13 @@ the rearrangement. Edit the YAML, regenerate the map.
 | `ledger/`                  | Chart of accounts, dimensions, posting rules, golden input→transfer vectors. |
 | `adr/`                     | Decisions. Immutable once accepted.                                          |
 | `spikes/`                  | Timeboxed investigations. Each closes with an ADR.                           |
-| `formal/`                  | TLA+ specs for the two-store commit and period-close protocols.              |
+| `formal/`                  | Quint specs for the two-store commit and period-close protocols.             |
 | `migration/`               | Current Firestore path → new field map, including the defective paths.       |
 | `roadmap/`                 | Milestones to `spec-v1`.                                                     |
 | `traceability/`            | Generated only.                                                              |
 
 Context codes: `LED` ledger · `FUL` fulfillment · `BIL` billing · `FA` fixed-assets · `ORD` ordering
-· `AVL` availability · `BNK` banking · `TAX` tax.
+· `AVL` availability · `BNK` banking · `TAX` tax · `PRO` procurement.
 
 ## Generated files — never hand-edit
 

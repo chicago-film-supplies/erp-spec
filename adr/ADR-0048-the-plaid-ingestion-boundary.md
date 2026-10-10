@@ -1,8 +1,8 @@
 ---
 id: ADR-0048
-headline: the bank feed lands in Mongo and does not post
+headline: the bank feed lands in an inbox and does not post
 title: >-
-  The Plaid ingestion boundary — a MongoDB inbox at the edge that does not post, CFS-minted identity,
+  The Plaid ingestion boundary — an inbox table at the edge that does not post, CFS-minted identity,
   and delta-atomic application
 status: proposed
 date: 2026-08-24
@@ -17,6 +17,8 @@ relates_to: [
   ADR-0015,
   ADR-0017,
   ADR-0042,
+  ADR-0049,
+  ADR-0055,
   SPIKE-004,
   OQ-062,
   OQ-063,
@@ -95,15 +97,15 @@ asserts:
   - id: D14
     kind: decision
     claim: >-
-      INGESTION DOES NOT POST. A bank transaction reaching the boundary store produces no
-      TigerBeetle transfer; only a MATCH does. The boundary store is a MongoDB inbox of facts
-      awaiting recognition, and it is deliberately outside the ledger.
+      INGESTION DOES NOT POST. A bank transaction reaching the boundary store produces no ledger
+      posting; only a MATCH does. The boundary store is an inbox table of facts awaiting
+      recognition, and it is deliberately outside the ledger.
   - id: D15
     kind: decision
     claim: >-
-      Because TigerBeetle is append-only and Plaid is retractable, a retraction that arrives after
+      Because the ledger is append-only and Plaid is retractable, a retraction that arrives after
       a match has posted is corrected by a REVERSING posting, never by amending or deleting a
-      transfer — and the reversal copies the keys of what it reverses.
+      posting — and the reversal copies the keys of what it reverses.
   - id: D16
     kind: decision
     claim: >-
@@ -148,9 +150,10 @@ asserts:
   - id: P7
     kind: premise
     claim: >-
-      Plaid's `pending` is a property of a BANK transaction and has no relationship to TigerBeetle's
-      two-phase pending transfer; no GL posting rule uses a pending transfer at all.
-    source: "ADR-0015"
+      Plaid's `pending` is a property of a BANK transaction and has no relationship to an inventory
+      reservation (ADR-0055, formerly a TigerBeetle pending transfer under ADR-0015); no GL posting
+      rule uses a two-phase posting at all.
+    source: "ADR-0055"
   - id: P8
     kind: premise
     claim: >-
@@ -170,7 +173,7 @@ superseded_by:
 > **In the context of** ADR-0002 sourcing the bank feed from Plaid and ADR-0009 fencing foreign
 > identifiers out of domain models, **facing** a feed that mints new ids on every re-link, deletes
 > rows without saying what they were, announces changes that are not changes, and quotes money as an
-> unscaled float, **we decided** that the feed lands in a verbatim MongoDB inbox that **does not
+> unscaled float, **we decided** that the feed lands in a verbatim inbox table that **does not
 > post**, that CFS mints its own identity and reconstructs correspondence by matching rather than by
 > id, and that a whole delta is applied atomically, **to achieve** a mutable, retractable feed held
 > safely outside an append-only ledger, **accepting** that the boundary store is a second copy of
@@ -219,37 +222,42 @@ not exercise that** — every delta measured drained in one page — so it is a 
 repo has NOT reproduced, and it is recorded that way rather than as a finding. A per-page apply that
 sees the addition without the removal double-counts the money.
 
-### ⭐ D14 and D15 — where this sits relative to TigerBeetle, and why the answer is "nowhere"
+### ⭐ D14 and D15 — where this sits relative to the ledger, and why the answer is "outside it"
 
-**A bank transaction does not reach TigerBeetle on import.** It reaches it on a MATCH, through the
+> Reworded 2026-10-09 under ADR-0049 (PostgreSQL is the one system of record): drafted against a
+> MongoDB inbox and a TigerBeetle ledger. The inbox and the ledger are now tables in one database;
+> the boundary between them is unchanged.
+
+**A bank transaction does not reach the ledger on import.** It reaches it on a MATCH, through the
 `bank_transaction_matched` posting rule — which is still blocked on `OQ-063`. The boundary store is
-a **MongoDB inbox of ephemeral, retractable facts awaiting recognition**, and keeping it outside the
-ledger is forced by the two stores' opposite natures:
+an **inbox of ephemeral, retractable facts awaiting recognition**, and keeping it outside the ledger
+is forced by the two records' opposite natures:
 
-|                  | Plaid feed                                  | TigerBeetle                                       |
+|                  | Plaid feed                                  | the ledger (ADR-0049 D3)                          |
 | ---------------- | ------------------------------------------- | ------------------------------------------------- |
 | mutability       | rows are **added, modified and REMOVED**    | transfers are **immutable and append-only**       |
 | identity         | ids do not survive a re-link (SPIKE-004/M1) | account id = GL code, deterministic and permanent |
 | what a row means | "the bank says money moved"                 | "CFS recognises a movement"                       |
 
 ⇒ Ingesting straight to the ledger would mean a bank retraction demanding a transfer be unwritten,
-and **nothing in TigerBeetle can unwrite one.** D15 says the correction is a reversing posting, and
-that is not a new invention: `invoice_voided` and `settlement_reversed` already work this way, and
-the rule that a reversal **copies the keys of what it reverses** (so reports net to zero rather than
-losing one side) applies unchanged. If the original's period is closed, the reversal takes an
-accounting date in an OPEN period (ADR-0017).
+and **nothing in an append-only ledger can unwrite one.** D15 says the correction is a reversing
+posting, and that is not a new invention: `invoice_voided` and `settlement_reversed` already work
+this way, and the rule that a reversal **copies the keys of what it reverses** (so reports net to
+zero rather than losing one side) applies unchanged. If the original's period is closed, the
+reversal takes an accounting date in an OPEN period (ADR-0017).
 
-⚠️⚠️ **PLAID'S `pending` AND TIGERBEETLE'S PENDING TRANSFER ARE FALSE COGNATES, AND THIS IS THE ONE
-TO WRITE DOWN** (P7). A Plaid pending transaction is an unsettled _bank_ record. A TigerBeetle
-pending transfer is a two-phase reservation resolved by `post_pending`/`void_pending`. The words
-match and nothing else does — and the resemblance is seductive because both are "provisional, later
-resolved". **No GL posting rule uses a pending transfer**; two-phase appears only on the
-inventory-custody ledger (ADR-0015). ⇒ modelling a pending bank line as a pending GL transfer would
-put an unrecognised bank fact into the ledger with a resolution protocol that is not the bank's, and
-it would look right.
+⚠️⚠️ **PLAID'S `pending` AND A RESERVATION ARE FALSE COGNATES, AND THIS IS THE ONE TO WRITE DOWN**
+(P7). A Plaid pending transaction is an unsettled _bank_ record. A reservation is units committed to
+an in-progress fulfillment (ADR-0055; under ADR-0015 it was a TigerBeetle two-phase pending
+transfer). The words match and nothing else does — and the resemblance is seductive because both are
+"provisional, later resolved". **No GL posting rule uses a two-phase posting**; two-phase only ever
+appeared on the inventory-custody side. ⇒ modelling a pending bank line as a pending GL posting
+would put an unrecognised bank fact into the ledger with a resolution protocol that is not the
+bank's, and it would look right.
 
-⚠️ **The two-store commit protocol (ADR-0042) is NOT engaged by ingestion**, precisely because
-ingestion writes one store. It engages at the MATCH, which is `OQ-063`'s.
+⚠️ **No cross-store protocol is engaged.** As drafted, ingestion wrote one store and the two-store
+commit (ADR-0042, rejected 2026-10-09) engaged only at the MATCH. Under ADR-0049 there is one store
+and no such protocol; the MATCH is `OQ-063`'s.
 
 ### D16 — statements are importable, and the cheap half needs no PDF parsing
 

@@ -35,7 +35,7 @@ derivation: >-
   records a tax basis fully expensed and a GAAP basis of 2400000 depreciating over five years, and
   from 2026-08-12 the two schedules diverge for the rest of the asset's life. The tax P&L shows
   $24,000.00 of §179 expense against 7001 and the tax balance sheet shows the racks at zero — both
-  produced by the read side from this register fact, neither by a TigerBeetle transfer.
+  produced by the read side from this register fact, neither by a ledger transfer.
   **This is where a parallel posting ledger would have been.** Posting the tax book means Dr 7001 /
   Cr 1501 here, in a second ledger that must then carry every other transaction to produce a balance
   sheet at all — for a fleet where most assets take this election, most of the time. SAP calls the

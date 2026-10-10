@@ -49,7 +49,8 @@ and VictoriaTraces are the observability stores, reached through an OpenTelemetr
 - **A rendered PDF is a projection, never a source document.** The invoice is the accounting record;
   the PDF is a rendering of it. Nothing may reconstruct an amount by reading a document, and a
   re-render that differs from the original is a rendering bug, not a restatement (ADR-0017 makes the
-  sealed Parquet artifact the closed-period authority — not the paperwork).
+  sealed Parquet artifact the closed-period authority — not the paperwork; ADR-0051, proposed, makes
+  the ledger itself that authority, and neither makes it the paperwork).
 - **Both fail QUIET, and that is the operational risk to design against.** With `GOTENBERG_URL`
   unset the client returns a **placeholder PDF** rather than an error, so an environment can render
   nothing and look healthy. A missing collector drops telemetry silently — and the thing that has
@@ -63,8 +64,9 @@ and VictoriaTraces are the observability stores, reached through an OpenTelemetr
   runs tens of seconds, and aborting below 60s reproduced 502s that an infra fix had already
   eliminated. Self-hosting changes the cold-start profile, so re-derive it rather than copy it.
 - **Observability is in scope for the host budget** — nine containers before the application, the
-  database or the ledger. SPIKE-011 sizes Linode for TigerBeetle's durability and latency; it should
-  size for this tier too, or the answer is about the wrong machine.
+  database or the ledger. SPIKE-011 sizes Linode for the system of record (TigerBeetle's durability
+  and latency when written; PostgreSQL under ADR-0049); it should size for this tier too, or the
+  answer is about the wrong machine.
 - ⛔ ✅ **That sentence is now enacted, and it makes SPIKE-011 THIS ADR'S BLOCKER.** SPIKE-011 was
   rescoped 2026-08-24 and its criterion 3 is exactly this tier — one row per process, each memory
   and CPU figure measured or cited, never estimated. ⇒ **this ADR cannot be accepted until that

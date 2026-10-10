@@ -51,9 +51,11 @@ requirements:
       shall reproduce the stored projection exactly; the comparison shall be made against the ledger
       rather than against whatever wrote the projection.
     rationale: >-
-      ADR-0014 makes derived state a rebuildable projection. ADR-0022 materializes both fields into
-      the document store because the ledger answers no queries and a list view needs them — which
-      reintroduces the possibility of drift that materialization always does.
+      ADR-0014 makes derived state a rebuildable projection. ADR-0022 materializes both fields onto
+      the invoice so a list view can read them — which reintroduces the possibility of drift that
+      materialization always does. (ADR-0022's premise that the ledger answers no queries was
+      TigerBeetle's; under ADR-0049 the ledger is queryable, and the materialization and this
+      requirement stand.)
       ⚠️ **The second clause is the whole requirement.** "The projection equals what the projector
       produces" is a fixed-point check and can only ever agree with itself. ADR-0022 names the
       escape: recompute-versus-ledger is independent **because the ledger is not the normalizer**.

@@ -2,10 +2,10 @@
 #
 # Every event needs a producer and at least one consumer, or `terminal: true`.
 #
-# THE BOUNDARY THAT SHAPES THIS FILE (ADR-0015): a forward booking is NOT a TigerBeetle transfer.
-# TB balances are point-in-time; rental availability is interval-based, and a booking six months
-# out must not consume stock today. So everything here is interval math over booking records, and
-# the TB pending/post/void pair lives in FUL, over the operational window only.
+# THE BOUNDARY THAT SHAPES THIS FILE (ADR-0055 D1): a forward booking does NOT consume custody.
+# Custody is point-in-time; rental availability is interval-based, and a booking six months out
+# must not consume stock today. So everything here is interval math over booking records, and the
+# commit / check-out / void events live in FUL, over the operational window only.
 
 events:
   - id: EVT-AVL-001

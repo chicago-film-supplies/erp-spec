@@ -7,7 +7,7 @@ date: 2026-08-24
 review_by: 2026-11-01
 deciders: [repo owner]
 contexts: [ordering, billing, fulfillment, availability, tax]
-relates_to: [ADR-0004, ADR-0039, SPIKE-008]
+relates_to: [ADR-0004, ADR-0039, SPIKE-008, ADR-0049]
 accounting_shaped: false
 measurements:
   - id: M1
@@ -54,9 +54,9 @@ superseded_by:
   anti-pattern list live in the workspace `CLAUDE.md`.
 - **The library is already the vocabulary of that rule.** `@cfs/core/utils/dates` implements it with
   `date-fns` + `TZDate`, and all three v1 repos depend on both (M2).
-- **The ledger's dates are settled elsewhere and this ADR does not touch them.** ADR-0039 stores a
-  posting's accounting date as a packed `YYYYMMDD` in `user_data_32` with the cluster assigning the
-  posting timestamp; ADR-0010 requires the two to be distinct fields.
+- **The ledger's dates are settled elsewhere and this ADR does not touch them.** ADR-0039 (history
+  loads as ordinary postings) gives every posting its accounting date as its own field and the
+  recording instant as its posting timestamp; ADR-0010 requires the two to be distinct fields.
 - ⚠️ **`Temporal` is now native in both target runtimes** — measured, M1.
 
 ## Decision
@@ -104,10 +104,10 @@ happens **in a named zone** rather than in whatever zone the process happens to 
   the sole owner of its UTC calendar-day reduction and says so. A tool stamping when it ran is not a
   business datetime, and conflating the two is how a Chicago formatter once got pulled into a probe
   where it did not belong.
-- **The storage FORM is a separate question and is not decided here.** ADR-0003 replaces Firestore
-  with MongoDB, and whether v2 stores an offset string, a BSON `Date`, or both is a schema decision
-  this ADR deliberately leaves open — adopting a library for arithmetic does not settle what the
-  database holds.
+- **The storage FORM is a separate question and is not decided here.** ADR-0049 (PostgreSQL is the
+  one system of record) replaces Firestore with PostgreSQL, and whether v2 stores an offset string,
+  a `timestamptz`, or both is a schema decision this ADR deliberately leaves open — adopting a
+  library for arithmetic does not settle what the database holds.
 - ⚠️ **A dependency now needs a version policy.** Three repos already float on carets at two
   different floors (M2). Nothing in this ADR sets one, and the cross-repo publish order in the
   workspace `CLAUDE.md` is where a pin would have to be honoured.

@@ -44,7 +44,7 @@ derivation: >-
   **The tax book disagrees violently and posts nothing** (ADR-0026). §179 expensed this cart in year
   1, so `nbv_tax_minor` is 0 and the tax result is a $450.00 §1245 recapture against a $50.00 book
   gain. The register carries both numbers — the event declares `nbv_tax_minor` for exactly this
-  reason — and the read side reports the tax basis. No tax value reaches TigerBeetle.
+  reason — and the read side reports the tax basis. No tax value reaches the ledger.
   No dimension: 1500, 1501 and 1998 all name none.
 
 expect:

@@ -1,9 +1,11 @@
 # Domain events for FUL.
 # Every event needs a producer and at least one consumer, or `terminal: true`.
 #
-# THE BOUNDARY (ADR-0015): the TigerBeetle pending/post/void pair covers the OPERATIONAL window
-# only — units committed to a fulfillment in progress. Forward bookings stay interval math in AVL,
-# because a booking six months out must not consume a point-in-time balance today.
+# THE BOUNDARY (ADR-0055): commit / check out / void covers the OPERATIONAL window only — units
+# committed to a fulfillment in progress. Forward bookings stay interval math in AVL, because a
+# booking six months out must not consume custody today. Whether a commitment moves custody at all
+# is OQ-070; EVT-FUL-004 and EVT-FUL-007 exist only if it does. (Until 2026-10-09 this was a
+# TigerBeetle pending/post/void pair under ADR-0015, rejected.)
 
 events:
   - id: EVT-FUL-001
@@ -50,7 +52,7 @@ events:
       rather than suppressing the event.** The shift, its hours and its `absorbed_allocations` are
       written for a contributed shift too, so the costing layer keeps everything it needs to impute
       a cost at report time — which is where the imputed view lives (ADR-0036's two layers:
-      TigerBeetle holds the GL, Mongo holds the projection).
+      the ledger holds the GL, the costing projection holds the imputed view).
       ⚠️ **Without the discriminator the cost is not merely wrong, it is wrong in a way nothing
       catches.** `shift_recorded` credits **2010 Accrued Expenses: Received Not Invoiced**, so an
       unpaid owner shift would assert a liability that no bill can ever relieve, in the one account
@@ -75,25 +77,25 @@ events:
   - id: EVT-FUL-004
     name: UnitsCommitted
     description: >-
-      Units were committed to a fulfillment in progress — the TigerBeetle PENDING transfer
-      (ADR-0015). The transfer timeout is the compensation mechanism SPIKE-002 relies on: an
-      orphaned commitment expires on its own.
+      Units were committed to a fulfillment in progress (ADR-0055). Commits in the same transaction
+      as the fulfillment change that causes it, so no commitment can be orphaned. May name specific
+      units for a serialized product (ADR-0055 D4). Exists only under OQ-070 option A.
     producer: fulfillment
     consumers: [availability, ledger]
     terminal: false
-    carries: [fulfillment_ref, product_ref, quantity, pending_transfer_ref]
-    blocked_by: [SPIKE-012]
+    carries: [fulfillment_ref, product_ref, quantity, unit_refs, commitment_ref]
+    blocked_by: [SPIKE-012, OQ-070]
 
   - id: EVT-FUL-005
     name: UnitsCheckedOut
     description: >-
-      Custody transferred to the customer — the pending transfer POSTED. This is the point
-      `debits_must_not_exceed_credits` makes overselling physical custody unrepresentable rather
-      than merely checked.
+      Custody transferred to the customer. This is the point at which the database refuses a
+      check-out of more units than are held (ADR-0055 D3), making custody oversell unrepresentable
+      rather than merely checked. Names the units moved, for a serialized product.
     producer: fulfillment
     consumers: [availability, billing, ledger]
     terminal: false
-    carries: [fulfillment_ref, product_ref, quantity, posted_transfer_ref, checked_out_at]
+    carries: [fulfillment_ref, product_ref, quantity, unit_refs, commitment_ref, checked_out_at]
 
   - id: EVT-FUL-006
     name: UnitsReturned
@@ -108,12 +110,14 @@ events:
   - id: EVT-FUL-007
     name: CommitmentVoided
     description: >-
-      A commitment was released without a checkout — the pending transfer VOIDED, whether by
-      cancellation or by timeout. Distinct from a return: nothing ever left.
+      A commitment was released without a checkout, by cancellation. Distinct from a return:
+      nothing ever left. There is no timeout path — a commitment cannot be orphaned (ADR-0055 D2).
+      Exists only under OQ-070 option A.
     producer: fulfillment
     consumers: [availability, ledger]
     terminal: false
-    carries: [fulfillment_ref, product_ref, quantity, voided_transfer_ref, reason]
+    carries: [fulfillment_ref, product_ref, quantity, commitment_ref, reason]
+    blocked_by: [OQ-070]
 
   - id: EVT-FUL-008
     name: VehicleCostAbsorbed

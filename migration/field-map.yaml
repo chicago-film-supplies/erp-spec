@@ -107,7 +107,7 @@ collections:
     reason: >-
       Per-product optimistic-lock rows (`seq`, `uid_product`), 278 — one per product, which is the
       tell. Concurrency machinery for v1's Firestore writes; v2's store and its locking are different
-      (ADR-0003), so a lock row means nothing there.
+      (ADR-0003; ADR-0049 if accepted), so a lock row means nothing there.
 
   - collection: typesense
     disposition: drop
@@ -246,7 +246,7 @@ collections:
   # once here rather than repeated 20 times:
   #   - **foreign identifiers drop** — `crms_*`, `xero_*`, `current_rms_id`, `mapbox_id` — ADR-0009;
   #   - **`query_by_*` denorms drop** — they exist because Firestore cannot join, and ADR-0003
-  #     replaces it with a store that can. Carrying a query denorm forward migrates a workaround.
+  #     (ADR-0049 if accepted) replaces it with a store that can. Carrying a query denorm forward migrates a workaround.
   #   - **`*_fs` / `._seconds` / `._nanoseconds` twins drop** — a Firestore Timestamp mirror of a
   #     canonical Chicago-offset string. One field survives, not two.
 

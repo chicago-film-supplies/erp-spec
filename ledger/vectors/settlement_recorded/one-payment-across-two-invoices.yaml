@@ -35,9 +35,9 @@ derivation: >-
   and stating the zero here rather than omitting the field is the same absence-versus-null
   distinction REQ-LED-001 draws: the operator applied the whole payment, and that is a fact.
   **This is the evidence, not an illustration.** erp-spec#3 asks whether `journal_entry_id` can be
-  derived as (source document, posting event) and freed from `user_data_128`. Here one journal entry
+  derived as (source document, posting event) rather than stored. Here one journal entry
   references two invoices, so the grouping is not a function of any single source-document
-  reference, and the field stays reserved. `credit_note_allocated` is the other half.
+  reference, and the id stays a stored field. `credit_note_allocated` is the other half.
   **Each leg carries the INVOICE it relieves and declares `causal_orders: null`** (ADR-0036). That
   is what makes a session spanning two invoices legible on the ledger's own face: two legs, two
   invoice keys, one entry. ⚠️ This paragraph read "Neither account carries a dimension — 1001 and

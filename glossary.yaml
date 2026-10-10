@@ -264,8 +264,10 @@ terms:
     source: adr/ADR-0010-accounting-date-vs-posting-timestamp.md
     open_questions: [OQ-009]
     notes: >-
-      TigerBeetle assigns its own timestamp at post time and that is a posting timestamp, not an
-      accounting date. Reporting needs accounting date. This is HOT-005 and SPIKE-003.
+      Assigned by the database when the posting commits, never supplied by the caller — including
+      for history loaded at migration (ADR-0039). Reporting periodizes by accounting date, never by
+      this. HOT-005 and SPIKE-003 recorded why the two must differ when TigerBeetle indexed only
+      this one.
 
   - term: journal entry
     definition: >-
@@ -326,9 +328,10 @@ terms:
       order — a value or an explicit null — and an empty list is refused alongside absence because it
       satisfies a naive presence check while stating nothing.
       ⚠️ **Line identity is `item.path`, never `item.uid`** — `uid` identifies the product and repeats
-      within one document (18% of prod orders). And it is STORED as a hash or a minted surrogate:
-      invoice paths run to depth 7 and 178 bytes, and 14,410 of 14,410 exceed a u128's 16. Collision
-      is not the risk (~1e-11 on 64 bits); **opacity is**, and ADR-0036 takes that trade knowingly.
+      within one document (18% of prod orders). ADR-0036 stores it as a hash or a minted surrogate,
+      because TigerBeetle's widest field is a u128: invoice paths run to depth 7 and 178 bytes, and
+      14,410 of 14,410 exceed 16. Under ADR-0049 that constraint is gone, and whether a path is
+      stored as itself is not yet decided.
 
   - term: period close
     definition: >-
@@ -340,7 +343,8 @@ terms:
     verified: false
     notes: >-
       Per ADR-0006 a closed period's Parquet file is the audit artifact and its hash goes into the
-      close record.
+      close record. ADR-0051 (one ledger answers every period, proposed) would make the ledger
+      itself the closed-period authority and the hash one over the period's postings.
 
   - term: book
     definition: >-

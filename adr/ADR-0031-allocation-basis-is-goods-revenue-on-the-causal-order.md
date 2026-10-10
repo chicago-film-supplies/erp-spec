@@ -241,6 +241,7 @@ revenue on the causal order**.
   toward the average. Reading this report as evidence that the best line is less profitable than it
   looked is the misreading, and it is the exact hazard the criterion names. The report showing own
   and allocated separately is what prevents it.
-- **Reporting authority is unchanged (ADR-0017).** Whether the allocated view is sealed at close or
-  recomputed on demand from sealed inputs is decided in `reporting/`, not here — but it is only a
-  free choice _because_ the basis is versioned.
+- **Reporting authority is unchanged (ADR-0017, or ADR-0051 if it is accepted — one ledger answers
+  every period).** Whether the allocated view is fixed at close or recomputed on demand from closed
+  inputs is decided in `reporting/`, not here — but it is only a free choice _because_ the basis is
+  versioned.

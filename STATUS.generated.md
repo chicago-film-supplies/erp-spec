@@ -11,7 +11,7 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 29 open | 41 answered of 70 · **0 with no owner or no decide-by** |
+| Open questions | 30 open | 41 answered of 71 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 25 | 1 open |
 | Decisions (ADR) | 55 | 29 in force · 20 proposed |
 | Spikes | 14 | 3 open |
@@ -22,7 +22,7 @@ is `deno task validate`'s judgement, not this file's.
 
 ## The bottleneck: undecided questions
 
-**29 of 70 still open**, soonest decide-by first.
+**30 of 71 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
@@ -44,6 +44,7 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-067` | How do committed changes reach subscribed clients live — a read-model row per document pl… | alex | 2026-12-15 | `ADR-0047` |
 | `OQ-069` | Is PostgreSQL run self-managed on a Linode VM or as Linode's managed database, and what a… | alex | 2026-12-15 | `SPIKE-011` |
 | `OQ-070` | Under PostgreSQL, does reserving units for an in-progress fulfillment move them into a `c… | alex | 2026-12-15 | `ADR-0055` |
+| `OQ-071` | Under PostgreSQL, which rules does the database carry and by which mechanism — column typ… | alex | 2026-12-15 | `ADR-0040` |
 | `OQ-039` | `organizations.tax_profile` carries two different concepts in one enum — who owes (applie… | alex | 2027-01-15 | — |
 | `OQ-052` | What vehicle rate absorbs into 5900, over what normal-capacity denominator — and where do… | alex | 2027-01-31 | — |
 | `OQ-059` | Which CDN carries CFS images — Uploadcare re-evaluated against imgix and any other suitab… | alex | 2027-01-31 | — |
@@ -106,15 +107,15 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | `ADR-0031` | The official product-line P&L allocates by goods revenue on the causal order, declared as a proxy | 2026-11-01 | — | `OQ-033` |
 | `ADR-0032` | The organization tree is a liability tree; projects and settlement points are addressing beneath it | 2026-11-15 | — | `OQ-035` `OQ-038` `OQ-039` |
 | `ADR-0033` | A document is addressed to exactly one node by a level-tagged reference, and unallocated credit sits at the settlement point | 2026-11-15 | — | `OQ-030` `OQ-038` `OQ-040` |
-| `ADR-0039` | Historical ledger entries load as ordinary postings with cluster-assigned timestamps; the TigerBeetle `imported` flag is refused | 2026-11-15 | — | — |
-| `ADR-0040` | The Zod schema is the sole authority and the MongoDB validator is generated from it one-way, with every rule the validator cannot carry named in a registry CI walks | 2026-11-15 | — | — |
+| `ADR-0039` | Historical ledger entries load as ordinary postings whose posting timestamp is the load instant; a back-dated posting timestamp is refused | 2026-11-15 | — | — |
+| `ADR-0040` | The Zod schema is the sole authority and the database's constraints are generated from it one-way, with every rule the database cannot carry named in a registry CI walks | 2026-11-15 | — | `SPIKE-014` `OQ-071` |
 | `ADR-0041` | The labor rate variance posts as its own fact keyed to causal orders, and the plan burden rate is re-derived from each observed run | 2026-11-01 | — | `OQ-045` |
 | `ADR-0043` | The depreciation engine is hand-rolled behind a package boundary, computed per taxpayer-year, with the year's rules as versioned data | 2026-11-15 | — | `OQ-054` |
 | `ADR-0044` | CFS is the principal on a production service agreement, so the client's budget is revenue and the crew cost is CFS's cost | 2026-11-30 | — | — |
 | `ADR-0045` | A stored jurisdiction records WHO asserted it and under what authority — not which rung of the precedence answered, which is a restatement of fields the document already holds | 2026-11-30 | — | `OQ-056` `OQ-057` |
 | `ADR-0046` | Adopt date-fns and @date-fns/tz as planned dependencies for every business datetime | 2026-11-01 | — | — |
-| `ADR-0047` | The client data model — one live transport replacing Firestore listeners, and an offline queue reconciled by three-way merge | 2026-11-15 | — | `OQ-043` `OQ-061` |
-| `ADR-0048` | The Plaid ingestion boundary — a MongoDB inbox at the edge that does not post, CFS-minted identity, and delta-atomic application | 2026-11-30 | — | `OQ-062` `OQ-063` |
+| `ADR-0047` | The client data model — one live transport replacing Firestore listeners, and an offline queue reconciled by three-way merge | 2026-11-15 | — | `OQ-043` `OQ-061` `OQ-067` |
+| `ADR-0048` | The Plaid ingestion boundary — an inbox table at the edge that does not post, CFS-minted identity, and delta-atomic application | 2026-11-30 | — | `OQ-062` `OQ-063` |
 | `ADR-0049` | PostgreSQL is the one system of record — documents, ledger, event store, queues and reporting in one transactional database | 2026-12-15 | `ADR-0003` | `SPIKE-011` `SPIKE-014` `HOT-025` `OQ-065` `OQ-066` `OQ-067` `OQ-068` `OQ-069` |
 | `ADR-0050` | Work queues are PostgreSQL tables, enqueued in the transaction that causes the work and claimed with SKIP LOCKED | 2026-12-15 | `ADR-0012` | `SPIKE-014` |
 | `ADR-0051` | The PostgreSQL ledger is the reporting authority for open and closed periods alike; a closed period is protected by the database and a closing hash | 2026-12-15 | `ADR-0017` | `OQ-051` `OQ-056` **rule 8a survey** |

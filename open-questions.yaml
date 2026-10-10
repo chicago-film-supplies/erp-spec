@@ -3156,3 +3156,23 @@ open_questions:
       abandoned reservation; option B is smaller and surfaces the conflict at check-out. SPIKE-012's
       boundary measurements bear on it; the manager's check-in/check-out lifecycle was not live when
       they were taken (SPIKE-012 M3).
+
+  - id: OQ-071
+    headline: "what PostgreSQL enforces from the Zod schema"
+    question: >-
+      Under PostgreSQL, which rules does the database carry and by which mechanism — column types,
+      `CHECK` constraints, a JSON-schema check on `jsonb` columns, triggers for the cross-element
+      items invariants — and how is each generated one-way from the Zod schema?
+    owner: alex
+    decide_by: 2026-12-15
+    blocks: [ADR-0040]
+    status: open
+    notes: >-
+      Opened 2026-10-09 when ADR-0040 (Zod is the schema authority) was reworded under ADR-0049.
+      SPIKE-006 answered this for MongoDB (`$jsonSchema` + `$expr`) and nothing has measured it for
+      PostgreSQL. SPIKE-006's Zod-side findings carry over unchanged: `z.toJSONSchema()` drops
+      refinements silently, `z.literal` emits `const`, and `io: "output"` erases transformed fields.
+      Its most valuable result also carries as a requirement on the answer: the items invariants
+      must be checked by something written against the stored data, not by a fixed point of
+      `computeItemPaths`. Whether a JSON-schema check needs an extension (and whether Linode's
+      managed offering permits it) ties to OQ-069.

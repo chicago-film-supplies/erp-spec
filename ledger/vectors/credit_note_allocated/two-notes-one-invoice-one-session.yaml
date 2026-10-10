@@ -25,8 +25,8 @@ given:
 derivation: >-
   **One journal entry, two credit notes.** This is the vector erp-spec#3 is waiting on. The entry
   debits 2050 twice and credits 1200 twice, and it references CN-VEC-1015 and CN-VEC-1017 — so
-  `journal_entry_id` is not a function of any single source-document reference, and it keeps
-  `user_data_128`. `settlement_recorded/one-payment-across-two-invoices` is the same conclusion from
+  `journal_entry_id` is not a function of any single source-document reference, and it stays a
+  stored field. `settlement_recorded/one-payment-across-two-invoices` is the same conclusion from
   the cash side; between them the claim rests on two written rules rather than on two event
   descriptions.
   The corpus carries the mirror shape too: **CN-1015's $259.74 is split across two invoices**, 24775

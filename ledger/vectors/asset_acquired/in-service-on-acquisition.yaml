@@ -33,7 +33,7 @@ derivation: >-
   Clearing is for the gap between buying and using, and here there is none.
   **The tax basis is recorded and NOT posted** (ADR-0026). `section_179_minor` expenses the whole
   $12,000 for tax in year 1 while GAAP carries it over five, so the two books diverge from this
-  moment — but only the GAAP figure reaches TigerBeetle. A second transfer for the tax basis would
+  moment — but only the GAAP figure reaches the ledger. A second transfer for the tax basis would
   double the balance sheet, which is why the parallel-ledger option was rejected.
   No dimension: 1500 and 2010 both name none. An acquisition is not a sale, and the racks acquire a
   product line when they earn revenue, not when they are bought.

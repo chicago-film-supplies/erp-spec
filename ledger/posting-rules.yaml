@@ -43,7 +43,7 @@
 #   accounting_date          a NAMED FIELD of the source document. Never a clock word — the date a
 #                            transaction belongs to is business data (ADR-0010, charter fence).
 #   posting_timestamp        always the literal `assigned_by_ledger`. Monotonic, never back-dated.
-#   postings[]               paired transfers, matching TigerBeetle's model and the vector shape:
+#   postings[]               paired transfers (one debit, one credit, one amount), the vector shape:
 #                              debit_account / credit_account   a GL code, or a dotted path
 #                              per                              fans the posting over a collection
 #                              amount                           a dotted path — NEVER an expression
@@ -52,8 +52,9 @@
 #   invariants[]             what must hold, in prose, each traceable to a REQ/ADR
 #   vectors_dir              ledger/vectors/<id>/
 #
-# **A posting whose amount is zero is not written.** A TigerBeetle transfer carries a non-zero
-# amount, so a zero-value leg is an absence rather than a transfer — a fully depreciated asset is
+# **A posting whose amount is zero is not written.** A zero-value leg is an absence rather than a
+# transfer (first forced by TigerBeetle's non-zero amount; kept under ADR-0049 as a rule of the
+# ledger) — a fully depreciated asset is
 # disposed of with ONE relief leg, not two, an ordinary payment writes no unapplied leg, and a
 # `per:` over an empty collection produces nothing at all. This is why `asset_basis_adjusted` can
 # legitimately post nothing while still being `specified`, and why the control total of such an
@@ -530,7 +531,7 @@ rules:
           fleet is §179'd to zero in year 1 while GAAP carries it 5, 10 or 20 years — so the tax gain
           differs too, and it is §1245 recapture rather than a book gain. `EVT-FA-003` carries
           `nbv_tax_minor` for exactly that reason: the register computes the tax result and the read
-          side reports it. No tax-basis value reaches TigerBeetle.
+          side reports it. No tax-basis value reaches the ledger.
       - >-
           **Accumulated depreciation plus net book value equals cost**, which is what the control
           total checks. The two legs relieve the asset account to zero between them; if the register's
@@ -668,8 +669,8 @@ rules:
           accept vector and `contributed-shift-that-posts-rejected` is its minimal pair.
           **The shift and its `absorbed_allocations` are still RECORDED** — hours, causal job and
           `labor_line` all survive, because they are what the costing layer needs. **The imputed
-          cost is a REPORT, not a posting** (ADR-0036's two layers: TigerBeetle holds the GL, Mongo
-          holds the projection). ⚠️ **The GAAP gross margin is therefore flattered by contributed
+          cost is a REPORT, not a posting** (ADR-0036's two layers: the ledger holds the GL, the
+          costing projection holds the imputed view). ⚠️ **The GAAP gross margin is therefore flattered by contributed
           labor, and that is what GAAP requires** — which is why the imputed view has to EXIST
           rather than be optional. A margin that is honest only in a report nobody runs is not
           honest.
@@ -957,7 +958,7 @@ rules:
     invariants:
       - >-
           ⚠️ **ONLY THE GAAP BOOK POSTS** (ADR-0026). The schedule carries two numbers per asset per
-          period and exactly one of them reaches TigerBeetle: `line.gaap_amount_minor`. The tax
+          period and exactly one of them reaches the ledger: `line.gaap_amount_minor`. The tax
           figure is derived at report time from the register's per-book schedules and **must never
           appear as a transfer** — a second posting for the same asset in the same period would
           double the expense while balancing perfectly, so no control total or trial balance could
@@ -1370,13 +1371,12 @@ no_posting:
 
   - event: EVT-FUL-004
     reason: >-
-      A TigerBeetle PENDING transfer on the **inventory-custody** ledger (ADR-0015), not a GL
-      posting. Physical custody and money are different ledgers with different rules — custody must
+      A custody commitment on the **inventory-custody** side (ADR-0055), not a GL posting. Physical custody and money are different ledgers with different rules — custody must
       not go negative, money must.
 
   - event: EVT-FUL-005
     reason: >-
-      The custody pending transfer POSTS. Revenue is recognised when the invoice posts
+      Custody leaves the building. Revenue is recognised when the invoice posts
       (EVT-BIL-001), not when units leave the building, so there is no GL consequence here.
 
   - event: EVT-FUL-006
@@ -1386,7 +1386,7 @@ no_posting:
       `invoice_issued`.
 
   - event: EVT-FUL-007
-    reason: "The custody pending transfer VOIDS, by cancellation or timeout. Nothing ever left, so nothing posts."
+    reason: "A custody commitment is released by cancellation (ADR-0055). Nothing ever left, so nothing posts."
 
   - event: EVT-BNK-001
     reason: >-

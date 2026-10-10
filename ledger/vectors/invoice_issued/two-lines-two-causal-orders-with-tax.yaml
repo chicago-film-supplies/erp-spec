@@ -58,11 +58,11 @@ derivation: >-
   a tax component is not a row of the sale.
   control_total = 75000 + 12500 + 11250 + 1281 = 100031 = `invoice.total_minor`. The tax legs are
   what make the control total non-trivial: a rule that dropped them balances and understates AR.
-  ⚠️ **`path` is stored as a HASH or a minted surrogate, never as the list written here** (ADR-0036).
-  Invoice paths run to depth 7 and 178 bytes, and 14,410 of 14,410 exceed a u128's 16 — 100%, with a
-  single 36-char uuid overflowing one on its own. The list form is written in these vectors because
-  it is what the rule READS; what TigerBeetle holds is a fingerprint that verifies against the
-  projection rather than a reference that resolves without it.
+  ⚠️ **ADR-0036 stores `path` as a HASH or a minted surrogate, never as the list written here.**
+  Invoice paths run to depth 7 and 178 bytes, and 14,410 of 14,410 exceed TigerBeetle's u128 — 100%,
+  with a single 36-char uuid overflowing one on its own. Under ADR-0049 that limit is gone and the
+  stored form is not yet decided. The list form is written in these vectors because it is what the
+  rule READS.
 
 expect:
   transfers:

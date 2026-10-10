@@ -27,6 +27,6 @@ amounts.
 
 ## Open
 
-- HOT-005 / OQ-009 — whether TigerBeetle or DuckDB is the reporting source of truth.
-- ADR-0008 — dimension-exploded accounts, blocked on the above.
+- HOT-005 / OQ-009 — the reporting source of truth; ADR-0051 (one ledger answers every period,
+  proposed) answers it under ADR-0049 (PostgreSQL is the one system of record).
 - OQ-008 — who sets standard labor rates.

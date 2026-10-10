@@ -8,8 +8,8 @@
 #
 # ── keeping the oracle honest ───────────────────────────────────────────────────────────────────
 # ⚠️ **"Σ debits == Σ credits" is VACUOUS on this shape and is deliberately not checked.** A
-# transfer here is a `{debit_account, credit_account, amount_minor}` triple — TigerBeetle's actual
-# model — so every transfer contributes the same amount to both sides and the sums are equal by
+# transfer here is a `{debit_account, credit_account, amount_minor}` triple — one debit, one credit,
+# one amount — so every transfer contributes the same amount to both sides and the sums are equal by
 # construction, for any set of transfers whatsoever. A gate asserting it could never fail. It is
 # the textbook shape of a guard that only consults its own oracle.
 #

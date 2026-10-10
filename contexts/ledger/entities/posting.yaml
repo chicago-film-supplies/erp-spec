@@ -49,6 +49,6 @@ fields:
   source_document: {
     type: document_ref,
     required: true,
-    note: "⚠️ At TigerBeetle this field does NOT get its own slot — `line_identity` displaces `source_document_ref` in `user_data_64`, because a path names the document AND the row within it (ADR-0036; `ledger/tigerbeetle-accounts.yaml` owns the field budget). It stays a field of the logical posting: the projection resolves it, and a posting with no line — a tax leg, a period-end accrual — still has a source document.",
+    note: "A path names the document AND the row within it, so where `line_identity` is present it implies the source document (ADR-0036). It stays a field of its own: a posting with no line — a tax leg, a period-end accrual — still has a source document. (Under TigerBeetle the two shared one `user_data_64` slot; ADR-0049 retires that field budget.)",
   }
   posting_rule: { type: rule_id, required: true }

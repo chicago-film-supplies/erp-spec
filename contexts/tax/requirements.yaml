@@ -64,9 +64,9 @@ requirements:
       covered by input-to-expected-output vectors including rejection cases.
     rationale: >-
       ADR-0026 names this as the real cost of the decision: **the tax basis has no double-entry
-      enforcement.** TigerBeetle guarantees the GAAP book and nothing else, so the tax basis rests
-      entirely on its derivation being deterministic and on the per-asset audit trail ADR-0007
-      already requires.
+      enforcement.** The ledger's balance constraint (ADR-0049 D4) guarantees the GAAP book and
+      nothing else, so the tax basis rests entirely on its derivation being deterministic and on
+      the per-asset audit trail ADR-0007 already requires.
       That is why the derivation belongs in one place with vectors over it rather than in a report
       template — a rule expressed in a template is re-expressed in every template, and the copies
       drift. The GAAP side already works this way, and the golden vectors in `ledger/vectors/` are

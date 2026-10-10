@@ -29,7 +29,7 @@ derivation: >-
   because a trade-in reduced the tax basis — and an instruction to post both books.
   **Two transfers would put $22,800.00 of racks on a balance sheet holding $12,000.00 of racks.** The
   asset exists once. ADR-0026 settles where the second set of numbers lives: the fixed-asset register
-  carries the tax basis, the read side reports the tax-basis statements, and TigerBeetle holds one
+  carries the tax basis, the read side reports the tax-basis statements, and the ledger holds one
   book.
   **This is the tempting error precisely because ADR-0007 says "per book" everywhere.** Cost basis IS
   recorded per book — that sentence is true and it is about the register, not about the ledger. The

@@ -92,7 +92,8 @@ Each of these is a deliberate decision, not an oversight. Reversing one is an AD
   repair.
 - **Preserving CRMS.** CRMS is being retired at the cutover. Do not design around it.
 - **Rewriting into another language.** `ADR-0004` keeps Deno/TypeScript, with a narrow Go sidecar
-  escape hatch for the ledger service only.
+  escape hatch for the ledger service only. That hatch existed for the TigerBeetle client; under
+  ADR-0049 (PostgreSQL is the one system of record) there is no ledger service for it to serve.
 - **Replacing the external EOR's time-and-attendance system of record for payroll purposes.** CFS
   shift records drive _costing_; the EOR's records drive _pay_. They will disagree at the margin and
   that is tolerated. Reconciling them is not a goal.

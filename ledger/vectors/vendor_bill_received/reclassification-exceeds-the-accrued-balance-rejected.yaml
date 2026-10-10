@@ -48,8 +48,8 @@ derivation: >-
   **That distinction is the reason this is a refusal rather than a cap.** Silently clamping the
   reclassification to 84000 would balance the entry, satisfy the control total, and leave $120.00 of
   real cost unrecorded — a quieter failure than the one being prevented.
-  **The check consults the projection, not a ledger balance.** 2010 holds one total in TigerBeetle;
-  the per-obligation outstanding is a document-store fact, exactly as
+  **The check consults the projection, not a ledger balance.** 2010 holds one total in the ledger;
+  the per-obligation outstanding is a document fact, exactly as
   `credit-notes.remaining_credit_cents` is in the current system.
 
 expect:

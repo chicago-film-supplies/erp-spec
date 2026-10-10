@@ -36,9 +36,9 @@ derivation: >-
   Posting it a second time credits 1500 for another 100000 — an asset account driven **negative** by
   50000 across the two entries — and debits 1501 for accumulated depreciation that has already been
   relieved. It also books a second $50.00 gain on one sale.
-  ⚠️ **TigerBeetle will not stop this.** The GL deliberately sets no balance-direction flag on any
-  account, because a revenue account legitimately goes debit-side on a reversal and AR legitimately
-  goes credit-side on an overpayment (`ledger/tigerbeetle-accounts.yaml`). A negative asset balance
+  ⚠️ **The ledger will not stop this.** The GL deliberately puts no balance-direction constraint on
+  any account, because a revenue account legitimately goes debit-side on a reversal and AR
+  legitimately goes credit-side on an overpayment (`ledger/tigerbeetle-accounts.yaml`). A negative asset balance
   is representable by design, so "the store would refuse it" is not available here and the rule has
   to.
   The right response to a redelivered disposal is nothing at all. **Idempotency is a property of the

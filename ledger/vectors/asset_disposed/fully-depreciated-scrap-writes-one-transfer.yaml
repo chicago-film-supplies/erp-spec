@@ -30,8 +30,8 @@ derivation: >-
   Same cost, same accounts, past the end of its GAAP life — accumulated depreciation equals cost and
   net book value is zero.
   **ONE transfer, not two with a zero.** The second leg's amount is 0, and a zero-amount posting is
-  not written: a TigerBeetle transfer carries a non-zero amount, so a zero-value leg is an absence
-  rather than a transfer. `control_total` = 100000 = the single transfer, and the identity
+  not written: a zero-value leg is an absence rather than a transfer (`ledger/posting-rules.yaml`
+  header). `control_total` = 100000 = the single transfer, and the identity
   accumulated + NBV = cost still holds with NBV at zero.
   **This is the arm that would go unexercised.** A rule written against the sale vector alone reads
   as "always two legs", and the implementation that follows it either emits a zero-amount transfer —

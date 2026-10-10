@@ -9,7 +9,19 @@ date: 2026-08-24
 review_by: 2026-11-15
 deciders: [repo owner]
 contexts: [ordering, billing, fulfillment, availability]
-relates_to: [ADR-0003, ADR-0005, ADR-0012, ADR-0032, ADR-0045, SPIKE-009, SPIKE-013, OQ-043, OQ-061]
+relates_to: [
+  ADR-0003,
+  ADR-0005,
+  ADR-0012,
+  ADR-0032,
+  ADR-0045,
+  SPIKE-009,
+  SPIKE-013,
+  OQ-043,
+  OQ-061,
+  ADR-0049,
+  OQ-067,
+]
 accounting_shaped: false
 measurements: [] # ⚠️ DELIBERATELY EMPTY, and it is the architecture rather than an omission.
 # Every figure this decision rests on was measured by SPIKE-009 or SPIKE-013, and gate 22 makes
@@ -107,6 +119,12 @@ asserts:
 supersedes:
 superseded_by:
 ---
+
+> ⚠️ **2026-10-09: ADR-0049 (PostgreSQL is the one system of record) replaces MongoDB.** D1 (the
+> client persists a change-stream resume token) and D3 (pre/post images on money-bearing
+> collections) name MongoDB change-stream features and are re-expressed when OQ-067 (the live
+> transport under PostgreSQL) is answered. D2 and D4–D17 do not depend on the store. The body below
+> is unchanged until then.
 
 > **In the context of** ADR-0003 replacing Firestore with MongoDB and ADR-0005 keeping SolidJS,
 > **facing** a client whose live reads and whose write recovery are both defined in terms of a
