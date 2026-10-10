@@ -67,7 +67,12 @@ superseded_by:
 
 - **The sink doubles as the audit stream** for documents that are not event-sourced: who changed
   what and when, readable by any engine. Its row shape (LSN, commit time, operation, before/after,
-  actor, request id) and the compaction and hashing cadence are SPIKE-014 work.
+  actor, request id) are SPIKE-014 work. The hashing was ruled by the owner on 2026-10-09: a
+  per-file hash as written, a canonical-row hash, the range of changes each file covers, daily
+  manifests chained and written back into PostgreSQL, a period sealed by one hash over its daily
+  manifests, all in a compliance-locked bucket with ten-year retention. File size and compaction
+  stay SPIKE-014 work
+  (`inbox/2026-10-09-owner-accepts-prevent-chain-anchor-immutability-and-a-verifiable-parquet-archive-with-ten-year-retention.md`).
 - **It needs a durable, ordered consumer.** A logical-replication consumer that stops retains WAL
   (ADR-0049 Consequences).
 - **Offline analysis is anyone's engine.** DuckDB on a laptop reading the archive is fine; it is a

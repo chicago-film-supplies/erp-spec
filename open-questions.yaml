@@ -3079,7 +3079,13 @@ open_questions:
     owner: alex
     decide_by: 2026-12-15
     blocks: [ADR-0049]
-    status: open
+    status: answered
+    answer: >-
+      All three layers (owner, 2026-10-09). Prevent: a NOLOGIN owner role, an application role with
+      INSERT and SELECT only, UPDATE/DELETE/TRUNCATE triggers set ENABLE ALWAYS, and an event
+      trigger rejecting ALTER, DROP and DISABLE TRIGGER on the ledger tables. Detect: one hash chain
+      with its head locked to commit. Anchor: daily heads in a compliance-locked bucket, ten-year
+      retention. Who may hold the bypassing superuser is OQ-073.
     notes: >-
       Opened 2026-10-09 by ADR-0049 D3. Grants and triggers PREVENT; a hash chain only DETECTS, but
       it is the one that survives a superuser or a migration — the weakness ADR-0049 accepts.
@@ -3200,3 +3206,19 @@ open_questions:
       PII-free by REQ-OPS-008 (ADR-0054 D6), precisely so this answer never reaches them. Customers
       logging in (CLAUDE.md, owner 2026-08-23) raises the stakes: a customer-facing request log
       carries their identity by default.
+
+  - id: OQ-073
+    headline: "who holds the PostgreSQL superuser, and how its use is recorded"
+    question: >-
+      Every database-level guard on the event store yields to a superuser. Is there a login that
+      holds it day to day, a break-glass credential used only in an emergency, or none at all
+      outside single-user recovery — and how is each use recorded somewhere the user cannot erase?
+    owner: alex
+    decide_by: 2026-12-15
+    blocks: []
+    status: open
+    notes: >-
+      Opened 2026-10-09 when OQ-066 was answered. Self-hosting (owner, 2026-10-09) means CFS holds a
+      real superuser. The hash chain anchored in a compliance-locked bucket DETECTS what a superuser
+      does to the event store; this question is about how rarely that detection should ever have
+      to fire. pgaudit cannot reliably audit superusers (its own README).

@@ -11,18 +11,18 @@ is `deno task validate`'s judgement, not this file's.
 
 | | Count | |
 |---|---:|---|
-| Open questions | 31 open | 41 answered of 72 · **0 with no owner or no decide-by** |
+| Open questions | 31 open | 42 answered of 73 · **0 with no owner or no decide-by** |
 | Conflicts (HOT) | 25 | 1 open |
 | Decisions (ADR) | 55 | 29 in force · 20 proposed |
 | Spikes | 14 | 3 open |
 | Requirements | 38 | 0 without a scenario |
-| Inbox | 158 | 124 unpromoted |
+| Inbox | 159 | 124 unpromoted |
 | Drops awaiting `deno task ingest` | 0 | |
 | Glossary terms | 28 | 0 still `TODO` |
 
 ## The bottleneck: undecided questions
 
-**31 of 72 still open**, soonest decide-by first.
+**31 of 73 still open**, soonest decide-by first.
 
 | OQ | Question | Owner | Decide by | Blocks |
 |---|---|---|---|---|
@@ -40,12 +40,12 @@ is `deno task validate`'s judgement, not this file's.
 | `OQ-056` | What remains after 2026-08-22's answers and corrections, and it is machinery rather than… | alex | 2026-12-15 | — |
 | `OQ-057` | Has CFS made the ASC 606-10-32-2A accounting policy election to exclude collected sales a… | alex | 2026-12-15 | — |
 | `OQ-063` | May a PENDING bank transaction post at all; which of the feed's two dates is the accounti… | alex | 2026-12-15 | — |
-| `OQ-066` | Which mechanism makes the PostgreSQL event store append-only — an INSERT-only grant to th… | alex | 2026-12-15 | `ADR-0049` |
 | `OQ-067` | How do committed changes reach subscribed clients live — a read-model row per document pl… | alex | 2026-12-15 | `ADR-0047` |
 | `OQ-069` | PostgreSQL is self-managed on a Linode VM by default (owner, 2026-10-09). What are the re… | alex | 2026-12-15 | `SPIKE-011` |
 | `OQ-070` | Under PostgreSQL, does reserving units for an in-progress fulfillment move them into a `c… | alex | 2026-12-15 | `ADR-0055` |
 | `OQ-071` | Under PostgreSQL, which rules does the database carry and by which mechanism — column typ… | alex | 2026-12-15 | `ADR-0040` |
 | `OQ-072` | How long does v2 keep operational logs, what personal data may a log line carry, and how… | alex | 2026-12-15 | — |
+| `OQ-073` | Every database-level guard on the event store yields to a superuser. Is there a login tha… | alex | 2026-12-15 | — |
 | `OQ-039` | `organizations.tax_profile` carries two different concepts in one enum — who owes (applie… | alex | 2027-01-15 | — |
 | `OQ-052` | What vehicle rate absorbs into 5900, over what normal-capacity denominator — and where do… | alex | 2027-01-31 | — |
 | `OQ-059` | Which CDN carries CFS images — Uploadcare re-evaluated against imgix and any other suitab… | alex | 2027-01-31 | — |
@@ -117,7 +117,7 @@ Whether any of these dates has PASSED is `deno task validate`'s judgement — ga
 | `ADR-0046` | Adopt date-fns and @date-fns/tz as planned dependencies for every business datetime | 2026-11-01 | — | — |
 | `ADR-0047` | The client data model — one live transport replacing Firestore listeners, and an offline queue reconciled by three-way merge | 2026-11-15 | — | `OQ-043` `OQ-061` `OQ-067` |
 | `ADR-0048` | The Plaid ingestion boundary — an inbox table at the edge that does not post, CFS-minted identity, and delta-atomic application | 2026-11-30 | — | `OQ-062` `OQ-063` |
-| `ADR-0049` | PostgreSQL is the one system of record — documents, ledger, event store, queues and reporting in one transactional database | 2026-12-15 | `ADR-0003` | `SPIKE-011` `SPIKE-014` `HOT-025` `OQ-065` `OQ-066` `OQ-067` `OQ-068` `OQ-069` |
+| `ADR-0049` | PostgreSQL is the one system of record — documents, ledger, event store, queues and reporting in one transactional database | 2026-12-15 | `ADR-0003` | `SPIKE-011` `SPIKE-014` `HOT-025` `OQ-065` `OQ-067` `OQ-068` `OQ-069` |
 | `ADR-0050` | Work queues are PostgreSQL tables, enqueued in the transaction that causes the work and claimed with SKIP LOCKED | 2026-12-15 | `ADR-0012` | `SPIKE-014` |
 | `ADR-0051` | The PostgreSQL ledger is the reporting authority for open and closed periods alike; a closed period is protected by the database and a closing hash | 2026-12-15 | `ADR-0017` | `OQ-051` `OQ-056` **rule 8a survey** |
 | `ADR-0052` | DuckDB leaves the runtime; Parquet survives as an append-only change-feed sink, keeping ADR-0024's encoding rules | 2026-12-15 | `ADR-0024` | `SPIKE-014` |
