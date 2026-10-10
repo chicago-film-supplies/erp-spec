@@ -624,7 +624,7 @@
           <outline text="EVT-PRO-003 — VendorBillReceived" _note="procurement → ledger, banking"/>
         </outline>
       </outline>
-      <outline text="Capture (124 unpromoted of 155)" _note="no drops pending">
+      <outline text="Capture (123 unpromoted of 154)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -743,7 +743,6 @@
         <outline text="Owner rules the stored number stays an INTEGER and the prefix becomes a display function — orders a…" _note="inbox/2026-08-29-owner-numbers-stay-integers-and-the-prefix-is-a-display-function-and-four-more-entities-need-one.md"/>
         <outline text="v1 now has a real `suppliers` collection and a CFS-authored ACCPAY path — procurement's &quot;CFS holds…" _note="inbox/2026-08-31-survey-v1-now-has-a-real-suppliers-collection-and-a-cfs-authored-accpay-path.md"/>
         <outline text="Owner rules FIFO for both inventory relief and asset disposition — and the spec has no inventory co…" _note="inbox/2026-09-19-owner-fifo-is-the-costing-method-and-the-spec-has-no-inventory-costing-layer-at-all.md"/>
-        <outline text="A bill whose payee is a person and whose lines span several vendors is an expense claim, not a vend…" _note="inbox/2026-10-06-finding-a-reimbursed-expense-claim-is-not-a-vendor-bill-and-v1-just-met-the-first-one.md"/>
         <outline text="v1 settled the serialized-unit model that ADR-0015 leaves out of scope — a roster per product, per-…" _note="inbox/2026-10-07-survey-v1-settled-the-serialized-unit-model-that-adr-0015-leaves-out-of-scope.md"/>
         <outline text="v1 split a purchase into ordered, received, billed and paid on 2026-10-06 — a receipt is a movement…" _note="inbox/2026-10-07-survey-v1-split-a-purchase-into-ordered-received-billed-and-paid-and-a-receipt-quantity-is-a-co-written-bucket.md"/>
         <outline text="Seven accepted ADRs keep their decisions under the PostgreSQL ruling but cite a replaced store as a…" _note="inbox/2026-10-09-correction-seven-accepted-adrs-cite-a-replaced-store-as-a-premise-and-their-decisions-stand.md"/>
