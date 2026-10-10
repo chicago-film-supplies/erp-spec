@@ -643,7 +643,7 @@
           <outline text="REQ-OPS-011 — Invariants shall be checked against live state and a violation shall raise an alert; a divergence t…"/>
         </outline>
       </outline>
-      <outline text="Capture (123 unpromoted of 156)" _note="no drops pending">
+      <outline text="Capture (124 unpromoted of 157)" _note="no drops pending">
         <outline text="Addresses are geocoded but not normalized — region representation is inconsistent" _note="inbox/2026-08-08-addresses-unvalidated.md"/>
         <outline text="Byproduct rule — one causal job per shift bears the whole crew-day" _note="inbox/2026-08-08-byproduct-causal-job-rule.md"/>
         <outline text="Chicago Personal Property Lease Transaction Tax applies to equipment rental" _note="inbox/2026-08-08-chicago-lease-transaction-tax.md"/>
@@ -767,6 +767,7 @@
         <outline text="v1 split a purchase into ordered, received, billed and paid on 2026-10-06 — a receipt is a movement…" _note="inbox/2026-10-07-survey-v1-split-a-purchase-into-ordered-received-billed-and-paid-and-a-receipt-quantity-is-a-co-written-bucket.md"/>
         <outline text="Seven accepted ADRs keep their decisions under the PostgreSQL ruling but cite a replaced store as a…" _note="inbox/2026-10-09-correction-seven-accepted-adrs-cite-a-replaced-store-as-a-premise-and-their-decisions-stand.md"/>
         <outline text="Owner rules a new `ops` bounded context to own observability, alerting and verification requirement…" _note="inbox/2026-10-09-owner-a-new-ops-context-owns-observability-alerting-and-verification.md"/>
+        <outline text="PostgreSQL immutability is prevent-in-the-database plus detect-outside-it — grants, ALWAYS triggers…" _note="inbox/2026-10-09-research-postgres-immutability-is-prevent-plus-detect-and-only-an-external-anchor-survives-a-superuser.md"/>
       </outline>
     </outline>
   </body>
