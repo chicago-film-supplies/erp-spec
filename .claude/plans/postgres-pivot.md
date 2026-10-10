@@ -1,26 +1,31 @@
 # The PostgreSQL pivot — every artifact the ruling touches, and the order to move them
 
-**Date:** 2026-10-09 • **Repo:** erp-spec • **Status:** ⏳ phases 1, 2 and 3a done — nothing
+**Date:** 2026-10-09 • **Repo:** erp-spec • **Status:** ⏳ phases 1, 2, 3a, 4 and 5 done — nothing
 accepted • **Origin:** owner ruling
 `inbox/2026-10-09-owner-rules-postgres-is-the-one-system-of-record-replacing-mongo-tigerbeetle-valkey-and-duckdb.md`
 • **Related:** ADR-0049 to ADR-0054, SPIKE-014, OQ-066 to OQ-069, HOT-025
 
-> ## ⚠️ STATUS UPDATE 2026-10-09 (second session)
+> ## ⚠️ STATUS UPDATE 2026-10-09 (after the third session)
 >
-> - **Phase 2 done.** Owner rejected ADR-0015 and ADR-0042 (3ff7b14,
->   `inbox/2026-10-09-owner-rejects-adr-0015-and-adr-0042-and-asks-for-both-reservation-models-drafted.md`).
->   ADR-0055 (what a reservation is under PostgreSQL, proposed) carries what survives; custody phase
->   versus movement count is **OQ-070**, drafted both ways at the owner's request. Serialized
->   products reserve a quantity with optional named units (D4). HOT-022 has a resolution note;
->   SPIKE-012 closes ADR-0055. ADR-0039/0040/0046/0047/0048/0028/0031 reworded (9a3ca12); ADR-0040's
->   database mechanism is now **OQ-071**.
-> - **Phase 3a done** (9a3ca12): EVT-FUL-004/005/007 carry `commitment_ref` + `unit_refs`, and
->   004/007 are `blocked_by: OQ-070` (they exist only under option A).
-> - **Left over from 2/3a, not done:** ADR-0040's filename still says `mongo-validator` (a rename
->   breaks citations); glossary entries for `transfer`, `projection`, `sealed artifact`,
->   `close record` and `reservation` not added (`reservation` waits on OQ-070).
-> - **Next:** phase 4 (runnable now) or 3b (waits on ADR-0051 acceptance). Close #63/#64 once
->   pushed.
+> - **Done:** phases 1, 2, 3a (3ff7b14, 9a3ca12), 4 and 5 (02156c8, 91b1af2, 63b736c, b7b4af4).
+>   ADR-0055 re-decides reservations; custody phase vs movement count is **OQ-070**; ADR-0040's
+>   database mechanism is **OQ-071**; log retention and PII is **OQ-072**.
+> - **Phase 4 as landed:** `ops` (`OPS`) is the tenth context; `tools/labels.ts` was emitting bare
+>   pre-rename labels and now emits `area:*`. `deno task formal` + `.github/workflows/formal.yml`
+>   run every Quint module against `formal/expectations.yaml` (pin 0.32.0), fail closed, landed red
+>   three ways; m5's criteria now read the declaration. Replaced-store notes carry "being replaced"
+>   banners, `postgres.md` exists, the fetcher dropped TigerBeetle/MongoDB/DuckDB.
+> - ⚠️ **#70 said "sequenced after ADR-0049 acceptance, except quint.md"; this session did it
+>   anyway**, worded as "being replaced, still in force" so nothing claims an acceptance. One commit
+>   (91b1af2), revertable on its own if the owner disagrees.
+> - **The formal workflow has not run on GitHub yet** — only locally. First push is its first run.
+> - **Still waiting on ADR-0049 acceptance:** mark `two-store-commit.qnt` superseded in
+>   `formal/README.md`; retire m5's two-store criterion. Plus everything in 3b and 7.
+> - **Left over, not done:** ADR-0040's filename still says `mongo-validator` (a rename breaks
+>   citations); glossary entries for `transfer`, `projection`, `sealed artifact`, `close record`,
+>   `reservation` (the last waits on OQ-070); the workspace `~/cfs/CLAUDE.md` erp-spec line still
+>   says "8 bounded contexts" and "MongoDB + TigerBeetle" (outside this repo).
+> - **Next:** phase 6 (SPIKE-014 — needs a local PostgreSQL), or 3b/7 once the owner accepts.
 
 ## START HERE
 
@@ -116,7 +121,7 @@ Launch from: `erp-spec/`. **3a can run now; 3b waits for ADR-0049/0051 acceptanc
   TigerBeetle semantics — renaming touches gates 10g/10h/10i/10m and `milestone-checks.ts:375`.
   Decide whether it is worth it; keeping it is defensible.
 
-## Phase 4 — machinery (`ops` #68, Quint CI #69, retirement #70)
+## Phase 4 — machinery (`ops` #68, Quint CI #69, retirement #70) ✅ 2026-10-09
 
 Launch from: `erp-spec/`.
 
@@ -146,7 +151,7 @@ Launch from: `erp-spec/`.
   11 cites them); mark them retired in `spikes/harness/_README.md`. `tools/validate.ts:1563` (gate
   10m comment) cites TigerBeetle.
 
-## Phase 5 — `ops` requirements (#68)
+## Phase 5 — `ops` requirements (#68) ✅ 2026-10-09
 
 Launch from: `erp-spec/`. Source notes:
 `inbox/2026-10-09-gap-the-spec-names-an-observability-stack-and-no-signal-it-must-carry.md`,
@@ -176,5 +181,6 @@ the read-only `cfs-api-prod` MCP tools only.
 
 ## Context recommendation
 
-Clear before phase 2. Phase 1's inventory is in this doc; a fresh session reads it and the ADRs
-rather than this conversation.
+Clear before phase 6. Everything a fresh session needs is in this doc, the ADRs and SPIKE-014; phase
+6 is a different kind of work (a local PostgreSQL and a harness) and inherits nothing useful from
+this conversation.

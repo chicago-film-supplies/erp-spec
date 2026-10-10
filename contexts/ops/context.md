@@ -38,7 +38,7 @@ owner ruled a separate context over scattering each signal into the context it w
 
 ## Open
 
-- Requirements are not yet promoted — erp-spec#68, plan phase 5. Ids will be `REQ-OPS-001` onward.
+- **OQ-072** (v2 log retention and PII rules) — a decision, so it is not a requirement here.
 - Whether a verification event (ADR-0054 D5) is a domain event in `events.yaml` or a log record
   outside it. Undecided; `events.yaml` is empty until it is.
 - The stack runs on the host it watches (ADR-0028), so a host outage silences it. The external
