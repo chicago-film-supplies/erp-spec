@@ -1,8 +1,24 @@
 # Spec system v2 — a fresh repo for the ERP spec, its evidence, and a browsable UI
 
-**Date:** 2026-10-11 • **Repo:** erp-spec (until the new repo exists; then this doc moves there) • **Status:** planned
+**Date:** 2026-10-11 • **Repo:** erp-spec (until the new repo exists; then this doc moves there) • **Status:** in-progress
 **Origin:** research session 2026-10-11 — eleven read-only agents covering a content audit, a CI audit, storage options, UI options, open-source wiki/PM/ALM/argument tools, a capability catalog and relationship discovery. Their findings are summarised under *Evidence* below; nothing in erp-spec was changed by that session.
 **Related:** `tools/validate.ts`, `tools/view.ts`, `open-questions.yaml`, `hotspots.yaml`, `adr/`, `inbox/`, erp-spec#52 (v1-only evidence census), erp-spec#37 (accounts named by no rule)
+
+> ## ⚠️ STATUS UPDATE 2026-10-11 — Phase 1 done: the information model is signed off
+> - **Phase 1 is complete.** The deliverable is `.claude/plans/spec-system-v2-model.md`, signed off by the owner 2026-10-11. It moves to the new repo as `model.md` with this doc. It is **authoritative over the draft "information model" section below** wherever they differ.
+> - **Rulings that changed the draft model below:**
+>   - **Full IBIS, not flat (R1).** `argument` records nest.
+>   - **Acceptance pins a transaction rather than freezing text (R1a).** Argument text stays editable, with history.
+>   - **Only ADRs are decisions (R3).** OQ answers stay fields on the question, and a census counts accounting-domain answers the survey check can't see.
+>   - **Facts must name their source (R2).**
+>   - **Legacy ids are permanent aliases, and new questions mint `Q-` (R4).**
+>   - **No `annotation` kind (R5).** A correction is new evidence plus a `corrects` link.
+>   - **Design work lives in the tool, not GitHub; issues are for code only (R7).** This also changes Phase 4 (erp-spec's issues are split into tasks vs. code work) and Phase 5 (the workspace "Deferred tasks → GitHub issues" rule needs a carve-out).
+> - **Two standing rules from the owner:**
+>   - erp-spec's past decisions *inform* this design and do not *bind* it.
+>   - **Change history must be complete, written in the same transaction as the change, recording actor and verb, and enforced by the database.** The mechanism is Phase 2's choice: trigger-written history, log-first, or temporal tables, with an optional logical-replication sink. A post-commit sink alone does not satisfy it.
+> - **Next: Phase 2, stack evaluation, against the model.** Model §10 lists the history-mechanism candidates, and whether Postgres 18 has system-versioned tables is **unverified**.
+> - Context recommendation reaffirmed: **CLEAR CONTEXT · opus**. Phase 2 starts cold from the two docs. Opus because a storage choice that can't enforce §2 still looks fine on paper.
 
 ## START HERE
 
@@ -102,10 +118,10 @@ Then work through Phase 1 with the owner.
 
 ### Phase 1 — information model (design, no code)
 **Launch from:** `erp-spec/` • **Skills:** cfs-skills:cfs-issues, cfs-skills:cfs-plan-docs • **Read:** this doc, `erp-spec/CLAUDE.md`, ADR-0034 and ADR-0037 (immutability, typed measurements/asserts)
-- [ ] Settle the four layers, the kind list, the per-kind fields, the relation types and the lifecycle state machines, with transition preconditions (survey-before-accept, close-spike-requires-facts, answer-requires-links). Proof: `model.md` in the new repo, owner sign-off recorded in it.
-- [ ] Define the labelling standard and the registry. Proof: vocabulary tables in `model.md`.
-- [ ] **Hand-map one real end-to-end slice** onto the model before anything is built: the storage pivot (research drop → questions → ADR-0003 / ADR-0049 → spec "stack" section → facts) and one accounting decision with its survey. Proof: the slice written as records in `model.md`, with every gap noted.
-- [ ] Define the discovery and enforcement rules:
+- [x] Settle the four layers, the kind list, the per-kind fields, the relation types and the lifecycle state machines, with transition preconditions (survey-before-accept, close-spike-requires-facts, answer-requires-links). Proof: `model.md` in the new repo, owner sign-off recorded in it.
+- [x] Define the labelling standard and the registry. Proof: vocabulary tables in `model.md`.
+- [x] **Hand-map one real end-to-end slice** onto the model before anything is built: the storage pivot (research drop → questions → ADR-0003 / ADR-0049 → spec "stack" section → facts) and one accounting decision with its survey. Proof: the slice written as records in `model.md`, with every gap noted.
+- [x] Define the discovery and enforcement rules:
   - undeclared-id mentions;
   - fact restatement;
   - link-or-dismiss with remembered dismissals;
